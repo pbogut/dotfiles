@@ -121,16 +121,16 @@ alias update="yaourt -Syu --aur"
 alias tunelssh_pl="sshuttle --dns -vr root@46.41.130.28 0/0"
 alias tunelssh_de="sshuttle --dns -vr smeagol@smeagol.pl:59184 0/0"
 
-source $HOME/.localsh
-
-source $HOME/.profile
 
 #local configs
+if [ -f ~/.profile ]; then
+  source ~/.profile
+fi
 if [ -f ~/.localsh ]; then
   source ~/.localsh
 fi
 
-export PATH="$PATH:./bin:$HOME/bin:/usr/lib/perl5/vendor_perl/bin:/home/smeagol/bin/scripts:/home/smeagol/.gem/ruby/2.1.0/bin"
+export PATH="$PATH:./bin:$HOME/bin:/usr/lib/perl5/vendor_perl/bin:$HOME/bin/scripts"
 
 #git branch in prompt
 setopt prompt_subst

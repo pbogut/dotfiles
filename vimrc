@@ -24,6 +24,8 @@ Plugin 'bling/vim-airline'
 
 Plugin 'scrooloose/nerdtree'
 
+Plugin 'scrooloose/nerdcommenter'
+
 Plugin 'ctrlpvim/ctrlp.vim'
 
 Plugin 'nanotech/jellybeans.vim'
@@ -128,4 +130,26 @@ highlight SpecialKey ctermbg=none
 set showbreak=↪
 nmap <leader>l :set list!<cr>
 
+set history=1000         " remember more commands and search history
+set undolevels=1000      " use many muchos levels of undo
+set wildignore=*.swp,*.bak,*.pyc,*.class
 
+" delimitMate
+let delimitMate_jump_expansion = 1
+let g:delimitMate_expand_cr = 2
+let g:delimitMate_expand_space = 1
+" move text blocks up and down
+" gnome-terminal, guake
+nnoremap j :m .+1<CR>==
+nnoremap k :m .-2<CR>==
+" inoremap k <Esc>:m .-2<CR>==gi
+" inoremap j <Esc>:m .+1<CR>==gi
+vnoremap j :m '>+1<CR>gv=gv
+vnoremap k :m '<-2<CR>gv=gv
+" vim way, not working in some terminals
+nnoremap <A-j> :m .+1<CR>==
+nnoremap <A-k> :m .-2<CR>==
+" inoremap <A-j> <Esc>:m .+1<CR>==gi
+" inoremap <A-k> <Esc>:m .-2<CR>==gi
+vnoremap <A-j> :m '>+1<CR>gv=gv
+vnoremap <A-k> :m '<-2<CR>gv=gv
