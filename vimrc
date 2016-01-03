@@ -16,12 +16,13 @@ Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'tpope/vim-fugitive'
 
+Plugin 'tpope/vim-git'
+
 Plugin 'scrooloose/syntastic'
 
 Plugin 'bling/vim-airline'
 
 Plugin 'scrooloose/nerdtree'
-
 
 Plugin 'ctrlpvim/ctrlp.vim'
 
@@ -80,7 +81,7 @@ autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 " Close if only panel left
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 " ctr+n shortcut
-let mapleader = ";"
+let mapleader = ","
 map <Leader>s :NERDTreeFocusToggle<cr>
 map <Leader>t :NERDTreeTabsToggle<cr>
 map <Leader>r :NERDTreeFind<cr>
@@ -92,6 +93,7 @@ map <Leader>k <C-W>k<C-W>_
 map <Leader>j <C-W>j<C-W>_
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
+nnoremap ; :
 " air-line
 set laststatus=2
 let g:airline#extensions#tabline#enabled = 1

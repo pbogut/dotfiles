@@ -32,8 +32,8 @@ bindkey '^j' history-beginning-search-forward
 bindkey '^k' history-beginning-search-backward  
 
 
-vim_ins_mode="%F{022}%K{022}%B%F{255} INSERT %b%K{000}%{$reset_color%}"
-vim_cmd_mode="%F{027}%K{027}%B%F{255} NORMAL %b%K{000}%{$reset_color%}"
+vim_ins_mode="%F{022}%K{022}%B%F{255} INSERT %b%{$reset_color%}"
+vim_cmd_mode="%F{027}%K{027}%B%F{255} NORMAL %b%{$reset_color%}"
 
 precmd() {
   RPROMPT=$vim_ins_mode
@@ -59,15 +59,13 @@ zle -N zle-line-init
 
 # End of lines configured by zsh-newuser-install
 # The following lines were added by compinstall
-zstyle :compinstall filename '/home/smeagol/.zshrc'
+zstyle :compinstall filename '~/.zshrc'
 
 autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 
 
-PS1="${BRED}(${NORMAL}%~${BRED})
-${BGREEN}%n${BRED}@${BGREEN}%M ${BRED}\$${NORMAL} "
 
 # create a zkbd compatible hash;
 # to add other keys to this hash, see: man 5 terminfo
@@ -129,7 +127,7 @@ source $HOME/.profile
 
 #local configs
 if [ -f ~/.localsh ]; then
-  sh ~/.localsh
+  source ~/.localsh
 fi
 
 export PATH="$PATH:./bin:$HOME/bin:/usr/lib/perl5/vendor_perl/bin:/home/smeagol/bin/scripts:/home/smeagol/.gem/ruby/2.1.0/bin"
@@ -140,12 +138,13 @@ setopt prompt_subst
 # export RPROMPT=$'$(__git_ps1 "%s")'
 GIT_BRANCH=$'$(__git_ps1 "(%s)")'
 PS1="${BRED}(${NORMAL}%~${BRED}) ${BBLUE}${GIT_BRANCH}
-${BGREEN}%n${BRED}@${BGREEN}%M ${BRED}\$${NORMAL} "
+%(!.${BRED}.${BGREEN})%n${BRED}@${BGREEN}%M ${BRED}%(!.#.$)${NORMAL} "
 
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 export PATH="$PATH:$HOME/npm/bin"
 export PATH="$PATH:$HOME/.composer/vendor/bin"
 
-export TERM=xterm-256color
+# export TERM=xterm-256color
+# make colors compatibile with tmux
 export TERM=screen-256color
