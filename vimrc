@@ -49,6 +49,16 @@ Plugin 'airblade/vim-gitgutter'
 
 Plugin 'terryma/vim-multiple-cursors'
 
+Plugin 'MarcWeber/vim-addon-mw-utils'
+
+Plugin 'tomtom/tlib_vim'
+
+Plugin 'garbas/vim-snipmate'
+
+Plugin 'Raimondi/delimitMate'
+
+
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -80,6 +90,8 @@ map <Leader>l :bn!<cr>
 map <Leader>h :bp!<cr>
 map <Leader>k <C-W>k<C-W>_
 map <Leader>j <C-W>j<C-W>_
+nnoremap <leader>d "_d
+vnoremap <leader>d "_d
 " air-line
 set laststatus=2
 let g:airline#extensions#tabline#enabled = 1
@@ -104,4 +116,14 @@ autocmd FileType php :setlocal tabstop=4 shiftwidth=4
 " line 80 limit
 set colorcolumn=81
 " multicoursor
+
+" white characters
+" toggle invisible characters
+set invlist
+set listchars=tab:▸\ ,eol:¬,trail:⋅,extends:❯,precedes:❮
+" make the highlighting of tabs less annoying
+highlight SpecialKey ctermbg=none 
+set showbreak=↪
+nmap <leader>l :set list!<cr>
+
 

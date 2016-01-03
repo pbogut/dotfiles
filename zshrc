@@ -28,6 +28,9 @@ bindkey '^?' backward-delete-char
 bindkey '^h' backward-delete-char
 bindkey '^w' backward-kill-word
 bindkey '^r' history-incremental-search-backward
+bindkey '^j' history-beginning-search-forward 
+bindkey '^k' history-beginning-search-backward  
+
 
 vim_ins_mode="%F{022}%K{022}%B%F{255} INSERT %b%K{000}%{$reset_color%}"
 vim_cmd_mode="%F{027}%K{027}%B%F{255} NORMAL %b%K{000}%{$reset_color%}"
@@ -145,3 +148,4 @@ export PATH="$PATH:$HOME/npm/bin"
 export PATH="$PATH:$HOME/.composer/vendor/bin"
 
 export TERM=xterm-256color
+export TERM=screen-256color
