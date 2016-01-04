@@ -24,6 +24,8 @@ Plugin 'bling/vim-airline'
 
 Plugin 'scrooloose/nerdtree'
 
+Plugin 'scrooloose/nerdcommenter'
+
 Plugin 'ctrlpvim/ctrlp.vim'
 
 Plugin 'nanotech/jellybeans.vim'
@@ -58,7 +60,11 @@ Plugin 'garbas/vim-snipmate'
 
 Plugin 'Raimondi/delimitMate'
 
+Plugin 'szw/vim-tags'
 
+Plugin 'tpope/vim-dispatch'
+
+Plugin 'mileszs/ack.vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -89,6 +95,9 @@ map <Leader>n :bn!<cr>
 map <Leader>p :bp!<cr>
 map <Leader>l :bn!<cr>
 map <Leader>h :bp!<cr>
+map <Leader>q :b#<bar>bd#<bar>b<cr>
+map <Leader>x :bd<cr>
+map <Leader>X :bd!<cr>
 map <Leader>k <C-W>k<C-W>_
 map <Leader>j <C-W>j<C-W>_
 nnoremap <leader>d "_d
@@ -115,6 +124,7 @@ set expandtab
 " tab size for php and html
 autocmd FileType html :setlocal tabstop=4 shiftwidth=4
 autocmd FileType php :setlocal tabstop=4 shiftwidth=4
+autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
 " line 80 limit
 set colorcolumn=81
 " multicoursor
@@ -127,5 +137,23 @@ set listchars=tab:▸\ ,eol:¬,trail:⋅,extends:❯,precedes:❮
 highlight SpecialKey ctermbg=none 
 set showbreak=↪
 nmap <leader>l :set list!<cr>
-
+" php linter
+"let g:syntastic_quiet_messages = { "type": "style" }
+let g:syntastic_php_checkers = ['php', 'phpmd', 'phpcs']
+" delimitMate
+let g:delimitMate_expand_cr = 1
+let g:delimitMate_expand_space = 1
+" vim tags
+let g:vim_tags_use_language_field = 1
+" ctrlp
+let g:ctrlp_extensions = ['tag', 'mixed']
+let g:ctrlp_user_command = {
+   \ 'types': {
+      \ 1: ['.git', 'cd %s && git ls-files'],
+      \ 2: ['.hg', 'hg --cwd %s locate -I .'],
+      \ },
+    \ 'fallback': 'find %s -type f'
+    \ }
+" async ack
+let g:ack_use_dispatch = 1
 
