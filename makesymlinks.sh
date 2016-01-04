@@ -25,7 +25,7 @@ echo "done"
 # move any existing dotfiles in homedir to dotfiles_old directory, then create symlinks from the homedir to any files in the ~/dotfiles directory specified in $files
 for file in $files; do
     echo "Moving any existing dotfiles from ~ to $olddir"
-    mv ~/.$file ~/dotfiles_old/
+    mv ~/.$file $olddir/
     echo "Creating symlink to $file in home directory."
     ln -s $dir/$file ~/.$file
 done
@@ -38,7 +38,7 @@ if [ -f /bin/zsh -o -f /usr/bin/zsh ]; then
         git clone http://github.com/robbyrussell/oh-my-zsh.git
     fi
     # Set the default shell to zsh if it isn't currently set to zsh
-    if [[ ! $(echo $SHELL) == $(which zsh) ]]; then
+    if [[ ! $(echo $SHELL) == *"/zsh" ]]; then
         chsh -s $(which zsh)
     fi
 else
