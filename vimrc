@@ -68,6 +68,8 @@ Plugin 'tpope/vim-dispatch'
 
 Plugin 'mileszs/ack.vim'
 
+Plugin 'maxbrunsfeld/vim-yankstack'
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -83,6 +85,9 @@ filetype plugin indent on    " required
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
 
+" yankstack mappings
+call yankstack#setup()
+
 " Show panel only if open without file
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
@@ -93,8 +98,6 @@ let mapleader = ","
 map <Leader>s :NERDTreeFocusToggle<cr>
 map <Leader>t :NERDTreeTabsToggle<cr>
 map <Leader>r :NERDTreeFind<cr>
-map <Leader>n :bn!<cr>
-map <Leader>p :bp!<cr>
 map <Leader>l :bn!<cr>
 map <Leader>h :bp!<cr>
 map <Leader>q :b#<bar>bd#<bar>b<cr>
@@ -181,4 +184,8 @@ let g:ctrlp_user_command = {
     \ }
 " async ack
 let g:ack_use_dispatch = 1
+" yankstack
+let g:yankstack_map_keys = 0
+nmap <leader>p <Plug>yankstack_substitute_older_paste
+nmap <leader>P <Plug>yankstack_substitute_newer_paste
 
