@@ -134,7 +134,7 @@ export PATH="$PATH:./bin:$HOME/bin:/usr/lib/perl5/vendor_perl/bin:$HOME/bin/scri
 
 #git branch in prompt
 setopt prompt_subst
-. git-prompt.sh
+source ~/.scripts/git-prompt.sh
 # export RPROMPT=$'$(__git_ps1 "%s")'
 GIT_BRANCH=$'$(__git_ps1 "(%s)")'
 PS1="${BRED}(${NORMAL}%~${BRED}) ${BBLUE}${GIT_BRANCH}
@@ -143,6 +143,7 @@ PS1="${BRED}(${NORMAL}%~${BRED}) ${BBLUE}${GIT_BRANCH}
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 export PATH="$PATH:$HOME/npm/bin"
+export PATH="$PATH:$HOME/.scripts"
 export PATH="$PATH:$HOME/.composer/vendor/bin"
 
 # export TERM=xterm-256color

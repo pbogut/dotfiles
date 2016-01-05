@@ -22,6 +22,8 @@ Plugin 'scrooloose/syntastic'
 
 Plugin 'bling/vim-airline'
 
+Plugin 'edkolev/tmuxline.vim'
+
 Plugin 'scrooloose/nerdtree'
 
 Plugin 'scrooloose/nerdcommenter'
