@@ -71,6 +71,8 @@ Plugin 'mileszs/ack.vim'
 
 Plugin 'maxbrunsfeld/vim-yankstack'
 
+Plugin 'gioele/vim-autoswap'
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -192,3 +194,5 @@ nmap <leader>P <Plug>yankstack_substitute_newer_paste
 " despatch hax to not cover half screen
 let g:dispatch_quickfix_height = 10
 let g:dispatch_tmux_height = 1
+" autoswap tmux support
+let g:autoswap_detect_tmux = 1
