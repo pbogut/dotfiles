@@ -73,6 +73,10 @@ Plugin 'maxbrunsfeld/vim-yankstack'
 
 Plugin 'gioele/vim-autoswap'
 
+Plugin 'ntpeters/vim-better-whitespace'
+
+" Plugin 'sirver/ultisnips'
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -111,6 +115,9 @@ map <Leader>j <C-W>j<C-W>_
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
 nnoremap ; :
+map <Leader>gp <Plug>GitGutterPreviewHunk
+map <Leader>gr <Plug>GitGutterRevertHunk
+map <Leader>gstage <Plug>GitGutterStageHunk
 " air-line
 set laststatus=2
 let g:airline#extensions#tabline#enabled = 1
@@ -144,7 +151,7 @@ set listchars=tab:▸\ ,eol:¬,trail:⋅,extends:❯,precedes:❮
 " make the highlighting of tabs less annoying
 highlight SpecialKey ctermbg=none 
 set showbreak=↪
-nmap <leader>l :set list!<cr>
+" nmap <leader>l :set list!<cr>
 
 set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
@@ -188,6 +195,7 @@ let g:ctrlp_user_command = {
 " async ack
 let g:ack_use_dispatch = 1
 " yankstack
+
 let g:yankstack_map_keys = 0
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
@@ -196,3 +204,5 @@ let g:dispatch_quickfix_height = 10
 let g:dispatch_tmux_height = 1
 " autoswap tmux support
 let g:autoswap_detect_tmux = 1
+" snipMate
+let g:snips_trigger_key = '<C-\>'
