@@ -5,6 +5,8 @@ set number
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
+set timeoutlen=1000 ttimeoutlen=0   " eliminate esc timeout
+
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -163,15 +165,15 @@ let g:delimitMate_expand_cr = 2
 let g:delimitMate_expand_space = 1
 " move text blocks up and down
 " gnome-terminal, guake
-nnoremap j :m .+1<CR>==
-nnoremap k :m .-2<CR>==
+" nnoremap j :m .+1<CR>==
+" nnoremap k :m .-2<CR>==
 " inoremap k <Esc>:m .-2<CR>==gi
 " inoremap j <Esc>:m .+1<CR>==gi
 vnoremap j :m '>+1<CR>gv=gv
 vnoremap k :m '<-2<CR>gv=gv
 " vim way, not working in some terminals
-nnoremap <A-j> :m .+1<CR>==
-nnoremap <A-k> :m .-2<CR>==
+" nnoremap <A-j> :m .+1<CR>==
+" nnoremap <A-k> :m .-2<CR>==
 " inoremap <A-j> <Esc>:m .+1<CR>==gi
 " inoremap <A-k> <Esc>:m .-2<CR>==gi
 vnoremap <A-j> :m '>+1<CR>gv=gv
@@ -195,7 +197,6 @@ let g:ctrlp_user_command = {
 " async ack
 let g:ack_use_dispatch = 1
 " yankstack
-
 let g:yankstack_map_keys = 0
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
@@ -206,3 +207,4 @@ let g:dispatch_tmux_height = 1
 let g:autoswap_detect_tmux = 1
 " snipMate
 let g:snips_trigger_key = '<C-\>'
+
