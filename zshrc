@@ -21,6 +21,7 @@ setopt transientrprompt
 bindkey -v
 
 export KEYTIMEOUT=1
+export ZLE_RPROMPT_INDENT=0
 
 bindkey '^P' up-history
 bindkey '^N' down-history
