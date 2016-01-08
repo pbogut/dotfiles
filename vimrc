@@ -60,7 +60,7 @@ Plugin 'MarcWeber/vim-addon-mw-utils'
 
 Plugin 'tomtom/tlib_vim'
 
-Plugin 'garbas/vim-snipmate'
+"Plugin 'garbas/vim-snipmate'
 
 Plugin 'Raimondi/delimitMate'
 
@@ -77,7 +77,9 @@ Plugin 'gioele/vim-autoswap'
 
 Plugin 'ntpeters/vim-better-whitespace'
 
-" Plugin 'sirver/ultisnips'
+Plugin 'sirver/ultisnips'
+
+Plugin 'honza/vim-snippets'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -120,6 +122,8 @@ nnoremap ; :
 map <Leader>gp <Plug>GitGutterPreviewHunk
 map <Leader>gr <Plug>GitGutterRevertHunk
 map <Leader>gstage <Plug>GitGutterStageHunk
+" CtrlP
+let g:ctrlp_cmd = 'CtrlPMixed'
 " air-line
 set laststatus=2
 let g:airline#extensions#tabline#enabled = 1
@@ -151,7 +155,7 @@ set colorcolumn=81
 set invlist
 set listchars=tab:▸\ ,eol:¬,trail:⋅,extends:❯,precedes:❮
 " make the highlighting of tabs less annoying
-highlight SpecialKey ctermbg=none 
+highlight SpecialKey ctermbg=none
 set showbreak=↪
 " nmap <leader>l :set list!<cr>
 
@@ -160,7 +164,7 @@ set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
 
 " delimitMate
-let delimitMate_jump_expansion = 1
+let g:delimitMate_jump_expansion = 1
 let g:delimitMate_expand_cr = 2
 let g:delimitMate_expand_space = 1
 " move text blocks up and down
@@ -178,13 +182,14 @@ vnoremap k :m '<-2<CR>gv=gv
 " inoremap <A-k> <Esc>:m .-2<CR>==gi
 vnoremap <A-j> :m '>+1<CR>gv=gv
 vnoremap <A-k> :m '<-2<CR>gv=gv
-" scroll 
+" scroll
 set scrolloff=3
 " php linter
 "let g:syntastic_quiet_messages = { "type": "style" }
 let g:syntastic_php_checkers = ['php', 'phpmd', 'phpcs']
 " vim tags
 let g:vim_tags_use_language_field = 1
+let g:vim_tags_use_vim_dispatch = 1
 " ctrlp
 let g:ctrlp_extensions = ['tag', 'mixed']
 let g:ctrlp_user_command = {
@@ -206,5 +211,50 @@ let g:dispatch_tmux_height = 1
 " autoswap tmux support
 let g:autoswap_detect_tmux = 1
 " snipMate
-let g:snips_trigger_key = '<C-\>'
+" inoremap <CR> <Plug>snipMateNextOrTrigger
+" ultisnip
+function! g:UltiSnips_Complete()
+  call UltiSnips#ExpandSnippetOrJump()
+  if g:ulti_expand_or_jump_res == 0
+    if pumvisible()
+      return "\<C-N>"
+    else
+      return "\<TAB>"
+    endif
+  endif
+
+  return ""
+endfunction
+
+function! g:UltiSnips_Reverse()
+  call UltiSnips#JumpBackwards()
+  if g:ulti_jump_backwards_res == 0
+    return "\<C-P>"
+  endif
+
+  return ""
+endfunction
+
+if !exists("g:UltiSnipsJumpForwardTrigger")
+  let g:UltiSnipsJumpForwardTrigger = "<tab>"
+endif
+
+if !exists("g:UltiSnipsJumpBackwardTrigger")
+  let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+endif
+
+
+au BufEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
+au BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsListSnippets="<c-e>"
+" this mapping Enter key to <C-y> to chose the current highlight item
+" and close the selection list, same as other IDEs.
+" CONFLICT with some plugins like tpope/Endwise
+" inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+let g:UltiSnipsExpandTrigger ="<C-Space>"
+" If you prefer the Omni-Completion tip window to close when a selection is
+" made, these lines close it on movement in insert mode or when leaving
+" insert mode
+au CompleteDone * pclose
 
