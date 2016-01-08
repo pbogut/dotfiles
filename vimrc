@@ -20,6 +20,8 @@ Plugin 'tpope/vim-fugitive'
 
 Plugin 'tpope/vim-git'
 
+Plugin 'tpope/vim-commentary'
+
 Plugin 'scrooloose/syntastic'
 
 Plugin 'bling/vim-airline'
@@ -60,6 +62,8 @@ Plugin 'MarcWeber/vim-addon-mw-utils'
 
 Plugin 'tomtom/tlib_vim'
 
+" Plugin 'tomtom/tcomment_vim'
+
 "Plugin 'garbas/vim-snipmate'
 
 Plugin 'Raimondi/delimitMate'
@@ -80,6 +84,8 @@ Plugin 'ntpeters/vim-better-whitespace'
 Plugin 'sirver/ultisnips'
 
 Plugin 'honza/vim-snippets'
+
+Plugin 'mattn/emmet-vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -122,6 +128,24 @@ nnoremap ; :
 map <Leader>gp <Plug>GitGutterPreviewHunk
 map <Leader>gr <Plug>GitGutterRevertHunk
 map <Leader>gstage <Plug>GitGutterStageHunk
+" Insert mode quick commands
+inoremap <Leader><Leader>i <Esc>I
+inoremap <Leader><Leader>I <Esc>I
+inoremap <Leader><Leader>a <Esc>A
+inoremap <Leader><Leader>A <Esc>A
+inoremap II <Esc>I
+inoremap AA <Esc>A
+" inoremap OO <Esc>O
+" inoremap CC <Esc>C
+" inoremap SS <Esc>S
+" inoremap DD <Esc>dd
+" inoremap UU <Esc>u
+" get rid of bad habbits :)
+" Easy version for now
+noremap <Up> <NOP>
+noremap <Down> <NOP>
+noremap <Left> <NOP>
+noremap <Right> <NOP>
 " CtrlP
 let g:ctrlp_cmd = 'CtrlPMixed'
 " air-line
@@ -257,4 +281,7 @@ let g:UltiSnipsExpandTrigger ="<C-Space>"
 " made, these lines close it on movement in insert mode or when leaving
 " insert mode
 au CompleteDone * pclose
-
+" custom commands
+" close all buffers but current
+command! BCloseOther execute "%bd | e#"
+command! BCloseOtherForce execute "%bd! | e#"
