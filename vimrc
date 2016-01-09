@@ -176,6 +176,7 @@ set expandtab
 autocmd FileType html :setlocal tabstop=4 shiftwidth=4
 autocmd FileType php :setlocal tabstop=4 shiftwidth=4
 autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
+autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
 " line 80 limit
 set colorcolumn=81
 " multicoursor
