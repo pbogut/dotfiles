@@ -1,7 +1,5 @@
 syntax on
 
-set number
-
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
@@ -179,8 +177,10 @@ autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
 autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
 " line 80 limit
 set colorcolumn=81
-" multicoursor
-
+" line numering
+set number
+set relativenumber
+map <Leader>m :set relativenumber
 " white characters
 " toggle invisible characters
 set invlist
