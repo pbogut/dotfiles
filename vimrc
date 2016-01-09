@@ -180,7 +180,8 @@ set colorcolumn=81
 " line numering
 set number
 set relativenumber
-map <Leader>m :set relativenumber
+map <Leader>m :set relativenumber!<cr>
+map <Leader>w :set nowrap!<cr>
 " white characters
 " toggle invisible characters
 set invlist
