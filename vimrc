@@ -85,6 +85,8 @@ Plugin 'sirver/ultisnips'
 
 Plugin 'honza/vim-snippets'
 
+Plugin 'majutsushi/tagbar'
+
 Plugin 'mattn/emmet-vim'
 
 " All of your Plugins must be added before the following line
@@ -142,10 +144,14 @@ inoremap AA <Esc>A
 " inoremap UU <Esc>u
 " get rid of bad habbits :)
 " Easy version for now
-noremap <Up> <NOP>
-noremap <Down> <NOP>
-noremap <Left> <NOP>
-noremap <Right> <NOP>
+inoremap <Up> <nop>
+inoremap <Down> <nop>
+inoremap <Left> <nop>
+inoremap <Right> <nop>
+noremap <Up> <nop>
+noremap <Down> <nop>
+noremap <Left> <nop>
+noremap <Right> <nop>
 " CtrlP
 let g:ctrlp_cmd = 'CtrlPMixed'
 " air-line
@@ -268,20 +274,39 @@ if !exists("g:UltiSnipsJumpBackwardTrigger")
 endif
 
 
-au BufEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
-au BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
+autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
+autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
 let g:UltiSnipsJumpForwardTrigger="<cr>"
 let g:UltiSnipsListSnippets="<c-e>"
 " this mapping Enter key to <C-y> to chose the current highlight item
 " and close the selection list, same as other IDEs.
 " CONFLICT with some plugins like tpope/Endwise
 " inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
 let g:UltiSnipsExpandTrigger ="<C-Space>"
 " If you prefer the Omni-Completion tip window to close when a selection is
 " made, these lines close it on movement in insert mode or when leaving
 " insert mode
-au CompleteDone * pclose
+autocmd CompleteDone * pclose
 " custom commands
 " close all buffers but current
 command! BCloseOther execute "%bd | e#"
 command! BCloseOtherForce execute "%bd! | e#"
+
+" set a directory to store the undo history
+set undodir=~/.vim/undofiles//
+set undofile
+" set a directory for swp files
+set dir=~/.vim/swapfiles//
+" set backup disr
+set backupdir=~/.vim/backupfiles//
+set backup
+
+
+" copy to system clipboard
+" alpha stage
+function! g:ClipCopy()
+  let selection = @"
+  silent echo system('echo ' . shellescape(join(split(selection,'\n'),'\n')). '|xclip -i -selection c')
+endfunction
+
