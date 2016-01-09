@@ -21,7 +21,6 @@ setopt transientrprompt
 bindkey -v
 
 export KEYTIMEOUT=1
-export ZLE_RPROMPT_INDENT=0
 
 bindkey '^P' up-history
 bindkey '^N' down-history
@@ -150,3 +149,4 @@ export PATH="$PATH:$HOME/.composer/vendor/bin"
 # export TERM=xterm-256color
 # make colors compatibile with tmux
 export TERM=screen-256color
+export ZLE_RPROMPT_INDENT=0
