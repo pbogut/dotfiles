@@ -89,6 +89,8 @@ Plugin 'mattn/emmet-vim'
 
 Plugin 'christoomey/vim-tmux-navigator'
 
+Plugin 'moll/vim-bbye'
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -120,10 +122,8 @@ map <Leader>r :NERDTreeFind<cr>
 map <Leader>l :bn!<cr>
 map <Leader>h :bp!<cr>
 map <Leader>q :b#<bar>bd#<bar>b<cr>
-map <Leader>x :bd<cr>
-map <Leader>X :bd!<cr>
-map <Leader>k <C-W>k<C-W>_
-map <Leader>j <C-W>j<C-W>_
+map <C-w>d :Bdelete<cr>
+map <C-w>D :Bdelete!<cr>
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
 nnoremap ; :
