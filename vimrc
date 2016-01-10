@@ -144,14 +144,26 @@ inoremap AA <Esc>A
 " inoremap UU <Esc>u
 " get rid of bad habbits :)
 " Easy version for now
-inoremap <Up> <nop>
-inoremap <Down> <nop>
-inoremap <Left> <nop>
-inoremap <Right> <nop>
-noremap <Up> <nop>
-noremap <Down> <nop>
-noremap <Left> <nop>
-noremap <Right> <nop>
+noremap  <Up> ""
+noremap! <Up> <Esc>
+noremap  <Down> ""
+noremap! <Down> <Esc>
+noremap  <Left> ""
+noremap! <Left> <Esc>
+noremap  <Right> ""
+noremap! <Right> <Esc>
+noremap  <Del> ""
+noremap! <Del> <Esc>
+noremap  <Ins> ""
+noremap! <Ins> <Esc>
+noremap  <Home> ""
+noremap! <Home> <Esc>
+noremap  <End> ""
+noremap! <End> <Esc>
+noremap  <PageUp> ""
+noremap! <PageUp> <Esc>
+noremap  <PageDown> ""
+noremap! <PageDown> <Esc>
 " CtrlP
 let g:ctrlp_cmd = 'CtrlPMixed'
 " air-line
