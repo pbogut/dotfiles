@@ -2,7 +2,7 @@
 HISTFILE=~/.histfile
 HISTSIZE=1000
 SAVEHIST=1000
-setopt appendhistory autocd extendedglob nomatch
+setopt appendhistory autocd extendedglob nomatch ignoreeof
 unsetopt beep
 #colors
 autoload -U colors && colors
