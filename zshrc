@@ -28,8 +28,8 @@ bindkey '^?' backward-delete-char
 bindkey '^h' backward-delete-char
 bindkey '^w' backward-kill-word
 bindkey '^r' history-incremental-search-backward
-bindkey '^j' history-beginning-search-forward 
-bindkey '^k' history-beginning-search-backward  
+bindkey '^j' history-beginning-search-forward
+bindkey '^k' history-beginning-search-backward
 
 
 vim_ins_mode="%F{022}%K{022}%B%F{255} INSERT %b%{$reset_color%}"
@@ -150,3 +150,15 @@ export PATH="$PATH:$HOME/.composer/vendor/bin"
 # make colors compatibile with tmux
 export TERM=screen-256color
 export ZLE_RPROMPT_INDENT=0
+
+# always create/attach tmux session
+[[ $- != *i*  ]] && return
+if [[ -z "$TMUX"  ]]; then
+  sessions=`tmux list-sessions -F '---#{session_name}---'`
+  if [[ $sessions == *"---Main---"*  ]]; then
+    exec tmux new-session -t Main \; new-window
+  else
+    exec tmux new-session -s Main
+  fi
+fi
+

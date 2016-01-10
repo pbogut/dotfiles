@@ -317,7 +317,9 @@ set dir=~/.vim/swapfiles//
 " set backup disr
 set backupdir=~/.vim/backupfiles//
 set backup
-
+" disable double save (cousing file watchers issues)
+set nowritebackup
+set nobackup " well, thats the only way to prevent guard from rutting tests twice ;/
 
 " copy to system clipboard
 " alpha stage
