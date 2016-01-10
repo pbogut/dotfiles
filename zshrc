@@ -153,12 +153,4 @@ export ZLE_RPROMPT_INDENT=0
 
 # always create/attach tmux session
 [[ $- != *i*  ]] && return
-if [[ -z "$TMUX"  ]]; then
-  sessions=`tmux list-sessions -F '---#{session_name}---'`
-  if [[ $sessions == *"---Main---"*  ]]; then
-    exec tmux new-session -t Main \; new-window
-  else
-    exec tmux new-session -s Main
-  fi
-fi
 
