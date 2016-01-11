@@ -9,7 +9,7 @@
 dir=~/dotfiles                    # dotfiles directory
 olddir=~/dotfiles_`date +%s%N`    # old dotfiles backup directory
 files="vimrc zshrc tmux.conf scripts"    # list of files/folders to symlink in homedir
-directories="~/.vim/undofiles ~/.vim/swapfiles ~/.vim/backupfiles" #empty dirs thats needs to exist
+directories=".vim/undofiles .vim/swapfiles .vim/backupfiles" #empty dirs thats needs to exist
 
 ##########
 
@@ -25,8 +25,8 @@ echo "done"
 
 # create required directories
 for directory in $directories; do
-    echo -n "Creating directory $directory ..."
-    mkdir -p $directory
+    echo -n "Creating directory ~/$directory ..."
+    mkdir -p ~/$directory
     echo "done"
 done
 # move any existing dotfiles in homedir to dotfiles_old directory, then create symlinks from the homedir to any files in the ~/dotfiles directory specified in $files
