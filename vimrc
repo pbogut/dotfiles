@@ -91,6 +91,12 @@ Plugin 'christoomey/vim-tmux-navigator'
 
 Plugin 'moll/vim-bbye'
 
+Plugin 'jelera/vim-javascript-syntax'
+
+Plugin 'hail2u/vim-css3-syntax'
+
+Plugin 'jaxbot/browserlink.vim'
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -127,6 +133,7 @@ map <C-w>D :Bdelete!<cr>
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
 nnoremap ; :
+map <leader>== migg=G'i
 map <Leader>gp <Plug>GitGutterPreviewHunk
 map <Leader>gr <Plug>GitGutterRevertHunk
 map <Leader>gstage <Plug>GitGutterStageHunk
@@ -164,6 +171,9 @@ noremap  <PageUp> ""
 noremap! <PageUp> <Esc>
 noremap  <PageDown> ""
 noremap! <PageDown> <Esc>
+" Reload Browser
+map <F5> :BLReloadPage<cr>
+map <F6> :BLReloadCSS<cr>
 " CtrlP
 let g:ctrlp_cmd = 'CtrlPMixed'
 " air-line
@@ -239,12 +249,12 @@ let g:vim_tags_use_vim_dispatch = 1
 " ctrlp
 let g:ctrlp_extensions = ['tag', 'mixed']
 let g:ctrlp_user_command = {
-   \ 'types': {
+      \ 'types': {
       \ 1: ['.git', 'cd %s && git ls-files'],
       \ 2: ['.hg', 'hg --cwd %s locate -I .'],
       \ },
-    \ 'fallback': 'find %s -type f'
-    \ }
+      \ 'fallback': 'find %s -type f'
+      \ }
 " async ack
 let g:ack_use_dispatch = 1
 " yankstack
@@ -327,4 +337,7 @@ function! g:ClipCopy()
   let selection = @"
   silent echo system('echo ' . shellescape(join(split(selection,'\n'),'\n')). '|xclip -i -selection c')
 endfunction
+
+" better javascript colours
+autocmd FileType javascript call JavaScriptFold()
 
