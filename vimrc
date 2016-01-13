@@ -115,21 +115,23 @@ filetype plugin indent on    " required
 " yankstack mappings
 call yankstack#setup()
 
-" Show panel only if open without file
-autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 " Close if only panel left
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 " ctr+n shortcut
 let mapleader = ","
-map <Leader>s :NERDTreeFocusToggle<cr>
-map <Leader>t :NERDTreeTabsToggle<cr>
+map <Leader>s :NERDTreeToggle<cr>
+map <Leader>t :TagbarToggle<cr>
 map <Leader>r :NERDTreeFind<cr>
 map <Leader>l :bn!<cr>
 map <Leader>h :bp!<cr>
-map <Leader>q :b#<bar>bd#<bar>b<cr>
+map <Leader>b :CtrlPBuffer<cr>
+map <Leader>m :CtrlPMRUFiles<cr>
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
+map <C-w>p :bp!<cr>
+map <C-w>n :bn!<cr>
+map <C-w>x :Bdelete <bar>q<cr>
+map <C-w>X :Bdelete! <bar> q<cr>
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
 nnoremap ; :
@@ -204,7 +206,6 @@ set colorcolumn=81
 " line numering
 set number
 set relativenumber
-map <Leader>m :set relativenumber!<cr>
 map <Leader>w :set nowrap!<cr>
 " white characters
 " toggle invisible characters
