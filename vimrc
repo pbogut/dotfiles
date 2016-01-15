@@ -15,105 +15,56 @@ call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'tpope/vim-fugitive'
-
 Plugin 'tpope/vim-git'
-
 Plugin 'tpope/vim-commentary'
-
 Plugin 'tpope/vim-rvm'
-
-Plugin 'scrooloose/syntastic'
-
-Plugin 'bling/vim-airline'
-
-Plugin 'edkolev/tmuxline.vim'
-
-Plugin 'scrooloose/nerdtree'
-
-Plugin 'scrooloose/nerdcommenter'
-
-Plugin 'ctrlpvim/ctrlp.vim'
-
-Plugin 'nanotech/jellybeans.vim'
-
-Bundle 'jistr/vim-nerdtree-tabs'
-
-Plugin 'Shougo/unite.vim'
-
-Plugin 'tyru/open-browser.vim'
-
-Plugin 'lambdalisue/vim-gista'
-
-Plugin 'Valloric/YouCompleteMe'
-
-" Plugin 'mkusher/padawan.vim'
-
-Plugin 'tpope/vim-rails'
-
-Plugin 'tpope/vim-obsession'
-
-Plugin 'dhruvasagar/vim-prosession'
-
-Plugin 'airblade/vim-gitgutter'
-
-Plugin 'terryma/vim-multiple-cursors'
-
-Plugin 'MarcWeber/vim-addon-mw-utils'
-
-Plugin 'tomtom/tlib_vim'
-
-" Plugin 'tomtom/tcomment_vim'
-
-"Plugin 'garbas/vim-snipmate'
-
-Plugin 'Raimondi/delimitMate'
-
-Plugin 'szw/vim-tags'
-
-"Plugin 'tpope/vim-dispatch'
-Plugin 'Smeagol07/vim-dispatch' " panel size
-
-Plugin 'mileszs/ack.vim'
-
-Plugin 'maxbrunsfeld/vim-yankstack'
-
-Plugin 'gioele/vim-autoswap'
-
-Plugin 'ntpeters/vim-better-whitespace'
-
-Plugin 'sirver/ultisnips'
-
-Plugin 'honza/vim-snippets'
-
-Plugin 'majutsushi/tagbar'
-
-Plugin 'mattn/emmet-vim'
-
-Plugin 'christoomey/vim-tmux-navigator'
-
-Plugin 'moll/vim-bbye'
-
-" Plugin 'jelera/vim-javascript-syntax'
-
-" Plugin 'hail2u/vim-css3-syntax'
-
-Plugin 'jaxbot/browserlink.vim'
-
 Plugin 'tpope/vim-surround'
-
 Plugin 'tpope/vim-repeat'
+Plugin 'tpope/vim-rails'
+Plugin 'tpope/vim-obsession'
+" Plugin 'tpope/vim-dispatch'
+Plugin 'pbogut/vim-dispatch' " panel size
+Plugin 'scrooloose/syntastic'
+Plugin 'scrooloose/nerdtree'
+Plugin 'scrooloose/nerdcommenter'
+Plugin 'bling/vim-airline'
+Plugin 'edkolev/tmuxline.vim'
+Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'nanotech/jellybeans.vim'
+Bundle 'jistr/vim-nerdtree-tabs'
+Plugin 'Shougo/unite.vim'
+Plugin 'tyru/open-browser.vim'
+Plugin 'lambdalisue/vim-gista'
+Plugin 'Valloric/YouCompleteMe'
+" Plugin 'mkusher/padawan.vim'
+Plugin 'dhruvasagar/vim-prosession'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'terryma/vim-multiple-cursors'
+Plugin 'MarcWeber/vim-addon-mw-utils'
+Plugin 'tomtom/tlib_vim'
+" Plugin 'tomtom/tcomment_vim'
+" Plugin 'garbas/vim-snipmate'
+Plugin 'Raimondi/delimitMate'
+Plugin 'szw/vim-tags'
+Plugin 'mileszs/ack.vim'
+Plugin 'maxbrunsfeld/vim-yankstack'
+Plugin 'gioele/vim-autoswap'
+Plugin 'ntpeters/vim-better-whitespace'
+Plugin 'sirver/ultisnips'
+Plugin 'honza/vim-snippets'
+Plugin 'majutsushi/tagbar'
+Plugin 'mattn/emmet-vim'
+Plugin 'christoomey/vim-tmux-navigator'
+Plugin 'moll/vim-bbye'
+" Plugin 'jelera/vim-javascript-syntax'
+" Plugin 'hail2u/vim-css3-syntax'
+Plugin 'jaxbot/browserlink.vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:
 "filetype plugin on
-"
-" Brief help
-" :PluginList       - lists configured plugins
-" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
-" :PluginSearch foo - searches for foo; append `!` to refresh local cache
-" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
 "
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
@@ -140,6 +91,8 @@ map <C-w>x :Bdelete <bar>q<cr>
 map <C-w>X :Bdelete! <bar> q<cr>
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
+nnoremap <leader>c "_c
+vnoremap <leader>c "_c
 nnoremap ; :
 map <leader>== migg=G'i
 map <Leader>gp <Plug>GitGutterPreviewHunk
@@ -217,6 +170,7 @@ map <Leader>w :set nowrap!<cr>
 " toggle invisible characters
 set invlist
 set listchars=tab:▸\ ,eol:¬,trail:⋅,extends:❯,precedes:❮
+let g:strip_whitespace_on_save = 1
 " make the highlighting of tabs less annoying
 highlight SpecialKey ctermbg=none
 set showbreak=↪
