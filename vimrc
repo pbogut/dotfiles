@@ -44,7 +44,7 @@ Plugin 'lambdalisue/vim-gista'
 
 Plugin 'Valloric/YouCompleteMe'
 
-Plugin 'mkusher/padawan.vim'
+" Plugin 'mkusher/padawan.vim'
 
 Plugin 'tpope/vim-rails'
 
@@ -91,11 +91,15 @@ Plugin 'christoomey/vim-tmux-navigator'
 
 Plugin 'moll/vim-bbye'
 
-Plugin 'jelera/vim-javascript-syntax'
+" Plugin 'jelera/vim-javascript-syntax'
 
-Plugin 'hail2u/vim-css3-syntax'
+" Plugin 'hail2u/vim-css3-syntax'
 
 Plugin 'jaxbot/browserlink.vim'
+
+Plugin 'tpope/vim-surround'
+
+Plugin 'tpope/vim-repeat'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
