@@ -20,6 +20,8 @@ Plugin 'tpope/vim-git'
 
 Plugin 'tpope/vim-commentary'
 
+Plugin 'tpope/vim-rvm'
+
 Plugin 'scrooloose/syntastic'
 
 Plugin 'bling/vim-airline'
@@ -44,7 +46,7 @@ Plugin 'lambdalisue/vim-gista'
 
 Plugin 'Valloric/YouCompleteMe'
 
-Plugin 'mkusher/padawan.vim'
+" Plugin 'mkusher/padawan.vim'
 
 Plugin 'tpope/vim-rails'
 
@@ -91,9 +93,9 @@ Plugin 'christoomey/vim-tmux-navigator'
 
 Plugin 'moll/vim-bbye'
 
-Plugin 'jelera/vim-javascript-syntax'
+" Plugin 'jelera/vim-javascript-syntax'
 
-Plugin 'hail2u/vim-css3-syntax'
+" Plugin 'hail2u/vim-css3-syntax'
 
 Plugin 'jaxbot/browserlink.vim'
 
