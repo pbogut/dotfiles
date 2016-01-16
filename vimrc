@@ -3,7 +3,7 @@ syntax on
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
-set timeoutlen=1000 ttimeoutlen=0   " eliminate esc timeout
+set timeoutlen=500 ttimeoutlen=0   " eliminate esc timeout
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -93,6 +93,7 @@ nnoremap <leader>d "_d
 vnoremap <leader>d "_d
 nnoremap <leader>c "_c
 vnoremap <leader>c "_c
+inoremap jk <Esc>
 nnoremap ; :
 map <leader>== migg=G'i
 map <Leader>gp <Plug>GitGutterPreviewHunk
@@ -175,11 +176,9 @@ let g:strip_whitespace_on_save = 1
 highlight SpecialKey ctermbg=none
 set showbreak=↪
 " nmap <leader>l :set list!<cr>
-
 set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
-
 " delimitMate
 let g:delimitMate_jump_expansion = 1
 let g:delimitMate_expand_cr = 2
@@ -239,37 +238,25 @@ function! g:UltiSnips_Complete()
       return "\<TAB>"
     endif
   endif
-
   return ""
 endfunction
-
 function! g:UltiSnips_Reverse()
   call UltiSnips#JumpBackwards()
   if g:ulti_jump_backwards_res == 0
     return "\<C-P>"
   endif
-
   return ""
 endfunction
-
 if !exists("g:UltiSnipsJumpForwardTrigger")
   let g:UltiSnipsJumpForwardTrigger = "<tab>"
 endif
-
 if !exists("g:UltiSnipsJumpBackwardTrigger")
   let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 endif
-
-
 autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
 autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
 let g:UltiSnipsJumpForwardTrigger="<cr>"
 let g:UltiSnipsListSnippets="<c-e>"
-" this mapping Enter key to <C-y> to chose the current highlight item
-" and close the selection list, same as other IDEs.
-" CONFLICT with some plugins like tpope/Endwise
-" inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-
 let g:UltiSnipsExpandTrigger ="<C-Space>"
 " If you prefer the Omni-Completion tip window to close when a selection is
 " made, these lines close it on movement in insert mode or when leaving
@@ -279,7 +266,6 @@ autocmd CompleteDone * pclose
 " close all buffers but current
 command! BCloseOther execute "%bd | e#"
 command! BCloseOtherForce execute "%bd! | e#"
-
 " set a directory to store the undo history
 set undodir=~/.vim/undofiles//
 set undofile
@@ -291,14 +277,12 @@ set backup
 " disable double save (cousing file watchers issues)
 set nowritebackup
 set nobackup " well, thats the only way to prevent guard from rutting tests twice ;/
-
 " copy to system clipboard
 " alpha stage
 function! g:ClipCopy()
   let selection = @"
   silent echo system('echo ' . shellescape(join(split(selection,'\n'),'\n')). '|xclip -i -selection c')
 endfunction
-
 " better javascript colours
 autocmd FileType javascript call JavaScriptFold()
 
