@@ -1,0 +1,9 @@
+[user]
+	name = Pawel Bogut
+	email = pbogut@smeagol.pl
+[core]
+	autocrlf = input
+[push]
+	default = simple
+[github]
+	user = pbogut
