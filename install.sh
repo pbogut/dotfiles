@@ -8,7 +8,7 @@
 
 dir=~/dotfiles                    # dotfiles directory
 olddir=~/dotfiles_`date +%s%N`    # old dotfiles backup directory
-files="vimrc zshrc tmux.conf scripts"    # list of files/folders to symlink in homedir
+files="vimrc zshrc tmux.conf yaourtrc scripts"    # list of files/folders to symlink in homedir
 directories=".vim/undofiles .vim/swapfiles .vim/backupfiles" #empty dirs thats needs to exist
 
 ##########
