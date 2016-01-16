@@ -3,9 +3,24 @@ HISTFILE=~/.histfile
 HISTSIZE=1000
 SAVEHIST=1000
 setopt appendhistory autocd extendedglob nomatch ignoreeof
+set -o shwordsplit
 unsetopt beep
 #colors
 autoload -U colors && colors
+
+# The following lines were added by compinstall
+zstyle :compinstall filename '~/.zshrc'
+
+autoload -Uz compinit
+compinit
+
+# End of lines added by compinstall
+# Load all files from .shell/zshrc.d directory
+if [ -d $HOME/.zshrc.d ]; then
+  for file in $HOME/.zshrc.d/*.zsh; do
+    source $file
+  done
+fi
 
 # Prompt
 BGREEN=$'%{\e[1;32m%}'
@@ -58,12 +73,6 @@ zle -N zle-line-init
 
 
 # End of lines configured by zsh-newuser-install
-# The following lines were added by compinstall
-zstyle :compinstall filename '~/.zshrc'
-
-autoload -Uz compinit
-compinit
-# End of lines added by compinstall
 
 
 
@@ -121,6 +130,7 @@ alias update="yaourt -Syu --aur"
 alias tunelssh_pl="sshuttle --dns -vr root@46.41.130.28 0/0"
 alias tunelssh_de="sshuttle --dns -vr smeagol@smeagol.pl:59184 0/0"
 
+alias yaourt-ignore-pgp="yaourt --m-arg \"--skipchecksums --skippgpcheck\""
 
 #local configs
 if [ -f ~/.profile ]; then
@@ -134,7 +144,6 @@ export PATH="$PATH:./bin:$HOME/bin:/usr/lib/perl5/vendor_perl/bin:$HOME/bin/scri
 
 #git branch in prompt
 setopt prompt_subst
-source ~/.scripts/git-prompt.sh
 # export RPROMPT=$'$(__git_ps1 "%s")'
 GIT_BRANCH=$'$(__git_ps1 "(%s)")'
 PS1="${BRED}(${NORMAL}%~${BRED}) ${BBLUE}${GIT_BRANCH}
@@ -150,7 +159,8 @@ export PATH="$PATH:$HOME/.composer/vendor/bin"
 # make colors compatibile with tmux
 export TERM=screen-256color
 export ZLE_RPROMPT_INDENT=0
-
+# default editor
+export EDITOR=vim
 # always create/attach tmux session
 [[ $- != *i*  ]] && return
 
