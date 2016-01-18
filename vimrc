@@ -3,7 +3,7 @@ syntax on
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
-set timeoutlen=500 ttimeoutlen=0   " eliminate esc timeout
+set timeoutlen=1000 ttimeoutlen=0   " eliminate esc timeout
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -15,105 +15,56 @@ call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'tpope/vim-fugitive'
-
 Plugin 'tpope/vim-git'
-
 Plugin 'tpope/vim-commentary'
-
-Plugin 'scrooloose/syntastic'
-
-Plugin 'bling/vim-airline'
-
-Plugin 'edkolev/tmuxline.vim'
-
-Plugin 'scrooloose/nerdtree'
-
-Plugin 'scrooloose/nerdcommenter'
-
-Plugin 'ctrlpvim/ctrlp.vim'
-
-Plugin 'nanotech/jellybeans.vim'
-
-Bundle 'jistr/vim-nerdtree-tabs'
-
-Plugin 'Shougo/unite.vim'
-
-Plugin 'tyru/open-browser.vim'
-
-Plugin 'lambdalisue/vim-gista'
-
-Plugin 'Valloric/YouCompleteMe'
-
-" Plugin 'mkusher/padawan.vim'
-
-Plugin 'tpope/vim-rails'
-
-Plugin 'tpope/vim-obsession'
-
-Plugin 'dhruvasagar/vim-prosession'
-
-Plugin 'airblade/vim-gitgutter'
-
-Plugin 'terryma/vim-multiple-cursors'
-
-Plugin 'MarcWeber/vim-addon-mw-utils'
-
-Plugin 'tomtom/tlib_vim'
-
-" Plugin 'tomtom/tcomment_vim'
-
-"Plugin 'garbas/vim-snipmate'
-
-Plugin 'Raimondi/delimitMate'
-
-Plugin 'szw/vim-tags'
-
-"Plugin 'tpope/vim-dispatch'
-Plugin 'Smeagol07/vim-dispatch' " panel size
-
-Plugin 'mileszs/ack.vim'
-
-Plugin 'maxbrunsfeld/vim-yankstack'
-
-Plugin 'gioele/vim-autoswap'
-
-Plugin 'ntpeters/vim-better-whitespace'
-
-Plugin 'sirver/ultisnips'
-
-Plugin 'honza/vim-snippets'
-
-Plugin 'majutsushi/tagbar'
-
-Plugin 'mattn/emmet-vim'
-
-Plugin 'christoomey/vim-tmux-navigator'
-
-Plugin 'moll/vim-bbye'
-
-" Plugin 'jelera/vim-javascript-syntax'
-
-" Plugin 'hail2u/vim-css3-syntax'
-
-Plugin 'jaxbot/browserlink.vim'
-
+Plugin 'tpope/vim-rvm'
 Plugin 'tpope/vim-surround'
-
 Plugin 'tpope/vim-repeat'
-
-" Plugin 'shawncplus/phpcomplete.vim'
+Plugin 'tpope/vim-rails'
+Plugin 'tpope/vim-obsession'
+" Plugin 'tpope/vim-dispatch'
+Plugin 'pbogut/vim-dispatch' " panel size
+Plugin 'scrooloose/syntastic'
+Plugin 'scrooloose/nerdtree'
+Plugin 'scrooloose/nerdcommenter'
+Plugin 'bling/vim-airline'
+Plugin 'edkolev/tmuxline.vim'
+Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'nanotech/jellybeans.vim'
+Bundle 'jistr/vim-nerdtree-tabs'
+Plugin 'Shougo/unite.vim'
+Plugin 'tyru/open-browser.vim'
+Plugin 'lambdalisue/vim-gista'
+Plugin 'Valloric/YouCompleteMe'
+" Plugin 'mkusher/padawan.vim'
+Plugin 'dhruvasagar/vim-prosession'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'terryma/vim-multiple-cursors'
+Plugin 'MarcWeber/vim-addon-mw-utils'
+Plugin 'tomtom/tlib_vim'
+" Plugin 'tomtom/tcomment_vim'
+" Plugin 'garbas/vim-snipmate'
+Plugin 'Raimondi/delimitMate'
+Plugin 'szw/vim-tags'
+Plugin 'mileszs/ack.vim'
+Plugin 'maxbrunsfeld/vim-yankstack'
+Plugin 'gioele/vim-autoswap'
+Plugin 'ntpeters/vim-better-whitespace'
+Plugin 'sirver/ultisnips'
+Plugin 'honza/vim-snippets'
+Plugin 'majutsushi/tagbar'
+Plugin 'mattn/emmet-vim'
+Plugin 'christoomey/vim-tmux-navigator'
+Plugin 'moll/vim-bbye'
+" Plugin 'jelera/vim-javascript-syntax'
+" Plugin 'hail2u/vim-css3-syntax'
+Plugin 'jaxbot/browserlink.vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:
 "filetype plugin on
-"
-" Brief help
-" :PluginList       - lists configured plugins
-" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
-" :PluginSearch foo - searches for foo; append `!` to refresh local cache
-" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
 "
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
@@ -142,8 +93,8 @@ nnoremap <leader>d "_d
 vnoremap <leader>d "_d
 nnoremap <leader>c "_c
 vnoremap <leader>c "_c
-nnoremap ; :
 inoremap jk <Esc>
+nnoremap ; :
 map <leader>== migg=G'i
 map <Leader>gp <Plug>GitGutterPreviewHunk
 map <Leader>gr <Plug>GitGutterRevertHunk
@@ -225,11 +176,9 @@ let g:strip_whitespace_on_save = 1
 highlight SpecialKey ctermbg=none
 set showbreak=↪
 " nmap <leader>l :set list!<cr>
-
 set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
-
 " delimitMate
 let g:delimitMate_jump_expansion = 1
 let g:delimitMate_expand_cr = 2
@@ -289,37 +238,25 @@ function! g:UltiSnips_Complete()
       return "\<TAB>"
     endif
   endif
-
   return ""
 endfunction
-
 function! g:UltiSnips_Reverse()
   call UltiSnips#JumpBackwards()
   if g:ulti_jump_backwards_res == 0
     return "\<C-P>"
   endif
-
   return ""
 endfunction
-
 if !exists("g:UltiSnipsJumpForwardTrigger")
   let g:UltiSnipsJumpForwardTrigger = "<tab>"
 endif
-
 if !exists("g:UltiSnipsJumpBackwardTrigger")
   let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 endif
-
-
 autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
 autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
 let g:UltiSnipsJumpForwardTrigger="<cr>"
 let g:UltiSnipsListSnippets="<c-e>"
-" this mapping Enter key to <C-y> to chose the current highlight item
-" and close the selection list, same as other IDEs.
-" CONFLICT with some plugins like tpope/Endwise
-" inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-
 let g:UltiSnipsExpandTrigger ="<C-Space>"
 " If you prefer the Omni-Completion tip window to close when a selection is
 " made, these lines close it on movement in insert mode or when leaving
@@ -329,7 +266,6 @@ autocmd CompleteDone * pclose
 " close all buffers but current
 command! BCloseOther execute "%bd | e#"
 command! BCloseOtherForce execute "%bd! | e#"
-
 " set a directory to store the undo history
 set undodir=~/.vim/undofiles//
 set undofile
@@ -341,14 +277,12 @@ set backup
 " disable double save (cousing file watchers issues)
 set nowritebackup
 set nobackup " well, thats the only way to prevent guard from rutting tests twice ;/
-
 " copy to system clipboard
 " alpha stage
 function! g:ClipCopy()
   let selection = @"
   silent echo system('echo ' . shellescape(join(split(selection,'\n'),'\n')). '|xclip -i -selection c')
 endfunction
-
 " better javascript colours
 autocmd FileType javascript call JavaScriptFold()
 
