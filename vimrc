@@ -3,7 +3,7 @@ syntax on
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
-set timeoutlen=1000 ttimeoutlen=0   " eliminate esc timeout
+set timeoutlen=500 ttimeoutlen=0   " eliminate esc timeout
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -101,6 +101,8 @@ Plugin 'tpope/vim-surround'
 
 Plugin 'tpope/vim-repeat'
 
+" Plugin 'shawncplus/phpcomplete.vim'
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -138,7 +140,10 @@ map <C-w>x :Bdelete <bar>q<cr>
 map <C-w>X :Bdelete! <bar> q<cr>
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
+nnoremap <leader>c "_c
+vnoremap <leader>c "_c
 nnoremap ; :
+inoremap jk <Esc>
 map <leader>== migg=G'i
 map <Leader>gp <Plug>GitGutterPreviewHunk
 map <Leader>gr <Plug>GitGutterRevertHunk
@@ -189,8 +194,8 @@ let g:airline_powerline_fonts = 1
 " color scheme
 colorscheme jellybeans
 " Padawan
-let g:ycm_semantic_triggers = {}
-let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
+" let g:ycm_semantic_triggers = {}
+" let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
 
 " space instead of tab
 filetype plugin indent on
@@ -215,6 +220,7 @@ map <Leader>w :set nowrap!<cr>
 " toggle invisible characters
 set invlist
 set listchars=tab:▸\ ,eol:¬,trail:⋅,extends:❯,precedes:❮
+let g:strip_whitespace_on_save = 1
 " make the highlighting of tabs less annoying
 highlight SpecialKey ctermbg=none
 set showbreak=↪
