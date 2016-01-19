@@ -1,0 +1,17 @@
+[roxterm profile]
+full_screen=0
+maximise=1
+saturation=1,000000
+colour_scheme=Tango
+font=Monospace 10
+disable_menu_access=1
+disable_tab_menu_shortcuts=1
+disable_menu_shortcuts=1
+scrollbar_pos=0
+audible_bell=0
+hide_mouse=1
+bell_highlights_tab=0
+tab_pos=4
+hide_menubar=1
+show_add_tab_btn=0
+always_show_tabs=0

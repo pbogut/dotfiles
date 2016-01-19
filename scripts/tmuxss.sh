@@ -1,9 +1,9 @@
 #!/bin/bash
 if [[ -z "$TMUX"  ]]; then
   sessions=`tmux list-sessions -F '---#{session_name}---'`
-  if [[ $sessions == *"---Main---"*  ]]; then
-    exec tmux new-session -t Main \; new-window
+  if [[ $sessions == *"---$1---"*  ]]; then
+    exec tmux new-session -t $1 \; new-window
   else
-    exec tmux new-session -s Main
+    exec tmux new-session -s $1
   fi
 fi
