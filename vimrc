@@ -3,7 +3,7 @@ syntax on
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
-set timeoutlen=1000 ttimeoutlen=0   " eliminate esc timeout
+set timeoutlen=500 ttimeoutlen=0   " eliminate esc timeout
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -75,14 +75,17 @@ call yankstack#setup()
 " Close if only panel left
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 " ctr+n shortcut
-let mapleader = ","
-map <Leader>s :NERDTreeToggle<cr>
-map <Leader>t :TagbarToggle<cr>
-map <Leader>r :NERDTreeFind<cr>
-map <Leader>l :bn!<cr>
-map <Leader>h :bp!<cr>
-map <Leader>b :CtrlPBuffer<cr>
-map <Leader>m :CtrlPMRUFiles<cr>
+let mapleader = "\<space>" " test if that will work better
+nnoremap <leader>s :NERDTreeToggle<cr>
+nnoremap <leader>t :TagbarToggle<cr>
+nnoremap <leader>r :NERDTreeFind<cr>
+nnoremap <leader>l :bn!<cr>
+nnoremap <leader>h :bp!<cr>
+nnoremap <leader>b :CtrlPBuffer<cr>
+nnoremap <leader>m :CtrlPMRUFiles<cr>
+nnoremap <leader>w :w<cr>
+map <C-p> :bn!<cr>
+map <C-n> :bp!<cr>
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>p :bp!<cr>
@@ -94,16 +97,15 @@ vnoremap <leader>d "_d
 nnoremap <leader>c "_c
 vnoremap <leader>c "_c
 inoremap jk <Esc>
-nnoremap ; :
-map <leader>== migg=G'i
-map <Leader>gp <Plug>GitGutterPreviewHunk
-map <Leader>gr <Plug>GitGutterRevertHunk
-map <Leader>gstage <Plug>GitGutterStageHunk
+" nnoremap ; :
+" nnoremap : ;
+map q: :q
+map q; :q
+nnoremap <leader>== migg=G'i
+nnoremap <leader>gp <Plug>GitGutterPreviewHunk
+nnoremap <leader>gr <Plug>GitGutterRevertHunk
+nnoremap <leader>gstage <Plug>GitGutterStageHunk
 " Insert mode quick commands
-inoremap <Leader><Leader>i <Esc>I
-inoremap <Leader><Leader>I <Esc>I
-inoremap <Leader><Leader>a <Esc>A
-inoremap <Leader><Leader>A <Esc>A
 inoremap II <Esc>I
 inoremap AA <Esc>A
 " inoremap OO <Esc>O
@@ -138,6 +140,7 @@ map <F5> :BLReloadPage<cr>
 map <F6> :BLReloadCSS<cr>
 " CtrlP
 let g:ctrlp_cmd = 'CtrlPMixed'
+let g:ctrlp_map = '<leader>f'
 " air-line
 set laststatus=2
 let g:airline#extensions#tabline#enabled = 1
@@ -166,7 +169,13 @@ set colorcolumn=81
 " line numering
 set number
 set relativenumber
-map <Leader>w :set nowrap!<cr>
+" map <leader>w :set nowrap!<cr>
+" multiple-cursors'
+let g:multi_cursor_use_default_mapping = 0
+let g:multi_cursor_next_key='<C-m>'
+let g:multi_cursor_prev_key='<C-p>'
+let g:multi_cursor_skip_key='<C-x>'
+let g:multi_cursor_quit_key='<Esc>'
 " white characters
 " toggle invisible characters
 set invlist
