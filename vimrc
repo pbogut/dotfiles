@@ -26,7 +26,7 @@ Plugin 'tpope/vim-obsession'
 Plugin 'pbogut/vim-dispatch' " panel size
 Plugin 'scrooloose/syntastic'
 Plugin 'scrooloose/nerdtree'
-Plugin 'scrooloose/nerdcommenter'
+" Plugin 'scrooloose/nerdcommenter'
 Plugin 'bling/vim-airline'
 Plugin 'edkolev/tmuxline.vim'
 Plugin 'ctrlpvim/ctrlp.vim'
@@ -183,6 +183,8 @@ set wildignore=*.swp,*.bak,*.pyc,*.class
 let g:delimitMate_jump_expansion = 1
 let g:delimitMate_expand_cr = 2
 let g:delimitMate_expand_space = 1
+let g:delimitMate_matchpairs = "(:),[:],{:}"
+let g:delimitMate_jump_expansion = 0
 " move text blocks up and down
 " gnome-terminal, guake
 " nnoremap j :m .+1<CR>==
