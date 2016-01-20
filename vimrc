@@ -24,6 +24,7 @@ Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-obsession'
 " Plugin 'tpope/vim-dispatch'
 Plugin 'pbogut/vim-dispatch' " panel size
+Plugin 'terryma/vim-expand-region'
 Plugin 'scrooloose/syntastic'
 Plugin 'scrooloose/nerdtree'
 " Plugin 'scrooloose/nerdcommenter'
