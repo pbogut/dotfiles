@@ -132,6 +132,8 @@ alias tunelssh_de="sshuttle --dns -vr smeagol@smeagol.pl:59184 0/0"
 
 alias yaourt-ignore-pgp="yaourt --m-arg \"--skipchecksums --skippgpcheck\""
 
+alias eclimd="/usr/lib/eclipse/eclimd"
+
 #local configs
 if [ -f ~/.profile ]; then
   source ~/.profile
