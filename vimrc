@@ -31,11 +31,11 @@ Plugin 'bling/vim-airline'
 Plugin 'edkolev/tmuxline.vim'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'nanotech/jellybeans.vim'
-Bundle 'jistr/vim-nerdtree-tabs'
+" Bundle 'jistr/vim-nerdtree-tabs'
 Plugin 'Shougo/unite.vim'
-Plugin 'tyru/open-browser.vim'
-Plugin 'lambdalisue/vim-gista'
-Plugin 'Valloric/YouCompleteMe'
+" Plugin 'tyru/open-browser.vim'
+" Plugin 'lambdalisue/vim-gista'
+" Plugin 'Valloric/YouCompleteMe'
 " Plugin 'mkusher/padawan.vim'
 Plugin 'dhruvasagar/vim-prosession'
 Plugin 'airblade/vim-gitgutter'
@@ -52,7 +52,9 @@ Plugin 'gioele/vim-autoswap'
 Plugin 'ntpeters/vim-better-whitespace'
 Plugin 'sirver/ultisnips'
 Plugin 'honza/vim-snippets'
-Plugin 'majutsushi/tagbar'
+" Plugin 'majutsushi/tagbar'
+Plugin 'Shougo/neocomplete.vim'
+Plugin 'Shougo/echodoc.vim'
 Plugin 'mattn/emmet-vim'
 Plugin 'christoomey/vim-tmux-navigator'
 Plugin 'moll/vim-bbye'
@@ -84,8 +86,8 @@ nnoremap <leader>h :bp!<cr>
 nnoremap <leader>b :CtrlPBuffer<cr>
 nnoremap <leader>m :CtrlPMRUFiles<cr>
 nnoremap <leader>w :w<cr>
-map <C-p> :bn!<cr>
-map <C-n> :bp!<cr>
+map <C-n> :bn!<cr>
+map <C-p> :bp!<cr>
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>p :bp!<cr>
@@ -138,7 +140,7 @@ noremap! <PageDown> <Esc>
 " Reload Browser
 map <F5> :BLReloadPage<cr>
 map <F6> :BLReloadCSS<cr>
-" CtrlP
+" CtrlPset splitbelow
 let g:ctrlp_cmd = 'CtrlPMixed'
 let g:ctrlp_map = '<leader>f'
 " air-line
@@ -150,7 +152,27 @@ colorscheme jellybeans
 " Padawan
 " let g:ycm_semantic_triggers = {}
 " let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
-
+" neocomplete
+let g:echodoc_enable_at_startup = 1
+set completeopt-=preview
+set splitbelow
+let g:neocomplete#enable_at_startup = 1
+" <TAB>: completion.
+inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+" <C-h>, <BS>: close popup and delete backword char.
+inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+" if !exists('g:neocomplete#sources#omni#input_patterns')
+"   let g:neocomplete#sources#omni#input_patterns = {}
+" endif
+" let g:neocomplete#sources#omni#input_patterns.php = '\h\w*\|[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
+if !exists('g:neocomplete#force_omni_input_patterns')
+  let g:neocomplete#force_omni_input_patterns = {}
+endif
+let g:EclimCompletionMethod = 'omnifunc'
+let g:neocomplete#force_omni_input_patterns.php = '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
 " space instead of tab
 filetype plugin indent on
 " show existing tab with 4 spaces width
@@ -211,7 +233,13 @@ vnoremap <A-j> :m '>+1<CR>gv=gv
 vnoremap <A-k> :m '<-2<CR>gv=gv
 " scroll
 set scrolloff=3
+" eclim
+let g:EclimFileTypeValidate = 0
 " php linter
+let g:syntastic_mode_map = {
+    \ "mode": "active",
+    \ "active_filetypes": ["ruby", "php"],
+    \ "passive_filetypes": ["puppet"] }
 "let g:syntastic_quiet_messages = { "type": "style" }
 let g:syntastic_php_checkers = ['php', 'phpmd', 'phpcs']
 " vim tags
@@ -294,6 +322,4 @@ function! g:ClipCopy()
   let selection = @"
   silent echo system('echo ' . shellescape(join(split(selection,'\n'),'\n')). '|xclip -i -selection c')
 endfunction
-" better javascript colours
-autocmd FileType javascript call JavaScriptFold()
 
