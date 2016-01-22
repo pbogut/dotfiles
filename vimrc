@@ -170,7 +170,7 @@ if has('nvim')
   let g:deoplete#enable_at_startup = 1
   " <C-h>, <BS>: close popup and delete backword char.
   inoremap <expr><C-h>  deoplete#mappings#smart_close_popup()."\<C-h>"
-  inoremap <expr><BS> deoplete#mappings#smart_close_popup()*."\<C-h>"
+  inoremap <expr><BS> deoplete#mappings#smart_close_popup()."\<C-h>"
   if !exists('g:neocomplete#force_omni_input_patterns')
     let g:deoplete#omni#input_patterns = {}
   endif
