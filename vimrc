@@ -54,7 +54,6 @@ Plugin 'ntpeters/vim-better-whitespace'
 Plugin 'sirver/ultisnips'
 Plugin 'honza/vim-snippets'
 " Plugin 'majutsushi/tagbar'
-Plugin 'Shougo/neocomplete.vim'
 Plugin 'Shougo/echodoc.vim'
 Plugin 'mattn/emmet-vim'
 Plugin 'christoomey/vim-tmux-navigator'
@@ -62,7 +61,13 @@ Plugin 'moll/vim-bbye'
 " Plugin 'jelera/vim-javascript-syntax'
 " Plugin 'hail2u/vim-css3-syntax'
 Plugin 'jaxbot/browserlink.vim'
-
+if has('nvim')
+  " nvim only plugins
+  Plugin 'Shougo/deoplete.nvim'
+else
+  " vim only plugins
+  Plugin 'Shougo/neocomplete.vim'
+endif
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -156,24 +161,35 @@ colorscheme jellybeans
 " neocomplete
 let g:echodoc_enable_at_startup = 1
 set completeopt-=preview
-set splitbelow
-let g:neocomplete#enable_at_startup = 1
+set cmdheight=2
 " <TAB>: completion.
 inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-" <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
-" if !exists('g:neocomplete#sources#omni#input_patterns')
-"   let g:neocomplete#sources#omni#input_patterns = {}
-" endif
-" let g:neocomplete#sources#omni#input_patterns.php = '\h\w*\|[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
-if !exists('g:neocomplete#force_omni_input_patterns')
-  let g:neocomplete#force_omni_input_patterns = {}
+if has('nvim')
+  let g:deoplete#enable_at_startup = 1
+  " <C-h>, <BS>: close popup and delete backword char.
+  inoremap <expr><C-h>  deoplete#mappings#smart_close_popup()."\<C-h>"
+  inoremap <expr><BS> deoplete#mappings#smart_close_popup()*."\<C-h>"
+  if !exists('g:neocomplete#force_omni_input_patterns')
+    let g:deoplete#omni#input_patterns = {}
+  endif
+  let g:deoplete#omni#input_patterns.php = '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
+else
+  let g:neocomplete#enable_at_startup = 1
+  " <C-h>, <BS>: close popup and delete backword char.
+  inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+  inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+  " if !exists('g:neocomplete#sources#omni#input_patterns')
+  "   let g:neocomplete#sources#omni#input_patterns = {}
+  " endif
+  " let g:neocomplete#sources#omni#input_patterns.php = '\h\w*\|[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
+  if !exists('g:neocomplete#force_omni_input_patterns')
+    let g:neocomplete#force_omni_input_patterns = {}
+  endif
+  let g:neocomplete#force_omni_input_patterns.php = '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
 endif
 let g:EclimCompletionMethod = 'omnifunc'
-let g:neocomplete#force_omni_input_patterns.php = '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
 " space instead of tab
 filetype plugin indent on
 " show existing tab with 4 spaces width
@@ -238,9 +254,9 @@ set scrolloff=3
 let g:EclimFileTypeValidate = 0
 " php linter
 let g:syntastic_mode_map = {
-    \ "mode": "active",
-    \ "active_filetypes": ["ruby", "php"],
-    \ "passive_filetypes": ["puppet"] }
+      \ "mode": "active",
+      \ "active_filetypes": ["ruby", "php"],
+      \ "passive_filetypes": ["puppet"] }
 "let g:syntastic_quiet_messages = { "type": "style" }
 let g:syntastic_php_checkers = ['php', 'phpmd', 'phpcs']
 " vim tags
