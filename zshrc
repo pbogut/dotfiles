@@ -47,8 +47,8 @@ bindkey '^j' history-beginning-search-forward
 bindkey '^k' history-beginning-search-backward
 
 
-vim_ins_mode="%F{022}%K{022}%B%F{255} INSERT %b%{$reset_color%}"
-vim_cmd_mode="%F{027}%K{027}%B%F{255} NORMAL %b%{$reset_color%}"
+vim_ins_mode="%F{022}%K{022}%B%F{255} INSERT %k%b%{$reset_color%}"
+vim_cmd_mode="%F{027}%K{027}%B%F{255} NORMAL %k%b%{$reset_color%}"
 
 precmd() {
   RPROMPT=$vim_ins_mode
@@ -158,7 +158,9 @@ export PATH="$PATH:$HOME/.composer/vendor/bin"
 # export TERM=xterm-256color
 # make colors compatibile with tmux
 export TERM=screen-256color
-export ZLE_RPROMPT_INDENT=0
+if [[ ! -z "$TMUX"  ]]; then
+  export ZLE_RPROMPT_INDENT=0
+fi
 # default editor
 export EDITOR=vim
 # always create/attach tmux session
