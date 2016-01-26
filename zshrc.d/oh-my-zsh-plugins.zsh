@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Plugin list
-plugins="rails n98-magerun"
+plugins="rails n98-magerun ruby rvm"
 
 mydir=${0:a:h}
 # Load all files from .shell/zshrc.d directory

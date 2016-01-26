@@ -152,6 +152,7 @@ PS1="${BRED}(${NORMAL}%~${BRED}) ${BBLUE}${GIT_BRANCH}
 
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
+export rvmsudo_secure_path=1
 export PATH="$PATH:$HOME/npm/bin"
 export PATH="$PATH:$HOME/.scripts"
 export PATH="$PATH:$HOME/.composer/vendor/bin"
