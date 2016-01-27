@@ -61,6 +61,8 @@ Plugin 'moll/vim-bbye'
 " Plugin 'jelera/vim-javascript-syntax'
 " Plugin 'hail2u/vim-css3-syntax'
 Plugin 'jaxbot/browserlink.vim'
+" Plugin 'Shougo/neosnippet'
+" Plugin 'Shougo/neosnippet-snippets'
 if has('nvim')
   " nvim only plugins
   Plugin 'Shougo/deoplete.nvim'
@@ -169,7 +171,49 @@ set cmdheight=2
 " <TAB>: completion.
 inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+" ultisnip
+function! g:UltiSnips_Complete()
+  call UltiSnips#ExpandSnippetOrJump()
+  if g:ulti_expand_or_jump_res == 0
+    if pumvisible()
+      return "\<C-N>"
+    else
+      return "\<TAB>"
+    endif
+  endif
+  return ""
+endfunction
+function! g:UltiSnips_Reverse()
+  call UltiSnips#JumpBackwards()
+  if g:ulti_jump_backwards_res == 0
+    return "\<C-P>"
+  endif
+  return ""
+endfunction
+if !exists("g:UltiSnipsJumpForwardTrigger")
+  let g:UltiSnipsJumpForwardTrigger = "<tab>"
+endif
+if !exists("g:UltiSnipsJumpBackwardTrigger")
+  let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+endif
+autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
+autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
+" let g:UltiSnipsJumpForwardTrigger="<cr>"
+let g:UltiSnipsListSnippets="<c-e>"
+let g:UltiSnipsExpandTrigger ="<c-@>"
+let g:neocomplete#sources#syntax#min_keyword_length = 1
+" neocomplete
+if 0 == 1
+  xmap <expr><cr> pumvisible() ? "\<plug>(neosnippet_expand)" : "\<cr>"
+  imap <expr><cr> pumvisible() ? "\<plug>(neosnippet_expand)" : "\<cr>"
+  smap <expr><cr> pumvisible() ? "\<plug>(neosnippet_expand)" : "\<cr>"
+  " SuperTab like snippets behavior.
+  imap <expr><TAB> neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)" : pumvisible() ? "\<C-n>" : "\<TAB>"
+  " For snippet_complete marker.
+  if has('conceal')
+    set conceallevel=2 concealcursor=i
+  endif
+endif
 if has('nvim')
   let g:deoplete#enable_at_startup = 1
   " <C-h>, <BS>: close popup and delete backword char.
@@ -286,38 +330,6 @@ let g:dispatch_quickfix_height = 10
 let g:dispatch_tmux_height = 1
 " autoswap tmux support
 let g:autoswap_detect_tmux = 1
-" snipMate
-" inoremap <CR> <Plug>snipMateNextOrTrigger
-" ultisnip
-function! g:UltiSnips_Complete()
-  call UltiSnips#ExpandSnippetOrJump()
-  if g:ulti_expand_or_jump_res == 0
-    if pumvisible()
-      return "\<C-N>"
-    else
-      return "\<TAB>"
-    endif
-  endif
-  return ""
-endfunction
-function! g:UltiSnips_Reverse()
-  call UltiSnips#JumpBackwards()
-  if g:ulti_jump_backwards_res == 0
-    return "\<C-P>"
-  endif
-  return ""
-endfunction
-if !exists("g:UltiSnipsJumpForwardTrigger")
-  let g:UltiSnipsJumpForwardTrigger = "<tab>"
-endif
-if !exists("g:UltiSnipsJumpBackwardTrigger")
-  let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-endif
-autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
-autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
-let g:UltiSnipsJumpForwardTrigger="<cr>"
-let g:UltiSnipsListSnippets="<c-e>"
-let g:UltiSnipsExpandTrigger ="<C-Space>"
 " If you prefer the Omni-Completion tip window to close when a selection is
 " made, these lines close it on movement in insert mode or when leaving
 " insert mode
