@@ -50,12 +50,15 @@ bindkey '^k' history-beginning-search-backward
 
 vim_ins_mode="%F{022}%K{022}%B%F{255} INSERT %k%b%{$reset_color%}"
 vim_cmd_mode="%F{027}%K{027}%B%F{255} NORMAL %k%b%{$reset_color%}"
+vim_vis_mode="%F{088}%K{088}%B%F{255} VISUAL %k%b%{$reset_color%}"
 
 precmd() {
   RPROMPT=$vim_ins_mode
 }
 zle-keymap-select() {
   RPROMPT=$vim_ins_mode
+  [[ $KEYMAP = vivis ]] && RPROMPT=$vim_vis_mode
+  () { return $__prompt_status }
   [[ $KEYMAP = vicmd ]] && RPROMPT=$vim_cmd_mode
   () { return $__prompt_status }
   zle reset-prompt
