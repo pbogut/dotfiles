@@ -148,10 +148,14 @@ export PATH="$PATH:./bin:$HOME/bin:/usr/lib/perl5/vendor_perl/bin:$HOME/bin/scri
 
 #git branch in prompt
 setopt prompt_subst
+HOST_COLOR="${BGREEN}"
+if [ -n "$SSH_CLIENT"  ] || [ -n "$SSH_TTY"  ]; then
+  HOST_COLOR="%F{226}"
+fi
 # export RPROMPT=$'$(__git_ps1 "%s")'
 GIT_BRANCH=$'$(__git_ps1 "(%s)")'
 PS1="${BRED}(${NORMAL}%~${BRED}) ${BBLUE}${GIT_BRANCH}
-%(!.${BRED}.${BGREEN})%n${BRED}@${BGREEN}%M ${BRED}%(!.#.$)${NORMAL} "
+%(!.${BRED}.${BGREEN})%n${BRED}@${HOST_COLOR}%M ${BRED}%(!.#.$)${NORMAL}%f%b%k "
 
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
