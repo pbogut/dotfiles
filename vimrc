@@ -4,6 +4,7 @@ set nocompatible              " be iMproved, required
 filetype off                  " required
 
 set timeoutlen=500 ttimeoutlen=0   " eliminate esc timeout
+set report=0
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -201,7 +202,6 @@ autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R
 " let g:UltiSnipsJumpForwardTrigger="<cr>"
 let g:UltiSnipsListSnippets="<c-e>"
 let g:UltiSnipsExpandTrigger ="<c-@>"
-let g:neocomplete#sources#syntax#min_keyword_length = 1
 " neocomplete
 if 0 == 1
   xmap <expr><cr> pumvisible() ? "\<plug>(neosnippet_expand)" : "\<cr>"
@@ -336,6 +336,7 @@ let g:autoswap_detect_tmux = 1
 autocmd CompleteDone * pclose
 " custom commands
 " close all buffers but current
+command! BCloseAll execute "%bd"
 command! BCloseOther execute "%bd | e#"
 command! BCloseOtherForce execute "%bd! | e#"
 " set a directory to store the undo history
@@ -355,4 +356,13 @@ function! g:ClipCopy()
   let selection = @"
   silent echo system('echo ' . shellescape(join(split(selection,'\n'),'\n')). '|xclip -i -selection c')
 endfunction
+" modify selected text using combining diacritics
+command! -range -nargs=0 Overline        call s:CombineSelection(<line1>, <line2>, '0305')
+command! -range -nargs=0 Underline       call s:CombineSelection(<line1>, <line2>, '0332')
+command! -range -nargs=0 DoubleUnderline call s:CombineSelection(<line1>, <line2>, '0333')
+command! -range -nargs=0 Strikethrough   call s:CombineSelection(<line1>, <line2>, '0336')
 
+function! s:CombineSelection(line1, line2, cp)
+  execute 'let char = "\u'.a:cp.'"'
+  execute a:line1.','.a:line2.'s/\%V[^[:cntrl:]]/&'.char.'/ge'
+endfunction
