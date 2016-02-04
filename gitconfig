@@ -13,6 +13,12 @@
 [color]
     ui = auto
 [alias]
+    #my aliases
+    ai = add -i
+    ap = add -p
+    rmc = rm --cached
+    cob = checkout -b
+    #Gary's aliases
     st = status
     ci = commit --verbose
     co = checkout
