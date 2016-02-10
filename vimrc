@@ -88,10 +88,19 @@ call yankstack#setup()
 " Close if only panel left
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 " ctr+n shortcut
+" nerdtree
+let NERDTreeQuitOnOpen=1
+function! ToggleNERDTree()
+  if &buftype == 'nofile'
+    :NERDTreeClose
+  else
+    :NERDTreeFind
+  endif
+endfunction
 let mapleader = "\<space>" " test if that will work better
-nnoremap <leader>s :NERDTreeToggle<cr>
+" nnoremap <leader>s :NERDTreeToggle<cr>
 nnoremap <leader>t :TagbarToggle<cr>
-nnoremap <leader>r :NERDTreeFind<cr>
+nnoremap <leader>r :call ToggleNERDTree()<cr>
 nnoremap <leader>l :bn!<cr>
 nnoremap <leader>h :bp!<cr>
 nnoremap <leader>b :CtrlPBuffer<cr>
