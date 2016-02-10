@@ -136,6 +136,8 @@ alias tunelssh_de="sshuttle --dns -vr smeagol@smeagol.pl:59184 0/0"
 
 alias yaourt-ignore-pgp="yaourt --m-arg \"--skipchecksums --skippgpcheck\""
 
+tmux() { if [[ $1 == "-ss"  ]]; then command tmuxss.sh; else command tmux "$@"; fi; }
+
 #local configs
 if [ -f ~/.profile ]; then
   source ~/.profile
