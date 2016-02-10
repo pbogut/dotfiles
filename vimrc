@@ -54,7 +54,6 @@ Plugin 'mileszs/ack.vim'
 Plugin 'maxbrunsfeld/vim-yankstack'
 Plugin 'gioele/vim-autoswap'
 Plugin 'ntpeters/vim-better-whitespace'
-Plugin 'sirver/ultisnips'
 Plugin 'honza/vim-snippets'
 " Plugin 'majutsushi/tagbar'
 Plugin 'Shougo/echodoc.vim'
@@ -64,7 +63,6 @@ Plugin 'christoomey/vim-tmux-navigator'
 Plugin 'moll/vim-bbye'
 " Plugin 'jelera/vim-javascript-syntax'
 " Plugin 'hail2u/vim-css3-syntax'
-Plugin 'jaxbot/browserlink.vim'
 " Plugin 'Shougo/neosnippet'
 " Plugin 'Shougo/neosnippet-snippets'
 if has('nvim')
@@ -73,6 +71,8 @@ if has('nvim')
 else
   " vim only plugins
   Plugin 'Shougo/neocomplete.vim'
+  Plugin 'sirver/ultisnips'
+  Plugin 'jaxbot/browserlink.vim'
 endif
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
