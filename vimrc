@@ -349,9 +349,9 @@ let g:ctrlp_user_command = {
 let g:ack_use_dispatch = 1
 " yankstack
 let g:yankstack_map_keys = 0
-" r like... ring
-nmap <leader>r <Plug>yankstack_substitute_older_paste
-nmap <leader>R <Plug>yankstack_substitute_newer_paste
+" r like... stack or switch
+nmap <leader>s <Plug>yankstack_substitute_older_paste
+nmap <leader>S <Plug>yankstack_substitute_newer_paste
 " despatch hax to not cover half screen
 let g:dispatch_quickfix_height = 10
 let g:dispatch_tmux_height = 1
