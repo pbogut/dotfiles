@@ -127,6 +127,10 @@ nnoremap <leader>C "_C
 vnoremap <leader>C "_C
 nnoremap <leader>x "_x
 vnoremap <leader>x "_x
+nnoremap <leader>y "+y
+vnoremap <leader>Y "+Y
+nnoremap <leader>p "+p
+vnoremap <leader>P "+P
 inoremap jk <Esc>
 " nnoremap ; :
 " nnoremap : ;
@@ -345,8 +349,9 @@ let g:ctrlp_user_command = {
 let g:ack_use_dispatch = 1
 " yankstack
 let g:yankstack_map_keys = 0
-nmap <leader>p <Plug>yankstack_substitute_older_paste
-nmap <leader>P <Plug>yankstack_substitute_newer_paste
+" r like... ring
+nmap <leader>r <Plug>yankstack_substitute_older_paste
+nmap <leader>R <Plug>yankstack_substitute_newer_paste
 " despatch hax to not cover half screen
 let g:dispatch_quickfix_height = 10
 let g:dispatch_tmux_height = 1
