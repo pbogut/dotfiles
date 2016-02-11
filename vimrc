@@ -5,6 +5,8 @@ filetype off                  " required
 
 set timeoutlen=500 ttimeoutlen=0   " eliminate esc timeout
 set report=0
+set nohlsearch
+set mouse= "disable mouse support
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -237,10 +239,10 @@ if has('nvim')
   " <C-h>, <BS>: close popup and delete backword char.
   inoremap <expr><C-h>  deoplete#mappings#smart_close_popup()."\<C-h>"
   inoremap <expr><BS> deoplete#mappings#smart_close_popup()."\<C-h>"
-  if !exists('g:neocomplete#force_omni_input_patterns')
-    let g:deoplete#omni#input_patterns = {}
-  endif
-  let g:deoplete#omni#input_patterns.php = '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
+  " if !exists('g:neocomplete#force_omni_input_patterns')
+  "   let g:deoplete#omni#input_patterns = {}
+  " endif
+  " let g:deoplete#omni#input_patterns.php = '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
 else
   let g:neocomplete#enable_at_startup = 1
   " <C-h>, <BS>: close popup and delete backword char.
