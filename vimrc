@@ -131,6 +131,9 @@ nnoremap <leader>y "+y
 vnoremap <leader>Y "+Y
 nnoremap <leader>p "+p
 vnoremap <leader>P "+P
+" case insensitive search by default
+nnoremap / /\c
+nnoremap ? ?\c
 inoremap jk <Esc>
 " nnoremap ; :
 " nnoremap : ;
