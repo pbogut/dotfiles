@@ -3,7 +3,7 @@ syntax on
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
-set timeoutlen=500 ttimeoutlen=0   " eliminate esc timeout
+set timeoutlen=1000 ttimeoutlen=0   " eliminate esc timeout
 set report=0
 set nohlsearch
 set mouse= "disable mouse support
