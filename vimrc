@@ -28,7 +28,6 @@ Plugin 'tpope/vim-obsession'
 " Plugin 'tpope/vim-dispatch'
 Plugin 'pbogut/vim-dispatch' " panel size
 Plugin 'terryma/vim-expand-region'
-Plugin 'scrooloose/syntastic'
 Plugin 'scrooloose/nerdtree'
 " Plugin 'scrooloose/nerdcommenter'
 Plugin 'vim-airline/vim-airline'
@@ -69,9 +68,13 @@ Plugin 'moll/vim-bbye'
 " Plugin 'Shougo/neosnippet-snippets'
 if has('nvim')
   " nvim only plugins
+  Plugin 'benekastah/neomake'
+  autocmd! BufWritePost * Neomake
+  autocmd! BufReadPre,FileReadPre * Neomake
   Plugin 'Shougo/deoplete.nvim'
 else
   " vim only plugins
+  Plugin 'scrooloose/syntastic'
   Plugin 'Shougo/neocomplete.vim'
   Plugin 'sirver/ultisnips'
   Plugin 'jaxbot/browserlink.vim'
