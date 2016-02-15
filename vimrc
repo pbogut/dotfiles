@@ -3,7 +3,7 @@ syntax on
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
-set timeoutlen=500 ttimeoutlen=0   " eliminate esc timeout
+set timeoutlen=1000 ttimeoutlen=0   " eliminate esc timeout
 set report=0
 set nohlsearch
 set mouse= "disable mouse support
@@ -25,6 +25,7 @@ Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-obsession'
+Plugin 'tpope/vim-endwise'
 " Plugin 'tpope/vim-dispatch'
 Plugin 'pbogut/vim-dispatch' " panel size
 Plugin 'terryma/vim-expand-region'
@@ -62,6 +63,8 @@ Plugin 'Shougo/vimproc.vim'
 Plugin 'mattn/emmet-vim'
 Plugin 'christoomey/vim-tmux-navigator'
 Plugin 'moll/vim-bbye'
+Plugin 'kchmck/vim-coffee-script'
+Plugin 'sirver/ultisnips'
 " Plugin 'jelera/vim-javascript-syntax'
 " Plugin 'hail2u/vim-css3-syntax'
 " Plugin 'Shougo/neosnippet'
@@ -77,7 +80,6 @@ else
   " vim only plugins
   Plugin 'scrooloose/syntastic'
   Plugin 'Shougo/neocomplete.vim'
-  Plugin 'sirver/ultisnips'
   Plugin 'jaxbot/browserlink.vim'
 endif
 " All of your Plugins must be added before the following line
@@ -223,7 +225,7 @@ function! g:UltiSnips_Reverse()
   return ""
 endfunction
 if !exists("g:UltiSnipsJumpForwardTrigger")
-  let g:UltiSnipsJumpForwardTrigger = "<tab>"
+  let g:UltiSnipsJumpForwardTrigger = "<c-@>"
 endif
 if !exists("g:UltiSnipsJumpBackwardTrigger")
   let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
@@ -250,10 +252,13 @@ if has('nvim')
   " <C-h>, <BS>: close popup and delete backword char.
   inoremap <expr><C-h>  deoplete#mappings#smart_close_popup()."\<C-h>"
   inoremap <expr><BS> deoplete#mappings#smart_close_popup()."\<C-h>"
-  " if !exists('g:neocomplete#force_omni_input_patterns')
-  "   let g:deoplete#omni#input_patterns = {}
+  " if !exists('g:deoplete#omni_patterns')
+  "   let g:deoplete#omni_patterns = {}
   " endif
-  " let g:deoplete#omni#input_patterns.php = '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
+  " let g:deoplete#omni_patterns.php =
+  "   \ '\h\w*\|[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
+  " let g:deoplete#omni_patterns.ruby =
+  "   \ '\h\w*\|[^. \t]\.\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
 else
   let g:neocomplete#enable_at_startup = 1
   " <C-h>, <BS>: close popup and delete backword char.
@@ -307,7 +312,6 @@ set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
 " delimitMate
-let g:delimitMate_jump_expansion = 1
 let g:delimitMate_expand_cr = 2
 let g:delimitMate_expand_space = 1
 let g:delimitMate_matchpairs = "(:),[:],{:}"
@@ -318,8 +322,8 @@ let g:delimitMate_jump_expansion = 0
 " nnoremap k :m .-2<CR>==
 " inoremap k <Esc>:m .-2<CR>==gi
 " inoremap j <Esc>:m .+1<CR>==gi
-vnoremap j :m '>+1<CR>gv=gv
-vnoremap k :m '<-2<CR>gv=gv
+" vnoremap j :m '>+1<CR>gv=gv
+" vnoremap k :m '<-2<CR>gv=gv
 " vim way, not working in some terminals
 " nnoremap <A-j> :m .+1<CR>==
 " nnoremap <A-k> :m .-2<CR>==
