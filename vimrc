@@ -25,6 +25,7 @@ Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-obsession'
+Plugin 'tpope/vim-endwise'
 " Plugin 'tpope/vim-dispatch'
 Plugin 'pbogut/vim-dispatch' " panel size
 Plugin 'terryma/vim-expand-region'
@@ -63,6 +64,8 @@ Plugin 'Shougo/vimproc.vim'
 Plugin 'mattn/emmet-vim'
 Plugin 'christoomey/vim-tmux-navigator'
 Plugin 'moll/vim-bbye'
+Plugin 'kchmck/vim-coffee-script'
+Plugin 'sirver/ultisnips'
 " Plugin 'jelera/vim-javascript-syntax'
 " Plugin 'hail2u/vim-css3-syntax'
 " Plugin 'Shougo/neosnippet'
@@ -73,7 +76,6 @@ if has('nvim')
 else
   " vim only plugins
   Plugin 'Shougo/neocomplete.vim'
-  Plugin 'sirver/ultisnips'
   Plugin 'jaxbot/browserlink.vim'
 endif
 " All of your Plugins must be added before the following line
