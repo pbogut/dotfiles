@@ -316,8 +316,8 @@ let g:delimitMate_jump_expansion = 0
 " nnoremap k :m .-2<CR>==
 " inoremap k <Esc>:m .-2<CR>==gi
 " inoremap j <Esc>:m .+1<CR>==gi
-vnoremap j :m '>+1<CR>gv=gv
-vnoremap k :m '<-2<CR>gv=gv
+" vnoremap j :m '>+1<CR>gv=gv
+" vnoremap k :m '<-2<CR>gv=gv
 " vim way, not working in some terminals
 " nnoremap <A-j> :m .+1<CR>==
 " nnoremap <A-k> :m .-2<CR>==
