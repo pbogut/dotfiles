@@ -218,7 +218,7 @@ function! g:UltiSnips_Reverse()
   return ""
 endfunction
 if !exists("g:UltiSnipsJumpForwardTrigger")
-  let g:UltiSnipsJumpForwardTrigger = "<tab>"
+  let g:UltiSnipsJumpForwardTrigger = "<c-@>"
 endif
 if !exists("g:UltiSnipsJumpBackwardTrigger")
   let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
