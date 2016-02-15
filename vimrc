@@ -66,6 +66,7 @@ Plugin 'moll/vim-bbye'
 " Plugin 'hail2u/vim-css3-syntax'
 " Plugin 'Shougo/neosnippet'
 " Plugin 'Shougo/neosnippet-snippets'
+Bundle 'joonty/vdebug.git'
 if has('nvim')
   " nvim only plugins
   Plugin 'benekastah/neomake'
