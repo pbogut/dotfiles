@@ -133,6 +133,9 @@ nnoremap <leader>y "+y
 vnoremap <leader>Y "+Y
 nnoremap <leader>p "+p
 vnoremap <leader>P "+P
+" case insensitive search by default
+nnoremap / /\c
+nnoremap ? ?\c
 inoremap jk <Esc>
 " nnoremap ; :
 " nnoremap : ;
@@ -353,7 +356,7 @@ let g:ctrlp_user_command = {
 let g:ack_use_dispatch = 1
 " yankstack
 let g:yankstack_map_keys = 0
-" r like... stack or switch
+" r like... stack or... swith
 nmap <leader>s <Plug>yankstack_substitute_older_paste
 nmap <leader>S <Plug>yankstack_substitute_newer_paste
 " despatch hax to not cover half screen
