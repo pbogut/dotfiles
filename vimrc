@@ -245,10 +245,13 @@ if has('nvim')
   " <C-h>, <BS>: close popup and delete backword char.
   inoremap <expr><C-h>  deoplete#mappings#smart_close_popup()."\<C-h>"
   inoremap <expr><BS> deoplete#mappings#smart_close_popup()."\<C-h>"
-  " if !exists('g:neocomplete#force_omni_input_patterns')
-  "   let g:deoplete#omni#input_patterns = {}
+  " if !exists('g:deoplete#omni_patterns')
+  "   let g:deoplete#omni_patterns = {}
   " endif
-  " let g:deoplete#omni#input_patterns.php = '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
+  " let g:deoplete#omni_patterns.php =
+  "   \ '\h\w*\|[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
+  " let g:deoplete#omni_patterns.ruby =
+  "   \ '\h\w*\|[^. \t]\.\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
 else
   let g:neocomplete#enable_at_startup = 1
   " <C-h>, <BS>: close popup and delete backword char.
