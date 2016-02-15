@@ -305,7 +305,6 @@ set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
 " delimitMate
-let g:delimitMate_jump_expansion = 1
 let g:delimitMate_expand_cr = 2
 let g:delimitMate_expand_space = 1
 let g:delimitMate_matchpairs = "(:),[:],{:}"
