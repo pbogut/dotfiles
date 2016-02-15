@@ -159,18 +159,6 @@ inoremap AA <Esc>A
 " inoremap UU <Esc>u
 " get rid of bad habbits :)
 " Easy version for now
-" noremap  <Up> ""
-map <Up> <C-k>
-map! <Up> <C-k>
-" noremap  <Down> ""
-map <Down> <C-j>
-map! <Down> <C-j>
-" noremap  <Left> ""
-map <Left> <C-h>
-map! <Left> <C-h>
-" noremap  <Right> ""
-map <Right> <C-l>
-map! <Right> <C-l>
 noremap  <Del> ""
 noremap! <Del> <Esc>
 noremap  <Ins> ""
