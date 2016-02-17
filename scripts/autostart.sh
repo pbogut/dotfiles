@@ -1,5 +1,6 @@
 #super awesome capslock key
 setxkbmap -option 'caps:ctrl_modifier'
+killall xcape -9 > /dev/null 2>&1
 xcape -e 'Caps_Lock=Escape'
 #chrome textaid extention server
 script=$(readlink -f "$0")
