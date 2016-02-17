@@ -7,6 +7,7 @@ set timeoutlen=1000 ttimeoutlen=0   " eliminate esc timeout
 set report=0
 set nohlsearch
 set mouse= "disable mouse support
+set cursorline
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -26,6 +27,7 @@ Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-obsession'
 Plugin 'tpope/vim-endwise'
+Plugin 'tpope/vim-unimpaired'
 " Plugin 'tpope/vim-dispatch'
 Plugin 'pbogut/vim-dispatch' " panel size
 Plugin 'terryma/vim-expand-region'
@@ -277,6 +279,8 @@ autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
 autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
 " line 80 limit
 set colorcolumn=81
+highlight ColorColumn ctermbg=234
+highlight CursorLine ctermbg=233
 " line numering
 set number
 set relativenumber
@@ -299,6 +303,9 @@ set showbreak=↪
 set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
+" expand region
+vmap v <Plug>(expand_region_expand)
+vmap V <Plug>(expand_region_shrink)
 " delimitMate
 let g:delimitMate_expand_cr = 2
 let g:delimitMate_expand_space = 1
