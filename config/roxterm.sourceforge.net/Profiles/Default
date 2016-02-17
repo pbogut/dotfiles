@@ -16,3 +16,4 @@ hide_menubar=1
 show_add_tab_btn=0
 always_show_tabs=0
 backspace_binding=0
+login_shell=1
