@@ -65,12 +65,10 @@ Plugin 'Shougo/vimproc.vim'
 Plugin 'mattn/emmet-vim'
 Plugin 'christoomey/vim-tmux-navigator'
 Plugin 'moll/vim-bbye'
-Plugin 'kchmck/vim-coffee-script'
 Plugin 'sirver/ultisnips'
-" Plugin 'jelera/vim-javascript-syntax'
-" Plugin 'hail2u/vim-css3-syntax'
 " Plugin 'Shougo/neosnippet'
 " Plugin 'Shougo/neosnippet-snippets'
+Plugin 'sheerun/vim-polyglot'
 Bundle 'joonty/vdebug.git'
 if has('nvim')
   " nvim only plugins
