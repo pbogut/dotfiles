@@ -125,7 +125,7 @@ fi
 
 
 alias ls="ls --color"
-alias ssh-weechat="ssh weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
+alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
 alias php_debug_on="export XDEBUG_CONFIG=\"idekey=PHPSTORM\""
 alias php_debug_off="export XDEBUG_CONFIG="
