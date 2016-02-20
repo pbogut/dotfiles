@@ -18,6 +18,7 @@ call vundle#begin()
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 
+Plugin 'Raimondi/delimitMate' "needs to be loaded before endwise
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-git'
 Plugin 'tpope/vim-commentary'
@@ -51,7 +52,6 @@ Plugin 'MarcWeber/vim-addon-mw-utils'
 Plugin 'tomtom/tlib_vim'
 " Plugin 'tomtom/tcomment_vim'
 " Plugin 'garbas/vim-snipmate'
-Plugin 'Raimondi/delimitMate'
 " Plugin 'szw/vim-tags'
 Plugin 'craigemery/vim-autotag'
 Plugin 'mileszs/ack.vim'
