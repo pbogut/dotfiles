@@ -305,6 +305,7 @@ set wildignore=*.swp,*.bak,*.pyc,*.class
 vmap v <Plug>(expand_region_expand)
 vmap V <Plug>(expand_region_shrink)
 " delimitMate
+let g:delimitMate_smart_matchpairs = 1
 let g:delimitMate_expand_cr = 2
 let g:delimitMate_expand_space = 1
 let g:delimitMate_matchpairs = "(:),[:],{:}"
