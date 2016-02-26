@@ -48,6 +48,7 @@ Plugin 'nanotech/jellybeans.vim'
 Plugin 'Shougo/unite.vim'
 " Plugin 'tyru/open-browser.vim'
 " Plugin 'lambdalisue/vim-gista'
+Bundle 'ervandew/supertab'
 Plugin 'Valloric/YouCompleteMe'
 " Plugin 'mkusher/padawan.vim'
 Plugin 'dhruvasagar/vim-prosession'
@@ -205,45 +206,56 @@ let g:airline_powerline_fonts = 1
 " color scheme
 colorscheme jellybeans
 " Padawan
-" let g:ycm_semantic_triggers = {}
-" let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
+let g:ycm_semantic_triggers = {}
+let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
 " neocomplete
 let g:echodoc_enable_at_startup = 1
 set completeopt-=preview
 set cmdheight=2
+
+" make YCM compatible with UltiSnips (using supertab)
+let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
+let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
+let g:SuperTabDefaultCompletionType = '<C-n>'
+
+" better key bindings for UltiSnipsExpandTrigger
+let g:UltiSnipsExpandTrigger = "<tab>"
+let g:UltiSnipsJumpForwardTrigger = "<tab>"
+let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+
 " <TAB>: completion.
-inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+" inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+" inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 " ultisnip
-function! g:UltiSnips_Complete()
-  call UltiSnips#ExpandSnippetOrJump()
-  if g:ulti_expand_or_jump_res == 0
-    if pumvisible()
-      return "\<C-N>"
-    else
-      return "\<TAB>"
-    endif
-  endif
-  return ""
-endfunction
-function! g:UltiSnips_Reverse()
-  call UltiSnips#JumpBackwards()
-  if g:ulti_jump_backwards_res == 0
-    return "\<C-P>"
-  endif
-  return ""
-endfunction
-if !exists("g:UltiSnipsJumpForwardTrigger")
-  let g:UltiSnipsJumpForwardTrigger = "<c-@>"
-endif
-if !exists("g:UltiSnipsJumpBackwardTrigger")
-  let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-endif
-autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
-autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
+" function! g:UltiSnips_Complete()
+"   call UltiSnips#ExpandSnippetOrJump()
+"   if g:ulti_expand_or_jump_res == 0
+"     if pumvisible()
+"       return "\<C-N>"
+"     else
+"       return "\<TAB>"
+"     endif
+"   endif
+"   return ""
+" endfunction
+" function! g:UltiSnips_Reverse()
+"   call UltiSnips#JumpBackwards()
+"   if g:ulti_jump_backwards_res == 0
+"     return "\<C-P>"
+"   endif
+"   return ""
+" endfunction
+" if !exists("g:UltiSnipsJumpForwardTrigger")
+"   let g:UltiSnipsJumpForwardTrigger = "<c-@>"
+" endif
+" if !exists("g:UltiSnipsJumpBackwardTrigger")
+"   let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+" endif
+" autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
+" autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
 " let g:UltiSnipsJumpForwardTrigger="<cr>"
-let g:UltiSnipsListSnippets="<c-e>"
-let g:UltiSnipsExpandTrigger ="<c-@>"
+" let g:UltiSnipsListSnippets="<c-e>"
+" let g:UltiSnipsExpandTrigger ="<c-@>"
 " neocomplete
 if 0 == 1
   xmap <expr><cr> pumvisible() ? "\<plug>(neosnippet_expand)" : "\<cr>"
