@@ -49,8 +49,9 @@ Plugin 'nanotech/jellybeans.vim'
 Plugin 'Shougo/unite.vim'
 " Plugin 'tyru/open-browser.vim'
 " Plugin 'lambdalisue/vim-gista'
+Bundle 'ervandew/supertab'
 Plugin 'Valloric/YouCompleteMe'
-" Plugin 'mkusher/padawan.vim'
+Plugin 'mkusher/padawan.vim'
 Plugin 'dhruvasagar/vim-prosession'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'terryma/vim-multiple-cursors'
@@ -61,14 +62,12 @@ Plugin 'tomtom/tlib_vim'
 " Plugin 'szw/vim-tags'
 Plugin 'craigemery/vim-autotag'
 Plugin 'mileszs/ack.vim'
-Plugin 'rking/ag.vim'
-Plugin 'chun-yang/vim-action-ag'
 Plugin 'maxbrunsfeld/vim-yankstack'
 Plugin 'gioele/vim-autoswap'
 Plugin 'ntpeters/vim-better-whitespace'
 Plugin 'honza/vim-snippets'
 " Plugin 'majutsushi/tagbar'
-Plugin 'Shougo/echodoc.vim'
+" Plugin 'Shougo/echodoc.vim'
 Plugin 'Shougo/vimproc.vim'
 Plugin 'mattn/emmet-vim'
 Plugin 'christoomey/vim-tmux-navigator'
@@ -83,6 +82,8 @@ if has('nvim')
   Plugin 'benekastah/neomake'
   autocmd! BufWritePost * Neomake
   autocmd! BufReadPre,FileReadPre * Neomake
+  let g:neomake_airline = 1
+  let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
   " Plugin 'Shougo/deoplete.nvim'
 else
   " vim only plugins
@@ -166,7 +167,7 @@ inoremap jk <Esc>
 " nnoremap : ;
 noremap q: :q
 noremap q; :q
-nnoremap <leader>== migg=G'i
+nnoremap <leader>= migg=G'i
 nnoremap <leader>gp <Plug>GitGutterPreviewHunk
 nnoremap <leader>gr <Plug>GitGutterRevertHunk
 nnoremap <leader>gstage <Plug>GitGutterStageHunk
@@ -205,45 +206,56 @@ let g:airline_powerline_fonts = 1
 " color scheme
 colorscheme jellybeans
 " Padawan
-" let g:ycm_semantic_triggers = {}
-" let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
+let g:ycm_semantic_triggers = {}
+let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
 " neocomplete
 let g:echodoc_enable_at_startup = 1
 set completeopt-=preview
 set cmdheight=2
+
+" make YCM compatible with UltiSnips (using supertab)
+let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
+let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
+let g:SuperTabDefaultCompletionType = '<C-n>'
+
+" better key bindings for UltiSnipsExpandTrigger
+let g:UltiSnipsExpandTrigger = "<tab>"
+let g:UltiSnipsJumpForwardTrigger = "<tab>"
+let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+
 " <TAB>: completion.
-inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+" inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+" inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 " ultisnip
-function! g:UltiSnips_Complete()
-  call UltiSnips#ExpandSnippetOrJump()
-  if g:ulti_expand_or_jump_res == 0
-    if pumvisible()
-      return "\<C-N>"
-    else
-      return "\<TAB>"
-    endif
-  endif
-  return ""
-endfunction
-function! g:UltiSnips_Reverse()
-  call UltiSnips#JumpBackwards()
-  if g:ulti_jump_backwards_res == 0
-    return "\<C-P>"
-  endif
-  return ""
-endfunction
-if !exists("g:UltiSnipsJumpForwardTrigger")
-  let g:UltiSnipsJumpForwardTrigger = "<c-@>"
-endif
-if !exists("g:UltiSnipsJumpBackwardTrigger")
-  let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-endif
-autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
-autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
+" function! g:UltiSnips_Complete()
+"   call UltiSnips#ExpandSnippetOrJump()
+"   if g:ulti_expand_or_jump_res == 0
+"     if pumvisible()
+"       return "\<C-N>"
+"     else
+"       return "\<TAB>"
+"     endif
+"   endif
+"   return ""
+" endfunction
+" function! g:UltiSnips_Reverse()
+"   call UltiSnips#JumpBackwards()
+"   if g:ulti_jump_backwards_res == 0
+"     return "\<C-P>"
+"   endif
+"   return ""
+" endfunction
+" if !exists("g:UltiSnipsJumpForwardTrigger")
+"   let g:UltiSnipsJumpForwardTrigger = "<c-@>"
+" endif
+" if !exists("g:UltiSnipsJumpBackwardTrigger")
+"   let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+" endif
+" autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
+" autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
 " let g:UltiSnipsJumpForwardTrigger="<cr>"
-let g:UltiSnipsListSnippets="<c-e>"
-let g:UltiSnipsExpandTrigger ="<c-@>"
+" let g:UltiSnipsListSnippets="<c-e>"
+" let g:UltiSnipsExpandTrigger ="<c-@>"
 " neocomplete
 if 0 == 1
   xmap <expr><cr> pumvisible() ? "\<plug>(neosnippet_expand)" : "\<cr>"
@@ -373,6 +385,18 @@ let g:ctrlp_user_command = {
       \ }
 " async ack
 let g:ack_use_dispatch = 1
+" use ag if available
+if executable('ag')
+  let g:ackprg = 'ag --vimgrep'
+endif
+cnoreabbrev A Ack
+cnoreabbrev Ag Ack
+
+
+
+cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
+
+
 " yankstack
 let g:yankstack_map_keys = 0
 " r like... stack or... swith
