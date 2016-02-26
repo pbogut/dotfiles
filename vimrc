@@ -50,7 +50,7 @@ Plugin 'Shougo/unite.vim'
 " Plugin 'lambdalisue/vim-gista'
 Bundle 'ervandew/supertab'
 Plugin 'Valloric/YouCompleteMe'
-" Plugin 'mkusher/padawan.vim'
+Plugin 'mkusher/padawan.vim'
 Plugin 'dhruvasagar/vim-prosession'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'terryma/vim-multiple-cursors'
@@ -62,14 +62,12 @@ Plugin 'Raimondi/delimitMate'
 " Plugin 'szw/vim-tags'
 Plugin 'craigemery/vim-autotag'
 Plugin 'mileszs/ack.vim'
-Plugin 'rking/ag.vim'
-Plugin 'chun-yang/vim-action-ag'
 Plugin 'maxbrunsfeld/vim-yankstack'
 Plugin 'gioele/vim-autoswap'
 Plugin 'ntpeters/vim-better-whitespace'
 Plugin 'honza/vim-snippets'
 " Plugin 'majutsushi/tagbar'
-Plugin 'Shougo/echodoc.vim'
+" Plugin 'Shougo/echodoc.vim'
 Plugin 'Shougo/vimproc.vim'
 Plugin 'mattn/emmet-vim'
 Plugin 'christoomey/vim-tmux-navigator'
@@ -384,6 +382,12 @@ let g:ctrlp_user_command = {
       \ }
 " async ack
 let g:ack_use_dispatch = 1
+" use ag if available
+if executable('ag')
+  let g:ackprg = 'ag --vimgrep'
+endif
+cnoreabbrev A Ack
+cnoreabbrev Ag Ack
 " yankstack
 let g:yankstack_map_keys = 0
 " r like... stack or... swith
