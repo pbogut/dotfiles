@@ -82,6 +82,8 @@ if has('nvim')
   Plugin 'benekastah/neomake'
   autocmd! BufWritePost * Neomake
   autocmd! BufReadPre,FileReadPre * Neomake
+  let g:neomake_airline = 1
+  let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
   " Plugin 'Shougo/deoplete.nvim'
 else
   " vim only plugins
@@ -165,7 +167,7 @@ inoremap jk <Esc>
 " nnoremap : ;
 noremap q: :q
 noremap q; :q
-nnoremap <leader>== migg=G'i
+nnoremap <leader>= migg=G'i
 nnoremap <leader>gp <Plug>GitGutterPreviewHunk
 nnoremap <leader>gr <Plug>GitGutterRevertHunk
 nnoremap <leader>gstage <Plug>GitGutterStageHunk
@@ -388,6 +390,12 @@ if executable('ag')
 endif
 cnoreabbrev A Ack
 cnoreabbrev Ag Ack
+
+
+
+cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
+
+
 " yankstack
 let g:yankstack_map_keys = 0
 " r like... stack or... swith
