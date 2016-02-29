@@ -8,6 +8,50 @@ set report=0
 set nohlsearch
 set mouse= "disable mouse support
 set cursorline
+" space instead of tab
+set laststatus=2
+set completeopt-=preview
+set cmdheight=2
+" show existing tab with 4 spaces width
+set tabstop=2
+" when indenting with '>', use 4 spaces width
+set shiftwidth=2
+" On pressing tab, insert 4 spaces
+set expandtab
+" scroll
+set scrolloff=3
+" tab size for php and html
+" line numering
+set number
+set relativenumber
+set lazyredraw
+set wildmenu
+set incsearch
+set showcmd
+" toggle invisible characters
+set invlist
+set listchars=tab:▸\ ,eol:¬,trail:⋅,extends:❯,precedes:❮
+set showbreak=↪
+set history=1000         " remember more commands and search history
+set undolevels=1000      " use many muchos levels of undo
+set wildignore=*.swp,*.bak,*.pyc,*.class
+augroup configgroup
+  autocmd!
+  autocmd FileType html :setlocal tabstop=4 shiftwidth=4
+  autocmd FileType php :setlocal tabstop=4 shiftwidth=4
+  autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
+  autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
+augroup END
+" line 80 limit
+set colorcolumn=81
+highlight ColorColumn ctermbg=234
+highlight CursorLine ctermbg=233
+highlight SpecialKey ctermbg=none
+
+" edit vimrc/zshrc and load vimrc bindings
+nnoremap <leader>ev :vsp $MYVIMRC<CR>
+nnoremap <leader>ez :vsp ~/.zshrc<CR>
+nnoremap <leader>sv :source $MYVIMRC<CR>
 
 let g:python_host_prog='/usr/bin/python2'
 
@@ -18,10 +62,6 @@ endif
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
-" alternatively, pass a path where Vundle should install plugins
-"call vundle#begin('~/some/path/here')
-
-" let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'Raimondi/delimitMate' "needs to be loaded before endwise
@@ -77,20 +117,9 @@ Plugin 'sirver/ultisnips'
 " Plugin 'Shougo/neosnippet-snippets'
 Plugin 'sheerun/vim-polyglot'
 Bundle 'joonty/vdebug.git'
-if has('nvim')
-  " nvim only plugins
-  Plugin 'benekastah/neomake'
-  autocmd! BufWritePost * Neomake
-  autocmd! BufReadPre,FileReadPre * Neomake
-  let g:neomake_airline = 1
-  let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
-  " Plugin 'Shougo/deoplete.nvim'
-else
-  " vim only plugins
-  Plugin 'scrooloose/syntastic'
-  " Plugin 'Shougo/neocomplete.vim'
-  Plugin 'jaxbot/browserlink.vim'
-endif
+Plugin 'jaxbot/browserlink.vim'
+" Plugin 'scrooloose/syntastic'
+Plugin 'benekastah/neomake'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -103,11 +132,18 @@ filetype plugin indent on    " required
 " yankstack mappings
 call yankstack#setup()
 
+" Neomake
+autocmd BufWritePost * Neomake
+autocmd BufReadPre,FileReadPre * Neomake
+let g:neomake_airline = 1
+let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
+
 " Close if only panel left
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 " ctr+n shortcut
 " nerdtree
 let NERDTreeQuitOnOpen=1
+" one actino to reaveal file and close sidebar
 function! ToggleNERDTree()
   if &buftype == 'nofile'
     :NERDTreeClose
@@ -162,37 +198,12 @@ snoremap <leader>P "+P
 " case insensitive search by default
 nnoremap / /\c
 nnoremap ? ?\c
-inoremap jk <Esc>
-" nnoremap ; :
-" nnoremap : ;
 noremap q: :q
 noremap q; :q
 nnoremap <leader>= migg=G'i
 nnoremap <leader>gp <Plug>GitGutterPreviewHunk
 nnoremap <leader>gr <Plug>GitGutterRevertHunk
 nnoremap <leader>gstage <Plug>GitGutterStageHunk
-" Insert mode quick commands
-inoremap II <Esc>I
-inoremap AA <Esc>A
-" inoremap OO <Esc>O
-" inoremap CC <Esc>C
-" inoremap SS <Esc>S
-" inoremap DD <Esc>dd
-" inoremap UU <Esc>u
-" get rid of bad habbits :)
-" Easy version for now
-noremap  <Del> ""
-noremap! <Del> <Esc>
-noremap  <Ins> ""
-noremap! <Ins> <Esc>
-noremap  <Home> ""
-noremap! <Home> <Esc>
-noremap  <End> ""
-noremap! <End> <Esc>
-noremap  <PageUp> ""
-noremap! <PageUp> <Esc>
-noremap  <PageDown> ""
-noremap! <PageDown> <Esc>
 " Reload Browser
 map <F5> :BLReloadPage<cr>
 map <F6> :BLReloadCSS<cr>
@@ -200,7 +211,6 @@ map <F6> :BLReloadCSS<cr>
 let g:ctrlp_cmd = 'CtrlPMixed'
 let g:ctrlp_map = '<leader>f'
 " air-line
-set laststatus=2
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
 " color scheme
@@ -208,10 +218,6 @@ colorscheme jellybeans
 " Padawan
 let g:ycm_semantic_triggers = {}
 let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
-" neocomplete
-let g:echodoc_enable_at_startup = 1
-set completeopt-=preview
-set cmdheight=2
 
 " make YCM compatible with UltiSnips (using supertab)
 let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
@@ -223,145 +229,19 @@ let g:UltiSnipsExpandTrigger = "<tab>"
 let g:UltiSnipsJumpForwardTrigger = "<tab>"
 let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
 
-" <TAB>: completion.
-" inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-" inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-" ultisnip
-" function! g:UltiSnips_Complete()
-"   call UltiSnips#ExpandSnippetOrJump()
-"   if g:ulti_expand_or_jump_res == 0
-"     if pumvisible()
-"       return "\<C-N>"
-"     else
-"       return "\<TAB>"
-"     endif
-"   endif
-"   return ""
-" endfunction
-" function! g:UltiSnips_Reverse()
-"   call UltiSnips#JumpBackwards()
-"   if g:ulti_jump_backwards_res == 0
-"     return "\<C-P>"
-"   endif
-"   return ""
-" endfunction
-" if !exists("g:UltiSnipsJumpForwardTrigger")
-"   let g:UltiSnipsJumpForwardTrigger = "<c-@>"
-" endif
-" if !exists("g:UltiSnipsJumpBackwardTrigger")
-"   let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-" endif
-" autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
-" autocmd BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
-" let g:UltiSnipsJumpForwardTrigger="<cr>"
-" let g:UltiSnipsListSnippets="<c-e>"
-" let g:UltiSnipsExpandTrigger ="<c-@>"
-" neocomplete
-if 0 == 1
-  xmap <expr><cr> pumvisible() ? "\<plug>(neosnippet_expand)" : "\<cr>"
-  imap <expr><cr> pumvisible() ? "\<plug>(neosnippet_expand)" : "\<cr>"
-  smap <expr><cr> pumvisible() ? "\<plug>(neosnippet_expand)" : "\<cr>"
-  " SuperTab like snippets behavior.
-  imap <expr><TAB> neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)" : pumvisible() ? "\<C-n>" : "\<TAB>"
-  " For snippet_complete marker.
-  if has('conceal')
-    set conceallevel=2 concealcursor=i
-  endif
-endif
-if has('nvim')
-  " let g:deoplete#enable_at_startup = 1
-  " <C-h>, <BS>: close popup and delete backword char.
-  " inoremap <expr><C-h>  deoplete#mappings#smart_close_popup()."\<C-h>"
-  " inoremap <expr><BS> deoplete#mappings#smart_close_popup()."\<C-h>"
-  " if !exists('g:deoplete#omni_patterns')
-  "   let g:deoplete#omni_patterns = {}
-  " endif
-  " let g:deoplete#omni_patterns.php =
-  "   \ '\h\w*\|[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
-  " let g:deoplete#omni_patterns.ruby =
-  "   \ '\h\w*\|[^. \t]\.\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
-else
-  " let g:neocomplete#enable_at_startup = 1
-  " <C-h>, <BS>: close popup and delete backword char.
-  " inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-  " inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
-  " if !exists('g:neocomplete#sources#omni#input_patterns')
-  "   let g:neocomplete#sources#omni#input_patterns = {}
-  " endif
-  " let g:neocomplete#sources#omni#input_patterns.php = '\h\w*\|[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
-  " if !exists('g:neocomplete#force_omni_input_patterns')
-  "   let g:neocomplete#force_omni_input_patterns = {}
-  " endif
-  " let g:neocomplete#force_omni_input_patterns.php = '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
-endif
+" eclim
+let g:EclimFileTypeValidate = 0
 let g:EclimCompletionMethod = 'omnifunc'
-" space instead of tab
-filetype plugin indent on
-" show existing tab with 4 spaces width
-set tabstop=2
-" when indenting with '>', use 4 spaces width
-set shiftwidth=2
-" On pressing tab, insert 4 spaces
-set expandtab
-" tab size for php and html
-autocmd FileType html :setlocal tabstop=4 shiftwidth=4
-autocmd FileType php :setlocal tabstop=4 shiftwidth=4
-autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
-autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
-" line 80 limit
-set colorcolumn=81
-highlight ColorColumn ctermbg=234
-highlight CursorLine ctermbg=233
-" line numering
-set number
-set relativenumber
-" map <leader>w :set nowrap!<cr>
-" multiple-cursors'
-let g:multi_cursor_use_default_mapping = 0
-let g:multi_cursor_next_key='<C-m>'
-let g:multi_cursor_prev_key='<C-p>'
-let g:multi_cursor_skip_key='<C-x>'
-let g:multi_cursor_quit_key='<Esc>'
-" white characters
-" toggle invisible characters
-set invlist
-set listchars=tab:▸\ ,eol:¬,trail:⋅,extends:❯,precedes:❮
-let g:strip_whitespace_on_save = 1
-" make the highlighting of tabs less annoying
-highlight SpecialKey ctermbg=none
-set showbreak=↪
-" nmap <leader>l :set list!<cr>
-set history=1000         " remember more commands and search history
-set undolevels=1000      " use many muchos levels of undo
-set wildignore=*.swp,*.bak,*.pyc,*.class
 " expand region
 vmap v <Plug>(expand_region_expand)
 vmap V <Plug>(expand_region_shrink)
+let g:strip_whitespace_on_save = 1
 " delimitMate
 let g:delimitMate_smart_matchpairs = 1
 let g:delimitMate_expand_cr = 2
 let g:delimitMate_expand_space = 1
 let g:delimitMate_matchpairs = "(:),[:],{:}"
 let g:delimitMate_jump_expansion = 0
-" move text blocks up and down
-" gnome-terminal, guake
-" nnoremap j :m .+1<CR>==
-" nnoremap k :m .-2<CR>==
-" inoremap k <Esc>:m .-2<CR>==gi
-" inoremap j <Esc>:m .+1<CR>==gi
-" vnoremap j :m '>+1<CR>gv=gv
-" vnoremap k :m '<-2<CR>gv=gv
-" vim way, not working in some terminals
-" nnoremap <A-j> :m .+1<CR>==
-" nnoremap <A-k> :m .-2<CR>==
-" inoremap <A-j> <Esc>:m .+1<CR>==gi
-" inoremap <A-k> <Esc>:m .-2<CR>==gi
-vnoremap <A-j> :m '>+1<CR>gv=gv
-vnoremap <A-k> :m '<-2<CR>gv=gv
-" scroll
-set scrolloff=3
-" eclim
-let g:EclimFileTypeValidate = 0
 " php linter
 let g:syntastic_mode_map = {
       \ "mode": "active",
@@ -392,10 +272,7 @@ endif
 cnoreabbrev A Ack
 cnoreabbrev Ag Ack
 
-
-
 cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
-
 
 " yankstack
 let g:yankstack_map_keys = 0
@@ -427,18 +304,11 @@ set backup
 " disable double save (cousing file watchers issues)
 set nowritebackup
 set nobackup " well, thats the only way to prevent guard from rutting tests twice ;/
-" copy to system clipboard
-" alpha stage
-function! g:ClipCopy()
-  let selection = @"
-  silent echo system('echo ' . shellescape(join(split(selection,'\n'),'\n')). '|xclip -i -selection c')
-endfunction
 " modify selected text using combining diacritics
 command! -range -nargs=0 Overline        call s:CombineSelection(<line1>, <line2>, '0305')
 command! -range -nargs=0 Underline       call s:CombineSelection(<line1>, <line2>, '0332')
 command! -range -nargs=0 DoubleUnderline call s:CombineSelection(<line1>, <line2>, '0333')
 command! -range -nargs=0 Strikethrough   call s:CombineSelection(<line1>, <line2>, '0336')
-
 function! s:CombineSelection(line1, line2, cp)
   execute 'let char = "\u'.a:cp.'"'
   execute a:line1.','.a:line2.'s/\%V[^[:cntrl:]]/&'.char.'/ge'
