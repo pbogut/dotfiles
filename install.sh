@@ -20,7 +20,7 @@ read -d '' files <<"EOF"
     scripts
     gitconfig
     githelpers
-    screen-256color.ti
+    terminfo
     weechat/cron.txt
     weechat/alias.conf
     weechat/weechat.conf
