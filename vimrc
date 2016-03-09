@@ -120,6 +120,7 @@ Bundle 'joonty/vdebug.git'
 Plugin 'jaxbot/browserlink.vim'
 " Plugin 'scrooloose/syntastic'
 Plugin 'benekastah/neomake'
+Plugin 'Chiel92/vim-autoformat'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -160,6 +161,7 @@ nnoremap <leader>h :bp!<cr>
 nnoremap <leader>b :CtrlPBuffer<cr>
 nnoremap <leader>m :CtrlPMRUFiles<cr>
 nnoremap <leader>w :w<cr>
+nnoremap <leader>a :Autoformat<cr>
 map <C-n> :bn!<cr>
 map <C-p> :bp!<cr>
 map <C-w>d :Bdelete<cr>
@@ -274,6 +276,9 @@ cnoreabbrev Ag Ack
 
 cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
 
+" Autoformat
+let g:formatdef_phpcbf = '"phpcbf"'
+let g:formatters_php = ['phpcbf']
 " yankstack
 let g:yankstack_map_keys = 0
 " r like... stack or... swith
