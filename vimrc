@@ -48,11 +48,6 @@ highlight ColorColumn ctermbg=234
 highlight CursorLine ctermbg=233
 highlight SpecialKey ctermbg=none
 
-" edit vimrc/zshrc and load vimrc bindings
-nnoremap <leader>ev :vsp $MYVIMRC<CR>
-nnoremap <leader>ez :vsp ~/.zshrc<CR>
-nnoremap <leader>sv :source $MYVIMRC<CR>
-
 let g:python_host_prog='/usr/bin/python2'
 
 if has("patch-7.4.314")
@@ -121,6 +116,8 @@ Plugin 'jaxbot/browserlink.vim'
 " Plugin 'scrooloose/syntastic'
 Plugin 'benekastah/neomake'
 Plugin 'Chiel92/vim-autoformat'
+Plugin 'alvan/vim-closetag'
+Plugin 'edsono/vim-matchit'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -133,9 +130,15 @@ filetype plugin indent on    " required
 " yankstack mappings
 call yankstack#setup()
 
+" closetag
+let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml"
 " Neomake
-autocmd BufWritePost * Neomake
-autocmd BufReadPre,FileReadPre * Neomake
+augroup neomake
+  autocmd!
+  autocmd BufWritePost * silent Neomake
+  autocmd BufReadPre,FileReadPre * silent Neomake
+augroup END
+
 let g:neomake_airline = 1
 let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
 
@@ -153,6 +156,10 @@ function! ToggleNERDTree()
   endif
 endfunction
 let mapleader = "\<space>" " test if that will work better
+" edit vimrc/zshrc and load vimrc bindings
+nnoremap <leader>ev :vsp $MYVIMRC<CR>
+nnoremap <leader>ez :vsp ~/.zshrc<CR>
+nnoremap <leader>sv :source $MYVIMRC<CR>
 " nnoremap <leader>s :NERDTreeToggle<cr>
 nnoremap <leader>t :TagbarToggle<cr>
 nnoremap <leader>r :call ToggleNERDTree()<cr>
@@ -160,6 +167,9 @@ nnoremap <leader>l :bn!<cr>
 nnoremap <leader>h :bp!<cr>
 nnoremap <leader>b :CtrlPBuffer<cr>
 nnoremap <leader>m :CtrlPMRUFiles<cr>
+" nnoremap <leader>gf :CtrlP<cr><C-\>f
+" nnoremap <leader>gw :CtrlP<cr><C-\>w
+" nnoremap <leader>gt :CtrlPTag<cr><C-\>w
 nnoremap <leader>w :w<cr>
 nnoremap <leader>a :Autoformat<cr>
 map <C-n> :bn!<cr>
@@ -207,9 +217,23 @@ nnoremap <leader>gp <Plug>GitGutterPreviewHunk
 nnoremap <leader>gr <Plug>GitGutterRevertHunk
 nnoremap <leader>gstage <Plug>GitGutterStageHunk
 " Reload Browser
-map <F5> :BLReloadPage<cr>
-map <F6> :BLReloadCSS<cr>
+iabbrev <// </<C-X><C-O>
+map <F8> :BLReloadPage<cr>
+map <F7> :BLReloadCSS<cr>
+let g:bl_no_autoupdate = 1
 " CtrlPset splitbelow
+function! CtrlPFindTag()
+  let g:ctrlp_default_input = expand('<cword>')
+  CtrlPTag
+  let g:ctrlp_default_input = ''
+endfunction
+function! CtrlPFindFile()
+  let g:ctrlp_default_input = expand('<cfile>')
+  CtrlP
+  let g:ctrlp_default_input = ''
+endfunction
+nnoremap <leader>gf :call CtrlPFindFile()<cr>
+nnoremap <leader>gt :call CtrlPFindTag()<cr>
 let g:ctrlp_cmd = 'CtrlPMixed'
 let g:ctrlp_map = '<leader>f'
 " air-line
@@ -278,7 +302,8 @@ cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
 
 " Autoformat
 let g:formatdef_phpcbf = '"phpcbf"'
-let g:formatters_php = ['phpcbf']
+let g:formatdef_php_beautifier = '"php_beautifier -s ".shiftwidth()." -l KeepEmptyLines 2>/dev/null"'
+let g:formatters_php = ['htmlbeautify', 'php_beautifier', 'phpcbf']
 " yankstack
 let g:yankstack_map_keys = 0
 " r like... stack or... swith
