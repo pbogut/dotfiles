@@ -29,6 +29,7 @@ read -d '' files <<"EOF"
     config/autostart/autostart.desktop
     config/autostart/rescuetime.desktop
     vim/bundle/Vundle.vim
+    composer/composer.json
 EOF
 read -d '' directories <<"EOF"
     .vim/undofiles
