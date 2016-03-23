@@ -8,6 +8,7 @@ set report=0
 set nohlsearch
 set mouse= "disable mouse support
 set cursorline
+set cursorcolumn
 " space instead of tab
 set laststatus=2
 set completeopt-=preview
@@ -39,14 +40,12 @@ augroup configgroup
   autocmd!
   autocmd FileType html :setlocal tabstop=4 shiftwidth=4
   autocmd FileType php :setlocal tabstop=4 shiftwidth=4
+  autocmd FileType javascript :setlocal tabstop=4 shiftwidth=4
   autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
   autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
 augroup END
 " line 80 limit
 set colorcolumn=81
-highlight ColorColumn ctermbg=234
-highlight CursorLine ctermbg=233
-highlight SpecialKey ctermbg=none
 
 let g:python_host_prog='/usr/bin/python2'
 
@@ -97,7 +96,6 @@ Plugin 'tomtom/tlib_vim'
 " Plugin 'szw/vim-tags'
 Plugin 'craigemery/vim-autotag'
 Plugin 'mileszs/ack.vim'
-Plugin 'maxbrunsfeld/vim-yankstack'
 Plugin 'gioele/vim-autoswap'
 Plugin 'ntpeters/vim-better-whitespace'
 Plugin 'honza/vim-snippets'
@@ -127,24 +125,17 @@ filetype plugin indent on    " required
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
 
-" yankstack mappings
-call yankstack#setup()
-
 " closetag
 let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml"
 " Neomake
 augroup neomake
   autocmd!
   autocmd BufWritePost * silent Neomake
-  autocmd BufReadPre,FileReadPre * silent Neomake
 augroup END
 
 let g:neomake_airline = 1
 let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
 
-" Close if only panel left
-autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-" ctr+n shortcut
 " nerdtree
 let NERDTreeQuitOnOpen=1
 " one actino to reaveal file and close sidebar
@@ -207,6 +198,16 @@ snoremap <leader>p "+p
 nnoremap <leader>P "+P
 vnoremap <leader>P "+P
 snoremap <leader>P "+P
+noremap <leader>sh :set syntax=html<cr>
+noremap <leader>sp :set syntax=php<cr>
+noremap <leader>sr :set syntax=ruby<cr>
+noremap <leader>sc :set syntax=css<cr>
+noremap <leader>sj :set syntax=js<cr>
+noremap <leader>sx :set syntax=xml<cr>
+noremap <leader>sa :exec "Autoformat ".&syntax<cr>
+" prevent pasting in visual from yank seletion
+snoremap p "_dP
+vnoremap p "_dP
 " case insensitive search by default
 nnoremap / /\c
 nnoremap ? ?\c
@@ -241,6 +242,10 @@ let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
 " color scheme
 colorscheme jellybeans
+highlight ColorColumn ctermbg=234
+highlight CursorLine ctermbg=233
+highlight CursorColumn ctermbg=232
+highlight SpecialKey ctermbg=none
 " Padawan
 let g:ycm_semantic_triggers = {}
 let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
@@ -301,14 +306,9 @@ cnoreabbrev Ag Ack
 cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
 
 " Autoformat
-let g:formatdef_phpcbf = '"phpcbf"'
-let g:formatdef_php_beautifier = '"php_beautifier -s ".shiftwidth()." -l KeepEmptyLines 2>/dev/null"'
-let g:formatters_php = ['htmlbeautify', 'php_beautifier', 'phpcbf']
-" yankstack
-let g:yankstack_map_keys = 0
-" r like... stack or... swith
-nmap <leader>s <Plug>yankstack_substitute_older_paste
-nmap <leader>S <Plug>yankstack_substitute_newer_paste
+" PHP - pipline of few
+let g:formatdef_phppipeline = '"fmt.phar --passes=ConvertOpenTagWithEcho --indent_with_space=".&shiftwidth." - | html-beautify -s ".&shiftwidth." | phpcbf"'
+let g:formatters_php = ['phppipeline']
 " despatch hax to not cover half screen
 let g:dispatch_quickfix_height = 10
 let g:dispatch_tmux_height = 1
