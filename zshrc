@@ -123,7 +123,6 @@ if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
     zle -N zle-line-finish
 fi
 
-
 alias ls="ls --color"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
@@ -163,7 +162,7 @@ PS1="${BRED}(${NORMAL}%~${BRED}) ${BBLUE}${GIT_BRANCH}
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 export rvmsudo_secure_path=1
-export PATH="$PATH:$HOME/npm/bin"
+export PATH="$HOME/.npm/bin:$PATH"
 export PATH="$PATH:$HOME/.scripts"
 export PATH="$PATH:$HOME/.composer/vendor/bin"
 
@@ -175,6 +174,9 @@ if [[ ! -z "$TMUX"  ]]; then
 fi
 # default editor
 export EDITOR=nvim
+if ! type "nvim" > /dev/null; then
+  export EDITOR=vim
+fi
 # always create/attach tmux session
 [[ $- != *i*  ]] && return
 
