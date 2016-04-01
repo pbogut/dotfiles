@@ -9,6 +9,12 @@ set nohlsearch
 set mouse= "disable mouse support
 set cursorline
 
+let g:python_host_prog='/usr/bin/python2'
+
+if has("patch-7.4.314")
+  set shortmess+=c
+endif
+
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -42,7 +48,7 @@ Plugin 'nanotech/jellybeans.vim'
 Plugin 'Shougo/unite.vim'
 " Plugin 'tyru/open-browser.vim'
 " Plugin 'lambdalisue/vim-gista'
-" Plugin 'Valloric/YouCompleteMe'
+Plugin 'Valloric/YouCompleteMe'
 " Plugin 'mkusher/padawan.vim'
 Plugin 'dhruvasagar/vim-prosession'
 Plugin 'airblade/vim-gitgutter'
@@ -55,6 +61,8 @@ Plugin 'Raimondi/delimitMate'
 " Plugin 'szw/vim-tags'
 Plugin 'craigemery/vim-autotag'
 Plugin 'mileszs/ack.vim'
+Plugin 'rking/ag.vim'
+Plugin 'chun-yang/vim-action-ag'
 Plugin 'maxbrunsfeld/vim-yankstack'
 Plugin 'gioele/vim-autoswap'
 Plugin 'ntpeters/vim-better-whitespace'
@@ -75,11 +83,11 @@ if has('nvim')
   Plugin 'benekastah/neomake'
   autocmd! BufWritePost * Neomake
   autocmd! BufReadPre,FileReadPre * Neomake
-  Plugin 'Shougo/deoplete.nvim'
+  " Plugin 'Shougo/deoplete.nvim'
 else
   " vim only plugins
   Plugin 'scrooloose/syntastic'
-  Plugin 'Shougo/neocomplete.vim'
+  " Plugin 'Shougo/neocomplete.vim'
   Plugin 'jaxbot/browserlink.vim'
 endif
 " All of your Plugins must be added before the following line
@@ -125,18 +133,31 @@ map <C-w>x :Bdelete <bar>q<cr>
 map <C-w>X :Bdelete! <bar> q<cr>
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
+snoremap <leader>d "_d
 nnoremap <leader>D "_D
 vnoremap <leader>D "_D
+snoremap <leader>D "_D
 nnoremap <leader>c "_c
 vnoremap <leader>c "_c
+snoremap <leader>c "_c
 nnoremap <leader>C "_C
 vnoremap <leader>C "_C
+snoremap <leader>C "_C
 nnoremap <leader>x "_x
 vnoremap <leader>x "_x
+snoremap <leader>x "_x
 nnoremap <leader>y "+y
+vnoremap <leader>y "+y
+snoremap <leader>y "+y
+nnoremap <leader>Y "+Y
 vnoremap <leader>Y "+Y
+snoremap <leader>Y "+Y
 nnoremap <leader>p "+p
+vnoremap <leader>p "+p
+snoremap <leader>p "+p
+nnoremap <leader>P "+P
 vnoremap <leader>P "+P
+snoremap <leader>P "+P
 " case insensitive search by default
 nnoremap / /\c
 nnoremap ? ?\c
@@ -236,10 +257,10 @@ if 0 == 1
   endif
 endif
 if has('nvim')
-  let g:deoplete#enable_at_startup = 1
+  " let g:deoplete#enable_at_startup = 1
   " <C-h>, <BS>: close popup and delete backword char.
-  inoremap <expr><C-h>  deoplete#mappings#smart_close_popup()."\<C-h>"
-  inoremap <expr><BS> deoplete#mappings#smart_close_popup()."\<C-h>"
+  " inoremap <expr><C-h>  deoplete#mappings#smart_close_popup()."\<C-h>"
+  " inoremap <expr><BS> deoplete#mappings#smart_close_popup()."\<C-h>"
   " if !exists('g:deoplete#omni_patterns')
   "   let g:deoplete#omni_patterns = {}
   " endif
@@ -248,18 +269,18 @@ if has('nvim')
   " let g:deoplete#omni_patterns.ruby =
   "   \ '\h\w*\|[^. \t]\.\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
 else
-  let g:neocomplete#enable_at_startup = 1
+  " let g:neocomplete#enable_at_startup = 1
   " <C-h>, <BS>: close popup and delete backword char.
-  inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-  inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+  " inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+  " inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
   " if !exists('g:neocomplete#sources#omni#input_patterns')
   "   let g:neocomplete#sources#omni#input_patterns = {}
   " endif
   " let g:neocomplete#sources#omni#input_patterns.php = '\h\w*\|[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
-  if !exists('g:neocomplete#force_omni_input_patterns')
-    let g:neocomplete#force_omni_input_patterns = {}
-  endif
-  let g:neocomplete#force_omni_input_patterns.php = '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
+  " if !exists('g:neocomplete#force_omni_input_patterns')
+  "   let g:neocomplete#force_omni_input_patterns = {}
+  " endif
+  " let g:neocomplete#force_omni_input_patterns.php = '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
 endif
 let g:EclimCompletionMethod = 'omnifunc'
 " space instead of tab
