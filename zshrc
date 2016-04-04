@@ -173,9 +173,11 @@ if [[ ! -z "$TMUX"  ]]; then
   export ZLE_RPROMPT_INDENT=0
 fi
 # default editor
-export EDITOR=nvim
 if ! type "nvim" > /dev/null; then
   export EDITOR=vim
+else
+  export EDITOR=nvim
+  alias vim="nvim"
 fi
 # always create/attach tmux session
 [[ $- != *i*  ]] && return
