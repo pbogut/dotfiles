@@ -40,7 +40,7 @@ augroup configgroup
   autocmd!
   autocmd FileType html :setlocal tabstop=4 shiftwidth=4
   autocmd FileType php :setlocal tabstop=4 shiftwidth=4
-  autocmd FileType javascript :setlocal tabstop=4 shiftwidth=4
+  " autocmd FileType javascript :setlocal tabstop=4 shiftwidth=4
   autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
   autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
 augroup END
