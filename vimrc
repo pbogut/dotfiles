@@ -128,7 +128,7 @@ filetype plugin indent on    " required
 " closetag
 let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml"
 " Neomake
-augroup neomake
+augroup neomakegroup
   autocmd!
   autocmd BufWritePost * silent Neomake
 augroup END
