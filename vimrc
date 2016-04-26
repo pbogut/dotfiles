@@ -131,7 +131,7 @@ let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml"
 " Neomake
 augroup neomakegroup
   autocmd!
-  autocmd BufWritePost * silent Neomake
+  autocmd BufWritePost * Neomake
 augroup END
 
 let g:neomake_airline = 1
@@ -298,8 +298,7 @@ let g:ack_use_dispatch = 1
 if executable('ag')
   let g:ackprg = 'ag --vimgrep'
 endif
-cnoreabbrev A Ack
-cnoreabbrev Ag Ack
+let g:ag_working_path_mode="r"
 
 cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
 
