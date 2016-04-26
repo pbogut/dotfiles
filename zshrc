@@ -124,6 +124,7 @@ if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
 fi
 
 alias ls="ls --color"
+alias fix_terminal="stty sane"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
 alias php_debug_on="export XDEBUG_CONFIG=\"idekey=PHPSTORM\""
@@ -135,6 +136,7 @@ alias tunelssh_pl="sshuttle --dns -vr root@46.41.130.28 0/0"
 alias tunelssh_de="sshuttle --dns -vr smeagol@smeagol.pl:59184 0/0"
 
 alias yaourt-ignore-pgp="yaourt --m-arg \"--skipchecksums --skippgpcheck\""
+
 
 tmux() { if [[ $1 == "-ss"  ]]; then command tmuxss.sh "$2"; else command tmux "$@"; fi; }
 
@@ -182,3 +184,6 @@ fi
 # always create/attach tmux session
 [[ $- != *i*  ]] && return
 
+
+export NVM_DIR="/home/pbogut/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
