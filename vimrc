@@ -96,6 +96,7 @@ Plugin 'tomtom/tlib_vim'
 " Plugin 'szw/vim-tags'
 Plugin 'craigemery/vim-autotag'
 Plugin 'mileszs/ack.vim'
+Plugin 'rking/ag.vim'
 Plugin 'gioele/vim-autoswap'
 Plugin 'ntpeters/vim-better-whitespace'
 Plugin 'honza/vim-snippets'
@@ -211,8 +212,6 @@ vnoremap p "_dP
 " case insensitive search by default
 nnoremap / /\c
 nnoremap ? ?\c
-noremap q: :q
-noremap q; :q
 nnoremap <leader>= migg=G'i
 nnoremap <leader>gp <Plug>GitGutterPreviewHunk
 nnoremap <leader>gr <Plug>GitGutterRevertHunk
