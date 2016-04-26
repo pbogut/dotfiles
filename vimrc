@@ -148,6 +148,9 @@ function! ToggleNERDTree()
   endif
 endfunction
 let mapleader = "\<space>" " test if that will work better
+" macros
+nnoremap <leader>em :vsp ~/.vim/macros.vim<cr>
+nnoremap <leader>sm :source ~/.vim/macros.vim<cr>
 " edit vimrc/zshrc and load vimrc bindings
 nnoremap <leader>ev :vsp $MYVIMRC<CR>
 nnoremap <leader>ez :vsp ~/.zshrc<CR>
