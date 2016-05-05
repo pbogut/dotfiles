@@ -85,7 +85,7 @@ Plugin 'Shougo/unite.vim'
 " Plugin 'lambdalisue/vim-gista'
 Bundle 'ervandew/supertab'
 Plugin 'Valloric/YouCompleteMe'
-Plugin 'mkusher/padawan.vim'
+" Plugin 'mkusher/padawan.vim'
 Plugin 'dhruvasagar/vim-prosession'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'terryma/vim-multiple-cursors'
@@ -112,11 +112,14 @@ Plugin 'sirver/ultisnips'
 Plugin 'sheerun/vim-polyglot'
 Bundle 'joonty/vdebug.git'
 Plugin 'jaxbot/browserlink.vim'
-" Plugin 'scrooloose/syntastic'
-Plugin 'benekastah/neomake'
+Plugin 'scrooloose/syntastic'
+" Plugin 'benekastah/neomake'
 Plugin 'Chiel92/vim-autoformat'
 Plugin 'alvan/vim-closetag'
 Plugin 'edsono/vim-matchit'
+
+Plugin 'captbaritone/better-indent-support-for-php-with-html'
+Plugin 'docteurklein/php-getter-setter.vim'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -129,10 +132,10 @@ filetype plugin indent on    " required
 " closetag
 let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml"
 " Neomake
-augroup neomakegroup
-  autocmd!
-  autocmd BufWritePost * Neomake
-augroup END
+" augroup neomakegroup
+"   autocmd!
+"   autocmd BufWritePost * Neomake
+" augroup END
 
 let g:neomake_airline = 1
 let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
@@ -280,7 +283,8 @@ let g:syntastic_mode_map = {
       \ "active_filetypes": ["ruby", "php"],
       \ "passive_filetypes": ["puppet"] }
 "let g:syntastic_quiet_messages = { "type": "style" }
-let g:syntastic_php_checkers = ['php', 'phpmd', 'phpcs']
+" let g:syntastic_php_checkers = ['php', 'phpmd', 'phpcs']
+let g:syntastic_php_checkers = ['php', 'phpmd']
 let g:syntastic_aggregate_errors = 1
 let g:syntastic_enable_signs = 0
 " vim tags
@@ -309,6 +313,8 @@ cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
 " PHP - pipline of few
 let g:formatdef_phppipeline = '"fmt.phar --passes=ConvertOpenTagWithEcho --indent_with_space=".&shiftwidth." - | html-beautify -s ".&shiftwidth." | phpcbf"'
 let g:formatters_php = ['phppipeline']
+let g:formatdef_blade = '"html-beautify -s ".&shiftwidth'
+let g:formatters_blade = ['blade']
 " despatch hax to not cover half screen
 let g:dispatch_quickfix_height = 10
 let g:dispatch_tmux_height = 1
