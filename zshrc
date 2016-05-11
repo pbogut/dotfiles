@@ -124,11 +124,13 @@ if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
 fi
 
 alias ls="ls --color"
+alias e="exit"
 alias fix_terminal="stty sane"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
 alias php_debug_on="export XDEBUG_CONFIG=\"idekey=PHPSTORM\""
 alias php_debug_off="export XDEBUG_CONFIG="
+alias ctags_php="ctags -h \".php\" -R --exclude=\".git\" --exclude=\"tests\" --exclude=\"*.js\" --PHP-kinds=+cf"
 
 alias update="yaourt -Syu --aur"
 
