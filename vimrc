@@ -58,7 +58,8 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 
-Plugin 'Raimondi/delimitMate' "needs to be loaded before endwise
+" Plugin 'Raimondi/delimitMate' "needs to be loaded before endwise
+Plugin 'jiangmiao/auto-pairs'
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-git'
 Plugin 'tpope/vim-commentary'
@@ -277,6 +278,8 @@ let g:delimitMate_expand_cr = 2
 let g:delimitMate_expand_space = 1
 let g:delimitMate_matchpairs = "(:),[:],{:}"
 let g:delimitMate_jump_expansion = 0
+" AutoPair
+let g:AutoPairsMultilineClose = 0
 " php linter
 let g:syntastic_mode_map = {
       \ "mode": "active",
