@@ -58,6 +58,8 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 
+Plugin 'vim-ruby/vim-ruby'
+
 " Plugin 'Raimondi/delimitMate' "needs to be loaded before endwise
 Plugin 'jiangmiao/auto-pairs'
 Plugin 'tpope/vim-fugitive'
@@ -123,6 +125,10 @@ Plugin 'edsono/vim-matchit'
 
 Plugin 'captbaritone/better-indent-support-for-php-with-html'
 Plugin 'docteurklein/php-getter-setter.vim'
+
+Plugin 'elixir-lang/vim-elixir'
+Plugin 'thinca/vim-ref'
+Plugin 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -259,6 +265,10 @@ let g:ycm_semantic_triggers = {}
 let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
 " Deoplete
 let g:deoplete#enable_at_startup = 1
+let g:deoplete#omni_patterns = {}
+let g:deoplete#omni_patterns.java = '[^. *\t]\.\w*'
+let g:deoplete#omni_patterns.php =
+\ '\h\w*\|[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
 " make YCM compatible with UltiSnips (using supertab)
 let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
 let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
