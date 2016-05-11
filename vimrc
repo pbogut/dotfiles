@@ -117,8 +117,8 @@ Plugin 'sirver/ultisnips'
 Plugin 'sheerun/vim-polyglot'
 Bundle 'joonty/vdebug.git'
 Plugin 'jaxbot/browserlink.vim'
-Plugin 'scrooloose/syntastic'
-" Plugin 'benekastah/neomake'
+" Plugin 'scrooloose/syntastic'
+Plugin 'benekastah/neomake' "efed615 - working commit, 3bfb4ef - seams to work as well
 Plugin 'Chiel92/vim-autoformat'
 Plugin 'alvan/vim-closetag'
 Plugin 'edsono/vim-matchit'
@@ -141,10 +141,10 @@ filetype plugin indent on    " required
 " closetag
 let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml"
 " Neomake
-" augroup neomakegroup
-"   autocmd!
-"   autocmd BufWritePost * Neomake
-" augroup END
+augroup neomakegroup
+  autocmd!
+  autocmd BufWritePost * Neomake
+augroup END
 
 let g:neomake_airline = 1
 let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
