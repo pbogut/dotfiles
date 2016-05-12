@@ -149,6 +149,8 @@ augroup END
 let g:neomake_airline = 1
 let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
 
+let g:neomake_php_enabled_makers = ['php', 'phpmd']
+
 " nerdtree
 let NERDTreeQuitOnOpen=1
 " one actino to reaveal file and close sidebar
