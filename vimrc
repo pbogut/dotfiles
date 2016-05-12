@@ -181,8 +181,6 @@ nnoremap <leader>m :CtrlPMRUFiles<cr>
 " nnoremap <leader>gt :CtrlPTag<cr><C-\>w
 nnoremap <leader>w :w<cr>
 nnoremap <leader>a :Autoformat<cr>
-map <C-n> :bn!<cr>
-map <C-p> :bp!<cr>
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>p :bp!<cr>
