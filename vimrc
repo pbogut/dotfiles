@@ -43,6 +43,7 @@ augroup configgroup
   " autocmd FileType javascript :setlocal tabstop=4 shiftwidth=4
   autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
   autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
+  autocmd FileType qf :nnoremap <buffer> o <enter>
 augroup END
 " line 80 limit
 set colorcolumn=81
@@ -169,6 +170,9 @@ nnoremap <leader>sm :source ~/.vim/macros.vim<cr>
 nnoremap <leader>ev :vsp $MYVIMRC<CR>
 nnoremap <leader>ez :vsp ~/.zshrc<CR>
 nnoremap <leader>sv :source $MYVIMRC<CR>
+" open list / quickfix
+nnoremap <leader>ol :lopen<cr>
+nnoremap <leader>oq :copen<cr>
 " nnoremap <leader>s :NERDTreeToggle<cr>
 nnoremap <leader>t :TagbarToggle<cr>
 nnoremap <leader>r :call ToggleNERDTree()<cr>
