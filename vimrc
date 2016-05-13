@@ -385,9 +385,26 @@ set dir=~/.vim/swapfiles//
 " set backup disr
 set backupdir=~/.vim/backupfiles//
 set backup
+
+augroup backup
+  autocmd!
+  autocmd BufWritePre * call UpdateBackupExt()
+augroup END
+" new backup file every minute, coz I can
+" its recreating file path and then save copy ther with current time
+" dont know how fast it will grow...
+function! UpdateBackupExt()
+  let filedir = expand('%:p:h')
+  execute "!mkdir -p ~/.vim/backupfiles/" . filedir
+  execute "set backupdir=~/.vim/backupfiles/" . filedir
+  " let myvar = substitute(myvar, '/', '_', 'ge')
+  let myvar = strftime("_%y%m%d_%H%M")
+  let myvar = "set backupext=___". myvar
+  execute myvar
+endfunction
 " disable double save (cousing file watchers issues)
 set nowritebackup
-set nobackup " well, thats the only way to prevent guard from rutting tests twice ;/
+" set nobackup " well, thats the only way to prevent guard from running tests twice ;/
 " modify selected text using combining diacritics
 command! -range -nargs=0 Overline        call s:CombineSelection(<line1>, <line2>, '0305')
 command! -range -nargs=0 Underline       call s:CombineSelection(<line1>, <line2>, '0332')
