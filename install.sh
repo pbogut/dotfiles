@@ -12,6 +12,7 @@ read -d '' files <<"EOF"
     screenrc
     vimrc
     zshrc
+    inputrc
     zshrc.d
     tmux
     tmux.conf

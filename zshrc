@@ -139,6 +139,10 @@ alias tunelssh_de="sshuttle --dns -vr smeagol@smeagol.pl:59184 0/0"
 
 alias yaourt-ignore-pgp="yaourt --m-arg \"--skipchecksums --skippgpcheck\""
 
+# rlwrap aliases to get vi like input, thats just awesome
+if type rlwrap > /dev/null; then
+  alias iex="rlwrap -a iex"
+fi
 
 tmux() { if [[ $1 == "-ss"  ]]; then command tmuxss.sh "$2"; else command tmux "$@"; fi; }
 
