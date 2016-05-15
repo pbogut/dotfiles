@@ -46,7 +46,8 @@ bindkey '^w' backward-kill-word
 bindkey '^r' history-incremental-search-backward
 bindkey '^j' history-beginning-search-forward
 bindkey '^k' history-beginning-search-backward
-
+bindkey '^[j' history-beginning-search-forward
+bindkey '^[k' history-beginning-search-backward
 
 vim_ins_mode="%F{022}%K{022}%B%F{255} INSERT %k%b%{$reset_color%}"
 vim_cmd_mode="%F{027}%K{027}%B%F{255} NORMAL %k%b%{$reset_color%}"

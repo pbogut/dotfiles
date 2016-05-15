@@ -256,7 +256,15 @@ noremap <leader>sr :set syntax=ruby<cr>
 noremap <leader>sc :set syntax=css<cr>
 noremap <leader>sj :set syntax=js<cr>
 noremap <leader>sx :set syntax=xml<cr>
-noremap <leader>sa :exec "Autoformat ".&syntax<cr>
+noremap <leader>sa :exec "Autoformta ".&syntax<cr>
+" nvim now can map alt without terminal issues, new cool shortcuts commin
+if has('nvim')
+  noremap <M-a> <Esc>A
+  noremap <M-i> <Esc>I
+  " search command history based on typed stryng
+  cnoremap <A-k> <Up>
+  cnoremap <A-j> <Down>
+endif
 " prevent pasting in visual from yank seletion
 snoremap p "_dP
 vnoremap p "_dP
@@ -326,6 +334,10 @@ let g:delimitMate_matchpairs = "(:),[:],{:}"
 let g:delimitMate_jump_expansion = 0
 " AutoPair
 let g:AutoPairsMultilineClose = 0
+let g:AutoPairsShortcutToggle = ''
+let g:AutoPairsShortcutFastWrap = ''
+let g:AutoPairsShortcutJump = ''
+let g:AutoPairsShortcutBackInsert = ''
 " php linter
 let g:syntastic_mode_map = {
       \ "mode": "active",
