@@ -36,6 +36,7 @@ set showbreak=↪
 set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
+set hidden " No bang needed to open new file
 augroup configgroup
   autocmd!
   autocmd FileType html :setlocal tabstop=4 shiftwidth=4
@@ -384,27 +385,26 @@ set undofile
 set dir=~/.vim/swapfiles//
 " set backup disr
 set backupdir=~/.vim/backupfiles//
-set backup
+set nowritebackup
+set nobackup " well, thats the only way to prevent guard from running tests twice ;/
 
+" new backup file every minute, coz I can
+" its recreating file path and then save copy there with current time
+" dont know how fast it will grow...
 augroup backup
   autocmd!
-  autocmd BufWritePre * call UpdateBackupExt()
+  autocmd BufWritePre * call ParanoicBackup()
 augroup END
-" new backup file every minute, coz I can
-" its recreating file path and then save copy ther with current time
-" dont know how fast it will grow...
-function! UpdateBackupExt()
-  let filedir = expand('%:p:h')
-  execute "!mkdir -p ~/.vim/backupfiles/" . filedir
-  execute "set backupdir=~/.vim/backupfiles/" . filedir
-  " let myvar = substitute(myvar, '/', '_', 'ge')
-  let myvar = strftime("_%y%m%d_%H%M")
-  let myvar = "set backupext=___". myvar
-  execute myvar
+let g:paranoic_backup_dir="~/.vim/backupfiles/"
+function! ParanoicBackup()
+  let filedir = g:paranoic_backup_dir . expand('%:p:h')
+  let filename = expand('%:t')
+  let timestamp = strftime("___%y%m%d_%H%M")
+  silent execute "!mkdir -p " . filedir
+  silent execute "w! " . filedir . '/' . filename . timestamp
 endfunction
+
 " disable double save (cousing file watchers issues)
-set nowritebackup
-" set nobackup " well, thats the only way to prevent guard from running tests twice ;/
 " modify selected text using combining diacritics
 command! -range -nargs=0 Overline        call s:CombineSelection(<line1>, <line2>, '0305')
 command! -range -nargs=0 Underline       call s:CombineSelection(<line1>, <line2>, '0332')
