@@ -44,6 +44,7 @@ augroup configgroup
   autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
   autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
   autocmd FileType qf :nnoremap <buffer> o <enter>
+  autocmd FileType qf :nnoremap <buffer> q :q
 augroup END
 " line 80 limit
 set colorcolumn=81
