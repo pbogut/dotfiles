@@ -124,7 +124,6 @@ if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
 fi
 
 alias ls="ls --color"
-alias e="exit"
 alias fix_terminal="stty sane"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
@@ -139,6 +138,9 @@ alias tunelssh_de="sshuttle --dns -vr smeagol@smeagol.pl:59184 0/0"
 
 alias yaourt-ignore-pgp="yaourt --m-arg \"--skipchecksums --skippgpcheck\""
 
+# shortcuts
+alias e="exit"
+alias m="ncmpcpp"
 
 tmux() { if [[ $1 == "-ss"  ]]; then command tmuxss.sh "$2"; else command tmux "$@"; fi; }
 
