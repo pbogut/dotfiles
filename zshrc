@@ -46,7 +46,8 @@ bindkey '^w' backward-kill-word
 bindkey '^r' history-incremental-search-backward
 bindkey '^j' history-beginning-search-forward
 bindkey '^k' history-beginning-search-backward
-
+bindkey '^[j' history-beginning-search-forward
+bindkey '^[k' history-beginning-search-backward
 
 vim_ins_mode="%F{022}%K{022}%B%F{255} INSERT %k%b%{$reset_color%}"
 vim_cmd_mode="%F{027}%K{027}%B%F{255} NORMAL %k%b%{$reset_color%}"
@@ -141,6 +142,11 @@ alias yaourt-ignore-pgp="yaourt --m-arg \"--skipchecksums --skippgpcheck\""
 # shortcuts
 alias e="exit"
 alias m="ncmpcpp"
+
+# rlwrap aliases to get vi like input, thats just awesome
+if type rlwrap > /dev/null; then
+  alias iex="rlwrap -a iex"
+fi
 
 tmux() { if [[ $1 == "-ss"  ]]; then command tmuxss.sh "$2"; else command tmux "$@"; fi; }
 
