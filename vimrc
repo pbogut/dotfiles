@@ -11,7 +11,7 @@ set cursorline
 set cursorcolumn
 " space instead of tab
 set laststatus=2
-set completeopt-=preview
+set completeopt=menuone,noselect
 set cmdheight=2
 " show existing tab with 4 spaces width
 set tabstop=2
@@ -382,10 +382,6 @@ let g:dispatch_quickfix_height = 10
 let g:dispatch_tmux_height = 1
 " autoswap tmux support
 let g:autoswap_detect_tmux = 1
-" If you prefer the Omni-Completion tip window to close when a selection is
-" made, these lines close it on movement in insert mode or when leaving
-" insert mode
-autocmd CompleteDone * pclose
 " custom commands
 " close all buffers but current
 command! BCloseAll execute "%bd"
