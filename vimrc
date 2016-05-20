@@ -260,8 +260,14 @@ noremap <leader>sx :set syntax=xml<cr>
 noremap <leader>sa :exec "Autoformta ".&syntax<cr>
 " nvim now can map alt without terminal issues, new cool shortcuts commin
 if has('nvim')
-  noremap <M-a> <Esc>A
-  noremap <M-i> <Esc>I
+  inoremap <A-a> <Esc>A
+  inoremap <A-i> <Esc>I
+  noremap <A-a> <Esc>A
+  noremap <A-i> <Esc>I
+  noremap <A-l> <C-w>>
+  noremap <A-h> <C-w><
+  noremap <A-j> <C-w>-
+  noremap <A-k> <C-w>+
   " search command history based on typed stryng
   cnoremap <A-k> <Up>
   cnoremap <A-j> <Down>
