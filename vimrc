@@ -355,6 +355,10 @@ let g:syntastic_mode_map = {
 let g:syntastic_php_checkers = ['php', 'phpmd']
 let g:syntastic_aggregate_errors = 1
 let g:syntastic_enable_signs = 0
+" gutentags
+let g:gutentags_generate_on_new = 0
+let g:gutentags_generate_on_missing = 0
+let g:gutentags_exclude = ['*node_modules*']
 " vim tags
 let g:vim_tags_use_language_field = 1
 let g:vim_tags_use_vim_dispatch = 1
