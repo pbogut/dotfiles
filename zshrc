@@ -15,6 +15,10 @@ zstyle ':completion:*' menu select
 autoload -Uz compinit
 compinit
 
+lazy_source () {
+    eval "$1 () { [ -f $2 ] && source $2 && $1 \$@ }"
+}
+
 # End of lines added by compinstall
 # Load all files from .shell/zshrc.d directory
 if [ -d $HOME/.zshrc.d ]; then
@@ -76,17 +80,13 @@ bindkey -M vicmd '\e' noop
 zle -N zle-keymap-select
 zle -N zle-line-init
 
-
 # End of lines configured by zsh-newuser-install
-
-
 
 # create a zkbd compatible hash;
 # to add other keys to this hash, see: man 5 terminfo
 typeset -A key
 
 key[Home]=${terminfo[khome]}
-
 key[End]=${terminfo[kend]}
 key[Insert]=${terminfo[kich1]}
 key[Delete]=${terminfo[kdch1]}
@@ -102,8 +102,6 @@ key[PageDown]=${terminfo[knp]}
 [[ -n "${key[End]}"      ]]  && bindkey  "${key[End]}"      end-of-line
 [[ -n "${key[Insert]}"   ]]  && bindkey  "${key[Insert]}"   overwrite-mode
 [[ -n "${key[Delete]}"   ]]  && bindkey  "${key[Delete]}"   delete-char
-#[[ -n "${key[Up]}"       ]]  && bindkey  "${key[Up]}"       up-line-or-history
-#[[ -n "${key[Down]}"     ]]  && bindkey  "${key[Down]}"     down-line-or-history
 [[ -n "${key[Up]}"       ]]  && bindkey  "${key[Up]}"       history-beginning-search-backward
 [[ -n "${key[Down]}"     ]]  && bindkey  "${key[Down]}"     history-beginning-search-forward
 [[ -n "${key[Left]}"     ]]  && bindkey  "${key[Left]}"     backward-char
@@ -158,7 +156,7 @@ if [ -f ~/.localsh ]; then
   source ~/.localsh
 fi
 
-export PATH="$PATH:./bin:$HOME/bin:/usr/lib/perl5/vendor_perl/bin:$HOME/bin/scripts"
+export PATH="$PATH:./bin:$HOME/bin:$HOME/.bin:/usr/lib/perl5/vendor_perl/bin:$HOME/bin/scripts"
 
 #git branch in prompt
 setopt prompt_subst
@@ -191,9 +189,6 @@ else
   export EDITOR=nvim
   alias vim="nvim"
 fi
-# always create/attach tmux session
-[[ $- != *i*  ]] && return
 
-
-export NVM_DIR="/home/pbogut/.nvm"
+export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm

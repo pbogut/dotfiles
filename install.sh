@@ -19,6 +19,7 @@ read -d '' files <<"EOF"
     yaourtrc
     ackrc
     scripts
+    bin
     gitconfig
     githelpers
     terminfo
@@ -104,3 +105,13 @@ install_zsh () {
 }
 
 install_zsh
+
+echo ""
+echo "Additional setup"
+echo ""
+echo "nvm:"
+echo "  curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash"
+echo "rvm:"
+echo "  curl -sSL https://get.rvm.io | bash"
+echo ""
+
