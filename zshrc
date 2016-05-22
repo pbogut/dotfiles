@@ -156,7 +156,7 @@ if [ -f ~/.localsh ]; then
   source ~/.localsh
 fi
 
-export PATH="$PATH:./bin:$HOME/bin:$HOME/.bin:/usr/lib/perl5/vendor_perl/bin:$HOME/bin/scripts"
+export PATH="$PATH:$HOME/bin:$HOME/.bin:$HOME/.scripts"
 
 #git branch in prompt
 setopt prompt_subst
@@ -169,19 +169,16 @@ GIT_BRANCH=$'$(__git_ps1 "(%s)")'
 PS1="${BRED}(${NORMAL}%~${BRED}) ${BBLUE}${GIT_BRANCH}
 %(!.${BRED}.${BGREEN})%n${BRED}@${HOST_COLOR}%M ${BRED}%(!.#.$)${NORMAL}%f%b%k "
 
-
-export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 export rvmsudo_secure_path=1
-export PATH="$HOME/.npm/bin:$PATH"
-export PATH="$PATH:$HOME/.scripts"
+export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="$PATH:$HOME/.composer/vendor/bin"
 
-# export TERM=xterm-256color
 # make colors compatibile with tmux
 export TERM=screen-256color
 if [[ ! -z "$TMUX"  ]]; then
   export ZLE_RPROMPT_INDENT=0
 fi
+
 # default editor
 if ! type "nvim" > /dev/null; then
   export EDITOR=vim
@@ -189,6 +186,3 @@ else
   export EDITOR=nvim
   alias vim="nvim"
 fi
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm

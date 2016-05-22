@@ -9,10 +9,11 @@
 dir=~/dotfiles                    # dotfiles directory
 olddir=~/dotfiles_`date +%s%N`    # old dotfiles backup directory
 read -d '' files <<"EOF"
+    inputrc
     screenrc
     vimrc
     zshrc
-    inputrc
+    zlogin
     zshrc.d
     tmux
     tmux.conf
