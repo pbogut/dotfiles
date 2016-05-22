@@ -73,6 +73,8 @@ for file in $files; do
 done
 
 find $dir -name "*.sh" -exec chmod +x {} \;
+find $dir -name "*.zsh" -exec chmod +x {} \;
+find $dir -name "*.phar" -exec chmod +x {} \;
 
 install_zsh () {
     # Test to see if zshell is installed.  If it is:
