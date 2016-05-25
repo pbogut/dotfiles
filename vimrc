@@ -364,13 +364,9 @@ let g:vim_tags_use_language_field = 1
 let g:vim_tags_use_vim_dispatch = 1
 " ctrlp
 let g:ctrlp_extensions = ['tag', 'mixed']
-let g:ctrlp_user_command = {
-      \ 'types': {
-      \ 1: ['.git', 'cd %s && git ls-files'],
-      \ 2: ['.hg', 'hg --cwd %s locate -I .'],
-      \ },
-      \ 'fallback': 'find %s -type f'
-      \ }
+" Use silver searcher to list files
+let g:ctrlp_user_command =
+      \ 'ag %s --files-with-matches -g "" --ignore "\.git$\|\.hg$\|\.svn$"; '
 " async ack
 let g:ack_use_dispatch = 1
 " use ag if available
