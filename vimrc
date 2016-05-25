@@ -458,3 +458,6 @@ function! Wipeout(bang)
   endfor
   echon "Deleted " . l:tally . " buffers"
 endfun
+
+let g:snips_author = "Pawel Bogut"
+let g:snips_github = "https://github.com/pbogut"
