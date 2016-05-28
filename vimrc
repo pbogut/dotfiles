@@ -85,6 +85,7 @@ Plugin 'vim-airline/vim-airline-themes'
 Plugin 'edkolev/tmuxline.vim'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'nanotech/jellybeans.vim'
+Plugin 'altercation/vim-colors-solarized'
 " Bundle 'jistr/vim-nerdtree-tabs'
 Plugin 'Shougo/unite.vim'
 " Plugin 'tyru/open-browser.vim'
@@ -306,11 +307,23 @@ let g:ctrlp_map = '<leader>f'
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
 " color scheme
-colorscheme jellybeans
-highlight ColorColumn ctermbg=234
-highlight CursorLine ctermbg=233
-highlight CursorColumn ctermbg=232
-highlight SpecialKey ctermbg=none
+" colorscheme jellybeans
+" highlight ColorColumn ctermbg=234
+" highlight CursorLine ctermbg=233
+" highlight CursorColumn ctermbg=232
+" highlight SpecialKey ctermbg=none
+function! SolarizedLight()
+  set background=light
+  silent !dbus-send --session /net/sf/roxterm/Options net.sf.roxterm.Options.SetColourScheme string:$ROXTERM_ID string:Solarized\ Light
+endfunction
+function! SolarizedDark()
+  set background=dark
+  silent !dbus-send --session /net/sf/roxterm/Options net.sf.roxterm.Options.SetColourScheme string:$ROXTERM_ID string:Solarized\ Dark
+endfunction
+nnoremap <leader>cd :call SolarizedDark()<cr>
+nnoremap <leader>cl :call SolarizedLight()<cr>
+set background=dark
+colorscheme solarized
 " Padawan
 let g:ycm_semantic_triggers = {}
 let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
