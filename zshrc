@@ -140,6 +140,8 @@ alias yaourt-ignore-pgp="yaourt --m-arg \"--skipchecksums --skippgpcheck\""
 # shortcuts
 alias e="exit"
 alias m="ncmpcpp"
+# exit shell after closing ncmpcpp
+alias mq="ncmpcpp && exit"
 
 # rlwrap aliases to get vi like input, thats just awesome
 if type rlwrap > /dev/null; then
