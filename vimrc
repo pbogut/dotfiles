@@ -92,7 +92,6 @@ Plugin 'Shougo/unite.vim'
 " Plugin 'lambdalisue/vim-gista'
 Bundle 'ervandew/supertab'
 " Plugin 'Valloric/YouCompleteMe'
-Plugin 'Shougo/deoplete.nvim'
 " Plugin 'mkusher/padawan.vim'
 Plugin 'dhruvasagar/vim-prosession'
 Plugin 'airblade/vim-gitgutter'
@@ -122,7 +121,7 @@ Plugin 'sheerun/vim-polyglot'
 Bundle 'joonty/vdebug.git'
 Plugin 'jaxbot/browserlink.vim'
 " Plugin 'scrooloose/syntastic'
-Plugin 'benekastah/neomake' "efed615 - working commit, 3bfb4ef - seams to work as well
+Plugin 'benekastah/neomake'
 Plugin 'Chiel92/vim-autoformat'
 Plugin 'alvan/vim-closetag'
 Plugin 'edsono/vim-matchit'
@@ -132,9 +131,12 @@ Plugin 'docteurklein/php-getter-setter.vim'
 
 Plugin 'elixir-lang/vim-elixir'
 Plugin 'thinca/vim-ref'
-Plugin 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
 
 Plugin 'chrisbra/csv.vim'
+if has('nvim')
+  Plugin 'Shougo/deoplete.nvim'
+  Plugin 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
+endif
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
