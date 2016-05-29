@@ -133,6 +133,7 @@ Plugin 'elixir-lang/vim-elixir'
 Plugin 'thinca/vim-ref'
 
 Plugin 'chrisbra/csv.vim'
+Plugin 'rhysd/vim-grammarous'
 if has('nvim')
   Plugin 'Shougo/deoplete.nvim'
   Plugin 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
