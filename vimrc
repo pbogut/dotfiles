@@ -221,6 +221,11 @@ nnoremap <leader>m :CtrlPMRUFiles<cr>
 " nnoremap <leader>gt :CtrlPTag<cr><C-\>w
 nnoremap <leader>w :w<cr>
 nnoremap <leader>a :Autoformat<cr>
+" vim is getting ^_ when pressing ^/, so I've mapped both
+nmap <C-_> gcc<down>^
+nmap <C-/> gcc<down>^
+vmap <C-_> gc
+vmap <C-/> gc
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>p :bp!<cr>
