@@ -196,3 +196,9 @@ else
   export EDITOR=nvim
   alias vim="nvim"
 fi
+
+# chruby
+[[ -s "/usr/local/share/chruby/chruby.sh" ]] && . "/usr/local/share/chruby/chruby.sh"
+# its slow as hell and I'm not using it too offen, so lazy loading should be fine
+export NVM_DIR="$HOME/.nvm"
+lazy_source nvm "$NVM_DIR/nvm.sh"
