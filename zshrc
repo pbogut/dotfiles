@@ -176,7 +176,7 @@ export PATH="$PATH:$HOME/bin:$HOME/.bin:$HOME/.scripts"
 setopt prompt_subst
 HOST_COLOR="%F{012}"
 if [ -n "$SSH_CLIENT"  ] || [ -n "$SSH_TTY"  ]; then
-  HOST_COLOR="%F{005}"
+  HOST_COLOR="%F{003}"
 fi
 # export RPROMPT=$'$(__git_ps1 "%s")'
 export rvmsudo_secure_path=1
