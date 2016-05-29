@@ -6,10 +6,17 @@ xcape -e 'Caps_Lock=Escape'
 #chrome textaid extention server
 script=$(readlink -f "$0")
 scriptpath=$(dirname "$script")
-pidfile=/tmp/textaid.pid
-if [ -f "$pidfile" ] && kill -0 `cat $pidfile` 2>/dev/null; then
+textaid_pid=/tmp/textaid.pid
+if [ -f "$textaid_pid" ] && kill -0 `cat $textaid_pid` 2>/dev/null; then
     echo 'ekhm....' > /dev/null
 else
     perl "$scriptpath/edit-server.pl" &
-    echo $! > $pidfile
+    echo $! > $textaid_pid
+fi
+mopidy_pid=/tmp/mopidy.pid
+if [ -f "$mopidy_pid" ] && kill -0 `cat $mopidy_pid` 2>/dev/null; then
+    echo 'ekhm....' > /dev/null
+else
+    mopidy &
+    echo $! > $mopidy_pid
 fi

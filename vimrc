@@ -11,7 +11,7 @@ set cursorline
 set cursorcolumn
 " space instead of tab
 set laststatus=2
-set completeopt-=preview
+set completeopt=menuone,noselect
 set cmdheight=2
 " show existing tab with 4 spaces width
 set tabstop=2
@@ -36,18 +36,21 @@ set showbreak=↪
 set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
+set hidden " No bang needed to open new file
 augroup configgroup
   autocmd!
   autocmd FileType html :setlocal tabstop=4 shiftwidth=4
   autocmd FileType php :setlocal tabstop=4 shiftwidth=4
-  autocmd FileType javascript :setlocal tabstop=4 shiftwidth=4
+  " autocmd FileType javascript :setlocal tabstop=4 shiftwidth=4
   autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
   autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
+  autocmd FileType qf :nnoremap <buffer> o <enter>
+  autocmd FileType qf :nnoremap <buffer> q :q
 augroup END
 " line 80 limit
 set colorcolumn=81
 
-let g:python_host_prog='/usr/bin/python2'
+let g:python_host_prog='/usr/bin/python'
 
 if has("patch-7.4.314")
   set shortmess+=c
@@ -58,7 +61,10 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 
-Plugin 'Raimondi/delimitMate' "needs to be loaded before endwise
+Plugin 'vim-ruby/vim-ruby'
+
+" Plugin 'Raimondi/delimitMate' "needs to be loaded before endwise
+Plugin 'jiangmiao/auto-pairs'
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-git'
 Plugin 'tpope/vim-commentary'
@@ -79,13 +85,14 @@ Plugin 'vim-airline/vim-airline-themes'
 Plugin 'edkolev/tmuxline.vim'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'nanotech/jellybeans.vim'
+Plugin 'altercation/vim-colors-solarized'
 " Bundle 'jistr/vim-nerdtree-tabs'
 Plugin 'Shougo/unite.vim'
 " Plugin 'tyru/open-browser.vim'
 " Plugin 'lambdalisue/vim-gista'
 Bundle 'ervandew/supertab'
-Plugin 'Valloric/YouCompleteMe'
-Plugin 'mkusher/padawan.vim'
+" Plugin 'Valloric/YouCompleteMe'
+" Plugin 'mkusher/padawan.vim'
 Plugin 'dhruvasagar/vim-prosession'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'terryma/vim-multiple-cursors'
@@ -94,8 +101,10 @@ Plugin 'tomtom/tlib_vim'
 " Plugin 'tomtom/tcomment_vim'
 " Plugin 'garbas/vim-snipmate'
 " Plugin 'szw/vim-tags'
-Plugin 'craigemery/vim-autotag'
+" Plugin 'craigemery/vim-autotag'
+Plugin 'ludovicchabant/vim-gutentags'
 Plugin 'mileszs/ack.vim'
+Plugin 'rking/ag.vim'
 Plugin 'gioele/vim-autoswap'
 Plugin 'ntpeters/vim-better-whitespace'
 Plugin 'honza/vim-snippets'
@@ -116,6 +125,18 @@ Plugin 'benekastah/neomake'
 Plugin 'Chiel92/vim-autoformat'
 Plugin 'alvan/vim-closetag'
 Plugin 'edsono/vim-matchit'
+
+Plugin 'captbaritone/better-indent-support-for-php-with-html'
+Plugin 'docteurklein/php-getter-setter.vim'
+
+Plugin 'elixir-lang/vim-elixir'
+Plugin 'thinca/vim-ref'
+
+Plugin 'chrisbra/csv.vim'
+if has('nvim')
+  Plugin 'Shougo/deoplete.nvim'
+  Plugin 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
+endif
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -128,13 +149,44 @@ filetype plugin indent on    " required
 " closetag
 let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml"
 " Neomake
-augroup neomake
+augroup neomakegroup
   autocmd!
-  autocmd BufWritePost * silent Neomake
+  autocmd BufWritePost * Neomake
 augroup END
 
 let g:neomake_airline = 1
 let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
+
+let g:neomake_php_enabled_makers = ['php', 'phpmd']
+
+" phpgetset config
+let g:phpgetset_insertPosition = 2 " below current block
+let b:phpgetset_insertPosition = 2 " below current block
+let g:phpgetset_getterTemplate =
+\ "    \n" .
+\ "    /**\n" .
+\ "     * Get %varname%\n" .
+\ "     *\n" .
+\ "     * @return %varname%\n" .
+\ "     */\n" .
+\ "    public function %funcname%()\n" .
+\ "    {\n" .
+\ "        return $this->%varname%;\n" .
+\ "    }"
+
+let g:phpgetset_setterTemplate =
+\ "    \n" .
+\ "    /**\n" .
+\ "     * Set %varname%.\n" .
+\ "     *\n" .
+\ "     * @param %varname% - value to set.\n" .
+\ "     * @return $this\n" .
+\ "     */\n" .
+\ "    public function %funcname%($%varname%)\n" .
+\ "    {\n" .
+\ "        $this->%varname% = $%varname%;\n" .
+\ "        return $this;\n" .
+\ "    }"
 
 " nerdtree
 let NERDTreeQuitOnOpen=1
@@ -147,10 +199,16 @@ function! ToggleNERDTree()
   endif
 endfunction
 let mapleader = "\<space>" " test if that will work better
+" macros
+nnoremap <leader>em :tabnew ~/.vim/macros.vim<cr>
+nnoremap <leader>sm :source ~/.vim/macros.vim<cr>
 " edit vimrc/zshrc and load vimrc bindings
-nnoremap <leader>ev :vsp $MYVIMRC<CR>
-nnoremap <leader>ez :vsp ~/.zshrc<CR>
+nnoremap <leader>ev :tabnew $MYVIMRC<CR>
+nnoremap <leader>ez :tabnew ~/.zshrc<CR>
 nnoremap <leader>sv :source $MYVIMRC<CR>
+" open list / quickfix
+nnoremap <leader>ol :lopen<cr>
+nnoremap <leader>oq :copen<cr>
 " nnoremap <leader>s :NERDTreeToggle<cr>
 nnoremap <leader>t :TagbarToggle<cr>
 nnoremap <leader>r :call ToggleNERDTree()<cr>
@@ -163,8 +221,11 @@ nnoremap <leader>m :CtrlPMRUFiles<cr>
 " nnoremap <leader>gt :CtrlPTag<cr><C-\>w
 nnoremap <leader>w :w<cr>
 nnoremap <leader>a :Autoformat<cr>
-map <C-n> :bn!<cr>
-map <C-p> :bp!<cr>
+" vim is getting ^_ when pressing ^/, so I've mapped both
+nmap <C-_> gcc<down>^
+nmap <C-/> gcc<down>^
+vmap <C-_> gc
+vmap <C-/> gc
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>p :bp!<cr>
@@ -204,15 +265,27 @@ noremap <leader>sr :set syntax=ruby<cr>
 noremap <leader>sc :set syntax=css<cr>
 noremap <leader>sj :set syntax=js<cr>
 noremap <leader>sx :set syntax=xml<cr>
-noremap <leader>sa :exec "Autoformat ".&syntax<cr>
+noremap <leader>sa :exec "Autoformta ".&syntax<cr>
+" nvim now can map alt without terminal issues, new cool shortcuts commin
+if has('nvim')
+  inoremap <A-a> <Esc>A
+  inoremap <A-i> <Esc>I
+  noremap <A-a> <Esc>A
+  noremap <A-i> <Esc>I
+  noremap <A-l> <C-w>>
+  noremap <A-h> <C-w><
+  noremap <A-j> <C-w>-
+  noremap <A-k> <C-w>+
+  " search command history based on typed stryng
+  cnoremap <A-k> <Up>
+  cnoremap <A-j> <Down>
+endif
 " prevent pasting in visual from yank seletion
 snoremap p "_dP
 vnoremap p "_dP
 " case insensitive search by default
 nnoremap / /\c
 nnoremap ? ?\c
-noremap q: :q
-noremap q; :q
 nnoremap <leader>= migg=G'i
 nnoremap <leader>gp <Plug>GitGutterPreviewHunk
 nnoremap <leader>gr <Plug>GitGutterRevertHunk
@@ -241,25 +314,38 @@ let g:ctrlp_map = '<leader>f'
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
 " color scheme
-colorscheme jellybeans
-highlight ColorColumn ctermbg=234
-highlight CursorLine ctermbg=233
-highlight CursorColumn ctermbg=232
-highlight SpecialKey ctermbg=none
+" colorscheme jellybeans
+" highlight ColorColumn ctermbg=234
+" highlight CursorLine ctermbg=233
+" highlight CursorColumn ctermbg=232
+" highlight SpecialKey ctermbg=none
+function! SolarizedLight()
+  set background=light
+  silent !dbus-send --session /net/sf/roxterm/Options net.sf.roxterm.Options.SetColourScheme string:$ROXTERM_ID string:Solarized\ Light
+endfunction
+function! SolarizedDark()
+  set background=dark
+  silent !dbus-send --session /net/sf/roxterm/Options net.sf.roxterm.Options.SetColourScheme string:$ROXTERM_ID string:Solarized\ Dark
+endfunction
+nnoremap <leader>cd :call SolarizedDark()<cr>
+nnoremap <leader>cl :call SolarizedLight()<cr>
+set background=dark
+colorscheme solarized
 " Padawan
 let g:ycm_semantic_triggers = {}
 let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
-
+" Deoplete
+let g:deoplete#enable_at_startup = 1
+inoremap <C-Space> <c-x><c-o>
+imap <C-@> <C-Space>
 " make YCM compatible with UltiSnips (using supertab)
 let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
 let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
 let g:SuperTabDefaultCompletionType = '<C-n>'
-
 " better key bindings for UltiSnipsExpandTrigger
 let g:UltiSnipsExpandTrigger = "<tab>"
 let g:UltiSnipsJumpForwardTrigger = "<tab>"
 let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
-
 " eclim
 let g:EclimFileTypeValidate = 0
 let g:EclimCompletionMethod = 'omnifunc'
@@ -273,35 +359,41 @@ let g:delimitMate_expand_cr = 2
 let g:delimitMate_expand_space = 1
 let g:delimitMate_matchpairs = "(:),[:],{:}"
 let g:delimitMate_jump_expansion = 0
+" AutoPair
+let g:AutoPairsMultilineClose = 0
+let g:AutoPairsShortcutToggle = ''
+let g:AutoPairsShortcutFastWrap = ''
+let g:AutoPairsShortcutJump = ''
+let g:AutoPairsShortcutBackInsert = ''
 " php linter
 let g:syntastic_mode_map = {
       \ "mode": "active",
       \ "active_filetypes": ["ruby", "php"],
       \ "passive_filetypes": ["puppet"] }
 "let g:syntastic_quiet_messages = { "type": "style" }
-let g:syntastic_php_checkers = ['php', 'phpmd', 'phpcs']
+" let g:syntastic_php_checkers = ['php', 'phpmd', 'phpcs']
+let g:syntastic_php_checkers = ['php', 'phpmd']
 let g:syntastic_aggregate_errors = 1
 let g:syntastic_enable_signs = 0
+" gutentags
+let g:gutentags_generate_on_new = 0
+let g:gutentags_generate_on_missing = 0
+let g:gutentags_exclude = ['*node_modules*', '*bower_components*', 'tmp*', 'temp*']
 " vim tags
 let g:vim_tags_use_language_field = 1
 let g:vim_tags_use_vim_dispatch = 1
 " ctrlp
 let g:ctrlp_extensions = ['tag', 'mixed']
-let g:ctrlp_user_command = {
-      \ 'types': {
-      \ 1: ['.git', 'cd %s && git ls-files'],
-      \ 2: ['.hg', 'hg --cwd %s locate -I .'],
-      \ },
-      \ 'fallback': 'find %s -type f'
-      \ }
+" Use silver searcher to list files
+let g:ctrlp_user_command =
+      \ 'ag %s --files-with-matches -g "" --ignore "\.git$\|\.hg$\|\.svn$"; '
 " async ack
 let g:ack_use_dispatch = 1
 " use ag if available
 if executable('ag')
   let g:ackprg = 'ag --vimgrep'
 endif
-cnoreabbrev A Ack
-cnoreabbrev Ag Ack
+let g:ag_working_path_mode="r"
 
 cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
 
@@ -309,15 +401,13 @@ cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
 " PHP - pipline of few
 let g:formatdef_phppipeline = '"fmt.phar --passes=ConvertOpenTagWithEcho --indent_with_space=".&shiftwidth." - | html-beautify -s ".&shiftwidth." | phpcbf"'
 let g:formatters_php = ['phppipeline']
+let g:formatdef_blade = '"html-beautify -s ".&shiftwidth'
+let g:formatters_blade = ['blade']
 " despatch hax to not cover half screen
 let g:dispatch_quickfix_height = 10
 let g:dispatch_tmux_height = 1
 " autoswap tmux support
 let g:autoswap_detect_tmux = 1
-" If you prefer the Omni-Completion tip window to close when a selection is
-" made, these lines close it on movement in insert mode or when leaving
-" insert mode
-autocmd CompleteDone * pclose
 " custom commands
 " close all buffers but current
 command! BCloseAll execute "%bd"
@@ -330,10 +420,26 @@ set undofile
 set dir=~/.vim/swapfiles//
 " set backup disr
 set backupdir=~/.vim/backupfiles//
-set backup
-" disable double save (cousing file watchers issues)
 set nowritebackup
-set nobackup " well, thats the only way to prevent guard from rutting tests twice ;/
+set nobackup " well, thats the only way to prevent guard from running tests twice ;/
+
+" new backup file every minute, coz I can
+" its recreating file path and then save copy there with current time
+" dont know how fast it will grow...
+augroup backup
+  autocmd!
+  autocmd BufWritePre * call ParanoicBackup()
+augroup END
+let g:paranoic_backup_dir="~/.vim/backupfiles/"
+function! ParanoicBackup()
+  let filedir = g:paranoic_backup_dir . expand('%:p:h')
+  let filename = expand('%:t')
+  let timestamp = strftime("___%y%m%d_%H%M")
+  silent execute "!mkdir -p " . filedir
+  silent execute "w! " . filedir . '/' . filename . timestamp
+endfunction
+
+" disable double save (cousing file watchers issues)
 " modify selected text using combining diacritics
 command! -range -nargs=0 Overline        call s:CombineSelection(<line1>, <line2>, '0305')
 command! -range -nargs=0 Underline       call s:CombineSelection(<line1>, <line2>, '0332')
@@ -343,3 +449,31 @@ function! s:CombineSelection(line1, line2, cp)
   execute 'let char = "\u'.a:cp.'"'
   execute a:line1.','.a:line2.'s/\%V[^[:cntrl:]]/&'.char.'/ge'
 endfunction
+
+" Wipes out all invisible buffers
+command! -bang Wipeout :call Wipeout(<bang>0)
+function! Wipeout(bang)
+  " figure out which buffers are visible in any tab
+  let visible = {}
+  for t in range(1, tabpagenr('$'))
+    for b in tabpagebuflist(t)
+      let visible[b] = 1
+    endfor
+  endfor
+  " close any buffer that are loaded and not visible
+  let l:tally = 0
+  let l:cmd = 'bw'
+  if a:bang
+    let l:cmd .= '!'
+  endif
+  for b in range(1, bufnr('$'))
+    if buflisted(b) && !has_key(visible, b)
+      let l:tally += 1
+      silent exe l:cmd . ' ' . b
+    endif
+  endfor
+  echon "Deleted " . l:tally . " buffers"
+endfun
+
+let g:snips_author = "Pawel Bogut"
+let g:snips_github = "https://github.com/pbogut"

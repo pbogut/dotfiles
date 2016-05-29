@@ -1,4 +1,3 @@
-
 [roxterm shortcuts scheme]
 File/New Window=<Shift><Control>n
 File/New Tab=<Shift><Control>t
@@ -9,8 +8,6 @@ Tabs/Next Tab=<Control>Page_Down
 Edit/Select All=<Shift><Control>a
 Edit/Copy=<Shift><Control>c
 Edit/Paste=<Shift><Control>v
-View/Zoom In=<Control>plus
-View/Zoom Out=<Control>minus
 View/Normal Size=<Control>0
 View/Full Screen=
 View/Scroll Up One Line=<Shift>Up

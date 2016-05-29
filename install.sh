@@ -9,15 +9,18 @@
 dir=~/dotfiles                    # dotfiles directory
 olddir=~/dotfiles_`date +%s%N`    # old dotfiles backup directory
 read -d '' files <<"EOF"
+    inputrc
     screenrc
     vimrc
     zshrc
+    zlogin
     zshrc.d
     tmux
     tmux.conf
     yaourtrc
     ackrc
     scripts
+    bin
     gitconfig
     githelpers
     terminfo
@@ -38,6 +41,8 @@ read -d '' directories <<"EOF"
     .vim/bundle
     .config/nvim
     .config/autostart
+    .weechat
+    .composer
 EOF
 ##########
 
@@ -68,6 +73,8 @@ for file in $files; do
 done
 
 find $dir -name "*.sh" -exec chmod +x {} \;
+find $dir -name "*.zsh" -exec chmod +x {} \;
+find $dir -name "*.phar" -exec chmod +x {} \;
 
 install_zsh () {
     # Test to see if zshell is installed.  If it is:
@@ -101,3 +108,13 @@ install_zsh () {
 }
 
 install_zsh
+
+echo ""
+echo "Additional setup"
+echo ""
+echo "nvm:"
+echo "  curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash"
+echo "rvm:"
+echo "  curl -sSL https://get.rvm.io | bash"
+echo ""
+
