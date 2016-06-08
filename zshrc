@@ -53,22 +53,34 @@ bindkey '^k' history-beginning-search-backward
 bindkey '^[j' history-beginning-search-forward
 bindkey '^[k' history-beginning-search-backward
 
-vim_ins_mode="%F{022}%K{022}%B%F{255} INSERT %k%b%{$reset_color%}"
-vim_cmd_mode="%F{027}%K{027}%B%F{255} NORMAL %k%b%{$reset_color%}"
-vim_vis_mode="%F{088}%K{088}%B%F{255} VISUAL %k%b%{$reset_color%}"
+# vim_ins_mode="%F{022}%K{022}%B%F{255} INSERT %k%b%{$reset_color%}"
+# vim_cmd_mode="%F{027}%K{027}%B%F{255} NORMAL %k%b%{$reset_color%}"
+# vim_vis_mode="%F{088}%K{088}%B%F{255} VISUAL %k%b%{$reset_color%}"
+# solarized colors
+vim_ins_mode="%F{003}%K{003}%B%F{255} INSERT %k%b%{$reset_color%}"
+vim_cmd_mode="%F{014}%K{014}%B%F{255} NORMAL %k%b%{$reset_color%}"
+vim_vis_mode="%F{005}%K{005}%B%F{255} VISUAL %k%b%{$reset_color%}"
 
+GIT_BRANCH=$'$(__git_ps1 "(%s)")'
+
+VIMODE_COLOR="003"
+vim_ps1() {
+  PS1="%B%F{001}(%b%F{012}%~%B%F{001}) %b%F{004}${GIT_BRANCH}%f
+%F{${VIMODE_COLOR}} %k%(!.%F{001}.%F{012}%n%F{001}@${HOST_COLOR}%M %B%F{001}%(!.#.$) %b%f%k"
+}
 precmd() {
-  RPROMPT=$vim_ins_mode
+  RPROMPT=$vim_ins_mode && VIMODE_COLOR="003"
+  vim_ps1
 }
 zle-keymap-select() {
-  RPROMPT=$vim_ins_mode
-  [[ $KEYMAP = vivis ]] && RPROMPT=$vim_vis_mode
-  () { return $__prompt_status }
-  [[ $KEYMAP = vicmd ]] && RPROMPT=$vim_cmd_mode
-  () { return $__prompt_status }
+  RPROMPT=$vim_ins_mode && VIMODE_COLOR="003"
+  [[ $KEYMAP = vicmd ]] && RPROMPT=$vim_cmd_mode && VIMODE_COLOR="014"
+  [[ $KEYMAP = vivis ]] && RPROMPT=$vim_vis_mode && VIMODE_COLOR="005"
+  vim_ps1
   zle reset-prompt
 }
 zle-line-init() {
+  VIMODE_COLOR="003" && reload_ps1
   typeset -g __prompt_status="$?"
 }
 
@@ -162,15 +174,11 @@ export PATH="$PATH:$HOME/bin:$HOME/.bin:$HOME/.scripts"
 
 #git branch in prompt
 setopt prompt_subst
-HOST_COLOR="${BGREEN}"
+HOST_COLOR="%F{012}"
 if [ -n "$SSH_CLIENT"  ] || [ -n "$SSH_TTY"  ]; then
-  HOST_COLOR="%F{226}"
+  HOST_COLOR="%F{003}"
 fi
 # export RPROMPT=$'$(__git_ps1 "%s")'
-GIT_BRANCH=$'$(__git_ps1 "(%s)")'
-PS1="${BRED}(${NORMAL}%~${BRED}) ${BBLUE}${GIT_BRANCH}
-%(!.${BRED}.${BGREEN})%n${BRED}@${HOST_COLOR}%M ${BRED}%(!.#.$)${NORMAL}%f%b%k "
-
 export rvmsudo_secure_path=1
 export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="$PATH:$HOME/.composer/vendor/bin"
@@ -188,3 +196,9 @@ else
   export EDITOR=nvim
   alias vim="nvim"
 fi
+
+# chruby
+[[ -s "/usr/local/share/chruby/chruby.sh" ]] && . "/usr/local/share/chruby/chruby.sh"
+# its slow as hell and I'm not using it too offen, so lazy loading should be fine
+export NVM_DIR="$HOME/.nvm"
+lazy_source nvm "$NVM_DIR/nvm.sh"

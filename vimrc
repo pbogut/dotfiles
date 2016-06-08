@@ -85,13 +85,13 @@ Plugin 'vim-airline/vim-airline-themes'
 Plugin 'edkolev/tmuxline.vim'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'nanotech/jellybeans.vim'
+Plugin 'altercation/vim-colors-solarized'
 " Bundle 'jistr/vim-nerdtree-tabs'
 Plugin 'Shougo/unite.vim'
 " Plugin 'tyru/open-browser.vim'
 " Plugin 'lambdalisue/vim-gista'
 Bundle 'ervandew/supertab'
 " Plugin 'Valloric/YouCompleteMe'
-Plugin 'Shougo/deoplete.nvim'
 " Plugin 'mkusher/padawan.vim'
 Plugin 'dhruvasagar/vim-prosession'
 Plugin 'airblade/vim-gitgutter'
@@ -121,7 +121,7 @@ Plugin 'sheerun/vim-polyglot'
 Bundle 'joonty/vdebug.git'
 Plugin 'jaxbot/browserlink.vim'
 " Plugin 'scrooloose/syntastic'
-Plugin 'benekastah/neomake' "efed615 - working commit, 3bfb4ef - seams to work as well
+Plugin 'benekastah/neomake'
 Plugin 'Chiel92/vim-autoformat'
 Plugin 'alvan/vim-closetag'
 Plugin 'edsono/vim-matchit'
@@ -131,9 +131,13 @@ Plugin 'docteurklein/php-getter-setter.vim'
 
 Plugin 'elixir-lang/vim-elixir'
 Plugin 'thinca/vim-ref'
-Plugin 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
 
 Plugin 'chrisbra/csv.vim'
+Plugin 'rhysd/vim-grammarous'
+if has('nvim')
+  Plugin 'Shougo/deoplete.nvim'
+  Plugin 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
+endif
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -218,6 +222,11 @@ nnoremap <leader>m :CtrlPMRUFiles<cr>
 " nnoremap <leader>gt :CtrlPTag<cr><C-\>w
 nnoremap <leader>w :w<cr>
 nnoremap <leader>a :Autoformat<cr>
+" vim is getting ^_ when pressing ^/, so I've mapped both
+nmap <C-_> gcc<down>^
+nmap <C-/> gcc<down>^
+vmap <C-_> gc
+vmap <C-/> gc
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>p :bp!<cr>
@@ -306,11 +315,23 @@ let g:ctrlp_map = '<leader>f'
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
 " color scheme
-colorscheme jellybeans
-highlight ColorColumn ctermbg=234
-highlight CursorLine ctermbg=233
-highlight CursorColumn ctermbg=232
-highlight SpecialKey ctermbg=none
+" colorscheme jellybeans
+" highlight ColorColumn ctermbg=234
+" highlight CursorLine ctermbg=233
+" highlight CursorColumn ctermbg=232
+" highlight SpecialKey ctermbg=none
+function! SolarizedLight()
+  set background=light
+  silent !dbus-send --session /net/sf/roxterm/Options net.sf.roxterm.Options.SetColourScheme string:$ROXTERM_ID string:Solarized\ Light
+endfunction
+function! SolarizedDark()
+  set background=dark
+  silent !dbus-send --session /net/sf/roxterm/Options net.sf.roxterm.Options.SetColourScheme string:$ROXTERM_ID string:Solarized\ Dark
+endfunction
+nnoremap <leader>cd :call SolarizedDark()<cr>
+nnoremap <leader>cl :call SolarizedLight()<cr>
+set background=dark
+colorscheme solarized
 " Padawan
 let g:ycm_semantic_triggers = {}
 let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
