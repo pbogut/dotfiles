@@ -66,7 +66,7 @@ GIT_BRANCH=$'$(__git_ps1 "(%s)")'
 VIMODE_COLOR="003"
 vim_ps1() {
   PS1="%B%F{001}(%b%F{012}%~%B%F{001}) %b%F{004}${GIT_BRANCH}%f
-%F{${VIMODE_COLOR}} %k%(!.%F{001}.%F{012}%n%F{001}@${HOST_COLOR}%M %B%F{001}%(!.#.$) %b%f%k"
+%F{${VIMODE_COLOR}} %k%(!.%F{001}.%F{012})%n%F{001}@${HOST_COLOR}%M %B%F{001}%(!.#.$) %b%f%k"
 }
 precmd() {
   RPROMPT=$vim_ins_mode && VIMODE_COLOR="003"
