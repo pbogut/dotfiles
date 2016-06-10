@@ -292,7 +292,7 @@ nnoremap <leader>gp <Plug>GitGutterPreviewHunk
 nnoremap <leader>gr <Plug>GitGutterRevertHunk
 nnoremap <leader>gstage <Plug>GitGutterStageHunk
 " Reload Browser
-iabbrev <// </<C-X><C-O>
+iabbrev </ </<C-X><C-O><C-n>
 map <F8> :BLReloadPage<cr>
 map <F7> :BLReloadCSS<cr>
 let g:bl_no_autoupdate = 1
