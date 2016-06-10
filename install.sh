@@ -33,6 +33,9 @@ read -d '' files <<"EOF"
     config/autostart/rescuetime.desktop
     vim/bundle/Vundle.vim
     composer/composer.json
+    mutt/muttrc
+    mutt/mailcap
+    mutt/solarized-dark-16.muttrc
 EOF
 read -d '' directories <<"EOF"
     .vim/undofiles
@@ -43,6 +46,7 @@ read -d '' directories <<"EOF"
     .config/autostart
     .weechat
     .composer
+    .mutt
 EOF
 ##########
 
