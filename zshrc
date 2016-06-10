@@ -197,6 +197,9 @@ else
   alias vim="nvim"
 fi
 
+# mutt mailcap
+export MAILCAPS="$MAILCAPS:$HOME/.mutt/mailcap"
+
 # chruby
 [[ -s "/usr/local/share/chruby/chruby.sh" ]] && . "/usr/local/share/chruby/chruby.sh"
 # its slow as hell and I'm not using it too offen, so lazy loading should be fine
