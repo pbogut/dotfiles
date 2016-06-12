@@ -1,2 +1,3 @@
 text/html; w3m -I %{charset} -T text/html; copiousoutput;
 image/*; ~/.scripts/muttimage.sh %s ; copiousoutput;
+application/pdf; pdftotext -layout %s -; copiousoutput;

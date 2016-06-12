@@ -1,7 +1,7 @@
 # IMAP: offlineimap
-set folder = "~/Maildir"
+set folder = "`echo $HOME`/Maildir"
 source ~/.mutt/mailboxes
-source ~/.mutt/accounts
+# source ~/.mutt/accounts
 
 # Sidebar
 set sidebar_visible = yes
@@ -10,6 +10,31 @@ set sidebar_visible = yes
 bind index,pager \CP sidebar-prev
 bind index,pager \CN sidebar-next
 bind index,pager \CO sidebar-open
+
+# wrap settings
+set smart_wrap
+set wrap=100 # 20 ish is for sidebar
+set markers=no
+
+# notmuch
+set nm_default_uri="notmuch://`echo $HOME`/Maildir" # path to the maildir
+set virtual_spoolfile=yes                          # enable virtual folders
+#set sendmail="/PATH/TO/bin/nm_sendmail"            # enables parsing of outgoing mail
+virtual-mailboxes \
+    "Inbox"     "notmuch://?query=tag:inbox and NOT tag:archive"\
+    "Threads"   "notmuch://?query=(tag:sent or tag:inbox) and NOT tag:archive"\
+    "Unread"    "notmuch://?query=tag:unread"\
+    "Starred"   "notmuch://?query=tag:*"\
+    "Sent"      "notmuch://?query=tag:sent"\
+    "Archive"   "notmuch://?query=tag:archive" # sets up queries for
+
+# notmuch bindings
+macro pager,index \\\\ "<vfolder-from-query>"              # looks up a hand made query
+macro index A "<modify-labels-then-hide>+archive -unread -inbox\n<sync-mailbox>"        # tag as Archived
+#macro index I "<modify-labels>-inbox -unread\\n"                 # removed from inbox
+#macro index S "<modify-labels-then-hide>-inbox -unread +junk\\n" # tag as Junk mail
+macro index + "<modify-labels>+*\\n<sync-mailbox>"               # tag as starred
+macro index - "<modify-labels>-*\\n<sync-mailbox>"               # tag as unstarred
 
 auto_view text/html                                      # view html automatically
 alternative_order text/plain text/enriched text/html     # save html for last
