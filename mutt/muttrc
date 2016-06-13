@@ -1,6 +1,8 @@
 # IMAP: offlineimap
 set folder = "`echo $HOME`/Maildir"
 source ~/.mutt/mailboxes
+set mailcap_path=~/.mutt/mailcap
+set sort=threads
 # source ~/.mutt/accounts
 
 # Sidebar
@@ -26,17 +28,27 @@ virtual-mailboxes \
     "Unread"    "notmuch://?query=tag:unread"\
     "Starred"   "notmuch://?query=tag:*"\
     "Sent"      "notmuch://?query=tag:sent"\
+    "Todo"      "notmuch://?query=tag:todo and NOT tag:done"\
     "Archive"   "notmuch://?query=tag:archive" # sets up queries for
 
 # notmuch bindings
 macro pager,index \\\\ "<vfolder-from-query>"              # looks up a hand made query
 macro index A "<modify-labels-then-hide>+archive -unread -inbox\n<sync-mailbox>"        # tag as Archived
+macro index T "<modify-labels>+todo\n"
 #macro index I "<modify-labels>-inbox -unread\\n"                 # removed from inbox
 #macro index S "<modify-labels-then-hide>-inbox -unread +junk\\n" # tag as Junk mail
 macro index + "<modify-labels>+*\\n<sync-mailbox>"               # tag as starred
 macro index - "<modify-labels>-*\\n<sync-mailbox>"               # tag as unstarred
 
+# quick jump between boxes
+macro index gi "<change-vfolder> Inbox<enter>" "Go to Inbox"
+macro index ga "<change-vfolder> Archive<enter>" "Go to Archive"
+macro index gs "<change-vfolder> Sent<enter>" "Go to Sent Mail"
+macro index gd "<change-vfolder> Drafts<enter>" "Go to Drafts"
+macro index gt "<change-vfolder> Todo<enter>" "Go to Drafts"
+
 auto_view text/html                                      # view html automatically
+auto_view text/calendar                                  # view ics automatically
 alternative_order text/plain text/enriched text/html     # save html for last
 
 # theme
