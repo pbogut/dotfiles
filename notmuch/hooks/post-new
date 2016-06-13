@@ -1,0 +1,8 @@
+#!/bin/bash
+# in gmail everything is in archive, so it was removing everything... damn
+#ls -1d --color=never ~/Maildir/*/archive | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag +archive --
+ls -1d --color=never ~/Maildir/*/INBOX | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -archive +inbox --
+ls -1d --color=never ~/Maildir/*/drafts | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag +drafts --
+ls -1d --color=never ~/Maildir/*/sent | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag +sent --
+
+notmuch tag +sent -inbox -- from:pawel.bogut@ or from:pbogut@
