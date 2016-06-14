@@ -5,4 +5,5 @@ ls -1d --color=never ~/Maildir/*/INBOX | sed "s#$HOME/Maildir/#folder:#g" | xarg
 ls -1d --color=never ~/Maildir/*/drafts | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag +drafts --
 ls -1d --color=never ~/Maildir/*/sent | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag +sent --
 
+notmuch tag +archive -- date:..`date --date='6 month ago' +%Y-%m-%d`
 notmuch tag +sent -inbox -- from:pawel.bogut@ or from:pbogut@
