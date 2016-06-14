@@ -51,7 +51,7 @@ tag-formats "inbox"   "GI" \
             "deleted" "GD" \
             "invites" "Gi"
 
-set index_format="%4C %Z %{%b %d} %-15.15L (%<l?%4l&%4c>) %s"
+set index_format="%4C %Z %?GT?%GT& ? %{%b %d} %-15.15L (%<l?%4l&%4c>) %s"
 
 # notmuch bindings
 macro pager,index \\\\ "<vfolder-from-query>"              # looks up a hand made query
