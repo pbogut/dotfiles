@@ -175,8 +175,14 @@ export PATH="$PATH:$HOME/bin:$HOME/.bin:$HOME/.scripts"
 #git branch in prompt
 setopt prompt_subst
 HOST_COLOR="%F{012}"
+#ssh session settings
 if [ -n "$SSH_CLIENT"  ] || [ -n "$SSH_TTY"  ]; then
+  #diferent host color when ssh
   HOST_COLOR="%F{003}"
+  #default tmux bind when ssh (so I can use it remotly and localy)
+  tmux unbind C-a 2>&1 > /dev/null
+  tmux set -g prefix C-b 2>&1 > /dev/null
+  tmux bind C-b send-prefix 2>&1 > /dev/null
 fi
 # export RPROMPT=$'$(__git_ps1 "%s")'
 export rvmsudo_secure_path=1
