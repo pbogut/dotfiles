@@ -29,6 +29,7 @@ virtual-mailboxes \
     "Starred"   "notmuch://?query=tag:*"\
     "Sent"      "notmuch://?query=tag:sent"\
     "Todo"      "notmuch://?query=tag:todo and NOT tag:done"\
+    "Drafts"    "notmuch://?query=tag:drafts"\
     "Archive"   "notmuch://?query=tag:archive" # sets up queries for
 
 # notmuch bindings

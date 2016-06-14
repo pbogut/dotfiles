@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# move mails with archive tag to archvie imap catalog
+notmuch search --output=files tag:archive |grep -v '/archive/' |while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/cur#Maildir/\1/archive/cur#'`";done;
