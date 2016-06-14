@@ -29,7 +29,29 @@ virtual-mailboxes \
     "Starred"   "notmuch://?query=tag:*"\
     "Sent"      "notmuch://?query=tag:sent"\
     "Todo"      "notmuch://?query=tag:todo and NOT tag:done"\
+    "Drafts"    "notmuch://?query=tag:drafts"\
     "Archive"   "notmuch://?query=tag:archive" # sets up queries for
+
+
+# index format
+tag-transforms "inbox"   "i"   \
+               "unread"  "u"   \
+               "replied" "↻ "  \
+               "sent"    "➥ "  \
+               "todo"    "T"   \
+               "archive" "A"   \
+               "invites" "CAL"
+
+tag-formats "inbox"   "GI" \
+            "unread"  "GU" \
+            "replied" "GR" \
+            "sent"    "GS" \
+            "todo"    "GT" \
+            "archive" "GA" \
+            "deleted" "GD" \
+            "invites" "Gi"
+
+set index_format="%4C %Z %?GT?%GT& ? %{%b %d} %-15.15L (%<l?%4l&%4c>) %s"
 
 # notmuch bindings
 macro pager,index \\\\ "<vfolder-from-query>"              # looks up a hand made query
