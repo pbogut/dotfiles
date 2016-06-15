@@ -37,6 +37,7 @@ read -d '' files <<"EOF"
     mutt/muttrc
     mutt/mailcap
     mutt/solarized-dark-16.muttrc
+    urlview
 EOF
 read -d '' directories <<"EOF"
     .vim/undofiles
