@@ -30,7 +30,8 @@ virtual-mailboxes \
     "Sent"      "notmuch://?query=tag:sent"\
     "Todo"      "notmuch://?query=tag:todo and NOT tag:done"\
     "Drafts"    "notmuch://?query=tag:drafts"\
-    "Archive"   "notmuch://?query=tag:archive" # sets up queries for
+    "Archive"   "notmuch://?query=tag:archive"\
+    "Other"     "notmuch://?query=not tag:archive and not tag:drafts and not tag:sent and not tag:todo and not tag:* and not tag:unread and not tag:inbox" # sets up queries for
 
 
 # index format
@@ -51,16 +52,16 @@ tag-formats "inbox"   "GI" \
             "deleted" "GD" \
             "invites" "Gi"
 
-set index_format="%4C %Z %?GT?%GT& ? %{%b %d} %-15.15L (%<l?%4l&%4c>) %s"
+set index_format="%4C %Z %?GT?%GT& ?%?GA?%GA& ? %{%b %d} %-15.15L (%<l?%4l&%4c>) %s"
 
 # notmuch bindings
 macro pager,index \\\\ "<vfolder-from-query>"              # looks up a hand made query
-macro index A "<modify-labels-then-hide>+archive -unread -inbox\n<sync-mailbox>"        # tag as Archived
+macro index A "<modify-labels-then-hide>+archive\n"        # tag as Archived
 macro index T "<modify-labels>+todo\n"
 #macro index I "<modify-labels>-inbox -unread\\n"                 # removed from inbox
 #macro index S "<modify-labels-then-hide>-inbox -unread +junk\\n" # tag as Junk mail
-macro index + "<modify-labels>+*\\n<sync-mailbox>"               # tag as starred
-macro index - "<modify-labels>-*\\n<sync-mailbox>"               # tag as unstarred
+macro index + "<modify-labels>+*\n"               # tag as starred
+macro index - "<modify-labels>-*\n"               # tag as unstarred
 
 # quick jump between boxes
 macro index gi "<change-vfolder> Inbox<enter>" "Go to Inbox"
@@ -75,3 +76,4 @@ alternative_order text/plain text/enriched text/html     # save html for last
 
 # theme
 source ~/.mutt/solarized-dark-16.muttrc
+#folder-hook ! archive "color index red default \"~Y '\W?archive\W?'\""
