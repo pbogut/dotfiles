@@ -67,6 +67,7 @@ macro index - "<modify-labels>-*\n"               # tag as unstarred
 
 # quick jump between boxes
 macro index gi "<change-vfolder> Inbox<enter>" "Go to Inbox"
+macro index gI "<change-vfolder> Threads<enter>" "Go to Threads"
 macro index ga "<change-vfolder> Archive<enter>" "Go to Archive"
 macro index gs "<change-vfolder> Sent<enter>" "Go to Sent Mail"
 macro index gd "<change-vfolder> Drafts<enter>" "Go to Drafts"
