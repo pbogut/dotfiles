@@ -26,7 +26,7 @@ virtual-mailboxes \
     "Inbox"     "notmuch://?query=tag:inbox and NOT tag:archive"\
     "Threads"   "notmuch://?query=(tag:sent or tag:inbox) and NOT tag:archive"\
     "Unread"    "notmuch://?query=tag:unread"\
-    "Starred"   "notmuch://?query=tag:*"\
+    "Flagged"   "notmuch://?query=tag:flagged"\
     "Sent"      "notmuch://?query=tag:sent"\
     "Todo"      "notmuch://?query=tag:todo and NOT tag:done"\
     "Drafts"    "notmuch://?query=tag:drafts"\
@@ -62,8 +62,6 @@ macro index A "<modify-labels-then-hide>+archive\n"        # tag as Archived
 macro index T "<modify-labels>+todo\n"
 #macro index I "<modify-labels>-inbox -unread\\n"                 # removed from inbox
 #macro index S "<modify-labels-then-hide>-inbox -unread +junk\\n" # tag as Junk mail
-macro index + "<modify-labels>+*\n"               # tag as starred
-macro index - "<modify-labels>-*\n"               # tag as unstarred
 
 # quick jump between boxes
 macro index gi "<change-vfolder> Inbox<enter>" "Go to Inbox"

@@ -1,10 +1,6 @@
 #!/bin/bash
 notmuch new
 
-# tag as sent if get out from one of these
-notmuch tag +sent -- from:pawel.bogut@ or from:pbogut@ or from:@smeagol.pl or from:@bogut.me or from:"Pawel Bogut" or from:"Paweł Bogut"
-notmuch tag -inbox -- tag:sent
-
 # initial tags as directories
 # im using new tag so I can set everything
 # before archive, which in gmails contain all mails by default (fy Google)
