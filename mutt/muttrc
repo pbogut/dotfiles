@@ -52,7 +52,9 @@ tag-formats "inbox"   "GI" \
             "deleted" "GD" \
             "invites" "Gi"
 
-set index_format="%4C %Z %?GT?%GT& ?%?GA?%GA& ? %{%b %d} %-15.15L (%<l?%4l&%4c>) %s"
+# date-cond patch used for conditional date formating
+# notmuch tags indicators for todo and archive
+set index_format="%4C %Z %?GT?%GT& ?%?GA?%GA& ? %<[y?%<[m?%<[d?%[ %H:%M]&%[%a %d]>&%[%b %d]>&%[%m/%y ]> %-15.15L (%<l?%4l&%4c>) %s"
 
 # notmuch bindings
 macro pager,index \\\\ "<vfolder-from-query>"              # looks up a hand made query
