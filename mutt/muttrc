@@ -66,6 +66,7 @@ macro index T "<modify-labels>+todo\n"
 # quick jump between boxes
 macro index gi "<change-vfolder> Inbox<enter>" "Go to Inbox"
 macro index gI "<change-vfolder> Threads<enter>" "Go to Threads"
+macro index gu "<change-vfolder> Unread<enter>" "Go to Unread"
 macro index ga "<change-vfolder> Archive<enter>" "Go to Archive"
 macro index gs "<change-vfolder> Sent<enter>" "Go to Sent Mail"
 macro index gd "<change-vfolder> Drafts<enter>" "Go to Drafts"
