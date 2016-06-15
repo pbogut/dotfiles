@@ -1,2 +1,22 @@
 #!/bin/bash
 notmuch new
+
+# tag as sent if get out from one of these
+notmuch tag +sent -- from:pawel.bogut@ or from:pbogut@ or from:@smeagol.pl or from:@bogut.me or from:"Pawel Bogut" or from:"Paweł Bogut"
+notmuch tag -inbox -- tag:sent
+
+# initial tags as directories
+# im using new tag so I can set everything
+# before archive, which in gmails contain all mails by default (fy Google)
+ls -1d --color=never ~/Maildir/*/INBOX | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +inbox -- tag:new and
+ls -1d --color=never ~/Maildir/*/drafts | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +drafts +draft -- tag:new and
+ls -1d --color=never ~/Maildir/*/sent | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +sent -- tag:new and
+ls -1d --color=never ~/Maildir/*/trash | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +trash -- tag:new and
+ls -1d --color=never ~/Maildir/*/spam | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +spam -- tag:new and
+# in gmail everything is in archive, so we do this at the end
+ls -1d --color=never ~/Maildir/*/archive | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +archive -- tag:new and
+
+# auto archivie couses issues with gmail - wrrrr....
+#notmuch tag +archive -- date:..`date --date='6 month ago' +%Y-%m-%d`
+
+notmuch tag -new -- tag:new #clear new tag
