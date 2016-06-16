@@ -128,6 +128,7 @@ Plugin 'edsono/vim-matchit'
 
 Plugin 'captbaritone/better-indent-support-for-php-with-html'
 Plugin 'docteurklein/php-getter-setter.vim'
+Plugin 'pbogut/phpfolding.vim'
 
 Plugin 'elixir-lang/vim-elixir'
 Plugin 'thinca/vim-ref'
@@ -475,6 +476,25 @@ function! Wipeout(bang)
   endfor
   echon "Deleted " . l:tally . " buffers"
 endfun
+
+" fold adjust
+set fillchars="vert:|,fold: "
+" remove underline
+hi Folded term=NONE cterm=NONE gui=NONE
+" new fold style
+function! NeatFoldText()
+  let line = ' ' . substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
+  let lines_count = v:foldend - v:foldstart + 1
+  let lines_count_text = '| ' . printf("%10s", lines_count . ' lines') . ' |'
+  " let foldchar = matchstr(&fillchars, 'fold:\zs.')
+  let foldchar = ' ' " use the space
+  let foldtextstart = strpart('+' . repeat(foldchar, v:foldlevel*2) . line, 0, (winwidth(0)*2)/3)
+  let foldtextend = lines_count_text . repeat(foldchar, 8)
+  let foldtextlength = strlen(substitute(foldtextstart . foldtextend, '.', 'x', 'g')) + &foldcolumn
+  return foldtextstart . repeat(foldchar, winwidth(0)-foldtextlength) . foldtextend
+endfunction
+set foldtext=NeatFoldText()
+let g:DisableAutoPHPFolding = 1
 
 let g:snips_author = "Pawel Bogut"
 let g:snips_github = "https://github.com/pbogut"
