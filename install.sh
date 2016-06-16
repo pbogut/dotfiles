@@ -11,6 +11,7 @@ olddir=~/dotfiles_`date +%s%N`    # old dotfiles backup directory
 read -d '' files <<"EOF"
     inputrc
     offlineimap-hooks
+    offlineimap.py
     screenrc
     vimrc
     zshrc
