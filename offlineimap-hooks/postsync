@@ -1,8 +1,11 @@
 #!/bin/bash
 notmuch new
 
-# initial tags as directories
-# im using new tag so I can set everything
+# add image tag
+notmuch tag +image -- tag:new and mimetype:image
+
+# tags as directories
+# im removing new tag so I can set everything
 # before archive, which in gmails contain all mails by default (fy Google)
 ls -1d --color=never ~/Maildir/*/INBOX | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +inbox -- tag:new and
 ls -1d --color=never ~/Maildir/*/drafts | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +drafts +draft -- tag:new and

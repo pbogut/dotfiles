@@ -4,6 +4,10 @@ source ~/.mutt/mailboxes
 set mailcap_path=~/.mutt/mailcap
 set sort=threads
 # source ~/.mutt/accounts
+set edit_headers = yes
+set record = "+sent"
+set nm_record = yes
+set nm_record_tags = "-index +sent"
 
 # Sidebar
 set sidebar_visible = yes
@@ -13,18 +17,20 @@ bind index,pager \CP sidebar-prev
 bind index,pager \CN sidebar-next
 bind index,pager \CO sidebar-open
 
+macro attach \CO '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>xdg-open /tmp/.mutt-tmp/* 2>&1 > /dev/null<enter>'
+
 # wrap settings
 set smart_wrap
 set wrap=100 # 20 ish is for sidebar
 set markers=no
+set wait_key=no
 
 # notmuch
 set nm_default_uri="notmuch://`echo $HOME`/Maildir" # path to the maildir
 set virtual_spoolfile=yes                          # enable virtual folders
 #set sendmail="/PATH/TO/bin/nm_sendmail"            # enables parsing of outgoing mail
 virtual-mailboxes \
-    "Inbox"     "notmuch://?query=tag:inbox and NOT tag:archive"\
-    "Threads"   "notmuch://?query=(tag:sent or tag:inbox) and NOT tag:archive"\
+    "Inbox"   "notmuch://?query=(tag:sent or tag:inbox) and NOT tag:archive"\
     "Unread"    "notmuch://?query=tag:unread"\
     "Flagged"   "notmuch://?query=tag:flagged"\
     "Sent"      "notmuch://?query=tag:sent"\
@@ -65,7 +71,6 @@ macro index T "<modify-labels>+todo\n"
 
 # quick jump between boxes
 macro index gi "<change-vfolder> Inbox<enter>" "Go to Inbox"
-macro index gI "<change-vfolder> Threads<enter>" "Go to Threads"
 macro index gu "<change-vfolder> Unread<enter>" "Go to Unread"
 macro index ga "<change-vfolder> Archive<enter>" "Go to Archive"
 macro index gs "<change-vfolder> Sent<enter>" "Go to Sent Mail"
