@@ -3,6 +3,12 @@ notmuch new
 
 # add image tag
 notmuch tag +image -- tag:new and mimetype:image
+# set up account tag
+notmuch search --output=threads tag:new | while read thread; do
+    notmuch search --output=files $thread | grep -v 'Maildir/sent' | sed 's#.*Maildir/\([^/]*\)/.*#+account-\1#' | while read account; do
+        notmuch tag $account -- $thread
+    done
+done
 
 # tags as directories
 # im removing new tag so I can set everything
