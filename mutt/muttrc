@@ -63,12 +63,12 @@ virtual-mailboxes \
 
 # index format
 tag-transforms "inbox"   "i"   \
-               "unread"  "u"   \
+               "unread"  "✉"   \
                "replied" "↻ "  \
-               "sent"    "➥ "  \
-               "todo"    "T"   \
-               "archive" "A"   \
-               "invites" "CAL"
+               "sent"    "→"  \
+               "todo"    "☑"   \
+               "archive" "⚓"   \
+               "invites" "≣"
 
 tag-formats "inbox"   "GI" \
             "unread"  "GU" \
