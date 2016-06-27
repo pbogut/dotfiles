@@ -3,6 +3,7 @@ syntax on
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
+set runtimepath+=~/.vim
 set timeoutlen=1000 ttimeoutlen=0   " eliminate esc timeout
 set report=0
 set nohlsearch
@@ -134,6 +135,8 @@ Plugin 'pbogut/phpfolding.vim'
 
 Plugin 'elixir-lang/vim-elixir'
 Plugin 'thinca/vim-ref'
+Plugin 'kana/vim-operator-user'
+Plugin 'tyru/operator-camelize.vim'
 
 Plugin 'chrisbra/csv.vim'
 Plugin 'rhysd/vim-grammarous'
@@ -350,6 +353,8 @@ let g:SuperTabDefaultCompletionType = '<C-n>'
 let g:UltiSnipsExpandTrigger = "<tab>"
 let g:UltiSnipsJumpForwardTrigger = "<tab>"
 let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+
+let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnippets"]
 " eclim
 let g:EclimFileTypeValidate = 0
 let g:EclimCompletionMethod = 'omnifunc'
