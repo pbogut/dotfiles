@@ -60,64 +60,66 @@ endif
 
 " set the runtime path to include Vundle and initialize
 " set rtp+=~/.vim/bundle/Vundle.vim
-call plug#begin()
-Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
-Plug 'jiangmiao/auto-pairs'
-Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-git'
-Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-surround'
-Plug 'tpope/vim-repeat'
-Plug 'tpope/vim-rails', { 'for': 'ruby' }
-Plug 'tpope/vim-endwise'
-Plug 'tpope/vim-unimpaired'
-Plug 'tpope/vim-obsession'
-Plug 'dhruvasagar/vim-prosession'
-Plug 'terryma/vim-expand-region'
-Plug 'scrooloose/nerdtree', { 'on': ['NERDTreeClose', 'NERDTreeFind'] }
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-Plug 'edkolev/tmuxline.vim'
-" Plug 'nanotech/jellybeans.vim'
-Plug 'altercation/vim-colors-solarized'
-" Plug 'Shougo/unite.vim'
-" Plug 'ervandew/supertab'
-Plug 'airblade/vim-gitgutter'
-Plug 'terryma/vim-multiple-cursors'
-Plug 'MarcWeber/vim-addon-mw-utils'
-" Plug 'tomtom/tlib_vim'
-Plug 'ludovicchabant/vim-gutentags'
-Plug 'gioele/vim-autoswap'
-Plug 'ntpeters/vim-better-whitespace'
-Plug 'honza/vim-snippets'
-" Plug 'Shougo/vimproc.vim'
-Plug 'mattn/emmet-vim'
-Plug 'christoomey/vim-tmux-navigator'
-Plug 'sirver/ultisnips'
-Plug 'sheerun/vim-polyglot'
-Plug 'joonty/vdebug', { 'for': 'php' }
-Plug 'benekastah/neomake', { 'on': 'Neomake' }
-Plug 'Chiel92/vim-autoformat'
-Plug 'alvan/vim-closetag'
-Plug 'edsono/vim-matchit'
-Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
-Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
-Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
-Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
-" Plug 'thinca/vim-ref'
-Plug 'kana/vim-operator-user'
-Plug 'tyru/operator-camelize.vim'
-Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
-Plug 'rhysd/vim-grammarous'
-Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
-if has('nvim')
-  Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-  Plug 'junegunn/fzf.vim'
-  Plug 'Shougo/deoplete.nvim'
-  " Plug 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
-endif
-" All of your Plugins must be added before the following line
-call plug#end()            " required
+silent! call plug#begin()
+if exists(':Plug')
+  Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
+  Plug 'jiangmiao/auto-pairs'
+  Plug 'tpope/vim-fugitive'
+  Plug 'tpope/vim-git'
+  Plug 'tpope/vim-commentary'
+  Plug 'tpope/vim-surround'
+  Plug 'tpope/vim-repeat'
+  Plug 'tpope/vim-rails', { 'for': 'ruby' }
+  Plug 'tpope/vim-endwise'
+  Plug 'tpope/vim-unimpaired'
+  Plug 'tpope/vim-obsession'
+  Plug 'dhruvasagar/vim-prosession'
+  Plug 'terryma/vim-expand-region'
+  Plug 'scrooloose/nerdtree', { 'on': ['NERDTreeClose', 'NERDTreeFind'] }
+  Plug 'vim-airline/vim-airline'
+  Plug 'vim-airline/vim-airline-themes'
+  Plug 'edkolev/tmuxline.vim'
+  " Plug 'nanotech/jellybeans.vim'
+  Plug 'altercation/vim-colors-solarized'
+  " Plug 'Shougo/unite.vim'
+  " Plug 'ervandew/supertab'
+  Plug 'airblade/vim-gitgutter'
+  Plug 'terryma/vim-multiple-cursors'
+  Plug 'MarcWeber/vim-addon-mw-utils'
+  " Plug 'tomtom/tlib_vim'
+  Plug 'ludovicchabant/vim-gutentags'
+  Plug 'gioele/vim-autoswap'
+  Plug 'ntpeters/vim-better-whitespace'
+  Plug 'honza/vim-snippets'
+  " Plug 'Shougo/vimproc.vim'
+  Plug 'mattn/emmet-vim'
+  Plug 'christoomey/vim-tmux-navigator'
+  Plug 'sirver/ultisnips'
+  Plug 'sheerun/vim-polyglot'
+  Plug 'joonty/vdebug', { 'for': 'php' }
+  Plug 'benekastah/neomake', { 'on': 'Neomake' }
+  Plug 'Chiel92/vim-autoformat'
+  Plug 'alvan/vim-closetag'
+  Plug 'edsono/vim-matchit'
+  Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
+  Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
+  Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
+  Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
+  " Plug 'thinca/vim-ref'
+  Plug 'kana/vim-operator-user'
+  Plug 'tyru/operator-camelize.vim'
+  Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
+  Plug 'rhysd/vim-grammarous'
+  Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
+  if has('nvim')
+    Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+    Plug 'junegunn/fzf.vim'
+    Plug 'Shougo/deoplete.nvim'
+    " Plug 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
+  endif " if Plug installed
+  " All of your Plugins must be added before the following line
+endif "
+silent! call plug#end()            " requiredc
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:
 "filetype plugin on
@@ -300,7 +302,7 @@ endfunction
 nnoremap <leader>cd :call SolarizedDark()<cr>
 nnoremap <leader>cl :call SolarizedLight()<cr>
 set background=dark
-colorscheme solarized
+silent! colorscheme solarized
 " Padawan
 let g:ycm_semantic_triggers = {}
 let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
