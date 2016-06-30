@@ -61,12 +61,7 @@ endif
 " set the runtime path to include Vundle and initialize
 " set rtp+=~/.vim/bundle/Vundle.vim
 call plug#begin()
-" call vundle#begin()
-Plug 'VundleVim/Vundle.vim'
-
 Plug 'vim-ruby/vim-ruby'
-
-" Plugin 'Raimondi/delimitMate' "needs to be loaded before endwise
 Plug 'jiangmiao/auto-pairs'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-git'
@@ -78,74 +73,52 @@ Plug 'tpope/vim-rails'
 Plug 'tpope/vim-obsession'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-unimpaired'
-" Plugin 'tpope/vim-dispatch'
-Plug 'pbogut/vim-dispatch' " panel size
 Plug 'terryma/vim-expand-region'
 Plug 'scrooloose/nerdtree'
-" Plugin 'scrooloose/nerdcommenter'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'edkolev/tmuxline.vim'
-Plug 'ctrlpvim/ctrlp.vim'
 Plug 'nanotech/jellybeans.vim'
 Plug 'altercation/vim-colors-solarized'
-" Bundle 'jistr/vim-nerdtree-tabs'
 Plug 'Shougo/unite.vim'
-" Plugin 'tyru/open-browser.vim'
-" Plugin 'lambdalisue/vim-gista'
 Plug 'ervandew/supertab'
-" Plugin 'Valloric/YouCompleteMe'
-" Plugin 'mkusher/padawan.vim'
 Plug 'dhruvasagar/vim-prosession'
 Plug 'airblade/vim-gitgutter'
 Plug 'terryma/vim-multiple-cursors'
 Plug 'MarcWeber/vim-addon-mw-utils'
 Plug 'tomtom/tlib_vim'
-" Plugin 'tomtom/tcomment_vim'
-" Plugin 'garbas/vim-snipmate'
-" Plugin 'szw/vim-tags'
-" Plugin 'craigemery/vim-autotag'
 Plug 'ludovicchabant/vim-gutentags'
-Plug 'mileszs/ack.vim'
-Plug 'rking/ag.vim'
 Plug 'gioele/vim-autoswap'
 Plug 'ntpeters/vim-better-whitespace'
 Plug 'honza/vim-snippets'
-" Plugin 'majutsushi/tagbar'
-" Plugin 'Shougo/echodoc.vim'
 Plug 'Shougo/vimproc.vim'
 Plug 'mattn/emmet-vim'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'moll/vim-bbye'
 Plug 'sirver/ultisnips'
-" Plugin 'Shougo/neosnippet'
-" Plugin 'Shougo/neosnippet-snippets'
 Plug 'sheerun/vim-polyglot'
 Plug 'joonty/vdebug.git'
-Plug 'jaxbot/browserlink.vim'
-" Plugin 'scrooloose/syntastic'
 Plug 'benekastah/neomake'
 Plug 'Chiel92/vim-autoformat'
 Plug 'alvan/vim-closetag'
 Plug 'edsono/vim-matchit'
-
 Plug 'captbaritone/better-indent-support-for-php-with-html'
 Plug 'docteurklein/php-getter-setter.vim'
 Plug 'pbogut/phpfolding.vim'
-
 Plug 'elixir-lang/vim-elixir'
 Plug 'thinca/vim-ref'
 Plug 'kana/vim-operator-user'
 Plug 'tyru/operator-camelize.vim'
-
 Plug 'chrisbra/csv.vim'
 Plug 'rhysd/vim-grammarous'
+
 if has('nvim')
+  Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+  Plug 'junegunn/fzf.vim'
   Plug 'Shougo/deoplete.nvim'
   Plug 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
 endif
 " All of your Plugins must be added before the following line
-" call vundle#end()            " required
 call plug#end()            " required
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:
@@ -228,13 +201,11 @@ nnoremap <leader>sv :source $MYVIMRC<CR>
 nnoremap <leader>ol :lopen<cr>
 nnoremap <leader>oq :copen<cr>
 " nnoremap <leader>s :NERDTreeToggle<cr>
-nnoremap <leader>t :TagbarToggle<cr>
+nnoremap <leader>t :Tags<cr>
 nnoremap <leader>r :call ToggleNERDTree()<cr>
-nnoremap <leader>b :CtrlPBuffer<cr>
-nnoremap <leader>m :CtrlPMRUFiles<cr>
-" nnoremap <leader>gf :CtrlP<cr><C-\>f
-" nnoremap <leader>gw :CtrlP<cr><C-\>w
-" nnoremap <leader>gt :CtrlPTag<cr><C-\>w
+nnoremap <leader>b :Buffers<cr>
+nnoremap <leader>m :History<cr>
+nnoremap <leader>f :Files<cr>
 nnoremap <leader>w :call WriteOrCr()<cr>
 nnoremap <leader>a :Autoformat<cr>
 map <leader>_ <Plug>(operator-camelize-toggle)
@@ -309,22 +280,9 @@ nnoremap <leader>gstage <Plug>GitGutterStageHunk
 iabbrev </ </<C-X><C-O><C-n>
 map <F8> :BLReloadPage<cr>
 map <F7> :BLReloadCSS<cr>
-let g:bl_no_autoupdate = 1
-" CtrlPset splitbelow
-function! CtrlPFindTag()
-  let g:ctrlp_default_input = expand('<cword>')
-  CtrlPTag
-  let g:ctrlp_default_input = ''
-endfunction
-function! CtrlPFindFile()
-  let g:ctrlp_default_input = expand('<cfile>')
-  CtrlP
-  let g:ctrlp_default_input = ''
-endfunction
-nnoremap <leader>gf :call CtrlPFindFile()<cr>
-nnoremap <leader>gt :call CtrlPFindTag()<cr>
-let g:ctrlp_cmd = 'CtrlPMixed'
-let g:ctrlp_map = '<leader>f'
+" fzf
+nnoremap <leader>gf :call fzf#vim#files('',{'options': '-q '.shellescape(expand('<cfile>')), 'down': '~20%'})<cr>
+nnoremap <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
 " air-line
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
@@ -402,6 +360,9 @@ let g:gutentags_exclude = ['*node_modules*', '*bower_components*', 'tmp*', 'temp
 " vim tags
 let g:vim_tags_use_language_field = 1
 let g:vim_tags_use_vim_dispatch = 1
+" fzf
+let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
+let g:fzf_layout = { 'down': '~20%' }
 " ctrlp
 let g:ctrlp_extensions = ['tag', 'mixed']
 " Use silver searcher to list files
