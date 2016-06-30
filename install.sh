@@ -34,6 +34,7 @@ read -d '' files <<"EOF"
     config/autostart/autostart.desktop
     config/autostart/rescuetime.desktop
     vim/bundle/Vundle.vim
+    vim/autoload/plug.vim
     composer/composer.json
     mutt/muttrc
     mutt/mailcap
@@ -45,6 +46,7 @@ read -d '' directories <<"EOF"
     .vim/swapfiles
     .vim/backupfiles
     .vim/bundle
+    .vim/autoload
     .config/nvim
     .config/autostart
     .weechat
