@@ -111,6 +111,7 @@ if exists(':Plug')
   Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
   Plug 'rhysd/vim-grammarous'
   Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
+  Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   if has('nvim')
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
