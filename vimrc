@@ -1,5 +1,4 @@
 syntax on
-
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
@@ -60,92 +59,94 @@ if has("patch-7.4.314")
 endif
 
 " set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
+" set rtp+=~/.vim/bundle/Vundle.vim
+call plug#begin()
+" call vundle#begin()
+Plug 'VundleVim/Vundle.vim'
 
-Plugin 'vim-ruby/vim-ruby'
+Plug 'vim-ruby/vim-ruby'
 
 " Plugin 'Raimondi/delimitMate' "needs to be loaded before endwise
-Plugin 'jiangmiao/auto-pairs'
-Plugin 'tpope/vim-fugitive'
-Plugin 'tpope/vim-git'
-Plugin 'tpope/vim-commentary'
-Plugin 'tpope/vim-rvm'
-Plugin 'tpope/vim-surround'
-Plugin 'tpope/vim-repeat'
-Plugin 'tpope/vim-rails'
-Plugin 'tpope/vim-obsession'
-Plugin 'tpope/vim-endwise'
-Plugin 'tpope/vim-unimpaired'
+Plug 'jiangmiao/auto-pairs'
+Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-git'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-rvm'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-rails'
+Plug 'tpope/vim-obsession'
+Plug 'tpope/vim-endwise'
+Plug 'tpope/vim-unimpaired'
 " Plugin 'tpope/vim-dispatch'
-Plugin 'pbogut/vim-dispatch' " panel size
-Plugin 'terryma/vim-expand-region'
-Plugin 'scrooloose/nerdtree'
+Plug 'pbogut/vim-dispatch' " panel size
+Plug 'terryma/vim-expand-region'
+Plug 'scrooloose/nerdtree'
 " Plugin 'scrooloose/nerdcommenter'
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
-Plugin 'edkolev/tmuxline.vim'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'nanotech/jellybeans.vim'
-Plugin 'altercation/vim-colors-solarized'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'edkolev/tmuxline.vim'
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'nanotech/jellybeans.vim'
+Plug 'altercation/vim-colors-solarized'
 " Bundle 'jistr/vim-nerdtree-tabs'
-Plugin 'Shougo/unite.vim'
+Plug 'Shougo/unite.vim'
 " Plugin 'tyru/open-browser.vim'
 " Plugin 'lambdalisue/vim-gista'
-Bundle 'ervandew/supertab'
+Plug 'ervandew/supertab'
 " Plugin 'Valloric/YouCompleteMe'
 " Plugin 'mkusher/padawan.vim'
-Plugin 'dhruvasagar/vim-prosession'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'terryma/vim-multiple-cursors'
-Plugin 'MarcWeber/vim-addon-mw-utils'
-Plugin 'tomtom/tlib_vim'
+Plug 'dhruvasagar/vim-prosession'
+Plug 'airblade/vim-gitgutter'
+Plug 'terryma/vim-multiple-cursors'
+Plug 'MarcWeber/vim-addon-mw-utils'
+Plug 'tomtom/tlib_vim'
 " Plugin 'tomtom/tcomment_vim'
 " Plugin 'garbas/vim-snipmate'
 " Plugin 'szw/vim-tags'
 " Plugin 'craigemery/vim-autotag'
-Plugin 'ludovicchabant/vim-gutentags'
-Plugin 'mileszs/ack.vim'
-Plugin 'rking/ag.vim'
-Plugin 'gioele/vim-autoswap'
-Plugin 'ntpeters/vim-better-whitespace'
-Plugin 'honza/vim-snippets'
+Plug 'ludovicchabant/vim-gutentags'
+Plug 'mileszs/ack.vim'
+Plug 'rking/ag.vim'
+Plug 'gioele/vim-autoswap'
+Plug 'ntpeters/vim-better-whitespace'
+Plug 'honza/vim-snippets'
 " Plugin 'majutsushi/tagbar'
 " Plugin 'Shougo/echodoc.vim'
-Plugin 'Shougo/vimproc.vim'
-Plugin 'mattn/emmet-vim'
-Plugin 'christoomey/vim-tmux-navigator'
-Plugin 'moll/vim-bbye'
-Plugin 'sirver/ultisnips'
+Plug 'Shougo/vimproc.vim'
+Plug 'mattn/emmet-vim'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'moll/vim-bbye'
+Plug 'sirver/ultisnips'
 " Plugin 'Shougo/neosnippet'
 " Plugin 'Shougo/neosnippet-snippets'
-Plugin 'sheerun/vim-polyglot'
-Bundle 'joonty/vdebug.git'
-Plugin 'jaxbot/browserlink.vim'
+Plug 'sheerun/vim-polyglot'
+Plug 'joonty/vdebug.git'
+Plug 'jaxbot/browserlink.vim'
 " Plugin 'scrooloose/syntastic'
-Plugin 'benekastah/neomake'
-Plugin 'Chiel92/vim-autoformat'
-Plugin 'alvan/vim-closetag'
-Plugin 'edsono/vim-matchit'
+Plug 'benekastah/neomake'
+Plug 'Chiel92/vim-autoformat'
+Plug 'alvan/vim-closetag'
+Plug 'edsono/vim-matchit'
 
-Plugin 'captbaritone/better-indent-support-for-php-with-html'
-Plugin 'docteurklein/php-getter-setter.vim'
-Plugin 'pbogut/phpfolding.vim'
+Plug 'captbaritone/better-indent-support-for-php-with-html'
+Plug 'docteurklein/php-getter-setter.vim'
+Plug 'pbogut/phpfolding.vim'
 
-Plugin 'elixir-lang/vim-elixir'
-Plugin 'thinca/vim-ref'
-Plugin 'kana/vim-operator-user'
-Plugin 'tyru/operator-camelize.vim'
+Plug 'elixir-lang/vim-elixir'
+Plug 'thinca/vim-ref'
+Plug 'kana/vim-operator-user'
+Plug 'tyru/operator-camelize.vim'
 
-Plugin 'chrisbra/csv.vim'
-Plugin 'rhysd/vim-grammarous'
+Plug 'chrisbra/csv.vim'
+Plug 'rhysd/vim-grammarous'
 if has('nvim')
-  Plugin 'Shougo/deoplete.nvim'
-  Plugin 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
 endif
 " All of your Plugins must be added before the following line
-call vundle#end()            " required
+" call vundle#end()            " required
+call plug#end()            " required
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:
 "filetype plugin on
@@ -205,6 +206,16 @@ function! ToggleNERDTree()
     :NERDTreeFind
   endif
 endfunction
+" write or select when in command mode
+function! WriteOrCr()
+  if &buftype == 'nofile'
+    call feedkeys("\<cr>")
+  elseif @% != ''
+    exec "w"
+  else
+    echo 'Nothing to save...'
+  endif
+endfunction
 let mapleader = "\<space>" " test if that will work better
 " macros
 nnoremap <leader>em :tabnew ~/.vim/macros.vim<cr>
@@ -219,15 +230,14 @@ nnoremap <leader>oq :copen<cr>
 " nnoremap <leader>s :NERDTreeToggle<cr>
 nnoremap <leader>t :TagbarToggle<cr>
 nnoremap <leader>r :call ToggleNERDTree()<cr>
-nnoremap <leader>l :bn!<cr>
-nnoremap <leader>h :bp!<cr>
 nnoremap <leader>b :CtrlPBuffer<cr>
 nnoremap <leader>m :CtrlPMRUFiles<cr>
 " nnoremap <leader>gf :CtrlP<cr><C-\>f
 " nnoremap <leader>gw :CtrlP<cr><C-\>w
 " nnoremap <leader>gt :CtrlPTag<cr><C-\>w
-nnoremap <leader>w :w<cr>
+nnoremap <leader>w :call WriteOrCr()<cr>
 nnoremap <leader>a :Autoformat<cr>
+map <leader>_ <Plug>(operator-camelize-toggle)
 " vim is getting ^_ when pressing ^/, so I've mapped both
 nmap <C-_> gcc<down>^
 nmap <C-/> gcc<down>^
@@ -235,8 +245,6 @@ vmap <C-_> gc
 vmap <C-/> gc
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
-map <C-w>p :bp!<cr>
-map <C-w>n :bn!<cr>
 map <C-w>x :Bdelete <bar>q<cr>
 map <C-w>X :Bdelete! <bar> q<cr>
 nnoremap <leader>d "_d
@@ -343,6 +351,9 @@ let g:ycm_semantic_triggers = {}
 let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
 " Deoplete
 let g:deoplete#enable_at_startup = 1
+let g:deoplete#sources = {}
+let g:deoplete#sources._ = ['buffer']
+let g:deoplete#sources.php = ['buffer', 'tag', 'member', 'file']
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
 " make YCM compatible with UltiSnips (using supertab)
