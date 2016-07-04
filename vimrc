@@ -79,7 +79,8 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'edkolev/tmuxline.vim'
 Plug 'nanotech/jellybeans.vim'
-Plug 'altercation/vim-colors-solarized'
+" Plug 'altercation/vim-colors-solarized'
+Plug 'arakashic/nvim-colors-solarized'
 Plug 'Shougo/unite.vim'
 Plug 'ervandew/supertab'
 Plug 'dhruvasagar/vim-prosession'
@@ -302,6 +303,7 @@ function! SolarizedDark()
 endfunction
 nnoremap <leader>cd :call SolarizedDark()<cr>
 nnoremap <leader>cl :call SolarizedLight()<cr>
+" let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 set background=dark
 colorscheme solarized
 " Padawan
@@ -309,9 +311,9 @@ let g:ycm_semantic_triggers = {}
 let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
 " Deoplete
 let g:deoplete#enable_at_startup = 1
-let g:deoplete#sources = {}
-let g:deoplete#sources._ = ['buffer']
-let g:deoplete#sources.php = ['buffer', 'tag', 'member', 'file']
+" let g:deoplete#sources = {}
+" let g:deoplete#sources._ = ['buffer']
+" let g:deoplete#sources.php = ['buffer', 'tag', 'member', 'file']
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
 " make YCM compatible with UltiSnips (using supertab)
