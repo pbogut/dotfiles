@@ -48,7 +48,6 @@ augroup configgroup
   autocmd FileType qf :nnoremap <buffer> q :q
   " start mutt file edit  on first empty line
   autocmd BufRead mutt* execute 'normal gg/\n\n
-j'
 augroup END
 " line 80 limit
 set colorcolumn=81
