@@ -47,7 +47,8 @@ augroup configgroup
   autocmd FileType qf :nnoremap <buffer> o <enter>
   autocmd FileType qf :nnoremap <buffer> q :q
   " start mutt file edit  on first empty line
-  autocmd BufRead mutt* execute 'normal gg/\n\nj'
+  autocmd BufRead mutt* execute 'normal gg/\n\n
+j'
 augroup END
 " line 80 limit
 set colorcolumn=81
@@ -60,67 +61,67 @@ endif
 
 " set the runtime path to include Vundle and initialize
 " set rtp+=~/.vim/bundle/Vundle.vim
-call plug#begin()
-Plug 'vim-ruby/vim-ruby'
-Plug 'jiangmiao/auto-pairs'
-Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-git'
-Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-rvm'
-Plug 'tpope/vim-surround'
-Plug 'tpope/vim-repeat'
-Plug 'tpope/vim-rails'
-Plug 'tpope/vim-obsession'
-Plug 'tpope/vim-endwise'
-Plug 'tpope/vim-unimpaired'
-Plug 'terryma/vim-expand-region'
-Plug 'scrooloose/nerdtree'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-Plug 'edkolev/tmuxline.vim'
-Plug 'nanotech/jellybeans.vim'
-" Plug 'altercation/vim-colors-solarized'
-Plug 'arakashic/nvim-colors-solarized'
-Plug 'Shougo/unite.vim'
-Plug 'ervandew/supertab'
-Plug 'dhruvasagar/vim-prosession'
-Plug 'airblade/vim-gitgutter'
-Plug 'terryma/vim-multiple-cursors'
-Plug 'MarcWeber/vim-addon-mw-utils'
-Plug 'tomtom/tlib_vim'
-Plug 'ludovicchabant/vim-gutentags'
-Plug 'gioele/vim-autoswap'
-Plug 'ntpeters/vim-better-whitespace'
-Plug 'honza/vim-snippets'
-Plug 'Shougo/vimproc.vim'
-Plug 'mattn/emmet-vim'
-Plug 'christoomey/vim-tmux-navigator'
-Plug 'moll/vim-bbye'
-Plug 'sirver/ultisnips'
-Plug 'sheerun/vim-polyglot'
-Plug 'joonty/vdebug.git'
-Plug 'benekastah/neomake'
-Plug 'Chiel92/vim-autoformat'
-Plug 'alvan/vim-closetag'
-Plug 'edsono/vim-matchit'
-Plug 'captbaritone/better-indent-support-for-php-with-html'
-Plug 'docteurklein/php-getter-setter.vim'
-Plug 'pbogut/phpfolding.vim'
-Plug 'elixir-lang/vim-elixir'
-Plug 'thinca/vim-ref'
-Plug 'kana/vim-operator-user'
-Plug 'tyru/operator-camelize.vim'
-Plug 'chrisbra/csv.vim'
-Plug 'rhysd/vim-grammarous'
-
-if has('nvim')
-  Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-  Plug 'junegunn/fzf.vim'
-  Plug 'Shougo/deoplete.nvim'
-  Plug 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
-endif
-" All of your Plugins must be added before the following line
-call plug#end()            " required
+silent! call plug#begin()
+if exists(':Plug')
+  Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
+  Plug 'jiangmiao/auto-pairs'
+  Plug 'tpope/vim-fugitive'
+  Plug 'tpope/vim-git'
+  Plug 'tpope/vim-commentary'
+  Plug 'tpope/vim-surround'
+  Plug 'tpope/vim-repeat'
+  Plug 'tpope/vim-rails', { 'for': 'ruby' }
+  Plug 'tpope/vim-endwise'
+  Plug 'tpope/vim-unimpaired'
+  Plug 'tpope/vim-obsession'
+  Plug 'dhruvasagar/vim-prosession'
+  Plug 'terryma/vim-expand-region'
+  Plug 'scrooloose/nerdtree', { 'on': ['NERDTreeClose', 'NERDTreeFind'] }
+  Plug 'vim-airline/vim-airline'
+  Plug 'vim-airline/vim-airline-themes'
+  Plug 'edkolev/tmuxline.vim'
+  " Plug 'nanotech/jellybeans.vim'
+  Plug 'altercation/vim-colors-solarized'
+  Plug 'Shougo/unite.vim'
+  " Plug 'ervandew/supertab'
+  Plug 'airblade/vim-gitgutter'
+  Plug 'terryma/vim-multiple-cursors'
+  Plug 'MarcWeber/vim-addon-mw-utils'
+  " Plug 'tomtom/tlib_vim'
+  Plug 'ludovicchabant/vim-gutentags'
+  Plug 'gioele/vim-autoswap'
+  Plug 'ntpeters/vim-better-whitespace'
+  Plug 'honza/vim-snippets'
+  " Plug 'Shougo/vimproc.vim'
+  Plug 'mattn/emmet-vim'
+  Plug 'christoomey/vim-tmux-navigator'
+  Plug 'sirver/ultisnips'
+  Plug 'sheerun/vim-polyglot'
+  Plug 'joonty/vdebug', { 'for': 'php' }
+  Plug 'benekastah/neomake', { 'on': 'Neomake' }
+  Plug 'Chiel92/vim-autoformat'
+  Plug 'alvan/vim-closetag'
+  Plug 'edsono/vim-matchit'
+  Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
+  Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
+  Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
+  Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
+  " Plug 'thinca/vim-ref'
+  Plug 'kana/vim-operator-user'
+  Plug 'tyru/operator-camelize.vim'
+  Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
+  Plug 'rhysd/vim-grammarous'
+  Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
+  Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
+  if has('nvim')
+    Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+    Plug 'junegunn/fzf.vim'
+    Plug 'Shougo/deoplete.nvim'
+    " Plug 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
+  endif " if Plug installed
+  " All of your Plugins must be added before the following line
+endif "
+silent! call plug#end()            " requiredc
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:
 "filetype plugin on
@@ -201,7 +202,6 @@ nnoremap <leader>sv :source $MYVIMRC<CR>
 " open list / quickfix
 nnoremap <leader>ol :lopen<cr>
 nnoremap <leader>oq :copen<cr>
-" nnoremap <leader>s :NERDTreeToggle<cr>
 nnoremap <leader>t :Tags<cr>
 nnoremap <leader>r :call ToggleNERDTree()<cr>
 nnoremap <leader>b :Buffers<cr>
@@ -303,17 +303,16 @@ function! SolarizedDark()
 endfunction
 nnoremap <leader>cd :call SolarizedDark()<cr>
 nnoremap <leader>cl :call SolarizedLight()<cr>
-" let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 set background=dark
-colorscheme solarized
+silent! colorscheme solarized
 " Padawan
 let g:ycm_semantic_triggers = {}
 let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
 " Deoplete
 let g:deoplete#enable_at_startup = 1
-" let g:deoplete#sources = {}
-" let g:deoplete#sources._ = ['buffer']
-" let g:deoplete#sources.php = ['buffer', 'tag', 'member', 'file']
+let g:deoplete#sources = {}
+let g:deoplete#sources._ = ['buffer']
+let g:deoplete#sources.php = ['buffer', 'tag', 'member', 'file']
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
 " make YCM compatible with UltiSnips (using supertab)
