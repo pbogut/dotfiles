@@ -48,6 +48,7 @@ augroup configgroup
   autocmd FileType qf :nnoremap <buffer> q :q
   " start mutt file edit  on first empty line
   autocmd BufRead mutt* execute 'normal gg/\n\n
+  autocmd BufEnter * normal zR
 augroup END
 " line 80 limit
 set colorcolumn=81
@@ -208,6 +209,7 @@ nnoremap <leader>m :History<cr>
 nnoremap <leader>f :Files<cr>
 nnoremap <leader>w :call WriteOrCr()<cr>
 nnoremap <leader>a :Autoformat<cr>
+nnoremap <leader>z :call PHP__Fold()<cr>
 map <leader>_ <Plug>(operator-camelize-toggle)
 " vim is getting ^_ when pressing ^/, so I've mapped both
 nmap <C-_> gcc<down>^
@@ -309,9 +311,11 @@ let g:ycm_semantic_triggers = {}
 let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
 " Deoplete
 let g:deoplete#enable_at_startup = 1
-let g:deoplete#sources = {}
-let g:deoplete#sources._ = ['buffer']
-let g:deoplete#sources.php = ['buffer', 'tag', 'member', 'file']
+let g:deoplete#auto_completion_start_length = 1
+let g:deoplete#enable_debug=1
+" let g:deoplete#sources = {}
+" let g:deoplete#sources._ = ['buffer']
+" let g:deoplete#sources.php = ['buffer', 'tag', 'member', 'file']
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
 " make YCM compatible with UltiSnips (using supertab)
@@ -456,6 +460,19 @@ function! Wipeout(bang)
   echon "Deleted " . l:tally . " buffers"
 endfun
 
+" This allows for change paste motion cp{motion}
+nmap <silent> cp :set opfunc=ChangePaste<CR>g@
+function! ChangePaste(type, ...)
+  if a:0  " Invoked from Visual mode, use '< and '> marks.
+      silent exe "normal! `<" . a:type . "`>\"_c" . @"
+  elseif a:type == 'line'
+      silent exe "normal! '[V']\"_c" . @"
+  elseif a:type == 'block'
+      silent exe "normal! `[\<C-V>`]\"_c" . @"
+  else
+      silent exe "normal! `[v`]\"_c" . @"
+  endif
+endfunction
 " fold adjust
 set fillchars="vert:|,fold: "
 " remove underline
@@ -471,6 +488,15 @@ function! NeatFoldText()
   let foldtextend = lines_count_text . repeat(foldchar, 8)
   let foldtextlength = strlen(substitute(foldtextstart . foldtextend, '.', 'x', 'g')) + &foldcolumn
   return foldtextstart . repeat(foldchar, winwidth(0)-foldtextlength) . foldtextend
+endfunction
+function! PHP__Fold()
+  if (get(b:, 'PHP__Flod__INITIATED', 0))
+    silent! normal za
+  else
+    silent! execute 'EnableFastPHPFolds'
+    silent! normal zRza
+    let b:PHP__Flod__INITIATED = 1
+  endif
 endfunction
 set foldtext=NeatFoldText()
 let g:DisableAutoPHPFolding = 1
