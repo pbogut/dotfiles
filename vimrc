@@ -37,17 +37,21 @@ set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
 set hidden " No bang needed to open new file
+let mapleader = "\<space>" " test if that will work better
 augroup configgroup
   autocmd!
   autocmd FileType html :setlocal tabstop=4 shiftwidth=4
   autocmd FileType php :setlocal tabstop=4 shiftwidth=4
+        \| noremap <leader>ta :AltTestPhp<cr>
+        \| noremap <leader>tA :AltTestPhp!<cr> " create separate function to handle file type
   " autocmd FileType javascript :setlocal tabstop=4 shiftwidth=4
   autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
   autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
   autocmd FileType qf :nnoremap <buffer> o <enter>
   autocmd FileType qf :nnoremap <buffer> q :q
+  autocmd FileType blade :let b:commentary_format='{{-- %s --}}'
   " start mutt file edit  on first empty line
-  autocmd BufRead mutt* execute 'normal gg/\n\n
+  autocmd BufRead mutt* execute 'normal gg/\n\nj'
   autocmd BufEnter * normal zR
 augroup END
 " line 80 limit
@@ -82,7 +86,6 @@ if exists(':Plug')
   Plug 'edkolev/tmuxline.vim'
   " Plug 'nanotech/jellybeans.vim'
   Plug 'altercation/vim-colors-solarized'
-  Plug 'Shougo/unite.vim'
   " Plug 'ervandew/supertab'
   Plug 'airblade/vim-gitgutter'
   Plug 'terryma/vim-multiple-cursors'
@@ -105,17 +108,21 @@ if exists(':Plug')
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
   Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
   Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
-  Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
+  Plug 'janko-m/vim-test'
+  Plug 'benmills/vimux'
+  " Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
   " Plug 'thinca/vim-ref'
   Plug 'kana/vim-operator-user'
   Plug 'tyru/operator-camelize.vim'
   Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
   Plug 'rhysd/vim-grammarous'
-  Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
+  " Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
+  Plug 'ctrlpvim/ctrlp.vim'
   if has('nvim')
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
+    Plug 'pbogut/fzf-mru.vim'
     Plug 'Shougo/deoplete.nvim'
     " Plug 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
   endif " if Plug installed
@@ -191,7 +198,6 @@ function! WriteOrCr()
     echo 'Nothing to save...'
   endif
 endfunction
-let mapleader = "\<space>" " test if that will work better
 " macros
 nnoremap <leader>em :tabnew ~/.vim/macros.vim<cr>
 nnoremap <leader>sm :source ~/.vim/macros.vim<cr>
@@ -202,10 +208,9 @@ nnoremap <leader>sv :source $MYVIMRC<CR>
 " open list / quickfix
 nnoremap <leader>ol :lopen<cr>
 nnoremap <leader>oq :copen<cr>
-nnoremap <leader>t :Tags<cr>
 nnoremap <leader>r :call ToggleNERDTree()<cr>
 nnoremap <leader>b :Buffers<cr>
-nnoremap <leader>m :History<cr>
+nnoremap <leader>m :FZFMru<cr>
 nnoremap <leader>f :Files<cr>
 nnoremap <leader>w :call WriteOrCr()<cr>
 nnoremap <leader>a :Autoformat<cr>
@@ -283,7 +288,8 @@ iabbrev </ </<C-X><C-O><C-n>
 map <F8> :BLReloadPage<cr>
 map <F7> :BLReloadCSS<cr>
 " fzf
-nnoremap <leader>gf :call fzf#vim#files('',{'options': '-q '.shellescape(expand('<cfile>')), 'down': '~20%'})<cr>
+let g:fzf_filemru_bufwrite = 1
+nnoremap <leader>gf :call fzf#vim#files('', extend({'options': '-q '.shellescape(expand('<cfile>'))}, g:fzf_layout))<cr>
 nnoremap <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
 " air-line
 let g:airline#extensions#tabline#enabled = 1
@@ -407,7 +413,32 @@ set dir=~/.vim/swapfiles//
 set backupdir=~/.vim/backupfiles//
 set nowritebackup
 set nobackup " well, thats the only way to prevent guard from running tests twice ;/
-
+" vim-test
+nmap <silent> <leader>tn :TestNearest<CR>
+nmap <silent> <leader>tf :TestFile<CR>
+nmap <silent> <leader>ts :TestSuite<CR>
+nmap <silent> <leader>tl :TestLast<CR>
+nmap <silent> <leader>gT :TestVisit<CR>
+nmap <silent> <leader>tv :TestVisit<CR>
+nmap <silent> <leader>ti :call InspectTest()<CR>
+nmap <silent> <leader>tx :VimuxCloseRunner<CR>
+nmap <silent> <leader>tq :VimuxCloseRunner<CR>
+function! InspectTestStrategy(cmd)
+  let echo  = 'echo -e ' . shellescape(a:cmd)
+  let cmd = join(['clear', l:echo, a:cmd], '; ')
+  call VimuxCloseRunner()
+  call VimuxRunCommand(cmd)
+  call VimuxZoomRunner()
+  call VimuxRunCommand('tmux copy-mode')
+  call VimuxSendText('exit')
+endfunction
+let g:test#custom_strategies = {'inspect': function('InspectTestStrategy')}
+let g:test#strategy = 'vimux'
+function! InspectTest()
+  call VimuxZoomRunner()
+  call VimuxSendText('exit')
+  call VimuxInspectRunner()
+endfunction
 " new backup file every minute, coz I can
 " its recreating file path and then save copy there with current time
 " dont know how fast it will grow...
@@ -459,6 +490,29 @@ function! Wipeout(bang)
   endfor
   echon "Deleted " . l:tally . " buffers"
 endfun
+" switch between class and test file
+function! AltTestPhp(bang)
+  let s:fullpath = expand('%:p')
+  if !(s:fullpath =~ ".*\.php$")
+    echo("Its not a php file")
+    return
+  endif
+  if s:fullpath =~ ".*Test\.php$"
+    let l:alternate = substitute(s:fullpath, '\(.*\)Test\.php$', '\1\.php', '')
+    let l:alternate = substitute(l:alternate, '/tests/', '/app/', '')
+  else
+    let l:alternate = substitute(s:fullpath, '\(.*\)\.php$', '\1Test\.php', '')
+    let l:alternate = substitute(l:alternate, '/app/', '/tests/', '')
+  endif
+
+  if (!filereadable(l:alternate) && !a:bang)
+    echo("Alternate file not found. Use bang to force.")
+  else
+    echo (l:alternate)
+    silent execute('edit '.l:alternate)
+  endif
+endfunction
+command! -bang AltTestPhp :call AltTestPhp(<bang>0)
 
 " This allows for change paste motion cp{motion}
 nmap <silent> cp :set opfunc=ChangePaste<CR>g@

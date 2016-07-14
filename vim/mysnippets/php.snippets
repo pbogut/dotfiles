@@ -1,0 +1,44 @@
+priority -50
+
+snippet ans "namespace declaration" b
+namespace ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[a-zA-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '\\')
+	# snip.rv = snip.rv.title()
+	snip.rv = snip.rv[0].upper() + snip.rv[1:]
+`};
+endsnippet
+
+snippet aclass "Class declaration template" b
+<?php
+
+namespace ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[a-zA-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '\\')
+	snip.rv = snip.rv[0].upper() + snip.rv[1:]
+`};
+
+/**
+ * Class ${1:`!p snip.rv=snip.basename`}
+ * @author ${2:`!v g:snips_author`}
+ */
+class $1
+{
+}
+endsnippet
+
+snippet tclass "Test class declaration"
+<?php
+
+/**
+ * TestClass ${1:`!p snip.rv=snip.basename`}
+ * @author ${2:`!v g:snips_author`}
+ */
+class $1 extends TestCase
+{
+}
+endsnippet

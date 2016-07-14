@@ -149,6 +149,11 @@ alias tunelssh_de="sshuttle --dns -vr smeagol@smeagol.pl:59184 0/0"
 
 alias yaourt-ignore-pgp="yaourt --m-arg \"--skipchecksums --skippgpcheck\""
 
+# anamnesis clipboard fuzy lookup
+alias clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_content \
+            order by docid desc;\" | sqlite3 ~/.local/share/anamnesis/database \
+            | fzf | sed 's/¬n¬/\n/g' | perl -p -e 'chomp if eof' \
+            | xclip -in -selection clipboard"
 # shortcuts
 alias e="exit"
 alias m="ncmpcpp"
