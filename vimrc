@@ -47,7 +47,7 @@ augroup configgroup
   autocmd FileType qf :nnoremap <buffer> o <enter>
   autocmd FileType qf :nnoremap <buffer> q :q
   " start mutt file edit  on first empty line
-  autocmd BufRead mutt* execute 'normal gg/\n\n
+  autocmd BufRead mutt* execute 'normal gg/\n\nj'
   autocmd BufEnter * normal zR
 augroup END
 " line 80 limit
@@ -81,7 +81,6 @@ if exists(':Plug')
   Plug 'vim-airline/vim-airline-themes'
   Plug 'edkolev/tmuxline.vim'
   " Plug 'nanotech/jellybeans.vim'
-  Plug 'altercation/vim-colors-solarized'
   Plug 'Shougo/unite.vim'
   " Plug 'ervandew/supertab'
   Plug 'airblade/vim-gitgutter'
@@ -113,11 +112,16 @@ if exists(':Plug')
   Plug 'rhysd/vim-grammarous'
   Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
+  Plug 'kien/ctrlp.vim'
   if has('nvim')
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
+    Plug 'pbogut/fzf-mru.vim'
     Plug 'Shougo/deoplete.nvim'
     " Plug 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
+    Plug 'frankier/neovim-colors-solarized-truecolor-only'
+  else
+    Plug 'altercation/vim-colors-solarized'
   endif " if Plug installed
   " All of your Plugins must be added before the following line
 endif "
@@ -304,6 +308,7 @@ function! SolarizedDark()
 endfunction
 nnoremap <leader>cd :call SolarizedDark()<cr>
 nnoremap <leader>cl :call SolarizedLight()<cr>
+let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 set background=dark
 silent! colorscheme solarized
 " Padawan

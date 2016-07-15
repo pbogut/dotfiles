@@ -134,7 +134,7 @@ if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
     zle -N zle-line-finish
 fi
 
-alias ls="ls --color"
+alias ls="ls --color=auto"
 alias fix_terminal="stty sane"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
@@ -190,7 +190,7 @@ export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="$PATH:$HOME/.composer/vendor/bin"
 
 # make colors compatibile with tmux
-export TERM=screen-256color
+export TERM=xterm-256color
 if [[ ! -z "$TMUX"  ]]; then
   export ZLE_RPROMPT_INDENT=0
 fi
@@ -208,3 +208,5 @@ fi
 # its slow as hell and I'm not using it too offen, so lazy loading should be fine
 export NVM_DIR="$HOME/.nvm"
 lazy_source nvm "$NVM_DIR/nvm.sh"
+alias myip=wget http://ipinfo.io/ip -qO -
+alias myip="wget http://ipinfo.io/ip -qO -"
