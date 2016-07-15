@@ -51,8 +51,7 @@ augroup configgroup
   autocmd FileType qf :nnoremap <buffer> q :q
   autocmd FileType blade :let b:commentary_format='{{-- %s --}}'
   " start mutt file edit  on first empty line
-  autocmd BufRead mutt* execute 'normal gg/\n\n
-j'
+  autocmd BufRead mutt* execute 'normal gg/\n\nj'
         \| :setlocal spell spelllang=en_gb
   autocmd BufEnter * normal zR
 augroup END
