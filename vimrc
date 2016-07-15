@@ -52,6 +52,7 @@ augroup configgroup
   autocmd FileType blade :let b:commentary_format='{{-- %s --}}'
   " start mutt file edit  on first empty line
   autocmd BufRead mutt* execute 'normal gg/\n\nj'
+        \| :setlocal spell spelllang=en_gb
   autocmd BufEnter * normal zR
 augroup END
 " line 80 limit
@@ -371,7 +372,7 @@ let g:gutentags_exclude = ['*node_modules*', '*bower_components*', 'tmp*', 'temp
 let g:vim_tags_use_language_field = 1
 let g:vim_tags_use_vim_dispatch = 1
 " fzf
-let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
+"let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
 let g:fzf_layout = { 'down': '~20%' }
 " ctrlp
 let g:ctrlp_extensions = ['tag', 'mixed']
@@ -454,7 +455,15 @@ function! ParanoicBackup()
   silent execute "!mkdir -p " . filedir
   silent execute "w! " . filedir . '/' . filename . timestamp
 endfunction
-
+command! -bang W :call CreateFoldersAndWrite(<bang>0)
+function! CreateFoldersAndWrite(bang)
+  if (a:bang)
+    silent execute('!mkdir -p %:h')
+    execute(':w')
+  else
+    echo('You need to use W!')
+  endif
+endfunction
 " disable double save (cousing file watchers issues)
 " modify selected text using combining diacritics
 command! -range -nargs=0 Overline        call s:CombineSelection(<line1>, <line2>, '0305')
@@ -516,6 +525,7 @@ command! -bang AltTestPhp :call AltTestPhp(<bang>0)
 
 " This allows for change paste motion cp{motion}
 nmap <silent> cp :set opfunc=ChangePaste<CR>g@
+nmap <silent> cpp :normal! V"_dP<cr>
 function! ChangePaste(type, ...)
   if a:0  " Invoked from Visual mode, use '< and '> marks.
       silent exe "normal! `<" . a:type . "`>\"_c" . @"
