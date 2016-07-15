@@ -92,6 +92,7 @@ set index_format="%4C %Z %?GT?%GT& ?%?GA?%GA& ? %<[y?%<[m?%<[d?%[ %H:%M]&%[%a %d
 # notmuch bindings
 macro pager,index \\\\ "<vfolder-from-query>"              # looks up a hand made query
 macro index A "<modify-labels-then-hide>+archive\n"        # tag as Archived
+macro pager A "<modify-labels-then-hide>+archive\nq"       # tag as Archived
 macro index T "<modify-labels>+todo\n"
 #macro index I "<modify-labels>-inbox -unread\\n"                 # removed from inbox
 #macro index S "<modify-labels-then-hide>-inbox -unread +junk\\n" # tag as Junk mail
