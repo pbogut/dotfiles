@@ -37,7 +37,7 @@ set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
 set hidden " No bang needed to open new file
-let mapleader = "\<space>" " test if that will work better
+let mapleader = "\<space>" " life changer
 augroup configgroup
   autocmd!
   autocmd FileType html :setlocal tabstop=4 shiftwidth=4
@@ -51,7 +51,8 @@ augroup configgroup
   autocmd FileType qf :nnoremap <buffer> q :q
   autocmd FileType blade :let b:commentary_format='{{-- %s --}}'
   " start mutt file edit  on first empty line
-  autocmd BufRead mutt* execute 'normal gg/\n\nj'
+  autocmd BufRead mutt* execute 'normal gg/\n\n
+j'
         \| :setlocal spell spelllang=en_gb
   autocmd BufEnter * normal zR
 augroup END
@@ -85,9 +86,6 @@ if exists(':Plug')
   Plug 'vim-airline/vim-airline'
   Plug 'vim-airline/vim-airline-themes'
   Plug 'edkolev/tmuxline.vim'
-  " Plug 'nanotech/jellybeans.vim'
-  Plug 'altercation/vim-colors-solarized'
-  " Plug 'ervandew/supertab'
   Plug 'airblade/vim-gitgutter'
   Plug 'terryma/vim-multiple-cursors'
   Plug 'MarcWeber/vim-addon-mw-utils'
@@ -112,12 +110,11 @@ if exists(':Plug')
   Plug 'janko-m/vim-test'
   Plug 'benmills/vimux'
   " Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
-  " Plug 'thinca/vim-ref'
   Plug 'kana/vim-operator-user'
   Plug 'tyru/operator-camelize.vim'
   Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
   Plug 'rhysd/vim-grammarous'
-  " Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
+  Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   Plug 'ctrlpvim/ctrlp.vim'
   if has('nvim')
@@ -125,7 +122,9 @@ if exists(':Plug')
     Plug 'junegunn/fzf.vim'
     Plug 'pbogut/fzf-mru.vim'
     Plug 'Shougo/deoplete.nvim'
-    " Plug 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
+    Plug 'frankier/neovim-colors-solarized-truecolor-only'
+  else
+    Plug 'altercation/vim-colors-solarized'
   endif " if Plug installed
   " All of your Plugins must be added before the following line
 endif "
@@ -289,7 +288,6 @@ iabbrev </ </<C-X><C-O><C-n>
 map <F8> :BLReloadPage<cr>
 map <F7> :BLReloadCSS<cr>
 " fzf
-let g:fzf_filemru_bufwrite = 1
 nnoremap <leader>gf :call fzf#vim#files('', extend({'options': '-q '.shellescape(expand('<cfile>'))}, g:fzf_layout))<cr>
 nnoremap <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
 " air-line
@@ -311,6 +309,7 @@ function! SolarizedDark()
 endfunction
 nnoremap <leader>cd :call SolarizedDark()<cr>
 nnoremap <leader>cl :call SolarizedLight()<cr>
+let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 set background=dark
 silent! colorscheme solarized
 " Padawan
