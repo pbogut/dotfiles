@@ -372,7 +372,11 @@ let g:gutentags_exclude = ['*node_modules*', '*bower_components*', 'tmp*', 'temp
 let g:vim_tags_use_language_field = 1
 let g:vim_tags_use_vim_dispatch = 1
 " fzf
-"let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
+function! FzfFilesAg()
+  let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
+  execute('Files')
+  let $FZF_DEFAULT_COMMAND = ''
+endfunction
 let g:fzf_layout = { 'down': '~20%' }
 " ctrlp
 let g:ctrlp_extensions = ['tag', 'mixed']
@@ -419,11 +423,12 @@ nmap <silent> <leader>tn :TestNearest<CR>
 nmap <silent> <leader>tf :TestFile<CR>
 nmap <silent> <leader>ts :TestSuite<CR>
 nmap <silent> <leader>tl :TestLast<CR>
-nmap <silent> <leader>gT :TestVisit<CR>
 nmap <silent> <leader>tv :TestVisit<CR>
+" to close and go back to Vim perss <c-k> or <c-j>
 nmap <silent> <leader>ti :call InspectTest()<CR>
 nmap <silent> <leader>tx :VimuxCloseRunner<CR>
 nmap <silent> <leader>tq :VimuxCloseRunner<CR>
+let g:VimuxHeight = "7"
 function! InspectTestStrategy(cmd)
   let echo  = 'echo -e ' . shellescape(a:cmd)
   let cmd = join(['clear', l:echo, a:cmd], '; ')
@@ -437,7 +442,6 @@ let g:test#custom_strategies = {'inspect': function('InspectTestStrategy')}
 let g:test#strategy = 'vimux'
 function! InspectTest()
   call VimuxZoomRunner()
-  call VimuxSendText('exit')
   call VimuxInspectRunner()
 endfunction
 " new backup file every minute, coz I can
