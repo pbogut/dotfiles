@@ -108,12 +108,12 @@ if exists(':Plug')
   Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
   Plug 'janko-m/vim-test'
   Plug 'benmills/vimux'
-  " Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
+  Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
+  Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
   Plug 'kana/vim-operator-user'
   Plug 'tyru/operator-camelize.vim'
   Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
   Plug 'rhysd/vim-grammarous'
-  " Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   Plug 'ctrlpvim/ctrlp.vim'
   if has('nvim')
@@ -121,7 +121,6 @@ if exists(':Plug')
     Plug 'junegunn/fzf.vim'
     Plug 'pbogut/fzf-mru.vim'
     Plug 'Shougo/deoplete.nvim'
-    " Plug 'awetzel/elixir.nvim', { 'do': 'yes \| ./install.sh' }
     Plug 'frankier/neovim-colors-solarized-truecolor-only'
   else
     Plug 'altercation/vim-colors-solarized'
