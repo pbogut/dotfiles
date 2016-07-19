@@ -215,7 +215,8 @@ nnoremap <leader>oq :copen<cr>
 nnoremap <leader>r :call ToggleNERDTree()<cr>
 nnoremap <leader>b :Buffers<cr>
 nnoremap <leader>m :FZFMru<cr>
-nnoremap <leader>f :Files<cr>
+nnoremap <leader>f :call FzfFilesAg()<cr>
+nnoremap <leader>F :Files<cr>
 nnoremap <leader>w :call WriteOrCr()<cr>
 nnoremap <leader>a :Autoformat<cr>
 nnoremap <leader>z :call PHP__Fold()<cr>
