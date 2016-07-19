@@ -109,12 +109,12 @@ if exists(':Plug')
   Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
   Plug 'janko-m/vim-test'
   Plug 'benmills/vimux'
-  " Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
+  Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
+  Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
   Plug 'kana/vim-operator-user'
   Plug 'tyru/operator-camelize.vim'
   Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
   Plug 'rhysd/vim-grammarous'
-  Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   Plug 'ctrlpvim/ctrlp.vim'
   if has('nvim')
