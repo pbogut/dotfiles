@@ -122,10 +122,14 @@ if exists(':Plug')
     Plug 'junegunn/fzf.vim'
     Plug 'pbogut/fzf-mru.vim'
     Plug 'Shougo/deoplete.nvim'
-    Plug 'frankier/neovim-colors-solarized-truecolor-only'
   else
-    Plug 'altercation/vim-colors-solarized'
   endif " if Plug installed
+  if (!has('nvim') || $STY != '')
+    Plug 'altercation/vim-colors-solarized'
+  else
+    let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+    Plug 'frankier/neovim-colors-solarized-truecolor-only'
+  endif
   " All of your Plugins must be added before the following line
 endif "
 silent! call plug#end()            " requiredc
@@ -309,7 +313,6 @@ function! SolarizedDark()
 endfunction
 nnoremap <leader>cd :call SolarizedDark()<cr>
 nnoremap <leader>cl :call SolarizedLight()<cr>
-let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 set background=dark
 silent! colorscheme solarized
 " Padawan
