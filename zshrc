@@ -155,6 +155,7 @@ alias clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_content \
             | fzf | sed 's/¬n¬/\n/g' | perl -p -e 'chomp if eof' \
             | xclip -in -selection clipboard"
 # shortcuts
+alias sc="bash -c \"\`cat ~/.commands | fzf\`\""
 alias e="exit"
 alias m="ncmpcpp"
 # exit shell after closing ncmpcpp
@@ -173,6 +174,9 @@ if [ -f ~/.profile ]; then
 fi
 if [ -f ~/.localsh ]; then
   source ~/.localsh
+fi
+if [ -f ~/.fzf.zsh ]; then
+  source ~/.fzf.zsh
 fi
 
 export PATH="$PATH:$HOME/bin:$HOME/.bin:$HOME/.scripts"
@@ -213,5 +217,4 @@ fi
 # its slow as hell and I'm not using it too offen, so lazy loading should be fine
 export NVM_DIR="$HOME/.nvm"
 lazy_source nvm "$NVM_DIR/nvm.sh"
-alias myip=wget http://ipinfo.io/ip -qO -
 alias myip="wget http://ipinfo.io/ip -qO -"
