@@ -33,6 +33,7 @@ read -d '' files <<"EOF"
     config/roxterm.sourceforge.net
     config/autostart/autostart.desktop
     config/autostart/rescuetime.desktop
+    config/i3/config
     vim/bundle/Vundle.vim
     vim/autoload/plug.vim
     composer/composer.json
