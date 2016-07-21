@@ -80,8 +80,10 @@ bindsym $mod+Shift+F fullscreen toggle global
 
 # change container layout (stacked, tabbed, toggle split)
 bindsym $mod+o layout stacking
-bindsym $mod+w layout tabbed
-bindsym $modlp layout default
+# tabbed layout
+bindsym $mod+t layout tabbed
+# normal laoyout
+bindsym $mod+n layout default
 bindsym $mod+e layout toggle split
 
 # toggle tiling / floating
@@ -156,10 +158,19 @@ bindsym $mod+r mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
-        status_command i3status
+#        status_command i3status
+        status_command bash ~/.scripts/i3status.sh
+        position       top
 }
+#client.focused  #4c7899  #F6C050  #d3d3d3
+new_window 1pixel
 
 #fake-outputs 3288x1080+0+0
+#
+bindsym $mod+i exec --no-startup-id "i3lock -i ~/Pictures/lockscreen.png"
+bindsym $mod+Tab exec --no-startup-id "i3-focus-last.py --switch"
 bindsym $mod+m move workspace to output left
-exec --no-startup-id ~/.scripts/i3-startup.sh
+
+exec --no-startup-id "setxkbmap -variant colemak"
+exec --no-startup-id "~/.scripts/i3-startup.sh"
 

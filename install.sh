@@ -49,6 +49,7 @@ read -d '' directories <<"EOF"
     .vim/bundle
     .vim/autoload
     .config/nvim
+    .config/i3
     .config/autostart
     .weechat
     .composer
