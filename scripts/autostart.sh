@@ -23,3 +23,10 @@ else
     mopidy &
     echo $! > $mopidy_pid
 fi
+i3_focus_last_pid=/tmp/i3_focus_last.pid
+if [ -f "$i3_focus_last_pid" ] && kill -0 `cat $i3_focus_last_pid` 2>/dev/null; then
+    echo 'ekhm....' > /dev/null
+else
+    i3-focus-last.py &
+    echo $! > $i3_focus_last_pid
+fi

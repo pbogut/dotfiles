@@ -164,8 +164,11 @@ bar {
 }
 #client.focused  #4c7899  #F6C050  #d3d3d3
 new_window 1pixel
+
 bindsym $mod+i exec --no-startup-id "i3lock -i ~/Pictures/lockscreen.png"
+bindsym $mod+Tab exec --no-startup-id "i3-focus-last.py --switch"
 bindsym $mod+m move workspace to output left
+
 exec --no-startup-id "setxkbmap -variant colemak"
 exec --no-startup-id "~/.scripts/i3-startup.sh"
 
