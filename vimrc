@@ -70,6 +70,8 @@ endif
 silent! call plug#begin()
 if exists(':Plug')
   Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
+  Plug 'xolox/vim-misc'
+  Plug 'xolox/vim-notes'
   Plug 'jiangmiao/auto-pairs'
   Plug 'tpope/vim-fugitive'
   Plug 'tpope/vim-git'
@@ -80,6 +82,7 @@ if exists(':Plug')
   Plug 'tpope/vim-endwise'
   Plug 'tpope/vim-unimpaired'
   Plug 'tpope/vim-obsession'
+  Plug 'pbogut/vim-dispatch' " panel size patch
   Plug 'dhruvasagar/vim-prosession'
   Plug 'terryma/vim-expand-region'
   Plug 'scrooloose/nerdtree', { 'on': ['NERDTreeClose', 'NERDTreeFind'] }
@@ -116,6 +119,7 @@ if exists(':Plug')
   Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
   Plug 'rhysd/vim-grammarous'
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
+  Plug 'cosminadrianpopescu/vim-sql-workbench'
   Plug 'ctrlpvim/ctrlp.vim'
   if has('nvim')
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
