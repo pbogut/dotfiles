@@ -159,6 +159,7 @@ bar {
         status_command i3status
 }
 
+#fake-outputs 3288x1080+0+0
 bindsym $mod+m move workspace to output left
 exec --no-startup-id ~/.scripts/i3-startup.sh
 
