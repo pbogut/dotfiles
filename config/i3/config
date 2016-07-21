@@ -130,9 +130,8 @@ bindsym $mod+Shift+R restart
 bindsym $mod+Shift+E exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
 # resize window (you can also use the mouse for that)
-mode "resize" {
-        # These bindings trigger as soon as you enter the resize mode
-
+set $mode_resize Resize (h) shrink width, (l) grow width, (j) shrink height, (k) grow height, (Esc) done
+mode "$mode_resize" {
         # Pressing left will shrink the window’s width.
         # Pressing right will grow the window’s width.
         # Pressing up will shrink the window’s height.
@@ -152,11 +151,14 @@ mode "resize" {
         bindsym Return mode "default"
         bindsym Escape mode "default"
 }
-bindsym $mod+r mode "resize"
+bindsym $mod+r mode "$mode_resize"
 
+# screen lock with delay after, so suspend / hibernate with locked screen
 set $Locker i3lock -i ~/Pictures/lockscreen.png && sleep 1
 set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown, (Esc) cancel
 mode "$mode_system" {
+
+    # lock screen, then go back to default mode
     bindsym l exec --no-startup-id $Locker, mode "default"
     bindsym e exec --no-startup-id i3-msg exit, mode "default"
     bindsym s exec --no-startup-id $Locker && systemctl suspend, mode "default"
