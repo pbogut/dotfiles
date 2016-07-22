@@ -230,7 +230,7 @@ nmap <C-_> gcc<down>^
 nmap <C-/> gcc<down>^
 vmap <C-_> gc
 vmap <C-/> gc
-nmap <bs> <c-w>h
+nmap <bs> :TmuxNavigateLeft<cr>
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>x :Bdelete <bar>q<cr>
