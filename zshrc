@@ -80,7 +80,7 @@ zle-keymap-select() {
   zle reset-prompt
 }
 zle-line-init() {
-  VIMODE_COLOR="003" && reload_ps1
+  VIMODE_COLOR="003" && vim_ps1
   typeset -g __prompt_status="$?"
 }
 
