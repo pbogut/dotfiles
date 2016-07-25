@@ -35,6 +35,7 @@ read -d '' files <<"EOF"
     config/autostart/rescuetime.desktop
     config/i3/config
     config/i3/i3status.conf
+    config/ranger/rc.conf
     vim/bundle/Vundle.vim
     vim/autoload/plug.vim
     composer/composer.json
@@ -51,6 +52,7 @@ read -d '' directories <<"EOF"
     .vim/autoload
     .config/nvim
     .config/i3
+    .config/ranger
     .config/autostart
     .weechat
     .composer
