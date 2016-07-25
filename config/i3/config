@@ -78,7 +78,7 @@ bindsym $mod+v split h
 bindsym $mod+s split v
 
 # enter fullscreen mode for the focused container
-bindsym $mod+f fullscreen toggle
+bindsym $mod+z fullscreen toggle
 bindsym $mod+Shift+F fullscreen toggle global
 
 # change container layout (stacked, tabbed, toggle split)
@@ -210,13 +210,14 @@ bindsym $mod+p exec --no-startup-id ~/.scripts/i3-switch-workspace.py prev same_
 bindsym $mod+Shift+N exec --no-startup-id ~/.scripts/i3-switch-workspace.py next
 bindsym $mod+Shift+P exec --no-startup-id ~/.scripts/i3-switch-workspace.py prev
 
+bindsym $mod+f exec --no-startup-id ~/.scripts/i3-container-commander.py --group-by none
+
 bindsym $mod+c exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py
 bindsym $mod+Shift+C exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py move
 bindsym $mod+Shift+X exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py send
 
 bindsym $mod+i exec --no-startup-id $Locker
 bindsym $mod+Tab exec --no-startup-id "~/.scripts/i3-focus-last.py --switch"
-bindsym $mod+z exec --no-startup-id "feh --randomize --bg-fill  ~/Pictures/wallpaper"
 
 # move workspace to another monitor
 bindsym $mod+m move workspace to output left; $update_status
