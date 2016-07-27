@@ -36,6 +36,7 @@ read -d '' files <<"EOF"
     config/i3/config
     config/i3/i3status.conf
     config/ranger/rc.conf
+    config/ncmpcpp/config
     vim/bundle/Vundle.vim
     vim/autoload/plug.vim
     composer/composer.json
@@ -54,6 +55,7 @@ read -d '' directories <<"EOF"
     .config/i3
     .config/ranger
     .config/autostart
+    .config/ncmpcpp
     .weechat
     .composer
     .mutt
