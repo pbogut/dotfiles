@@ -194,7 +194,8 @@ bar {
         # status_command i3status --config ~/.config/i3/i3status.conf
         # status_command i3status --config ~/.config/i3/i3status.conf
         status_command bash ~/.scripts/i3-status.sh
-        position       top
+        position top
+        tray_output primary
 }
 
 #client.focused  #4c7899  #F6C050  #d3d3d3
