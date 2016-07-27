@@ -30,3 +30,21 @@ else
     i3-focus-last.py &
     echo $! > $i3_focus_last_pid
 fi
+
+rescue_time_pid=/tmp/rescue_time.pid
+if [ -f "$rescue_time_pid" ] && kill -0 `cat $rescue_time_pid` 2>/dev/null; then
+    echo 'ekhm....' > /dev/null
+else
+    rescuetime &
+    echo $! > $rescue_time_pid
+fi
+# sepcific for the computer
+if [ "$host_name" == "darkbox" ]; then # pc at work
+    dav_mail_pid=/tmp/dav_mail.pid
+    if [ -f "$dav_mail_pid" ] && kill -0 `cat $dav_mail_pid` 2>/dev/null; then
+        echo 'ekhm....' > /dev/null
+    else
+        davmail &
+        echo $! > $dav_mail_pid
+    fi
+fi
