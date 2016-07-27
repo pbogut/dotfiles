@@ -18,6 +18,8 @@
     ap = add -p
     rmc = rm --cached
     cob = checkout -b
+    #Create branch
+    cb = checkout -b
     #Gary's aliases
     st = status
     ci = commit --verbose
