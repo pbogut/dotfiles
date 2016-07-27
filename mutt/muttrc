@@ -33,8 +33,8 @@ bind index,pager \CO sidebar-open
 # bind index,pager \CV sidebar-toggle-virtual
 
 # open attachments with xdg-open
-macro attach \CO '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>xdg-open /tmp/.mutt-tmp/* 2>&1 > /dev/null<enter>'
-macro attach \CI '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/tmp-file.html<enter><shell-escape>xdg-open /tmp/.mutt-tmp/* 2>&1 > /dev/null<enter>'
+macro attach \CO '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>xdg-open /tmp/.mutt-tmp/* > /dev/null 2>&1 &<enter>'
+macro attach \CI '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/tmp-file.html<enter><shell-escape>xdg-open /tmp/.mutt-tmp/* > /dev/null 2>&1 &<enter>'
 
 # status format with current account info
 set status_format="-%r-`get-config.sh email-default-from`: %f [Msgs:%?M?%M/?%m%?n? New:%n?%?o? Old:%o?%?d? Del:%d?%?F? Flag:%F?%?t? Tag:%t?%?p? Post:%p?%?b? Inc:%b?%?l? %l?]---(%s/%S)-%>-(%P)---"
