@@ -135,8 +135,12 @@ if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
 fi
 
 alias ls="ls --color=auto"
+alias pacman="pacman --color=auto"
 alias fix_terminal="stty sane"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
+
+alias mutt="LC_ALL=en_GB.utf8 screen -U -D -RR mutt mutt"
+alias ncmpcpp="LC_ALL=en_GB.utf8 screen -U -D -RR ncmpcpp ncmpcpp"
 
 alias php_debug_on="export XDEBUG_CONFIG=\"idekey=PHPSTORM\""
 alias php_debug_off="export XDEBUG_CONFIG="
@@ -153,6 +157,10 @@ alias yaourt-ignore-pgp="yaourt --m-arg \"--skipchecksums --skippgpcheck\""
 alias clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_content \
             order by docid desc;\" | sqlite3 ~/.local/share/anamnesis/database \
             | fzf | sed 's/¬n¬/\n/g' | perl -p -e 'chomp if eof' \
+            | xclip -in -selection clipboard"
+alias dmenu_clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_content \
+            order by docid desc limit 50;\" | sqlite3 ~/.local/share/anamnesis/database \
+            | dmenu -l 10 | sed 's/¬n¬/\n/g' | perl -p -e 'chomp if eof' \
             | xclip -in -selection clipboard"
 # shortcuts
 alias sc="bash -c \"\`cat ~/.commands | fzf\`\""
