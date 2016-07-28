@@ -565,6 +565,17 @@ function! NeatFoldText()
   let foldtextlength = strlen(substitute(foldtextstart . foldtextend, '.', 'x', 'g')) + &foldcolumn
   return foldtextstart . repeat(foldchar, winwidth(0)-foldtextlength) . foldtextend
 endfunction
+func! I3Focus(comando,vim_comando)
+  let oldw = winnr()
+  silent exe 'wincmd ' . a:vim_comando
+  let neww = winnr()
+  if oldw == neww
+    silent exe '!i3-msg -q focus ' . a:comando
+    if !has("gui_running")
+        redraw!
+    endif
+  endif
+endfunction
 function! PHP__Fold()
   if (get(b:, 'PHP__Flod__INITIATED', 0))
     silent! normal za

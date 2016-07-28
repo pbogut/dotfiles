@@ -30,7 +30,7 @@ font pango:monospace 8
 floating_modifier $mod
 
 # Update i3status on i3bar
-set $update_status exec --no-startup-id killall -USR1 i3status
+set $update_title exec --no-startup-id pkill -RTMIN+1 i3block
 
 # start a terminal
 bindsym $mod+Return exec roxterm
@@ -48,16 +48,16 @@ bindsym $mod+Shift+colon exec fehlstarts --one-way
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 
 # change focus
-bindsym $mod+h focus left; $update_status
-bindsym $mod+j focus down; $update_status
-bindsym $mod+k focus up; $update_status
-bindsym $mod+l focus right; $update_status
+bindsym $mod+h focus left; $update_title
+bindsym $mod+j focus down; $update_title
+bindsym $mod+k focus up; $update_title
+bindsym $mod+l focus right; $update_title
 
 # alternatively, you can use the cursor keys:
-bindsym $mod+Left focus left; $update_status
-bindsym $mod+Down focus down; $update_status
-bindsym $mod+Up focus up; $update_status
-bindsym $mod+Right focus right; $update_status
+bindsym $mod+Left focus left; $update_title
+bindsym $mod+Down focus down; $update_title
+bindsym $mod+Up focus up; $update_title
+bindsym $mod+Right focus right; $update_title
 
 # move focused window
 bindsym $mod+Shift+H move left
@@ -101,40 +101,40 @@ bindsym $mod+a focus parent
 #bindsym $mod+d focus child
 
 # switch to workspace
-bindsym $mod+1 workspace 1; $update_status
-bindsym $mod+2 workspace 2; $update_status
-bindsym $mod+3 workspace 3; $update_status
-bindsym $mod+4 workspace 4; $update_status
-bindsym $mod+5 workspace 5; $update_status
-bindsym $mod+6 workspace 6; $update_status
-bindsym $mod+7 workspace 7; $update_status
-bindsym $mod+8 workspace 8; $update_status
-bindsym $mod+9 workspace 9; $update_status
-bindsym $mod+0 workspace 10; $update_status
+bindsym $mod+1 workspace 1; $update_title
+bindsym $mod+2 workspace 2; $update_title
+bindsym $mod+3 workspace 3; $update_title
+bindsym $mod+4 workspace 4; $update_title
+bindsym $mod+5 workspace 5; $update_title
+bindsym $mod+6 workspace 6; $update_title
+bindsym $mod+7 workspace 7; $update_title
+bindsym $mod+8 workspace 8; $update_title
+bindsym $mod+9 workspace 9; $update_title
+bindsym $mod+0 workspace 10; $update_title
 
 # move focused container to workspace and switch workspace
-bindsym $mod+Shift+1 move container to workspace 1; workspace 1; $update_status
-bindsym $mod+Shift+2 move container to workspace 2; workspace 2; $update_status
-bindsym $mod+Shift+3 move container to workspace 3; workspace 3; $update_status
-bindsym $mod+Shift+4 move container to workspace 4; workspace 4; $update_status
-bindsym $mod+Shift+5 move container to workspace 5; workspace 5; $update_status
-bindsym $mod+Shift+6 move container to workspace 6; workspace 6; $update_status
-bindsym $mod+Shift+7 move container to workspace 7; workspace 7; $update_status
-bindsym $mod+Shift+8 move container to workspace 8; workspace 8; $update_status
-bindsym $mod+Shift+9 move container to workspace 9; workspace 9; $update_status
-bindsym $mod+Shift+0 move container to workspace 10; workspace 10; $update_status
+bindsym $mod+Shift+1 move container to workspace 1; workspace 1; $update_title
+bindsym $mod+Shift+2 move container to workspace 2; workspace 2; $update_title
+bindsym $mod+Shift+3 move container to workspace 3; workspace 3; $update_title
+bindsym $mod+Shift+4 move container to workspace 4; workspace 4; $update_title
+bindsym $mod+Shift+5 move container to workspace 5; workspace 5; $update_title
+bindsym $mod+Shift+6 move container to workspace 6; workspace 6; $update_title
+bindsym $mod+Shift+7 move container to workspace 7; workspace 7; $update_title
+bindsym $mod+Shift+8 move container to workspace 8; workspace 8; $update_title
+bindsym $mod+Shift+9 move container to workspace 9; workspace 9; $update_title
+bindsym $mod+Shift+0 move container to workspace 10; workspace 10; $update_title
 
 # move focused container to workspace
-bindsym $mod+Ctrl+1 move container to workspace 1; $update_status
-bindsym $mod+Ctrl+2 move container to workspace 2; $update_status
-bindsym $mod+Ctrl+3 move container to workspace 3; $update_status
-bindsym $mod+Ctrl+4 move container to workspace 4; $update_status
-bindsym $mod+Ctrl+5 move container to workspace 5; $update_status
-bindsym $mod+Ctrl+6 move container to workspace 6; $update_status
-bindsym $mod+Ctrl+7 move container to workspace 7; $update_status
-bindsym $mod+Ctrl+8 move container to workspace 8; $update_status
-bindsym $mod+Ctrl+9 move container to workspace 9; $update_status
-bindsym $mod+Ctrl+0 move container to workspace 10; $update_status
+bindsym $mod+Ctrl+1 move container to workspace 1; $update_title
+bindsym $mod+Ctrl+2 move container to workspace 2; $update_title
+bindsym $mod+Ctrl+3 move container to workspace 3; $update_title
+bindsym $mod+Ctrl+4 move container to workspace 4; $update_title
+bindsym $mod+Ctrl+5 move container to workspace 5; $update_title
+bindsym $mod+Ctrl+6 move container to workspace 6; $update_title
+bindsym $mod+Ctrl+7 move container to workspace 7; $update_title
+bindsym $mod+Ctrl+8 move container to workspace 8; $update_title
+bindsym $mod+Ctrl+9 move container to workspace 9; $update_title
+bindsym $mod+Ctrl+0 move container to workspace 10; $update_title
 
 # reload the configuration file
 # bindsym $mod+Shift+c reload
@@ -221,9 +221,9 @@ bindsym $mod+i exec --no-startup-id $Locker
 bindsym $mod+Tab exec --no-startup-id "~/.scripts/i3-focus-last.py --switch"
 
 # move workspace to another monitor
-bindsym $mod+m move workspace to output left; $update_status
+bindsym $mod+m move workspace to output left; $update_title
 # swap workspaces between two monitors
-bindsym $mod+Shift+M exec --no-startup-id "~/.scripts/i3-swap-workspaces.py"; $update_status
+bindsym $mod+Shift+M exec --no-startup-id "~/.scripts/i3-swap-workspaces.py"; $update_title
 # anamnesis clip board
 bindsym $mod+apostrophe exec --no-startup-id "~/.scripts/i3-dmenu-anamnesis.sh"
 # screen shots
