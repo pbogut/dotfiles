@@ -134,10 +134,15 @@ if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
     zle -N zle-line-finish
 fi
 
+eval `dircolors ~/.config/dircolors-solarized/dircolors.256dark`
+
 alias ls="ls --color=auto"
 alias pacman="pacman --color=auto"
 alias fix_terminal="stty sane"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
+
+alias xo="xdg-open"
+alias so="source"
 
 alias mutt="LC_ALL=en_GB.utf8 screen -U -D -RR mutt mutt"
 alias ncmpcpp="LC_ALL=en_GB.utf8 screen -U -D -RR ncmpcpp ncmpcpp"

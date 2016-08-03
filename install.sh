@@ -36,7 +36,10 @@ read -d '' files <<"EOF"
     config/i3/config
     config/i3/i3status.conf
     config/ranger/rc.conf
+    config/ranger/devicons.py
+    config/ranger/plugins/devicons_linemode.py
     config/ncmpcpp/config
+    config/dircolors-solarized
     vim/bundle/Vundle.vim
     vim/autoload/plug.vim
     composer/composer.json
@@ -54,6 +57,7 @@ read -d '' directories <<"EOF"
     .config/nvim
     .config/i3
     .config/ranger
+    .config/ranger/plugins
     .config/autostart
     .config/ncmpcpp
     .weechat
