@@ -121,7 +121,6 @@ if exists(':Plug')
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   Plug 'cosminadrianpopescu/vim-sql-workbench'
   Plug 'ctrlpvim/ctrlp.vim'
-  Plug 'ryanoasis/vim-devicons'
   if has('nvim')
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
