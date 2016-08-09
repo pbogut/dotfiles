@@ -1,2 +1,3 @@
 #!/bin/bash
-roxterm --separate -d `xcwd`
+roxterm --separate -d "`xcwd`"
+#-e zsh -ic tmux

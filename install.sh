@@ -42,6 +42,7 @@ read -d '' files <<"EOF"
     config/dircolors-solarized
     vim/bundle/Vundle.vim
     vim/autoload/plug.vim
+    i3blocks.conf
     composer/composer.json
     mutt/muttrc
     mutt/mailcap
