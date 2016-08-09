@@ -48,10 +48,10 @@ bindsym $mod+Shift+colon exec --no-startup-id ~/.scripts/i3-dmenu-run-in-termina
 
 # change focus
 set $focus exec --no-startup-id ~/.scripts/i3-focus.py
-bindsym $mod+h focus left; $update_title
-bindsym $mod+j focus down; $update_title
-bindsym $mod+k focus up; $update_title
-bindsym $mod+l focus right; $update_title
+bindsym $mod+h $focus left; $update_title
+bindsym $mod+j $focus down; $update_title
+bindsym $mod+k $focus up; $update_title
+bindsym $mod+l $focus right; $update_title
 
 # alternatively, you can use the cursor keys:
 bindsym $mod+Left $focus left; $update_title
