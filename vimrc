@@ -464,8 +464,8 @@ function! ParanoicBackup()
   let filedir = g:paranoic_backup_dir . expand('%:p:h')
   let filename = expand('%:t')
   let timestamp = strftime("___%y%m%d_%H%M")
-  silent execute "!mkdir -p " . filedir
-  silent execute "w! " . filedir . '/' . filename . timestamp
+  silent execute "!mkdir -p " . fnameescape(filedir)
+  silent execute "w! " . fnameescape(filedir . '/' . filename . timestamp)
 endfunction
 command! -bang W :call CreateFoldersAndWrite(<bang>0)
 function! CreateFoldersAndWrite(bang)
