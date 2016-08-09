@@ -30,7 +30,7 @@ font pango:monospace 8
 floating_modifier $mod
 
 # Update i3status on i3bar
-set $update_title exec --no-startup-id pkill -RTMIN+1 i3block
+set $update_title exec --no-startup-id pkill -SIGRTMIN+10 i3blocks
 
 # start a terminal
 bindsym $mod+Return exec --no-startup-id ~/.scripts/roxterm-in-current-dir.sh

@@ -6,7 +6,7 @@
 
 ########## Variables
 
-dir=~/dotfiles                    # dotfiles directory
+dir=`pwd`                    # dotfiles directory
 olddir=~/dotfiles_`date +%s%N`    # old dotfiles backup directory
 read -d '' files <<"EOF"
     inputrc

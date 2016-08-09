@@ -235,6 +235,10 @@ map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>x :Bdelete <bar>q<cr>
 map <C-w>X :Bdelete! <bar> q<cr>
+noremap <C-w>i3j :silent call I3Focus('down', 'j')<cr>
+noremap <C-w>i3k :silent call I3Focus('up', 'k')<cr>
+noremap <C-w>i3l :silent call I3Focus('right', 'l')<cr>
+noremap <C-w>i3h :silent call I3Focus('left', 'h')<cr>
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
 snoremap <leader>d "_d
@@ -269,6 +273,16 @@ noremap <leader>sc :set syntax=css<cr>
 noremap <leader>sj :set syntax=js<cr>
 noremap <leader>sx :set syntax=xml<cr>
 noremap <leader>sa :exec "Autoformta ".&syntax<cr>
+" nicer wrapline navigation
+noremap <silent> j gj
+noremap <silent> k gk
+noremap  <silent> 0 g0
+noremap  <silent> $ g$
+noremap  <silent> ^ g^
+vnoremap <silent> j gj
+vnoremap <silent> k gk
+onoremap <silent> j gj
+onoremap <silent> k gk
 " nvim now can map alt without terminal issues, new cool shortcuts commin
 if has('nvim')
   inoremap <A-a> <Esc>A
@@ -565,15 +579,12 @@ function! NeatFoldText()
   let foldtextlength = strlen(substitute(foldtextstart . foldtextend, '.', 'x', 'g')) + &foldcolumn
   return foldtextstart . repeat(foldchar, winwidth(0)-foldtextlength) . foldtextend
 endfunction
-func! I3Focus(comando,vim_comando)
+func! I3Focus(comando, vim_comando)
   let oldw = winnr()
   silent exe 'wincmd ' . a:vim_comando
   let neww = winnr()
   if oldw == neww
-    silent exe '!i3-msg -q focus ' . a:comando
-    if !has("gui_running")
-        redraw!
-    endif
+    silent exe '!~/.scripts/i3-focus.py ' . a:comando . ' --skip-vim > /dev/null'
   endif
 endfunction
 function! PHP__Fold()

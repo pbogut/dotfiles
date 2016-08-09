@@ -4,6 +4,19 @@ import i3
 import subprocess
 import sys
 
+def is_vim_in_tmux(session_id):
+    try:
+        if str(sys.argv[2]) == "--skip-vim": return False
+    except:
+        pass
+
+    grep = " | grep '1$' |sed 's/1$//'"
+    command = "tmux list-pane -F '#{pane_current_command}#{pane_active}'" + grep
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+    current_command = proc.stdout.read()
+
+    return current_command in ['vim', 'nvim', b'vim\n', b'nvim\n']
+
 def is_tmux_edge(session_id, direction):
     list_command = "tmux list-panes -t \\" + session_id + " "
     grep = " | grep '1$' |sed 's/1$//'"
@@ -43,6 +56,12 @@ if __name__ == '__main__':
         'up': '-U',
         'right': '-R'
     }
+    vim_dir = {
+        'left': 'c-w i3h',
+        'down': 'c-w i3j',
+        'up': 'c-w i3k',
+        'right': 'c-w i3l'
+    }
 
     current = i3.filter(nodes=[], focused=True)[0]
     name = current['name']
@@ -50,9 +69,13 @@ if __name__ == '__main__':
     if 'tmux' in name:
         session_id = "$" + re.search(r"tmux \$(\d+):", name).group(1)
 
-        if is_tmux_edge(session_id, direction):
-            subprocess.Popen("i3-msg focus " + direction, shell=True)
+        if is_vim_in_tmux(session_id):
+            subprocess.Popen("tmux send-keys -t \\" + session_id + " " + vim_dir[direction], shell=True)
         else:
-            subprocess.Popen("tmux select-pane -t \\" + session_id + " " + pane_dir[direction], shell=True)
+
+            if is_tmux_edge(session_id, direction):
+                i3.focus(direction)
+            else:
+                subprocess.Popen("tmux select-pane -t \\" + session_id + " " + pane_dir[direction], shell=True)
     else:
         i3.focus(direction)
