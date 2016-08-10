@@ -5,6 +5,7 @@ track_id=`curl -s -X GET "https://api.spotify.com/v1/search?q=$query&type=track"
 token=`cat ~/.spotify-api-token`
 if [ -z $token ]; then
     echo "Token not found, you need to place token in ~/.spotify-api-token file"
+    echo "You can get token by visiting https://developer.spotify.com/web-api/console/put-current-user-saved-tracks/"
     exit 1
 fi
 if [ $track_id == "" ]; then
