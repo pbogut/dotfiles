@@ -16,6 +16,7 @@
     #my aliases
     ai = add -i
     ap = add -p
+    an = add -N
     rmc = rm --cached
     cob = checkout -b
     #Create branch
@@ -31,6 +32,7 @@
     ff = merge --ff-only --no-commit
     pullff = pull --ff-only
     noff = merge --no-ff --no-commit
+    noffci = merge --no-ff
     merge = merge --no-commit
     nofc = !git merge --no-ff --no-commit $1 && git commit --verbose && :
     fa = fetch --all
@@ -41,6 +43,7 @@
 
     # funny
     whatthecommit = "!git commit --verbose -m \"`curl -qs http://whatthecommit.com/index.txt`\""
+    wtc = "!echo \"`curl -qs http://whatthecommit.com/index.txt`\""
 
     # Divergence (commits we added and commits remote added)
     div = divergence.sh
