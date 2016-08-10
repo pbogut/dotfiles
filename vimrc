@@ -161,30 +161,30 @@ let g:neomake_php_enabled_makers = ['php', 'phpmd']
 let g:phpgetset_insertPosition = 2 " below current block
 let b:phpgetset_insertPosition = 2 " below current block
 let g:phpgetset_getterTemplate =
-\ "    \n" .
-\ "    /**\n" .
-\ "     * Get %varname%\n" .
-\ "     *\n" .
-\ "     * @return %varname%\n" .
-\ "     */\n" .
-\ "    public function %funcname%()\n" .
-\ "    {\n" .
-\ "        return $this->%varname%;\n" .
-\ "    }"
+      \ "    \n" .
+      \ "    /**\n" .
+      \ "     * Get %varname%\n" .
+      \ "     *\n" .
+      \ "     * @return %varname%\n" .
+      \ "     */\n" .
+      \ "    public function %funcname%()\n" .
+      \ "    {\n" .
+      \ "        return $this->%varname%;\n" .
+      \ "    }"
 
 let g:phpgetset_setterTemplate =
-\ "    \n" .
-\ "    /**\n" .
-\ "     * Set %varname%.\n" .
-\ "     *\n" .
-\ "     * @param %varname% - value to set.\n" .
-\ "     * @return $this\n" .
-\ "     */\n" .
-\ "    public function %funcname%($%varname%)\n" .
-\ "    {\n" .
-\ "        $this->%varname% = $%varname%;\n" .
-\ "        return $this;\n" .
-\ "    }"
+      \ "    \n" .
+      \ "    /**\n" .
+      \ "     * Set %varname%.\n" .
+      \ "     *\n" .
+      \ "     * @param %varname% - value to set.\n" .
+      \ "     * @return $this\n" .
+      \ "     */\n" .
+      \ "    public function %funcname%($%varname%)\n" .
+      \ "    {\n" .
+      \ "        $this->%varname% = $%varname%;\n" .
+      \ "        return $this;\n" .
+      \ "    }"
 
 " nerdtree
 let NERDTreeQuitOnOpen=1
@@ -554,13 +554,13 @@ nmap <silent> cp :set opfunc=ChangePaste<CR>g@
 nmap <silent> cpp :normal! V"_dP<cr>
 function! ChangePaste(type, ...)
   if a:0  " Invoked from Visual mode, use '< and '> marks.
-      silent exe "normal! `<" . a:type . "`>\"_c" . @"
+    silent exe "normal! `<" . a:type . "`>\"_c" . @"
   elseif a:type == 'line'
-      silent exe "normal! '[V']\"_c" . @"
+    silent exe "normal! '[V']\"_c" . @"
   elseif a:type == 'block'
-      silent exe "normal! `[\<C-V>`]\"_c" . @"
+    silent exe "normal! `[\<C-V>`]\"_c" . @"
   else
-      silent exe "normal! `[v`]\"_c" . @"
+    silent exe "normal! `[v`]\"_c" . @"
   endif
 endfunction
 " fold adjust
