@@ -20,7 +20,7 @@ mopidy_pid=/tmp/mopidy.pid
 if [ -f "$mopidy_pid" ] && kill -0 `cat $mopidy_pid` 2>/dev/null; then
     echo 'ekhm....' > /dev/null
 else
-    mopidy &
+    mopidy -q &
     echo $! > $mopidy_pid
 fi
 i3_focus_last_pid=/tmp/i3_focus_last.pid

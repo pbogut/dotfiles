@@ -390,6 +390,7 @@ let g:syntastic_enable_signs = 0
 let g:gutentags_generate_on_new = 0
 let g:gutentags_generate_on_missing = 0
 let g:gutentags_exclude = ['*node_modules*', '*bower_components*', 'tmp*', 'temp*']
+let g:gutentags_project_root = ['composer.json']
 " vim tags
 let g:vim_tags_use_language_field = 1
 let g:vim_tags_use_vim_dispatch = 1
@@ -550,17 +551,17 @@ endfunction
 command! -bang AltTestPhp :call AltTestPhp(<bang>0)
 
 " This allows for change paste motion cp{motion}
-nmap <silent> cp :set opfunc=ChangePaste<CR>g@
-nmap <silent> cpp :normal! V"_dP<cr>
+nmap <silent> cp :let b:changepaste_register = v:register<cr>:set opfunc=ChangePaste<CR>g@
+nmap <silent> cpp :exec "normal! V\"_d\"" . v:register . "P"<cr>
 function! ChangePaste(type, ...)
   if a:0  " Invoked from Visual mode, use '< and '> marks.
-    silent exe "normal! `<" . a:type . "`>\"_c" . @"
+    silent exe "normal! `<" . a:type . "`>\"_c" . getreg(b:changepaste_register)
   elseif a:type == 'line'
-    silent exe "normal! '[V']\"_c" . @"
+    silent exe "normal! '[V']\"_c" . getreg(b:changepaste_register)
   elseif a:type == 'block'
-    silent exe "normal! `[\<C-V>`]\"_c" . @"
+    silent exe "normal! `[\<C-V>`]\"_c" . getreg(b:changepaste_register)
   else
-    silent exe "normal! `[v`]\"_c" . @"
+    silent exe "normal! `[v`]\"_c" . getreg(b:changepaste_register)
   endif
 endfunction
 " fold adjust
