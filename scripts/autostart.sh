@@ -4,7 +4,6 @@ setxkbmap -option 'caps:ctrl_modifier'
 host_name=`hostname -s`
 killall xcape -9 > /dev/null 2>&1
 xcape -e 'Caps_Lock=Escape'
-#chrome textaid extention server
 # anamnesis clipboard daemon
 anamnesis --start 2>&1 > /dev/null
 # custom daemons
