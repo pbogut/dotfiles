@@ -36,6 +36,7 @@ read -d '' files <<"EOF"
     config/i3/config
     config/i3/i3status.conf
     config/ranger/rc.conf
+    config/ranger/rifle.conf
     config/ranger/devicons.py
     config/ranger/plugins/devicons_linemode.py
     config/ncmpcpp/config
@@ -64,6 +65,7 @@ read -d '' directories <<"EOF"
     .weechat
     .composer
     .mutt
+    .gocode
 EOF
 ##########
 

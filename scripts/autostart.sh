@@ -2,11 +2,6 @@
 #super awesome capslock key
 setxkbmap -option 'caps:ctrl_modifier'
 host_name=`hostname -s`
-killall xcape -9 > /dev/null 2>&1
-xcape -e 'Caps_Lock=Escape'
-# anamnesis clipboard daemon
-anamnesis --start 2>&1 > /dev/null
-# custom daemons
 script=$(readlink -f "$0")
 scriptpath=$(dirname "$script")
 
@@ -19,10 +14,18 @@ function demonize {
     fi
 }
 
+# make use of the useless capslock
+killall xcape -9 > /dev/null 2>&1
+xcape -e 'Caps_Lock=Escape'
+
+# daemons
+anamnesis --start > /dev/null 2>&1
+insync start > /dev/null 2>&1
 demonize redshift 'redshift-gtk'
 demonize textaid "perl $scriptpath/edit-server.pl"
 demonize mopidy mopidy
 demonize rescuetime rescuetime
+demonize nm-applet nm-applet
 
 # sepcific for the computer
 if [ "$host_name" == "darkbox" ]; then # pc at work

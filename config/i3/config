@@ -196,7 +196,7 @@ bar {
         # status_command bash ~/.scripts/i3-status.sh
         status_command i3blocks
         position top
-        # tray_output primary
+        tray_output primary
 }
 
 #client.focused  #4c7899  #F6C050  #d3d3d3

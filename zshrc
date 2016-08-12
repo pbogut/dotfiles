@@ -71,6 +71,7 @@ vim_ps1() {
 precmd() {
   RPROMPT=$vim_ins_mode && VIMODE_COLOR="003"
   vim_ps1
+  print -Pn "\e]0;%n@%m\a"
 }
 zle-keymap-select() {
   RPROMPT=$vim_ins_mode && VIMODE_COLOR="003"
@@ -206,9 +207,7 @@ if [ -n "$SSH_CLIENT"  ] || [ -n "$SSH_TTY"  ]; then
   tmux set -g prefix C-b 2>&1 > /dev/null
   tmux bind C-b send-prefix 2>&1 > /dev/null
 fi
-# export RPROMPT=$'$(__git_ps1 "%s")'
-export rvmsudo_secure_path=1
-export PATH="$PATH:$HOME/.rvm/bin"
+
 export PATH="$PATH:$HOME/.composer/vendor/bin"
 
 # make colors compatibile with tmux
@@ -224,7 +223,9 @@ else
   export EDITOR=nvim
   alias vim="nvim"
 fi
-
+# golang
+export GOPATH="$HOME/.gocode"
+export PATH="$PATH:$HOME/.gocode/bin"
 # chruby
 [[ -s "/usr/local/share/chruby/chruby.sh" ]] && . "/usr/local/share/chruby/chruby.sh"
 # its slow as hell and I'm not using it too offen, so lazy loading should be fine

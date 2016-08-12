@@ -15,7 +15,12 @@ def is_vim_in_tmux(session_id):
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     current_command = proc.stdout.read()
 
-    return current_command in ['vim', 'nvim', b'vim\n', b'nvim\n']
+    return current_command in ['vim',
+                               'nvim',
+                               'vimdiff',
+                               b'vimdiff\n',
+                               b'vim\n',
+                               b'nvim\n']
 
 def is_tmux_edge(session_id, direction):
     list_command = "tmux list-panes -t \\" + session_id + " "
