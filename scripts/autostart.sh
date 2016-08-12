@@ -9,30 +9,6 @@ anamnesis --start 2>&1 > /dev/null
 # custom daemons
 script=$(readlink -f "$0")
 scriptpath=$(dirname "$script")
-<<<<<<< HEAD
-textaid_pid=/tmp/textaid.pid
-if [ -f "$textaid_pid" ] && kill -0 `cat $textaid_pid` 2>/dev/null; then
-    echo 'ekhm....' > /dev/null
-else
-    perl "$scriptpath/edit-server.pl" &
-    echo $! > $textaid_pid
-fi
-mopidy_pid=/tmp/mopidy.pid
-if [ -f "$mopidy_pid" ] && kill -0 `cat $mopidy_pid` 2>/dev/null; then
-    echo 'ekhm....' > /dev/null
-else
-    mopidy -q &
-    echo $! > $mopidy_pid
-fi
-i3_focus_last_pid=/tmp/i3_focus_last.pid
-if [ -f "$i3_focus_last_pid" ] && kill -0 `cat $i3_focus_last_pid` 2>/dev/null; then
-    echo 'ekhm....' > /dev/null
-else
-    i3-focus-last.py &
-    echo $! > $i3_focus_last_pid
-fi
-=======
->>>>>>> 755b06b6e87927e4276e5f96a6d875c10936fe57
 
 function demonize {
     pid="/tmp/__$1.pid"
