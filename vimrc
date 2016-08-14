@@ -11,7 +11,8 @@ set cursorline
 set cursorcolumn
 " space instead of tab
 set laststatus=2
-set completeopt=menuone,noselect
+set completeopt=menuone
+silent! set completeopt=menuone,noselect
 set cmdheight=2
 " show existing tab with 4 spaces width
 set tabstop=2
