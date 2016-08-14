@@ -66,11 +66,12 @@ GIT_BRANCH=$'$(__git_ps1 "(%s)")'
 VIMODE_COLOR="003"
 vim_ps1() {
   PS1="%B%F{001}(%b%F{012}%~%B%F{001}) %b%F{004}${GIT_BRANCH}%f
-%F{${VIMODE_COLOR}} %k%(!.%F{001}.%F{012}%n%F{001}@${HOST_COLOR}%M %B%F{001}%(!.#.$) %b%f%k"
+%F{${VIMODE_COLOR}} %k%(!.%F{001}.%F{012})%n%F{001}@${HOST_COLOR}%M %B%F{001}%(!.#.$) %b%f%k"
 }
 precmd() {
   RPROMPT=$vim_ins_mode && VIMODE_COLOR="003"
   vim_ps1
+  print -Pn "\e]0;%n@%m:%~\a"
 }
 zle-keymap-select() {
   RPROMPT=$vim_ins_mode && VIMODE_COLOR="003"
@@ -80,7 +81,7 @@ zle-keymap-select() {
   zle reset-prompt
 }
 zle-line-init() {
-  VIMODE_COLOR="003" && reload_ps1
+  VIMODE_COLOR="003" && vim_ps1
   typeset -g __prompt_status="$?"
 }
 
@@ -134,9 +135,18 @@ if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
     zle -N zle-line-finish
 fi
 
-alias ls="ls --color"
+eval `dircolors ~/.config/dircolors-solarized/dircolors.256dark`
+
+alias ls="ls --color=auto"
+alias pacman="pacman --color=auto"
 alias fix_terminal="stty sane"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
+
+alias xo="xdg-open"
+alias so="source"
+
+alias mutt="LC_ALL=en_GB.utf8 screen -U -D -RR mutt mutt"
+alias ncmpcpp="LC_ALL=en_GB.utf8 screen -U -D -RR ncmpcpp ncmpcpp"
 
 alias php_debug_on="export XDEBUG_CONFIG=\"idekey=PHPSTORM\""
 alias php_debug_off="export XDEBUG_CONFIG="
@@ -149,7 +159,17 @@ alias tunelssh_de="sshuttle --dns -vr smeagol@smeagol.pl:59184 0/0"
 
 alias yaourt-ignore-pgp="yaourt --m-arg \"--skipchecksums --skippgpcheck\""
 
+# anamnesis clipboard fuzy lookup
+alias clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_content \
+            order by docid desc;\" | sqlite3 ~/.local/share/anamnesis/database \
+            | fzf | sed 's/¬n¬/\n/g' | perl -p -e 'chomp if eof' \
+            | xclip -in -selection clipboard"
+alias dmenu_clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_content \
+            order by docid desc limit 50;\" | sqlite3 ~/.local/share/anamnesis/database \
+            | dmenu -l 10 | sed 's/¬n¬/\n/g' | perl -p -e 'chomp if eof' \
+            | xclip -in -selection clipboard"
 # shortcuts
+alias sc="bash -c \"\`cat ~/.commands | fzf\`\""
 alias e="exit"
 alias m="ncmpcpp"
 # exit shell after closing ncmpcpp
@@ -169,22 +189,29 @@ fi
 if [ -f ~/.localsh ]; then
   source ~/.localsh
 fi
+if [ -f ~/.fzf.zsh ]; then
+  source ~/.fzf.zsh
+fi
 
 export PATH="$PATH:$HOME/bin:$HOME/.bin:$HOME/.scripts"
 
 #git branch in prompt
 setopt prompt_subst
 HOST_COLOR="%F{012}"
+#ssh session settings
 if [ -n "$SSH_CLIENT"  ] || [ -n "$SSH_TTY"  ]; then
+  #diferent host color when ssh
   HOST_COLOR="%F{003}"
+  #default tmux bind when ssh (so I can use it remotly and localy)
+  tmux unbind C-a 2>&1 > /dev/null
+  tmux set -g prefix C-b 2>&1 > /dev/null
+  tmux bind C-b send-prefix 2>&1 > /dev/null
 fi
-# export RPROMPT=$'$(__git_ps1 "%s")'
-export rvmsudo_secure_path=1
-export PATH="$PATH:$HOME/.rvm/bin"
+
 export PATH="$PATH:$HOME/.composer/vendor/bin"
 
 # make colors compatibile with tmux
-export TERM=screen-256color
+export TERM=xterm-256color
 if [[ ! -z "$TMUX"  ]]; then
   export ZLE_RPROMPT_INDENT=0
 fi
@@ -196,3 +223,12 @@ else
   export EDITOR=nvim
   alias vim="nvim"
 fi
+# golang
+export GOPATH="$HOME/.gocode"
+export PATH="$PATH:$HOME/.gocode/bin"
+# chruby
+[[ -s "/usr/local/share/chruby/chruby.sh" ]] && . "/usr/local/share/chruby/chruby.sh"
+# its slow as hell and I'm not using it too offen, so lazy loading should be fine
+export NVM_DIR="$HOME/.nvm"
+lazy_source nvm "$NVM_DIR/nvm.sh"
+alias myip="wget http://ipinfo.io/ip -qO -"

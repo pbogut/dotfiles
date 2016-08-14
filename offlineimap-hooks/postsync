@@ -1,0 +1,27 @@
+#!/bin/bash
+notmuch new
+
+# add image tag
+notmuch tag +image -- tag:new and mimetype:image
+# set up account tag
+notmuch search --output=threads tag:new | while read thread; do
+    notmuch search --output=files $thread | grep -v 'Maildir/sent' | sed 's#.*Maildir/\([^/]*\)/.*#+account-\1#' | while read account; do
+        notmuch tag $account -- $thread
+    done
+done
+
+# tags as directories
+# im removing new tag so I can set everything
+# before archive, which in gmails contain all mails by default (fy Google)
+ls -1d --color=never ~/Maildir/*/INBOX | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +inbox -- tag:new and
+ls -1d --color=never ~/Maildir/*/drafts | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +drafts +draft -- tag:new and
+ls -1d --color=never ~/Maildir/*/sent | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +sent -- tag:new and
+ls -1d --color=never ~/Maildir/*/trash | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +trash -- tag:new and
+ls -1d --color=never ~/Maildir/*/spam | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +spam -- tag:new and
+# in gmail everything is in archive, so we do this at the end
+ls -1d --color=never ~/Maildir/*/archive | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +archive -- tag:new and
+
+# auto archivie couses issues with gmail - wrrrr....
+#notmuch tag +archive -- date:..`date --date='6 month ago' +%Y-%m-%d`
+
+notmuch tag -new -- tag:new #clear new tag

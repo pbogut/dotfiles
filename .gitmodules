@@ -10,3 +10,9 @@
 [submodule "tmux/plugins/tmux-continuum"]
 	path = tmux/plugins/tmux-continuum
 	url = https://github.com/tmux-plugins/tmux-continuum
+[submodule "vim/vim-plug"]
+	path = vim/vim-plug
+	url = https://github.com/junegunn/vim-plug
+[submodule "config/dircolors-solarized"]
+	path = config/dircolors-solarized
+	url = https://github.com/seebi/dircolors-solarized

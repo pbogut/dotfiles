@@ -6,10 +6,12 @@
 
 ########## Variables
 
-dir=~/dotfiles                    # dotfiles directory
+dir=`pwd`                    # dotfiles directory
 olddir=~/dotfiles_`date +%s%N`    # old dotfiles backup directory
 read -d '' files <<"EOF"
     inputrc
+    offlineimap-hooks
+    offlineimap.py
     screenrc
     vimrc
     zshrc
@@ -31,18 +33,39 @@ read -d '' files <<"EOF"
     config/roxterm.sourceforge.net
     config/autostart/autostart.desktop
     config/autostart/rescuetime.desktop
+    config/i3/config
+    config/i3/i3status.conf
+    config/ranger/rc.conf
+    config/ranger/rifle.conf
+    config/ranger/devicons.py
+    config/ranger/plugins/devicons_linemode.py
+    config/ncmpcpp/config
+    config/dircolors-solarized
     vim/bundle/Vundle.vim
+    vim/autoload/plug.vim
+    i3blocks.conf
     composer/composer.json
+    mutt/muttrc
+    mutt/mailcap
+    mutt/solarized-dark-16.muttrc
+    urlview
 EOF
 read -d '' directories <<"EOF"
     .vim/undofiles
     .vim/swapfiles
     .vim/backupfiles
     .vim/bundle
+    .vim/autoload
     .config/nvim
+    .config/i3
+    .config/ranger
+    .config/ranger/plugins
     .config/autostart
+    .config/ncmpcpp
     .weechat
     .composer
+    .mutt
+    .gocode
 EOF
 ##########
 
