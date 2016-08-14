@@ -14,7 +14,7 @@ if not status:
     # fulltext = "<span color='red'><span font='FontAwesome'>\uf00d \uf240</span></span>"
     # percentleft = 100
     # if no battery then its probably PC
-    return
+    pass
 else:
     state = status.split(": ")[1].split(", ")[0]
     commasplitstatus = status.split(", ")
