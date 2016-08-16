@@ -8,7 +8,7 @@ if [ -z $token ]; then
     echo "You can get token by visiting https://developer.spotify.com/web-api/console/put-current-user-saved-tracks/"
     exit 1
 fi
-if [ $track_id == "" ]; then
+if [ "$track_id" == "" ]; then
     echo "Can't find the track:"
     echo -e "\t$track (id:$track_id)"
     exit 1

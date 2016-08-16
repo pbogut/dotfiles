@@ -60,7 +60,7 @@ augroup END
 " line 80 limit
 set colorcolumn=81
 
-let g:python_host_prog='/usr/bin/python'
+" let g:python_host_prog='/usr/bin/python'
 
 if has("patch-7.4.314")
   set shortmess+=c
@@ -103,7 +103,7 @@ if exists(':Plug')
   Plug 'christoomey/vim-tmux-navigator'
   Plug 'sirver/ultisnips'
   Plug 'sheerun/vim-polyglot'
-  Plug 'joonty/vdebug', { 'for': 'php' }
+  " Plug 'joonty/vdebug', { 'for': 'php' }
   Plug 'benekastah/neomake', { 'on': 'Neomake' }
   Plug 'Chiel92/vim-autoformat'
   Plug 'alvan/vim-closetag'
@@ -135,7 +135,7 @@ if exists(':Plug')
   if (!has('nvim') || $STY != '')
     Plug 'altercation/vim-colors-solarized'
   else
-    let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+    set termguicolors
     Plug 'frankier/neovim-colors-solarized-truecolor-only'
   endif
   " All of your Plugins must be added before the following line
@@ -234,6 +234,8 @@ nmap <C-_> gcc<down>^
 nmap <C-/> gcc<down>^
 vmap <C-_> gc
 vmap <C-/> gc
+" surround
+vmap s S
 nmap <bs> :TmuxNavigateLeft<cr>
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>

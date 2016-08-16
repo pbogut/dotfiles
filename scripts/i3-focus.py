@@ -75,6 +75,9 @@ if __name__ == '__main__':
         session_id = "$" + re.search(r"tmux \$(\d+):", name).group(1)
 
         if is_vim_in_tmux(session_id):
+            # send esc to make sure your in normal mode (its buggy sometimes ;S)
+            subprocess.Popen("tmux send-keys -t \\" + session_id + " Escape", shell=True)
+            # then send I3Focus trigger combination
             subprocess.Popen("tmux send-keys -t \\" + session_id + " " + vim_dir[direction], shell=True)
         else:
 

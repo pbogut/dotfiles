@@ -14,12 +14,12 @@ zstyle ':completion:*' menu select
 
 autoload -Uz compinit
 compinit
-
 lazy_source () {
     eval "$1 () { [ -f $2 ] && source $2 && $1 \$@ }"
 }
 
 # End of lines added by compinstall
+hostname=`hostname`
 # Load all files from .shell/zshrc.d directory
 if [ -d $HOME/.zshrc.d ]; then
   for file in $HOME/.zshrc.d/*.zsh; do
@@ -232,3 +232,8 @@ export PATH="$PATH:$HOME/.gocode/bin"
 export NVM_DIR="$HOME/.nvm"
 lazy_source nvm "$NVM_DIR/nvm.sh"
 alias myip="wget http://ipinfo.io/ip -qO -"
+
+# host specific config
+if [ -f $HOME/.$hostname.zsh ]; then
+  source $HOME/.$hostname.zsh
+fi
