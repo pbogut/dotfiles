@@ -67,7 +67,7 @@ virtual-mailboxes \
     "Flagged"   "notmuch://?query=tag:flagged"\
     "Sent"      "notmuch://?query=tag:sent"\
     "Todo"      "notmuch://?query=tag:todo and NOT tag:done"\
-    "Projects"  "notmuch://?query=`notmuch search --output=tags not tag:_ |grep '^project/' | while read l; do echo -n " tag:$l"; done`"\
+    "Projects"  "notmuch://?query=tag:project`notmuch search --output=tags not tag:_ |grep '^project/' | while read l; do echo -n " tag:$l"; done`"\
     `notmuch search --output=tags not tag:_ | grep '^project/' | sed 's#\(.*\)\/\(.*\)#" \2" "notmuch://?query=tag:\1/\2"#g' | while read l; do echo -n " $l "; done` \
     "Drafts"    "notmuch://?query=tag:drafts"\
     "Archive"   "notmuch://?query=tag:archive"\
