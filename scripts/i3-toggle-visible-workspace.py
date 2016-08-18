@@ -1,16 +1,15 @@
 #!/usr/bin/python2.7
-# Swith between workspaces
-# Usage:
-#     i3-toggle-visible-workspace.py next
-#     i3-toggle-visible-workspace.py prev
-
 import i3
 import sys
+import argparse
 
-if(len(sys.argv) >= 2):
-    prev = str(sys.argv[1]) == "prev"
-else:
-    prev = False
+parser = argparse.ArgumentParser(description='Toggle between visible workspaces.')
+parser.add_argument('--prev', dest='direction', action='store_const',
+                    help='swich to the provious workspace (by default it goes to next)',  const="prev", default="next")
+parser.add_argument('--next', dest='direction', action='store_const',
+                    help='swich to the next workspace (default)',  const="next", default="next")
+
+args = parser.parse_args()
 
 workspaces = []
 for workspace in i3.get_workspaces():
@@ -19,7 +18,7 @@ for workspace in i3.get_workspaces():
 
 workspaces.extend(workspaces)
 
-if prev:
+if args.direction == "prev":
     workspaces.reverse()
 
 switch_to = False
