@@ -6,10 +6,10 @@ set_walpaper () {
     feh --randomize --bg-fill  ~/Pictures/wallpaper
 }
 if [ "$hostname" == "v3engine" ]; then # my laptop
-    (
+    (   sleep 3
         xrandr --output HDMI1 --primary --auto --left-of eDP1
-        sleep 3
         xrandr --output eDP1 --mode 1368x768 --pos 1920x0
+        i3-msg restart
         set_walpaper
     )  &
 elif [ "$hostname" == "darkbox" ]; then # pc at work

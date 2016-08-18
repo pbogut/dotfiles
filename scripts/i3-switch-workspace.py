@@ -14,6 +14,9 @@ parser.add_argument('--next', dest='direction', action='store_const',
 parser.add_argument('--same-output', dest='same_output', action='store_const',
                     help='switch only between workspaces on the current output',
                     const=True, default=False)
+parser.add_argument('--with-container', dest='with_container',
+                    help='take active container to the next (or prev) workspace',
+                    action='store_const', const=True, default=False)
 
 args = parser.parse_args()
 
@@ -36,6 +39,8 @@ for workspace in workspaces:
     if (args.same_output and workspace['output'] != current_output):
         continue
     if switch_to:
+        if args.with_container:
+            i3.command('move', 'container to workspace {}'.format(workspace['name']))
         i3.workspace(workspace['name'])
         break
     if workspace['focused']:

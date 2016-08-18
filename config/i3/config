@@ -211,8 +211,8 @@ bindsym $mod+n exec --no-startup-id ~/.scripts/i3-switch-workspace.py --next --s
 bindsym $mod+p exec --no-startup-id ~/.scripts/i3-switch-workspace.py --prev --same-output
 bindsym $mod+Tab exec --no-startup-id ~/.scripts/i3-toggle-visible-workspace.py --next
 bindsym $mod+Shift+Tab exec --no-startup-id ~/.scripts/i3-toggle-visible-workspace.py --prev
-bindsym $mod+Shift+N exec --no-startup-id ~/.scripts/i3-switch-workspace.py --next
-bindsym $mod+Shift+P exec --no-startup-id ~/.scripts/i3-switch-workspace.py --prev
+bindsym $mod+Shift+N exec --no-startup-id ~/.scripts/i3-switch-workspace.py --next --same-output --with-container
+bindsym $mod+Shift+P exec --no-startup-id ~/.scripts/i3-switch-workspace.py --prev --same-output --with-container
 
 bindsym $mod+f exec --no-startup-id ~/.scripts/i3-container-commander.py --group-by none
 
