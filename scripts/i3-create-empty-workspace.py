@@ -10,14 +10,16 @@
 
 import i3
 import sys
+import argparse
 
+parser = argparse.ArgumentParser(description='Creates new workspace')
+parser.add_argument('--move', dest='move', action='store_const',
+                    help='move focused window to new workspace',  const=True, default=False)
+parser.add_argument('--send', dest='send', action='store_const',
+                    help='send focus window to new workspace while staying on current workspace',
+                    const=True, default=False)
 
-move = None
-send = None
-
-if(len(sys.argv) >= 2):
-    move = str(sys.argv[1]) == "move"
-    send = str(sys.argv[1]) == "send"
+args = parser.parse_args()
 
 workspaces = []
 for workspace in i3.get_workspaces():
@@ -25,8 +27,8 @@ for workspace in i3.get_workspaces():
 
 for i in range(1, 100): # I guess 100 workspaces its already too much
     if str(i) not in workspaces:
-        if send or move:
+        if args.send or args.move:
             i3.command('move', 'container to workspace {i}'.format(i=i))
-        if not send:
+        if not args.send:
             i3.workspace(str(i))
         break

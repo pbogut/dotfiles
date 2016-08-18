@@ -3,12 +3,26 @@ import re
 import i3
 import subprocess
 import sys
+import argparse
+
+def validate_direction(parser, val):
+    if val not in ['left', 'right', 'up', 'down']:
+        parser.error('{} is not a valid direction.'.format(val))
+    return val
+
+parser = argparse.ArgumentParser(description='Toggle between visible workspaces.')
+parser.add_argument('direction',
+                    help='Focus direction, can be left, right, up or down',
+                    type=lambda val: validate_direction(parser, val))
+parser.add_argument('--skip-vim', dest='skip_vim', action='store_const',
+                    help='swich to the provious workspace (by default it goes to next)',
+                    const=True, default=False)
+
+
+args = parser.parse_args()
 
 def is_vim_in_tmux(session_id):
-    try:
-        if str(sys.argv[2]) == "--skip-vim": return False
-    except:
-        pass
+    if args.skip_vim: return False
 
     grep = " | grep '1$' |sed 's/1$//'"
     command = "tmux list-pane -F '#{pane_current_command}#{pane_active}'" + grep
@@ -54,7 +68,7 @@ def is_tmux_edge(session_id, direction):
 
 
 if __name__ == '__main__':
-    direction = str(sys.argv[1])
+    direction = args.direction
     pane_dir = {
         'left': '-L',
         'down': '-D',
@@ -71,7 +85,7 @@ if __name__ == '__main__':
     current = i3.filter(nodes=[], focused=True)[0]
     name = current['name']
 
-    if 'tmux' in name:
+    if  bool(re.match(r'.* tmux \$\d+:\d+:\d+$', name)):
         session_id = "$" + re.search(r"tmux \$(\d+):", name).group(1)
 
         if is_vim_in_tmux(session_id):

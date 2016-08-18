@@ -207,18 +207,18 @@ new_window 1pixel
 exec --no-startup-id setxkbmap -variant colemak
 exec --no-startup-id ~/.scripts/i3-startup.sh
 
-bindsym $mod+n exec --no-startup-id ~/.scripts/i3-switch-workspace.py next same_output
-bindsym $mod+p exec --no-startup-id ~/.scripts/i3-switch-workspace.py prev same_output
-bindsym $mod+Tab exec --no-startup-id ~/.scripts/i3-toggle-visible-workspace.py next
-bindsym $mod+Shift+Tab exec --no-startup-id ~/.scripts/i3-toggle-visible-workspace.py prev
-bindsym $mod+Shift+N exec --no-startup-id ~/.scripts/i3-switch-workspace.py next
-bindsym $mod+Shift+P exec --no-startup-id ~/.scripts/i3-switch-workspace.py prev
+bindsym $mod+n exec --no-startup-id ~/.scripts/i3-switch-workspace.py --next --same-output
+bindsym $mod+p exec --no-startup-id ~/.scripts/i3-switch-workspace.py --prev --same-output
+bindsym $mod+Tab exec --no-startup-id ~/.scripts/i3-toggle-visible-workspace.py --next
+bindsym $mod+Shift+Tab exec --no-startup-id ~/.scripts/i3-toggle-visible-workspace.py --prev
+bindsym $mod+Shift+N exec --no-startup-id ~/.scripts/i3-switch-workspace.py --next
+bindsym $mod+Shift+P exec --no-startup-id ~/.scripts/i3-switch-workspace.py --prev
 
 bindsym $mod+f exec --no-startup-id ~/.scripts/i3-container-commander.py --group-by none
 
 bindsym $mod+c exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py
-bindsym $mod+Shift+C exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py move
-bindsym $mod+Shift+X exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py send
+bindsym $mod+Shift+C exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py --move
+bindsym $mod+Shift+X exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py --send
 
 # move workspace to another monitor
 bindsym $mod+m move workspace to output left; $update_title
