@@ -207,6 +207,9 @@ new_window 1pixel
 exec --no-startup-id setxkbmap -variant colemak
 exec --no-startup-id ~/.scripts/i3-startup.sh
 
+bindsym XF86MonBrightnessUp exec --no-startup-id ~/.scripts/i3-brightness.sh up
+bindsym XF86MonBrightnessDown exec --no-startup-id ~/.scripts/i3-brightness.sh down
+
 bindsym $mod+n exec --no-startup-id ~/.scripts/i3-switch-workspace.py --next --same-output
 bindsym $mod+p exec --no-startup-id ~/.scripts/i3-switch-workspace.py --prev --same-output
 bindsym $mod+Tab exec --no-startup-id ~/.scripts/i3-toggle-visible-workspace.py --next
