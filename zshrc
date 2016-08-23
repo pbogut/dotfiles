@@ -142,6 +142,9 @@ alias pacman="pacman --color=auto"
 alias fix_terminal="stty sane"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
+vimnote() { if [ -z $1 ];then; vim ~/Notes/; else vim ~/Notes/ +"Note $1"; fi }
+alias note=vimnote
+
 alias xo="xdg-open"
 alias so="source"
 

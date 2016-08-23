@@ -133,6 +133,7 @@ if exists(':Plug')
     Plug 'archSeer/elixir.nvim', { 'for': 'elixir' }
     Plug 'zchee/deoplete-go', { 'do': 'make', 'for': 'go'}
     Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
+    Plug 'zchee/deoplete-jedi', { 'for': 'python' }
   else
   endif " if Plug installed
   if (!has('nvim') || $STY != '')
@@ -164,6 +165,8 @@ let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
 
 let g:neomake_php_enabled_makers = ['php', 'phpmd']
 
+" notes
+let g:notes_directories = [ $HOME . "/Notes/" ]
 " phpgetset config
 let g:phpgetset_insertPosition = 2 " below current block
 let b:phpgetset_insertPosition = 2 " below current block
@@ -596,6 +599,7 @@ function! ChangePaste(type, ...)
     silent exe "normal! `[v`]\"_c" . getreg(b:changepaste_register)
   endif
 endfunction
+nmap <leader>cp "+cp
 " fold adjust
 set fillchars="vert:|,fold: "
 " remove underline
