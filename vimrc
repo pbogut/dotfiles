@@ -42,6 +42,9 @@ let mapleader = "\<space>" " life changer
 augroup configgroup
   autocmd!
   autocmd FileType html :setlocal tabstop=4 shiftwidth=4
+  autocmd FileType elixir :
+        \| noremap <leader>ta :AltTestElixir<cr>
+        \| noremap <leader>tA :AltTestElixir!<cr>
   autocmd FileType php :setlocal tabstop=4 shiftwidth=4
         \| noremap <leader>ta :AltTestPhp<cr>
         \| noremap <leader>tA :AltTestPhp!<cr> " create separate function to handle file type
@@ -555,6 +558,29 @@ function! AltTestPhp(bang)
   endif
 endfunction
 command! -bang AltTestPhp :call AltTestPhp(<bang>0)
+
+" switch between lib and test file
+function! AltTestElixir(bang)
+  let s:fullpath = expand('%:p')
+  if !(s:fullpath =~ ".*\.ex$") && !(s:fullpath =~ ".*\.exs$")
+    echo("Its not a elixir file")
+    return
+  endif
+  if s:fullpath =~ ".*_test\.exs$"
+    let l:alternate = substitute(s:fullpath, '\(.*\)_test\.exs$', '\1\.ex', '')
+    let l:alternate = substitute(l:alternate, '/test/', '/lib/', '')
+  else
+    let l:alternate = substitute(s:fullpath, '\(.*\)\.ex$', '\1_test.exs', '')
+    let l:alternate = substitute(l:alternate, '/lib/', '/test/', '')
+  endif
+  if (!filereadable(l:alternate) && !a:bang)
+    echo("Alternate file not found. Use bang to force.")
+  else
+    echo (l:alternate)
+    silent execute('edit '.l:alternate)
+  endif
+endfunction
+command! -bang AltTestElixir :call AltTestElixir(<bang>0)
 
 " This allows for change paste motion cp{motion}
 nmap <silent> cp :let b:changepaste_register = v:register<cr>:set opfunc=ChangePaste<CR>g@
