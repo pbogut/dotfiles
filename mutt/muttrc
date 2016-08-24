@@ -65,9 +65,9 @@ virtual-mailboxes \
     "Inbox"     "notmuch://?query=(tag:sent or tag:inbox) and NOT tag:archive"\
     "Unread"    "notmuch://?query=tag:unread"\
     "Flagged"   "notmuch://?query=tag:flagged"\
-    "Sent"      "notmuch://?query=tag:sent"\
-    "Todo"      "notmuch://?query=tag:todo and NOT tag:done"\
-    "Projects"  "notmuch://?query=tag:project`notmuch search --output=tags not tag:_ |grep '^project/' | while read l; do echo -n " tag:$l"; done`"\
+    "Sent"      "notmuch://?query=tag:sent and not tag:archive"\
+    "Todo"      "notmuch://?query=tag:todo and not (tag:done or tag:archive)"\
+    "Projects"  "notmuch://?query=tag:project`notmuch search --output=tags not tag:_ |grep '^project/' | while read l; do echo -n " tag:$l"; done` and not tag:archive"\
     `notmuch search --output=tags not tag:_ | grep '^project/' | sed 's#\(.*\)\/\(.*\)#" \2" "notmuch://?query=tag:\1/\2"#g' | while read l; do echo -n " $l "; done` \
     "Drafts"    "notmuch://?query=tag:drafts"\
     "Archive"   "notmuch://?query=tag:archive"\
@@ -98,9 +98,10 @@ set index_format="%4C %Z %?GT?%GT& ?%?GA?%GA& ? %<[y?%<[m?%<[d?%[ %H:%M]&%[%a %d
 
 # notmuch bindings
 macro pager,index \\\\ "<vfolder-from-query>"              # looks up a hand made query
-macro index A "<modify-labels-then-hide>+archive\n"        # tag as Archived
-macro pager A "<modify-labels-then-hide>+archive\nq"       # tag as Archived
-macro index T "<modify-labels>+todo\n"
+macro index A "<modify-labels-then-hide>+archive -inbox\n"        # tag as Archived
+macro pager A "<modify-labels-then-hide>+archive -inbox\nq"       # tag as Archived
+macro index T "<modify-labels>+todo -inbox\n"                     # tag as Todo
+macro index I "<modify-labels>-inbox\n"                           # remove from inbox
 #macro index I "<modify-labels>-inbox -unread\\n"                 # removed from inbox
 #macro index S "<modify-labels-then-hide>-inbox -unread +junk\\n" # tag as Junk mail
 
