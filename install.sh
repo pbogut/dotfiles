@@ -6,7 +6,10 @@
 
 ########## Variables
 
-dir=`pwd`                    # dotfiles directory
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # dotfiles directory
+echo -n "Updating submodules ..."
+git submodule update --init
+echo "done"
 olddir=~/dotfiles_`date +%s%N`    # old dotfiles backup directory
 read -d '' files <<"EOF"
     inputrc
@@ -15,7 +18,6 @@ read -d '' files <<"EOF"
     screenrc
     vimrc
     zshrc
-    zlogin
     zshrc.d
     tmux
     tmux.conf
@@ -80,24 +82,36 @@ cd $dir
 echo "done"
 
 # create required directories
+echo "Creating missing directories"
 for directory in $directories; do
-    echo -n "Creating directory ~/$directory ..."
-    mkdir -p ~/$directory
-    echo "done"
+    if  [ ! -e ~/$directory ]; then
+        echo -en "\t~/$directory "
+        mkdir -p ~/$directory
+        echo "done"
+    fi
 done
 # move any existing dotfiles in homedir to dotfiles_old directory, then create symlinks from the homedir to any files in the ~/dotfiles directory specified in $files
+echo "Backing up current files to $olddir/"
 for file in $files; do
-    echo -n "Moving ~/.$file to $olddir/ ..."
-    mv ~/.$file $olddir/
-    echo "done"
-    echo -n "Creating symlink to $file in home directory ..."
+    if [ -e ~/.$file ]; then
+        echo -en "\t~/.$file "
+        mv ~/.$file $olddir/
+        echo "done"
+    fi
+done
+echo "Creating symlinks in home directory"
+for file in $files; do
+    echo -en "\t~/.$file "
     ln -s $dir/$file ~/.$file
     echo "done"
 done
 
-find $dir -name "*.sh" -exec chmod +x {} \;
-find $dir -name "*.zsh" -exec chmod +x {} \;
-find $dir -name "*.phar" -exec chmod +x {} \;
+echo -n "Making scripts executable ... "
+find $dir -name "*.sh" -exec chmod +x {} \; > /dev/null 2&>1
+find $dir -name "*.zsh" -exec chmod +x {} \; > /dev/null 2&>1
+find $dir -name "*.phar" -exec chmod +x {} \; > /dev/null 2&>1
+chmod +x ~/.scripts/* > /dev/null 2&>1
+echo "done"
 
 install_zsh () {
     # Test to see if zshell is installed.  If it is:
@@ -137,7 +151,5 @@ echo "Additional setup"
 echo ""
 echo "nvm:"
 echo "  curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash"
-echo "rvm:"
-echo "  curl -sSL https://get.rvm.io | bash"
 echo ""
 
