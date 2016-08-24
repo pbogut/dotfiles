@@ -638,3 +638,4 @@ let g:DisableAutoPHPFolding = 1
 
 let g:snips_author = "Pawel Bogut"
 let g:snips_github = "https://github.com/pbogut"
+silent! exec(":source " . hostname() . ".vim")
