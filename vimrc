@@ -134,6 +134,7 @@ if exists(':Plug')
     Plug 'zchee/deoplete-go', { 'do': 'make', 'for': 'go'}
     Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
+    Plug 'eugen0329/vim-esearch'
   else
   endif " if Plug installed
   if (!has('nvim') || $STY != '')
@@ -164,7 +165,13 @@ let g:neomake_airline = 1
 let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
 
 let g:neomake_php_enabled_makers = ['php', 'phpmd']
-
+" esearch
+let g:esearch = {
+      \ 'adapter':    'ag',
+      \ 'out':        'win',
+      \ 'batch_size': 1000,
+      \ 'use':        ['visual', 'hlsearch', 'last'],
+      \}
 " notes
 let g:notes_directories = [ $HOME . "/Notes/" ]
 " phpgetset config
@@ -295,6 +302,9 @@ vnoremap <silent> j gj
 vnoremap <silent> k gk
 onoremap <silent> j gj
 onoremap <silent> k gk
+" nice to have
+inoremap <c-d> <del>
+cnoremap <c-d> <del>
 " nvim now can map alt without terminal issues, new cool shortcuts commin
 if has('nvim')
   inoremap <A-a> <Esc>A
@@ -430,7 +440,7 @@ cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
 
 " Autoformat
 " PHP - pipline of few
-let g:formatdef_phppipeline = '"fmt.phar --passes=ConvertOpenTagWithEcho --indent_with_space=".&shiftwidth." - | html-beautify -s ".&shiftwidth." | phpcbf"'
+let g:formatdef_phppipeline = '"fmt.phar --passes=ConvertOpenTagWithEcho --indent_with_space=".&shiftwidth." - | phpcbf | sed ' . "'s/[ ]*$//g'" . '"'
 let g:formatters_php = ['phppipeline']
 let g:formatdef_blade = '"html-beautify -s ".&shiftwidth'
 let g:formatters_blade = ['blade']
@@ -639,3 +649,4 @@ let g:DisableAutoPHPFolding = 1
 let g:snips_author = "Pawel Bogut"
 let g:snips_github = "https://github.com/pbogut"
 silent! exec(":source " . hostname() . ".vim")
+let mapleader = "\\" " fuck you sh1ty plugin makers
