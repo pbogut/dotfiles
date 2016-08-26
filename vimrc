@@ -134,6 +134,7 @@ if exists(':Plug')
     Plug 'zchee/deoplete-go', { 'do': 'make', 'for': 'go'}
     Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
+    Plug 'pbogut/deoplete-padawan'
     Plug 'eugen0329/vim-esearch'
   else
   endif " if Plug installed
