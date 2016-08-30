@@ -256,10 +256,10 @@ map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>x :Bdelete <bar>q<cr>
 map <C-w>X :Bdelete! <bar> q<cr>
-noremap <C-w>i3j :silent call I3Focus('down', 'j')<cr>
-noremap <C-w>i3k :silent call I3Focus('up', 'k')<cr>
-noremap <C-w>i3l :silent call I3Focus('right', 'l')<cr>
-noremap <C-w>i3h :silent call I3Focus('left', 'h')<cr>
+noremap <C-w>i3j :call I3Focus('down', 'j')<cr>
+noremap <C-w>i3k :call I3Focus('up', 'k')<cr>
+noremap <C-w>i3l :call I3Focus('right', 'l')<cr>
+noremap <C-w>i3h :call I3Focus('left', 'h')<cr>
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
 snoremap <leader>d "_d
@@ -629,11 +629,13 @@ function! NeatFoldText()
   return foldtextstart . repeat(foldchar, winwidth(0)-foldtextlength) . foldtextend
 endfunction
 func! I3Focus(comando, vim_comando)
+  " clear mapping echo
+  echo("")
   let oldw = winnr()
   silent exe 'wincmd ' . a:vim_comando
   let neww = winnr()
   if oldw == neww
-    silent exe '!~/.scripts/i3-focus.py ' . a:comando . ' --skip-vim > /dev/null'
+    silent! exe '!~/.scripts/i3-focus.py ' . a:comando . ' --skip-vim > /dev/null'
   endif
 endfunction
 function! PHP__Fold()
@@ -650,5 +652,5 @@ let g:DisableAutoPHPFolding = 1
 
 let g:snips_author = "Pawel Bogut"
 let g:snips_github = "https://github.com/pbogut"
-silent! exec(":source " . hostname() . ".vim")
+silent! exec(":source ~/.vim/" . hostname() . ".vim")
 let mapleader = "\\" " fuck you sh1ty plugin makers
