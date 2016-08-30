@@ -174,6 +174,7 @@ let g:esearch = {
       \ 'batch_size': 1000,
       \ 'use':        ['visual', 'hlsearch', 'last'],
       \}
+" let g:esearch#out#win#open = 'enew'
 " notes
 let g:notes_directories = [ $HOME . "/Notes/" ]
 " phpgetset config
