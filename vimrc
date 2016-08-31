@@ -310,15 +310,11 @@ inoremap <c-d> <del>
 cnoremap <c-d> <del>
 " nvim now can map alt without terminal issues, new cool shortcuts commin
 if has('nvim')
-  inoremap <A-a> <Esc>A
-  inoremap <A-i> <Esc>I
-  noremap <A-a> <Esc>A
-  noremap <A-i> <Esc>I
-  noremap <A-l> <C-w>>
-  noremap <A-h> <C-w><
-  noremap <A-j> <C-w>-
-  noremap <A-k> <C-w>+
-  " search command history based on typed stryng
+  noremap <M-r> :call I3Focus('down', 'j')<cr>
+  noremap <M-w> :call I3Focus('up', 'k')<cr>
+  noremap <M-t> :call I3Focus('right', 'l')<cr>
+  noremap <M-a> :call I3Focus('left', 'h')<cr>
+
   cnoremap <A-k> <Up>
   cnoremap <A-j> <Down>
 endif

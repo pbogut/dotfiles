@@ -76,10 +76,10 @@ if __name__ == '__main__':
         'right': '-R'
     }
     vim_dir = {
-        'left': 'c-w i3h',
-        'down': 'c-w i3j',
-        'up': 'c-w i3k',
-        'right': 'c-w i3l'
+        'left': 'm-a',
+        'down': 'm-r',
+        'up': 'm-w',
+        'right': 'm-t'
     }
 
     current = i3.filter(nodes=[], focused=True)[0]
