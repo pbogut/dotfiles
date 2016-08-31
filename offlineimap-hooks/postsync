@@ -21,6 +21,13 @@ ls -1d --color=never ~/Maildir/*/spam | sed "s#$HOME/Maildir/#folder:#g" | xargs
 # in gmail everything is in archive, so we do this at the end
 ls -1d --color=never ~/Maildir/*/archive | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +archive -- tag:new and
 
+# tag github messages
+notmuch search --output=files from:notifications@github.com and tag:new | while read f; do
+    tag=`cat "$f" | grep '^To: ' | sed 's/^To: \([^ ]*\).*/\1/g'`
+    id=`cat "$f" | grep '^Message-ID: ' | sed 's/^Message-ID: <\([^ ]*\)>.*/\1/g'`
+    notmuch tag +$tag -- id:$id and tag:new
+done
+
 # auto archivie couses issues with gmail - wrrrr....
 #notmuch tag +archive -- date:..`date --date='6 month ago' +%Y-%m-%d`
 
