@@ -208,6 +208,7 @@ let g:phpgetset_setterTemplate =
 
 " nerdtree
 let NERDTreeQuitOnOpen=1
+let NERDTreeAutoDeleteBuffer=1
 " one actino to reaveal file and close sidebar
 function! ToggleNERDTree()
   if &buftype == 'nofile'
