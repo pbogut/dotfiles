@@ -14,11 +14,11 @@ set laststatus=2
 set completeopt=menuone
 silent! set completeopt=menuone,noselect
 set cmdheight=2
-" show existing tab with 4 spaces width
+" show existing tab with 2 spaces width
 set tabstop=2
-" when indenting with '>', use 4 spaces width
+" when indenting with '>', use 2 spaces width
 set shiftwidth=2
-" On pressing tab, insert 4 spaces
+" On pressing tab, insert 2 spaces
 set expandtab
 " scroll
 set scrolloff=3
@@ -52,6 +52,8 @@ augroup configgroup
   " autocmd FileType javascript :setlocal tabstop=4 shiftwidth=4
   autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
   autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
+  autocmd FileType css :setlocal tabstop=4 shiftwidth=4
+  autocmd FileType scss :setlocal tabstop=4 shiftwidth=4
   autocmd FileType qf :nnoremap <buffer> o <enter>
   autocmd FileType qf :nnoremap <buffer> q :q
   autocmd FileType blade :let b:commentary_format='{{-- %s --}}'
@@ -63,8 +65,6 @@ augroup configgroup
 augroup END
 " line 80 limit
 set colorcolumn=81
-
-" let g:python_host_prog='/usr/bin/python'
 
 if has("patch-7.4.314")
   set shortmess+=c
@@ -126,6 +126,7 @@ if exists(':Plug')
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   Plug 'cosminadrianpopescu/vim-sql-workbench'
   Plug 'ctrlpvim/ctrlp.vim'
+  Plug 'will133/vim-dirdiff'
   if has('nvim')
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
@@ -258,10 +259,6 @@ map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>x :Bdelete <bar>q<cr>
 map <C-w>X :Bdelete! <bar> q<cr>
-noremap <C-w>i3j :call I3Focus('down', 'j')<cr>
-noremap <C-w>i3k :call I3Focus('up', 'k')<cr>
-noremap <C-w>i3l :call I3Focus('right', 'l')<cr>
-noremap <C-w>i3h :call I3Focus('left', 'h')<cr>
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
 snoremap <leader>d "_d
@@ -311,10 +308,10 @@ inoremap <c-d> <del>
 cnoremap <c-d> <del>
 " nvim now can map alt without terminal issues, new cool shortcuts commin
 if has('nvim')
-  noremap <M-r> :call I3Focus('down', 'j')<cr>
-  noremap <M-w> :call I3Focus('up', 'k')<cr>
-  noremap <M-t> :call I3Focus('right', 'l')<cr>
-  noremap <M-a> :call I3Focus('left', 'h')<cr>
+  noremap <silent> <M-r> :call I3Focus('down', 'j')<cr>
+  noremap <silent> <M-w> :call I3Focus('up', 'k')<cr>
+  noremap <silent> <M-t> :call I3Focus('right', 'l')<cr>
+  noremap <silent> <M-a> :call I3Focus('left', 'h')<cr>
 
   cnoremap <A-k> <Up>
   cnoremap <A-j> <Down>
@@ -629,7 +626,6 @@ function! NeatFoldText()
 endfunction
 func! I3Focus(comando, vim_comando)
   " clear mapping echo
-  echo("")
   let oldw = winnr()
   silent exe 'wincmd ' . a:vim_comando
   let neww = winnr()
