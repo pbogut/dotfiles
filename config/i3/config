@@ -205,7 +205,7 @@ new_window 1pixel
 
 # fake-outputs 3288x1080+0+0
 # exec --no-startup-id i3-msg 'workspace 1; exec /usr/bin/roxterm'
-exec --no-startup-id setxkbmap -variant colemak
+exec --no-startup-id setxkbmap us -variant colemak
 exec --no-startup-id ~/.scripts/i3-startup.sh
 
 bindsym XF86MonBrightnessUp exec --no-startup-id ~/.scripts/i3-brightness.sh up
