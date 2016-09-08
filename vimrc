@@ -107,8 +107,8 @@ if exists(':Plug')
   Plug 'christoomey/vim-tmux-navigator'
   Plug 'sirver/ultisnips'
   Plug 'sheerun/vim-polyglot'
-  " Plug 'joonty/vdebug', { 'for': 'php' }
-  Plug 'benekastah/neomake', { 'on': 'Neomake' }
+  Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
+  Plug 'benekastah/neomake'
   Plug 'Chiel92/vim-autoformat'
   Plug 'alvan/vim-closetag'
   Plug 'edsono/vim-matchit'
