@@ -144,6 +144,14 @@ alias fix_terminal="stty sane"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
 vimnote() { if [ -z $1 ];then; vim ~/Notes/; else vim ~/Notes/ +"Note $1"; fi }
+dirdiff() {
+  if [[ -z  $2 ]]; then
+    echo "Usage: dirdiff /path/to/dir/one /path/to/dir/two"
+  else
+    echo ":bw! | DirDiff $1 $2" | nvim /tmp/skip_session
+  fi
+}
+
 alias note=vimnote
 
 alias xo="xdg-open"
@@ -176,6 +184,8 @@ alias dmenu_clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_conten
 alias sc="bash -c \"\`cat ~/.commands | fzf\`\""
 alias e="exit"
 alias m="ncmpcpp"
+alias t="tmux"
+alias ti="tmuxinator"
 # exit shell after closing ncmpcpp
 alias mq="ncmpcpp && exit"
 

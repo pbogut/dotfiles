@@ -164,10 +164,30 @@ augroup neomakegroup
   autocmd BufWritePost * Neomake
 augroup END
 
-let g:neomake_airline = 1
 let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
+let g:neomake_warning_sign = {'texthl': 'WarningMsg'}
+
+function! NeomakeSetWarningType(entry)
+  let a:entry.type = "W"
+endfunction
+function! NeomakeSetInfoType(entry)
+  let a:entry.type = "I"
+endfunction
+function! NeomakeSetMessageType(entry)
+  let a:entry.type = "M"
+endfunction
 
 let g:neomake_php_enabled_makers = ['php', 'phpmd']
+let g:neomake_php_phpcs_maker = neomake#makers#ft#php#phpcs()
+let g:neomake_php_phpcs_maker.postprocess = function('NeomakeSetMessageType')
+let g:neomake_php_phpmd_maker = neomake#makers#ft#php#phpmd()
+let g:neomake_php_phpmd_maker.postprocess = function('NeomakeSetWarningType')
+
+let g:neomake_xml_enabled_makers = ['xmllint']
+let g:neomake_xml_xmllint_maker = {
+      \ 'errorformat': '%A%f:%l:\ %m'
+      \}
+
 " esearch
 let g:esearch = {
       \ 'adapter':    'ag',
@@ -466,6 +486,7 @@ nmap <silent> <leader>tn :TestNearest<CR>
 nmap <silent> <leader>tf :TestFile<CR>
 nmap <silent> <leader>ts :TestSuite<CR>
 nmap <silent> <leader>tl :TestLast<CR>
+nmap <silent> <leader>tt :TestLast<CR>
 nmap <silent> <leader>tv :TestVisit<CR>
 " to close and go back to Vim perss <c-k> or <c-j>
 nmap <silent> <leader>ti :call InspectTest()<CR>
@@ -484,6 +505,9 @@ endfunction
 let g:test#custom_strategies = {'inspect': function('InspectTestStrategy')}
 let g:test#strategy = 'vimux'
 function! InspectTest()
+  " how about add new shortcut for q which will do the action below? should be
+  " awesome
+  call VimuxSendText('tmux resize-pane -Z; tmux select-pane -U')
   call VimuxZoomRunner()
   call VimuxInspectRunner()
 endfunction
