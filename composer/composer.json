@@ -10,6 +10,7 @@
     "phpfmt/fmt": "^19.6",
     "phpmd/phpmd": "^2.4",
     "squizlabs/php_codesniffer": "^2.6.2",
-    "composer/composer": "^1.0@beta"
+    "composer/composer": "^1.0@beta",
+    "phpunit/phpunit": "^5.5"
   }
 }

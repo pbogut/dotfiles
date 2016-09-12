@@ -43,7 +43,6 @@ read -d '' files <<"EOF"
     config/ranger/plugins/devicons_linemode.py
     config/ncmpcpp/config
     config/dircolors-solarized
-    vim/bundle/Vundle.vim
     vim/autoload/plug.vim
     i3blocks.conf
     composer/composer.json
@@ -56,7 +55,6 @@ read -d '' directories <<"EOF"
     .vim/undofiles
     .vim/swapfiles
     .vim/backupfiles
-    .vim/bundle
     .vim/autoload
     .config/nvim
     .config/i3
