@@ -34,6 +34,7 @@ set $update_title exec --no-startup-id pkill -SIGRTMIN+10 i3blocks
 
 # start a terminal
 bindsym $mod+Return exec --no-startup-id ~/.scripts/roxterm-in-current-dir.sh
+bindsym $mod+Ctrl+Return exec --no-startup-id ~/.scripts/roxterm-in-current-dir.sh --tmux
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -202,6 +203,11 @@ bar {
 
 #client.focused  #4c7899  #F6C050  #d3d3d3
 new_window 1pixel
+
+# assign apps to specific workspaces
+set $dbeaver_workspace 9
+assign [title="^DBeaver" class="^SWT$"] $dbeaver_workspace
+assign [title="^Dbeaver$"] $dbeaver_workspace
 
 # fake-outputs 3288x1080+0+0
 # exec --no-startup-id i3-msg 'workspace 1; exec /usr/bin/roxterm'

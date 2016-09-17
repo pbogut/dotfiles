@@ -87,7 +87,7 @@ if exists(':Plug')
   Plug 'tpope/vim-endwise'
   Plug 'tpope/vim-unimpaired'
   Plug 'tpope/vim-obsession'
-  Plug 'pbogut/vim-dispatch' " panel size patch
+  Plug 'tpope/vim-dispatch'
   Plug 'dhruvasagar/vim-prosession'
   Plug 'terryma/vim-expand-region'
   Plug 'scrooloose/nerdtree', { 'on': ['NERDTreeClose', 'NERDTreeFind'] }
@@ -127,6 +127,8 @@ if exists(':Plug')
   Plug 'cosminadrianpopescu/vim-sql-workbench'
   Plug 'ctrlpvim/ctrlp.vim'
   Plug 'will133/vim-dirdiff'
+  Plug 'dbakker/vim-projectroot'
+  Plug 'osyo-manga/vim-over'
   if has('nvim')
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
@@ -158,16 +160,65 @@ filetype plugin indent on    " required
 
 " closetag
 let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml"
+" vim over
+let g:over_enable_cmd_window = 0
 " Neomake
 augroup neomakegroup
   autocmd!
   autocmd BufWritePost * Neomake
+  autocmd BufWritePre * call NeomakePreWrite()
+	autocmd FileType php call NeomakeInitPhp()
 augroup END
 
-let g:neomake_airline = 1
+function! NeomakePreWrite()
+  if exists('b:neomake_php_phpmd_maker_args')
+    let g:neomake_php_phpmd_maker.args = b:neomake_php_phpmd_maker_args
+  endif
+endfunction
+
+function! NeomakeInitPhp()
+  if get(b:, 'neomake_php_init')
+    return
+  endif
+  let b:neomake_php_init = 1
+
+  let phpmd_xml_file = projectroot#guess() . '/phpmd.xml'
+  if filereadable(phpmd_xml_file)
+    let b:neomake_php_phpmd_maker_args = ['%:p', 'text', phpmd_xml_file]
+  else
+    let b:neomake_php_phpmd_maker_args = ['%:p', 'text', 'codesize,design,unusedcode,naming']
+  endif
+endfunction
+
 let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
+let g:neomake_warning_sign = {'texthl': 'WarningMsg'}
+" highlight NeomakeErrorSign ctermfg=223 ctermbg=223 " cant make it work ;/
+" let g:neomake_error_sign = {'text': '✖', 'texthl': 'NeomakeErrorSign'}
+" let g:neomake_warning_sign = {'text': '⚠', 'texthl': 'NeomakeWarningSign'}
+" let g:neomake_message_sign = {'text': '➤', 'texthl': 'NeomakeMessageSign'}
+" let g:neomake_info_sign = {'text': 'ℹ', 'texthl': 'NeomakeInfoSign'}
+
+function! NeomakeSetWarningType(entry)
+  let a:entry.type = "W"
+endfunction
+function! NeomakeSetInfoType(entry)
+  let a:entry.type = "I"
+endfunction
+function! NeomakeSetMessageType(entry)
+  let a:entry.type = "M"
+endfunction
 
 let g:neomake_php_enabled_makers = ['php', 'phpmd']
+let g:neomake_php_phpcs_maker = neomake#makers#ft#php#phpcs()
+let g:neomake_php_phpcs_maker.postprocess = function('NeomakeSetMessageType')
+let g:neomake_php_phpmd_maker = neomake#makers#ft#php#phpmd()
+let g:neomake_php_phpmd_maker.postprocess = function('NeomakeSetWarningType')
+
+let g:neomake_xml_enabled_makers = ['xmllint']
+let g:neomake_xml_xmllint_maker = {
+      \ 'errorformat': '%A%f:%l:\ %m'
+      \}
+
 " esearch
 let g:esearch = {
       \ 'adapter':    'ag',
@@ -178,6 +229,9 @@ let g:esearch = {
 " let g:esearch#out#win#open = 'enew'
 " notes
 let g:notes_directories = [ $HOME . "/Notes/" ]
+" projectroot
+let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
+      \ '_darcs', 'build.xml', 'composer.json']
 " phpgetset config
 let g:phpgetset_insertPosition = 2 " below current block
 let b:phpgetset_insertPosition = 2 " below current block
@@ -239,11 +293,11 @@ nnoremap <leader>sv :source $MYVIMRC<CR>
 nnoremap <leader>ol :lopen<cr>
 nnoremap <leader>oq :copen<cr>
 nnoremap <leader>r :call ToggleNERDTree()<cr>
-nnoremap <leader>b :Buffers<cr>
-nnoremap <leader>m :FZFMru<cr>
-nnoremap <leader>f :call FzfFilesAg()<cr>
-nnoremap <leader>F :Files<cr>
-nnoremap <leader>w :call WriteOrCr()<cr>
+nnoremap <silent> <leader>b :Buffers<cr>
+nnoremap <silent> <leader>m :FZFMru<cr>
+nnoremap <silent> <leader>f :call FzfFilesAg()<cr>
+nnoremap <silent> <leader>F :Files<cr>
+nnoremap <silent> <leader>w :call WriteOrCr()<cr>
 nnoremap <leader>a :Autoformat<cr>
 nnoremap <leader>z :call PHP__Fold()<cr>
 map <leader>_ <Plug>(operator-camelize-toggle)
@@ -466,6 +520,7 @@ nmap <silent> <leader>tn :TestNearest<CR>
 nmap <silent> <leader>tf :TestFile<CR>
 nmap <silent> <leader>ts :TestSuite<CR>
 nmap <silent> <leader>tl :TestLast<CR>
+nmap <silent> <leader>tt :TestLast<CR>
 nmap <silent> <leader>tv :TestVisit<CR>
 " to close and go back to Vim perss <c-k> or <c-j>
 nmap <silent> <leader>ti :call InspectTest()<CR>
@@ -484,6 +539,9 @@ endfunction
 let g:test#custom_strategies = {'inspect': function('InspectTestStrategy')}
 let g:test#strategy = 'vimux'
 function! InspectTest()
+  " how about add new shortcut for q which will do the action below? should be
+  " awesome
+  call VimuxSendText('tmux resize-pane -Z; tmux select-pane -U')
   call VimuxZoomRunner()
   call VimuxInspectRunner()
 endfunction

@@ -32,7 +32,9 @@ def is_vim_in_tmux(session_id):
     return current_command in ['vim',
                                'nvim',
                                'vimdiff',
+                               'dirdiff',
                                b'vimdiff\n',
+                               b'dirdiff\n',
                                b'vim\n',
                                b'nvim\n']
 
