@@ -144,7 +144,7 @@ alias fix_terminal="stty sane"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
 vimnote() { if [ -z $1 ];then; vim ~/Notes/; else vim ~/Notes/ +"Note $1"; fi }
-dirdiff() {
+vimdirdiff() {
   if [[ -z  $2 ]]; then
     echo "Usage: dirdiff /path/to/dir/one /path/to/dir/two"
   else
@@ -153,6 +153,7 @@ dirdiff() {
 }
 
 alias note=vimnote
+alias dirdiff=vimdirdiff
 
 alias xo="xdg-open"
 alias so="source"
@@ -237,6 +238,7 @@ else
   export EDITOR=nvim
   alias vim="nvim"
 fi
+export PAGER="less"
 # golang
 export GOPATH="$HOME/.gocode"
 export PATH="$PATH:$HOME/.gocode/bin"

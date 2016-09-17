@@ -27,6 +27,7 @@ demonize textaid "perl $scriptpath/edit-server.pl"
 demonize mopidy mopidy
 demonize rescuetime rescuetime
 demonize nm-applet nm-applet
+demonize twmnd twmnd
 
 # sepcific for the computer
 if [ "$host_name" == "darkbox" ]; then # pc at work
