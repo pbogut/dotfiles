@@ -43,6 +43,7 @@ read -d '' files <<"EOF"
     config/ranger/plugins/devicons_linemode.py
     config/ncmpcpp/config
     config/dircolors-solarized
+    config/twmn/twmn.conf
     vim/autoload/plug.vim
     i3blocks.conf
     composer/composer.json
@@ -62,6 +63,7 @@ read -d '' directories <<"EOF"
     .config/ranger/plugins
     .config/autostart
     .config/ncmpcpp
+    .config/twmn
     .weechat
     .composer
     .mutt
