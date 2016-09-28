@@ -40,9 +40,11 @@ URxvt.keysym.M-s:           perl:keyboard-select:search
 URxvt.clipboard.autocopy:   true
 URxvt.clipboard.copycmd:    xsel -ib
 URxvt.clipboard.pastecmd:   xsel -ob
-URxvt.keysym.M-c:   perl:clipboard:copy
-URxvt.keysym.M-v:   perl:clipboard:paste
-URxvt.keysym.M-C-v: perl:clipboard:paste_escaped
+URxvt.keysym.C-C:           perl:clipboard:copy
+URxvt.keysym.C-V:           perl:clipboard:paste
+URxvt.keysym.C-A-V:         perl:clipboard:paste_escaped
+
+URxvt.iso14755:             false
 
 !!Source http://github.com/altercation/solarized
 
