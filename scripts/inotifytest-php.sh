@@ -26,6 +26,9 @@ inotifywait -rqme close_write --format '%w%f' . | while read -r file; do {
 
   # run test file and print any errors or test fails
   php vendor/bin/phpunit "$file"
+  test_exit_status=$?
+  test $test_exit_status -eq 0 && notify-send -i /usr/share/icons/gnome/48x48/emblems/emblem-default.png "Tests passed"
+  test $test_exit_status -eq 0 || notify-send -i /usr/share/icons/gnome/48x48/emblems/emblem-important.png "Tests failed"
 
 } </dev/null
 done
