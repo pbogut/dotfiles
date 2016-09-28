@@ -33,8 +33,8 @@ floating_modifier $mod
 set $update_title exec --no-startup-id pkill -SIGRTMIN+10 i3blocks
 
 # start a terminal
-bindsym $mod+Return exec --no-startup-id ~/.scripts/roxterm-in-current-dir.sh
-bindsym $mod+Ctrl+Return exec --no-startup-id ~/.scripts/roxterm-in-current-dir.sh --tmux
+bindsym $mod+Return exec --no-startup-id ~/.scripts/i3-term-in-current-dir.sh
+bindsym $mod+Ctrl+Return exec --no-startup-id ~/.scripts/i3-term-in-current-dir.sh --tmux
 
 # kill focused window
 bindsym $mod+Shift+q kill
