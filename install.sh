@@ -45,6 +45,7 @@ read -d '' files <<"EOF"
     config/ncmpcpp/config
     config/dircolors-solarized
     config/twmn/twmn.conf
+    config/feh/keys
     vim/autoload/plug.vim
     vim/after/plugin/abolish.vim
     i3blocks.conf
@@ -69,6 +70,7 @@ read -d '' directories <<"EOF"
     .config/autostart
     .config/ncmpcpp
     .config/twmn
+    .config/feh
     .weechat
     .composer
     .mutt
