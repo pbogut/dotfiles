@@ -32,6 +32,7 @@ read -d '' files <<"EOF"
     weechat/alias.conf
     weechat/weechat.conf
     config/nvim/init.vim
+    config/nvim/after/plugin/abolish.vim
     config/roxterm.sourceforge.net
     config/autostart/autostart.desktop
     config/autostart/rescuetime.desktop
@@ -45,6 +46,7 @@ read -d '' files <<"EOF"
     config/dircolors-solarized
     config/twmn/twmn.conf
     vim/autoload/plug.vim
+    vim/after/plugin/abolish.vim
     i3blocks.conf
     composer/composer.json
     mutt/muttrc
@@ -58,7 +60,9 @@ read -d '' directories <<"EOF"
     .vim/swapfiles
     .vim/backupfiles
     .vim/autoload
+    .vim/after/plugin
     .config/nvim
+    .config/nvim/after/plugin
     .config/i3
     .config/ranger
     .config/ranger/plugins
