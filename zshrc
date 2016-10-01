@@ -157,6 +157,8 @@ alias dirdiff=vimdirdiff
 
 alias xo="xdg-open"
 alias so="source"
+alias clone="~/.scripts/term-in-current-dir.sh"
+alias c="clone"
 
 alias mutt="LC_ALL=en_GB.utf8 screen -U -D -RR mutt mutt"
 alias ncmpcpp="LC_ALL=en_GB.utf8 screen -U -D -RR ncmpcpp ncmpcpp"
@@ -239,6 +241,7 @@ else
   alias vim="nvim"
 fi
 export PAGER="less"
+export TERMINAL="urxvt"
 # golang
 export GOPATH="$HOME/.gocode"
 export PATH="$PATH:$HOME/.gocode/bin"

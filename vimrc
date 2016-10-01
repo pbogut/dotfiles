@@ -88,6 +88,7 @@ if exists(':Plug')
   Plug 'tpope/vim-unimpaired'
   Plug 'tpope/vim-obsession'
   Plug 'tpope/vim-dispatch'
+  Plug 'tpope/vim-abolish'
   Plug 'dhruvasagar/vim-prosession'
   Plug 'terryma/vim-expand-region'
   Plug 'scrooloose/nerdtree', { 'on': ['NERDTreeClose', 'NERDTreeFind'] }
@@ -120,7 +121,6 @@ if exists(':Plug')
   Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
   " Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
   Plug 'kana/vim-operator-user'
-  Plug 'tyru/operator-camelize.vim'
   Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
   Plug 'rhysd/vim-grammarous'
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
@@ -128,6 +128,7 @@ if exists(':Plug')
   Plug 'ctrlpvim/ctrlp.vim'
   Plug 'will133/vim-dirdiff'
   Plug 'dbakker/vim-projectroot'
+  Plug 'AndrewRadev/switch.vim'
   Plug 'osyo-manga/vim-over'
   if has('nvim')
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -140,8 +141,10 @@ if exists(':Plug')
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
     Plug 'pbogut/deoplete-padawan'
     Plug 'eugen0329/vim-esearch'
-  else
   endif " if Plug installed
+  if has('nvim') || has('vim8')
+    Plug 'metakirby5/codi.vim'
+  endif
   if (!has('nvim') || $STY != '')
     Plug 'altercation/vim-colors-solarized'
   else
@@ -218,7 +221,9 @@ let g:neomake_xml_enabled_makers = ['xmllint']
 let g:neomake_xml_xmllint_maker = {
       \ 'errorformat': '%A%f:%l:\ %m'
       \}
-
+" sqlworkbench
+let g:sw_config_dir = $HOME . "/.sqlworkbench/"
+let g:sw_exe = "/opt/SQLWorkbench/sqlwbconsole.sh"
 " esearch
 let g:esearch = {
       \ 'adapter':    'ag',
@@ -226,7 +231,7 @@ let g:esearch = {
       \ 'batch_size': 1000,
       \ 'use':        ['visual', 'hlsearch', 'last'],
       \}
-" let g:esearch#out#win#open = 'enew'
+let g:esearch#out#win#open = 'enew'
 " notes
 let g:notes_directories = [ $HOME . "/Notes/" ]
 " projectroot
@@ -300,7 +305,6 @@ nnoremap <silent> <leader>F :Files<cr>
 nnoremap <silent> <leader>w :call WriteOrCr()<cr>
 nnoremap <leader>a :Autoformat<cr>
 nnoremap <leader>z :call PHP__Fold()<cr>
-map <leader>_ <Plug>(operator-camelize-toggle)
 " vim is getting ^_ when pressing ^/, so I've mapped both
 nmap <C-_> gcc<down>^
 nmap <C-/> gcc<down>^
