@@ -3,11 +3,12 @@
 !-------------------------------------------------------------------------------
 
 URxvt.depth:                32
-!URxvt.geometry:             90x30
+URxvt*buffered:             false
+! URxvt.geometry:             90x30
 URxvt.transparent:          false
 URxvt.fading:               0
-! URxvt.urgentOnBell:         true
-! URxvt.visualBell:           true
+URxvt.urgentOnBell:         false
+URxvt.visualBell:           false
 URxvt.loginShell:           true
 ! URxvt.saveLines:            50
 ! URxvt.internalBorder:       3
