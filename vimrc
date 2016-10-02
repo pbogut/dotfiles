@@ -49,6 +49,7 @@ augroup configgroup
         \| noremap <leader>ta :AltTestPhp<cr>
         \| noremap <leader>tA :AltTestPhp!<cr> " create separate function to handle file type
         \| :let b:commentary_format='// %s'
+  autocmd FileType go :setlocal expandtab!
   " autocmd FileType javascript :setlocal tabstop=4 shiftwidth=4
   autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
   autocmd FileType sh :setlocal tabstop=4 shiftwidth=4

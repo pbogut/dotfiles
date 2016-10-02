@@ -19,6 +19,7 @@ killall xcape -9 > /dev/null 2>&1
 xcape -e 'Caps_Lock=Escape'
 
 # daemons
+mails-go-web -r 'notmuch search --output=files id:%s' > /dev/null 2>&1 &
 anamnesis --start > /dev/null 2>&1
 insync start > /dev/null 2>&1
 compton -b
