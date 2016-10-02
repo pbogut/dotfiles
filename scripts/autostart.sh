@@ -22,7 +22,7 @@ xcape -e 'Caps_Lock=Escape'
 mails-go-web -r 'notmuch search --output=files id:%s' > /dev/null 2>&1 &
 anamnesis --start > /dev/null 2>&1
 insync start > /dev/null 2>&1
-compton -b
+compton -b --xrender-sync-fence --xrender-sync
 demonize redshift 'redshift-gtk'
 demonize textaid "perl $scriptpath/edit-server.pl"
 demonize mopidy mopidy
