@@ -98,11 +98,12 @@ set index_format="%4C %Z %?GT?%GT& ?%?GA?%GA& ? %<[y?%<[m?%<[d?%[ %H:%M]&%[%a %d
 # notmuch bindings
 macro pager,index \\\\ "<vfolder-from-query>"              # looks up a hand made query
 macro pager,index \` "<modify-labels>"                     # change notmuch labels
-macro index A "<modify-labels-then-hide>+archive -inbox\n"        # tag as Archived
-macro pager A "<modify-labels-then-hide>+archive -inbox\nq"       # tag as Archived
-macro index T "<modify-labels>+todo -inbox\n"                     # tag as Todo
-macro index I "<modify-labels>-inbox\n"                           # remove from inbox
-#macro index I "<modify-labels>-inbox -unread\\n"                 # removed from inbox
+macro index A "<modify-labels-then-hide>+archive -inbox\n" # tag as Archived
+macro pager A "qA"                                         # tag as Archived
+macro attach A "qA"                                        # tag as Archived
+macro index T "<modify-labels>+todo -inbox\n"              # tag as Todo
+macro index I "<modify-labels>-inbox\n"                    # remove from inbox
+#macro index I "<modify-labels>-inbox -unread\\n"          # removed from inbox
 #macro index S "<modify-labels-then-hide>-inbox -unread +junk\\n" # tag as Junk mail
 
 # quick jump between boxes
