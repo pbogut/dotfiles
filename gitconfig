@@ -19,6 +19,7 @@
     an = add -N
     rmc = rm --cached
     cob = checkout -b
+    cl = "!. ~/.githelpers && git_clone_to_projects"
     #Create branch
     cb = checkout -b
     #Gary's aliases

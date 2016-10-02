@@ -64,3 +64,12 @@ pretty_git_log() {
         fi
 }
 
+git_clone_to_projects() {
+  if [[ "$2" == "" ]];then
+    dest="$HOME/Projects/`echo "$1" | sed 's#[^@]*@##' | sed 's#^\(https\|http\)://##g' | sed 's#:#/#g'`"
+  else
+    dest="$2"
+  fi
+  git clone $1 $dest
+}
+
