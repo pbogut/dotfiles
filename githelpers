@@ -70,6 +70,15 @@ git_clone_to_projects() {
   else
     dest="$2"
   fi
-  git clone $1 $dest
+  if [[ -n $1 ]];then
+      git clone $1 $dest
+  else
+      echo "You must specify a repository to clone."
+      echo
+      echo "usage: git cl <repo> [<dir>]"
+      echo
+      echo "If no dir provided then ~/Projects/<git-host>/<repo-owner>/<repo-name> is used."
+      echo
+  fi
 }
 
