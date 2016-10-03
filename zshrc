@@ -185,8 +185,10 @@ alias dmenu_clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_conten
             | xclip -in -selection clipboard"
 # shortcuts
 alias sc="bash -c \"\`cat ~/.commands | fzf\`\""
-alias e="exit"
+alias q="exit"
 alias m="ncmpcpp"
+alias i="ssh-weechat"
+alias e="mutt"
 alias t="tmux"
 alias ti="tmuxinator"
 # exit shell after closing ncmpcpp
@@ -220,9 +222,11 @@ if [ -n "$SSH_CLIENT"  ] || [ -n "$SSH_TTY"  ]; then
   #diferent host color when ssh
   HOST_COLOR="%F{003}"
   #default tmux bind when ssh (so I can use it remotly and localy)
-  tmux unbind C-a 2>&1 > /dev/null
-  tmux set -g prefix C-b 2>&1 > /dev/null
-  tmux bind C-b send-prefix 2>&1 > /dev/null
+  if [[ ! -z "$TMUX"  ]]; then
+    tmux unbind C-a 2>&1 > /dev/null
+    tmux set -g prefix C-b 2>&1 > /dev/null
+    tmux bind C-b send-prefix 2>&1 > /dev/null
+  fi
 fi
 
 export PATH="$PATH:$HOME/.composer/vendor/bin"
