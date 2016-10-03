@@ -14,6 +14,8 @@ function demonize {
     fi
 }
 
+# numlock
+numlockx on
 # make use of the useless capslock
 killall xcape -9 > /dev/null 2>&1
 xcape -e 'Caps_Lock=Escape'

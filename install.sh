@@ -114,11 +114,11 @@ for file in $files; do
 done
 
 echo -n "Making scripts executable ... "
-find $dir -name "*.sh" -exec chmod +x {} \; > /dev/null 2&>1
-find $dir -name "*.zsh" -exec chmod +x {} \; > /dev/null 2&>1
-find $dir -name "*.phar" -exec chmod +x {} \; > /dev/null 2&>1
-chmod +x ~/.scripts/* > /dev/null 2&>1
-chmod +x ~/.offlineimap-hooks/* > /dev/null 2&>1
+find $dir -name "*.sh" -exec chmod +x {} \; > /dev/null 2>&1
+find $dir -name "*.zsh" -exec chmod +x {} \; > /dev/null 2>&1
+find $dir -name "*.phar" -exec chmod +x {} \; > /dev/null 2>&1
+chmod +x ~/.scripts/* > /dev/null 2>&1
+chmod +x ~/.offlineimap-hooks/* > /dev/null 2>&1
 echo "done"
 
 install_zsh () {
