@@ -44,6 +44,7 @@ URxvt.clipboard.pastecmd:   xsel -ob
 URxvt.keysym.C-C:           perl:clipboard:copy
 URxvt.keysym.C-V:           perl:clipboard:paste
 URxvt.keysym.C-A-V:         perl:clipboard:paste_escaped
+URxvt.keysym.A-p:           perl:clipboard:paste
 
 URxvt.iso14755:             false
 
