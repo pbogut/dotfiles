@@ -72,7 +72,11 @@ vim_ps1() {
 precmd() {
   RPROMPT=$vim_ins_mode && VIMODE_COLOR="003"
   vim_ps1
+  # set title
   print -Pn "\e]0;%n@%m:%~\a"
+}
+preexec() {
+  print -Pn "\033]0;%n@%m:$1\007"
 }
 zle-keymap-select() {
   RPROMPT=$vim_ins_mode && VIMODE_COLOR="003"

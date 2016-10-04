@@ -42,12 +42,13 @@ let mapleader = "\<space>" " life changer
 augroup configgroup
   autocmd!
   autocmd FileType html :setlocal tabstop=4 shiftwidth=4
-  autocmd FileType elixir :
-        \| noremap <leader>ta :AltTestElixir<cr>
-        \| noremap <leader>tA :AltTestElixir!<cr>
-  autocmd FileType php :setlocal tabstop=4 shiftwidth=4
-        \| noremap <leader>ta :AltTestPhp<cr>
-        \| noremap <leader>tA :AltTestPhp!<cr> " create separate function to handle file type
+  autocmd FileType elixir
+        \  noremap <buffer> <leader>ta :AltTestElixir<cr>
+        \| noremap <buffer> <leader>tA :AltTestElixir!<cr>
+  autocmd FileType php
+        \  setlocal tabstop=4 shiftwidth=4
+        \| noremap <buffer> <leader>ta :AltTestPhp<cr>
+        \| noremap <buffer> <leader>tA :AltTestPhp!<cr> " create separate function to handle file type
         \| :let b:commentary_format='// %s'
   autocmd FileType go :setlocal expandtab!
   " autocmd FileType javascript :setlocal tabstop=4 shiftwidth=4
@@ -141,7 +142,7 @@ if exists(':Plug')
     Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
     Plug 'pbogut/deoplete-padawan'
-    Plug 'eugen0329/vim-esearch'
+    " Plug 'eugen0329/vim-esearch'
   endif " if Plug installed
   if has('nvim') || has('vim8')
     Plug 'metakirby5/codi.vim'
@@ -275,7 +276,7 @@ function! ToggleNERDTree()
   if &buftype == 'nofile'
     :NERDTreeClose
   else
-    :NERDTreeFind
+    silent! :NERDTreeFind
   endif
 endfunction
 " write or select when in command mode
@@ -711,4 +712,3 @@ let g:DisableAutoPHPFolding = 1
 let g:snips_author = "Pawel Bogut"
 let g:snips_github = "https://github.com/pbogut"
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
-let mapleader = "\\" " fuck you sh1ty plugin makers
