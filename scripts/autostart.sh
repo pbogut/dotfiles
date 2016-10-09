@@ -19,6 +19,9 @@ numlockx on
 # make use of the useless capslock
 killall xcape -9 > /dev/null 2>&1
 xcape -e 'Caps_Lock=Escape'
+xcape -e 'Control_L=Escape'
+xcape -e 'Shift_L=parenleft'
+xcape -e 'Shift_R=parenright'
 
 # daemons
 mails-go-web -r 'notmuch search --output=files id:%s' > /dev/null 2>&1 &

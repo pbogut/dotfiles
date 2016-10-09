@@ -121,7 +121,6 @@ if exists(':Plug')
   Plug 'janko-m/vim-test'
   Plug 'benmills/vimux'
   Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
-  " Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
   Plug 'kana/vim-operator-user'
   Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
   Plug 'rhysd/vim-grammarous'
@@ -137,7 +136,7 @@ if exists(':Plug')
     Plug 'junegunn/fzf.vim'
     Plug 'pbogut/fzf-mru.vim'
     Plug 'Shougo/deoplete.nvim'
-    Plug 'archSeer/elixir.nvim', { 'for': 'elixir' }
+    Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
     Plug 'zchee/deoplete-go', { 'do': 'make', 'for': 'go'}
     Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }

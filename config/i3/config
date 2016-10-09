@@ -214,6 +214,8 @@ assign [title="^Dbeaver$"] $dbeaver_workspace
 exec --no-startup-id setxkbmap us -variant colemak
 exec --no-startup-id ~/.scripts/i3-startup.sh
 
+bindsym Ctrl+Shift+Alt+space exec --no-startup-id setxkbmap pl;
+
 bindsym XF86MonBrightnessUp exec --no-startup-id ~/.scripts/i3-brightness.sh up
 bindsym XF86MonBrightnessDown exec --no-startup-id ~/.scripts/i3-brightness.sh down
 
