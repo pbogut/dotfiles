@@ -355,9 +355,9 @@ noremap <leader>sa :exec "Autoformta ".&syntax<cr>
 " nicer wrapline navigation
 noremap <silent> j gj
 noremap <silent> k gk
-noremap  <silent> 0 g0
-noremap  <silent> $ g$
-noremap  <silent> ^ g^
+" noremap  <silent> 0 g0
+" noremap  <silent> $ g$
+" noremap  <silent> ^ g^
 vnoremap <silent> j gj
 vnoremap <silent> k gk
 onoremap <silent> j gj

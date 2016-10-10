@@ -31,6 +31,8 @@ floating_modifier $mod
 
 # Update i3status on i3bar
 set $update_title exec --no-startup-id pkill -SIGRTMIN+10 i3blocks
+# Update keyboard layout on i3bar
+set $update_keylayout exec --no-startup-id pkill -SIGRTMIN+12 i3blocks
 
 # start a terminal
 bindsym $mod+Return exec --no-startup-id ~/.scripts/i3-term-in-current-dir.sh
@@ -214,7 +216,7 @@ assign [title="^Dbeaver$"] $dbeaver_workspace
 exec --no-startup-id setxkbmap us -variant colemak
 exec --no-startup-id ~/.scripts/i3-startup.sh
 
-bindsym Ctrl+Shift+Alt+space exec --no-startup-id setxkbmap pl;
+bindsym Mod1+Shift+Ctrl+space exec --no-startup-id ~/.scripts/i3-keyboard-layout-toggle.sh; $update_keylayout
 
 bindsym XF86MonBrightnessUp exec --no-startup-id ~/.scripts/i3-brightness.sh up
 bindsym XF86MonBrightnessDown exec --no-startup-id ~/.scripts/i3-brightness.sh down
