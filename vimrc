@@ -313,7 +313,7 @@ vmap <C-_> gc
 vmap <C-/> gc
 " surround
 vmap s S
-nmap <bs> :TmuxNavigateLeft<cr>
+nmap <silent> <bs> :TmuxNavigateLeft<cr>
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>x :Bdelete <bar>q<cr>
@@ -345,6 +345,12 @@ snoremap <leader>p "+p
 nnoremap <leader>P "+P
 vnoremap <leader>P "+P
 snoremap <leader>P "+P
+nnoremap <leader><leader>p "*p
+vnoremap <leader><leader>p "*p
+snoremap <leader><leader>p "*p
+nnoremap <leader><leader>P "*P
+vnoremap <leader><leader>P "*P
+snoremap <leader><leader>P "*P
 noremap <leader>sh :set syntax=html<cr>
 noremap <leader>sp :set syntax=php<cr>
 noremap <leader>sr :set syntax=ruby<cr>
@@ -386,7 +392,8 @@ nnoremap <leader>gp <Plug>GitGutterPreviewHunk
 nnoremap <leader>gr <Plug>GitGutterRevertHunk
 nnoremap <leader>gstage <Plug>GitGutterStageHunk
 " Reload Browser
-iabbrev </ </<C-X><C-O><C-n>
+" iabbrev </ </<C-X><C-O><C-n>
+inoremap <silent> </ </<C-X><C-O><C-n><esc>mB==`Ba
 map <F8> :BLReloadPage<cr>
 map <F7> :BLReloadCSS<cr>
 " fzf
