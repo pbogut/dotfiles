@@ -39,6 +39,9 @@ bind index,pager \CP sidebar-prev
 bind index,pager \CN sidebar-next
 bind index,pager \CO sidebar-open
 # bind index,pager \CV sidebar-toggle-virtual
+# scroll half page
+bind pager <space> half-down
+bind pager - half-up
 
 macro index,pager \cr '<shell-escape>echo -n "Checking for new emails... " && OFFLINEIMAP_INBOX_ONLY=1 offlineimap > /dev/null 2>&1 <enter>'
 
