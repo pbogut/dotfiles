@@ -45,6 +45,8 @@ augroup configgroup
   autocmd FileType elixir
         \  noremap <buffer> <leader>ta :AltTestElixir<cr>
         \| noremap <buffer> <leader>tA :AltTestElixir!<cr>
+  autocmd FileType c
+        \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType php
         \  setlocal tabstop=4 shiftwidth=4
         \| noremap <buffer> <leader>ta :AltTestPhp<cr>
