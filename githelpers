@@ -66,7 +66,7 @@ pretty_git_log() {
 
 git_clone_to_projects() {
   if [[ "$2" == "" ]];then
-    dest="$HOME/Projects/`echo "$1" | sed 's#[^@]*@##' | sed 's#^\(https\|http\)://##g' | sed 's#:#/#g' | sed 's#\.git$##g'`"
+    dest="$HOME/projects/`echo "$1" | sed 's#[^@]*@##' | sed 's#^\(https\|http\)://##g' | sed 's#:#/#g' | sed 's#\.git$##g'`"
   else
     dest="$2"
   fi
@@ -77,7 +77,7 @@ git_clone_to_projects() {
       echo
       echo "usage: git cl <repo> [<dir>]"
       echo
-      echo "If no dir provided then ~/Projects/<git-host>/<repo-owner>/<repo-name> is used."
+      echo "If no dir provided then ~/projects/<git-host>/<repo-owner>/<repo-name> is used."
       echo
   fi
 }
