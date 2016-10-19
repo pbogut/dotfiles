@@ -11,6 +11,7 @@ macro index,pager \ci "<pipe-message>~/.scripts/mail-to-web.sh<return>" "html vi
 macro index,pager a "<pipe-message>abook --add-email-quiet<return>" "add the sender address to abook"
 bind editor <Tab> complete-query
 bind editor \cT complete
+bind index,pager r group-reply
 
 set sort = threads
 set edit_headers = yes
@@ -83,6 +84,7 @@ tag-transforms "inbox"   "i"   \
                "sent"    "→"  \
                "todo"    "☑"   \
                "archive" "⚓"   \
+               "attachment" ""   \
                "invites" "≣"
 
 tag-formats "inbox"   "GI" \
@@ -91,12 +93,13 @@ tag-formats "inbox"   "GI" \
             "sent"    "GS" \
             "todo"    "GT" \
             "archive" "GA" \
+            "attachment" "Ga" \
             "deleted" "GD" \
             "invites" "Gi"
 
 # date-cond patch used for conditional date formating
 # notmuch tags indicators for todo and archive
-set index_format="%4C %Z %?GT?%GT& ?%?GA?%GA& ? %<[y?%<[m?%<[d?%[ %H:%M]&%[%a %d]>&%[%b %d]>&%[%m/%y ]> %-15.15L (%<l?%4l&%4c>) %s"
+set index_format="%4C %Z %?GT?%GT& ?%?Ga?%Ga& ?%?GA?%GA& ? %<[y?%<[m?%<[d?%[ %H:%M]&%[%a %d]>&%[%b %d]>&%[%m/%y ]> %-15.15L (%<l?%4l&%4c>) %s"
 
 # notmuch bindings
 macro pager,index \\\\ "<vfolder-from-query>"              # looks up a hand made query
