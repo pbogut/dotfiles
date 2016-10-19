@@ -62,9 +62,11 @@ augroup configgroup
   autocmd FileType qf :nnoremap <buffer> q :q
   autocmd FileType blade :let b:commentary_format='{{-- %s --}}'
   autocmd FileType markdown :setlocal spell spelllang=en_gb
-  " start mutt file edit  on first empty line
-  autocmd BufRead mutt* execute 'normal gg/\n\nj'
-        \| :setlocal spell spelllang=en_gb
+  " start mutt file edit on first empty line
+  autocmd BufRead /tmp/mutt* execute "normal /^$/\ni\n\n\<esc>k"
+        \| setlocal spell spelllang=en_gb
+        \| let g:pencil#textwidth = 72
+        \| call pencil#init()
   autocmd BufEnter * normal zR
 augroup END
 " line 80 limit
@@ -133,6 +135,7 @@ if exists(':Plug')
   Plug 'dbakker/vim-projectroot'
   Plug 'AndrewRadev/switch.vim'
   Plug 'osyo-manga/vim-over'
+  Plug 'reedes/vim-pencil'
   if has('nvim')
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
@@ -329,6 +332,8 @@ vmap <C-/> gc
 " surround
 vmap s S
 nmap <silent> <bs> :TmuxNavigateLeft<cr>
+" remap delete to c-d because on hardware level Im sending del when c-d (ergodox)
+nmap <silent> <del> <c-d>
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>x :Bdelete <bar>q<cr>
@@ -729,6 +734,9 @@ function! PHP__Fold()
 endfunction
 set foldtext=NeatFoldText()
 let g:DisableAutoPHPFolding = 1
+
+let &titlestring = "nvim:" . substitute($NVIM_LISTEN_ADDRESS, '/tmp/nvim\(.*\)\/0$', '\1', 'g')
+set title
 
 let g:snips_author = "Pawel Bogut"
 let g:snips_github = "https://github.com/pbogut"
