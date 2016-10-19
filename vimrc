@@ -220,6 +220,19 @@ let g:neomake_php_phpcs_maker.postprocess = function('NeomakeSetMessageType')
 let g:neomake_php_phpmd_maker = neomake#makers#ft#php#phpmd()
 let g:neomake_php_phpmd_maker.postprocess = function('NeomakeSetWarningType')
 
+let g:neomake_elixir_mix_maker = {
+      \ 'exe' : 'mix',
+      \ 'args': ['compile', '--warnings-as-errors'],
+      \ 'cwd': getcwd(),
+      \ 'errorformat':
+        \ '** %s %f:%l: %m,' .
+        \ '%f:%l: warning: %m'
+      \ }
+
+let g:neomake_elixir_enabled_makers = ['mix']
+
+
+
 let g:neomake_xml_enabled_makers = ['xmllint']
 let g:neomake_xml_xmllint_maker = {
       \ 'errorformat': '%A%f:%l:\ %m'
