@@ -136,6 +136,7 @@ if exists(':Plug')
   Plug 'AndrewRadev/switch.vim'
   Plug 'osyo-manga/vim-over'
   Plug 'reedes/vim-pencil'
+  Plug 'vim-scripts/cmdalias.vim'
   if has('nvim')
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
@@ -146,7 +147,6 @@ if exists(':Plug')
     Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
     Plug 'pbogut/deoplete-padawan'
-    " Plug 'eugen0329/vim-esearch'
   endif " if Plug installed
   if has('nvim') || has('vim8')
     Plug 'metakirby5/codi.vim'
@@ -388,6 +388,8 @@ if has('nvim')
   cnoremap <A-k> <Up>
   cnoremap <A-j> <Down>
 endif
+cnoremap \\* \(.*\)
+cnoremap \\- \(.\{-}\)
 " prevent pasting in visual from yank seletion
 snoremap p "_dP
 vnoremap p "_dP
@@ -722,7 +724,7 @@ endfunction
 set foldtext=NeatFoldText()
 let g:DisableAutoPHPFolding = 1
 
-let &titlestring = "nvim:" . substitute($NVIM_LISTEN_ADDRESS, '/tmp/nvim\(.*\)\/0$', '\1', 'g')
+let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, '/tmp/nvim\(.*\)\/0$', '\1', 'g') . ":" . substitute(getcwd(),$HOME,'~', 'g')
 set title
 
 let g:snips_author = "Pawel Bogut"
