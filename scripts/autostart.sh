@@ -18,10 +18,13 @@ function demonize {
 numlockx on
 # make use of the useless capslock
 killall xcape -9 > /dev/null 2>&1
-xcape -e 'Caps_Lock=Escape'
-xcape -e 'Control_L=Escape'
-xcape -e 'Shift_L=parenleft'
-xcape -e 'Shift_R=parenright'
+# only if run with xcape option (its not playing nicely with my ergodox)
+if [[ $1 == "--xcape" ]]; then
+    xcape -e 'Caps_Lock=Escape'
+    xcape -e 'Control_L=Escape'
+    xcape -e 'Shift_L=parenleft'
+    xcape -e 'Shift_R=parenright'
+fi
 
 # daemons
 mails-go-web -r 'notmuch search --output=files id:%s' > /dev/null 2>&1 &
