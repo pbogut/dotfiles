@@ -81,4 +81,6 @@ git_clone_to_projects() {
       echo
   fi
 }
-
+git_push_upstream() {
+    git push --set-upstream origin `git branch | grep \* | cut -d ' ' -f2`
+}

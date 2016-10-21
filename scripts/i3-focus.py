@@ -42,6 +42,7 @@ def is_vim_in_tmux(session_id):
                                b'vim\n',
                                b'nvim\n']
 
+
 def is_tmux_edge(session_id, direction):
     list_command = "tmux list-panes -t \\" + session_id + " "
     grep = " | grep '1$' |sed 's/1$//'"
@@ -118,9 +119,9 @@ if __name__ == '__main__':
                                  session_id + " " +
                                  pane_dir[direction], shell=True)
     else:
-        if bool(re.match(r'^nvim:.*$', name)) and not args.skip_vim:
+        if bool(re.match(r'.*:nvim:.*:', name)) and not args.skip_vim:
             vim_id = "/tmp/nvim" + \
-                re.search(r"^nvim:(.*)$", name).group(1) + "/0"
+                    re.search(r".*:nvim:(.*?):.*", name).group(1) + "/0"
             subprocess.Popen("nvr --servername " + vim_id +
                              " --remote-send '<esc><" + vim_dir[direction] +
                              ">'", shell=True)

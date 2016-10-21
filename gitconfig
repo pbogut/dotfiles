@@ -23,6 +23,8 @@
     au = "update-index --assume-unchanged" #  assume unchanged
     nau = "update-index --no-assume-unchanged" #  no assume unchanged
     sau = "!git ls-files -v | grep '^[a-z]' | cut -f2 -d' '" # show assumed unchanged
+    pushup = "!. ~/.githelpers && git_push_upstream"
+    diffls = diff-tree --no-commit-id --name-only -r
     #Create branch
     cb = checkout -b
     #Gary's aliases
@@ -37,6 +39,7 @@
     pullff = pull --ff-only
     noff = merge --no-ff --no-commit
     noffci = merge --no-ff
+    mesq =  merge --squash
     merge = merge --no-commit
     nofc = !git merge --no-ff --no-commit $1 && git commit --verbose && :
     fa = fetch --all
