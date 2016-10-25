@@ -92,10 +92,18 @@ URxvt.iso14755:             false
 
 
 ! ------------------------------------------------------------------------------
-! ROFI Color theme
+! ROFI Config
 ! ------------------------------------------------------------------------------
 rofi.color-enabled: true
-rofi.color-window: #002b37, #002b37, #003642
-rofi.color-normal: #002b37, #819396, #002b37, #003642, #819396
-rofi.color-active: #002b37, #008ed4, #002b37, #003642, #008ed4
-rofi.color-urgent: #002b37, #da4281, #002b37, #003642, #da4281
+rofi.color-window: #222222, #222222, #285577
+rofi.color-normal: #222222, #cccccc, #222222, #285577, #dddddd
+rofi.color-active: #222222, #008ed4, #222222, #285577, #008ed4
+rofi.color-urgent: #222222, #da4281, #222222, #285577, #da4281
+rofi.modi: run,drun,ssh,window
+rofi.separator-style: solid
+rofi.location: 1
+rofi.width: 100
+rofi.font: Droid Sans Mono for Powerline Nerd Font 10
+rofi.padding: 3
+rofi.hide-scrollbar: true
+rofi.terminal: urxvt -e zsh -ic
