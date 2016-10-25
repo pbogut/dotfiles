@@ -42,7 +42,8 @@ bindsym $mod+Ctrl+Return exec --no-startup-id ~/.scripts/i3-term-in-current-dir.
 bindsym $mod+Shift+q kill
 
 # start dmenu (a program launcher)
-bindsym $mod+colon exec --no-startup-id dmenu_run -l 20 -p open
+# bindsym $mod+colon exec --no-startup-id dmenu_run -l 20 -p open
+bindsym $mod+colon exec --no-startup-id rofi -show run
 bindsym $mod+Shift+colon exec --no-startup-id ~/.scripts/i3-dmenu-start-at-new-workspace.sh
 bindsym $mod+Ctrl+colon exec --no-startup-id ~/.scripts/i3-dmenu-run-in-terminal.sh
 # There also is the (new) i3-dmenu-desktop which only displays applications
