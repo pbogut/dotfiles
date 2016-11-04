@@ -5,6 +5,7 @@ SAVEHIST=1000
 setopt appendhistory autocd extendedglob nomatch ignoreeof
 set -o shwordsplit
 unsetopt beep
+stty -ixon # disable c-s and c-q (terminal flow)
 #colors
 autoload -U colors && colors
 
@@ -144,7 +145,6 @@ eval `dircolors ~/.config/dircolors-solarized/dircolors.256dark`
 
 alias ls="ls --color=auto"
 alias pacman="pacman --color=auto"
-alias fix_terminal="stty sane"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
 vimnote() { if [ -z $1 ];then; vim ~/Notes/; else vim ~/Notes/ +"Note $1"; fi }
