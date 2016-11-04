@@ -173,7 +173,7 @@ mode "$mode_resize" {
 bindsym $mod+r mode "$mode_resize"
 
 # screen lock with delay after, so suspend / hibernate with locked screen
-set $Locker i3lock -i ~/Pictures/lockscreen.png && sleep 1
+set $Locker ~/.scripts/i3-lock.sh -i ~/Pictures/lockscreen.png && sleep 1
 set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown, (Esc) cancel
 mode "$mode_system" {
 
