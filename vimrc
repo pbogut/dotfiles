@@ -398,6 +398,11 @@ if has('nvim')
   noremap <silent> <M-t> :call I3Focus('right', 'l')<cr>
   noremap <silent> <M-a> :call I3Focus('left', 'h')<cr>
 
+  noremap <silent> <M-l> :vertical resize +10<cr>
+  noremap <silent> <M-h> :vertical resize -10<cr>
+  noremap <silent> <M-j> :resize +10<cr>
+  noremap <silent> <M-k> :resize -10<cr>
+
   cnoremap <A-k> <Up>
   cnoremap <A-j> <Down>
 endif

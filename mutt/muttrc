@@ -2,6 +2,7 @@
 set folder = "`echo $HOME`/Maildir"
 set mailcap_path=~/.mutt/mailcap
 set sendmail = "msmtp.sh `get-config.sh email-default-account`"
+set postponed = ~/.mutt/postponed
 mailboxes = `ls -1d --color=never ~/Maildir/*/* | grep 'INBOX\|sent\|drafts\|archive\|trash' | sed 's#.*Maildir/#+#' | while read line; do echo -n " $line"; done`
 
 set query_command="abook --mutt-query '%s'"
