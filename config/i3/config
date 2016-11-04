@@ -29,8 +29,6 @@ font pango:monospace 8
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
 
-# Update i3status on i3bar
-set $update_title exec --no-startup-id pkill -SIGRTMIN+10 i3blocks
 # Update keyboard layout on i3bar
 set $update_keylayout exec --no-startup-id pkill -SIGRTMIN+12 i3blocks
 
@@ -53,16 +51,16 @@ bindsym $mod+Ctrl+colon exec --no-startup-id ~/.scripts/i3-dmenu-run-in-terminal
 
 # change focus
 set $focus exec --no-startup-id ~/.scripts/i3-focus.py
-bindsym $mod+h $focus left; $update_title
-bindsym $mod+j $focus down; $update_title
-bindsym $mod+k $focus up; $update_title
-bindsym $mod+l $focus right; $update_title
+bindsym $mod+h $focus left
+bindsym $mod+j $focus down
+bindsym $mod+k $focus up
+bindsym $mod+l $focus right
 
 # alternatively, you can use the cursor keys:
-bindsym $mod+Left $focus left; $update_title
-bindsym $mod+Down $focus down; $update_title
-bindsym $mod+Up $focus up; $update_title
-bindsym $mod+Right $focus right; $update_title
+bindsym $mod+Left $focus left
+bindsym $mod+Down $focus down
+bindsym $mod+Up $focus up
+bindsym $mod+Right $focus right
 
 # move focused window
 bindsym $mod+Shift+H move left
@@ -106,40 +104,40 @@ bindsym $mod+a focus parent
 bindsym $mod+d focus child
 
 # switch to workspace
-bindsym $mod+1 workspace 1; $update_title
-bindsym $mod+2 workspace 2; $update_title
-bindsym $mod+3 workspace 3; $update_title
-bindsym $mod+4 workspace 4; $update_title
-bindsym $mod+5 workspace 5; $update_title
-bindsym $mod+6 workspace 6; $update_title
-bindsym $mod+7 workspace 7; $update_title
-bindsym $mod+8 workspace 8; $update_title
-bindsym $mod+9 workspace 9; $update_title
-bindsym $mod+0 workspace 10; $update_title
+bindsym $mod+1 workspace 1
+bindsym $mod+2 workspace 2
+bindsym $mod+3 workspace 3
+bindsym $mod+4 workspace 4
+bindsym $mod+5 workspace 5
+bindsym $mod+6 workspace 6
+bindsym $mod+7 workspace 7
+bindsym $mod+8 workspace 8
+bindsym $mod+9 workspace 9
+bindsym $mod+0 workspace 10
 
 # move focused container to workspace and switch workspace
-bindsym $mod+Shift+1 move container to workspace 1; workspace 1; $update_title
-bindsym $mod+Shift+2 move container to workspace 2; workspace 2; $update_title
-bindsym $mod+Shift+3 move container to workspace 3; workspace 3; $update_title
-bindsym $mod+Shift+4 move container to workspace 4; workspace 4; $update_title
-bindsym $mod+Shift+5 move container to workspace 5; workspace 5; $update_title
-bindsym $mod+Shift+6 move container to workspace 6; workspace 6; $update_title
-bindsym $mod+Shift+7 move container to workspace 7; workspace 7; $update_title
-bindsym $mod+Shift+8 move container to workspace 8; workspace 8; $update_title
-bindsym $mod+Shift+9 move container to workspace 9; workspace 9; $update_title
-bindsym $mod+Shift+0 move container to workspace 10; workspace 10; $update_title
+bindsym $mod+Shift+1 move container to workspace 1; workspace 1
+bindsym $mod+Shift+2 move container to workspace 2; workspace 2
+bindsym $mod+Shift+3 move container to workspace 3; workspace 3
+bindsym $mod+Shift+4 move container to workspace 4; workspace 4
+bindsym $mod+Shift+5 move container to workspace 5; workspace 5
+bindsym $mod+Shift+6 move container to workspace 6; workspace 6
+bindsym $mod+Shift+7 move container to workspace 7; workspace 7
+bindsym $mod+Shift+8 move container to workspace 8; workspace 8
+bindsym $mod+Shift+9 move container to workspace 9; workspace 9
+bindsym $mod+Shift+0 move container to workspace 10; workspace 10
 
 # move focused container to workspace
-bindsym $mod+Ctrl+1 move container to workspace 1; $update_title
-bindsym $mod+Ctrl+2 move container to workspace 2; $update_title
-bindsym $mod+Ctrl+3 move container to workspace 3; $update_title
-bindsym $mod+Ctrl+4 move container to workspace 4; $update_title
-bindsym $mod+Ctrl+5 move container to workspace 5; $update_title
-bindsym $mod+Ctrl+6 move container to workspace 6; $update_title
-bindsym $mod+Ctrl+7 move container to workspace 7; $update_title
-bindsym $mod+Ctrl+8 move container to workspace 8; $update_title
-bindsym $mod+Ctrl+9 move container to workspace 9; $update_title
-bindsym $mod+Ctrl+0 move container to workspace 10; $update_title
+bindsym $mod+Ctrl+1 move container to workspace 1
+bindsym $mod+Ctrl+2 move container to workspace 2
+bindsym $mod+Ctrl+3 move container to workspace 3
+bindsym $mod+Ctrl+4 move container to workspace 4
+bindsym $mod+Ctrl+5 move container to workspace 5
+bindsym $mod+Ctrl+6 move container to workspace 6
+bindsym $mod+Ctrl+7 move container to workspace 7
+bindsym $mod+Ctrl+8 move container to workspace 8
+bindsym $mod+Ctrl+9 move container to workspace 9
+bindsym $mod+Ctrl+0 move container to workspace 10
 
 # reload the configuration file
 # bindsym $mod+Shift+c reload
@@ -216,7 +214,7 @@ for_window [class="Skype"] floating enable
 
 # fake-outputs 3288x1080+0+0
 # exec --no-startup-id i3-msg 'workspace 1; exec /usr/bin/roxterm'
-exec --no-startup-id setxkbmap us -variant colemak
+exec --no-startup-id setxkbmap pl
 exec --no-startup-id ~/.scripts/i3-startup.sh
 
 bindsym Mod1+Shift+Ctrl+space exec --no-startup-id ~/.scripts/i3-keyboard-layout-toggle.sh; $update_keylayout
@@ -238,9 +236,9 @@ bindsym $mod+Shift+C exec --no-startup-id ~/.scripts/i3-create-empty-workspace.p
 bindsym $mod+Shift+X exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py --send
 
 # move workspace to another monitor
-bindsym $mod+m move workspace to output left; $update_title
+bindsym $mod+m move workspace to output left
 # swap workspaces between two monitors
-bindsym $mod+Shift+M exec --no-startup-id "~/.scripts/i3-swap-workspaces.py"; $update_title
+bindsym $mod+Shift+M exec --no-startup-id "~/.scripts/i3-swap-workspaces.py"
 # anamnesis clip board
 bindsym $mod+apostrophe exec --no-startup-id "~/.scripts/i3-dmenu-anamnesis.sh"
 # screen shots
