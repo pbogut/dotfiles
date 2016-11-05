@@ -55,6 +55,7 @@ read -d '' files <<"EOF"
     mutt/solarized-dark-16.muttrc
     urlview
     Xdefaults
+    local/share/applications/ranger.desktop
 EOF
 read -d '' directories <<"EOF"
     .vim/undofiles
@@ -75,6 +76,7 @@ read -d '' directories <<"EOF"
     .composer
     .mutt
     .gocode
+    .local/share/applications
 EOF
 ##########
 
@@ -119,6 +121,10 @@ find $dir -name "*.zsh" -exec chmod +x {} \; > /dev/null 2>&1
 find $dir -name "*.phar" -exec chmod +x {} \; > /dev/null 2>&1
 chmod +x ~/.scripts/* > /dev/null 2>&1
 chmod +x ~/.offlineimap-hooks/* > /dev/null 2>&1
+echo "done"
+
+echo -n "Set ranger as default manager... "
+xdg-mime default ranger.desktop inode/directory && gvfs-mime --set inode/directory ranger.desktop
 echo "done"
 
 install_zsh () {

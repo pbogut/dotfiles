@@ -1,5 +1,5 @@
 #!/bin/bash
-log=/tmp/.xlog
+log=/tmp/xranger.log
 path=${1#file://}
 
 if [ -d "$path" ]

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Ranger
+Exec=~/.scripts/xranger.sh %f
+Categories=System;FileTools;FileManager;Utility;
+MimeType=inode/directory;
