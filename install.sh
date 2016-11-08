@@ -17,6 +17,7 @@ read -d '' files <<"EOF"
     offlineimap.py
     screenrc
     vimrc
+    emacs
     zshrc
     zshrc.d
     tmux
