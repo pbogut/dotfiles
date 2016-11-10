@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# if something is archive, then it should not be inbox nor sent
-notmuch tag -inbox -sent -- tag:archive
+# if something is archive, then it should not be inbox
+notmuch tag -inbox -- tag:archive
 # moving files only if mutt is not running
 if [ -z "`pgrep mutt`" ]; then
 # move mails with archive tag to archvie imap catalog
