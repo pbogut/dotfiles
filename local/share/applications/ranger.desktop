@@ -2,6 +2,6 @@
 Version=1.0
 Type=Application
 Name=Ranger
-Exec=/bin/sh -c ~/.scripts/xranger.sh %f
+Exec=urxvt -e ranger %f
 Categories=System;FileTools;FileManager;Utility;
 MimeType=inode/directory;
