@@ -147,7 +147,7 @@ alias ls="ls --color=auto"
 alias pacman="pacman --color=auto"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
-vimnote() { if [ -z $1 ];then; vim ~/Notes/; else vim ~/Notes/ +"Note $1"; fi }
+vimnote() { if [ -z $1 ];then; nvim ~/Notes/; else nvim ~/Notes/ +"Note $1"; fi }
 vimdirdiff() {
   if [[ -z  $2 ]]; then
     echo "Usage: dirdiff /path/to/dir/one /path/to/dir/two"
@@ -176,7 +176,14 @@ alias update="yaourt -Syu --aur"
 alias tunelssh_pl="sshuttle --dns -vr root@46.41.130.28 0/0"
 alias tunelssh_de="sshuttle --dns -vr smeagol@smeagol.pl:59184 0/0"
 
-alias yaourt-ignore-pgp="yaourt --m-arg \"--skipchecksums --skippgpcheck\""
+rifle_with_ask() {
+  if [[ -z $2 ]] && [[ `/usr/bin/rifle -l "$1" | wc -l` -gt 1 ]]; then
+      /usr/bin/rifle -l "$1" | fzf | sed 's/\([0-9]*\).*/\1/' | xargs /usr/bin/rifle "$1" -p
+  else
+    /usr/bin/rifle "$@"
+  fi
+}
+alias rif=rifle_with_ask
 
 # anamnesis clipboard fuzy lookup
 alias clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_content \
