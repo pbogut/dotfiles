@@ -6,10 +6,10 @@ set postponed = ~/.mutt/postponed
 mailboxes = `ls -1d --color=never ~/Maildir/*/* | grep 'INBOX\|sent\|drafts\|archive\|trash' | sed 's#.*Maildir/#+#' | while read line; do echo -n " $line"; done`
 
 set query_command="abook --mutt-query '%s'"
-macro generic,index,pager \ca "<shell-escape>abook<return>" "launch abook"
 macro index,pager \cv "<pipe-message>urlview<return>" "url view"
 macro index,pager \ci "<pipe-message>~/.scripts/mail-to-web.sh<return>" "html view in browser"
-macro index,pager a "<pipe-message>abook --add-email-quiet<return>" "add the sender address to abook"
+macro index,pager \ca "<pipe-message>abook --add-email-quiet<return><shell-escape>~/.scripts/abook-remove-duplicates.sh<return>" "add the sender address to abook"
+macro generic,index,pager a "<shell-escape>abook<return>" "launch abook"
 bind editor <Tab> complete-query
 bind editor \cT complete
 bind index,pager r group-reply

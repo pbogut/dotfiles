@@ -183,6 +183,9 @@ function! NeomakePreWrite()
   if exists('b:neomake_php_phpmd_maker_args')
     let g:neomake_php_phpmd_maker.args = b:neomake_php_phpmd_maker_args
   endif
+  if exists('b:neomake_php_phpcs_maker_args')
+    let g:neomake_php_phpcs_maker.args = b:neomake_php_phpcs_maker_args
+  endif
 endfunction
 
 function! NeomakeInitPhp()
@@ -196,6 +199,14 @@ function! NeomakeInitPhp()
     let b:neomake_php_phpmd_maker_args = ['%:p', 'text', phpmd_xml_file]
   else
     let b:neomake_php_phpmd_maker_args = ['%:p', 'text', 'codesize,design,unusedcode,naming']
+  endif
+
+  let phpcs_file = projectroot#guess() . '/phpcs'
+  if filereadable(phpcs_file)
+    let b:neomake_php_phpcs_maker_args = readfile(phpcs_file)
+    let b:neomake_php_phpcs_maker_args += ['--report=csv']
+  else
+    let b:neomake_php_phpcs_maker_args = ['--report=csv']
   endif
 endfunction
 
@@ -217,7 +228,7 @@ function! NeomakeSetMessageType(entry)
   let a:entry.type = "M"
 endfunction
 
-let g:neomake_php_enabled_makers = ['php', 'phpmd']
+let g:neomake_php_enabled_makers = ['php', 'phpmd', 'phpcs']
 let g:neomake_php_phpcs_maker = neomake#makers#ft#php#phpcs()
 let g:neomake_php_phpcs_maker.postprocess = function('NeomakeSetMessageType')
 let g:neomake_php_phpmd_maker = neomake#makers#ft#php#phpmd()
@@ -421,7 +432,13 @@ snoremap p "_dP
 vnoremap p "_dP
 " case insensitive search by default
 nnoremap / /\c
+nnoremap c/ c/\c
+nnoremap d/ d/\c
+nnoremap y/ y/\c
 nnoremap ? ?\c
+nnoremap c? c?\c
+nnoremap d? d?\c
+nnoremap y? y?\c
 nnoremap <leader>= migg=G'i
 nnoremap <leader>gp <Plug>GitGutterPreviewHunk
 nnoremap <leader>gr <Plug>GitGutterRevertHunk
@@ -756,3 +773,20 @@ set title
 let g:snips_author = "Pawel Bogut"
 let g:snips_github = "https://github.com/pbogut"
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
+
+let g:terminal_color_0  = '#073642'
+let g:terminal_color_1  = '#dc322f'
+let g:terminal_color_2  = '#859900'
+let g:terminal_color_3  = '#b58900'
+let g:terminal_color_4  = '#268bd2'
+let g:terminal_color_5  = '#d33682'
+let g:terminal_color_6  = '#2aa198'
+let g:terminal_color_7  = '#eee8d5'
+let g:terminal_color_8  = '#002b36'
+let g:terminal_color_9  = '#cb4b16'
+let g:terminal_color_10 = '#586e75'
+let g:terminal_color_11 = '#657b83'
+let g:terminal_color_12 = '#839496'
+let g:terminal_color_13 = '#6c71c4'
+let g:terminal_color_14 = '#93a1a1'
+let g:terminal_color_15 = '#fdf6e3'
