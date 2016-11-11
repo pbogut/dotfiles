@@ -15,9 +15,9 @@ set completeopt=menuone
 silent! set completeopt=menuone,noselect
 set cmdheight=2
 " show existing tab with 2 spaces width
-set tabstop=2
+set tabstop=4
 " when indenting with '>', use 2 spaces width
-set shiftwidth=2
+set shiftwidth=4
 " On pressing tab, insert 2 spaces
 set expandtab
 " scroll
@@ -38,26 +38,35 @@ set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
 set hidden " No bang needed to open new file
+set inccommand=split
 let mapleader = "\<space>" " life changer
 augroup configgroup
   autocmd!
-  autocmd FileType html :setlocal tabstop=4 shiftwidth=4
+  " fix terminal display
+  autocmd TermOpen * setlocal listchars= | set nocursorline | set nocursorcolumn
+  autocmd FileType html
+        \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType elixir
-        \  noremap <buffer> <leader>ta :AltTestElixir<cr>
-        \| noremap <buffer> <leader>tA :AltTestElixir!<cr>
+        \  setlocal tabstop=2 shiftwidth=2
   autocmd FileType c
         \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType php
         \  setlocal tabstop=4 shiftwidth=4
-        \| noremap <buffer> <leader>ta :AltTestPhp<cr>
-        \| noremap <buffer> <leader>tA :AltTestPhp!<cr> " create separate function to handle file type
-        \| :let b:commentary_format='// %s'
+        \| let b:commentary_format='// %s'
   autocmd FileType go :setlocal expandtab!
   " autocmd FileType javascript :setlocal tabstop=4 shiftwidth=4
-  autocmd FileType xml :setlocal tabstop=4 shiftwidth=4
-  autocmd FileType sh :setlocal tabstop=4 shiftwidth=4
-  autocmd FileType css :setlocal tabstop=4 shiftwidth=4
-  autocmd FileType scss :setlocal tabstop=4 shiftwidth=4
+  autocmd FileType ruby
+        \  setlocal tabstop=2 shiftwidth=2
+  autocmd FileType vim
+        \  setlocal tabstop=2 shiftwidth=2
+  autocmd FileType xml
+        \  setlocal tabstop=4 shiftwidth=4
+  autocmd FileType sh
+        \  setlocal tabstop=4 shiftwidth=4
+  autocmd FileType css
+        \  setlocal tabstop=4 shiftwidth=4
+  autocmd FileType scss
+        \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType qf :nnoremap <buffer> o <enter>
   autocmd FileType qf :nnoremap <buffer> q :q
   autocmd FileType blade :let b:commentary_format='{{-- %s --}}'
@@ -68,6 +77,10 @@ augroup configgroup
         \| let g:pencil#textwidth = 72
         \| call pencil#init()
   autocmd BufEnter * normal zR
+  " check shada to share vim info between instances
+  " autocmd CursorHold * rshada | wshada
+  autocmd FocusLost * wshada
+  autocmd FocusGained * sleep 100m | rshada
 augroup END
 " line 80 limit
 set colorcolumn=81
@@ -95,6 +108,7 @@ if exists(':Plug')
   Plug 'tpope/vim-obsession'
   Plug 'tpope/vim-dispatch'
   Plug 'tpope/vim-abolish'
+  Plug 'tpope/vim-projectionist'
   Plug 'dhruvasagar/vim-prosession'
   Plug 'terryma/vim-expand-region'
   Plug 'scrooloose/nerdtree', { 'on': ['NERDTreeClose', 'NERDTreeFind'] }
@@ -176,7 +190,7 @@ augroup neomakegroup
   autocmd!
   autocmd BufWritePost * Neomake
   autocmd BufWritePre * call NeomakePreWrite()
-	autocmd FileType php call NeomakeInitPhp()
+  autocmd FileType php call InitPhpConfig()
 augroup END
 
 function! NeomakePreWrite()
@@ -188,12 +202,13 @@ function! NeomakePreWrite()
   endif
 endfunction
 
-function! NeomakeInitPhp()
-  if get(b:, 'neomake_php_init')
+function! InitPhpConfig()
+  if get(b:, 'init_php_config')
     return
   endif
-  let b:neomake_php_init = 1
+  let b:init_php_config = 1
 
+  " phpmd.xml for neomake
   let phpmd_xml_file = projectroot#guess() . '/phpmd.xml'
   if filereadable(phpmd_xml_file)
     let b:neomake_php_phpmd_maker_args = ['%:p', 'text', phpmd_xml_file]
@@ -201,10 +216,13 @@ function! NeomakeInitPhp()
     let b:neomake_php_phpmd_maker_args = ['%:p', 'text', 'codesize,design,unusedcode,naming']
   endif
 
+  " phpcs for neomake and autoformat
   let phpcs_file = projectroot#guess() . '/phpcs'
   if filereadable(phpcs_file)
     let b:neomake_php_phpcs_maker_args = readfile(phpcs_file)
     let b:neomake_php_phpcs_maker_args += ['--report=csv']
+
+    let b:autoformat_php_phpcbf_args = readfile(phpcs_file)
   else
     let b:neomake_php_phpcs_maker_args = ['--report=csv']
   endif
@@ -239,20 +257,16 @@ let g:neomake_elixir_mix_maker = {
       \ 'exe' : 'mix',
       \ 'args': ['compile', '--warnings-as-errors'],
       \ 'cwd': getcwd(),
-      \ 'errorformat':
-        \ '** %s %f:%l: %m,' .
-        \ '%f:%l: warning: %m'
+      \ 'errorformat': '** %s %f:%l: %m,%f:%l: warning: %m'
       \ }
 let g:neomake_elixir_elixir_maker = {
       \ 'exe': 'elixirc',
       \ 'args': [
-        \ '--ignore-module-conflict', '--warnings-as-errors',
-        \ '--app', 'mix', '--app', 'ex_unit',
-        \ '-o', $TMPDIR, '%:p'
+      \   '--ignore-module-conflict', '--warnings-as-errors',
+      \   '--app', 'mix', '--app', 'ex_unit',
+      \   '-o', $TMPDIR, '%:p'
       \ ],
-      \ 'errorformat':
-          \ '%E** %s %f:%l: %m,' .
-          \ '%W%f:%l'
+      \ 'errorformat': '%E** %s %f:%l: %m,%W%f:%l'
       \ }
 
 let g:neomake_xml_enabled_makers = ['xmllint']
@@ -341,13 +355,15 @@ nnoremap <silent> <leader>m :FZFMru<cr>
 nnoremap <silent> <leader>f :call FzfFilesAg()<cr>
 nnoremap <silent> <leader>F :Files<cr>
 nnoremap <silent> <leader>w :call WriteOrCr()<cr>
-nnoremap <leader>a :Autoformat<cr>
+nnoremap <leader>a :call Autoformat()<cr>
 nnoremap <leader>z :call PHP__Fold()<cr>
 " vim is getting ^_ when pressing ^/, so I've mapped both
 nmap <C-_> gcc<down>^
 nmap <C-/> gcc<down>^
 vmap <C-_> gc
 vmap <C-/> gc
+" projectionist - alternate
+noremap <leader>ta :A<cr>
 " surround
 vmap s S
 nmap <silent> <bs> :TmuxNavigateLeft<cr>
@@ -416,6 +432,11 @@ if has('nvim')
   noremap <silent> <M-w> :call I3Focus('up', 'k')<cr>
   noremap <silent> <M-t> :call I3Focus('right', 'l')<cr>
   noremap <silent> <M-a> :call I3Focus('left', 'h')<cr>
+  " escape terminal and move switch focus
+  tnoremap <silent> <M-r> <C-\><C-n>:call I3Focus('down', 'j')<cr>
+  tnoremap <silent> <M-w> <C-\><C-n>:call I3Focus('up', 'k')<cr>
+  tnoremap <silent> <M-t> <C-\><C-n>:call I3Focus('right', 'l')<cr>
+  tnoremap <silent> <M-a> <C-\><C-n>:call I3Focus('left', 'h')<cr>
 
   noremap <silent> <M-l> :vertical resize +10<cr>
   noremap <silent> <M-h> :vertical resize -10<cr>
@@ -520,8 +541,8 @@ let g:syntastic_mode_map = {
       \ "active_filetypes": ["ruby", "php"],
       \ "passive_filetypes": ["puppet"] }
 "let g:syntastic_quiet_messages = { "type": "style" }
-" let g:syntastic_php_checkers = ['php', 'phpmd', 'phpcs']
-let g:syntastic_php_checkers = ['php', 'phpmd']
+let g:syntastic_php_checkers = ['php', 'phpmd', 'phpcs']
+" let g:syntastic_php_checkers = ['php', 'phpmd']
 let g:syntastic_aggregate_errors = 1
 let g:syntastic_enable_signs = 0
 " gutentags
@@ -555,9 +576,19 @@ let g:ag_working_path_mode="r"
 cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
 
 " Autoformat
-" PHP - pipline of few
-let g:formatdef_phppipeline = '"fmt.phar --passes=ConvertOpenTagWithEcho --indent_with_space=".&shiftwidth." - | phpcbf | sed ' . "'s/[ ]*$//g'" . '"'
-let g:formatters_php = ['phppipeline']
+function! Autoformat()
+  if &ft == 'php'
+    let g:formatdef_phpcbf = '"phpcbf -d tabWidth=".&shiftwidth'
+    if exists('b:autoformat_php_phpcbf_args')
+      let g:formatdef_phpcbf = g:formatdef_phpcbf . '." '. join(b:autoformat_php_phpcbf_args) . '"'
+    endif
+  endif
+  execute('Autoformat')
+endfunction
+
+let g:formatdef_phpcbf = '"phpcbf -d tabWidth=".&shiftwidth'
+let g:formatters_php = ['phpcbf']
+
 let g:formatdef_blade = '"html-beautify -s ".&shiftwidth'
 let g:formatters_blade = ['blade']
 " despatch hax to not cover half screen
@@ -601,7 +632,7 @@ function! InspectTestStrategy(cmd)
   call VimuxSendText('exit')
 endfunction
 let g:test#custom_strategies = {'inspect': function('InspectTestStrategy')}
-let g:test#strategy = 'vimux'
+let g:test#strategy = 'neovim'
 function! InspectTest()
   " how about add new shortcut for q which will do the action below? should be
   " awesome
@@ -668,52 +699,51 @@ function! Wipeout(bang)
   endfor
   echon "Deleted " . l:tally . " buffers"
 endfun
+
 " switch between class and test file
-function! AltTestPhp(bang)
-  let s:fullpath = expand('%:p')
-  if !(s:fullpath =~ ".*\.php$")
-    echo("Its not a php file")
-    return
-  endif
-  if s:fullpath =~ ".*Test\.php$"
-    let l:alternate = substitute(s:fullpath, '\(.*\)Test\.php$', '\1\.php', '')
-    let l:alternate = substitute(l:alternate, '/tests/', '/app/', '')
-  else
-    let l:alternate = substitute(s:fullpath, '\(.*\)\.php$', '\1Test\.php', '')
-    let l:alternate = substitute(l:alternate, '/app/', '/tests/', '')
-  endif
-
-  if (!filereadable(l:alternate) && !a:bang)
-    echo("Alternate file not found. Use bang to force.")
-  else
-    echo (l:alternate)
-    silent execute('edit '.l:alternate)
-  endif
-endfunction
-command! -bang AltTestPhp :call AltTestPhp(<bang>0)
-
-" switch between lib and test file
-function! AltTestElixir(bang)
-  let s:fullpath = expand('%:p')
-  if !(s:fullpath =~ ".*\.ex$") && !(s:fullpath =~ ".*\.exs$")
-    echo("Its not a elixir file")
-    return
-  endif
-  if s:fullpath =~ ".*_test\.exs$"
-    let l:alternate = substitute(s:fullpath, '\(.*\)_test\.exs$', '\1\.ex', '')
-    let l:alternate = substitute(l:alternate, '/test/', '/lib/', '')
-  else
-    let l:alternate = substitute(s:fullpath, '\(.*\)\.ex$', '\1_test.exs', '')
-    let l:alternate = substitute(l:alternate, '/lib/', '/test/', '')
-  endif
-  if (!filereadable(l:alternate) && !a:bang)
-    echo("Alternate file not found. Use bang to force.")
-  else
-    echo (l:alternate)
-    silent execute('edit '.l:alternate)
-  endif
-endfunction
-command! -bang AltTestElixir :call AltTestElixir(<bang>0)
+" laravel
+" elixir phoenix
+" elixir
+let g:projectionist_heuristics = {
+      \   "artisan&composer.json": {
+      \     "app/*.php": {
+      \       "alternate": "tests/{}Test.php"
+      \     },
+      \     "lib/*.php": {
+      \       "alternate": "tests/{}Test.php"
+      \     },
+      \     "tests/*Test.php": {
+      \       "alternate": ["app/{}.php", "lib/{}.php"],
+      \       "template": [
+      \          "<?php\n",
+      \          "class {capitalize|underscore|camelcase}Test extends TestCase",
+      \          "{open}",
+      \          "{close}",
+      \       ],
+      \       "type": "test"
+      \     },
+      \   },
+      \   "mix.exs&web/": {
+      \     "web/*.ex": {
+      \       "alternate": "test/{}_test.exs"
+      \     },
+      \     "lib/*.ex": {
+      \       "alternate": "test/{}_test.exs"
+      \     },
+      \     "test/*_test.exs": {
+      \       "alternate": ["web/{}.ex", "lib/{}.ex"],
+      \       "type": "test"
+      \     },
+      \   },
+      \   "mix.exs": {
+      \     "lib/*.ex": {
+      \       "alternate": "test/{}_test.exs"
+      \     },
+      \     "test/*_test.exs": {
+      \       "alternate": "lib/{}.ex", "type": "test"
+      \     },
+      \   },
+      \ }
 
 " This allows for change paste motion cp{motion}
 nmap <silent> cp :let b:changepaste_register = v:register<cr>:set opfunc=ChangePaste<CR>g@

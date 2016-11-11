@@ -197,6 +197,7 @@ alias dmenu_clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_conten
 # shortcuts
 alias sc="bash -c \"\`cat ~/.commands | fzf\`\""
 alias q="exit"
+alias :q="exit"
 alias m="ncmpcpp"
 alias i="ssh-weechat"
 alias e="mutt"
