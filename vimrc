@@ -349,16 +349,20 @@ nnoremap <leader>ev :tabnew $MYVIMRC<CR>
 nnoremap <leader>ez :tabnew ~/.zshrc<CR>
 nnoremap <leader>sv :source $MYVIMRC<CR>
 " open list / quickfix
-nnoremap <leader>ol :lopen<cr>
-nnoremap <leader>oq :copen<cr>
-nnoremap <leader>r :call ToggleNERDTree()<cr>
+nnoremap <silent> <leader>ol :lopen<cr>
+nnoremap <silent> <leader>oq :copen<cr>
+nnoremap <silent> <leader>oc :copen<cr>
+nnoremap <silent> <leader>ot :belowright 11split \| terminal<cr>
+nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
+nnoremap <silent> <leader>ovt :belowright vertical split \| terminal<cr>
+nnoremap <silent> <leader>r :call ToggleNERDTree()<cr>
 nnoremap <silent> <leader>b :Buffers<cr>
 nnoremap <silent> <leader>m :FZFMru<cr>
 nnoremap <silent> <leader>f :call FzfFilesAg()<cr>
 nnoremap <silent> <leader>F :Files<cr>
 nnoremap <silent> <leader>w :call WriteOrCr()<cr>
-nnoremap <leader>a :call Autoformat()<cr>
-nnoremap <leader>z :call PHP__Fold()<cr>
+nnoremap <silent> <leader>a :call Autoformat()<cr>
+nnoremap <silent> <leader>z :call PHP__Fold()<cr>
 " vim is getting ^_ when pressing ^/, so I've mapped both
 nmap <C-_> gcc<down>^
 nmap <C-/> gcc<down>^
@@ -440,10 +444,12 @@ if has('nvim')
   tnoremap <silent> <M-t> <C-\><C-n>:call I3Focus('right', 'l')<cr>
   tnoremap <silent> <M-a> <C-\><C-n>:call I3Focus('left', 'h')<cr>
 
-  noremap <silent> <M-l> :vertical resize +10<cr>
-  noremap <silent> <M-h> :vertical resize -10<cr>
-  noremap <silent> <M-j> :resize +10<cr>
-  noremap <silent> <M-k> :resize -10<cr>
+  tnoremap <silent> <c-q> <C-\><C-n>
+
+  noremap <silent> <M-l> :vertical resize +1<cr>
+  noremap <silent> <M-h> :vertical resize -1<cr>
+  noremap <silent> <M-j> :resize +1<cr>
+  noremap <silent> <M-k> :resize -1<cr>
 
   cnoremap <A-k> <Up>
   cnoremap <A-j> <Down>
@@ -704,8 +710,8 @@ endfun
 
 " switch between class and test file
 " laravel
-" elixir phoenix
 " elixir
+" elixir phoenix
 let g:projectionist_heuristics = {
       \   "artisan&composer.json": {
       \     "app/*.php": {
@@ -725,24 +731,22 @@ let g:projectionist_heuristics = {
       \       "type": "test"
       \     },
       \   },
-      \   "mix.exs&web/": {
-      \     "web/*.ex": {
-      \       "alternate": "test/{}_test.exs"
-      \     },
-      \     "lib/*.ex": {
-      \       "alternate": "test/{}_test.exs"
-      \     },
-      \     "test/*_test.exs": {
-      \       "alternate": ["web/{}.ex", "lib/{}.ex"],
-      \       "type": "test"
-      \     },
-      \   },
       \   "mix.exs": {
       \     "lib/*.ex": {
       \       "alternate": "test/{}_test.exs"
       \     },
       \     "test/*_test.exs": {
-      \       "alternate": "lib/{}.ex", "type": "test"
+      \       "alternate": "lib/{}.ex",
+      \       "type": "test"
+      \     },
+      \   },
+      \   "mix.exs&web/": {
+      \     "web/*.ex": {
+      \       "alternate": "test/{}_test.exs"
+      \     },
+      \     "test/*_test.exs": {
+      \       "alternate": "web/{}.ex",
+      \       "type": "test"
       \     },
       \   },
       \ }
