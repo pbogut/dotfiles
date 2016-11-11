@@ -38,7 +38,9 @@ set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
 set hidden " No bang needed to open new file
-set inccommand=split
+if exists('&inccommand')
+  set inccommand=split
+endif
 let mapleader = "\<space>" " life changer
 augroup configgroup
   autocmd!
