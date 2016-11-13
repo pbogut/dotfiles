@@ -65,7 +65,6 @@ augroup configgroup
   autocmd TermOpen * setlocal listchars= | set nocursorline | set nocursorcolumn
   autocmd VimEnter *
         \  execute('Alias ag Ag')
-        \| execute('Alias git FZFGit')
   autocmd FileType html
         \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType elixir
