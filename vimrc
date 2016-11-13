@@ -362,6 +362,7 @@ map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>x :Bdelete <bar>q<cr>
 map <C-w>X :Bdelete! <bar> q<cr>
+map Y y$
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
 snoremap <leader>d "_d
