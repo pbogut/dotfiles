@@ -46,6 +46,9 @@ augroup configgroup
   autocmd!
   " fix terminal display
   autocmd TermOpen * setlocal listchars= | set nocursorline | set nocursorcolumn
+  autocmd VimEnter *
+        \  execute('Alias ag Ag')
+        \| execute('Alias git FZFGit')
   autocmd FileType html
         \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType elixir
@@ -146,7 +149,6 @@ if exists(':Plug')
   Plug 'rhysd/vim-grammarous'
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   Plug 'cosminadrianpopescu/vim-sql-workbench'
-  Plug 'ctrlpvim/ctrlp.vim'
   Plug 'will133/vim-dirdiff'
   Plug 'dbakker/vim-projectroot'
   Plug 'AndrewRadev/switch.vim'
@@ -439,10 +441,10 @@ if has('nvim')
   noremap <silent> <M-t> :call I3Focus('right', 'l')<cr>
   noremap <silent> <M-a> :call I3Focus('left', 'h')<cr>
   " escape terminal and move switch focus
-  tnoremap <silent> <M-r> <C-\><C-n>:call I3Focus('down', 'j')<cr>
+  tnoremap <silent> <M-r> <C-\><C-n> :call I3Focus('down', 'j')<cr>
   tnoremap <silent> <M-w> <C-\><C-n>:call I3Focus('up', 'k')<cr>
-  tnoremap <silent> <M-t> <C-\><C-n>:call I3Focus('right', 'l')<cr>
-  tnoremap <silent> <M-a> <C-\><C-n>:call I3Focus('left', 'h')<cr>
+  tnoremap <silent> <M-t> <C-\><C-n> :call I3Focus('right', 'l')<cr>
+  tnoremap <silent> <M-a> <C-\><C-n> :call I3Focus('left', 'h')<cr>
 
   tnoremap <silent> <c-q> <C-\><C-n>
 
@@ -562,17 +564,48 @@ let g:gutentags_project_root = ['composer.json', 'tags']
 let g:vim_tags_use_language_field = 1
 let g:vim_tags_use_vim_dispatch = 1
 " fzf
+let g:fzf_command_prefix = 'FZF'
+let g:fzf_layout = { 'down': '~20%' }
+let g:fzf_mru_relative = 1
 function! FzfFilesAg()
   let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
-  execute('Files')
+  execute('FZFFiles')
   let $FZF_DEFAULT_COMMAND = ''
 endfunction
-let g:fzf_layout = { 'down': '~20%' }
-" ctrlp
-let g:ctrlp_extensions = ['tag', 'mixed']
-" Use silver searcher to list files
-let g:ctrlp_user_command =
-      \ 'ag %s --files-with-matches -g "" --ignore "\.git$\|\.hg$\|\.svn$"; '
+" fzf git ls
+function! s:fzf_git_sink(line)
+  let result = substitute(a:line, '^...', '', '')
+  execute('e ' . result)
+endfunction
+function! s:fzf_git(...) abort
+  let options = {
+        \   'source': '{git -c color.status=always status --short; git ls-files | while read l; do echo -e "\033[0;34mG\033[0m  $l";done }',
+        \   'sink': function('s:fzf_git_sink'),
+        \   'options': '--ansi --prompt "Git> " ',
+        \ }
+  let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
+  call fzf#run(fzf#wrap('name', extra, 0))
+endfunction
+command! -nargs=* FZFGit call s:fzf_git(<q-args>)
+" Better Ag search (with optional dir specified)
+function! s:fzf_ag_process(string, escape) abort
+  if a:escape
+    return shellescape(a:string)
+  else
+    return a:string
+  endif
+endfunction
+function! s:fzf_ag(raw, ...) abort
+  let dir = a:000[-1]
+  if dir=~ '/$' && isdirectory(dir)
+    let params = s:fzf_ag_process(join(a:000[0:-2], ' '), !a:raw) . ' ' . dir
+  else
+    let params = s:fzf_ag_process(join(a:000, ' '), !a:raw)
+  endif
+  echo "ag " . params
+  call fzf#vim#ag_raw(params)
+endfunction
+command! -nargs=* -bang Ag call s:fzf_ag(<bang>0,<f-args>)
 " async ack
 let g:ack_use_dispatch = 1
 " use ag if available
