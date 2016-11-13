@@ -1,3 +1,7 @@
+" new backup file every minute, coz I can
+" its recreating file path and then save copy there with current time
+" dont know how fast it will grow...
+
 function! local#paranoicbackup#init()
   augroup paranoicbackup
     autocmd!

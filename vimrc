@@ -30,6 +30,15 @@ set lazyredraw
 set wildmenu
 set incsearch
 set showcmd
+" set a directory to store the undo history
+set undodir=~/.vim/undofiles//
+set undofile
+" set a directory for swp files
+set dir=~/.vim/swapfiles//
+" set backup disr
+set backupdir=~/.vim/backupfiles//
+set nowritebackup
+set nobackup " well, thats the only way to prevent guard from running tests twice ;/
 " toggle invisible characters
 set invlist
 set listchars=tab:▸\ ,eol:¬,trail:⋅,extends:❯,precedes:❮
@@ -38,9 +47,18 @@ set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
 set hidden " No bang needed to open new file
+" line 80 limit
+set colorcolumn=81
+" color scheme
+set background=dark
+silent! colorscheme solarized
 if exists('&inccommand')
   set inccommand=split
 endif
+if has("patch-7.4.314")
+  set shortmess+=c
+endif
+
 let mapleader = "\<space>" " life changer
 augroup configgroup
   autocmd!
@@ -87,12 +105,7 @@ augroup configgroup
   autocmd FocusLost * wshada
   autocmd FocusGained * sleep 100m | rshada
 augroup END
-" line 80 limit
-set colorcolumn=81
 
-if has("patch-7.4.314")
-  set shortmess+=c
-endif
 
 " set the runtime path to include Vundle and initialize
 " set rtp+=~/.vim/bundle/Vundle.vim
@@ -123,12 +136,10 @@ if exists(':Plug')
   Plug 'airblade/vim-gitgutter'
   Plug 'terryma/vim-multiple-cursors'
   Plug 'MarcWeber/vim-addon-mw-utils'
-  " Plug 'tomtom/tlib_vim'
   Plug 'ludovicchabant/vim-gutentags'
   Plug 'gioele/vim-autoswap'
   Plug 'ntpeters/vim-better-whitespace'
   Plug 'honza/vim-snippets'
-  " Plug 'Shougo/vimproc.vim'
   Plug 'mattn/emmet-vim'
   Plug 'christoomey/vim-tmux-navigator'
   Plug 'sirver/ultisnips'
@@ -152,7 +163,6 @@ if exists(':Plug')
   Plug 'will133/vim-dirdiff'
   Plug 'dbakker/vim-projectroot'
   Plug 'AndrewRadev/switch.vim'
-  Plug 'osyo-manga/vim-over'
   Plug 'reedes/vim-pencil'
   Plug 'vim-scripts/cmdalias.vim'
   if has('nvim')
@@ -161,7 +171,7 @@ if exists(':Plug')
     Plug 'pbogut/fzf-mru.vim'
     Plug 'Shougo/deoplete.nvim'
     Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
-    Plug 'zchee/deoplete-go', { 'do': 'make', 'for': 'go'}
+    Plug 'zchee/deoplete-go', { 'do': 'go get github.com/nsf/gocode && make', 'for': 'go'}
     Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
     Plug 'pbogut/deoplete-padawan'
@@ -175,20 +185,23 @@ if exists(':Plug')
     set termguicolors
     Plug 'frankier/neovim-colors-solarized-truecolor-only'
   endif
-  " All of your Plugins must be added before the following line
 endif "
-silent! call plug#end()            " requiredc
+silent! call plug#end()      " requiredc
 filetype plugin indent on    " required
-" To ignore plugin indent changes, instead use:
-"filetype plugin on
 "
-" see :h vundle for more details or wiki for FAQ
-" Put your non-Plugin stuff after this line
+
+source ~/.vim/plugin/config/projectionist.vimrc
+source ~/.vim/plugin/config/terminal.vimrc
+source ~/.vim/plugin/config/fzf.vimrc
+source ~/.vim/plugin/config/phpgetset.vimrc
+source ~/.vim/plugin/config/gutentags.vimrc
+source ~/.vim/plugin/config/airline.vimrc
+source ~/.vim/plugin/config/autopairs.vimrc
+source ~/.vim/plugin/config/deoplete.vimrc
 
 " closetag
 let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml"
-" vim over
-let g:over_enable_cmd_window = 0
+
 " Neomake
 augroup neomakegroup
   autocmd!
@@ -280,48 +293,11 @@ let g:neomake_xml_xmllint_maker = {
 " sqlworkbench
 let g:sw_config_dir = $HOME . "/.sqlworkbench/"
 let g:sw_exe = "/opt/SQLWorkbench/sqlwbconsole.sh"
-" esearch
-let g:esearch = {
-      \ 'adapter':    'ag',
-      \ 'out':        'win',
-      \ 'batch_size': 1000,
-      \ 'use':        ['visual', 'hlsearch', 'last'],
-      \}
-let g:esearch#out#win#open = 'enew'
 " notes
 let g:notes_directories = [ $HOME . "/Notes/" ]
 " projectroot
 let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
-      \ '_darcs', 'build.xml', 'composer.json']
-" phpgetset config
-let g:phpgetset_insertPosition = 2 " below current block
-let b:phpgetset_insertPosition = 2 " below current block
-let g:phpgetset_getterTemplate =
-      \ "    \n" .
-      \ "    /**\n" .
-      \ "     * Get %varname%\n" .
-      \ "     *\n" .
-      \ "     * @return %varname%\n" .
-      \ "     */\n" .
-      \ "    public function %funcname%()\n" .
-      \ "    {\n" .
-      \ "        return $this->%varname%;\n" .
-      \ "    }"
-
-let g:phpgetset_setterTemplate =
-      \ "    \n" .
-      \ "    /**\n" .
-      \ "     * Set %varname%.\n" .
-      \ "     *\n" .
-      \ "     * @param %varname% - value to set.\n" .
-      \ "     * @return $this\n" .
-      \ "     */\n" .
-      \ "    public function %funcname%($%varname%)\n" .
-      \ "    {\n" .
-      \ "        $this->%varname% = $%varname%;\n" .
-      \ "        return $this;\n" .
-      \ "    }"
-
+      \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
 " nerdtree
 let NERDTreeQuitOnOpen=1
 let NERDTreeAutoDeleteBuffer=1
@@ -419,6 +395,7 @@ snoremap <leader><leader>p "*p
 nnoremap <leader><leader>P "*P
 vnoremap <leader><leader>P "*P
 snoremap <leader><leader>P "*P
+nmap <leader>cp "+cp
 noremap <leader>sh :set syntax=html<cr>
 noremap <leader>sp :set syntax=php<cr>
 noremap <leader>sr :set syntax=ruby<cr>
@@ -439,6 +416,34 @@ onoremap <silent> k gk
 " nice to have
 inoremap <c-d> <del>
 cnoremap <c-d> <del>
+" vim-test
+nmap <silent> <leader>tn :TestNearest<CR>
+nmap <silent> <leader>tf :TestFile<CR>
+nmap <silent> <leader>ts :TestSuite<CR>
+nmap <silent> <leader>tl :TestLast<CR>
+nmap <silent> <leader>tt :TestLast<CR>
+nmap <silent> <leader>tv :TestVisit<CR>
+cnoremap \\* \(.*\)
+cnoremap \\- \(.\{-}\)
+" prevent pasting in visual from yank seletion
+snoremap p "_dP
+vnoremap p "_dP
+" case insensitive search by default
+nnoremap / /\c
+nnoremap c/ c/\c
+nnoremap d/ d/\c
+nnoremap y/ y/\c
+nnoremap ? ?\c
+nnoremap c? c?\c
+nnoremap d? d?\c
+nnoremap y? y?\c
+nnoremap <leader>= migg=G'i
+nnoremap <leader>gp <Plug>GitGutterPreviewHunk
+nnoremap <leader>gr <Plug>GitGutterRevertHunk
+nnoremap <leader>gstage <Plug>GitGutterStageHunk
+inoremap <C-Space> <c-x><c-o>
+imap <C-@> <C-Space>
+inoremap <silent> </ </<C-X><C-O><C-n><esc>mB==`Ba
 " nvim now can map alt without terminal issues, new cool shortcuts commin
 if has('nvim')
   noremap <silent> <M-r> :call I3Focus('down', 'j')<cr>
@@ -461,71 +466,7 @@ if has('nvim')
   cnoremap <A-k> <Up>
   cnoremap <A-j> <Down>
 endif
-cnoremap \\* \(.*\)
-cnoremap \\- \(.\{-}\)
-" prevent pasting in visual from yank seletion
-snoremap p "_dP
-vnoremap p "_dP
-" case insensitive search by default
-nnoremap / /\c
-nnoremap c/ c/\c
-nnoremap d/ d/\c
-nnoremap y/ y/\c
-nnoremap ? ?\c
-nnoremap c? c?\c
-nnoremap d? d?\c
-nnoremap y? y?\c
-nnoremap <leader>= migg=G'i
-nnoremap <leader>gp <Plug>GitGutterPreviewHunk
-nnoremap <leader>gr <Plug>GitGutterRevertHunk
-nnoremap <leader>gstage <Plug>GitGutterStageHunk
-" Reload Browser
-" iabbrev </ </<C-X><C-O><C-n>
-inoremap <silent> </ </<C-X><C-O><C-n><esc>mB==`Ba
-map <F8> :BLReloadPage<cr>
-map <F7> :BLReloadCSS<cr>
 
-" fzf
-let g:fzf_layout = { 'down': '~20%' }
-let g:fzf_mru_relative = 1
-" air-line
-let g:airline#extensions#tabline#enabled = 1
-let g:airline_powerline_fonts = 1
-" color scheme
-" colorscheme jellybeans
-" highlight ColorColumn ctermbg=234
-" highlight CursorLine ctermbg=233
-" highlight CursorColumn ctermbg=232
-" highlight SpecialKey ctermbg=none
-function! SolarizedLight()
-  set background=light
-  silent !dbus-send --session /net/sf/roxterm/Options net.sf.roxterm.Options.SetColourScheme string:$ROXTERM_ID string:Solarized\ Light
-endfunction
-function! SolarizedDark()
-  set background=dark
-  silent !dbus-send --session /net/sf/roxterm/Options net.sf.roxterm.Options.SetColourScheme string:$ROXTERM_ID string:Solarized\ Dark
-endfunction
-nnoremap <leader>cd :call SolarizedDark()<cr>
-nnoremap <leader>cl :call SolarizedLight()<cr>
-set background=dark
-silent! colorscheme solarized
-" Padawan
-let g:ycm_semantic_triggers = {}
-let g:ycm_semantic_triggers.php = ['->', '::', '(', 'use ', 'namespace ', '\']
-" Deoplete
-let g:deoplete#enable_at_startup = 1
-let g:deoplete#auto_completion_start_length = 1
-let g:deoplete#enable_debug=1
-let g:deoplete#sources#padawan#add_parentheses = 1
-" let g:deoplete#sources = {}
-" let g:deoplete#sources._ = ['buffer']
-" let g:deoplete#sources.php = ['buffer', 'tag', 'member', 'file']
-inoremap <C-Space> <c-x><c-o>
-imap <C-@> <C-Space>
-" make YCM compatible with UltiSnips (using supertab)
-let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
-let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
-let g:SuperTabDefaultCompletionType = '<C-n>'
 " better key bindings for UltiSnipsExpandTrigger
 let g:UltiSnipsExpandTrigger = "<tab>"
 let g:UltiSnipsJumpForwardTrigger = "<tab>"
@@ -539,39 +480,6 @@ let g:EclimCompletionMethod = 'omnifunc'
 vmap v <Plug>(expand_region_expand)
 vmap V <Plug>(expand_region_shrink)
 let g:strip_whitespace_on_save = 1
-" delimitMate
-let g:delimitMate_smart_matchpairs = 1
-let g:delimitMate_expand_cr = 2
-let g:delimitMate_expand_space = 1
-let g:delimitMate_matchpairs = "(:),[:],{:}"
-let g:delimitMate_jump_expansion = 0
-" AutoPair
-let g:AutoPairsMultilineClose = 0
-let g:AutoPairsShortcutToggle = ''
-let g:AutoPairsShortcutFastWrap = ''
-let g:AutoPairsShortcutJump = ''
-let g:AutoPairsShortcutBackInsert = ''
-" php linter
-let g:syntastic_mode_map = {
-      \ "mode": "active",
-      \ "active_filetypes": ["ruby", "php"],
-      \ "passive_filetypes": ["puppet"] }
-"let g:syntastic_quiet_messages = { "type": "style" }
-let g:syntastic_php_checkers = ['php', 'phpmd', 'phpcs']
-" let g:syntastic_php_checkers = ['php', 'phpmd']
-let g:syntastic_aggregate_errors = 1
-let g:syntastic_enable_signs = 0
-" gutentags
-let g:gutentags_generate_on_new = 0
-let g:gutentags_generate_on_missing = 0
-let g:gutentags_exclude = ['*node_modules*', '*bower_components*', 'tmp*', 'temp*']
-let g:gutentags_project_root = ['composer.json', 'tags']
-" vim tags
-let g:vim_tags_use_language_field = 1
-let g:vim_tags_use_vim_dispatch = 1
-
-cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
-
 " Autoformat
 function! Autoformat()
   if &ft == 'php'
@@ -598,48 +506,8 @@ let g:autoswap_detect_tmux = 1
 command! BCloseAll execute "%bd"
 command! BCloseOther execute "%bd | e#"
 command! BCloseOtherForce execute "%bd! | e#"
-" set a directory to store the undo history
-set undodir=~/.vim/undofiles//
-set undofile
-" set a directory for swp files
-set dir=~/.vim/swapfiles//
-" set backup disr
-set backupdir=~/.vim/backupfiles//
-set nowritebackup
-set nobackup " well, thats the only way to prevent guard from running tests twice ;/
-" vim-test
-nmap <silent> <leader>tn :TestNearest<CR>
-nmap <silent> <leader>tf :TestFile<CR>
-nmap <silent> <leader>ts :TestSuite<CR>
-nmap <silent> <leader>tl :TestLast<CR>
-nmap <silent> <leader>tt :TestLast<CR>
-nmap <silent> <leader>tv :TestVisit<CR>
-" to close and go back to Vim perss <c-k> or <c-j>
-nmap <silent> <leader>ti :call InspectTest()<CR>
-nmap <silent> <leader>tx :VimuxCloseRunner<CR>
-nmap <silent> <leader>tq :VimuxCloseRunner<CR>
-let g:VimuxHeight = "7"
-function! InspectTestStrategy(cmd)
-  let echo  = 'echo -e ' . shellescape(a:cmd)
-  let cmd = join(['clear', l:echo, a:cmd], '; ')
-  call VimuxCloseRunner()
-  call VimuxRunCommand(cmd)
-  call VimuxZoomRunner()
-  call VimuxRunCommand('tmux copy-mode')
-  call VimuxSendText('exit')
-endfunction
-let g:test#custom_strategies = {'inspect': function('InspectTestStrategy')}
 let g:test#strategy = 'neovim'
-function! InspectTest()
-  " how about add new shortcut for q which will do the action below? should be
-  " awesome
-  call VimuxSendText('tmux resize-pane -Z; tmux select-pane -U')
-  call VimuxZoomRunner()
-  call VimuxInspectRunner()
-endfunction
-" new backup file every minute, coz I can
-" its recreating file path and then save copy there with current time
-" dont know how fast it will grow...
+
 let g:paranoic_backup_dir="~/.vim/backupfiles/"
 command! -bang W :call CreateFoldersAndWrite(<bang>0)
 function! CreateFoldersAndWrite(bang)
@@ -652,98 +520,15 @@ function! CreateFoldersAndWrite(bang)
 endfunction
 " disable double save (cousing file watchers issues)
 " modify selected text using combining diacritics
-command! -range -nargs=0 Overline        call s:CombineSelection(<line1>, <line2>, '0305')
-command! -range -nargs=0 Underline       call s:CombineSelection(<line1>, <line2>, '0332')
-command! -range -nargs=0 DoubleUnderline call s:CombineSelection(<line1>, <line2>, '0333')
-command! -range -nargs=0 Strikethrough   call s:CombineSelection(<line1>, <line2>, '0336')
-function! s:CombineSelection(line1, line2, cp)
+command! -range -nargs=0 Overline        call s:combine_selection(<line1>, <line2>, '0305')
+command! -range -nargs=0 Underline       call s:combine_selection(<line1>, <line2>, '0332')
+command! -range -nargs=0 DoubleUnderline call s:combine_selection(<line1>, <line2>, '0333')
+command! -range -nargs=0 Strikethrough   call s:combine_selection(<line1>, <line2>, '0336')
+function! s:combine_selection(line1, line2, cp)
   execute 'let char = "\u'.a:cp.'"'
   execute a:line1.','.a:line2.'s/\%V[^[:cntrl:]]/&'.char.'/ge'
 endfunction
 
-" Wipes out all invisible buffers
-command! -bang Wipeout :call Wipeout(<bang>0)
-function! Wipeout(bang)
-  " figure out which buffers are visible in any tab
-  let visible = {}
-  for t in range(1, tabpagenr('$'))
-    for b in tabpagebuflist(t)
-      let visible[b] = 1
-    endfor
-  endfor
-  " close any buffer that are loaded and not visible
-  let l:tally = 0
-  let l:cmd = 'bw'
-  if a:bang
-    let l:cmd .= '!'
-  endif
-  for b in range(1, bufnr('$'))
-    if buflisted(b) && !has_key(visible, b)
-      let l:tally += 1
-      silent exe l:cmd . ' ' . b
-    endif
-  endfor
-  echon "Deleted " . l:tally . " buffers"
-endfun
-
-" switch between class and test file
-" laravel
-" elixir
-" elixir phoenix
-let g:projectionist_heuristics = {
-      \   "artisan&composer.json": {
-      \     "app/*.php": {
-      \       "alternate": "tests/{}Test.php"
-      \     },
-      \     "lib/*.php": {
-      \       "alternate": "tests/{}Test.php"
-      \     },
-      \     "tests/*Test.php": {
-      \       "alternate": ["app/{}.php", "lib/{}.php"],
-      \       "template": [
-      \          "<?php\n",
-      \          "class {capitalize|underscore|camelcase}Test extends TestCase",
-      \          "{open}",
-      \          "{close}",
-      \       ],
-      \       "type": "test"
-      \     },
-      \   },
-      \   "mix.exs": {
-      \     "lib/*.ex": {
-      \       "alternate": "test/{}_test.exs"
-      \     },
-      \     "test/*_test.exs": {
-      \       "alternate": "lib/{}.ex",
-      \       "type": "test"
-      \     },
-      \   },
-      \   "mix.exs&web/": {
-      \     "web/*.ex": {
-      \       "alternate": "test/{}_test.exs"
-      \     },
-      \     "test/*_test.exs": {
-      \       "alternate": "web/{}.ex",
-      \       "type": "test"
-      \     },
-      \   },
-      \ }
-
-" This allows for change paste motion cp{motion}
-nmap <silent> cp :let b:changepaste_register = v:register<cr>:set opfunc=ChangePaste<CR>g@
-nmap <silent> cpp :exec "normal! V\"_d\"" . v:register . "P"<cr>
-function! ChangePaste(type, ...)
-  if a:0  " Invoked from Visual mode, use '< and '> marks.
-    silent exe "normal! `<" . a:type . "`>\"_c" . getreg(b:changepaste_register)
-  elseif a:type == 'line'
-    silent exe "normal! '[V']\"_c" . getreg(b:changepaste_register)
-  elseif a:type == 'block'
-    silent exe "normal! `[\<C-V>`]\"_c" . getreg(b:changepaste_register)
-  else
-    silent exe "normal! `[v`]\"_c" . getreg(b:changepaste_register)
-  endif
-endfunction
-nmap <leader>cp "+cp
 " fold adjust
 set fillchars="vert:|,fold: "
 " remove underline
@@ -786,21 +571,5 @@ set title
 
 let g:snips_author = "Pawel Bogut"
 let g:snips_github = "https://github.com/pbogut"
-silent! exec(":source ~/.vim/" . hostname() . ".vim")
 
-let g:terminal_color_0  = '#073642'
-let g:terminal_color_1  = '#dc322f'
-let g:terminal_color_2  = '#859900'
-let g:terminal_color_3  = '#b58900'
-let g:terminal_color_4  = '#268bd2'
-let g:terminal_color_5  = '#d33682'
-let g:terminal_color_6  = '#2aa198'
-let g:terminal_color_7  = '#eee8d5'
-let g:terminal_color_8  = '#002b36'
-let g:terminal_color_9  = '#cb4b16'
-let g:terminal_color_10 = '#586e75'
-let g:terminal_color_11 = '#657b83'
-let g:terminal_color_12 = '#839496'
-let g:terminal_color_13 = '#6c71c4'
-let g:terminal_color_14 = '#93a1a1'
-let g:terminal_color_15 = '#fdf6e3'
+silent! exec(":source ~/.vim/" . hostname() . ".vim")
