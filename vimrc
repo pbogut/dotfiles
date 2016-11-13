@@ -337,7 +337,7 @@ nnoremap <silent> <leader>ovt :belowright vertical split \| terminal<cr>
 nnoremap <silent> <leader>r :call ToggleNERDTree()<cr>
 nnoremap <silent> <leader>b :Buffers<cr>
 " fzf
-nnoremap <silent> <leader>fm :FZFMru<cr>
+nnoremap <silent> <leader>fm :FZFFreshMru<cr>
 nnoremap <silent> <leader>ff :call local#fzf#files()<cr>
 nnoremap <silent> <leader>fa :call local#fzf#all_files()<cr>
 nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
