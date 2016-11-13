@@ -161,6 +161,8 @@ if exists(':Plug')
   Plug 'will133/vim-dirdiff'
   Plug 'dbakker/vim-projectroot'
   Plug 'AndrewRadev/switch.vim'
+  Plug 'AndrewRadev/splitjoin.vim'
+  Plug 'godlygeek/tabular'
   Plug 'reedes/vim-pencil'
   Plug 'vim-scripts/cmdalias.vim'
   if has('nvim')
