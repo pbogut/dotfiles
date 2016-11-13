@@ -8,7 +8,7 @@ set_walpaper () {
 }
 if [ "$hostname" == "v3engine" ]; then # my laptop
     (   sleep 3
-        xrandr --output HDMI1 --primary --mode 1920x1080 --pos 0x0 --output eDP1 --mode 1368x768 --pos 1920x125
+        xrandr --output HDMI1 --primary --mode 1920x1080 --pos 0x0 --output eDP1 --mode 1368x768 --pos 1920x205
         i3-msg restart
         set_walpaper
     )  &
