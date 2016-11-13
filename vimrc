@@ -51,7 +51,6 @@ set hidden " No bang needed to open new file
 set colorcolumn=81
 " color scheme
 set background=dark
-silent! colorscheme solarized
 if exists('&inccommand')
   set inccommand=split
 endif
@@ -198,6 +197,8 @@ source ~/.vim/plugin/config/gutentags.vimrc
 source ~/.vim/plugin/config/airline.vimrc
 source ~/.vim/plugin/config/autopairs.vimrc
 source ~/.vim/plugin/config/deoplete.vimrc
+
+silent! colorscheme solarized
 
 " closetag
 let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml"
