@@ -49,6 +49,7 @@ read -d '' files <<"EOF"
     config/feh/keys
     vim/autoload/plug.vim
     vim/after/plugin/abolish.vim
+    vim/plugin
     i3blocks.conf
     composer/composer.json
     mutt/muttrc

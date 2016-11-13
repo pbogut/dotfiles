@@ -359,9 +359,14 @@ nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
 nnoremap <silent> <leader>ovt :belowright vertical split \| terminal<cr>
 nnoremap <silent> <leader>r :call ToggleNERDTree()<cr>
 nnoremap <silent> <leader>b :Buffers<cr>
-nnoremap <silent> <leader>m :FZFMru<cr>
-nnoremap <silent> <leader>f :call FzfFilesAg()<cr>
-nnoremap <silent> <leader>F :Files<cr>
+" fzf
+nnoremap <silent> <leader>fm :FZFMru<cr>
+nnoremap <silent> <leader>ff :call local#fzf#files()<cr>
+nnoremap <silent> <leader>fa :call local#fzf#all_files()<cr>
+nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
+nnoremap <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
+nnoremap <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
+
 nnoremap <silent> <leader>w :call WriteOrCr()<cr>
 nnoremap <silent> <leader>a :call Autoformat()<cr>
 nnoremap <silent> <leader>z :call PHP__Fold()<cr>
@@ -479,9 +484,10 @@ nnoremap <leader>gstage <Plug>GitGutterStageHunk
 inoremap <silent> </ </<C-X><C-O><C-n><esc>mB==`Ba
 map <F8> :BLReloadPage<cr>
 map <F7> :BLReloadCSS<cr>
+
 " fzf
-nnoremap <leader>gf :call fzf#vim#files('', extend({'options': '-q '.shellescape(expand('<cfile>'))}, g:fzf_layout))<cr>
-nnoremap <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
+let g:fzf_layout = { 'down': '~20%' }
+let g:fzf_mru_relative = 1
 " air-line
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
@@ -563,56 +569,6 @@ let g:gutentags_project_root = ['composer.json', 'tags']
 " vim tags
 let g:vim_tags_use_language_field = 1
 let g:vim_tags_use_vim_dispatch = 1
-" fzf
-let g:fzf_command_prefix = 'FZF'
-let g:fzf_layout = { 'down': '~20%' }
-let g:fzf_mru_relative = 1
-function! FzfFilesAg()
-  let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
-  execute('FZFFiles')
-  let $FZF_DEFAULT_COMMAND = ''
-endfunction
-" fzf git ls
-function! s:fzf_git_sink(line)
-  let result = substitute(a:line, '^...', '', '')
-  execute('e ' . result)
-endfunction
-function! s:fzf_git(...) abort
-  let options = {
-        \   'source': '{git -c color.status=always status --short; git ls-files | while read l; do echo -e "\033[0;34mG\033[0m  $l";done }',
-        \   'sink': function('s:fzf_git_sink'),
-        \   'options': '--ansi --prompt "Git> " ',
-        \ }
-  let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
-  call fzf#run(fzf#wrap('name', extra, 0))
-endfunction
-command! -nargs=* FZFGit call s:fzf_git(<q-args>)
-" Better Ag search (with optional dir specified)
-function! s:fzf_ag_process(string, escape) abort
-  if a:escape
-    return shellescape(a:string)
-  else
-    return a:string
-  endif
-endfunction
-function! s:fzf_ag(raw, ...) abort
-  let dir = a:000[-1]
-  if dir=~ '/$' && isdirectory(dir)
-    let params = s:fzf_ag_process(join(a:000[0:-2], ' '), !a:raw) . ' ' . dir
-  else
-    let params = s:fzf_ag_process(join(a:000, ' '), !a:raw)
-  endif
-  echo "ag " . params
-  call fzf#vim#ag_raw(params)
-endfunction
-command! -nargs=* -bang Ag call s:fzf_ag(<bang>0,<f-args>)
-" async ack
-let g:ack_use_dispatch = 1
-" use ag if available
-if executable('ag')
-  let g:ackprg = 'ag --vimgrep'
-endif
-let g:ag_working_path_mode="r"
 
 cnoreabbrev fixphpf %s/\(function.*\){$/\1\r{/g
 
@@ -684,18 +640,7 @@ endfunction
 " new backup file every minute, coz I can
 " its recreating file path and then save copy there with current time
 " dont know how fast it will grow...
-augroup backup
-  autocmd!
-  autocmd BufWritePre * call ParanoicBackup()
-augroup END
 let g:paranoic_backup_dir="~/.vim/backupfiles/"
-function! ParanoicBackup()
-  let filedir = g:paranoic_backup_dir . expand('%:p:h')
-  let filename = expand('%:t')
-  let timestamp = strftime("___%y%m%d_%H%M")
-  silent execute "!mkdir -p " . fnameescape(filedir)
-  silent execute "w! " . fnameescape(filedir . '/' . filename . timestamp)
-endfunction
 command! -bang W :call CreateFoldersAndWrite(<bang>0)
 function! CreateFoldersAndWrite(bang)
   if (a:bang)
