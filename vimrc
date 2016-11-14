@@ -160,6 +160,7 @@ if exists(':Plug')
   Plug 'dbakker/vim-projectroot'
   Plug 'AndrewRadev/switch.vim'
   Plug 'AndrewRadev/splitjoin.vim'
+  Plug 'AndrewRadev/sideways.vim'
   Plug 'godlygeek/tabular'
   Plug 'reedes/vim-pencil'
   Plug 'vim-scripts/cmdalias.vim'
@@ -449,6 +450,18 @@ nnoremap <leader>= migg=G'i
 nmap <leader>gp <Plug>GitGutterPreviewHunk
 nmap <leader>grevert <Plug>GitGutterRevertHunk
 nmap <leader>gstage <Plug>GitGutterStageHunk
+omap <leader>ga <plug>SidewaysArgumentTextobjA
+" keep ga functionality as gas
+nnoremap gas ga
+" Sideways
+nmap ga< :SidewaysLeft<cr>
+nmap ga> :SidewaysRight<cr>
+nmap gab :SidewaysJumpLeft<cr>
+nmap gaw :SidewaysJumpRight<cr>
+omap aa <plug>SidewaysArgumentTextobjA
+xmap aa <plug>SidewaysArgumentTextobjA
+omap ia <plug>SidewaysArgumentTextobjI
+xmap ia <plug>SidewaysArgumentTextobjI
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
 inoremap <silent> </ </<C-X><C-O><C-n><esc>mB==`Ba
