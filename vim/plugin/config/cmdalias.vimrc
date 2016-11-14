@@ -1,0 +1,2 @@
+" cmdalias
+Alias ag Ag

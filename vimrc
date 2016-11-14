@@ -63,8 +63,6 @@ augroup configgroup
   autocmd!
   " fix terminal display
   autocmd TermOpen * setlocal listchars= | set nocursorline | set nocursorcolumn
-  autocmd VimEnter *
-        \  execute('Alias ag Ag')
   autocmd FileType html
         \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType elixir
@@ -198,6 +196,13 @@ source ~/.vim/plugin/config/gutentags.vimrc
 source ~/.vim/plugin/config/airline.vimrc
 source ~/.vim/plugin/config/autopairs.vimrc
 source ~/.vim/plugin/config/deoplete.vimrc
+
+augroup after_load
+  autocmd!
+  autocmd VimEnter *
+        \  source ~/.vim/plugin/config/abolish.vimrc
+        \| source ~/.vim/plugin/config/cmdalias.vimrc
+augroup END
 
 silent! colorscheme solarized
 
@@ -441,9 +446,9 @@ nnoremap c? c?\c
 nnoremap d? d?\c
 nnoremap y? y?\c
 nnoremap <leader>= migg=G'i
-nnoremap <leader>gp <Plug>GitGutterPreviewHunk
-nnoremap <leader>gr <Plug>GitGutterRevertHunk
-nnoremap <leader>gstage <Plug>GitGutterStageHunk
+nmap <leader>gp <Plug>GitGutterPreviewHunk
+nmap <leader>grevert <Plug>GitGutterRevertHunk
+nmap <leader>gstage <Plug>GitGutterStageHunk
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
 inoremap <silent> </ </<C-X><C-O><C-n><esc>mB==`Ba
