@@ -197,6 +197,7 @@ source ~/.vim/plugin/config/gutentags.vimrc
 source ~/.vim/plugin/config/airline.vimrc
 source ~/.vim/plugin/config/autopairs.vimrc
 source ~/.vim/plugin/config/deoplete.vimrc
+source ~/.vim/plugin/config/switch.vimrc
 
 augroup after_load
   autocmd!
