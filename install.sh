@@ -164,11 +164,3 @@ install_zsh () {
 }
 
 install_zsh
-
-echo ""
-echo "Additional setup"
-echo ""
-echo "nvm:"
-echo "  curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash"
-echo ""
-
