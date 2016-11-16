@@ -472,6 +472,14 @@ if has('nvim')
   noremap <silent> <M-w> :call I3Focus('up', 'k')<cr>
   noremap <silent> <M-t> :call I3Focus('right', 'l')<cr>
   noremap <silent> <M-a> :call I3Focus('left', 'h')<cr>
+  inoremap <silent> <M-r> <end>:call I3Focus('down', 'j')<cr>
+  inoremap <silent> <M-w> <esc>:call I3Focus('up', 'k')<cr>
+  inoremap <silent> <M-t> <esc>:call I3Focus('right', 'l')<cr>
+  inoremap <silent> <M-a> <esc>:call I3Focus('left', 'h')<cr>
+  cnoremap <silent> <M-r> <end><c-u>:call I3Focus('down', 'j')<cr>
+  cnoremap <silent> <M-w> <end><c-u>:call I3Focus('up', 'k')<cr>
+  cnoremap <silent> <M-t> <end><c-u>:call I3Focus('right', 'l')<cr>
+  cnoremap <silent> <M-a> <end><c-u>:call I3Focus('left', 'h')<cr>
   " escape terminal and move switch focus
   tnoremap <silent> <M-r> <C-\><C-n> :call I3Focus('down', 'j')<cr>
   tnoremap <silent> <M-w> <C-\><C-n>:call I3Focus('up', 'k')<cr>

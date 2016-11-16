@@ -123,7 +123,7 @@ if __name__ == '__main__':
             vim_id = "/tmp/nvim" + \
                     re.search(r".*:nvim:(.*?):.*", name).group(1) + "/0"
             subprocess.Popen("nvr --servername " + vim_id +
-                             " --remote-send '<esc><" + vim_dir[direction] +
+                             " --remote-send '<" + vim_dir[direction] +
                              ">'", shell=True)
         else:
             i3.focus(direction)
