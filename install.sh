@@ -129,6 +129,9 @@ echo -n "Set ranger as default manager... "
 xdg-mime default ranger.desktop inode/directory && gvfs-mime --set inode/directory ranger.desktop
 echo "done"
 
+[[ -n `command -v /bin/vim` ]] && /bin/vim -u ./vim/silent.vimrc +PlugInstall +qa
+[[ -n `command -v /bin/nvim` ]] && /bin/nvim -u ./vim/silent.vimrc +PlugInstall +qa
+
 install_zsh () {
     # Test to see if zshell is installed.  If it is:
     if [ -f /bin/zsh -o -f /usr/bin/zsh ]; then

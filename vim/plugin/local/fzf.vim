@@ -61,4 +61,4 @@ function! local#fzf#ag(raw, ...) abort
   call fzf#vim#ag_raw(params)
 endfunction
 
-command! -nargs=* -bang Ag call local#fzf#ag(<bang>0,<f-args>)
+command! -nargs=* -bang -complete=dir Ag call local#fzf#ag(<bang>0,<f-args>)

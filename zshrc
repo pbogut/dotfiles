@@ -147,7 +147,7 @@ alias ls="ls --color=auto"
 alias pacman="pacman --color=auto"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
-vimnote() { if [ -z $1 ];then; nvim ~/Notes/; else nvim ~/Notes/ +"Note $1"; fi }
+vimnotes() { if [ -z $1 ];then; nvim ~/Notes/; else nvim ~/Notes/ +"Note $1"; fi }
 vimdirdiff() {
   if [[ -z  $2 ]]; then
     echo "Usage: dirdiff /path/to/dir/one /path/to/dir/two"
@@ -156,7 +156,7 @@ vimdirdiff() {
   fi
 }
 
-alias note=vimnote
+alias notes=vimnotes
 alias dirdiff=vimdirdiff
 
 alias xo="xdg-open"

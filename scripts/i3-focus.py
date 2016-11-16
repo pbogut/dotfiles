@@ -119,7 +119,7 @@ if __name__ == '__main__':
                                  session_id + " " +
                                  pane_dir[direction], shell=True)
     else:
-        if bool(re.match(r'.*:nvim:.*:', name)) and not args.skip_vim:
+        if bool(re.match(r'.*:nvim:..*:', name)) and not args.skip_vim:
             vim_id = "/tmp/nvim" + \
                     re.search(r".*:nvim:(.*?):.*", name).group(1) + "/0"
             subprocess.Popen("nvr --servername " + vim_id +
