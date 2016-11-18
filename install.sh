@@ -33,10 +33,8 @@ read -d '' files <<"EOF"
     weechat/alias.conf
     weechat/weechat.conf
     config/nvim/init.vim
-    config/nvim/after/plugin/abolish.vim
     config/roxterm.sourceforge.net
     config/autostart/autostart.desktop
-    config/autostart/rescuetime.desktop
     config/i3/config
     config/i3/i3status.conf
     config/ranger/rc.conf
@@ -48,7 +46,6 @@ read -d '' files <<"EOF"
     config/twmn/twmn.conf
     config/feh/keys
     vim/autoload/plug.vim
-    vim/after/plugin/abolish.vim
     vim/plugin
     i3blocks.conf
     composer/composer.json
@@ -63,22 +60,7 @@ read -d '' directories <<"EOF"
     .vim/undofiles
     .vim/swapfiles
     .vim/backupfiles
-    .vim/autoload
-    .vim/after/plugin
-    .config/nvim
-    .config/nvim/after/plugin
-    .config/i3
-    .config/ranger
-    .config/ranger/plugins
-    .config/autostart
-    .config/ncmpcpp
-    .config/twmn
-    .config/feh
-    .weechat
-    .composer
-    .mutt
     .gocode
-    .local/share/applications
 EOF
 ##########
 
@@ -113,11 +95,15 @@ done
 echo "Creating symlinks in home directory"
 for file in $files; do
     echo -en "\t~/.$file "
-    ln -s $dir/$file ~/.$file
+    # crate directory if not exists
+    mkdir -p `dirname $HOME/.$file`
+    ln -s $dir/$file $HOME/.$file
     echo "done"
 done
 
-echo -n "Making scripts executable ... "
+echo "Post install actions"
+
+echo -en "\tMaking scripts executable ... "
 find $dir -name "*.sh" -exec chmod +x {} \; > /dev/null 2>&1
 find $dir -name "*.zsh" -exec chmod +x {} \; > /dev/null 2>&1
 find $dir -name "*.phar" -exec chmod +x {} \; > /dev/null 2>&1
@@ -125,12 +111,14 @@ chmod +x ~/.scripts/* > /dev/null 2>&1
 chmod +x ~/.offlineimap-hooks/* > /dev/null 2>&1
 echo "done"
 
-echo -n "Set ranger as default manager... "
-xdg-mime default ranger.desktop inode/directory && gvfs-mime --set inode/directory ranger.desktop
+# Set ranger as default manager...
+echo -en "\t`xdg-mime default ranger.desktop inode/directory && gvfs-mime --set inode/directory ranger.desktop` ... "
 echo "done"
 
+echo -en "\tInstall vim/neovim plugins ... "
 [[ -n `command -v /bin/vim` ]] && /bin/vim -u ./vim/silent.vimrc +PlugInstall +qa
 [[ -n `command -v /bin/nvim` ]] && /bin/nvim -u ./vim/silent.vimrc +PlugInstall +qa
+echo "done"
 
 install_zsh () {
     # Test to see if zshell is installed.  If it is:
