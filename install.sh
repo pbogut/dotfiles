@@ -125,9 +125,10 @@ chmod +x ~/.scripts/* > /dev/null 2>&1
 chmod +x ~/.offlineimap-hooks/* > /dev/null 2>&1
 echo "done"
 
-echo -n "Set ranger as default manager... "
-xdg-mime default ranger.desktop inode/directory && gvfs-mime --set inode/directory ranger.desktop
+echo -n "Set ranger as default manager (xdg-mime) ... "
+[[ -n `command -v xdg-mime` ]] && xdg-mime default ranger.desktop inode/directory
 echo "done"
+echo -n $([[ -n `command -v gvfs-mime` ]] && gvfs-mime --set inode/directory ranger.desktop && echo " ... done")
 
 [[ -n `command -v /bin/vim` ]] && /bin/vim -u ./vim/silent.vimrc +PlugInstall +qa
 [[ -n `command -v /bin/nvim` ]] && /bin/nvim -u ./vim/silent.vimrc +PlugInstall +qa

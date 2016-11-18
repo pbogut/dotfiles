@@ -51,18 +51,20 @@ set hidden " No bang needed to open new file
 set colorcolumn=81
 " color scheme
 set background=dark
-if exists('&inccommand')
-  set inccommand=split
-endif
-if has("patch-7.4.314")
-  set shortmess+=c
-endif
+if exists('&inccommand') | set inccommand=split | endif
+if has("patch-7.4.314") | set shortmess+=c | endif
 
 let mapleader = "\<space>" " life changer
+
+if has('nvim')
+  augroup configgroup_nvim
+    autocmd!
+    " fix terminal display
+    autocmd TermOpen * setlocal listchars= | set nocursorline | set nocursorcolumn
+  augroup END
+endif
 augroup configgroup
   autocmd!
-  " fix terminal display
-  autocmd TermOpen * setlocal listchars= | set nocursorline | set nocursorcolumn
   autocmd FileType html
         \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType elixir
@@ -100,6 +102,17 @@ augroup configgroup
   " autocmd CursorHold * rshada | wshada
   " autocmd FocusLost * wshada
   " autocmd FocusGained * sleep 100m | rshada
+  autocmd FileType vimfiler
+        \  nunmap <buffer> <leader>
+        \| nunmap <buffer> N
+        \| nmap <buffer> A <Plug>(vimfiler_new_file)
+        \| nmap <buffer> <leader>r q
+        \| nmap <buffer> v <Plug>(vimfiler_toggle_mark_current_line)
+        \| nmap <buffer> <leader>fm q <bar> :FZFFreshMru<cr>
+        \| nmap <buffer> <leader>fa q <bar> :call local#fzf#files()<cr>
+        \| nmap <buffer> <leader>ff q <bar> :call local#fzf#all_files()<cr>
+        \| nmap <buffer> <leader>fg q <bar> :call local#fzf#git_ls()<cr>
+        \| nmap <buffer> <leader>fb q <bar> :FZFBuffers<cr>
 augroup END
 
 
@@ -125,7 +138,6 @@ if exists(':Plug')
   Plug 'tpope/vim-projectionist'
   Plug 'dhruvasagar/vim-prosession'
   Plug 'terryma/vim-expand-region'
-  Plug 'scrooloose/nerdtree', { 'on': ['NERDTreeClose', 'NERDTreeFind'] }
   Plug 'vim-airline/vim-airline'
   Plug 'vim-airline/vim-airline-themes'
   Plug 'edkolev/tmuxline.vim'
@@ -164,6 +176,9 @@ if exists(':Plug')
   Plug 'godlygeek/tabular'
   Plug 'reedes/vim-pencil'
   Plug 'vim-scripts/cmdalias.vim'
+  Plug 'Shougo/unite.vim'
+  Plug 'Shougo/vimfiler.vim'
+  Plug 't9md/vim-choosewin'
   if has('nvim')
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
@@ -208,8 +223,10 @@ augroup END
 
 silent! colorscheme solarized
 
+" vim filer
+let g:vimfiler_safe_mode_by_default = 0
 " closetag
-let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml"
+let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml,*.blade.php"
 
 " sqlworkbench
 let g:sw_config_dir = $HOME . "/.sqlworkbench/"
@@ -219,17 +236,6 @@ let g:notes_directories = [ $HOME . "/Notes/" ]
 " projectroot
 let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
       \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
-" nerdtree
-let NERDTreeQuitOnOpen=1
-let NERDTreeAutoDeleteBuffer=1
-" one actino to reaveal file and close sidebar
-function! ToggleNERDTree()
-  if &buftype == 'nofile'
-    :NERDTreeClose
-  else
-    silent! :NERDTreeFind
-  endif
-endfunction
 " write or select when in command mode
 function! WriteOrCr()
   if &buftype == 'nofile'
@@ -254,13 +260,14 @@ nnoremap <silent> <leader>oc :copen<cr>
 nnoremap <silent> <leader>ot :belowright 11split \| terminal<cr>
 nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
 nnoremap <silent> <leader>ovt :belowright vertical split \| terminal<cr>
-nnoremap <silent> <leader>r :call ToggleNERDTree()<cr>
+nnoremap <silent> <leader>r :VimFilerExplorer -find -force-quit<cr>
 nnoremap <silent> <leader>b :Buffers<cr>
 " fzf
 nnoremap <silent> <leader>fm :FZFFreshMru<cr>
-nnoremap <silent> <leader>ff :call local#fzf#files()<cr>
-nnoremap <silent> <leader>fa :call local#fzf#all_files()<cr>
+nnoremap <silent> <leader>fa :call local#fzf#files()<cr>
+nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
 nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
+nnoremap <silent> <leader>fb :FZFBuffers<cr>
 nnoremap <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
 nnoremap <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
 
@@ -283,6 +290,12 @@ map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
 map <C-w>x :Bdelete <bar>q<cr>
 map <C-w>X :Bdelete! <bar> q<cr>
+" more natural split (always right/below)
+nmap <c-w>v :silent! rightbelow vsplit<cr>
+nmap <c-w>s :silent! rightbelow split<cr>
+" just in case I want old behaviour from time to time
+nmap <c-w>V :silent! vsplit<cr>
+nmap <c-w>S :silent! split<cr>
 map Y y$
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
@@ -302,9 +315,9 @@ snoremap <leader>x "_x
 nnoremap <leader>y "+y
 vnoremap <leader>y "+y
 snoremap <leader>y "+y
-nnoremap <leader>Y "+Y
-vnoremap <leader>Y "+Y
-snoremap <leader>Y "+Y
+nnoremap <leader>Y "+y$
+vnoremap <leader>Y "+y$
+snoremap <leader>Y "+y$
 nnoremap <leader>p "+p
 vnoremap <leader>p "+p
 snoremap <leader>p "+p

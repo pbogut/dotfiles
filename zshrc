@@ -55,19 +55,16 @@ bindkey '^k' history-beginning-search-backward
 bindkey '^[j' history-beginning-search-forward
 bindkey '^[k' history-beginning-search-backward
 
-# vim_ins_mode="%F{022}%K{022}%B%F{255} INSERT %k%b%{$reset_color%}"
-# vim_cmd_mode="%F{027}%K{027}%B%F{255} NORMAL %k%b%{$reset_color%}"
-# vim_vis_mode="%F{088}%K{088}%B%F{255} VISUAL %k%b%{$reset_color%}"
 # solarized colors
 vim_ins_mode="%F{003}%K{003}%B%F{255} INSERT %k%b%{$reset_color%}"
 vim_cmd_mode="%F{014}%K{014}%B%F{255} NORMAL %k%b%{$reset_color%}"
 vim_vis_mode="%F{005}%K{005}%B%F{255} VISUAL %k%b%{$reset_color%}"
 
-GIT_BRANCH=$'$(__git_ps1 "(%s)")'
+GIT_BRANCH=$'$(__git_ps1 "  %s")'
 
 VIMODE_COLOR="003"
 vim_ps1() {
-  PS1="%B%F{001}(%b%F{012}%~%B%F{001}) %b%F{004}${GIT_BRANCH}%f
+    PS1="%B%F{001}(%b%F{012}%~%B%F{001}) %b%F{004}${GIT_BRANCH}%f
 %F{${VIMODE_COLOR}} %k%(!.%F{001}.%F{012})%n%F{001}@${HOST_COLOR}%M %B%F{001}%(!.#.$) %b%f%k"
 }
 precmd() {
@@ -142,6 +139,8 @@ if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
 fi
 
 eval `dircolors ~/.config/dircolors-solarized/dircolors.256dark`
+
+alias se="sudoedit"
 
 alias ls="ls --color=auto"
 alias pacman="pacman --color=auto"
@@ -272,3 +271,19 @@ alias myip="wget http://ipinfo.io/ip -qO -"
 if [ -f $HOME/.$hostname.zsh ]; then
   source $HOME/.$hostname.zsh
 fi
+
+# Less Colors for Man Pages
+# enter blinking mode
+export LESS_TERMCAP_mb=$(printf "\e[1;31m")
+# enter double-bright mode
+export LESS_TERMCAP_md=$(printf "\e[1;31m")
+# turn off all appearance modes (mb, md, so, us)
+export LESS_TERMCAP_me=$(printf "\e[0m")
+# leave standout mode
+export LESS_TERMCAP_se=$(printf "\e[0m")
+# enter standout mode - yellow
+export LESS_TERMCAP_so=$(printf "\e[0;37;102m")
+# leave underline mode
+export LESS_TERMCAP_ue=$(printf "\e[0m")
+# enter underline mode
+export LESS_TERMCAP_us=$(printf "\e[4;32m")
