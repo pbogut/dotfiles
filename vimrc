@@ -60,7 +60,10 @@ if has('nvim')
   augroup configgroup_nvim
     autocmd!
     " fix terminal display
-    autocmd TermOpen * setlocal listchars= | set nocursorline | set nocursorcolumn
+    autocmd TermOpen *
+          \  setlocal listchars=
+          \| set nocursorline
+          \| set nocursorcolumn
   augroup END
 endif
 augroup configgroup
@@ -137,11 +140,11 @@ if exists(':Plug')
   Plug 'tpope/vim-abolish'
   Plug 'tpope/vim-projectionist'
   Plug 'dhruvasagar/vim-prosession'
-  Plug 'terryma/vim-expand-region'
   Plug 'vim-airline/vim-airline'
   Plug 'vim-airline/vim-airline-themes'
   Plug 'edkolev/tmuxline.vim'
   Plug 'airblade/vim-gitgutter'
+  Plug 'terryma/vim-expand-region'
   Plug 'terryma/vim-multiple-cursors'
   Plug 'MarcWeber/vim-addon-mw-utils'
   Plug 'ludovicchabant/vim-gutentags'
@@ -167,7 +170,6 @@ if exists(':Plug')
   Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
   Plug 'rhysd/vim-grammarous'
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
-  Plug 'cosminadrianpopescu/vim-sql-workbench'
   Plug 'will133/vim-dirdiff'
   Plug 'dbakker/vim-projectroot'
   Plug 'AndrewRadev/switch.vim'
@@ -176,14 +178,14 @@ if exists(':Plug')
   Plug 'godlygeek/tabular'
   Plug 'reedes/vim-pencil'
   Plug 'vim-scripts/cmdalias.vim'
+  Plug 't9md/vim-choosewin'
   Plug 'Shougo/unite.vim'
   Plug 'Shougo/vimfiler.vim'
-  Plug 't9md/vim-choosewin'
   if has('nvim')
+    Plug 'Shougo/deoplete.nvim'
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
     Plug 'pbogut/fzf-mru.vim'
-    Plug 'Shougo/deoplete.nvim'
     Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
     Plug 'zchee/deoplete-go', { 'do': 'go get github.com/nsf/gocode && make', 'for': 'go'}
     Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
@@ -227,10 +229,6 @@ silent! colorscheme solarized
 let g:vimfiler_safe_mode_by_default = 0
 " closetag
 let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml,*.blade.php"
-
-" sqlworkbench
-let g:sw_config_dir = $HOME . "/.sqlworkbench/"
-let g:sw_exe = "/opt/SQLWorkbench/sqlwbconsole.sh"
 " notes
 let g:notes_directories = [ $HOME . "/Notes/" ]
 " projectroot
@@ -270,9 +268,8 @@ nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
 nnoremap <silent> <leader>fb :FZFBuffers<cr>
 nnoremap <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
 nnoremap <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
-
 nnoremap <silent> <leader>w :call WriteOrCr()<cr>
-nnoremap <silent> <leader>a :call Autoformat()<cr>
+nnoremap <silent> <leader>a :Autoformat<cr>
 nnoremap <silent> <leader>z :call PHP__Fold()<cr>
 " vim is getting ^_ when pressing ^/, so I've mapped both
 nmap <C-_> gcc<down>^
@@ -291,8 +288,8 @@ map <C-w>D :Bdelete!<cr>
 map <C-w>x :Bdelete <bar>q<cr>
 map <C-w>X :Bdelete! <bar> q<cr>
 " more natural split (always right/below)
-nmap <c-w>v :silent! rightbelow vsplit<cr>
-nmap <c-w>s :silent! rightbelow split<cr>
+nmap <silent> <c-w>v :rightbelow vsplit<cr>
+nmap <silent> <c-w>s :rightbelow split<cr>
 " just in case I want old behaviour from time to time
 nmap <c-w>V :silent! vsplit<cr>
 nmap <c-w>S :silent! split<cr>
@@ -436,16 +433,6 @@ vmap v <Plug>(expand_region_expand)
 vmap V <Plug>(expand_region_shrink)
 let g:strip_whitespace_on_save = 1
 " Autoformat
-function! Autoformat()
-  if &ft == 'php'
-    let g:formatdef_phpcbf = '"phpcbf -d tabWidth=".&shiftwidth'
-    if exists('b:autoformat_php_phpcbf_args')
-      let g:formatdef_phpcbf = g:formatdef_phpcbf . '." '. join(b:autoformat_php_phpcbf_args) . '"'
-    endif
-  endif
-  execute('Autoformat')
-endfunction
-
 let g:formatdef_phpcbf = '"phpcbf -d tabWidth=".&shiftwidth'
 let g:formatters_php = ['phpcbf']
 
@@ -510,12 +497,12 @@ func! I3Focus(comando, vim_comando)
   endif
 endfunction
 function! PHP__Fold()
-  if (get(b:, 'PHP__Flod__INITIATED', 0))
+  if (get(b:, '_php__flod__initiated', 0))
     silent! normal za
   else
     silent! execute 'EnableFastPHPFolds'
     silent! normal zRza
-    let b:PHP__Flod__INITIATED = 1
+    let b:_php__flod__initiated = 1
   endif
 endfunction
 set foldtext=NeatFoldText()
