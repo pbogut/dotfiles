@@ -10,6 +10,7 @@
 # Please see http://i3wm.org/docs/userguide.html for a complete reference!
 
 set $mod Mod4
+set $hype Mod4+Mod1+Ctrl+Shift
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -81,7 +82,7 @@ bindsym $mod+v split h
 bindsym $mod+s split v
 
 # enter fullscreen mode for the focused container
-bindsym $mod+z fullscreen toggle
+bindsym $mod+f fullscreen toggle
 bindsym $mod+Shift+F fullscreen toggle global
 
 # change container layout (stacked, tabbed, toggle split)
@@ -102,6 +103,16 @@ bindsym $mod+a focus parent
 
 # focus the child container
 bindsym $mod+d focus child
+
+set $wscode 0  code
+set $wsdb   0  db
+set $wsterm 0  term
+set $wsbrow 0  browser
+
+bindsym $hype+c workspace $wscode
+bindsym $hype+t workspace $wsterm
+bindsym $hype+b workspace $wsbrow
+bindsym $hype+d workspace $wsdb
 
 # switch to workspace
 bindsym $mod+1 workspace 1
@@ -233,6 +244,7 @@ bar {
         status_command i3blocks
         position top
         tray_output primary
+        strip_workspace_numbers yes
 }
 
 #client.focused  #4c7899  #F6C050  #d3d3d3
@@ -261,8 +273,6 @@ bindsym $mod+Tab exec --no-startup-id ~/.scripts/i3-toggle-visible-workspace.py 
 bindsym $mod+Shift+Tab exec --no-startup-id ~/.scripts/i3-toggle-visible-workspace.py --prev
 bindsym $mod+Shift+N exec --no-startup-id ~/.scripts/i3-switch-workspace.py --next --same-output --with-container
 bindsym $mod+Shift+P exec --no-startup-id ~/.scripts/i3-switch-workspace.py --prev --same-output --with-container
-
-bindsym $mod+f exec --no-startup-id ~/.scripts/i3-container-commander.py --group-by none
 
 bindsym $mod+c exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py
 bindsym $mod+Shift+C exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py --move

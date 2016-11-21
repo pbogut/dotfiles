@@ -266,8 +266,8 @@ nnoremap <silent> <leader>fa :call local#fzf#files()<cr>
 nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
 nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
 nnoremap <silent> <leader>fb :FZFBuffers<cr>
-nnoremap <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
-nnoremap <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
+nnoremap <silent> <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
+nnoremap <silent> <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
 nnoremap <silent> <leader>w :call WriteOrCr()<cr>
 nnoremap <silent> <leader>a :Autoformat<cr>
 nnoremap <silent> <leader>z :call PHP__Fold()<cr>
@@ -280,19 +280,20 @@ vmap <C-/> gc
 noremap <leader>ta :A<cr>
 " surround
 vmap s S
+" expand region
+vmap v <Plug>(expand_region_expand)
+vmap V <Plug>(expand_region_shrink)
 nmap <silent> <bs> :TmuxNavigateLeft<cr>
 " remap delete to c-d because on hardware level Im sending del when c-d (ergodox)
 nmap <silent> <del> <c-d>
 map <C-w>d :Bdelete<cr>
 map <C-w>D :Bdelete!<cr>
-map <C-w>x :Bdelete <bar>q<cr>
-map <C-w>X :Bdelete! <bar> q<cr>
 " more natural split (always right/below)
 nmap <silent> <c-w>v :rightbelow vsplit<cr>
 nmap <silent> <c-w>s :rightbelow split<cr>
 " just in case I want old behaviour from time to time
-nmap <c-w>V :silent! vsplit<cr>
-nmap <c-w>S :silent! split<cr>
+nmap <silent> <c-w>V :vsplit<cr>
+nmap <silent> <c-w>S :split<cr>
 map Y y$
 nnoremap <leader>d "_d
 vnoremap <leader>d "_d
@@ -369,44 +370,43 @@ nnoremap ? ?\c
 nnoremap c? c?\c
 nnoremap d? d?\c
 nnoremap y? y?\c
-nnoremap <leader>= migg=G'i
-nmap <leader>gp <Plug>GitGutterPreviewHunk
-nmap <leader>grevert <Plug>GitGutterRevertHunk
-nmap <leader>gstage <Plug>GitGutterStageHunk
-omap <leader>ga <plug>SidewaysArgumentTextobjA
+nnoremap <silent> <leader>= migg=G'i
+nmap <silent> <leader>gp <Plug>GitGutterPreviewHunk
+nmap <silent> <leader>grevert <Plug>GitGutterRevertHunk
+nmap <silent> <leader>gstage <Plug>GitGutterStageHunk
 " keep ga functionality as gas
 nnoremap gas ga
 " Sideways
-nmap ga< :SidewaysLeft<cr>
-nmap ga> :SidewaysRight<cr>
-nmap gab :SidewaysJumpLeft<cr>
-nmap gaw :SidewaysJumpRight<cr>
-omap aa <plug>SidewaysArgumentTextobjA
-xmap aa <plug>SidewaysArgumentTextobjA
-omap ia <plug>SidewaysArgumentTextobjI
-xmap ia <plug>SidewaysArgumentTextobjI
+nmap <silent> ga< :SidewaysLeft<cr>
+nmap <silent> ga> :SidewaysRight<cr>
+nmap <silent> gab :SidewaysJumpLeft<cr>
+nmap <silent> gaw :SidewaysJumpRight<cr>
+omap <silent> aa <plug>SidewaysArgumentTextobjA
+xmap <silent> aa <plug>SidewaysArgumentTextobjA
+omap <silent> ia <plug>SidewaysArgumentTextobjI
+xmap <silent> ia <plug>SidewaysArgumentTextobjI
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
 inoremap <silent> </ </<C-X><C-O><C-n><esc>mB==`Ba
 " nvim now can map alt without terminal issues, new cool shortcuts commin
 if has('nvim')
-  noremap <silent> <M-r> :call I3Focus('down', 'j')<cr>
-  noremap <silent> <M-w> :call I3Focus('up', 'k')<cr>
-  noremap <silent> <M-t> :call I3Focus('right', 'l')<cr>
-  noremap <silent> <M-a> :call I3Focus('left', 'h')<cr>
-  inoremap <silent> <M-r> <end>:call I3Focus('down', 'j')<cr>
-  inoremap <silent> <M-w> <esc>:call I3Focus('up', 'k')<cr>
-  inoremap <silent> <M-t> <esc>:call I3Focus('right', 'l')<cr>
-  inoremap <silent> <M-a> <esc>:call I3Focus('left', 'h')<cr>
-  cnoremap <silent> <M-r> <end><c-u>:call I3Focus('down', 'j')<cr>
-  cnoremap <silent> <M-w> <end><c-u>:call I3Focus('up', 'k')<cr>
-  cnoremap <silent> <M-t> <end><c-u>:call I3Focus('right', 'l')<cr>
-  cnoremap <silent> <M-a> <end><c-u>:call I3Focus('left', 'h')<cr>
+  noremap <silent> <M-r> :call local#i3focus#switch('down', 'j')<cr>
+  noremap <silent> <M-w> :call local#i3focus#switch('up', 'k')<cr>
+  noremap <silent> <M-t> :call local#i3focus#switch('right', 'l')<cr>
+  noremap <silent> <M-a> :call local#i3focus#switch('left', 'h')<cr>
+  inoremap <silent> <M-r> <end>:call local#i3focus#switch('down', 'j')<cr>
+  inoremap <silent> <M-w> <esc>:call local#i3focus#switch('up', 'k')<cr>
+  inoremap <silent> <M-t> <esc>:call local#i3focus#switch('right', 'l')<cr>
+  inoremap <silent> <M-a> <esc>:call local#i3focus#switch('left', 'h')<cr>
+  cnoremap <silent> <M-r> <end><c-u>:call local#i3focus#switch('down', 'j')<cr>
+  cnoremap <silent> <M-w> <end><c-u>:call local#i3focus#switch('up', 'k')<cr>
+  cnoremap <silent> <M-t> <end><c-u>:call local#i3focus#switch('right', 'l')<cr>
+  cnoremap <silent> <M-a> <end><c-u>:call local#i3focus#switch('left', 'h')<cr>
   " escape terminal and move switch focus
-  tnoremap <silent> <M-r> <C-\><C-n> :call I3Focus('down', 'j')<cr>
-  tnoremap <silent> <M-w> <C-\><C-n>:call I3Focus('up', 'k')<cr>
-  tnoremap <silent> <M-t> <C-\><C-n> :call I3Focus('right', 'l')<cr>
-  tnoremap <silent> <M-a> <C-\><C-n> :call I3Focus('left', 'h')<cr>
+  tnoremap <silent> <M-r> <C-\><C-n> :call local#i3focus#switch('down', 'j')<cr>
+  tnoremap <silent> <M-w> <C-\><C-n>:call local#i3focus#switch('up', 'k')<cr>
+  tnoremap <silent> <M-t> <C-\><C-n> :call local#i3focus#switch('right', 'l')<cr>
+  tnoremap <silent> <M-a> <C-\><C-n> :call local#i3focus#switch('left', 'h')<cr>
 
   tnoremap <silent> <c-q> <C-\><C-n>
 
@@ -428,9 +428,6 @@ let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnippets"]
 " eclim
 let g:EclimFileTypeValidate = 0
 let g:EclimCompletionMethod = 'omnifunc'
-" expand region
-vmap v <Plug>(expand_region_expand)
-vmap V <Plug>(expand_region_shrink)
 let g:strip_whitespace_on_save = 1
 " Autoformat
 let g:formatdef_phpcbf = '"phpcbf -d tabWidth=".&shiftwidth'
@@ -451,6 +448,7 @@ command! BCloseOtherForce execute "%bd! | e#"
 let g:test#strategy = 'neovim'
 
 let g:paranoic_backup_dir="~/.vim/backupfiles/"
+
 command! -bang W :call CreateFoldersAndWrite(<bang>0)
 function! CreateFoldersAndWrite(bang)
   if (a:bang)
@@ -461,15 +459,6 @@ function! CreateFoldersAndWrite(bang)
   endif
 endfunction
 " disable double save (cousing file watchers issues)
-" modify selected text using combining diacritics
-command! -range -nargs=0 Overline        call s:combine_selection(<line1>, <line2>, '0305')
-command! -range -nargs=0 Underline       call s:combine_selection(<line1>, <line2>, '0332')
-command! -range -nargs=0 DoubleUnderline call s:combine_selection(<line1>, <line2>, '0333')
-command! -range -nargs=0 Strikethrough   call s:combine_selection(<line1>, <line2>, '0336')
-function! s:combine_selection(line1, line2, cp)
-  execute 'let char = "\u'.a:cp.'"'
-  execute a:line1.','.a:line2.'s/\%V[^[:cntrl:]]/&'.char.'/ge'
-endfunction
 
 " fold adjust
 set fillchars="vert:|,fold: "
@@ -486,15 +475,6 @@ function! NeatFoldText()
   let foldtextend = lines_count_text . repeat(foldchar, 8)
   let foldtextlength = strlen(substitute(foldtextstart . foldtextend, '.', 'x', 'g')) + &foldcolumn
   return foldtextstart . repeat(foldchar, winwidth(0)-foldtextlength) . foldtextend
-endfunction
-func! I3Focus(comando, vim_comando)
-  " clear mapping echo
-  let oldw = winnr()
-  silent exe 'wincmd ' . a:vim_comando
-  let neww = winnr()
-  if oldw == neww
-    silent! exe '!~/.scripts/i3-focus.py ' . a:comando . ' --skip-vim > /dev/null'
-  endif
 endfunction
 function! PHP__Fold()
   if (get(b:, '_php__flod__initiated', 0))

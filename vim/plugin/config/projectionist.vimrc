@@ -27,16 +27,24 @@ let g:projectionist_heuristics = {
       \     },
       \     "test/*_test.exs": {
       \       "alternate": "lib/{}.ex",
-      \       "type": "test"
+      \       "template": [
+      \          "defmodule {camelcase|dot}Test do",
+      \          "\tuse {dirname|camelcase|dot}",
+      \          "end",
+      \       ],
+      \       "type": "test",
       \     },
       \   },
       \   "mix.exs&web/": {
+      \     "*": {
+      \       "start": "iex -S mix phoenix.server"
+      \     },
       \     "web/*.ex": {
       \       "alternate": "test/{}_test.exs"
       \     },
       \     "test/*_test.exs": {
       \       "alternate": "web/{}.ex",
-      \       "type": "test"
+      \       "type": "test",
       \     },
       \   },
       \ }
