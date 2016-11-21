@@ -104,10 +104,10 @@ bindsym $mod+a focus parent
 # focus the child container
 bindsym $mod+d focus child
 
-set $wscode 0  code
-set $wsdb   0  db
-set $wsterm 0  term
-set $wsbrow 0  browser
+set $wscode 0: code
+set $wsdb   0: db
+set $wsterm 0: term
+set $wsbrow 0: browser
 
 bindsym $hype+c workspace $wscode
 bindsym $hype+t workspace $wsterm

@@ -202,8 +202,8 @@ alias i="ssh-weechat"
 alias e="mutt"
 alias t="tmux"
 alias ti="tmuxinator"
-# exit shell after closing ncmpcpp
-alias mq="ncmpcpp && exit"
+alias vssh="vagrant ssh"
+alias vup="vagrant up"
 
 # rlwrap aliases to get vi like input, thats just awesome
 if type rlwrap > /dev/null; then

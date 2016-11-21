@@ -11,6 +11,10 @@ if m:
 `};
 endsnippet
 
+snippet cn "Class name (file name actually)"
+class ${1:`!p snip.rv=snip.basename`}
+endsnippet
+
 snippet aclass "Class declaration template" b
 <?php
 
@@ -24,6 +28,7 @@ if m:
 
 /**
  * Class ${1:`!p snip.rv=snip.basename`}
+ *
  * @author ${2:`!v g:snips_author`}
  */
 class $1
@@ -41,4 +46,63 @@ snippet tclass "Test class declaration"
 class $1 extends TestCase
 {
 }
+endsnippet
+
+snippet psy "Psy sh break point"
+eval(\Psy\sh());
+endsnippet
+
+snippet rpsy "Psy sh break point (with require)"
+require_once('psysh'); eval(\Psy\sh()); #make sure psysh is in your include path
+endsnippet
+
+snippet zd "Zend_Debug dump"
+Zend_Debug::dump($1);
+endsnippet
+
+snippet zd "Zend_Debug dump"
+Zend_Debug::dump($1);
+endsnippet
+
+snippet schcr "Laravel Schema::create"
+Schema::create('${1:table_name}', function (Blueprint $table) {
+	$table->${2:string('new_field');}$0
+});
+endsnippet
+
+snippet schdr "Laravel Schema::drop"
+Schema::drop('${1:table_name}');$0
+endsnippet
+
+snippet schtab "Laravel Schema::table"
+Schema::table('${1:table_name}', function (Blueprint $table) {
+	$table->${2:increments('id');}$0
+});
+endsnippet
+
+snippet cl "PSR-1 Class"
+<?php
+
+/**
+ * Class ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '_')  + '_' + snip.basename
+`}
+ *
+ * @author ${2:`!v g:snips_author`}
+ */
+class $1
+{$3
+}
+endsnippet
+
+snippet cln "PSR-1 Class only"
+class ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '_')  + '_' + snip.basename
+`}
 endsnippet

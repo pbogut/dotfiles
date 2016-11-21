@@ -40,7 +40,7 @@ for workspace in workspaces:
         continue
     if switch_to:
         if args.with_container:
-            i3.command('move', 'container to workspace {}'.format(workspace['name']))
+            i3.command('move', u'container to workspace {}'.format(workspace['name']))
         i3.workspace(workspace['name'])
         break
     if workspace['focused']:
