@@ -61,9 +61,8 @@ if has('nvim')
     autocmd!
     " fix terminal display
     autocmd TermOpen *
-          \  setlocal listchars=
-          \| set nocursorline
-          \| set nocursorcolumn
+          \  setlocal nocursorline
+          \| setlocal nocursorcolumn
   augroup END
 endif
 augroup configgroup
@@ -257,7 +256,7 @@ nnoremap <silent> <leader>oq :copen<cr>
 nnoremap <silent> <leader>oc :copen<cr>
 nnoremap <silent> <leader>ot :belowright 11split \| terminal<cr>
 nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
-nnoremap <silent> <leader>ovt :belowright vertical split \| terminal<cr>
+nnoremap <silent> <leader>ov :belowright 11split \| terminal vagrant ssh<cr>
 nnoremap <silent> <leader>r :VimFilerExplorer -find -force-quit<cr>
 nnoremap <silent> <leader>b :Buffers<cr>
 " fzf

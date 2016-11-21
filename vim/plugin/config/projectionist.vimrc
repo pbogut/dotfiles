@@ -4,6 +4,9 @@
 " elixir phoenix
 let g:projectionist_heuristics = {
       \   "artisan&composer.json": {
+      \     "*.php": {
+      \       "console": "php artisan tinker"
+      \     },
       \     "app/*.php": {
       \       "alternate": "tests/{}Test.php"
       \     },
