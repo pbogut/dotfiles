@@ -37,6 +37,7 @@ read -d '' files <<"EOF"
     config/autostart/autostart.desktop
     config/i3/config
     config/i3/i3status.conf
+    config/i3/workspaces
     config/ranger/rc.conf
     config/ranger/rifle.conf
     config/ranger/devicons.py
