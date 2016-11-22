@@ -491,7 +491,6 @@ let g:DisableAutoPHPFolding = 1
 autocmd BufEnter * call s:set_title_string()
 function! s:set_title_string()
   let file = expand('%:~')
-  let file = execute('!readlink % || echo %:~')
   if file == ""
     let file = substitute(getcwd(),$HOME,'~', 'g')
   endif
