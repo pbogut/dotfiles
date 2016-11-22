@@ -104,16 +104,6 @@ bindsym $mod+a focus parent
 # focus the child container
 bindsym $mod+d focus child
 
-set $wscode 0: code
-set $wsdb   0: db
-set $wsterm 0: term
-set $wsbrow 0: browser
-
-bindsym $hype+c workspace $wscode
-bindsym $hype+t workspace $wsterm
-bindsym $hype+b workspace $wsbrow
-bindsym $hype+d workspace $wsdb
-
 # switch to workspace
 bindsym $mod+1 workspace 1
 bindsym $mod+2 workspace 2
@@ -180,6 +170,17 @@ bindsym $mod+Ctrl+KP_7 move container to workspace 7
 bindsym $mod+Ctrl+KP_8 move container to workspace 8
 bindsym $mod+Ctrl+KP_9 move container to workspace 9
 bindsym $mod+Ctrl+KP_0 move container to workspace 10
+
+# named workspaces
+set $wscode 0: code
+set $wsdb   0: db
+set $wsterm 0: term
+set $wsbrow 0: browser
+
+bindsym $hype+c workspace $wscode
+bindsym $hype+t workspace $wsterm
+bindsym $hype+b workspace $wsbrow
+bindsym $hype+d workspace $wsdb
 
 workspace_auto_back_and_forth yes
 
@@ -251,7 +252,7 @@ bar {
 new_window 1pixel
 
 # assign apps to specific workspaces
-set $dbeaver_workspace 9
+set $dbeaver_workspace $wsdb
 assign [title="^DBeaver" class="^SWT$"] $dbeaver_workspace
 assign [title="^Dbeaver$"] $dbeaver_workspace
 
