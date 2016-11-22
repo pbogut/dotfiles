@@ -278,6 +278,9 @@ bindsym $mod+Shift+P exec --no-startup-id ~/.scripts/i3-switch-workspace.py --pr
 bindsym $mod+c exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py
 bindsym $mod+Shift+C exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py --move
 bindsym $mod+Shift+X exec --no-startup-id ~/.scripts/i3-create-empty-workspace.py --send
+bindsym $mod+w exec --no-startup-id ~/.scripts/i3-dmenu-workspaces.sh
+bindsym $mod+Shift+W exec --no-startup-id ~/.scripts/i3-dmenu-workspaces.sh --move
+bindsym $mod+Ctrl+w exec --no-startup-id ~/.scripts/i3-dmenu-workspaces.sh --send
 
 # move workspace to another monitor
 bindsym $mod+m move workspace to output left
