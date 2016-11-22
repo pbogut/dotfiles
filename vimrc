@@ -487,6 +487,16 @@ endfunction
 set foldtext=NeatFoldText()
 let g:DisableAutoPHPFolding = 1
 
+
+autocmd BufEnter * call s:set_title_string()
+function! s:set_title_string()
+  let file = expand('%:~')
+  let file = execute('!readlink % || echo %:~')
+  if file == ""
+    let file = substitute(getcwd(),$HOME,'~', 'g')
+  endif
+  let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, '/tmp/nvim\(.*\)\/0$', '\1', 'g') . ":" . l:file
+endfunction
 let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, '/tmp/nvim\(.*\)\/0$', '\1', 'g') . ":" . substitute(getcwd(),$HOME,'~', 'g')
 set title
 

@@ -5,7 +5,7 @@ echo "select docid, replace(c0text, '\n', '¬ ') \
         order by docid desc \
         limit 50;" \
         | sqlite3 ~/.local/share/anamnesis/database \
-        | rofi -dmenu -l 20 -p 'clipboard:' \
+        | rofi -dmenu -i -l 20 -p 'clipboard:' \
         | sed 's/\([0-9]*\)|.*/\1/g' \
         | read id;
 
