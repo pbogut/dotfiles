@@ -49,6 +49,8 @@ set wildignore=*.swp,*.bak,*.pyc,*.class
 set hidden " No bang needed to open new file
 " line 80 limit
 set colorcolumn=81
+set foldmethod=indent
+set foldnestmax=10
 " color scheme
 set background=dark
 if exists('&inccommand') | set inccommand=split | endif
@@ -76,8 +78,9 @@ augroup configgroup
   autocmd FileType php
         \  setlocal tabstop=4 shiftwidth=4
         \| let b:commentary_format='// %s'
-  autocmd FileType go :setlocal expandtab!
-  " autocmd FileType javascript :setlocal tabstop=4 shiftwidth=4
+  autocmd FileType go
+        \  setlocal noexpandtab
+        \| setlocal tabstop=2 shiftwidth=2
   autocmd FileType ruby
         \  setlocal tabstop=2 shiftwidth=2
   autocmd FileType vim
@@ -90,10 +93,13 @@ augroup configgroup
         \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType scss
         \  setlocal tabstop=4 shiftwidth=4
-  autocmd FileType qf :nnoremap <buffer> o <enter>
-  autocmd FileType qf :nnoremap <buffer> q :q
-  autocmd FileType blade :let b:commentary_format='{{-- %s --}}'
-  autocmd FileType markdown :setlocal spell spelllang=en_gb
+  autocmd FileType blade
+        \  let b:commentary_format='{{-- %s --}}'
+  autocmd FileType markdown
+        \  setlocal spell spelllang=en_gb
+  autocmd FileType qf
+        \  nnoremap <buffer> o <enter>
+        \| nnoremap <buffer> q :q
   " start mutt file edit on first empty line
   autocmd BufRead /tmp/mutt* execute "normal /^$/\ni\n\n\<esc>k"
         \| setlocal spell spelllang=en_gb
@@ -161,7 +167,7 @@ if exists(':Plug')
   Plug 'edsono/vim-matchit'
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
   Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
-  Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
+  " Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
   Plug 'janko-m/vim-test'
   Plug 'benmills/vimux'
   Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
@@ -177,7 +183,7 @@ if exists(':Plug')
   Plug 'godlygeek/tabular'
   Plug 'reedes/vim-pencil'
   Plug 'vim-scripts/cmdalias.vim'
-  Plug 't9md/vim-choosewin'
+  " Plug 't9md/vim-choosewin'
   Plug 'Shougo/unite.vim'
   Plug 'Shougo/vimfiler.vim'
   if has('nvim')
@@ -251,9 +257,9 @@ nnoremap <leader>ev :tabnew $MYVIMRC<CR>
 nnoremap <leader>ez :tabnew ~/.zshrc<CR>
 nnoremap <leader>sv :source $MYVIMRC<CR>
 " open list / quickfix
-nnoremap <silent> <leader>ol :lopen<cr>
-nnoremap <silent> <leader>oq :copen<cr>
-nnoremap <silent> <leader>oc :copen<cr>
+nnoremap <silent> <leader>ol :lw<cr>
+nnoremap <silent> <leader>oq :cw<cr>
+nnoremap <silent> <leader>oc :cw<cr>
 nnoremap <silent> <leader>ot :belowright 11split \| terminal<cr>
 nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
 nnoremap <silent> <leader>ov :belowright 11split \| terminal vagrant ssh<cr>
@@ -269,7 +275,9 @@ nnoremap <silent> <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
 nnoremap <silent> <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
 nnoremap <silent> <leader>w :call WriteOrCr()<cr>
 nnoremap <silent> <leader>a :Autoformat<cr>
-nnoremap <silent> <leader>z :call PHP__Fold()<cr>
+nnoremap <silent> <leader>z za
+nnoremap <silent> <leader><leader>z zA
+" nnoremap <silent> <leader>z :call PHP__Fold()<cr>
 " vim is getting ^_ when pressing ^/, so I've mapped both
 nmap <C-_> gcc<down>^
 nmap <C-/> gcc<down>^
@@ -470,25 +478,27 @@ function! NeatFoldText()
   let lines_count_text = '| ' . printf("%10s", lines_count . ' lines') . ' |'
   " let foldchar = matchstr(&fillchars, 'fold:\zs.')
   let foldchar = ' ' " use the space
-  let foldtextstart = strpart('+' . repeat(foldchar, v:foldlevel*2) . line, 0, (winwidth(0)*2)/3)
+  let foldtextstart = strpart('+' . repeat(foldchar, v:foldlevel*3) . line, 0, (winwidth(0)*2)/3)
   let foldtextend = lines_count_text . repeat(foldchar, 8)
   let foldtextlength = strlen(substitute(foldtextstart . foldtextend, '.', 'x', 'g')) + &foldcolumn
   return foldtextstart . repeat(foldchar, winwidth(0)-foldtextlength) . foldtextend
 endfunction
-function! PHP__Fold()
-  if (get(b:, '_php__flod__initiated', 0))
-    silent! normal za
-  else
-    silent! execute 'EnableFastPHPFolds'
-    silent! normal zRza
-    let b:_php__flod__initiated = 1
-  endif
-endfunction
+" function! PHP__Fold()
+"   if (get(b:, '_php__flod__initiated', 0))
+"     silent! normal za
+"   else
+"     silent! execute 'EnableFastPHPFolds'
+"     silent! normal zRza
+"     let b:_php__flod__initiated = 1
+"   endif
+" endfunction
 set foldtext=NeatFoldText()
-let g:DisableAutoPHPFolding = 1
+" let g:DisableAutoPHPFolding = 1
 
-
-autocmd BufEnter * call s:set_title_string()
+augroup set_title_group
+    autocmd!
+    autocmd BufEnter * call s:set_title_string()
+augroup END
 function! s:set_title_string()
   let file = expand('%:~')
   if file == ""

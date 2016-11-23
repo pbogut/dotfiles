@@ -1,3 +1,5 @@
+function! local#repl#init()
+endfunction
 
 augroup repl_group
   autocmd User ProjectionistActivate call s:activate()
