@@ -174,6 +174,7 @@ alias update="yaourt -Syu --aur"
 
 alias tunelssh_pl="sshuttle --dns -vr root@46.41.130.28 0/0"
 alias tunelssh_de="sshuttle --dns -vr smeagol@smeagol.pl:59184 0/0"
+alias tunelssh_gb="sshuttle --dns -vr smeagol@weechat.pbogut.me 0/0"
 
 rifle_with_ask() {
   if [[ -z $2 ]] && [[ `/usr/bin/rifle -l "$1" | wc -l` -gt 1 ]]; then
