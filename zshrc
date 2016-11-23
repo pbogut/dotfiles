@@ -267,6 +267,10 @@ export NVM_DIR="$HOME/.nvm"
 lazy_source nvm "$NVM_DIR/nvm.sh"
 alias myip="wget http://ipinfo.io/ip -qO -"
 
+# fzf
+if [ -f $HOME/.fzf.zsh ]; then
+  source $HOME/.fzf.zsh
+fi
 # host specific config
 if [ -f $HOME/.$hostname.zsh ]; then
   source $HOME/.$hostname.zsh

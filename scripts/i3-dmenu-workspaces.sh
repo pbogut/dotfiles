@@ -19,10 +19,10 @@ echo -e "$current\n$static" \
 
 if [[ -n $ws ]]; then
     if [[ $1 == "--move" || $1 == "--send" ]];then
-        i3-msg move workspace "$ws"
+        i3-msg "move --no-auto-back-and-forth workspace $ws"
     fi
     if [[ $1 == "--move" || $1 == "" ]];then
-        i3-msg workspace "$ws"
+        i3-msg "workspace --no-auto-back-and-forth $ws"
     fi
 fi
 done
