@@ -25,6 +25,8 @@
     sau = "!git ls-files -v | grep '^[a-z]' | cut -f2 -d' '" # show assumed unchanged
     pushup = "!. ~/.githelpers && git_push_upstream"
     diffls = diff-tree --no-commit-id --name-only -r
+    ls = "!. ~/.githelpers && git_ls"
+
     #Create branch
     cb = checkout -b
     #Gary's aliases
@@ -74,4 +76,12 @@
     l = "!. ~/.githelpers && pretty_git_log"
     la = !git l --all
 [merge]
-    tool = vimdiff
+    tool = nvimdiff_nomod
+[mergetool "nvimdiff"]
+    cmd = nvim -d $LOCAL $BASE $REMOTE $MERGED -c '$wincmd w' -c 'wincmd J'
+[mergetool "nvimdiff2"]
+    cmd = nvim -d $LOCAL $MERGED $REMOTE
+[mergetool "nvimdiff02"]
+    cmd = nvim -d $LOCAL $REMOTE $MERGED -c '$wincmd w' -c 'wincmd J'
+[mergetool "nvimdiff_nomod"]
+    cmd = nvim -d $BASE $LOCAL $REMOTE $MERGED -c 'set nomodifiable' -c 'wincmd l' -c 'set nomodifiable' -c 'wincmd l' -c 'set nomodifiable' -c 'wincmd l' -c 'wincmd J'

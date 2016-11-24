@@ -84,3 +84,9 @@ git_clone_to_projects() {
 git_push_upstream() {
     git push --set-upstream origin `git branch | grep \* | cut -d ' ' -f2`
 }
+
+git_ls() {
+    git ls-files \
+        | while read l; do echo -e "\033[0;34mG\033[0m  $l";done
+    git -c color.status=always status --short
+}
