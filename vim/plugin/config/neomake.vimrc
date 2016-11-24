@@ -3,30 +3,37 @@
 augroup neomakegroup
   autocmd!
   autocmd BufWritePost * Neomake
-  autocmd BufWritePre * call NeomakePreWritePhp()
-  autocmd FileType php call NeomakeInitPhp()
+  autocmd FileType php call s:init_php()
+  autocmd User ProjectionistActivate call s:activate()
 augroup END
 
-function! NeomakePreWritePhp()
-  if exists('b:neomake_php_phpmd_maker_args')
-    let g:neomake_php_phpmd_maker.args = b:neomake_php_phpmd_maker_args
-  endif
+" projectionist maker config
+" format "*": {"maker": {"name": "elixir", "props": {"exe": "elixirc"}}}
+function! s:activate() abort
+  for [root, attributes] in projectionist#query('maker')
+    let maker = attributes.name
+  endfor
+  for [root, attributes] in projectionist#query('maker')
+    let props = get(attributes, 'props', {})
+    for property in keys(props)
+      let value = get(props, property)
+      let b:["neomake_" . &ft . "_" . l:maker ."_" . l:property] = l:value
+    endfor
+  endfor
 endfunction
 
-function! NeomakeInitPhp()
-  if get(b:, 'neomake_php_initialized')
+function! s:init_php()
+  if get(b:, 'neomake_php_phpmd_args')
     return
   endif
-  let b:neomake_php_initialized = 1
 
   " phpmd.xml for neomake @todo fallback to getcwd()
   let phpmd_xml_file = projectroot#guess() . '/phpmd.xml'
   if filereadable(phpmd_xml_file)
-    let b:neomake_php_phpmd_maker_args = ['%:p', 'text', phpmd_xml_file]
+    let b:neomake_php_phpmd_args = ['%:p', 'text', phpmd_xml_file]
   else
-    let b:neomake_php_phpmd_maker_args = ['%:p', 'text', 'codesize,design,unusedcode,naming']
+    let b:neomake_php_phpmd_args = ['%:p', 'text', 'codesize,design,unusedcode,naming']
   endif
-
 endfunction
 
 " Messages
