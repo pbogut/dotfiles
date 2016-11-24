@@ -273,6 +273,8 @@ nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
 nnoremap <silent> <leader>fb :FZFBuffers<cr>
 nnoremap <silent> <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
 nnoremap <silent> <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
+nnoremap <silent> <leader>ga :Ag <cword><cr>
+vnoremap <silent> <leader>ga "ay :Ag <c-r>a<cr>
 nnoremap <silent> <leader>w :call WriteOrCr()<cr>
 nnoremap <silent> <leader>a :Autoformat<cr>
 nnoremap <silent> <leader>z za
