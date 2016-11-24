@@ -56,6 +56,11 @@ bindsym $mod+h $focus left
 bindsym $mod+j $focus down
 bindsym $mod+k $focus up
 bindsym $mod+l $focus right
+# just in case if for some reason i3-focus.py is not working
+bindsym $hype+h focus left
+bindsym $hype+j focus down
+bindsym $hype+k focus up
+bindsym $hype+l focus right
 
 # alternatively, you can use the cursor keys:
 bindsym $mod+Left $focus left
