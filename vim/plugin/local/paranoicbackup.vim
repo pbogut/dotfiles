@@ -15,6 +15,6 @@ function! local#paranoicbackup#write()
   let filename = expand('%:t')
   let timestamp = strftime("___%y%m%d_%H%M")
   silent execute "!mkdir -p " . fnameescape(filedir)
-  silent execute "w! " . fnameescape(filedir . '/' . filename . timestamp)
+  silent execute "keepalt w! " . fnameescape(filedir . '/' . filename . timestamp)
 endfunction
 
