@@ -112,9 +112,11 @@ augroup configgroup
   " autocmd FocusGained * sleep 100m | rshada
   autocmd FileType vimfiler
         \  nunmap <buffer> <leader>
+        \| nunmap <buffer> a
         \| nunmap <buffer> N
         \| nmap <buffer> A <Plug>(vimfiler_new_file)
         \| nmap <buffer> <leader>r q
+        \| nmap <buffer> <esc> q
         \| nmap <buffer> v <Plug>(vimfiler_toggle_mark_current_line)
         \| nmap <buffer> <leader>fm q <bar> :FZFFreshMru<cr>
         \| nmap <buffer> <leader>fa q <bar> :call local#fzf#files()<cr>
