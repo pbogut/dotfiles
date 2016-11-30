@@ -40,7 +40,8 @@ let g:projectionist_heuristics = {
       \   },
       \   "mix.exs&web/": {
       \     "*": {
-      \       "start": "iex -S mix phoenix.server"
+      \       "start": "iex --sname phoenix -S mix phoenix.server",
+      \       "console": "iex --sname relp",
       \     },
       \     "web/*.ex": {
       \       "alternate": "test/{}_test.exs"

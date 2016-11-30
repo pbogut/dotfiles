@@ -170,7 +170,8 @@ if exists(':Plug')
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
   Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
   " Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
-  Plug 'janko-m/vim-test'
+  " Plug 'janko-m/vim-test'
+  Plug 'pbogut/vim-test'
   Plug 'benmills/vimux'
   Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
   Plug 'kana/vim-operator-user'
