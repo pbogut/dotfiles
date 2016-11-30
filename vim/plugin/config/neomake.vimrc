@@ -23,7 +23,7 @@ function! s:activate() abort
 endfunction
 
 function! s:init_php()
-  if get(b:, 'neomake_php_phpmd_args')
+  if !empty(get(b:, 'neomake_php_phpmd_args'))
     return
   endif
 
