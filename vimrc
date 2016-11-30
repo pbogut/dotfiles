@@ -123,6 +123,8 @@ augroup configgroup
         \| nmap <buffer> <leader>ff q <bar> :call local#fzf#all_files()<cr>
         \| nmap <buffer> <leader>fg q <bar> :call local#fzf#git_ls()<cr>
         \| nmap <buffer> <leader>fb q <bar> :FZFBuffers<cr>
+  autocmd FileType tagbar
+        \  nmap <buffer> <leader>n q
 augroup END
 
 
@@ -159,6 +161,7 @@ if exists(':Plug')
   Plug 'ntpeters/vim-better-whitespace'
   Plug 'honza/vim-snippets'
   Plug 'mattn/emmet-vim'
+  Plug 'majutsushi/tagbar'
   Plug 'christoomey/vim-tmux-navigator'
   Plug 'sirver/ultisnips'
   Plug 'sheerun/vim-polyglot'
@@ -268,6 +271,7 @@ nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
 nnoremap <silent> <leader>ov :belowright 11split \| terminal vagrant ssh<cr>
 nnoremap <silent> <leader>r :VimFilerExplorer -find -force-hide<cr>
 nnoremap <silent> <leader>b :Buffers<cr>
+nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
 " fzf
 nnoremap <silent> <leader>fm :FZFFreshMru<cr>
 nnoremap <silent> <leader>fa :call local#fzf#files()<cr>
