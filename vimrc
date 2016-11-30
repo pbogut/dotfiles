@@ -49,7 +49,7 @@ set wildignore=*.swp,*.bak,*.pyc,*.class
 set hidden " No bang needed to open new file
 " line 80 limit
 set colorcolumn=81
-set foldmethod=indent
+set foldmethod=manual
 set foldnestmax=10
 " color scheme
 set background=dark
@@ -166,11 +166,12 @@ if exists(':Plug')
   Plug 'benekastah/neomake'
   Plug 'Chiel92/vim-autoformat'
   Plug 'alvan/vim-closetag'
-  Plug 'edsono/vim-matchit'
+  Plug 'k-takata/matchit.vim'
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
   Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
   " Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
-  Plug 'janko-m/vim-test'
+  " Plug 'janko-m/vim-test'
+  Plug 'pbogut/vim-test'
   Plug 'benmills/vimux'
   Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
   Plug 'kana/vim-operator-user'
@@ -265,7 +266,7 @@ nnoremap <silent> <leader>oc :cw<cr>
 nnoremap <silent> <leader>ot :belowright 11split \| terminal<cr>
 nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
 nnoremap <silent> <leader>ov :belowright 11split \| terminal vagrant ssh<cr>
-nnoremap <silent> <leader>r :VimFilerExplorer -find -force-quit<cr>
+nnoremap <silent> <leader>r :VimFilerExplorer -find -force-hide<cr>
 nnoremap <silent> <leader>b :Buffers<cr>
 " fzf
 nnoremap <silent> <leader>fm :FZFFreshMru<cr>
@@ -306,40 +307,10 @@ nmap <silent> <c-w>s :rightbelow split<cr>
 nmap <silent> <c-w>V :vsplit<cr>
 nmap <silent> <c-w>S :split<cr>
 map Y y$
-nnoremap <leader>d "_d
-vnoremap <leader>d "_d
-snoremap <leader>d "_d
-nnoremap <leader>D "_D
-vnoremap <leader>D "_D
-snoremap <leader>D "_D
-nnoremap <leader>c "_c
-vnoremap <leader>c "_c
-snoremap <leader>c "_c
-nnoremap <leader>C "_C
-vnoremap <leader>C "_C
-snoremap <leader>C "_C
-nnoremap <leader>x "_x
-vnoremap <leader>x "_x
-snoremap <leader>x "_x
-nnoremap <leader>y "+y
-vnoremap <leader>y "+y
-snoremap <leader>y "+y
-nnoremap <leader>Y "+y$
-vnoremap <leader>Y "+y$
-snoremap <leader>Y "+y$
-nnoremap <leader>p "+p
-vnoremap <leader>p "+p
-snoremap <leader>p "+p
-nnoremap <leader>P "+P
-vnoremap <leader>P "+P
-snoremap <leader>P "+P
-nnoremap <leader><leader>p "*p
-vnoremap <leader><leader>p "*p
-snoremap <leader><leader>p "*p
-nnoremap <leader><leader>P "*P
-vnoremap <leader><leader>P "*P
-snoremap <leader><leader>P "*P
-nmap <leader>cp "+cp
+nnoremap <leader> "+
+nnoremap <leader><leader> "*
+vnoremap <leader> "+
+vnoremap <leader><leader> "*
 noremap <leader>sh :set syntax=html<cr>
 noremap <leader>sp :set syntax=php<cr>
 noremap <leader>sr :set syntax=ruby<cr>
@@ -429,6 +400,9 @@ if has('nvim')
   cnoremap <A-k> <Up>
   cnoremap <A-j> <Down>
 endif
+
+nmap <cr> za
+vmap <cr> zf
 
 " better key bindings for UltiSnipsExpandTrigger
 let g:UltiSnipsExpandTrigger = "<tab>"
