@@ -118,7 +118,7 @@ augroup configgroup
         \| nmap <buffer> <leader>r q
         \| nmap <buffer> <esc> q
         \| nmap <buffer> v <Plug>(vimfiler_toggle_mark_current_line)
-        \| nmap <buffer> <leader>fm q <bar> :FZFFreshMru<cr>
+        \| nmap <buffer> <leader>fm q <bar> :execute(':FZFFreshMru '. g:fzf_preview)<cr>
         \| nmap <buffer> <leader>fa q <bar> :call local#fzf#files()<cr>
         \| nmap <buffer> <leader>ff q <bar> :call local#fzf#all_files()<cr>
         \| nmap <buffer> <leader>fg q <bar> :call local#fzf#git_ls()<cr>
@@ -273,7 +273,7 @@ nnoremap <silent> <leader>r :VimFilerExplorer -find -force-hide<cr>
 nnoremap <silent> <leader>b :Buffers<cr>
 nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
 " fzf
-nnoremap <silent> <leader>fm :FZFFreshMru<cr>
+nnoremap <silent> <leader>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
 nnoremap <silent> <leader>fa :call local#fzf#files()<cr>
 nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
 nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>

@@ -1,11 +1,12 @@
 " prepare params
 function! s:params(params)
+  let preview = get(g:,'fzf_preview', '')
   let params = join(a:params, ' ')
   if (len(params) && params[0] != '-')
     let params = '-q ' . shellescape(params)
   endif
 
-  return params
+  return preview . params
 endfunction
 
 " fzf git ls
