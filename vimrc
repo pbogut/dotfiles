@@ -405,8 +405,8 @@ if has('nvim')
   cnoremap <A-j> <Down>
 endif
 
-nmap <cr> za
-vmap <cr> zf
+nmap <leader><cr> za
+vmap <leader><cr> zf
 
 " better key bindings for UltiSnipsExpandTrigger
 let g:UltiSnipsExpandTrigger = "<tab>"
