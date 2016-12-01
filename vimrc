@@ -273,7 +273,6 @@ nnoremap <silent> <leader>ot :belowright 11split \| terminal<cr>
 nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
 nnoremap <silent> <leader>ov :belowright 11split \| terminal vagrant ssh<cr>
 nnoremap <silent> <leader>r :VimFilerExplorer -find -force-hide<cr>
-nnoremap <silent> <leader>b :Buffers<cr>
 nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
 " fzf
 nnoremap <silent> <leader>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
