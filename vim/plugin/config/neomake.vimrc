@@ -3,6 +3,7 @@
 augroup neomakegroup
   autocmd!
   autocmd BufWritePost * Neomake
+  autocmd BufRead * Neomake
   autocmd FileType php call s:init_php()
   autocmd User ProjectionistActivate call s:activate()
 augroup END
