@@ -125,6 +125,10 @@ augroup configgroup
         \| nmap <buffer> <leader>fb q <bar> :FZFBuffers<cr>
   autocmd FileType tagbar
         \  nmap <buffer> <leader>n q
+  " always show gutter column to avoid blinking and jumping
+  autocmd BufEnter *
+        \  execute('sign define dummy')
+        \| execute('sign place 98913 line=1 name=dummy buffer=' . bufnr(''))
 augroup END
 
 
@@ -189,7 +193,6 @@ if exists(':Plug')
   Plug 'godlygeek/tabular'
   Plug 'reedes/vim-pencil'
   Plug 'vim-scripts/cmdalias.vim'
-  " Plug 't9md/vim-choosewin'
   Plug 'Shougo/unite.vim'
   Plug 'Shougo/vimfiler.vim'
   if has('nvim')
