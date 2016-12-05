@@ -6,7 +6,7 @@ function! s:params(params)
     let params = '-q ' . shellescape(params)
   endif
 
-  return preview . params
+  return preview . ' ' . params
 endfunction
 
 " fzf git ls
