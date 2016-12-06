@@ -24,6 +24,51 @@ let g:projectionist_heuristics = {
       \       "type": "test"
       \     },
       \   },
+      \   "codeception.yml": {
+      \     "tests/unit/*Test.php": {
+      \       "alternate": ["app/{}.php", "lib/{}.php"],
+      \       "template": [
+      \          "<?php",
+      \          "namespace {dirname|capitalize|backslash};",
+      \          "",
+      \          "",
+      \          "class {basename|capitalize}Test extends \\Codeception\\Test\\Unit",
+      \          "{open}",
+      \          "\t/**",
+      \          "\t* @var \UnitTester",
+      \          "\t*/",
+      \          "\tprotected $tester;",
+      \          "",
+      \          "\tprotected function _before()",
+      \          "\t{open}",
+      \          "\t{close}",
+      \          "",
+      \          "\tprotected function _after()",
+      \          "\t{open}",
+      \          "\t{close}",
+      \          "",
+      \          "\t// tests",
+      \          "\tpublic function testMe()",
+      \          "\t{open}",
+      \          "",
+      \          "\t{close}",
+      \          "{close}",
+      \       ],
+      \       "type": "test"
+      \     },
+      \     "tests/**/*Cept.php": {
+      \       "type": "test"
+      \     },
+      \     "tests/**/*Cest.php": {
+      \       "type": "test"
+      \     },
+      \     "app/*.php": {
+      \       "alternate": "tests/unit/{}Test.php"
+      \     },
+      \     "lib/*.php": {
+      \       "alternate": "tests/unit/{}Test.php"
+      \     },
+      \   },
       \   "mix.exs": {
       \     "lib/*.ex": {
       \       "alternate": "test/{}_test.exs"
