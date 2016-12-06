@@ -63,9 +63,10 @@ let g:neomake_php_phpcs_maker.postprocess = function('NeomakeSetMessageType')
 let g:neomake_php_phpmd_maker = neomake#makers#ft#php#phpmd()
 let g:neomake_php_phpmd_maker.postprocess = function('NeomakeSetWarningType')
 
-let g:neomake_elixir_enabled_makers = ['credo']
-let g:neomake_elixir_credo_maker = neomake#makers#ft#elixir#credo()
-let g:neomake_elixir_credo_maker.args = ['credo', 'list', '%:p', '--format=oneline']
+let g:neomake_elixir_enabled_makers = []
+" let g:neomake_elixir_enabled_makers = ['credo']
+" let g:neomake_elixir_credo_maker = neomake#makers#ft#elixir#credo()
+" let g:neomake_elixir_credo_maker.args = ['credo', 'list', '%:p', '--format=oneline']
 
 let g:neomake_xml_enabled_makers = ['xmllint']
 let g:neomake_xml_xmllint_maker =
