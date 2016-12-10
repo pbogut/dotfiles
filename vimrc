@@ -55,6 +55,7 @@ set foldnestmax=10
 set background=dark
 if exists('&inccommand') | set inccommand=split | endif
 if has("patch-7.4.314") | set shortmess+=c | endif
+if executable('ag') | set grepprg=ag | endif
 
 let mapleader = "\<space>" " life changer
 
@@ -78,6 +79,7 @@ augroup configgroup
   autocmd FileType php
         \  setlocal tabstop=4 shiftwidth=4
         \| let b:commentary_format='// %s'
+        \| nmap <buffer> gD <plug>(composer-find)
   autocmd FileType go
         \  setlocal noexpandtab
         \| setlocal tabstop=2 shiftwidth=2
@@ -126,9 +128,9 @@ augroup configgroup
   autocmd FileType tagbar
         \  nmap <buffer> <leader>n q
   " always show gutter column to avoid blinking and jumping
-  autocmd BufEnter *
-        \  execute('sign define dummy')
-        \| execute('sign place 98913 line=1 name=dummy buffer=' . bufnr(''))
+  " autocmd BufEnter *
+  "       \  execute('sign define dummy')
+  "       \| execute('sign place 98913 line=1 name=dummy buffer=' . bufnr(''))
 augroup END
 
 
@@ -176,6 +178,7 @@ if exists(':Plug')
   Plug 'k-takata/matchit.vim'
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
   Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
+  Plug 'noahfrederick/vim-composer', { 'for': 'php' }
   " Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
   " Plug 'janko-m/vim-test'
   Plug 'pbogut/vim-test'
@@ -196,6 +199,7 @@ if exists(':Plug')
   Plug 'Shougo/unite.vim'
   Plug 'Shougo/vimfiler.vim'
   if has('nvim')
+    Plug 'Shougo/denite.nvim'
     Plug 'Shougo/deoplete.nvim'
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
@@ -221,6 +225,7 @@ filetype plugin indent on    " required
 "
 source ~/.vim/plugin/config/airline.vimrc
 source ~/.vim/plugin/config/autopairs.vimrc
+source ~/.vim/plugin/config/composer.vimrc
 source ~/.vim/plugin/config/deoplete.vimrc
 source ~/.vim/plugin/config/fzf.vimrc
 source ~/.vim/plugin/config/gutentags.vimrc

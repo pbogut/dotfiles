@@ -4,6 +4,9 @@
 " elixir phoenix
 let g:projectionist_heuristics = {
       \   "artisan&composer.json": {
+      \     "*": {
+      \       "project_root": 1
+      \     },
       \     "*.php": {
       \       "console": "php artisan tinker"
       \     },
@@ -25,6 +28,9 @@ let g:projectionist_heuristics = {
       \     },
       \   },
       \   "codeception.yml": {
+      \     "*": {
+      \       "project_root": 1
+      \     },
       \     "tests/unit/*Test.php": {
       \       "alternate": ["app/{}.php", "lib/{}.php"],
       \       "template": [
