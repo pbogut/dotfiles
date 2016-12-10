@@ -239,6 +239,8 @@ augroup END
 
 silent! colorscheme solarized
 
+" vim polyglot
+let g:polyglot_disabled = ['elixir']
 " vim filer
 let g:vimfiler_safe_mode_by_default = 0
 " closetag
