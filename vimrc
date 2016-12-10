@@ -197,9 +197,9 @@ if exists(':Plug')
   Plug 'reedes/vim-pencil'
   Plug 'vim-scripts/cmdalias.vim'
   Plug 'Shougo/unite.vim'
-  Plug 'Shougo/denite.nvim'
   Plug 'Shougo/vimfiler.vim'
   if has('nvim')
+    Plug 'Shougo/denite.nvim'
     Plug 'Shougo/deoplete.nvim'
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
