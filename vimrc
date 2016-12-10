@@ -247,7 +247,7 @@ silent! colorscheme solarized
 " vim filer
 let g:vimfiler_safe_mode_by_default = 0
 " closetag
-let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml,*.blade.php"
+let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml,*.blade.php,*.html.eex"
 " notes
 let g:notes_directories = [ $HOME . "/Notes/" ]
 " projectroot
@@ -380,7 +380,6 @@ omap <silent> ia <plug>SidewaysArgumentTextobjI
 xmap <silent> ia <plug>SidewaysArgumentTextobjI
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
-inoremap <silent> </ </<C-X><C-O><C-n><esc>mB==`Ba
 " nvim now can map alt without terminal issues, new cool shortcuts commin
 if has('nvim')
   noremap <silent> <M-r> :call local#i3focus#switch('down', 'j')<cr>
