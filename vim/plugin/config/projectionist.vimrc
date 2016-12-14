@@ -1,12 +1,15 @@
 " switch between class and test file
-" laravel
-" elixir
-" elixir phoenix
-let g:projectionist_heuristics = {
-      \   "artisan&composer.json": {
+let g:projectionist_heuristics = {}
+" composer projects
+let g:projectionist_heuristics["composer.json"] =
+      \   {
       \     "*": {
       \       "project_root": 1
       \     },
+      \   }
+" laravel
+let g:projectionist_heuristics["artisan&composer.json"] =
+      \   {
       \     "*.php": {
       \       "console": "php artisan tinker"
       \     },
@@ -26,11 +29,41 @@ let g:projectionist_heuristics = {
       \       ],
       \       "type": "test"
       \     },
-      \   },
-      \   "codeception.yml": {
-      \     "*": {
-      \       "project_root": 1
+      \   }
+" elixir
+let g:projectionist_heuristics["mix.exs"] =
+      \   {
+      \     "lib/*.ex": {
+      \       "alternate": "test/{}_test.exs"
       \     },
+      \     "test/*_test.exs": {
+      \       "alternate": "lib/{}.ex",
+      \       "template": [
+      \          "defmodule {camelcase|dot}Test do",
+      \          "\tuse {dirname|camelcase|dot}",
+      \          "end",
+      \       ],
+      \       "type": "test",
+      \     },
+      \   }
+" elixir phoenix
+let g:projectionist_heuristics["mix.exs&web/"] =
+      \   {
+      \     "*": {
+      \       "start": "iex --sname phoenix -S mix phoenix.server",
+      \       "console": "iex --sname relp",
+      \     },
+      \     "web/*.ex": {
+      \       "alternate": "test/{}_test.exs"
+      \     },
+      \     "test/*_test.exs": {
+      \       "alternate": "web/{}.ex",
+      \       "type": "test",
+      \     },
+      \   }
+" codeception
+let g:projectionist_heuristics["codeception.yml"] =
+      \   {
       \     "tests/unit/*Test.php": {
       \       "alternate": ["app/{}.php", "lib/{}.php"],
       \       "template": [
@@ -74,32 +107,4 @@ let g:projectionist_heuristics = {
       \     "lib/*.php": {
       \       "alternate": "tests/unit/{}Test.php"
       \     },
-      \   },
-      \   "mix.exs": {
-      \     "lib/*.ex": {
-      \       "alternate": "test/{}_test.exs"
-      \     },
-      \     "test/*_test.exs": {
-      \       "alternate": "lib/{}.ex",
-      \       "template": [
-      \          "defmodule {camelcase|dot}Test do",
-      \          "\tuse {dirname|camelcase|dot}",
-      \          "end",
-      \       ],
-      \       "type": "test",
-      \     },
-      \   },
-      \   "mix.exs&web/": {
-      \     "*": {
-      \       "start": "iex --sname phoenix -S mix phoenix.server",
-      \       "console": "iex --sname relp",
-      \     },
-      \     "web/*.ex": {
-      \       "alternate": "test/{}_test.exs"
-      \     },
-      \     "test/*_test.exs": {
-      \       "alternate": "web/{}.ex",
-      \       "type": "test",
-      \     },
-      \   },
-      \ }
+      \   }
