@@ -102,6 +102,9 @@ augroup configgroup
   autocmd FileType qf
         \  nnoremap <buffer> o <enter>
         \| nnoremap <buffer> q :q
+  autocmd FileType gitcommit
+        \  execute("wincmd J")
+        \| execute("resize 20")
   " start mutt file edit on first empty line
   autocmd BufRead /tmp/mutt* execute "normal /^$/\ni\n\n\<esc>k"
         \| setlocal spell spelllang=en_gb
