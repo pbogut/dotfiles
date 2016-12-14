@@ -122,9 +122,10 @@ macro index gd "<change-vfolder> Drafts<enter>" "Go to Drafts"
 macro index gt "<change-vfolder> Todo<enter>" "Go to Drafts"
 macro index gp "<change-vfolder> Projects<enter>" "Go to Projects"
 
-auto_view text/html                                      # view html automatically
-auto_view text/calendar                                  # view ics automatically
-alternative_order text/plain text/enriched text/html     # save html for last
+# auto_view text/html                                      # view html automatically
+# auto_view text/calendar                                  # view ics automatically
+# alternative_order text/plain text/enriched text/html     # save html for last
+set implicit_autoview
 
 # theme
 source ~/.mutt/solarized-dark-16.muttrc
