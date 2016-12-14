@@ -1,0 +1,2 @@
+#!/bin/bash
+chromium --profile-directory="Default" --app="https://toggl.com/app/timer"
