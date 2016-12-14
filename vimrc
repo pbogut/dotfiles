@@ -274,8 +274,8 @@ nnoremap <leader>ev :tabnew $MYVIMRC<CR>
 nnoremap <leader>ez :tabnew ~/.zshrc<CR>
 nnoremap <leader>sv :source $MYVIMRC<CR>
 " open list / quickfix
-nnoremap <silent> <leader>ol :lw<cr>
-nnoremap <silent> <leader>oq :cw<cr>
+nnoremap <silent> <leader>l :call local#togglelist#locationlist()<cr>
+nnoremap <silent> <leader>q :call local#togglelist#quickfixlist()<cr>
 nnoremap <silent> <leader>oc :cw<cr>
 nnoremap <silent> <leader>ot :belowright 11split \| terminal<cr>
 nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
