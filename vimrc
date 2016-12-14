@@ -102,6 +102,9 @@ augroup configgroup
   autocmd FileType qf
         \  nnoremap <buffer> o <enter>
         \| nnoremap <buffer> q :q
+  autocmd FileType gitcommit
+        \  execute("wincmd J")
+        \| execute("resize 20")
   " start mutt file edit on first empty line
   autocmd BufRead /tmp/mutt* execute "normal /^$/\ni\n\n\<esc>k"
         \| setlocal spell spelllang=en_gb
@@ -273,8 +276,8 @@ nnoremap <leader>ev :tabnew $MYVIMRC<CR>
 nnoremap <leader>ez :tabnew ~/.zshrc<CR>
 nnoremap <leader>sv :source $MYVIMRC<CR>
 " open list / quickfix
-nnoremap <silent> <leader>ol :lw<cr>
-nnoremap <silent> <leader>oq :cw<cr>
+nnoremap <silent> <leader>l :call local#togglelist#locationlist()<cr>
+nnoremap <silent> <leader>q :call local#togglelist#quickfixlist()<cr>
 nnoremap <silent> <leader>oc :cw<cr>
 nnoremap <silent> <leader>ot :belowright 11split \| terminal<cr>
 nnoremap <silent> <leader>oT :belowright split \| terminal<cr>

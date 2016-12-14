@@ -2,7 +2,7 @@
 HISTFILE=~/.histfile
 HISTSIZE=1000
 SAVEHIST=1000
-setopt appendhistory autocd extendedglob nomatch ignoreeof
+setopt appendhistory autocd extendedglob nomatch ignoreeof interactivecomments
 set -o shwordsplit
 unsetopt beep
 stty -ixon # disable c-s and c-q (terminal flow)
