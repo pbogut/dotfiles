@@ -45,6 +45,9 @@ bind index,pager \CO sidebar-open
 bind pager <space> half-down
 bind pager - half-up
 
+bind compose Y send-message
+bind compose y noop
+
 macro index,pager \cr '<shell-escape>echo -n "Checking for new emails... " && OFFLINEIMAP_INBOX_ONLY=1 offlineimap > /dev/null 2>&1 <enter>'
 
 # open attachments with rifle
