@@ -3,18 +3,25 @@
 " dont know how fast it will grow...
 
 function! local#paranoicbackup#init()
-  augroup paranoicbackup
+  augroup pb_paranoicbackup
     autocmd!
     autocmd BufWritePre * call local#paranoicbackup#write()
   augroup END
 endfunction
 
 function! local#paranoicbackup#write()
-  let dir = get(g:, 'paranoic_backup_dir' , '~/.vim/paranoic_backup/')
-  let filedir = dir . expand('%:p:h')
+  let dir = get(g:, 'paranoic_backup_dir' , '~/.vim/paranoic_backup')
+  let filedir = l:dir . '/' . expand('%:p:h')
   let filename = expand('%:t')
-  let timestamp = strftime("___%y%m%d_%H%M")
-  silent execute "!mkdir -p " . fnameescape(filedir)
-  silent execute "keepalt w! " . fnameescape(filedir . '/' . filename . timestamp)
+  let timestamp = strftime("%Y-%m-%d %H:%M:%S")
+  let fullpath = l:filedir . '/' . l:filename
+  let escdir = fnameescape(l:filedir)
+  let escfile = fnameescape(l:fullpath)
+  let message = l:timestamp . " "
+        \ . substitute(l:fullpath, '^.\{4,}\(.\{27}\)$', '...\1','')
+  silent execute "!mkdir -p " . l:escdir
+  silent execute "keepalt w! " . l:escfile
+  silent execute "!(cd " . l:escdir .
+        \ " && git add " . l:escfile .
+        \ " && git commit ". l:escfile . " -m'" . l:message . "') > /dev/null &"
 endfunction
-
