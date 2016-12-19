@@ -1,14 +1,11 @@
 " switch between class and test file
-let g:projectionist_heuristics = {}
-" composer projects
-let g:projectionist_heuristics["composer.json"] =
+let s:composer =
       \   {
       \     "*": {
       \       "project_root": 1
       \     },
       \   }
-" laravel
-let g:projectionist_heuristics["artisan&composer.json"] =
+let s:laravel =
       \   {
       \     "*.php": {
       \       "console": "php artisan tinker"
@@ -19,86 +16,70 @@ let g:projectionist_heuristics["artisan&composer.json"] =
       \     "lib/*.php": {
       \       "alternate": "tests/{}Test.php"
       \     },
+      \     "app/Http/Controllers/*Controller.php": {
+      \       "skeleton": "laravel_controller",
+      \     },
       \     "tests/*Test.php": {
       \       "alternate": ["app/{}.php", "lib/{}.php"],
-      \       "template": [
-      \          "<?php\n",
-      \          "class {capitalize|underscore|camelcase}Test extends TestCase",
-      \          "{open}",
-      \          "{close}",
-      \       ],
+      \       "skeleton": "laravel_test",
       \       "type": "test"
       \     },
       \   }
-" elixir
-let g:projectionist_heuristics["mix.exs"] =
+let s:elixir =
       \   {
       \     "lib/*.ex": {
       \       "alternate": "test/{}_test.exs"
       \     },
       \     "test/*_test.exs": {
       \       "alternate": "lib/{}.ex",
-      \       "template": [
-      \          "defmodule {camelcase|dot}Test do",
-      \          "\tuse {dirname|camelcase|dot}",
-      \          "end",
-      \       ],
       \       "type": "test",
       \     },
       \   }
-" elixir phoenix
-let g:projectionist_heuristics["mix.exs&web/"] =
+let s:phoenixframework =
       \   {
       \     "*": {
       \       "start": "iex --sname phoenix -S mix phoenix.server",
       \       "console": "iex --sname relp",
       \     },
+      \     "lib/*.ex": {
+      \       "alternate": "test/{}_test.exs",
+      \     },
       \     "web/*.ex": {
-      \       "alternate": "test/{}_test.exs"
+      \       "alternate": "test/{}_test.exs",
       \     },
       \     "test/*_test.exs": {
       \       "alternate": "web/{}.ex",
       \       "type": "test",
       \     },
+      \     "test/controllers/*_test.exs": {
+      \       "alternate": "web/controllers/{}.ex",
+      \       "skeleton": "phoenix_test_controller",
+      \       "type": "test",
+      \     },
+      \     "test/views/*_test.exs": {
+      \       "alternate": "web/views/{}.ex",
+      \       "skeleton": "phoenix_test_view",
+      \       "type": "test",
+      \     },
+      \     "test/models/*_test.exs": {
+      \       "alternate": "web/models/{}.ex",
+      \       "skeleton": "phoenix_test_model",
+      \       "type": "test",
+      \     },
       \   }
-" codeception
-let g:projectionist_heuristics["codeception.yml"] =
+let s:codeception =
       \   {
       \     "tests/unit/*Test.php": {
       \       "alternate": ["app/{}.php", "lib/{}.php"],
-      \       "template": [
-      \          "<?php",
-      \          "namespace {dirname|capitalize|backslash};",
-      \          "",
-      \          "",
-      \          "class {basename|capitalize}Test extends \\Codeception\\Test\\Unit",
-      \          "{open}",
-      \          "\t/**",
-      \          "\t* @var \UnitTester",
-      \          "\t*/",
-      \          "\tprotected $tester;",
-      \          "",
-      \          "\tprotected function _before()",
-      \          "\t{open}",
-      \          "\t{close}",
-      \          "",
-      \          "\tprotected function _after()",
-      \          "\t{open}",
-      \          "\t{close}",
-      \          "",
-      \          "\t// tests",
-      \          "\tpublic function testMe()",
-      \          "\t{open}",
-      \          "",
-      \          "\t{close}",
-      \          "{close}",
-      \       ],
+      \       "skeleton": "codeception_unit",
       \       "type": "test"
       \     },
-      \     "tests/**/*Cept.php": {
+      \     "tests/*Cept.php": {
+      \       "skeleton": "codeception_cept",
       \       "type": "test"
       \     },
-      \     "tests/**/*Cest.php": {
+      \     "tests/*Cest.php": {
+      \       "skeleton": "codeception_cest",
       \       "type": "test"
       \     },
       \     "app/*.php": {
@@ -108,3 +89,9 @@ let g:projectionist_heuristics["codeception.yml"] =
       \       "alternate": "tests/unit/{}Test.php"
       \     },
       \   }
+let g:projectionist_heuristics = {}
+let g:projectionist_heuristics["composer.json"] = s:composer
+let g:projectionist_heuristics["artisan&composer.json"] = s:laravel
+let g:projectionist_heuristics["mix.exs"] = s:elixir
+let g:projectionist_heuristics["mix.exs&web/"] = s:phoenixframework
+let g:projectionist_heuristics["codeception.yml"] = s:codeception

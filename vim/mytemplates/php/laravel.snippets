@@ -1,0 +1,90 @@
+priority -50
+
+snippet _t_laravel_test "Laravel Test" b
+<?php
+
+namespace ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '\\')
+`};
+
+use \TestCase
+
+class ${2:`!v expand('%:t:r')`} extends TestCase
+{
+}
+$0
+endsnippet
+
+
+snippet _t_laravel_controller "Laravel Test" b
+<?php
+
+namespace ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	snip.rv = "App\\" + m.group().replace('/', '\\')
+`};
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class ${2:`!v expand('%:t:r')`} extends Controller
+{
+	public function getIndex(Request $request)
+	{
+		$0
+	}
+}
+$0
+endsnippet
+
+
+snippet _t_laravel_controller_crud "Laravel Test" b
+<?php
+
+namespace ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	snip.rv = "App\\" + m.group().replace('/', '\\')
+`};
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class ${2:`!v expand('%:t:r')`} extends Controller
+{
+	public function getIndex(Request $request)
+	{$0
+	}
+
+	public function getNew(Request $request)
+	{
+	}
+
+	public function postCreate(Request $request)
+	{
+	}
+
+	public function getShow(Request $request)
+	{
+	}
+
+	public function getEdit(Request $request)
+	{
+	}
+
+	public function postUpdate(Request $request)
+	{
+	}
+
+	public function postDelete(Request $request)
+	{
+	}
+}
+$0
+endsnippet

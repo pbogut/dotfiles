@@ -5,4 +5,5 @@ Alias artisan Artisan
 Alias git Git
 Alias repl Repl
 Alias mix Mix
+Alias skel Skel
 endif

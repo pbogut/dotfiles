@@ -110,7 +110,7 @@ augroup configgroup
         \| setlocal spell spelllang=en_gb
         \| let g:pencil#textwidth = 72
         \| call pencil#init()
-  autocmd BufEnter * normal zR
+  " autocmd BufEnter * normal! zR
   " check shada to share vim info between instances
   " autocmd CursorHold * rshada | wshada
   " autocmd FocusLost * wshada
@@ -424,7 +424,7 @@ let g:UltiSnipsExpandTrigger = "<tab>"
 let g:UltiSnipsJumpForwardTrigger = "<tab>"
 let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
 
-let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnippets"]
+let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnippets", "mytemplates"]
 " eclim
 let g:EclimFileTypeValidate = 0
 let g:EclimCompletionMethod = 'omnifunc'
@@ -503,6 +503,7 @@ let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN
 set title
 
 let g:snips_author = "Pawel Bogut"
+let g:snips_author_url = "http://pbogut.me"
 let g:snips_github = "https://github.com/pbogut"
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")

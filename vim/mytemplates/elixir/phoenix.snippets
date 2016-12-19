@@ -1,0 +1,54 @@
+priority -50
+
+snippet _t_phoenix_skel "Phoenix Module Skeleton" b
+defmodule ${1:`!v
+templates#elixir#appmod()`}.${2:`!v
+templates#stfile('\(^lib/\|^web/\|^test/\)\([^/]*/\)', 'camelcase|dot')`} do
+	def ${3:function_name()} do
+		$0
+	end
+end
+endsnippet
+
+
+snippet _t_phoenix_test_model "Phoenix Model Test" b
+defmodule ${1:`!v
+templates#elixir#appmod()`}.${2:`!v
+templates#stfile('\(^lib/\|^web/\|^test/\)\([^/]*/\)', 'camelcase|dot')`} do
+	use $1.ModelCase
+
+	alias $1.${3:`!v templates#stfile(['\(^lib/\|^web/\|^test/\)\([^/]*/\)\(.*\)_test','\3'], 'camelcase|dot')`}
+
+	test "${4:test something}" do
+		$0${5:assert true}
+	end
+end
+endsnippet
+
+
+snippet _t_phoenix_test_controller "Phoenix Controller Test" b
+defmodule ${1:`!v
+templates#elixir#appmod()`}.${2:`!v
+templates#stfile('\(^lib/\|^web/\|^test/\)\([^/]*/\)', 'camelcase|dot')`} do
+	use $1.ConnCase
+
+	alias $1.${3:`!v templates#stfile(['\(^lib/\|^web/\|^test/\)\([^/]*/\)\(.*\)_controller_test','\3'], 'camelcase|dot')`}
+
+	test "${4:test something}" do
+		$0${5:assert true}
+	end
+end
+endsnippet
+
+
+snippet _t_phoenix_test_views "Phoenix View Test" b
+defmodule ${1:`!v
+templates#elixir#appmod()`}.${2:`!v
+templates#stfile('\(^lib/\|^web/\|^test/\)\([^/]*/\)', 'camelcase|dot')`} do
+	use $1.ConnCase, async: true
+
+	test "${4:test something}" do
+		$0${5:assert true}
+	end
+end
+endsnippet

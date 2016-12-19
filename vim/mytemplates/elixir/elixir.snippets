@@ -1,0 +1,11 @@
+priority -50
+
+snippet _t_skel "Elixir Module Skeleton" b
+defmodule ${1:`!v
+templates#elixir#appmod()`}.${2:`!v
+templates#stfile('\(^lib/\|^web/\|^test/\)', 'camelcase|dot')`} do
+	def ${3:function_name()} do
+		$0
+	end
+end
+endsnippet
