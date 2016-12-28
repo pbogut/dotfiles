@@ -369,7 +369,7 @@ nnoremap ? ?\c
 nnoremap c? c?\c
 nnoremap d? d?\c
 nnoremap y? y?\c
-nnoremap <silent> <leader>= migg=G'i
+nnoremap <silent> <leader>= migg=G`i
 nmap <silent> <leader>ggp <Plug>GitGutterPreviewHunk
 nmap <silent> <leader>ggu <Plug>GitGutterUndoHunk
 nmap <silent> <leader>ggs <Plug>GitGutterStageHunk

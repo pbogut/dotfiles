@@ -66,6 +66,7 @@ Return a list of installed packages or nil for every skipped package."
 (defvar my:theme 'solarized)
 (defvar my:theme-window-loaded nil)
 (defvar my:theme-terminal-loaded nil)
+
 (if (daemonp)
     (add-hook 'after-make-frame-functions
               (lambda (frame)
@@ -131,7 +132,6 @@ Return a list of installed packages or nil for every skipped package."
   (define-key company-active-map (kbd "C-p") #'company-select-previous))
 (global-company-mode)
 
-
 (global-flycheck-mode)
 
 
@@ -145,8 +145,6 @@ Return a list of installed packages or nil for every skipped package."
 (require 'whitespace)
 (global-whitespace-mode)
 
-
-
 (defvar linum-format)
 (setq linum-format "%3d ")
 (global-linum-mode)
@@ -159,6 +157,12 @@ Return a list of installed packages or nil for every skipped package."
 (add-to-list 'auto-mode-alist '("\\.html\\.twig\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.blade\\.php\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+
+
+(standard-display-ascii ?\t ">   ")
+(setq withespace-newline "8")
+(whitespace-mode t)
+(setq whitespace-display-mappings '((space-mark ?\  [?.]) (newline-mark ?\n [?- ?\n]) (tab-mark ?\t [?\> ?\t])))
 
 (show-paren-mode t)
 (defvar show-paren-delay)
