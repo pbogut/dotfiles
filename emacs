@@ -38,21 +38,21 @@ Return a list of installed packages or nil for every skipped package."
                           'flycheck
                           'company
                           'smartparens
-			  'git-gutter
+                          'git-gutter
                           'tramp
                           'quickrun
                           'expand-region
                           'restclient
-			  'relative-line-numbers
+                          'relative-line-numbers
                           'elixir-mode
 			  'alchemist
-                          'color-theme-solarized)
+			  'color-theme-solarized)
 
 ;; Theme
 (defvar my:theme 'solarized)
 (defvar my:theme-window-loaded nil)
 (defvar my:theme-terminal-loaded nil)
-(if (daemonp)
+(if (daemonp)    
     (add-hook 'after-make-frame-functions(lambda (frame)
                        (select-frame frame)
                        (if (window-system frame)
@@ -101,6 +101,12 @@ Return a list of installed packages or nil for every skipped package."
 (add-to-list 'auto-mode-alist '("\\.html\\.twig\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
 
+
+(standard-display-ascii ?\t ">   ")
+(setq withespace-newline "8")
+(whitespace-mode t)
+(setq whitespace-display-mappings '((space-mark ?\  [?.]) (newline-mark ?\n [?- ?\n]) (tab-mark ?\t [?\> ?\t])))
+
 (show-paren-mode t)
 (setq show-paren-delay 0)
 (defadvice show-paren-function
@@ -111,7 +117,7 @@ Return a list of installed packages or nil for every skipped package."
 	(interactive)
 	(let* ((cb (char-before (point)))
 	       (matching-text (and cb
-				   (char-equal (char-syntax cb) ?\) )
+				   (char-equal (char-syntax cb) ?\) )  
 				   (blink-matching-open))))
 	          (when matching-text (message matching-text))))
 
@@ -144,3 +150,4 @@ Return a list of installed packages or nil for every skipped package."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
