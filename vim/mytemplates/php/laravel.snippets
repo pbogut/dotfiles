@@ -19,7 +19,7 @@ $0
 endsnippet
 
 
-snippet _t_laravel_controller "Laravel Test" b
+snippet _t_laravel_controller "Laravel Controller" b
 <?php
 
 namespace ${1:`!p
@@ -43,7 +43,7 @@ $0
 endsnippet
 
 
-snippet _t_laravel_controller_crud "Laravel Test" b
+snippet _t_laravel_controller_crud "Laravel CRUD Controller" b
 <?php
 
 namespace ${1:`!p
@@ -87,4 +87,44 @@ class ${2:`!v expand('%:t:r')`} extends Controller
 	}
 }
 $0
+endsnippet
+
+snippet _t_laravel_console_command "Laravel Artisan Command" b
+<?php
+
+namespace ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	snip.rv = "App\\" + m.group().replace('/', '\\')
+`};
+
+use Illuminate\Console\Command;
+
+class ${2:`!v expand('%:t:r')`} extends Command
+{
+	/**
+	 * The name and signature of the console command.
+	 *
+	 * @var string
+	 */
+	protected $signature = '${3:`!v templates#tsfile('basename|snakecase', ['_', ':', 'g'])`}';
+
+	/**
+	 * The console command description.
+	 *
+	 * @var string
+	 */
+	protected $description = '${4:`!v templates#tfile('basename|snakecase|blank')`}';
+
+	/**
+	 * Execute the console command.
+	 *
+	 * @return mixed
+	 */
+	public function handle()
+	{
+		$0
+	}
+}
 endsnippet

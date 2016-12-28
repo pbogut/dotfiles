@@ -49,6 +49,7 @@ read -d '' files <<"EOF"
     vim/autoload/plug.vim
     vim/plugin
     vim/mysnippets
+    vim/mytemplates
     i3blocks.conf
     composer/composer.json
     mutt/muttrc

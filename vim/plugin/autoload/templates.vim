@@ -42,41 +42,60 @@ endfunction
 
 function! templates#trans(subject, ...) abort
   let result = a:subject
-  for trans in a:000
+
+  if type(a:1) == type("")
+    let trans_args = split(a:1, '|')
+  endif
+
+  if type(a:1) == type([])
+    let trans_args = a:1
+  endif
+
+  if len(a:000) > 1
+    let trans_args = a:000
+  endif
+
+  for trans in trans_args
     let result = g:projectionist_transformations[trans](result, '')
   endfor
+
   return result
 endfunction
 
-function! templates#tfile(...) abort
-  let result =
-  return call('templates#trans', [templates#file()] + a:000)
+function! templates#subs(subject, ...) abort
+  let subs_args = a:000
+
+  if type(a:1) == type([])
+    let subs_args = a:1
+  endif
+
+let g:subject = a:subject
+let g:a1 = a:1
+let g:subs_args = subs_args
+
+  let exc_expr = get(subs_args, 0, '')
+  let sub = get(subs_args, 1, '')
+  let flags = get(subs_args, 2, '')
+
+  return substitute(a:subject, exc_expr, sub, flags)
+endfunction
+
+function! templates#tfile(trans) abort
+  return templates#trans(templates#file(), a:trans)
 endfunction
 
 function! templates#sfile(...) abort
-  let exc_expr = get(a:, 1, '')
-  let sub = get(a:, 2, '')
-  let flags = get(a:, 3, '')
-  let file = templates#file()
-  if empty(exc_expr)
-    return file
-  endif
-  return substitute(file, exc_expr, sub, flags)
+  return templates#subs(templates#file(), a:000)
+endfunction
+
+function! templates#tsfile(trans, subs) abort
+  let result = templates#trans(templates#file(), a:trans)
+  return templates#subs(result, a:subs)
 endfunction
 
 function! templates#stfile(subs, trans) abort
-  let subs_args = a:subs
-  if type(a:subs) == type("")
-    let subs_args = [a:subs, '', '']
-  endif
-
-  let trans_args = a:trans
-  if type(a:trans) == type("")
-    let trans_args = split(a:trans, '|')
-  endif
-
-  let result = call('templates#sfile', subs_args)
-  return call('templates#trans', [result] + trans_args)
+  let result = templates#subs(templates#file(), a:subs)
+  return templates#trans(result, a:trans)
 endfunction
 
 function! templates#file() abort
