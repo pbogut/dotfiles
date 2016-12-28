@@ -28,6 +28,7 @@ read -d '' files <<"EOF"
     bin
     gitconfig
     githelpers
+    npmrc
     terminfo
     weechat/cron.txt
     weechat/alias.conf

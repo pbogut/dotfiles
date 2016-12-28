@@ -201,8 +201,6 @@ alias :q="exit"
 alias m="ncmpcpp"
 alias i="ssh-weechat"
 alias e="mutt"
-alias t="tmux"
-alias ti="tmuxinator"
 alias vssh="vagrant ssh"
 alias vup="vagrant up"
 
@@ -242,6 +240,8 @@ if [ -n "$SSH_CLIENT"  ] || [ -n "$SSH_TTY"  ]; then
 fi
 
 export PATH="$PATH:$HOME/.composer/vendor/bin"
+export PATH="$PATH:$HOME/.npm/bin"
+export PATH="$PATH:$HOME/.gocode/bin"
 
 # make colors compatibile with tmux
 export TERM=xterm-256color
@@ -260,7 +260,6 @@ export PAGER="less"
 export TERMINAL="urxvt"
 # golang
 export GOPATH="$HOME/.gocode"
-export PATH="$PATH:$HOME/.gocode/bin"
 # chruby
 [[ -s "/usr/local/share/chruby/chruby.sh" ]] && . "/usr/local/share/chruby/chruby.sh"
 # its slow as hell and I'm not using it too offen, so lazy loading should be fine
