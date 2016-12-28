@@ -51,6 +51,7 @@ set hidden " No bang needed to open new file
 set colorcolumn=81
 set foldmethod=manual
 set foldnestmax=10
+set foldlevelstart=99
 " color scheme
 set background=dark
 if exists('&inccommand') | set inccommand=split | endif
