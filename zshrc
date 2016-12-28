@@ -222,8 +222,6 @@ if [ -f ~/.fzf.zsh ]; then
   source ~/.fzf.zsh
 fi
 
-export PATH="$PATH:$HOME/bin:$HOME/.bin:$HOME/.scripts"
-
 #git branch in prompt
 setopt prompt_subst
 HOST_COLOR="%F{012}"
@@ -239,9 +237,11 @@ if [ -n "$SSH_CLIENT"  ] || [ -n "$SSH_TTY"  ]; then
   fi
 fi
 
+export PATH="$PATH:$HOME/bin:$HOME/.bin:$HOME/.scripts"
 export PATH="$PATH:$HOME/.composer/vendor/bin"
-export PATH="$PATH:$HOME/.npm/bin"
 export PATH="$PATH:$HOME/.gocode/bin"
+export PATH="$PATH:$HOME/.local/bin"
+export PATH="$PATH:$HOME/.npm/bin"
 
 # make colors compatibile with tmux
 export TERM=xterm-256color

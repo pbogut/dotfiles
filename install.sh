@@ -39,6 +39,7 @@ read -d '' files <<"EOF"
     config/i3/config
     config/i3/i3status.conf
     config/i3/workspaces
+    config/pip/pip.conf
     config/ranger/rc.conf
     config/ranger/rifle.conf
     config/ranger/devicons.py
