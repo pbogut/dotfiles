@@ -184,8 +184,7 @@ if exists(':Plug')
   Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
   Plug 'noahfrederick/vim-composer', { 'for': 'php' }
   " Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
-  " Plug 'janko-m/vim-test'
-  Plug 'pbogut/vim-test'
+  Plug 'janko-m/vim-test'
   Plug 'benmills/vimux'
   Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
   Plug 'kana/vim-operator-user'
@@ -203,7 +202,6 @@ if exists(':Plug')
   Plug 'Shougo/unite.vim'
   Plug 'Shougo/vimfiler.vim'
   if has('nvim')
-    Plug 'Shougo/denite.nvim'
     Plug 'Shougo/deoplete.nvim'
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
