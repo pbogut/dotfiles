@@ -38,3 +38,8 @@ notmuch search --output=files tag:new | while read l; do cat "$l" | abook --add-
 notmuch tag +attachment -- tag:new and attachment
 notmuch tag -inbox +archive +newsletter/gorails -- from:gorails.com tag:new
 notmuch tag -new -- tag:new #clear new tag
+
+# mark as archive if archived in remote / gmail
+ls -1d --color=never ~/Maildir/*/INBOX | sed "s#$HOME/Maildir/\(.*\)/INBOX#\1#g" | while read acc; do
+    notmuch tag +archive -inbox -- tag:inbox and folder:$acc/archive and not folder:$acc/INBOX
+done
