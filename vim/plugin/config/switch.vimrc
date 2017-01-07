@@ -25,6 +25,11 @@ let s:switch_elixir_assert =
             \   '\(assert\)':  'refute',
             \   '\(refute\)':   'assert',
             \ }
+let s:switch_elixir_map =
+            \ {
+            \   '\<\([a-zA-Z0-9_]*\): \([^,]*\),':  '"\1" => \2,',
+            \   '"\([a-zA-Z0-9_]*\)" => \([^,]*\),': '\1: \2,',
+            \ }
 augroup swich_vim
   autocmd!
   autocmd FileType php let b:switch_custom_definitions =
@@ -43,5 +48,6 @@ augroup swich_vim
   autocmd FileType elixir let b:switch_custom_definitions =
             \ [
             \   s:switch_elixir_assert,
+            \   s:switch_elixir_map,
             \ ]
 augroup END

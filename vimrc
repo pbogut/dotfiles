@@ -207,10 +207,11 @@ if exists(':Plug')
     Plug 'junegunn/fzf.vim'
     Plug 'pbogut/fzf-mru.vim'
     Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
+    Plug 'powerman/vim-plugin-AnsiEsc', { 'for': 'elixir' }
     Plug 'zchee/deoplete-go', { 'do': 'go get github.com/nsf/gocode && make', 'for': 'go'}
     Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
-    Plug 'pbogut/deoplete-padawan'
+    Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
   endif " if Plug installed
   if has('nvim') || has('vim8')
     Plug 'metakirby5/codi.vim'
@@ -247,6 +248,8 @@ augroup END
 
 silent! colorscheme solarized
 
+" ansi esc
+let g:no_plugin_maps = 1
 " vim polyglot
 let g:polyglot_disabled = ['elixir']
 " vim filer
