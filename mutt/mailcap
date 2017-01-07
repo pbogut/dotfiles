@@ -2,4 +2,4 @@ text/html; w3m -I %{charset} -T text/html; copiousoutput;
 # image/*; ~/.scripts/muttimage.sh %s; copiousoutput;
 image/*; feh %s
 application/pdf; pdftotext -layout %s -; copiousoutput;
-text/calendar; vcal %s; copiousoutput;
+text/calendar; ~/.scripts/icalview.rb %s; copiousoutput;
