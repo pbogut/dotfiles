@@ -53,6 +53,7 @@ macro index,pager \cr '<shell-escape>echo -n "Checking for new emails... " && OF
 
 # open attachments with rifle
 macro attach \CO '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>rifle /tmp/.mutt-tmp/* <enter>'
+macro compose \CO '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>rifle /tmp/.mutt-tmp/* <enter>'
 macro attach \CI '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/tmp-file.html<enter><shell-escape>rifle /tmp/.mutt-tmp/*<enter>'
 # status format with current account info
 set status_format="-%r-`get-config.sh email-default-from`: %f [Msgs:%?M?%M/?%m%?n? New:%n?%?o? Old:%o?%?d? Del:%d?%?F? Flag:%F?%?t? Tag:%t?%?p? Post:%p?%?b? Inc:%b?%?l? %l?]---(%s/%S)-%>-(%P)---"
@@ -76,7 +77,9 @@ virtual-mailboxes \
     "Sent"      "notmuch://?query=tag:sent and not tag:archive"\
     "Todo"      "notmuch://?query=tag:todo and not (tag:done or tag:archive)"\
     "Projects"  "notmuch://?query=tag:project`notmuch search --output=tags not tag:_ |grep '^project/' | while read l; do echo -n " tag:$l"; done` and not tag:archive"\
-    `notmuch search --output=tags not tag:_ | grep '^project/' | sed 's#\(.*\)\/\(.*\)#" \2" "notmuch://?query=tag:\1/\2"#g' | while read l; do echo -n " $l "; done` \
+    `notmuch search --output=tags not tag:_ | grep '^project/' | sed 's#\([^/]*\)\/\(.*\)#" \2" "notmuch://?query=tag:\1/\2"#g' | while read l; do echo -n " $l "; done` \
+    "Github"  "notmuch://?query=tag:github`notmuch search --output=tags not tag:_ |grep '^github/' | while read l; do echo -n " tag:$l"; done` and not tag:archive"\
+    `notmuch search --output=tags not tag:archive | grep '^github/' | sed 's#\([^/]*\)\/\(.*\)#" \2" "notmuch://?query=tag:\1/\2 and not tag:archive"#g' | while read l; do echo -n " $l "; done` \
     "Drafts"    "notmuch://?query=tag:drafts"\
     "Archive"   "notmuch://?query=tag:archive"\
     "Other"     "notmuch://?query=not tag:archive and not tag:drafts and not tag:sent and not tag:todo and not tag:* and not tag:unread and not tag:inbox" # sets up queries for
