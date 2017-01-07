@@ -47,6 +47,7 @@ bind pager - half-up
 
 bind compose Y send-message
 bind compose y noop
+macro compose H ":set editor=mutt-html-markdown.rb<enter>E:set editor=`echo $EDITOR`<enter>a~/.mutt/html-markdown-alternative.html<enter>" "Add html version (markdown)"
 
 macro index,pager \cr '<shell-escape>echo -n "Checking for new emails... " && OFFLINEIMAP_INBOX_ONLY=1 offlineimap > /dev/null 2>&1 <enter>'
 
