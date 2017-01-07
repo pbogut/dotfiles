@@ -81,6 +81,7 @@ augroup configgroup
         \  setlocal tabstop=4 shiftwidth=4
         \| let b:commentary_format='// %s'
         \| nmap <buffer> gD <plug>(composer-find)
+        \| setlocal kp=:PhpDoc
   autocmd FileType go
         \  setlocal noexpandtab
         \| setlocal tabstop=2 shiftwidth=2
@@ -174,7 +175,6 @@ if exists(':Plug')
   Plug 'majutsushi/tagbar'
   Plug 'christoomey/vim-tmux-navigator'
   Plug 'sirver/ultisnips'
-  Plug 'sheerun/vim-polyglot'
   Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
   Plug 'benekastah/neomake'
   Plug 'Chiel92/vim-autoformat'
@@ -188,7 +188,7 @@ if exists(':Plug')
   Plug 'benmills/vimux'
   Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
   Plug 'kana/vim-operator-user'
-  Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
+  " Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
   Plug 'rhysd/vim-grammarous'
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   Plug 'will133/vim-dirdiff'
@@ -221,6 +221,7 @@ if exists(':Plug')
     set termguicolors
     Plug 'frankier/neovim-colors-solarized-truecolor-only'
   endif
+  Plug 'sheerun/vim-polyglot'
 endif "
 silent! call plug#end()      " requiredc
 filetype plugin indent on    " required
@@ -258,11 +259,28 @@ let g:notes_directories = [ $HOME . "/Notes/" ]
 let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
       \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
 " write or select when in command mode
-function! WriteOrCr()
+function! WriteOrCr(...)
+  if get(a:, 1, 0)
+    let bang = '!'
+  else
+    let bang = ''
+  endif
+
   if &buftype == 'nofile'
     call feedkeys("\<cr>")
   elseif @% != ''
-    exec "w"
+    try
+      exec "w" . bang
+    catch /E45: 'readonly' option is set (add ! to override)/
+      " prevents multiline error and vim's "Press key to continue..." bullshit
+      echohl ErrorMsg
+      echom "E45: 'readonly' option is set (add ! to override)"
+      echohl NONE
+    catch /E212: Can't open file for writing/
+      echohl ErrorMsg
+      echom "E212: Can't open file for writing"
+      echohl NONE
+    endtry
   else
     echo 'Nothing to save...'
   endif
@@ -294,6 +312,7 @@ nnoremap <silent> <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
 nnoremap <silent> <leader>ga :Ag <cword><cr>
 vnoremap <silent> <leader>ga "ay :Ag <c-r>a<cr>
 nnoremap <silent> <leader>w :call WriteOrCr()<cr>
+nnoremap <silent> <leader>W :call WriteOrCr(1)<cr>
 nnoremap <silent> <leader>a :Autoformat<cr>
 nnoremap <silent> <leader>z za
 nnoremap <silent> <leader><leader>z zA
@@ -444,6 +463,11 @@ let g:autoswap_detect_tmux = 1
 command! BCloseAll execute "%bd"
 command! BCloseOther execute "%bd | e#"
 command! BCloseOtherForce execute "%bd! | e#"
+
+command! -nargs=1 PhpDoc split
+    \| enew
+    \| call termopen("psysh --color <<< 'doc <args>' | head -n -2 | tail -n +2")
+
 let g:test#strategy = 'neovim'
 
 let g:paranoic_backup_dir="~/.vim/backupfiles/"
