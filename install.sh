@@ -48,6 +48,8 @@ read -d '' files <<"EOF"
     config/dircolors-solarized
     config/twmn/twmn.conf
     config/feh/keys
+    config/qutebrowser/keys.conf
+    config/qutebrowser/qutebrowser.conf
     vim/autoload/plug.vim
     vim/plugin
     vim/mysnippets
