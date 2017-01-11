@@ -231,6 +231,7 @@ assign [title="^DBeaver" class="^SWT$"] $wsdb
 assign [title="^Dbeaver$"] $wsdb
 
 for_window [class="Skype"] floating enable
+for_window [class="^nvim-qt$"] floating enable
 for_window [class="^feh$"] fullscreen enable
 
 # fake-outputs 3288x1080+0+0

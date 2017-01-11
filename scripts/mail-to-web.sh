@@ -15,5 +15,5 @@ query=$(cat "$email_content"      |
     head -n 1                     |   # get one line only
     sed 's#[^<]*<\(.*\)>.*#\1#g'  |   # extract message id
     ruby -ne 'require "cgi"; puts CGI.escape($_)') # escape id so it fits in
-                                                     # url
-chromium  "http://localhost:6245?q=$query"           # open in browser
+
+(qutebrowser --target window "http://localhost:6245?q=$query" &) > /dev/null 2>&1         # open in browser
