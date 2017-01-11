@@ -1,0 +1,6 @@
+#!/bin/bash
+if [[ -f './vendor/bin/codecept' ]]; then
+    ./vendor/bin/codecept $@
+elif [[ -f './codecept.phar' ]]; then
+    php ./codecept.phar $@
+fi
