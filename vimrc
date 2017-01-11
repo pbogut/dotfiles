@@ -440,6 +440,13 @@ endif
 nmap <leader><cr> za
 vmap <leader><cr> zf
 
+" keep visual mode selection for some actions
+vnoremap > >gv
+vnoremap < <gv
+vnoremap <c-a> <c-a>gv
+vnoremap <c-x> <c-x>gv
+
+" global variables used by modules {{{
 " better key bindings for UltiSnipsExpandTrigger
 let g:UltiSnipsExpandTrigger = "<tab>"
 let g:UltiSnipsJumpForwardTrigger = "<tab>"
@@ -461,11 +468,18 @@ let g:dispatch_quickfix_height = 10
 let g:dispatch_tmux_height = 1
 " autoswap tmux support
 let g:autoswap_detect_tmux = 1
+" }}}
 " custom commands
 " close all buffers but current
 command! BCloseAll execute "%bd"
 command! BCloseOther execute "%bd | e#"
 command! BCloseOtherForce execute "%bd! | e#"
+
+command! Grevert
+            \  execute ":Gread"
+            \| execute ":noautocmd w"
+            \| execute ":GitGutter"
+            \| execute ":Neomake"
 
 command! -nargs=1 PhpDoc split
     \| enew
