@@ -44,6 +44,8 @@ bind index,pager \CO sidebar-open
 # scroll half page
 bind pager <space> half-down
 bind pager - half-up
+bind pager k previous-line
+bind pager j next-line
 
 bind compose Y send-message
 bind compose y noop
@@ -77,7 +79,7 @@ virtual-mailboxes \
     "Sent"      "notmuch://?query=tag:sent and not tag:archive"\
     "Todo"      "notmuch://?query=tag:todo and not (tag:done or tag:archive)"\
     "Projects"  "notmuch://?query=tag:project`notmuch search --output=tags not tag:_ |grep '^project/' | while read l; do echo -n " tag:$l"; done` and not tag:archive"\
-    `notmuch search --output=tags not tag:_ | grep '^project/' | sed 's#\([^/]*\)\/\(.*\)#" \2" "notmuch://?query=tag:\1/\2"#g' | while read l; do echo -n " $l "; done` \
+    `notmuch search --output=tags not tag:archive | grep '^project/' | sed 's#\([^/]*\)\/\(.*\)#" \2" "notmuch://?query=tag:\1/\2 and not tag:archive"#g' | while read l; do echo -n " $l "; done` \
     "Github"  "notmuch://?query=tag:github`notmuch search --output=tags not tag:_ |grep '^github/' | while read l; do echo -n " tag:$l"; done` and not tag:archive"\
     `notmuch search --output=tags not tag:archive | grep '^github/' | sed 's#\([^/]*\)\/\(.*\)#" \2" "notmuch://?query=tag:\1/\2 and not tag:archive"#g' | while read l; do echo -n " $l "; done` \
     "Drafts"    "notmuch://?query=tag:drafts"\
