@@ -33,7 +33,8 @@ html = `markdown <<< "#{new_body}"`
 result = <<HTML
 <html>
 <head>
-<meta name="generator" content="mutt-html-markdown/0.1">
+<meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
+<meta name="generator" content="mutt-html-markdown/0.1" />
 <style>
 code { font-family: 'Andale Mono', 'Lucida Console', 'Bitstream Vera Sans Mono', 'Courier New', monospace; }
 pre { border-left: 20px solid #ddd; margin-left: 10px; padding-left: 5px; }

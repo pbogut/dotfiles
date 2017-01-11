@@ -2,6 +2,8 @@
 
 # if something is archive, then it should not be inbox
 notmuch tag -inbox -- tag:archive
+# moving files only if mutt is not running
+if [ -z "`pgrep mutt`" ]; then
 # move mails with archive tag to archvie imap catalog
 # but only if they are in inbox or sent, other are in archive
 # already (at least on gmail, but that one actually make sense).
@@ -9,3 +11,4 @@ notmuch search --output=files tag:archive |grep '/INBOX/\|/sent/' |while read li
 # move sent item to coresponding folder
 # maybe I should do someting with that, like... config array...
 # notmuch search --output=files folder:sent and from:email@address |while read line;do echo mv "$line" "`echo $line | sed 's#Maildir/sent/#Maildir/folder/sent/#'`" 2>&1 > /dev/null ;done;
+fi

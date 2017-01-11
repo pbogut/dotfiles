@@ -22,7 +22,7 @@ ls -1d --color=never ~/Maildir/*/spam | sed "s#$HOME/Maildir/#folder:#g" | xargs
 ls -1d --color=never ~/Maildir/*/archive | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +archive -- tag:new and
 
 # tag github messages
-notmuch search --output=files from:notifications@github.com and tag:new | while read f; do
+notmuch search --output=files from:notifications@github.com and tag:inbox | while read f; do
     tag=`cat "$f" | grep '^To: ' | sed 's/^To: \([^ ]*\).*/\1/g' | sed 's/^"\(.*\)"$/\1/'`
     id=`cat "$f" | grep '^Message-ID: ' | sed 's/^Message-ID: <\([^ ]*\)>.*/\1/g'`
     notmuch tag -inbox +github/$tag -- id:$id
