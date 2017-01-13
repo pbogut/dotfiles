@@ -39,6 +39,11 @@ demonize nm-applet nm-applet
 demonize twmnd twmnd
 demonize udisksvm "udisksvm -a"
 
+# run qutebrowser in background with webengine and inspector enabled
+(while :; do
+    qutebrowser --backend webengine --enable-webengine-inspector --nowindow >> ~/.cache/qutebrowser/qb-webengine.log
+done) &
+
 # sepcific for the computer
 if [ "$host_name" == "darkbox" ]; then # pc at work
     demonize davmail davmail
