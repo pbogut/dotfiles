@@ -44,6 +44,7 @@ read -d '' files <<"EOF"
     config/ranger/rifle.conf
     config/ranger/devicons.py
     config/ranger/plugins/devicons_linemode.py
+    config/ncmpcpp/bindings
     config/ncmpcpp/config
     config/dircolors-solarized
     config/twmn/twmn.conf
