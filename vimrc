@@ -1,5 +1,5 @@
 syntax on
-set nocompatible              " be iMproved, required
+set nocompatible              " be improved, required
 filetype off                  " required
 
 set runtimepath+=~/.vim
@@ -108,10 +108,10 @@ augroup configgroup
         \  execute("wincmd J")
         \| if(winnr() != 1) | execute("resize 20") | endif
   " start mutt file edit on first empty line
-  autocmd BufRead /tmp/mutt* execute "normal /^$/\ni\n\n\<esc>k"
+  autocmd BufRead /tmp/mutt*
+        \ execute("normal /^$/\n")
         \| setlocal spell spelllang=en_gb
-        \| let g:pencil#textwidth = 72
-        \| call pencil#init()
+        \| setlocal textwidth=72
   " autocmd BufEnter * normal! zR
   " check shada to share vim info between instances
   " autocmd CursorHold * rshada | wshada
@@ -186,6 +186,7 @@ if exists(':Plug')
   " Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
   Plug 'janko-m/vim-test'
   Plug 'benmills/vimux'
+  Plug 'elmcast/elm-vim', { 'for': 'elm' }
   Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
   Plug 'kana/vim-operator-user'
   " Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
@@ -197,7 +198,6 @@ if exists(':Plug')
   Plug 'AndrewRadev/splitjoin.vim'
   Plug 'AndrewRadev/sideways.vim'
   Plug 'godlygeek/tabular'
-  Plug 'reedes/vim-pencil'
   Plug 'vim-scripts/cmdalias.vim'
   Plug 'Shougo/unite.vim'
   Plug 'Shougo/vimfiler.vim'
@@ -311,8 +311,10 @@ nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
 nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
 nnoremap <silent> <leader>fb :FZFBuffers<cr>
 nnoremap <silent> <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
+nnoremap <silent> <leader>gF :call local#fzf#all_files(expand('<cfile>'))<cr>
 nnoremap <silent> <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
-nnoremap <silent> <leader>ga :Ag <cword><cr>
+nnoremap <silent> <leader>gw :Ag <cword><cr>
+nnoremap <silent> <leader>ga :Ag<cr>
 vnoremap <silent> <leader>ga "ay :Ag <c-r>a<cr>
 nnoremap <silent> <leader>w :call WriteOrCr()<cr>
 nnoremap <silent> <leader>W :call WriteOrCr(1)<cr>
@@ -348,13 +350,7 @@ nnoremap <leader> "+
 nnoremap <leader><leader> "*
 vnoremap <leader> "+
 vnoremap <leader><leader> "*
-noremap <leader>sh :set syntax=html<cr>
-noremap <leader>sp :set syntax=php<cr>
-noremap <leader>sr :set syntax=ruby<cr>
-noremap <leader>sc :set syntax=css<cr>
-noremap <leader>sj :set syntax=js<cr>
-noremap <leader>sx :set syntax=xml<cr>
-noremap <leader>sa :exec "Autoformta ".&syntax<cr>
+noremap <leader>sc :execute(':rightbelow 10split \| te scspell %')<cr>
 " nicer wrapline navigation
 noremap <silent> j gj
 noremap <silent> k gk
