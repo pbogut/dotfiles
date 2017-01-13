@@ -27,3 +27,7 @@ let g:fzf_preview =
       \ . 'echo Preview is not available."'
       \ . "'"
 
+let g:fzf_action = {
+      \ 'ctrl-t': 'tab split',
+      \ 'ctrl-x': 'rightbelow split',
+      \ 'ctrl-v': 'rightbelow vsplit' }
