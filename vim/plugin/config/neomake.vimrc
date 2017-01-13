@@ -2,8 +2,8 @@
 " Autocommands
 augroup neomakegroup
   autocmd!
-  autocmd BufWritePost * Neomake
-  autocmd BufRead * Neomake
+  autocmd BufWritePost * NeomakeWithSpellCheck
+  autocmd BufRead * NeomakeWithSpellCheck
   autocmd FileType php call s:init_php()
   autocmd User ProjectionistActivate call s:activate()
 augroup END
@@ -73,3 +73,27 @@ let g:neomake_xml_xmllint_maker =
       \ {
       \   'errorformat': '%A%f:%l:\ %m'
       \ }
+
+" Source Code Spell Checker
+function! NeomakeWithSpellCheck(entry)
+  let a:entry.type = "I"
+  let line = getline(a:entry.lnum)
+  let word = substitute(a:entry.text, "[^']'\\(.\\{-}\\)'.*", "\\1", "")
+  let token = substitute(a:entry.text, ".*(from token '\\(.\\{-}\\)'.*", "\\1", "")
+  let offset = stridx(tolower(token), word)
+  let a:entry.col = stridx(line, token) + offset + 1
+endfunction
+
+function! s:neomake_with_spellcheck() abort
+  if empty(get(g:, 'neomake_' . &ft . '_scspell_maker', ''))
+    let g:['neomake_' . &ft . '_scspell_maker'] = {
+          \   'exe': 'scspell',
+          \   'args': ['--report-only'],
+          \   'postprocess': function('NeomakeWithSpellCheck'),
+          \ }
+  endif
+  let list = get(g:, 'neomake_' . &ft . '_enabled_makers', [])
+  execute ':Neomake ' . join(list) . ' scspell'
+endfunction
+
+command! NeomakeWithSpellCheck call s:neomake_with_spellcheck()
