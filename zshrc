@@ -41,8 +41,10 @@ NORMAL=$'%{\e[00m%}'
 setopt transientrprompt
 bindkey -v
 
-export KEYTIMEOUT=1
+# bash word style (c-w on /some/path| will results in /some/|)
+autoload -U select-word-style && select-word-style bash
 
+export KEYTIMEOUT=1
 bindkey '^P' up-history
 bindkey '^N' down-history
 bindkey '^?' backward-delete-char
