@@ -84,7 +84,15 @@ function! NeomakeWithSpellCheck(entry)
   let a:entry.col = stridx(line, token) + offset + 1
 endfunction
 
+let s:spellcheck_types = [
+      \ 'elixir', 'php', 'bash',
+      \ 'ruby', 'go', 'markdown',
+      \ 'javascript', 'git', 'vim']
+
 function! s:neomake_with_spellcheck() abort
+  if index(s:spellcheck_types, &ft) == -1
+    return
+  endif
   if empty(get(g:, 'neomake_' . &ft . '_scspell_maker', ''))
     let g:['neomake_' . &ft . '_scspell_maker'] = {
           \   'exe': 'scspell',
