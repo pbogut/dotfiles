@@ -44,13 +44,14 @@ read -d '' files <<"EOF"
     config/ranger/rifle.conf
     config/ranger/devicons.py
     config/ranger/plugins/devicons_linemode.py
-    config/ncmpcpp/bindings
     config/ncmpcpp/config
     config/dircolors-solarized
     config/twmn/twmn.conf
     config/feh/keys
     config/qutebrowser/keys.conf
     config/qutebrowser/qutebrowser.conf
+    ncmpcpp/bindings
+    scspell/dictionary.txt
     vim/autoload/plug.vim
     vim/plugin
     vim/mysnippets
