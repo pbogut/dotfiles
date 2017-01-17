@@ -39,15 +39,6 @@ demonize nm-applet nm-applet
 demonize twmnd twmnd
 demonize udisksvm "udisksvm -a"
 
-# run qutebrowser in background with webengine and inspector enabled
-(while :; do
-        then=`date '+%s'`
-        qutebrowser --backend webengine --enable-webengine-inspector --nowindow >> ~/.cache/qutebrowser/qb-webengine.log
-        now=`date '+%s'`
-        # spam spawn protect in case script runs twice
-        [[ `expr $now - $then` -gt 5 ]] || exit 1
-done) &
-
 # sepcific for the computer
 if [ "$host_name" == "darkbox" ]; then # pc at work
     demonize davmail davmail

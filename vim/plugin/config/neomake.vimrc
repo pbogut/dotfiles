@@ -40,6 +40,7 @@ endfunction
 " Messages
 let g:neomake_error_sign = {'texthl': 'ErrorMsg'}
 let g:neomake_warning_sign = {'texthl': 'WarningMsg'}
+let g:neomake_info_sign = {'text': '➤'}
 " highlight NeomakeErrorSign ctermfg=223 ctermbg=223 " cant make it work ;/
 " let g:neomake_error_sign = {'text': '✖', 'texthl': 'NeomakeErrorSign'}
 " let g:neomake_warning_sign = {'text': '⚠', 'texthl': 'NeomakeWarningSign'}
@@ -99,6 +100,11 @@ function! s:neomake_with_spellcheck() abort
           \   'args': ['--report-only'],
           \   'postprocess': function('NeomakeWithSpellCheck'),
           \ }
+    " let g:['neomake_' . &ft . '_scspell_maker'] = {
+    "       \   'exe': 'scaspell.rb',
+    "       \   'args': [],
+    "       \   'postprocess': function('NeomakeWithSpellCheck'),
+    "       \ }
   endif
   let list = get(g:, 'neomake_' . &ft . '_enabled_makers', [])
   execute ':Neomake ' . join(list) . ' scspell'

@@ -1,0 +1,7 @@
+#!/bin/bash
+#=================================================
+# name:   qutebrowser_ukpos.sh
+# author: Pawel Bogut <http://pbogut.me>
+# date:   16/01/2017
+#=================================================
+qutebrowser --backend webengine --enable-webengine-inspector

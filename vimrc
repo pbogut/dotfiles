@@ -81,7 +81,7 @@ augroup configgroup
         \  setlocal tabstop=4 shiftwidth=4
         \| let b:commentary_format='// %s'
         \| nmap <buffer> gD <plug>(composer-find)
-        \| setlocal kp=:PhpDoc
+        \| setlocal kp=:PhpDoc2
   autocmd FileType go
         \  setlocal noexpandtab
         \| setlocal tabstop=2 shiftwidth=2
@@ -480,6 +480,15 @@ command! Grevert
 command! -nargs=1 PhpDoc split
     \| enew
     \| call termopen("psysh --color <<< 'doc <args>' | head -n -2 | tail -n +2")
+command! -nargs=1 PhpDoc2 split
+    \| silent! execute("e phpdoc://<args>")
+    \| silent! setlocal noswapfile
+    \| silent! setlocal ft=php
+    \| silent! setlocal syntax=man
+    \| silent! execute("read !psysh <<< 'doc <args>' | head -n -2 | tail -n +2")
+    \| silent! execute("normal! ggdd")
+    \| silent! setlocal buftype=nofile
+    \| silent! setlocal nomodifiable
 
 let g:test#strategy = 'neovim'
 
