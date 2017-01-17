@@ -407,6 +407,7 @@ catch
 class
 const
 continue
+crm
 declare
 default
 die
@@ -450,6 +451,8 @@ public
 require
 require_once
 return
+sage
+sagecrm
 static
 switch
 throw
@@ -525,8 +528,13 @@ vsplit
 wildignore
 wildmenu
 
+FILETYPE: Elixir; .exs, .ex
+defmodule
+defp
+doctest
+rrule
+
 NATURAL:
-a
 aah
 aardvark
 aardvarks
@@ -6115,6 +6123,7 @@ barbwire
 barbwires
 barcarole
 barcaroles
+barcode
 bard
 bardic
 bards
@@ -12791,6 +12800,7 @@ checkoff
 checkoffs
 checkout
 checkouts
+checkoutsuccess
 checkpoint
 checkpoints
 checkroom
@@ -13972,6 +13982,7 @@ clewed
 clewing
 clews
 click
+clickandcollect
 clicked
 clicker
 clickers
@@ -34122,6 +34133,7 @@ greets
 gregarious
 gregariously
 gregariousness
+gregorian
 gremlin
 gremlins
 grenade
@@ -41912,6 +41924,7 @@ jaunting
 jaunts
 jaunty
 java
+javascript
 javelin
 javelins
 jaw
