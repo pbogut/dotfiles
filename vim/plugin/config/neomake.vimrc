@@ -86,7 +86,7 @@ function! NeomakeWithSpellCheck(entry)
 endfunction
 
 let s:spellcheck_types = [
-      \ 'elixir', 'php', 'bash',
+      \ 'elixir', 'php', 'bash', 'mail',
       \ 'ruby', 'go', 'markdown',
       \ 'javascript', 'git', 'vim']
 

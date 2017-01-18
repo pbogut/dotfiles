@@ -4,6 +4,8 @@
 # author: Pawel Bogut <http://pbogut.me>
 # date:   06/01/2017
 #=================================================
+require 'redcarpet'
+
 srcfile = File.open(ARGV[0], 'rb')
 mail = srcfile.read
 
@@ -28,7 +30,12 @@ end
 # if body ended on quoted text, then close pre
 new_body << "</pre>\n" if pre_block
 
-html = `markdown <<< "#{new_body}"`
+markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML,
+                                   autolink: true, tables: true,
+                                   no_intra_emphasis: true,
+                                   fenced_code_blocks: true,
+                                   strikethrough: true, underline: true)
+html = markdown.render(new_body)
 
 result = <<HTML
 <html>
