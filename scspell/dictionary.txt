@@ -31449,6 +31449,7 @@ friction
 frictional
 frictionless
 frictions
+friday
 fridge
 fridges
 fried
@@ -45185,6 +45186,7 @@ logicians
 logics
 logier
 logiest
+login
 logistic
 logistical
 logistically
@@ -49171,6 +49173,7 @@ monasticism
 monasticisms
 monastics
 monaural
+monday
 monetarily
 monetarism
 monetarist
@@ -79510,6 +79513,7 @@ thunderstorm
 thunderstorms
 thunderstruck
 thundery
+thursday
 thus
 thwack
 thwacked
@@ -81726,6 +81730,7 @@ tuckering
 tuckers
 tucking
 tucks
+tuesday
 tuft
 tufted
 tufter
@@ -86927,6 +86932,7 @@ wedgiest
 wedging
 wedlock
 wedlocks
+wednesday
 weds
 wee
 weed

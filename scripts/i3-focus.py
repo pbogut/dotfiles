@@ -127,3 +127,4 @@ if __name__ == '__main__':
                              ">'", shell=True)
         else:
             i3.focus(direction)
+            subprocess.Popen("~/.scripts/i3-current-window.sh", shell=True)
