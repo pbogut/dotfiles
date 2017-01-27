@@ -32,6 +32,7 @@ let s:elixir =
       \     },
       \     "test/*_test.exs": {
       \       "alternate": "lib/{}.ex",
+      \       "skeleton": "test",
       \       "type": "test",
       \     },
       \   }
