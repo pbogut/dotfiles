@@ -74,19 +74,37 @@ let s:codeception =
       \       "skeleton": "codeception_unit",
       \       "type": "test"
       \     },
-      \     "tests/*Cept.php": {
+      \     "tests/functional/*Cept.php": {
+      \       "alternate": ["app/{}.php", "lib/{}.php"],
       \       "skeleton": "codeception_cept",
       \       "type": "test"
       \     },
-      \     "tests/*Cest.php": {
+      \     "tests/functional/*Cest.php": {
+      \       "alternate": ["app/{}.php", "lib/{}.php"],
+      \       "skeleton": "codeception_cest",
+      \       "type": "test"
+      \     },
+      \     "tests/acceptance/*Cept.php": {
+      \       "alternate": ["app/{}.php", "lib/{}.php"],
+      \       "skeleton": "codeception_cept",
+      \       "type": "test"
+      \     },
+      \     "tests/acceptance/*Cest.php": {
+      \       "alternate": ["app/{}.php", "lib/{}.php"],
       \       "skeleton": "codeception_cest",
       \       "type": "test"
       \     },
       \     "app/*.php": {
-      \       "alternate": "tests/unit/{}Test.php"
+      \       "alternate": [
+      \         "tests/unit/{}Test.php",
+      \         "tests/functional/{}Cest.php",
+      \         "tests/functional/{}Cept.php",
+      \         "tests/acceptance/{}Cest.php",
+      \         "tests/acceptance/{}Cept.php",
+      \       ]
       \     },
       \     "lib/*.php": {
-      \       "alternate": "tests/unit/{}Test.php"
+      \       "alternate": ["tests/unit/{}Test.php", "tests/functional/{}Cept.php", "tests/functional/{}Cest.php"]
       \     },
       \   }
 let g:projectionist_heuristics = {}

@@ -12,7 +12,7 @@ function! s:cat_cmd() abort
   endif
 endfunction
 let g:fzf_preview =
-      \   "--bind=ctrl-e:preview-down,ctrl-y:preview-up "
+      \   "--bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview "
       \ . "--preview '"
       \ . 'sh -c "[ -f {-1} ] '
       \ . '&& '

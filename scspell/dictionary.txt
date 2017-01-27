@@ -12678,6 +12678,7 @@ charms
 charred
 charring
 chars
+charset
 chart
 charted
 charter
@@ -79809,6 +79810,7 @@ tintypes
 tinware
 tinwares
 tiny
+tinyint
 tip
 tipis
 tipped
@@ -85080,6 +85082,7 @@ vapors
 vapory
 vaquero
 vaqueros
+varchar
 variability
 variabilitys
 variable

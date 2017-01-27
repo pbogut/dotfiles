@@ -471,6 +471,9 @@ command! BCloseAll execute "%bd"
 command! BCloseOther execute "%bd | e#"
 command! BCloseOtherForce execute "%bd! | e#"
 
+" tabularize shortcut alias
+command! -nargs=* -range T Tabularize <args>
+
 command! Grevert
             \  execute ":Gread"
             \| execute ":noautocmd w"
@@ -507,17 +510,25 @@ endfunction
 set fillchars="vert:|,fold: "
 " remove underline
 hi Folded term=NONE cterm=NONE gui=NONE
-" new fold style
+" new fold                   style
 function! NeatFoldText()
   let line = ' ' . substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
+  let line = ' ' . substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
+  let line = ' ' . substitute(getline(v:foldstart), '^\s\s\s\s', '', 'g') . ' '
+  let g:line = line
   let lines_count = v:foldend - v:foldstart + 1
   let lines_count_text = '| ' . printf("%10s", lines_count . ' lines') . ' |'
   " let foldchar = matchstr(&fillchars, 'fold:\zs.')
   let foldchar = ' ' " use the space
-  let foldtextstart = strpart('+' . repeat(foldchar, v:foldlevel*3) . line, 0, (winwidth(0)*2)/3)
+  let winwidth = winwidth(0)
+  if l:winwidth > 88
+    let winwidth = 88
+  endif
+  let foldtextstart = strpart('+++' . repeat(foldchar, v:foldlevel*3) . line, 0, (l:winwidth*2)/3)
+  let foldtextstart = strpart('+++' . line, 0, (l:winwidth*2)/3)
   let foldtextend = lines_count_text . repeat(foldchar, 8)
   let foldtextlength = strlen(substitute(foldtextstart . foldtextend, '.', 'x', 'g')) + &foldcolumn
-  return foldtextstart . repeat(foldchar, winwidth(0)-foldtextlength) . foldtextend
+  return foldtextstart . repeat(foldchar, l:winwidth-foldtextlength) . foldtextend
 endfunction
 " function! PHP__Fold()
 "   if (get(b:, '_php__flod__initiated', 0))

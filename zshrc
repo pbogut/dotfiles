@@ -244,6 +244,7 @@ export PATH="$PATH:$HOME/.composer/vendor/bin"
 export PATH="$PATH:$HOME/.gocode/bin"
 export PATH="$PATH:$HOME/.local/bin"
 export PATH="$PATH:$HOME/.npm/bin"
+export PATH="$PATH:$HOME/.gem/ruby/2.4.0/bin"
 
 # make colors compatibile with tmux
 export TERM=xterm-256color
