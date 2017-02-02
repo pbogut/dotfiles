@@ -60,6 +60,8 @@ if executable('ag') | set grepprg=ag | endif
 
 let mapleader = "\<space>" " life changer
 
+let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
+
 if has('nvim')
   augroup configgroup_nvim
     autocmd!
@@ -89,6 +91,7 @@ augroup configgroup
         \  setlocal tabstop=2 shiftwidth=2
   autocmd FileType vim
         \  setlocal tabstop=2 shiftwidth=2
+        \| setlocal kp=:help
   autocmd FileType xml
         \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType sh
@@ -127,9 +130,12 @@ augroup configgroup
         \| nmap <buffer> v <Plug>(vimfiler_toggle_mark_current_line)
         \| nmap <buffer> <leader>fm q <bar> :execute(':FZFFreshMru '. g:fzf_preview)<cr>
         \| nmap <buffer> <leader>fa q <bar> :call local#fzf#files()<cr>
+        \| nmap <buffer> <leader>fd q <bar> :call local#fzf#buffer_dir_files()<cr>
         \| nmap <buffer> <leader>ff q <bar> :call local#fzf#all_files()<cr>
         \| nmap <buffer> <leader>fg q <bar> :call local#fzf#git_ls()<cr>
         \| nmap <buffer> <leader>fb q <bar> :FZFBuffers<cr>
+        \| nmap <buffer> <leader> q
+        \| nmap <buffer> : q :
   autocmd FileType tagbar
         \  nmap <buffer> <leader>n q
   " always show gutter column to avoid blinking and jumping
@@ -183,13 +189,11 @@ if exists(':Plug')
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
   Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
   Plug 'noahfrederick/vim-composer', { 'for': 'php' }
-  " Plug 'pbogut/phpfolding.vim', { 'for': 'php' }
   Plug 'janko-m/vim-test'
   Plug 'benmills/vimux'
   Plug 'elmcast/elm-vim', { 'for': 'elm' }
   Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
   Plug 'kana/vim-operator-user'
-  " Plug 'chrisbra/csv.vim', { 'for': ['csv', 'tsv'] }
   Plug 'rhysd/vim-grammarous'
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   Plug 'will133/vim-dirdiff'
@@ -202,7 +206,8 @@ if exists(':Plug')
   Plug 'Shougo/unite.vim'
   Plug 'Shougo/vimfiler.vim'
   if has('nvim')
-    Plug 'Shougo/deoplete.nvim'
+    Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
+    Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
     Plug 'pbogut/fzf-mru.vim'
@@ -213,9 +218,6 @@ if exists(':Plug')
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
     Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
   endif " if Plug installed
-  if has('nvim') || has('vim8')
-    Plug 'metakirby5/codi.vim'
-  endif
   if (!has('nvim') || $STY != '')
     Plug 'altercation/vim-colors-solarized'
   else
@@ -248,12 +250,25 @@ augroup END
 
 silent! colorscheme solarized
 
+" denite
+call denite#custom#map('insert', '<M-j>', '<denite:assign_next_matched_text>')
+call denite#custom#map('insert', '<M-k>', '<denite:assign_previous_matched_text>')
+call denite#custom#map('insert', '<C-n>', '<denite:move_to_next_line>')
+call denite#custom#map('insert', '<C-p>', '<denite:move_to_previous_line>')
+
+call denite#custom#alias('source', 'file_rec/git', 'file_rec')
+call denite#custom#var('file_rec/git', 'command',
+      \ ['git', 'ls-files', '-co', '--exclude-standard'])
+call denite#custom#alias('source', 'file_rec/ag', 'file_rec')
+call denite#custom#var('file_rec/ag', 'command',
+      \ ['ag', '-g', ''])
 " ansi esc
 let g:no_plugin_maps = 1
 " vim polyglot
 let g:polyglot_disabled = ['elixir']
 " vim filer
 let g:vimfiler_safe_mode_by_default = 0
+let g:vimfiler_ignore_pattern = []
 " closetag
 let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml,*.blade.php,*.html.eex"
 " notes
@@ -307,6 +322,7 @@ nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
 " fzf
 nnoremap <silent> <leader>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
 nnoremap <silent> <leader>fa :call local#fzf#files()<cr>
+nnoremap <silent> <leader>fd :call local#fzf#buffer_dir_files()<cr>
 nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
 nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
 nnoremap <silent> <leader>fb :FZFBuffers<cr>
@@ -437,10 +453,30 @@ nmap <leader><cr> za
 vmap <leader><cr> zf
 
 " keep visual mode selection for some actions
-vnoremap > >gv
-vnoremap < <gv
 vnoremap <c-a> <c-a>gv
 vnoremap <c-x> <c-x>gv
+
+" quick set
+nnoremap <leader>s  :set
+nnoremap <leader>sf :set filetype=
+nnoremap <leader>ss :set spell!<cr>
+nnoremap <leader>sp :set paste!<cr>
+
+nnoremap S :call SpellCheckToggle()<cr>
+function! SpellCheckToggle()
+  let b:spell_check = get(b:, 'spell_check', 0)
+  if b:spell_check == 1
+    let b:spell_check = 0
+    execute(':set syntax=' . b:syntax)
+    set nospell
+  else
+    let b:syntax = &syntax
+    let b:spell_check = 1
+    set syntax=
+    set spell
+  endif
+
+endfunction
 
 " global variables used by modules {{{
 " better key bindings for UltiSnipsExpandTrigger
