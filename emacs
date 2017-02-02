@@ -41,6 +41,7 @@ Return a list of installed packages or nil for every skipped package."
                           'evil-surround
                           'projectile
                           'magit
+                          'neotree
                           'helm
                           'helm-ls-git
                           'helm-ag
@@ -113,9 +114,46 @@ Return a list of installed packages or nil for every skipped package."
 (evil-leader/set-key
   "w" 'save-buffer
   "x" 'helm-M-x
+  "r" 'neotree-find
   "ff" 'helm-projectile
   "fb" 'helm-buffers-list
   "fa" 'helm-projectile)
+
+;; (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
+;; (evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-enter)
+
+(defun custom-neotree-enter-hide ()
+  (interactive)
+  (neotree-enter)
+  (neotree-hide))
+
+(add-hook 'neotree-mode-hook
+    (lambda ()
+        (evil-leader/set-key
+            "r" 'neotree-toggle)
+        (define-key evil-normal-state-local-map (kbd "q") 'neotree-hide)
+        (define-key evil-normal-state-local-map (kbd "o") 'neotree-enter)
+        (define-key evil-normal-state-local-map (kbd "RET")
+            'custom-neotree-enter-hide)))
+
+;; esc quits
+(defun minibuffer-keyboard-quit ()
+  "Abort recursive edit.
+In Delete Selection mode, if the mark is active, just deactivate it;
+then it takes a second \\[keyboard-quit] to abort the minibuffer."
+  (interactive)
+  (if (and delete-selection-mode transient-mark-mode mark-active)
+      (setq deactivate-mark  t)
+    (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
+    (abort-recursive-edit)))
+(define-key evil-normal-state-map [escape] 'keyboard-quit)
+(define-key evil-visual-state-map [escape] 'keyboard-quit)
+(define-key minibuffer-local-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-ns-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
+(global-set-key [escape] 'evil-exit-emacs-state)
 
 (require 'helm-config)
 (helm-mode 1)
@@ -201,7 +239,7 @@ Return a list of installed packages or nil for every skipped package."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(inhibit-startup-screen t)
- '(package-selected-packages (quote (helm magit projectile evil))))
+ '(package-selected-packages (quote (elm-mode neotree helm magit projectile evil))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -122,6 +122,7 @@ augroup configgroup
         \| nunmap <buffer> a
         \| nunmap <buffer> N
         \| nmap <buffer> A <Plug>(vimfiler_new_file)
+        \| nmap <buffer> H <Plug>(vimfiler_switch_to_parent_directory)
         \| nmap <buffer> <leader>r q
         \| nmap <buffer> <esc> q
         \| nmap <buffer> v <Plug>(vimfiler_toggle_mark_current_line)
