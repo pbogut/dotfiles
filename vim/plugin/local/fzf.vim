@@ -32,6 +32,16 @@ function! local#fzf#files(...) abort
   call fzf#run(fzf#wrap('name', extra, 0))
 endfunction
 
+
+function! local#fzf#buffer_dir_files(...) abort
+  let options = {
+        \   'source': 'ag -l -g "" ' . shellescape(expand('%:h')),
+        \   'options': '--prompt "Files> " ' . s:params(a:000),
+        \ }
+  let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
+  call fzf#run(fzf#wrap('name', extra, 0))
+endfunction
+
 function! local#fzf#git_ls(...) abort
   let options = {
         \   'source': '{git -c color.status=always status --short; git ls-files | while read l; do echo -e "\033[0;34mG\033[0m  $l";done }',

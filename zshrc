@@ -148,19 +148,26 @@ alias ls="ls --color=auto"
 alias pacman="pacman --color=auto"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 
-vimnotes() { if [ -z $1 ];then; nvim ~/Notes/; else nvim ~/Notes/ +"Note $1"; fi }
-vimdirdiff() {
+notes() {
+    if [ ! -z $1 ];then
+        $EDITOR ~/Notes/ +"Note $1"
+    else
+        note=$(find $HOME/Notes/ | sed "s#^$HOME/Notes/##" | grep -v '^$' | fzf)
+        if [[ ! -z $note ]];then
+            $EDITOR ~/Notes/ +"Note $note"
+        fi
+    fi
+}
+dirdiff() {
   if [[ -z  $2 ]]; then
     echo "Usage: dirdiff /path/to/dir/one /path/to/dir/two"
   else
-    echo ":bw! | DirDiff $1 $2" | nvim /tmp/skip_session
+    echo ":bw! | DirDiff $1 $2" | $EDITOR /tmp/skip_session
   fi
 }
 
-alias notes=vimnotes
-alias dirdiff=vimdirdiff
-
 alias xo="xdg-open"
+alias ro="rifle" #rifle open
 alias so="source"
 alias clone="~/.scripts/term-in-current-dir.sh"
 alias c="clone"
@@ -174,18 +181,16 @@ alias ctags_php="ctags -h \".php\" -R --exclude=\".git\" --exclude=\"tests\" --e
 
 alias update="yaourt -Syu --aur"
 
-alias tunelssh_pl="sshuttle --dns -vr root@46.41.130.28 0/0"
-alias tunelssh_de="sshuttle --dns -vr smeagol@smeagol.pl:59184 0/0"
-alias tunelssh_gb="sshuttle --dns -vr smeagol@weechat.pbogut.me 0/0"
+alias tunnelssh_gb="sshuttle --dns -vr centipede.pbogut.me 0/0"
 
-rifle_with_ask() {
+# rifle open ask
+roa() {
   if [[ -z $2 ]] && [[ `/usr/bin/rifle -l "$1" | wc -l` -gt 1 ]]; then
       /usr/bin/rifle -l "$1" | fzf | sed 's/\([0-9]*\).*/\1/' | xargs /usr/bin/rifle "$1" -p
   else
     /usr/bin/rifle "$@"
   fi
 }
-alias rif=rifle_with_ask
 
 # anamnesis clipboard fuzy lookup
 alias clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_content \
@@ -207,9 +212,12 @@ alias vssh="vagrant ssh"
 alias vup="vagrant up"
 
 # rlwrap aliases to get vi like input, thats just awesome
+# note that completion wont work with rlwrap
 if type rlwrap > /dev/null; then
-  alias iex="rlwrap -a iex"
+  alias viex="rlwrap -a iex"
 fi
+# autocomplete in irb
+alias irb="irb -r 'irb/completion'"
 
 tmux() { if [[ $1 == "-ss"  ]]; then command tmuxss.sh "$2"; else command tmux "$@"; fi; }
 
@@ -223,6 +231,11 @@ fi
 if [ -f ~/.fzf.zsh ]; then
   source ~/.fzf.zsh
 fi
+
+# fzf config
+export FZF_DEFAULT_OPTS="--filepath-word --reverse
+--bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
+--bind=ctrl-w:backward-kill-word"
 
 #git branch in prompt
 setopt prompt_subst
@@ -253,11 +266,11 @@ if [[ ! -z "$TMUX"  ]]; then
 fi
 
 # default editor
-if ! type "nvim" > /dev/null; then
-  export EDITOR=vim
-else
+if type "nvim" > /dev/null; then
   export EDITOR=nvim
   alias vim="nvim"
+else
+  export EDITOR=vim
 fi
 export PAGER="less"
 export TERMINAL="urxvt"
@@ -270,27 +283,7 @@ export NVM_DIR="$HOME/.nvm"
 lazy_source nvm "$NVM_DIR/nvm.sh"
 alias myip="wget http://ipinfo.io/ip -qO -"
 
-# fzf
-if [ -f $HOME/.fzf.zsh ]; then
-  source $HOME/.fzf.zsh
-fi
 # host specific config
 if [ -f $HOME/.$hostname.zsh ]; then
   source $HOME/.$hostname.zsh
 fi
-
-# Less Colors for Man Pages
-# enter blinking mode
-export LESS_TERMCAP_mb=$(printf "\e[1;31m")
-# enter double-bright mode
-export LESS_TERMCAP_md=$(printf "\e[1;31m")
-# turn off all appearance modes (mb, md, so, us)
-export LESS_TERMCAP_me=$(printf "\e[0m")
-# leave standout mode
-export LESS_TERMCAP_se=$(printf "\e[0m")
-# enter standout mode - yellow
-export LESS_TERMCAP_so=$(printf "\e[0;37;102m")
-# leave underline mode
-export LESS_TERMCAP_ue=$(printf "\e[0m")
-# enter underline mode
-export LESS_TERMCAP_us=$(printf "\e[4;32m")

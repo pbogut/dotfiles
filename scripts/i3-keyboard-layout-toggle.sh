@@ -12,14 +12,22 @@
 #setxkbmap pl
 #setxkbmap pl -variant colemak
 #)
-is_colemak=`setxkbmap -query | grep 'colemak'`
-is_pl=`setxkbmap -query | grep 'layout.*pl'`
-if [[ -n $is_colemak ]] && [[ -n $is_pl ]]; then
+eval $(setxkbmap -query | sed 's#\<\([^\>]*\):.*\<\(.*\)\>#\1="\2"#')
+# is_colemak=`setxkbmap -query | grep 'colemak'`
+# is_pl=`setxkbmap -query | grep 'layout.*pl'`
+
+# echo $layout
+# echo $model
+# echo $variant
+
+if [[ $variant == "colemak" ]] && [[ $layout == "pl" ]]; then
     setxkbmap gb
-elif [[ ! -n $is_colemak ]] && [[ -n $is_pl ]]; then
+elif [[ $variant == "" ]] && [[ $layout == "pl" ]]; then
     setxkbmap pl -variant colemak
-elif [[ ! -n $is_colemak ]] && [[ ! -n $is_pl ]]; then
+elif [[ $variant == "" ]] && [[ $layout == "gb" ]]; then
     setxkbmap gb -variant colemak
-elif [[ -n $is_colemak ]] && [[ ! -n $is_pl ]]; then
+elif [[ $variant == "colemak" ]] && [[ $layout == "gb" ]]; then
+    setxkbmap pl
+else
     setxkbmap pl
 fi
