@@ -47,6 +47,7 @@ set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
 set hidden " No bang needed to open new file
+set clipboard=unnamedplus
 " line 80 limit
 set colorcolumn=81
 set foldmethod=manual
@@ -131,12 +132,14 @@ augroup configgroup
         \| nmap <buffer> v <Plug>(vimfiler_toggle_mark_current_line)
         \| nmap <buffer> <leader>fm q <bar> :execute(':FZFFreshMru '. g:fzf_preview)<cr>
         \| nmap <buffer> <leader>fa q <bar> :call local#fzf#files()<cr>
+        \| nmap <buffer> <leader>fc q <bar> :call local#fzf#clip()<cr>
         \| nmap <buffer> <leader>fd q <bar> :call local#fzf#buffer_dir_files()<cr>
         \| nmap <buffer> <leader>ff q <bar> :call local#fzf#all_files()<cr>
         \| nmap <buffer> <leader>fg q <bar> :call local#fzf#git_ls()<cr>
         \| nmap <buffer> <leader>fb q <bar> :FZFBuffers<cr>
         \| nmap <buffer> <leader> q
-        \| nmap <buffer> : q :
+        \| nnoremap <buffer> : <c-w>q:
+        \| nnoremap <buffer> ;;; :
   autocmd FileType tagbar
         \  nmap <buffer> <leader>n q
   " always show gutter column to avoid blinking and jumping
@@ -323,6 +326,7 @@ nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
 " fzf
 nnoremap <silent> <leader>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
 nnoremap <silent> <leader>fa :call local#fzf#files()<cr>
+nnoremap <silent> <leader>fc :call local#fzf#clip()<cr>
 nnoremap <silent> <leader>fd :call local#fzf#buffer_dir_files()<cr>
 nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
 nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
@@ -354,8 +358,8 @@ vmap V <Plug>(expand_region_shrink)
 nmap <silent> <bs> :TmuxNavigateLeft<cr>
 " remap delete to c-d because on hardware level Im sending del when c-d (ergodox)
 nmap <silent> <del> <c-d>
-map <C-w>d :Bdelete<cr>
-map <C-w>D :Bdelete!<cr>
+map <silent> <C-w>d :silent! Bdelete<cr>
+map <silent> <C-w>D :silent! Bdelete!<cr>
 " more natural split (always right/below)
 nmap <silent> <c-w>v :rightbelow vsplit<cr>
 nmap <silent> <c-w>s :rightbelow split<cr>
@@ -368,16 +372,39 @@ nnoremap <leader><leader> "*
 vnoremap <leader> "+
 vnoremap <leader><leader> "*
 noremap <leader>sc :execute(':rightbelow 10split \| te scspell %')<cr>
-" nicer wrapline navigation
-noremap <silent> j gj
-noremap <silent> k gk
+" nicer wrapline navigation - i need some kind of toggle to switch that back
+" and forth
+" noremap  <silent> j gj
+" vnoremap <silent> j gj
+" onoremap <silent> j gj
+" noremap  <silent> k gk
+" vnoremap <silent> k gk
+" onoremap <silent> k gk
 " noremap  <silent> 0 g0
+" vnoremap <silent> 0 g0
+" onoremap <silent> 0 g0
 " noremap  <silent> $ g$
+" vnoremap <silent> $ g$
+" onoremap <silent> $ g$
 " noremap  <silent> ^ g^
-vnoremap <silent> j gj
-vnoremap <silent> k gk
-onoremap <silent> j gj
-onoremap <silent> k gk
+" vnoremap <silent> ^ g^
+" onoremap <silent> ^ g^
+" noremap  <silent> gj j
+" vnoremap <silent> gj j
+" onoremap <silent> gj j
+" noremap  <silent> gk k
+" vnoremap <silent> gk k
+" onoremap <silent> gk k
+" noremap  <silent> g0 0
+" vnoremap <silent> g0 0
+" onoremap <silent> g0 0
+" noremap  <silent> g$ $
+" vnoremap <silent> g$ $
+" onoremap <silent> g$ $
+" noremap  <silent> g^ ^
+" vnoremap <silent> g^ ^
+" onoremap <silent> g^ ^
+
 " nice to have
 inoremap <c-d> <del>
 cnoremap <c-d> <del>
@@ -403,9 +430,9 @@ nnoremap c? c?\c
 nnoremap d? d?\c
 nnoremap y? y?\c
 nnoremap <silent> <leader>= migg=G`i
-nmap <silent> <leader>ggp <Plug>GitGutterPreviewHunk
-nmap <silent> <leader>ggu <Plug>GitGutterUndoHunk
-nmap <silent> <leader>ggs <Plug>GitGutterStageHunk
+nmap <silent> <leader>gp <Plug>GitGutterPreviewHunk
+nmap <silent> <leader>gu <Plug>GitGutterUndoHunk
+nmap <silent> <leader>gs <Plug>GitGutterStageHunk
 " keep ga functionality as gas
 nnoremap gas ga
 " Sideways
@@ -419,6 +446,7 @@ omap <silent> ia <plug>SidewaysArgumentTextobjI
 xmap <silent> ia <plug>SidewaysArgumentTextobjI
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
+
 " nvim now can map alt without terminal issues, new cool shortcuts commin
 if has('nvim')
   noremap <silent> <M-r> :call local#i3focus#switch('down', 'j')<cr>
@@ -453,10 +481,6 @@ endif
 nmap <leader><cr> za
 vmap <leader><cr> zf
 
-" keep visual mode selection for some actions
-vnoremap <c-a> <c-a>gv
-vnoremap <c-x> <c-x>gv
-
 " quick set
 nnoremap <leader>s  :set
 nnoremap <leader>sf :set filetype=
@@ -469,11 +493,13 @@ function! SpellCheckToggle()
   if b:spell_check == 1
     let b:spell_check = 0
     execute(':set syntax=' . b:syntax)
+    hi SpellBad guifg=NONE
     set nospell
   else
     let b:syntax = &syntax
     let b:spell_check = 1
     set syntax=
+    hi SpellBad guifg=lightred
     set spell
   endif
 

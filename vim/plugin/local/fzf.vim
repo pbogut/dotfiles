@@ -1,12 +1,15 @@
 " prepare params
-function! s:params(params)
+function! s:params(params, preview)
   let preview = get(g:,'fzf_preview', '')
   let params = join(a:params, ' ')
   if (len(params) && params[0] != '-')
     let params = '-q ' . shellescape(params)
   endif
-
-  return preview . ' ' . params
+  if !empty(a:preview)
+    return preview . ' ' . params
+  else
+    return params
+  endif
 endfunction
 
 " fzf git ls
@@ -17,7 +20,7 @@ endfunction
 
 function! local#fzf#all_files(...) abort
   let options = {
-        \   'options': '--prompt "All files> " ' . s:params(a:000),
+        \   'options': '--prompt "All files> " ' . s:params(a:000, 1),
         \ }
   let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
   call fzf#run(fzf#wrap('name', extra, 0))
@@ -26,7 +29,7 @@ endfunction
 function! local#fzf#files(...) abort
   let options = {
         \   'source': 'ag -l -g ""',
-        \   'options': '--prompt "Files> " ' . s:params(a:000),
+        \   'options': '--prompt "Files> " ' . s:params(a:000, 1),
         \ }
   let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
   call fzf#run(fzf#wrap('name', extra, 0))
@@ -36,7 +39,7 @@ endfunction
 function! local#fzf#buffer_dir_files(...) abort
   let options = {
         \   'source': 'ag -l -g "" ' . shellescape(expand('%:h')),
-        \   'options': '--prompt "Files> " ' . s:params(a:000),
+        \   'options': '--prompt "Files> " ' . s:params(a:000, 1),
         \ }
   let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
   call fzf#run(fzf#wrap('name', extra, 0))
@@ -46,7 +49,7 @@ function! local#fzf#git_ls(...) abort
   let options = {
         \   'source': '{git -c color.status=always status --short; git ls-files | while read l; do echo -e "\033[0;34mG\033[0m  $l";done }',
         \   'sink': function('s:fzf_git_ls_sink'),
-        \   'options': '--ansi --prompt "Git> " ' . s:params(a:000),
+        \   'options': '--ansi --prompt "Git> " ' . s:params(a:000, 1),
         \ }
   let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
   call fzf#run(fzf#wrap('name', extra, 0))
@@ -86,6 +89,20 @@ function! local#fzf#agg(raw, ...) abort
   let params = s:fzf_ag_params(a:raw, a:000)
   silent! execute ":silent! grep " . params
   echo ":grep " . params
+endfunction
+
+function! s:fzf_clip_sink(line)
+  echo system('anamnesis.sh to_clip', a:line)
+endfunction
+
+function! local#fzf#clip(...) abort
+  let options = {
+        \   'source': 'anamnesis.sh list',
+        \   'sink': function('s:fzf_clip_sink'),
+        \   'options': '--ansi --prompt "Clip> " ' . s:params(a:000, 0),
+        \ }
+  let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
+  call fzf#run(fzf#wrap('name', extra, 0))
 endfunction
 
 command! -nargs=* -bang -complete=dir Ag call local#fzf#ag(<bang>0,<f-args>)

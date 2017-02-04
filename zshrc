@@ -192,15 +192,6 @@ roa() {
   fi
 }
 
-# anamnesis clipboard fuzy lookup
-alias clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_content \
-            order by docid desc;\" | sqlite3 ~/.local/share/anamnesis/database \
-            | fzf | sed 's/¬n¬/\n/g' | perl -p -e 'chomp if eof' \
-            | xclip -in -selection clipboard"
-alias dmenu_clip="echo \"select replace(c0text, '\n', '¬n¬') from clips_content \
-            order by docid desc limit 50;\" | sqlite3 ~/.local/share/anamnesis/database \
-            | dmenu -l 10 | sed 's/¬n¬/\n/g' | perl -p -e 'chomp if eof' \
-            | xclip -in -selection clipboard"
 # shortcuts
 alias sc="bash -c \"\`cat ~/.commands | fzf\`\""
 alias q="exit"
@@ -235,7 +226,9 @@ fi
 # fzf config
 export FZF_DEFAULT_OPTS="--filepath-word --reverse
 --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
---bind=ctrl-w:backward-kill-word"
+--bind=ctrl-w:backward-kill-word
+--height 40%
+"
 
 #git branch in prompt
 setopt prompt_subst

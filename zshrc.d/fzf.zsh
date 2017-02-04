@@ -1,0 +1,50 @@
+#!/bin/bash
+#=================================================
+# name:   fzf.zsh
+# author: Pawel Bogut <pbogut@ukpos.com> <http://pbogut.me>
+# date:   03/02/2017
+#
+# Based on:
+# https://www.reddit.com/r/vim/comments/3f0zbg/psa_if_youre_using_ctrlp_use_this_maintained_fork/
+#=================================================
+fe() {
+    # fe - Open the selected files with the default editor
+    local files=$(fzf --query="$1" --select-1 --exit-0 | sed -e "s/\(.*\)/\'\1\'/")
+    local command="${EDITOR:-vim} -p $files"
+    [ -n "$files" ] && eval $command
+}
+
+fd() {
+    # fd - cd to selected directory
+    local dir
+    dir=$(find ${1:-*} -path '*/\.*' -prune -o -type d -print 2> /dev/null | fzf +m) &&
+    cd "$dir"
+}
+
+fh() {
+    # fh - repeat history
+    eval $( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | sed 's/ *[0-9]* *//')
+}
+
+fkill() {
+    # fkill - kill process
+    pid=$(ps -ef | grep "^$USER" | sed 1d | fzf -m | awk '{print $2}')
+    if [ "x$pid" != "x" ]
+    then
+        kill -${1:-9} $pid
+    fi
+}
+
+sufkill() {
+    # fkill - kill process
+    pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
+    if [ "x$pid" != "x" ]
+    then
+        sudo kill -${1:-9} $pid
+    fi
+}
+
+# anamnesis clipboard fuzy lookup
+fclip() {
+    anamnesis.sh list | fzf | anamnesis.sh to_clip
+}
