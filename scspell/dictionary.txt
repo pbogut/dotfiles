@@ -532,6 +532,7 @@ FILETYPE: Elixir; .exs, .ex
 defmodule
 defp
 doctest
+moduledoc
 rrule
 
 NATURAL:
@@ -37469,6 +37470,7 @@ hoydenish
 hoydens
 html
 http
+https
 huarache
 huaraches
 hub
@@ -59676,6 +59678,7 @@ prepaying
 prepayment
 prepayments
 prepays
+prepend
 preplanned
 preponderance
 preponderances
@@ -68181,6 +68184,7 @@ saturates
 saturating
 saturation
 saturations
+saturday
 saturnalia
 saturnine
 satyr
@@ -76642,6 +76646,7 @@ sunbursts
 suncream
 sundae
 sundaes
+sunday
 sundeck
 sundecks
 sunder
