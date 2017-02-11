@@ -54,3 +54,11 @@ sufkill() {
 fclip() {
     anamnesis.sh list | fzf | anamnesis.sh to_clip
 }
+
+#porjects
+cdp() {
+    project=$(find ~/projects -maxdepth 3 -mindepth 3 -printf "%T+\t%p\n" -type d | sort -r | sed 's,.*\t'"$HOME"'/projects/,,g' | fzf -q "$1")
+    if [[ ! $project == "" ]]; then
+        cd "$HOME/projects/$project"
+    fi
+}

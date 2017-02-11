@@ -142,6 +142,8 @@ augroup configgroup
         \| nnoremap <buffer> ;;; :
   autocmd FileType tagbar
         \  nmap <buffer> <leader>n q
+  autocmd InsertLeave *
+              \ if &buftype == 'acwrite' | execute('WidenRegion') | endif
   " always show gutter column to avoid blinking and jumping
   " autocmd BufEnter *
   "       \  execute('sign define dummy')
