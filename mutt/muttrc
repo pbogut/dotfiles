@@ -16,12 +16,13 @@ bind index,pager r group-reply
 
 set sort = threads
 set edit_headers = yes
-set record = "+sent"
+# set record = "+sent"
+set record = ~/.mutt/sent
 set pager_stop = yes
 set use_from = yes
 set reverse_name = yes
-set nm_record = yes
-set nm_record_tags = "-index +sent +inbox"
+# set nm_record = yes
+# set nm_record_tags = "-index +sent +inbox"
 set smart_wrap
 set wrap=135 # 20 ish is for sidebar
 set markers=no
@@ -65,7 +66,7 @@ set status_format="-%r-`get-config.sh email-default-from`: %f [Msgs:%?M?%M/?%m%?
 # switch between accounts
 macro index \e1 ":set from=`get-config.sh email-default-from`\n:set status_format=\"-%r-`get-config.sh email-default-from`: %f [Msgs:%?M?%M/?%m%?n? New:%n?%?o? Old:%o?%?d? Del:%d?%?F? Flag:%F?%?t? Tag:%t?%?p? Post:%p?%?b? Inc:%b?%?l? %l?]---(%s/%S)-%>-(%P)---\"\n" "Switch to default (`get-config.sh email-default-from`)"
 # account specific settings
-send-hook "~f ^`get-config.sh email-default-from`$" 'set sendmail = "msmtp.sh `get-config.sh email-default-account`"; set record="+`get-config.sh email-default-account`/sent"'
+send-hook "~f ^`get-config.sh email-default-from`$" 'set sendmail = "msmtp.sh `get-config.sh email-default-account`"'
 my_hdr Bcc: `get-config.sh email-default-from`
 # alternates `get-config.sh email-alternates`
 source ~/.mutt/accounts

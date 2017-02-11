@@ -15,9 +15,15 @@ fe() {
 }
 
 fd() {
+    local start_dir query dir
+    if [[ -d $1 ]];then
+        start_dir=$1
+        query="${@:2}"
+    else
+        query="$@"
+    fi
+    dir=$(find ${start_dir:-*} -path '*/\.*' -prune -o -type d -print 2> /dev/null | fzf +m -q "$query") &&
     # fd - cd to selected directory
-    local dir
-    dir=$(find ${1:-*} -path '*/\.*' -prune -o -type d -print 2> /dev/null | fzf +m) &&
     cd "$dir"
 }
 
@@ -47,4 +53,12 @@ sufkill() {
 # anamnesis clipboard fuzy lookup
 fclip() {
     anamnesis.sh list | fzf | anamnesis.sh to_clip
+}
+
+#porjects
+cdp() {
+    project=$(find ~/projects -maxdepth 3 -mindepth 3 -printf "%T+\t%p\n" -type d | sort -r | sed 's,.*\t'"$HOME"'/projects/,,g' | fzf -q "$1")
+    if [[ ! $project == "" ]]; then
+        cd "$HOME/projects/$project"
+    fi
 }
