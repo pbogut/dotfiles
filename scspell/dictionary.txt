@@ -440,6 +440,7 @@ insteadof
 interface
 isset
 list
+magento
 namespace
 new
 or
@@ -459,10 +460,12 @@ throw
 trait
 try
 unset
+unshift
 use
 var
 while
 xor
+zend
 
 FILETYPE: XML; .xml
 allspecificcountries

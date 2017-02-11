@@ -157,6 +157,7 @@ if exists(':Plug')
   Plug 'xolox/vim-misc'
   Plug 'xolox/vim-notes'
   Plug 'jiangmiao/auto-pairs'
+  Plug 'tpope/vim-scriptease'
   Plug 'tpope/vim-fugitive'
   Plug 'tpope/vim-git'
   Plug 'tpope/vim-commentary'
@@ -209,6 +210,7 @@ if exists(':Plug')
   Plug 'vim-scripts/cmdalias.vim'
   Plug 'Shougo/unite.vim'
   Plug 'Shougo/vimfiler.vim'
+  Plug 'chrisbra/NrrwRgn'
   if has('nvim')
     Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
     Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -519,6 +521,11 @@ let g:strip_whitespace_on_save = 1
 " Autoformat
 let g:formatdef_phpcbf = '"phpcbf -d tabWidth=".&shiftwidth'
 let g:formatters_php = ['phpcbf']
+" NrrwRgn
+let g:nrrw_rgn_pad=40
+" let g:nrrw_rgn_wdth = 50
+" let g:nrrw_rgn_resize_window = 'absolute'
+let g:nrrw_rgn_resize_window = 'relative'
 
 let g:formatdef_blade = '"html-beautify -s ".&shiftwidth'
 let g:formatters_blade = ['blade']
@@ -622,5 +629,44 @@ set title
 let g:snips_author = "Pawel Bogut"
 let g:snips_author_url = "http://pbogut.me"
 let g:snips_github = "https://github.com/pbogut"
+
+
+nmap <leader>ni :call NarrowCodeBlock(1)<cr>
+nmap <leader>nb :call NarrowCodeBlock()<cr>
+
+let s:code_blocks = [
+      \ ['<style', '</style>', 'css'],
+      \ ['<script', '</script>', 'javascript.jsx'],
+      \ ['@sql\>', '@sqlend\>', 'sql'],
+      \ ['@css\>', '@cssend\>', 'css'],
+      \ ['@js\>', '@jsend\>', 'javascript.jsx'],
+      \ ['```bash', '```', 'sh'],
+      \ ['```sh', '```', 'sh'],
+      \ ['```php', '```', 'php'],
+      \ ['```js', '```', 'javascript.jsx'],
+      \ ['```javascript', '```', 'javascript.jsx'],
+      \ ]
+
+function! NarrowCodeBlock(...) abort
+  for [match_start, match_end, set_type] in s:code_blocks
+      let inner = get(a:, 1, 0)
+      let start = searchpair(match_start, '', match_end, 'bW')
+      if !empty(l:start)
+          let end = searchpair(match_start, '', match_end, 'W') - l:inner
+          let start = l:start + l:inner
+          if l:start > l:end
+            echom "Block is empty, inner mode is not possible"
+            return
+          endif
+          execute(l:start . ',' . l:end . ' call nrrwrgn#NrrwRgn("", 0)')
+              \ | execute('set ft=' . set_type)
+          return
+      endif
+  endfor
+  echom "No block found"
+endfunction
+
+
+
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")

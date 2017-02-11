@@ -10,6 +10,9 @@ notmuch search --output=threads tag:new | while read thread; do
     done
 done
 
+# emails from myself
+notmuch tag +sent -unread -- from:"Pawel Bogut"
+
 # tags as directories
 # im removing new tag so I can set everything
 # before archive, which in gmails contain all mails by default (fy Google)
