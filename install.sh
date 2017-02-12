@@ -54,6 +54,7 @@ read -d '' files <<"EOF"
     scspell/dictionary.txt
     vim/autoload/plug.vim
     vim/plugin
+    vim/ftplugin
     vim/mysnippets
     vim/mytemplates
     i3blocks.conf

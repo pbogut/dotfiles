@@ -213,6 +213,8 @@ if exists(':Plug')
   Plug 'Shougo/unite.vim'
   Plug 'Shougo/vimfiler.vim'
   Plug 'chrisbra/NrrwRgn'
+  Plug 'andyl/vim-textobj-elixir'
+  Plug 'kana/vim-textobj-user'
   if has('nvim')
     Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
     Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -667,8 +669,5 @@ function! NarrowCodeBlock(...) abort
   endfor
   echom "No block found"
 endfunction
-
-
-
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
