@@ -151,8 +151,6 @@ augroup configgroup
 augroup END
 
 
-" set the runtime path to include Vundle and initialize
-" set rtp+=~/.vim/bundle/Vundle.vim
 silent! call plug#begin()
 if exists(':Plug')
   Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
@@ -175,10 +173,9 @@ if exists(':Plug')
   Plug 'dhruvasagar/vim-prosession'
   Plug 'vim-airline/vim-airline'
   Plug 'vim-airline/vim-airline-themes'
-  Plug 'edkolev/tmuxline.vim'
   Plug 'airblade/vim-gitgutter'
   Plug 'terryma/vim-expand-region'
-  Plug 'terryma/vim-multiple-cursors'
+  " Plug 'terryma/vim-multiple-cursors'
   Plug 'MarcWeber/vim-addon-mw-utils'
   Plug 'ludovicchabant/vim-gutentags'
   Plug 'gioele/vim-autoswap'
@@ -186,7 +183,6 @@ if exists(':Plug')
   Plug 'honza/vim-snippets'
   Plug 'mattn/emmet-vim'
   Plug 'majutsushi/tagbar'
-  Plug 'christoomey/vim-tmux-navigator'
   Plug 'sirver/ultisnips'
   Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
   Plug 'benekastah/neomake'
@@ -260,6 +256,21 @@ augroup END
 
 silent! colorscheme solarized
 
+" vdebug
+let g:vdebug_keymap = {
+      \    "run" : "<leader>vr",
+      \    "run_to_cursor" : "<leader>vc",
+      \    "step_over" : "<leader>vn",
+      \    "step_into" : "<leader>vi",
+      \    "step_out" : "<leader>vo",
+      \    "close" : "<leader>vq",
+      \    "detach" : "<leader>vd",
+      \    "set_breakpoint" : "<leader>vb",
+      \    "get_context" : "<leader>vx",
+      \    "eval_under_cursor" : "<leader>ve",
+      \    "eval_visual" : "<leader>vv",
+      \}
+
 " denite
 call denite#custom#map('insert', '<M-j>', '<denite:assign_next_matched_text>')
 call denite#custom#map('insert', '<M-k>', '<denite:assign_previous_matched_text>')
@@ -324,9 +335,12 @@ nnoremap <leader>sv :source $MYVIMRC<CR>
 nnoremap <silent> <leader>l :call local#togglelist#locationlist()<cr>
 nnoremap <silent> <leader>q :call local#togglelist#quickfixlist()<cr>
 nnoremap <silent> <leader>oc :cw<cr>
-nnoremap <silent> <leader>ot :belowright 11split \| terminal<cr>
+nnoremap <silent> <leader>ot :belowright 20split \| terminal<cr>
+nnoremap <silent> <leader>of :let g:pwd = expand('%:h') \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
+nnoremap <silent> <leader>op :let g:pwd = projectroot#guess() \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
+nnoremap <silent> <leader>oe :let g:netrw_file_name = expand('%:t') <bar> :exe('e ' . expand('%:h')) <bar> :call search('\V\^' . escape(g:netrw_file_name, '\') . '\(@\\|\n\\|\$\\|*\)')<cr>
 nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
-nnoremap <silent> <leader>ov :belowright 11split \| terminal vagrant ssh<cr>
+nnoremap <silent> <leader>ov :belowright 20split \| terminal vagrant ssh<cr>
 nnoremap <silent> <leader>r :VimFilerExplorer -find -force-hide<cr>
 nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
 " fzf
@@ -361,7 +375,6 @@ vmap s S
 " expand region
 vmap v <Plug>(expand_region_expand)
 vmap V <Plug>(expand_region_shrink)
-nmap <silent> <bs> :TmuxNavigateLeft<cr>
 " remap delete to c-d because on hardware level Im sending del when c-d (ergodox)
 nmap <silent> <del> <c-d>
 map <silent> <C-w>d :silent! Bdelete<cr>
@@ -536,8 +549,6 @@ let g:formatters_blade = ['blade']
 " despatch hax to not cover half screen
 let g:dispatch_quickfix_height = 10
 let g:dispatch_tmux_height = 1
-" autoswap tmux support
-let g:autoswap_detect_tmux = 1
 " }}}
 " custom commands
 " close all buffers but current

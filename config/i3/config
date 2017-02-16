@@ -84,7 +84,7 @@ bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
 # split in horizontal orientation - who the fuck made it other way around?
-bindsym $mod+v split v
+# bindsym $mod+v split v
 
 # split in vertical orientation - who the fuck made it other way around?
 bindsym $mod+s split h
@@ -261,6 +261,8 @@ bindsym $mod+Shift+X $sh "~/.scripts/i3-create-empty-workspace.py --send"
 bindsym $mod+w $sh "~/.scripts/i3-dmenu-workspaces.sh"
 bindsym $mod+Shift+W $sh "~/.scripts/i3-dmenu-workspaces.sh --move"
 bindsym $mod+Ctrl+w $sh "~/.scripts/i3-dmenu-workspaces.sh --send"
+
+bindsym --release $mod+v $sh 'xdotool keyup Super && xdotool type "$(xsel)"'
 
 # move workspace to another monitor
 bindsym $mod+m move workspace to output left
