@@ -26,7 +26,9 @@ if mail.parts.map(&:filename).include?("html-markdown-alternative.html")
   # remove attachment file information, otherwise gmail is
   # displaying attachmet list instead of html in the email body
   text.content_disposition = nil
+  text.content_type = "text/plain; charset=UTF-8"
   html.content_disposition = nil
+  html.content_type = "text/html; charset=UTF-8"
 
   bodypart.text_part = text
   bodypart.html_part = html

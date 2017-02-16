@@ -124,6 +124,10 @@ macro index I "<modify-labels>-inbox\n"                            # remove from
 #macro index I "<modify-labels>-inbox -unread\\n"                  # removed from inbox
 #macro index S "<modify-labels-then-hide>-inbox -unread +junk\\n" # tag as Junk mail
 
+macro index P "<modify-labels-then-hide>-inbox +project/"          # tag as project
+macro pager P "qP"                                                 # tag as project
+macro attach P "qP"                                                # tag as project
+
 # quick jump between boxes
 macro index gi "<change-vfolder> Inbox<enter>" "Go to Inbox"
 macro index gu "<change-vfolder> Unread<enter>" "Go to Unread"

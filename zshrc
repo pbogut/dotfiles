@@ -193,7 +193,7 @@ roa() {
 }
 
 # shortcuts
-alias sc="bash -c \"\`cat ~/.commands | fzf\`\""
+alias sc="bash -c \"\`cat ~/.commands | fzf | sed 's,[^;]*;;; ,,'\`\""
 alias q="exit"
 alias :q="exit"
 alias m="ncmpcpp"
@@ -251,6 +251,8 @@ export PATH="$PATH:$HOME/.gocode/bin"
 export PATH="$PATH:$HOME/.local/bin"
 export PATH="$PATH:$HOME/.npm/bin"
 export PATH="$PATH:$HOME/.gem/ruby/2.4.0/bin"
+
+export LPASS_AGENT_TIMEOUT=0
 
 # make colors compatibile with tmux
 export TERM=xterm-256color
