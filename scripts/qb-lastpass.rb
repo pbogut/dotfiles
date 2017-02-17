@@ -14,14 +14,17 @@ no = -1
 list.each_line do |line|
   no += 1
   next if no <= 0
-  line = CSV.parse(line)[0]
-  url = line[0]
-  user = line[1]
-  pass= line[2]
-  name = line[4]
-  cat = line[5]
-  cat = "#{cat}/" if cat
-  formated_list <<  ('%3.3s| %-50.50s %-50.50s %s' % [no, "#{cat}#{name}" , user, url]) + "\n"
+  begin
+    line = CSV.parse(line)[0]
+    url = line[0]
+    user = line[1]
+    pass= line[2]
+    name = line[4]
+    cat = line[5]
+    cat = "#{cat}/" if cat
+    formated_list <<  ('%3.3s| %-50.50s %-50.50s %s' % [no, "#{cat}#{name}" , user, url]) + "\n"
+  rescue
+  end
 end
 site_url = ENV['QUTE_URL'].gsub(/^.*?\/\/(.*?)\/.*/, '\1')
 
@@ -47,3 +50,4 @@ File.open(ENV['QUTE_FIFO'], 'w') do |file|
   file.write("fake-key #{pass}\n")
   file.write("fake-key -g i\n")
 end
+
