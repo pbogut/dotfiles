@@ -8,11 +8,12 @@
 require "csv"
 require "open3"
 
+action, = ARGV
+
 list = `lpass export`
 formated_list = ''
 no = -1
 list.each_line do |line|
-  puts "#{no} #{line}"
   no += 1
   next if no <= 0
   begin
@@ -45,9 +46,35 @@ pass = result[2]
 
 sleep 0.2
 
-File.open(ENV['QUTE_FIFO'], 'w') do |file|
-  file.write("fake-key #{user}\n")
-  file.write("fake-key <tab>\n")
-  file.write("fake-key #{pass}\n")
-  file.write("fake-key -g i\n")
+
+if action == '--copy-user'
+  _, _, _ = Open3.capture3('xsel -p -i', stdin_data: user)
 end
+if action == '--copy-pass'
+  _, _, _ = Open3.capture3('xsel -p -i', stdin_data: pass)
+end
+if action == '--copy-user-and-pass'
+  _, _, _ = Open3.capture3('xsel -b -i', stdin_data: user)
+  _, _, _ = Open3.capture3('xsel -p -i', stdin_data: pass)
+end
+if action == '--type-user'
+  File.open(ENV['QUTE_FIFO'], 'w') do |file|
+    file.write("fake-key #{user}\n")
+    file.write("fake-key -g i\n")
+  end
+end
+if action == '--type-pass'
+  File.open(ENV['QUTE_FIFO'], 'w') do |file|
+    file.write("fake-key #{pass}\n")
+    file.write("fake-key -g i\n")
+  end
+end
+if action == '--type-user-and-pass' or action.blank?
+  File.open(ENV['QUTE_FIFO'], 'w') do |file|
+    file.write("fake-key #{user}\n")
+    file.write("fake-key <tab>\n")
+    file.write("fake-key #{pass}\n")
+    file.write("fake-key -g i\n")
+  end
+end
+

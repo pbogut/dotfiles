@@ -116,6 +116,11 @@ augroup configgroup
         \ execute("normal /^$/\n")
         \| setlocal spell spelllang=en_gb
         \| setlocal textwidth=72
+  autocmd BufEnter lpass.*
+        \  if search('^Password: $')
+        \|   execute('r !apg -m16 -n1')
+        \|   normal kJkk
+        \| endif
   " autocmd BufEnter * normal! zR
   " check shada to share vim info between instances
   " autocmd CursorHold * rshada | wshada
@@ -392,38 +397,13 @@ nnoremap <leader><leader> "*
 vnoremap <leader> "+
 vnoremap <leader><leader> "*
 noremap <leader>sc :execute(':rightbelow 10split \| te scspell %')<cr>
-" nicer wrapline navigation - i need some kind of toggle to switch that back
-" and forth
-" noremap  <silent> j gj
-" vnoremap <silent> j gj
-" onoremap <silent> j gj
-" noremap  <silent> k gk
-" vnoremap <silent> k gk
-" onoremap <silent> k gk
-" noremap  <silent> 0 g0
-" vnoremap <silent> 0 g0
-" onoremap <silent> 0 g0
-" noremap  <silent> $ g$
-" vnoremap <silent> $ g$
-" onoremap <silent> $ g$
-" noremap  <silent> ^ g^
-" vnoremap <silent> ^ g^
-" onoremap <silent> ^ g^
-" noremap  <silent> gj j
-" vnoremap <silent> gj j
-" onoremap <silent> gj j
-" noremap  <silent> gk k
-" vnoremap <silent> gk k
-" onoremap <silent> gk k
-" noremap  <silent> g0 0
-" vnoremap <silent> g0 0
-" onoremap <silent> g0 0
-" noremap  <silent> g$ $
-" vnoremap <silent> g$ $
-" onoremap <silent> g$ $
-" noremap  <silent> g^ ^
-" vnoremap <silent> g^ ^
-" onoremap <silent> g^ ^
+" nicer wrapline navigation
+for [key1, key2] in [['j', 'gj'], ['k', 'gk']]
+  for maptype in ['noremap', 'vnoremap', 'onoremap']
+    execute(maptype . ' <silent> ' . key1 . ' ' . key2)
+    execute(maptype . ' <silent> ' . key2 . ' ' . key1)
+  endfor
+endfor
 
 " nice to have
 inoremap <c-d> <del>

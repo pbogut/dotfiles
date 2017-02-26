@@ -145,6 +145,7 @@ eval `dircolors ~/.config/dircolors-solarized/dircolors.256dark`
 alias se="sudoedit"
 
 alias ls="ls --color=auto"
+alias ll="ls -lhA --color=auto"
 alias pacman="pacman --color=auto"
 alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
 

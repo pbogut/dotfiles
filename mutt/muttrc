@@ -14,6 +14,12 @@ bind editor <Tab> complete-query
 bind editor \cT complete
 bind index,pager r group-reply
 
+# some vim bindings
+bind index gg first-entry
+bind index G last-entry
+bind pager gg top
+bind pager G bottom
+
 set sort = threads
 set edit_headers = yes
 # set record = "+sent"
@@ -121,6 +127,7 @@ macro pager A "qA"                                                 # tag as Arch
 macro attach A "qA"                                                # tag as Archived
 macro index T "<modify-labels>+todo -inbox\n"                      # tag as Todo
 macro index I "<modify-labels>-inbox\n"                            # remove from inbox
+macro index B "<modify-labels>+inbox -archive -todo\n"             # remove from inbox
 #macro index I "<modify-labels>-inbox -unread\\n"                  # removed from inbox
 #macro index S "<modify-labels-then-hide>-inbox -unread +junk\\n" # tag as Junk mail
 
