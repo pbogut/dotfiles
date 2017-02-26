@@ -75,6 +75,18 @@ let g:neomake_xml_xmllint_maker =
       \   'errorformat': '%A%f:%l:\ %m'
       \ }
 
+let g:neomake_elm_enabled_makers = [ 'elmmake' ]
+let g:neomake_elm_elmmake_maker = {
+  \ 'exe': 'elm-make',
+  \ 'args': ['--output', '/tmp/_build.js'],
+  \ 'buffer_output': 1,
+  \ 'errorformat':
+    \ '%E%.%#--\ %m\ -%# %f' . ',' .
+    \ '%C%l\\|' . ',' .
+    \ '%C%.%#'
+\ }
+
+
 " Source Code Spell Checker
 function! NeomakeWithSpellCheck(entry)
   let a:entry.type = "I"
@@ -92,6 +104,7 @@ let s:spellcheck_types = [
 
 function! s:neomake_with_spellcheck() abort
   if index(s:spellcheck_types, &ft) == -1
+    execute ':Neomake'
     return
   endif
   if empty(get(g:, 'neomake_' . &ft . '_scspell_maker', ''))
@@ -100,11 +113,6 @@ function! s:neomake_with_spellcheck() abort
           \   'args': ['--report-only'],
           \   'postprocess': function('NeomakeWithSpellCheck'),
           \ }
-    " let g:['neomake_' . &ft . '_scspell_maker'] = {
-    "       \   'exe': 'scaspell.rb',
-    "       \   'args': [],
-    "       \   'postprocess': function('NeomakeWithSpellCheck'),
-    "       \ }
   endif
   let list = get(g:, 'neomake_' . &ft . '_enabled_makers', [])
   execute ':Neomake ' . join(list) . ' scspell'

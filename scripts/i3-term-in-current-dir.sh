@@ -1,6 +1,11 @@
 #!/bin/bash
-(if [[ "$1" == "--tmux" || "$1" == "-t" ]]; then
-    urxvt -e zsh -ic "~/.scripts/tmuxin.sh "'"'"`xcwd`"'"'""
-else
-    urxvt -cd "`xcwd`"
-fi) > /dev/null 2>&1 &
+cwd=$(xcwd)
+
+for arg in "$@"; do
+    case $arg in
+        "--new-workspace" )
+            i3-create-empty-workspace.py
+    esac
+done
+
+urxvt -cd "$cwd"

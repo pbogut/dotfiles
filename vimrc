@@ -223,6 +223,7 @@ if exists(':Plug')
     Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
     Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
+    Plug 'pbogut/deoplete-elm', { 'for': 'elm' }
   endif " if Plug installed
   if (!has('nvim') || $STY != '')
     Plug 'altercation/vim-colors-solarized'

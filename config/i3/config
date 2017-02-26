@@ -36,7 +36,7 @@ set $update_keylayout exec --no-startup-id pkill -SIGRTMIN+12 i3blocks
 
 # start a terminal
 bindsym $mod+Return $sh "~/.scripts/i3-term-in-current-dir.sh"
-bindsym $mod+Ctrl+Return $sh "~/.scripts/i3-term-in-current-dir.sh --tmux"
+bindsym $mod+Shift+Return $sh "~/.scripts/i3-term-in-current-dir.sh --new-workspace"
 
 # kill focused window
 bindsym $mod+Shift+q kill
