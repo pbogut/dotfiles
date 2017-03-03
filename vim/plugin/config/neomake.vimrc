@@ -1,10 +1,35 @@
+" Ale -- to be moved!!!!! START
+
+augroup pb_alegroup
+  autocmd!
+  autocmd FileType php call s:ale_init_php()
+augroup END
+
+function! s:ale_init_php()
+  if !empty(get(b:, 'neomake_php_phpmd_args'))
+    return
+  endif
+
+  " phpmd.xml for neomake @todo fallback to getcwd()
+  " it should update each time buffer is swiched... i guess
+  let phpmd_xml_file = projectroot#guess() . '/phpmd.xml'
+  if filereadable(phpmd_xml_file)
+    let g:ale_php_phpmd_ruleset = phpmd_xml_file
+  else
+    let g:ale_php_phpmd_ruleset = 'codesize,design,unusedcode,naming'
+  endif
+endfunction
+
+" Ale -- to be moved!!!!! END
+
+
 " Neomake
 " Autocommands
 augroup neomakegroup
   autocmd!
-  autocmd BufWritePost * NeomakeWithSpellCheck
-  autocmd BufRead * NeomakeWithSpellCheck
-  autocmd FileType php call s:init_php()
+  " autocmd BufWritePost * NeomakeWithSpellCheck
+  " autocmd BufRead * NeomakeWithSpellCheck
+  " autocmd FileType php call s:init_php()
   autocmd User ProjectionistActivate call s:activate()
 augroup END
 
@@ -77,14 +102,14 @@ let g:neomake_xml_xmllint_maker =
 
 let g:neomake_elm_enabled_makers = [ 'elmmake' ]
 let g:neomake_elm_elmmake_maker = {
-  \ 'exe': 'elm-make',
-  \ 'args': ['--output', '/tmp/_build.js'],
-  \ 'buffer_output': 1,
-  \ 'errorformat':
-    \ '%E%.%#--\ %m\ -%# %f' . ',' .
-    \ '%C%l\\|' . ',' .
-    \ '%C%.%#'
-\ }
+      \ 'exe': 'elm-make',
+      \ 'args': ['--output', '/tmp/_build.js'],
+      \ 'buffer_output': 1,
+      \ 'errorformat':
+      \ '%E%.%#--\ %m\ -%# %f' . ',' .
+      \ '%C%l\\|' . ',' .
+      \ '%C%.%#'
+      \ }
 
 
 " Source Code Spell Checker
@@ -97,10 +122,11 @@ function! NeomakeWithSpellCheck(entry)
   let a:entry.col = stridx(line, token) + offset + 1
 endfunction
 
-let s:spellcheck_types = [
-      \ 'elixir', 'php', 'bash', 'mail',
-      \ 'ruby', 'go', 'markdown',
-      \ 'javascript', 'git', 'vim']
+let s:spellcheck_types = []
+" let s:spellcheck_types = [
+"       \ 'elixir', 'php', 'bash', 'mail',
+"       \ 'ruby', 'go', 'markdown',
+"       \ 'javascript', 'git']
 
 function! s:neomake_with_spellcheck() abort
   if index(s:spellcheck_types, &ft) == -1
@@ -118,4 +144,19 @@ function! s:neomake_with_spellcheck() abort
   execute ':Neomake ' . join(list) . ' scspell'
 endfunction
 
+"@todo implement this in fzf, so I can select alternate file from fzf
+"(existing or new)
+function s:all_alternate() abort
+  for [root, attributes] in projectionist#query('alternate')
+    if type(attributes) == type('')
+      let attributes = [attributes]
+    endif
+    for file in attributes
+      echom file
+    endfor
+  endfor
+endfunction
+
 command! NeomakeWithSpellCheck call s:neomake_with_spellcheck()
+
+command! AA call s:all_alternate()

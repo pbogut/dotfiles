@@ -1,4 +1,4 @@
-# the t key isn't used and it's easier to press than /, so lets use it
+# @see /usr/share/doc/ncmpcpp/bindings
 def_key "_"
     find
 def_key "_"
@@ -48,3 +48,8 @@ def_key "G"
 
 def_key "t"
     jump_to_position_in_song
+
+def_key "space"
+    select_item
+def_key "D"
+    delete_playlist_items

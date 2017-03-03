@@ -263,6 +263,8 @@ bindsym $mod+Shift+W $sh "~/.scripts/i3-dmenu-workspaces.sh --move"
 bindsym $mod+Ctrl+w $sh "~/.scripts/i3-dmenu-workspaces.sh --send"
 
 bindsym --release $mod+v $sh 'xdotool keyup Super && xdotool type "$(xsel)"'
+bindsym $mod+Ctrl+i $sh '~/.scripts/vim-anywhere.sh --selection'
+bindsym $mod+i $sh '~/.scripts/vim-anywhere.sh'
 
 # move workspace to another monitor
 bindsym $mod+m move workspace to output left
