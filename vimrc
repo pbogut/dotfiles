@@ -242,6 +242,7 @@ silent! call plug#end()      " requiredc
 filetype plugin indent on    " required
 "
 source ~/.vim/plugin/config/airline.vimrc
+source ~/.vim/plugin/config/autoformat.vimrc
 source ~/.vim/plugin/config/autopairs.vimrc
 source ~/.vim/plugin/config/composer.vimrc
 source ~/.vim/plugin/config/deoplete.vimrc
