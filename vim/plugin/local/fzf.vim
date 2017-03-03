@@ -85,6 +85,14 @@ function! local#fzf#ag(raw, ...) abort
   call fzf#vim#ag_raw(params)
 endfunction
 
+function! local#fzf#rg(raw, ...) abort
+  let params = s:fzf_ag_params(a:raw, a:000)
+  echo "!rg -i " . params
+  " call fzf#vim#ag_raw(params)
+  call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=always -i '.params, 1)
+endfunction
+
 function! local#fzf#agg(raw, ...) abort
   let params = s:fzf_ag_params(a:raw, a:000)
   silent! execute ":silent! grep " . params
@@ -107,3 +115,5 @@ endfunction
 
 command! -nargs=* -bang -complete=dir Ag call local#fzf#ag(<bang>0,<f-args>)
 command! -nargs=* -bang -complete=dir Agg call local#fzf#agg(<bang>0,<f-args>)
+command! -nargs=* -bang -complete=dir Rg call local#fzf#rg(<bang>0,<f-args>)
+command! -nargs=* -bang -complete=dir Rgg call local#fzf#agg(<bang>0,<f-args>)

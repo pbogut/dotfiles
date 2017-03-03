@@ -58,6 +58,7 @@ set background=dark
 if exists('&inccommand') | set inccommand=split | endif
 if has("patch-7.4.314") | set shortmess+=c | endif
 if executable('ag') | set grepprg=ag | endif
+if executable('rg') | set grepprg=rg | endif
 
 let mapleader = "\<space>" " life changer
 
@@ -217,6 +218,7 @@ if exists(':Plug')
   Plug 'andyl/vim-textobj-elixir'
   Plug 'kana/vim-textobj-user'
   if has('nvim')
+    Plug 'w0rp/ale'
     Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
     Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -478,6 +480,12 @@ if has('nvim')
   cnoremap <A-j> <Down>
 endif
 
+" quick change and search for naxt, change can be repeaded by . N and n will
+" search for the same selection, gn gN will select same selection
+for keys in ['w', 'iw', 'aw', 'e', 'W', 'iW', 'aW']
+  exe('nnoremap cg' . keys . ' y' . keys . ':exe("let @/=@+")<bar><esc>cgn')
+endfor
+
 nmap <leader><cr> za
 vmap <leader><cr> zf
 
@@ -519,6 +527,8 @@ let g:strip_whitespace_on_save = 1
 " Autoformat
 let g:formatdef_phpcbf = '"phpcbf -d tabWidth=".&shiftwidth'
 let g:formatters_php = ['phpcbf']
+let g:formatdef_elmformat = '"elm-format --stdin --yes"'
+let g:formatters_elm = ['elmformat']
 " NrrwRgn
 let g:nrrw_rgn_pad=40
 " let g:nrrw_rgn_wdth = 50
@@ -544,7 +554,6 @@ command! Grevert
             \  execute ":Gread"
             \| execute ":noautocmd w"
             \| execute ":GitGutter"
-            \| execute ":Neomake"
 
 command! -nargs=1 PhpDoc split
     \| silent! execute("e phpdoc://<args>")
@@ -663,3 +672,8 @@ function! NarrowCodeBlock(...) abort
 endfunction
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
+
+
+let g:ale_sign_error = '✖'
+let g:ale_sign_warning = '⚠'
+let g:ale_sign_column_always = 1

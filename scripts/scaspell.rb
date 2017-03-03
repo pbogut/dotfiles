@@ -19,8 +19,6 @@ ARGV.each do |file|
       next if text == line
       text.strip!
       puts "#{file}:#{index}: '#{text}' was not found in the dictionary (from token '#{text}')"
-
-# aspeltest.txt:1: 'siema', 'ziomus' were not found in the dictionary (from token 'SiemaZiomus')
     end
   end
 end

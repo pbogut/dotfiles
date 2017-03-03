@@ -1,33 +1,39 @@
 let g:switch_custom_definitions =
             \ [
             \   {
-            \     '\(===\)':  '==',
-            \     '\(==\)':   '===',
+            \     '\(===\)': '==',
+            \     '\(==\)':  '===',
             \   },
             \   {
-            \     '\(!==\)':  '!=',
-            \     '\(!=\)':   '!==',
+            \     '\(!==\)': '!=',
+            \     '\(!=\)':  '!==',
             \   },
             \ ]
 let s:switch_c_like_if =
             \ {
-            \   'if (true || (\(.*\)))':           'if (false && (\1))',
-            \   'if (false && (\(.*\)))':          'if (\1)',
-            \   'if (\%(true\|false\)\@!\(.*\))':  'if (true || (\1))',
+            \   'if (true || (\(.*\)))':          'if (false && (\1))',
+            \   'if (false && (\(.*\)))':         'if (\1)',
+            \   'if (\%(true\|false\)\@!\(.*\))': 'if (true || (\1))',
+            \ }
+let s:switch_php_scope =
+            \ {
+            \   '\<private\>':   'protected',
+            \   '\<protected\>': 'public',
+            \   '\<public\>':    'private',
             \ }
 let s:switch_php_array =
             \ {
-            \   '\<array(\(.*\))':  '[\1]',
-            \   '\(\s*\|^\)\[\(.*\)\]':      '\1array(\2)',
+            \   '\<array(\(.*\))':      '[\1]',
+            \   '\(\s*\|^\)\[\(.*\)\]': '\1array(\2)',
             \ }
 let s:switch_elixir_assert =
             \ {
-            \   '\(assert\)':  'refute',
-            \   '\(refute\)':   'assert',
+            \   '\(assert\)': 'refute',
+            \   '\(refute\)': 'assert',
             \ }
 let s:switch_elixir_map =
             \ {
-            \   '\<\([a-zA-Z0-9_]*\): \([^,]*\),':  '"\1" => \2,',
+            \   '\<\([a-zA-Z0-9_]*\): \([^,]*\),':   '"\1" => \2,',
             \   '"\([a-zA-Z0-9_]*\)" => \([^,]*\),': '\1: \2,',
             \ }
 augroup swich_vim
@@ -36,6 +42,7 @@ augroup swich_vim
             \ [
             \   s:switch_c_like_if,
             \   s:switch_php_array,
+            \   s:switch_php_scope,
             \ ]
   autocmd FileType javascript let b:switch_custom_definitions =
             \ [
