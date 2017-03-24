@@ -244,6 +244,7 @@ silent! call plug#end()      " requiredc
 filetype plugin indent on    " required
 "
 source ~/.vim/plugin/config/airline.vimrc
+source ~/.vim/plugin/config/autoformat.vimrc
 source ~/.vim/plugin/config/autopairs.vimrc
 source ~/.vim/plugin/config/composer.vimrc
 source ~/.vim/plugin/config/deoplete.vimrc
@@ -531,11 +532,6 @@ let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnippets", "mytemplates"]
 let g:EclimFileTypeValidate = 0
 let g:EclimCompletionMethod = 'omnifunc'
 let g:strip_whitespace_on_save = 1
-" Autoformat
-let g:formatdef_phpcbf = '"phpcbf -d tabWidth=".&shiftwidth'
-let g:formatters_php = ['phpcbf']
-let g:formatdef_elmformat = '"elm-format --stdin --yes"'
-let g:formatters_elm = ['elmformat']
 " NrrwRgn
 let g:nrrw_rgn_pad=40
 " let g:nrrw_rgn_wdth = 50
@@ -690,6 +686,3 @@ let g:ale_javascript_eslint_options = "--rule 'semi: [1, always]'"
 let g:ale_echo_msg_error_str = 'E'
 let g:ale_echo_msg_warning_str = 'W'
 let g:ale_echo_msg_format = '[%severity%][%linter%] %s'
-
-let g:sw_config_dir = $HOME . '/.sqlworkbench/'
-let g:sw_exe = '/opt/SQLWorkbench/sqlworkbench.sh'

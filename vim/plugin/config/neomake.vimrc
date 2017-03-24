@@ -7,7 +7,7 @@ augroup pb_alegroup
 augroup END
 
 function! s:ale_init_php()
-  if !empty(get(b:, 'ale_php_phpmd_ruleset '))
+<<<<<<< HEAD
     let g:ale_php_phpmd_ruleset = b:ale_php_phpmd_ruleset
     return
   endif
@@ -24,7 +24,6 @@ function! s:ale_init_php()
 endfunction
 
 " Ale -- to be moved!!!!! END
-
 
 " Neomake
 " Autocommands
