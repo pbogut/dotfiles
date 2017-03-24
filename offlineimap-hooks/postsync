@@ -1,4 +1,8 @@
 #!/bin/bash
+hostname=`hostname`
+begin_hook="~/.offlineimap-hooks-pre-postsync-$hostname.sh"
+[[ -f $begin_hook ]] && $begin_hook
+
 notmuch new
 
 # add image tag
@@ -46,3 +50,6 @@ notmuch tag -new -- tag:new #clear new tag
 ls -1d --color=never ~/Maildir/*/INBOX | sed "s#$HOME/Maildir/\(.*\)/INBOX#\1#g" | while read acc; do
     notmuch tag +archive -inbox -- tag:inbox and folder:$acc/archive and not folder:$acc/INBOX
 done
+
+end_hook="~/.offlineimap-hooks-post-postsync-$hostname.sh"
+[[ -f $end_hook ]] && $end_hook
