@@ -151,7 +151,7 @@ alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U 
 
 notes() {
     if [ ! -z $1 ];then
-        $EDITOR ~/Notes/ +"Note $1"
+        $EDITOR ~/Notes/ +"Note $@"
     else
         note=$(find $HOME/Notes/ | sed "s#^$HOME/Notes/##" | grep -v '^$' | fzf)
         if [[ ! -z $note ]];then
@@ -229,6 +229,7 @@ export FZF_DEFAULT_OPTS="--filepath-word --reverse
 --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
 --bind=ctrl-w:backward-kill-word
 --height 40%
+--cycle
 "
 
 #git branch in prompt
@@ -261,10 +262,18 @@ if [[ ! -z "$TMUX"  ]]; then
   export ZLE_RPROMPT_INDENT=0
 fi
 
+vim() {
+    vim_suspended=$(jobs | head -n 1 | grep 'vim')
+    if [[ $vim_suspended == "" ]]; then
+        $EDITOR "$@"
+    else
+        fg
+    fi
+}
+
 # default editor
 if type "nvim" > /dev/null; then
   export EDITOR=nvim
-  alias vim="nvim"
 else
   export EDITOR=vim
 fi

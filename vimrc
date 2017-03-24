@@ -362,9 +362,11 @@ nnoremap <silent> <leader>fb :FZFBuffers<cr>
 nnoremap <silent> <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
 nnoremap <silent> <leader>gF :call local#fzf#all_files(expand('<cfile>'))<cr>
 nnoremap <silent> <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
-nnoremap <silent> <leader>gw :Ag <cword><cr>
+nnoremap <silent> <leader>gw :Rg <cword><cr>
 nnoremap <silent> <leader>ga :Ag<cr>
+nnoremap <silent> <leader>gr :Rg<cr>
 vnoremap <silent> <leader>ga "ay :Ag <c-r>a<cr>
+vnoremap <silent> <leader>gr "ay :Rg <c-r>a<cr>
 nnoremap <silent> <leader>w :call WriteOrCr()<cr>
 nnoremap <silent> <leader>W :call WriteOrCr(1)<cr>
 nnoremap <silent> <leader>a :Autoformat<cr>
@@ -480,10 +482,13 @@ if has('nvim')
   cnoremap <A-j> <Down>
 endif
 
-" quick change and search for naxt, change can be repeaded by . N and n will
-" search for the same selection, gn gN will select same selection
 for keys in ['w', 'iw', 'aw', 'e', 'W', 'iW', 'aW']
+  " quick change and search for naxt, change can be repeaded by . N and n will
+  " search for the same selection, gn gN will select same selection
   exe('nnoremap cg' . keys . ' y' . keys . ':exe("let @/=@+")<bar><esc>cgn')
+
+  " quick rip grep for motion
+  exe('nnoremap gr' . keys . ' "ay' . keys . ' :Rg <c-r>a<cr>')
 endfor
 
 nmap <leader><cr> za
@@ -495,7 +500,9 @@ nnoremap <leader>sf :set filetype=
 nnoremap <leader>ss :set spell!<cr>
 nnoremap <leader>sp :set paste!<cr>
 
-nnoremap S :call SpellCheckToggle()<cr>
+nnoremap S :!xdotool key ctrl+z<cr>
+
+nnoremap <leader>S :call SpellCheckToggle()<cr>
 function! SpellCheckToggle()
   let b:spell_check = get(b:, 'spell_check', 0)
   if b:spell_check == 1
@@ -673,7 +680,16 @@ endfunction
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
 
+let g:ale_lint_on_save = 1
 
 let g:ale_sign_error = '✖'
 let g:ale_sign_warning = '⚠'
 let g:ale_sign_column_always = 1
+
+let g:ale_javascript_eslint_options = "--rule 'semi: [1, always]'"
+let g:ale_echo_msg_error_str = 'E'
+let g:ale_echo_msg_warning_str = 'W'
+let g:ale_echo_msg_format = '[%severity%][%linter%] %s'
+
+let g:sw_config_dir = $HOME . '/.sqlworkbench/'
+let g:sw_exe = '/opt/SQLWorkbench/sqlworkbench.sh'

@@ -2,11 +2,13 @@
 
 augroup pb_alegroup
   autocmd!
+  autocmd InsertEnter php call s:ale_init_php()
   autocmd FileType php call s:ale_init_php()
 augroup END
 
 function! s:ale_init_php()
-  if !empty(get(b:, 'neomake_php_phpmd_args'))
+  if !empty(get(b:, 'ale_php_phpmd_ruleset '))
+    let g:ale_php_phpmd_ruleset = b:ale_php_phpmd_ruleset
     return
   endif
 
@@ -14,10 +16,11 @@ function! s:ale_init_php()
   " it should update each time buffer is swiched... i guess
   let phpmd_xml_file = projectroot#guess() . '/phpmd.xml'
   if filereadable(phpmd_xml_file)
-    let g:ale_php_phpmd_ruleset = phpmd_xml_file
+    let b:ale_php_phpmd_ruleset = phpmd_xml_file
   else
-    let g:ale_php_phpmd_ruleset = 'codesize,design,unusedcode,naming'
+    let b:ale_php_phpmd_ruleset = 'codesize,design,unusedcode,naming'
   endif
+  let g:ale_php_phpmd_ruleset = b:ale_php_phpmd_ruleset
 endfunction
 
 " Ale -- to be moved!!!!! END

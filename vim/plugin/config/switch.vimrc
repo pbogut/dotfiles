@@ -36,8 +36,17 @@ let s:switch_elixir_map =
             \   '\<\([a-zA-Z0-9_]*\): \([^,]*\),':   '"\1" => \2,',
             \   '"\([a-zA-Z0-9_]*\)" => \([^,]*\),': '\1: \2,',
             \ }
+let s:switch_blade_echo =
+            \ {
+            \   '{{\(.\{-}\)}}':   '{!!\1!!}',
+            \   '{!!\(.\{-}\)!!}':   '{{\1}}',
+            \ }
 augroup swich_vim
   autocmd!
+  autocmd FileType blade let b:switch_custom_definitions =
+            \ [
+            \   s:switch_blade_echo,
+            \ ]
   autocmd FileType php let b:switch_custom_definitions =
             \ [
             \   s:switch_c_like_if,

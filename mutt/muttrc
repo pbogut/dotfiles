@@ -123,7 +123,7 @@ set index_format="%4C %Z %?GT?%GT& ?%?Ga?%Ga& ?%?GA?%GA& ? %<[y?%<[m?%<[d?%[ %H:
 macro pager,index \\\\ "<vfolder-from-query>"                      # looks up a hand made query
 macro pager,index \` "<modify-labels>"                             # change notmuch labels
 macro index A "<modify-labels-then-hide>+archive -inbox -unread\n" # tag as Archived
-macro pager A "qA"                                                 # tag as Archived
+macro pager A "<modify-labels-then-hide>+archive -inbox -unread\nq" # tag as Archived
 macro attach A "qA"                                                # tag as Archived
 macro index T "<modify-labels>+todo -inbox\n"                      # tag as Todo
 macro index I "<modify-labels>-inbox\n"                            # remove from inbox
@@ -132,7 +132,7 @@ macro index B "<modify-labels>+inbox -archive -todo\n"             # remove from
 #macro index S "<modify-labels-then-hide>-inbox -unread +junk\\n" # tag as Junk mail
 
 macro index P "<modify-labels-then-hide>-inbox +project/"          # tag as project
-macro pager P "qP"                                                 # tag as project
+macro pager P "<modify-labels-then-hide>-inbox +project/"          # tag as project
 macro attach P "qP"                                                # tag as project
 
 # quick jump between boxes

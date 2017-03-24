@@ -12,65 +12,66 @@ git submodule update --init
 echo "done"
 olddir=~/dotfiles_`date +%s%N`    # old dotfiles backup directory
 read -d '' files <<"EOF"
+    ackrc
+    bin
+    emacs
+    gitconfig
+    githelpers
     inputrc
+    jshintrc
+    npmrc
     offlineimap-hooks
     offlineimap.py
     screenrc
-    vimrc
-    emacs
-    zshrc
-    zshrc.d
+    scripts
+    terminfo
     tmux
     tmux.conf
+    urlview
+    vimrc
     yaourtrc
-    ackrc
-    scripts
-    bin
-    gitconfig
-    githelpers
-    npmrc
-    terminfo
-    weechat/cron.txt
-    weechat/alias.conf
-    weechat/weechat.conf
-    config/nvim/init.vim
-    config/roxterm.sourceforge.net
+    zshrc
+    zshrc.d
+    Xdefaults
+    composer/composer.json
     config/autostart/autostart.desktop
+    config/dircolors-solarized
+    config/feh/keys
     config/i3/config
     config/i3/i3status.conf
     config/i3/workspaces
-    config/pip/pip.conf
-    config/ranger/rc.conf
-    config/ranger/rifle.conf
-    config/ranger/devicons.py
-    config/ranger/plugins/devicons_linemode.py
     config/ncmpcpp/config
-    config/dircolors-solarized
-    config/twmn/twmn.conf
-    config/feh/keys
+    config/nvim/init.vim
+    config/pip/pip.conf
     config/qutebrowser/keys.conf
     config/qutebrowser/qutebrowser.conf
+    config/ranger/devicons.py
+    config/ranger/plugins/devicons_linemode.py
+    config/ranger/rc.conf
+    config/ranger/rifle.conf
+    config/roxterm.sourceforge.net
+    config/twmn/twmn.conf
+    i3blocks.conf
+    local/share/applications/ranger.desktop
+    mutt/mailcap
+    mutt/muttrc
+    mutt/solarized-dark-16.muttrc
     ncmpcpp/bindings
     scspell/dictionary.txt
     vim/autoload/plug.vim
-    vim/plugin
     vim/ftplugin
     vim/mysnippets
     vim/mytemplates
-    i3blocks.conf
-    composer/composer.json
-    mutt/muttrc
-    mutt/mailcap
-    mutt/solarized-dark-16.muttrc
-    urlview
-    Xdefaults
-    local/share/applications/ranger.desktop
+    vim/plugin
+    weechat/alias.conf
+    weechat/cron.txt
+    weechat/weechat.conf
 EOF
 read -d '' directories <<"EOF"
-    .vim/undofiles
-    .vim/swapfiles
-    .vim/backupfiles
     .gocode
+    .vim/backupfiles
+    .vim/swapfiles
+    .vim/undofiles
 EOF
 ##########
 

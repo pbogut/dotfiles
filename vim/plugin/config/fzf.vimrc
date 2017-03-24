@@ -11,6 +11,7 @@ let g:fzf_action = {
 " default options
 let $FZF_DEFAULT_OPTS=
       \   "--filepath-word --reverse "
+      \ . "--cycle "
       \ . "--bind="
       \ . "ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview,"
       \ . "ctrl-w:backward-kill-word "

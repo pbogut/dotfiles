@@ -12,7 +12,7 @@
 #setxkbmap pl
 #setxkbmap pl -variant colemak
 #)
-eval $(setxkbmap -query | sed 's#\<\([^\>]*\):.*\<\(.*\)\>#\1="\2"#')
+eval $(setxkbmap -query | sed 's#\<\([^\>]*\):.*\<\(.*\)\>#\1="\2"#' | grep -v options)
 # is_colemak=`setxkbmap -query | grep 'colemak'`
 # is_pl=`setxkbmap -query | grep 'layout.*pl'`
 

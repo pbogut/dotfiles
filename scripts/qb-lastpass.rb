@@ -60,13 +60,13 @@ end
 if action == '--type-user'
   File.open(ENV['QUTE_FIFO'], 'w') do |file|
     file.write("fake-key #{user}\n")
-    file.write("fake-key -g i\n")
+    # file.write("fake-key -g <esc>i\n")
   end
 end
 if action == '--type-pass'
   File.open(ENV['QUTE_FIFO'], 'w') do |file|
     file.write("fake-key #{pass}\n")
-    file.write("fake-key -g i\n")
+    # file.write("fake-key -g <esc>i\n")
   end
 end
 if action == '--type-user-and-pass' or action.blank?
@@ -74,7 +74,7 @@ if action == '--type-user-and-pass' or action.blank?
     file.write("fake-key #{user}\n")
     file.write("fake-key <tab>\n")
     file.write("fake-key #{pass}\n")
-    file.write("fake-key -g i\n")
+    # file.write("fake-key -g <esc>i\n")
   end
 end
 
