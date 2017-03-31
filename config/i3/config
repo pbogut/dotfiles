@@ -272,6 +272,8 @@ bindsym $mod+m move workspace to output left
 bindsym $mod+Shift+M $sh "~/.scripts/i3-swap-workspaces.py"
 # anamnesis clip board
 bindsym $mod+apostrophe $sh "~/.scripts/i3-dmenu-anamnesis.sh"
+# browser shortcut
+bindsym $mod+slash $sh "~/.scripts/i3-dmenu-web.sh"
 # screen shots
 # full screen (image magick required)
 bindsym Print $sh "import -window root ~/Pictures/Screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"

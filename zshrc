@@ -151,11 +151,11 @@ alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U 
 
 notes() {
     if [ ! -z $1 ];then
-        $EDITOR ~/Notes/ +"Note $@"
+        $(which $EDITOR) ~/Notes/ +"Note $@"
     else
         note=$(find $HOME/Notes/ | sed "s#^$HOME/Notes/##" | grep -v '^$' | fzf)
         if [[ ! -z $note ]];then
-            $EDITOR ~/Notes/ +"Note $note"
+            $(which $EDITOR) ~/Notes/ +"Note $note"
         fi
     fi
 }
@@ -163,7 +163,7 @@ dirdiff() {
   if [[ -z  $2 ]]; then
     echo "Usage: dirdiff /path/to/dir/one /path/to/dir/two"
   else
-    echo ":bw! | DirDiff $1 $2" | $EDITOR /tmp/skip_session
+    echo ":bw! | DirDiff $1 $2" | $(which $EDITOR) /tmp/skip_session
   fi
 }
 
@@ -254,6 +254,8 @@ export PATH="$PATH:$HOME/.local/bin"
 export PATH="$PATH:$HOME/.npm/bin"
 export PATH="$PATH:$HOME/.gem/ruby/2.4.0/bin"
 
+[[ -f ~/.nix-profile/etc/profile.d/nix.sh ]] && source ~/.nix-profile/etc/profile.d/nix.sh
+
 export LPASS_AGENT_TIMEOUT=0
 
 # make colors compatibile with tmux
@@ -265,7 +267,7 @@ fi
 vim() {
     vim_suspended=$(jobs | head -n 1 | grep 'vim')
     if [[ $vim_suspended == "" ]]; then
-        $EDITOR "$@"
+        $(which $EDITOR) "$@"
     else
         fg
     fi

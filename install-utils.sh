@@ -1,6 +1,8 @@
 #echo "Checking for system updates..."
 # sudo pacman -Syu
 sudo pacman -Sy
+# $ curl https://nixos.org/nix/install | sh
+#
 
 install_pacaur() {
     # Create a tmp-working-dir an navigate into it
@@ -88,9 +90,10 @@ gem pristine --all
 go get github.com/nsf/gocode
 go get github.com/pbogut/mails-go-web
 
-npm install \
+[[ $(command -v yarn) ]] || npm install -g yarn
+yarn global add \
     elm \
     eslint \
     html-beautify \
     jshint \
-    -g
+    -y

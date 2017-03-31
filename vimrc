@@ -281,17 +281,19 @@ let g:vdebug_keymap = {
       \}
 
 " denite
-call denite#custom#map('insert', '<M-j>', '<denite:assign_next_matched_text>')
-call denite#custom#map('insert', '<M-k>', '<denite:assign_previous_matched_text>')
-call denite#custom#map('insert', '<C-n>', '<denite:move_to_next_line>')
-call denite#custom#map('insert', '<C-p>', '<denite:move_to_previous_line>')
+if has('nvim')
+  call denite#custom#map('insert', '<M-j>', '<denite:assign_next_matched_text>')
+  call denite#custom#map('insert', '<M-k>', '<denite:assign_previous_matched_text>')
+  call denite#custom#map('insert', '<C-n>', '<denite:move_to_next_line>')
+  call denite#custom#map('insert', '<C-p>', '<denite:move_to_previous_line>')
 
-call denite#custom#alias('source', 'file_rec/git', 'file_rec')
-call denite#custom#var('file_rec/git', 'command',
-      \ ['git', 'ls-files', '-co', '--exclude-standard'])
-call denite#custom#alias('source', 'file_rec/ag', 'file_rec')
-call denite#custom#var('file_rec/ag', 'command',
-      \ ['ag', '-g', ''])
+  call denite#custom#alias('source', 'file_rec/git', 'file_rec')
+  call denite#custom#var('file_rec/git', 'command',
+        \ ['git', 'ls-files', '-co', '--exclude-standard'])
+  call denite#custom#alias('source', 'file_rec/ag', 'file_rec')
+  call denite#custom#var('file_rec/ag', 'command',
+        \ ['ag', '-g', ''])
+endif
 " ansi esc
 let g:no_plugin_maps = 1
 " vim polyglot
@@ -414,12 +416,20 @@ endfor
 inoremap <c-d> <del>
 cnoremap <c-d> <del>
 " vim-test
-nmap <silent> <leader>tn :TestNearest<CR>
-nmap <silent> <leader>tf :TestFile<CR>
-nmap <silent> <leader>ts :TestSuite<CR>
-nmap <silent> <leader>tl :TestLast<CR>
-nmap <silent> <leader>tt :TestLast<CR>
-nmap <silent> <leader>tv :TestVisit<CR>
+nmap <silent> <leader>tn :call FixTestFileMod() <bar> TestNearest<CR>
+nmap <silent> <leader>tf :call FixTestFileMod() <bar> TestFile<CR>
+nmap <silent> <leader>ts :call FixTestFileMod() <bar> TestSuite<CR>
+nmap <silent> <leader>tl :call FixTestFileMod() <bar> TestLast<CR>
+nmap <silent> <leader>tt :call FixTestFileMod() <bar> TestLast<CR>
+nmap <silent> <leader>tv :call FixTestFileMod() <bar> TestVisit<CR>
+function! FixTestFileMod() abort
+  if &ft == 'elixir'
+    let g:test#filename_modifier = ':p'
+  elseif (!empty(get(g:, 'test#filename_modifier')))
+    unlet g:test#filename_modifier
+  endif
+endfunction
+" regex helpers
 cnoremap \\* \(.*\)
 cnoremap \\- \(.\{-}\)
 " prevent pasting in visual from yank seletion

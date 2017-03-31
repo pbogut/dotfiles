@@ -3,7 +3,7 @@ set folder = "`echo $HOME`/Maildir"
 set mailcap_path=~/.mutt/mailcap
 set sendmail = "msmtp.sh `get-config.sh email-default-account`"
 set postponed = ~/.mutt/postponed
-mailboxes = `ls -1d --color=never ~/Maildir/*/* | grep 'INBOX\|sent\|drafts\|archive\|trash' | sed 's#.*Maildir/#+#' | while read line; do echo -n " $line"; done`
+mailboxes = `echo $MAIL` `ls -1d --color=never ~/Maildir/*/* | grep 'INBOX\|sent\|drafts\|archive\|trash' | sed 's#.*Maildir/#+#' | while read line; do echo -n " $line"; done`
 
 set query_command="abook --mutt-query '%s'"
 macro index,pager \cv "<pipe-message>urlview<return>" "url view"
@@ -47,7 +47,7 @@ set sidebar_width = 30
 bind index,pager \CP sidebar-prev
 bind index,pager \CN sidebar-next
 bind index,pager \CO sidebar-open
-# bind index,pager \CV sidebar-toggle-virtual
+bind index,pager \CV sidebar-toggle-virtual
 # scroll half page
 bind pager <space> half-down
 bind pager - half-up

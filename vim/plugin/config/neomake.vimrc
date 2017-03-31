@@ -7,7 +7,7 @@ augroup pb_alegroup
 augroup END
 
 function! s:ale_init_php()
-<<<<<<< HEAD
+  if !empty(get(b:, 'ale_php_phpmd_ruleset'))
     let g:ale_php_phpmd_ruleset = b:ale_php_phpmd_ruleset
     return
   endif

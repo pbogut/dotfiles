@@ -61,6 +61,8 @@
     gn = goodness
     gnc = goodness --cached
 
+    wtf = what-the-hell-just-happened
+
     # Fancy logging.
     #   h = head
     #   hp = head with patch

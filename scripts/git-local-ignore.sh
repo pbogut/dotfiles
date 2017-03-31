@@ -13,5 +13,5 @@ if [[ ! -d $git_dir ]]; then
     exit
 fi
 
-echo "/tags" >> "$git_dir/info/exclude"
+echo "tags" >> "$git_dir/info/exclude"
 echo "/.padawan" >> "$git_dir/info/exclude"
