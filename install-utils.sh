@@ -41,6 +41,7 @@ pacaur -S \
     compton \
     dmenu \
     go \
+    gtk3-print-backends \
     i3wm i3lock i3blocks \
     imagemagick \
     inotify-tools \
