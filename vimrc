@@ -191,7 +191,7 @@ if exists(':Plug')
   Plug 'majutsushi/tagbar'
   Plug 'sirver/ultisnips'
   Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
-  Plug 'benekastah/neomake'
+  " Plug 'benekastah/neomake'
   Plug 'Chiel92/vim-autoformat'
   Plug 'alvan/vim-closetag'
   Plug 'k-takata/matchit.vim'
@@ -244,13 +244,14 @@ silent! call plug#end()      " requiredc
 filetype plugin indent on    " required
 "
 source ~/.vim/plugin/config/airline.vimrc
+source ~/.vim/plugin/config/ale.vimrc
 source ~/.vim/plugin/config/autoformat.vimrc
 source ~/.vim/plugin/config/autopairs.vimrc
 source ~/.vim/plugin/config/composer.vimrc
 source ~/.vim/plugin/config/deoplete.vimrc
 source ~/.vim/plugin/config/fzf.vimrc
 source ~/.vim/plugin/config/gutentags.vimrc
-source ~/.vim/plugin/config/neomake.vimrc
+" source ~/.vim/plugin/config/neomake.vimrc
 source ~/.vim/plugin/config/phpgetset.vimrc
 source ~/.vim/plugin/config/projectionist.vimrc
 source ~/.vim/plugin/config/switch.vimrc
@@ -689,14 +690,3 @@ function! NarrowCodeBlock(...) abort
 endfunction
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
-
-let g:ale_lint_on_save = 1
-
-let g:ale_sign_error = '✖'
-let g:ale_sign_warning = '⚠'
-let g:ale_sign_column_always = 1
-
-let g:ale_javascript_eslint_options = "--rule 'semi: [1, always]'"
-let g:ale_echo_msg_error_str = 'E'
-let g:ale_echo_msg_warning_str = 'W'
-let g:ale_echo_msg_format = '[%severity%][%linter%] %s'
