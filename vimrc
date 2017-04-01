@@ -639,7 +639,7 @@ function! s:set_title_string()
   if file == ""
     let file = substitute(getcwd(),$HOME,'~', 'g')
   endif
-  if empty($SSH_CLIENT) and empty($SSH_TTY)
+  if empty($SSH_CLIENT) && empty($SSH_TTY)
     let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, '/tmp/nvim\(.*\)\/0$', '\1', 'g') . ":" . l:file
   else
     let &titlestring = $USER . '@' . hostname() . ":nvim:" . l:file
