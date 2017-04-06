@@ -33,3 +33,68 @@ function! s:ale_init_php()
   endif
   let g:ale_php_phpmd_ruleset = b:ale_php_phpmd_ruleset
 endfunction
+
+let g:ale_linters =
+      \{
+      \ 'elixir': ['filtered_credo']
+      \}
+
+function! s:ale_filtered_credo(buffer, lines) abort
+  " Matches patterns line the following:
+  "
+  " lib/filename.ex:19:7: F: Pipe chain should start with a raw value.
+  let l:pattern = '\v:(\d+):?(\d+)?: (.): (.+)$'
+  let l:output = []
+
+  for l:line in a:lines
+    let l:match = matchlist(l:line, l:pattern)
+
+    if len(l:match) == 0
+        continue
+    endif
+
+    let l:type = l:match[3]
+    let l:text = l:match[4]
+
+    if l:text == "Functions should have a @spec type specification."
+      continue
+    endif
+
+    if l:type ==# 'C'
+      let l:type = 'E'
+    elseif l:type ==# 'R'
+      let l:type = 'W'
+    endif
+
+    " vcol is Needed to indicate that the column is a character.
+    call add(l:output, {
+    \   'bufnr': a:buffer,
+    \   'lnum': l:match[1] + 0,
+    \   'col': l:match[2] + 0,
+    \   'type': l:type,
+    \   'text': l:text,
+    \})
+  endfor
+
+  return l:output
+endfunction
+
+" function s:ale_filtered_credo(buffer, lines) abort
+"   let l:messages = ale_linters#elixir#credo#Handle(a:buffer, a:lines)
+
+"   let l:output = []
+"   for l:message in l:messages
+"     if l:message.text == "Functions should have a @spec type specification."
+"       continue
+"     endif
+"     call add(l:output, l:message)
+"   endfor
+
+"   return l:output
+" endfunction
+
+call ale#linter#Define('elixir', {
+      \ 'name': 'filtered_credo',
+      \ 'executable': 'mix',
+      \ 'command': 'mix credo suggest --format=flycheck --read-from-stdin %s',
+      \ 'callback': function('s:ale_filtered_credo') })

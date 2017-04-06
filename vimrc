@@ -58,7 +58,10 @@ set background=dark
 if exists('&inccommand') | set inccommand=split | endif
 if has("patch-7.4.314") | set shortmess+=c | endif
 if executable('ag') | set grepprg=ag | endif
-if executable('rg') | set grepprg=rg | endif
+if executable('rg')
+  set grepprg=rg\ --vimgrep\ --no-heading
+  set grepformat=%f:%l:%c:%m,%f:%l:%m
+endif
 
 let mapleader = "\<space>" " life changer
 
@@ -107,7 +110,7 @@ augroup configgroup
   autocmd FileType markdown
         \  setlocal spell spelllang=en_gb
   autocmd FileType qf
-        \  nnoremap <buffer> o <enter>
+        \  nnoremap <buffer> o <cr>
         \| nnoremap <buffer> q :q
   autocmd FileType gitcommit
         \  execute("wincmd J")
@@ -165,6 +168,7 @@ if exists(':Plug')
   Plug 'jiangmiao/auto-pairs'
   Plug 'tpope/vim-scriptease'
   Plug 'tpope/vim-fugitive'
+  Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-git'
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-surround'
@@ -181,7 +185,6 @@ if exists(':Plug')
   Plug 'vim-airline/vim-airline-themes'
   Plug 'airblade/vim-gitgutter'
   Plug 'terryma/vim-expand-region'
-  " Plug 'terryma/vim-multiple-cursors'
   Plug 'MarcWeber/vim-addon-mw-utils'
   Plug 'ludovicchabant/vim-gutentags'
   Plug 'gioele/vim-autoswap'
@@ -217,6 +220,8 @@ if exists(':Plug')
   Plug 'chrisbra/NrrwRgn'
   Plug 'andyl/vim-textobj-elixir'
   Plug 'kana/vim-textobj-user'
+  Plug 'justinmk/vim-dirvish'
+  Plug 'pbogut/dbext.vim'
   if has('nvim')
     Plug 'w0rp/ale'
     Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -231,6 +236,9 @@ if exists(':Plug')
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
     Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
     Plug 'pbogut/deoplete-elm', { 'for': 'elm' }
+    " Plug 'roxma/nvim-completion-manager'
+    Plug 'autozimu/LanguageClient-neovim', { 'do': ':UpdateRemotePlugins' }
+    " Plug 'roxma/LanguageServer-php-neovim',  {'do': 'composer install && composer run-script parse-stubs'}
   endif " if Plug installed
   if (!has('nvim') || $STY != '')
     Plug 'altercation/vim-colors-solarized'
@@ -262,6 +270,11 @@ augroup after_load
   autocmd VimEnter *
         \  source ~/.vim/plugin/config/abolish.vimrc
         \| source ~/.vim/plugin/config/cmdalias.vimrc
+  autocmd FileType dirvish
+        \  nmap <buffer> <bs> <Plug>(dirvish_up)
+        \| nmap <buffer> H <Plug>(dirvish_up)
+        \| nnoremap <buffer> / /\ze[^\/]*[\/]\=$<Home>\c
+        \| nnoremap <buffer> ? ?\ze[^\/]*[\/]\=$<Home>\c
 augroup END
 
 silent! colorscheme solarized
@@ -346,14 +359,14 @@ nnoremap <leader>sv :source $MYVIMRC<CR>
 " open list / quickfix
 nnoremap <silent> <leader>l :call local#togglelist#locationlist()<cr>
 nnoremap <silent> <leader>q :call local#togglelist#quickfixlist()<cr>
-nnoremap <silent> <leader>oc :cw<cr>
 nnoremap <silent> <leader>ot :belowright 20split \| terminal<cr>
 nnoremap <silent> <leader>of :let g:pwd = expand('%:h') \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
 nnoremap <silent> <leader>op :let g:pwd = projectroot#guess() \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
-nnoremap <silent> <leader>oe :let g:netrw_file_name = expand('%:t') <bar> :exe('e ' . expand('%:h')) <bar> :call search('\V\^' . escape(g:netrw_file_name, '\') . '\(@\\|\n\\|\$\\|*\)')<cr>
 nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
 nnoremap <silent> <leader>ov :belowright 20split \| terminal vagrant ssh<cr>
-nnoremap <silent> <leader>r :VimFilerExplorer -find -force-hide<cr>
+
+nnoremap <silent> <leader>r :echo "Currently not mapped, try backspace instead"<cr>
+nnoremap <silent> <bs> :Dirvish %:p:h<cr>
 nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
 " fzf
 nnoremap <silent> <leader>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
@@ -498,10 +511,25 @@ for keys in ['w', 'iw', 'aw', 'e', 'W', 'iW', 'aW']
   " quick change and search for naxt, change can be repeaded by . N and n will
   " search for the same selection, gn gN will select same selection
   exe('nnoremap cg' . keys . ' y' . keys . ':exe("let @/=@+")<bar><esc>cgn')
-
-  " quick rip grep for motion
-  exe('nnoremap gr' . keys . ' "ay' . keys . ' :Rg <c-r>a<cr>')
 endfor
+
+nmap <silent> grr :Rg<cr>
+nmap <silent> grq :Rgg<cr>
+nmap <silent> gr :set opfunc=<sid>ripgrep_from_motion<CR>g@
+function! s:ripgrep_from_motion(type, ...)
+  let l:tmp = @a
+  if a:0  " Invoked from Visual mode, use '< and '> marks.
+    silent exe("normal! `<" . a:type . "`>\"ay")
+  elseif a:type == 'line'
+    silent exe "normal! '[V']\"ay"
+  elseif a:type == 'block'
+    silent exe "normal! `[\<C-V>`]\"ay"
+  else
+    silent exe "normal! `[v`]\"ay"
+  endif
+  exe("Rg " . @a)
+  let @a = l:tmp
+endfunction
 
 nmap <leader><cr> za
 vmap <leader><cr> zf
@@ -512,7 +540,7 @@ nnoremap <leader>sf :set filetype=
 nnoremap <leader>ss :set spell!<cr>
 nnoremap <leader>sp :set paste!<cr>
 
-nnoremap S :!xdotool key ctrl+z<cr>
+nnoremap S :suspend<cr>
 
 nnoremap <leader>S :call SpellCheckToggle()<cr>
 function! SpellCheckToggle()
@@ -586,11 +614,11 @@ let g:paranoic_backup_dir="~/.vim/backupfiles/"
 
 command! -bang W :call CreateFoldersAndWrite(<bang>0)
 function! CreateFoldersAndWrite(bang)
+  silent execute('!mkdir -p %:h')
   if (a:bang)
-    silent execute('!mkdir -p %:h')
-    execute(':w')
+    execute(':w!')
   else
-    echo('You need to use W!')
+    execute(':w')
   endif
 endfunction
 " disable double save (cousing file watchers issues)
@@ -690,3 +718,14 @@ function! NarrowCodeBlock(...) abort
 endfunction
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
+
+" nnoremap <silent> K :call LanguageClient_textDocument_hover()<CR>
+" nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
+" nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
+
+nnoremap <silent> K :call LanguageClient_textDocument_hover()<CR>
+nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
+nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
+
+" dirvish
+let g:dirvish_mode = ':sort r /[^\/]$/'

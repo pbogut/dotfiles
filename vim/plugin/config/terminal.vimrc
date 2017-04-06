@@ -15,3 +15,40 @@ let g:terminal_color_12 = '#839496'
 let g:terminal_color_13 = '#6c71c4'
 let g:terminal_color_14 = '#93a1a1'
 let g:terminal_color_15 = '#fdf6e3'
+
+" got gof goT goF
+if has("nvim")
+  nnoremap <silent> goF :te ranger<cr>
+  nnoremap <silent> got :te cd %:p:h && $SHELL<cr>
+  nnoremap <silent> goT :te<cr>
+
+  fun! s:ranger_open_ohoosen_file(...)
+    silent! exec("Bdelete!")
+    silent! exec("q")
+    silent! exec("e " . system("cat /tmp/ranger_nvim_choosefile 2> /dev/null"))
+    silent! exec("!rm /tmp/ranger_nvim_choosefile")
+  endfun
+  fun! s:ranger(path, file)
+    silent! tabnew
+    silent! exec("!rm /tmp/ranger_nvim_choosefile")
+    silent! call termopen("cd ". a:path . " && ranger --selectfile=" . a:file . " --choosefile=/tmp/ranger_nvim_choosefile", {
+          \ 'on_exit' : function('s:ranger_open_ohoosen_file')
+          \ })
+    startinsert
+  endfun
+  fun! s:close_term_window(...)
+    exec("Bdelete!")
+  endfun
+  fun! s:open_terminal(path)
+    enew
+    call termopen("cd ". a:path . " && " . $SHELL, {
+          \ 'on_exit' : function('s:close_term_window')
+          \ })
+    startinsert
+  endfun
+
+  nnoremap <silent> gof :call <sid>ranger(expand("%:p:h"), expand("%:t"))<cr>
+  nnoremap <silent> goF :call <sid>ranger(getcwd(), expand("%:t"))<cr>
+  nnoremap <silent> got :call <sid>open_terminal(expand("%:p:h"))<cr>
+  nnoremap <silent> goT :call <sid>open_terminal(getcwd())<cr>
+endif

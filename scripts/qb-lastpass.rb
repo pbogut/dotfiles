@@ -28,7 +28,14 @@ list.each_line do |line|
   rescue
   end
 end
-site_url = ENV['QUTE_URL'].gsub(/^.*?\/\/(.*?)\/.*/, '\1')
+
+# get only top part of domain
+site_parts = []
+ENV['QUTE_URL'].gsub(/^.*?\/\/(.*?)[\/:].*/, '\1').split('.').reverse.each do |p|
+  site_parts << p
+  break unless p.length < 5
+end
+site_url = site_parts.reverse.join('.')
 
 cmd = "(sleep 0.2s; xdotool keyup Ctrl; xdotool type '#{site_url}')" +
       " & rofi -dmenu -p 'acc:'"
