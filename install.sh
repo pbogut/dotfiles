@@ -14,6 +14,7 @@ olddir=~/dotfiles_`date +%s%N`    # old dotfiles backup directory
 read -d '' files <<"EOF"
     ackrc
     bin
+    ctags
     emacs
     gitconfig
     githelpers

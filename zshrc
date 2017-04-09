@@ -1,8 +1,11 @@
 # Lines configured by zsh-newuser-install
 HISTFILE=~/.histfile
-HISTSIZE=1000
-SAVEHIST=1000
-setopt appendhistory autocd extendedglob nomatch ignoreeof interactivecomments
+HISTSIZE=10000
+SAVEHIST=10000
+setopt appendhistory autocd extendedglob nomatch ignoreeof interactivecomments \
+       append_history extended_history hist_expire_dups_first hist_ignore_dups \
+       hist_ignore_space hist_verify inc_append_history share_history
+
 set -o shwordsplit
 unsetopt beep
 stty -ixon # disable c-s and c-q (terminal flow)

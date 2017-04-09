@@ -38,7 +38,7 @@ done
 # add senders to abook
 notmuch search --output=files tag:new | while read l; do cat "$l" | abook --add-email-quiet; done
 # remove duplicates
-~/.scripts/abook-remove-duplicates.sh
+# ~/.scripts/abook-remove-duplicates.sh
 
 # auto archivie couses issues with gmail - wrrrr....
 #notmuch tag +archive -- date:..`date --date='6 month ago' +%Y-%m-%d`
