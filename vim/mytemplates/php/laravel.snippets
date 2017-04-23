@@ -1,21 +1,50 @@
 priority -50
 
+snippet _t_laravel_class "Laravel Test" b
+<?php
+
+namespace ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[a-zA-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '\\')
+	snip.rv = snip.rv[0].upper() + snip.rv[1:]
+`};
+
+/**
+ * Class ${2:`!p snip.rv=snip.basename`}
+ *
+ * @author ${3:`!v g:snips_author`}
+ */
+class $2
+{
+	$0
+}
+endsnippet
+
+
 snippet _t_laravel_test "Laravel Test" b
 <?php
 
 namespace ${1:`!p
 relpath = os.path.relpath(path)
-m = re.search(r'[A-Z].+(?=/)', relpath)
+m = re.search(r'[a-zA-Z].+(?=/)', relpath)
 if m:
 	snip.rv = m.group().replace('/', '\\')
+	snip.rv = snip.rv[0].upper() + snip.rv[1:]
 `};
 
-use \TestCase
+use Tests\\TestCase;
 
-class ${2:`!v expand('%:t:r')`} extends TestCase
+/**
+ * Class ${2:`!p snip.rv=snip.basename`}
+ *
+ * @author ${3:`!v g:snips_author`}
+ */
+class $2 extends TestCase
 {
+	$0
 }
-$0
 endsnippet
 
 
@@ -32,14 +61,18 @@ if m:
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class ${2:`!v expand('%:t:r')`} extends Controller
+/**
+ * Class ${2:`!p snip.rv=snip.basename`}
+ *
+ * @author ${3:`!v g:snips_author`}
+ */
+class $2 extends Controller
 {
 	public function getIndex(Request $request)
 	{
 		$0
 	}
 }
-$0
 endsnippet
 
 
@@ -56,7 +89,12 @@ if m:
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class ${2:`!v expand('%:t:r')`} extends Controller
+/**
+ * Class ${2:`!p snip.rv=snip.basename`}
+ *
+ * @author ${3:`!v g:snips_author`}
+ */
+class $2 extends Controller
 {
 	public function getIndex(Request $request)
 	{$0
@@ -86,7 +124,6 @@ class ${2:`!v expand('%:t:r')`} extends Controller
 	{
 	}
 }
-$0
 endsnippet
 
 snippet _t_laravel_console_command "Laravel Artisan Command" b
@@ -101,21 +138,26 @@ if m:
 
 use Illuminate\Console\Command;
 
-class ${2:`!v expand('%:t:r')`} extends Command
+/**
+ * Class ${2:`!p snip.rv=snip.basename`}
+ *
+ * @author ${3:`!v g:snips_author`}
+ */
+class $2 extends Command
 {
 	/**
 	 * The name and signature of the console command.
 	 *
 	 * @var string
 	 */
-	protected $signature = '${3:`!v templates#tsfile('basename|snakecase', ['_', ':', 'g'])`}';
+	protected $signature = '${4:`!v templates#tsfile('basename|snakecase', ['_', ':', 'g'])`}';
 
 	/**
 	 * The console command description.
 	 *
 	 * @var string
 	 */
-	protected $description = '${4:`!v templates#tfile('basename|snakecase|blank')`}';
+	protected $description = '${5:`!v templates#tfile('basename|snakecase|blank')`}';
 
 	/**
 	 * Execute the console command.

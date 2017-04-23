@@ -2,6 +2,7 @@ syntax on
 set nocompatible              " be improved, required
 filetype off                  " required
 
+set noshowmode
 set runtimepath+=~/.vim
 set timeoutlen=1000 ttimeoutlen=0   " eliminate esc timeout
 set report=0
@@ -217,13 +218,15 @@ if exists(':Plug')
   Plug 'vim-scripts/cmdalias.vim'
   Plug 'Shougo/unite.vim'
   Plug 'Shougo/vimfiler.vim'
+  Plug 'Shougo/echodoc.vim'
   Plug 'chrisbra/NrrwRgn'
   Plug 'andyl/vim-textobj-elixir'
   Plug 'kana/vim-textobj-user'
   Plug 'justinmk/vim-dirvish'
   Plug 'pbogut/dbext.vim'
+  Plug 'w0rp/ale'
+  Plug 'Rican7/php-doc-modded', { 'for': 'php' }
   if has('nvim')
-    Plug 'w0rp/ale'
     Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
     Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -273,6 +276,11 @@ augroup after_load
   autocmd FileType dirvish
         \  nmap <buffer> <bs> <Plug>(dirvish_up)
         \| nmap <buffer> H <Plug>(dirvish_up)
+        \| nmap <buffer> dd :!rm <c-r><c-a>
+        \| nmap <buffer> cc :!cp <c-r><c-a> <c-r><c-a><left><left><left><left>
+        \| nmap <buffer> mm :!mv <c-r><c-a> <c-r><c-a><left><left><left><left>
+        \| nmap <buffer> K :!mkdir -p %
+        \| nmap <buffer> A :e %
         \| nnoremap <buffer> / /\ze[^\/]*[\/]\=$<Home>\c
         \| nnoremap <buffer> ? ?\ze[^\/]*[\/]\=$<Home>\c
 augroup END
@@ -384,7 +392,7 @@ nnoremap <silent> <leader>ga :Ag<cr>
 nnoremap <silent> <leader>gr :Rg<cr>
 vnoremap <silent> <leader>ga "ay :Ag <c-r>a<cr>
 vnoremap <silent> <leader>gr "ay :Rg <c-r>a<cr>
-nnoremap <silent> <leader>w :call WriteOrCr()<cr>
+nnoremap <silent> <leader>w :W!<cr>
 nnoremap <silent> <leader>W :call WriteOrCr(1)<cr>
 nnoremap <silent> <leader>a :Autoformat<cr>
 nnoremap <silent> <leader>z za
@@ -725,3 +733,4 @@ silent! exec(":source ~/.vim/" . hostname() . ".vim")
 
 " dirvish
 let g:dirvish_mode = ':sort r /[^\/]$/'
+let g:echodoc_enable_at_startup = 1

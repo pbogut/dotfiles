@@ -1,14 +1,18 @@
+# ================================================================ #
+# Pawel Bogut .gitconfig                                           #
+#                                                                  #
+# Based on Gary's Bernhard .gitconfig                              #
+# https://github.com/garybernhardt/dotfiles/blob/master/.gitconfig #
+# ================================================================ #
 [user]
-	name = Pawel Bogut
-	email = pbogut@smeagol.pl
+    name = Pawel Bogut
+    email = pawel.bogut@gmail.com
 [core]
-	autocrlf = input
+    autocrlf = input
 [push]
-	default = simple
+    default = simple
 [github]
-	user = pbogut
-# Gary Bernhard .gitconfig
-# https://github.com/garybernhardt/dotfiles/blob/master/.gitconfig
+    user = pbogut
 [diff]
 [color]
     ui = auto
@@ -26,6 +30,7 @@
     pushup = "!. ~/.githelpers && git_push_upstream"
     diffls = diff-tree --no-commit-id --name-only -r
     ls = "!. ~/.githelpers && git_ls"
+    fst = "!. ~/.githelpers && git_fzf_st"
 
     #Create branch
     cb = checkout -b

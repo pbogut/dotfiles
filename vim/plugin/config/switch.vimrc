@@ -15,6 +15,12 @@ let s:switch_c_like_if =
             \   'if (false && (\(.*\)))':         'if (\1)',
             \   'if (\%(true\|false\)\@!\(.*\))': 'if (true || (\1))',
             \ }
+let s:switch_c_like_while =
+            \ {
+            \   'while (true || (\(.*\)))':          'while (false && (\1))',
+            \   'while (false && (\(.*\)))':         'while (\1)',
+            \   'while (\%(true\|false\)\@!\(.*\))': 'while (true || (\1))',
+            \ }
 let s:switch_php_scope =
             \ {
             \   '\<private\>':   'protected',
@@ -50,6 +56,7 @@ augroup swich_vim
   autocmd FileType php let b:switch_custom_definitions =
             \ [
             \   s:switch_c_like_if,
+            \   s:switch_c_like_while,
             \   s:switch_php_array,
             \   s:switch_php_scope,
             \ ]

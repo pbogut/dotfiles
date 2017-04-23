@@ -7,6 +7,15 @@
 # Based on:
 # https://www.reddit.com/r/vim/comments/3f0zbg/psa_if_youre_using_ctrlp_use_this_maintained_fork/
 #=================================================
+
+# fzf config
+export FZF_DEFAULT_OPTS="--filepath-word --reverse
+--bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
+--bind=ctrl-w:backward-kill-word
+--height 40%
+--cycle
+"
+
 fe() {
     # fe - Open the selected files with the default editor
     local files=$(fzf --query="$1" --select-1 --exit-0 | sed -e "s/\(.*\)/\'\1\'/")

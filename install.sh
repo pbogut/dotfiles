@@ -10,12 +10,12 @@ dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # dotfiles directory
 echo -n "Updating submodules ..."
 git submodule update --init
 echo "done"
-olddir=~/dotfiles_`date +%s%N`    # old dotfiles backup directory
+olddir=~/.dotfiles_backup/`date +%s%N`    # old dotfiles backup directory
 read -d '' files <<"EOF"
     ackrc
     bin
     ctags
-    emacs
+    emacs.d/init.el
     gitconfig
     githelpers
     inputrc

@@ -38,6 +38,7 @@ echo "Installing neovim..."
 pacaur -S \
     abook \
     anamnesis \
+    cava \
     compton \
     dmenu \
     go \

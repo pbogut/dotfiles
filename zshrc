@@ -4,7 +4,8 @@ HISTSIZE=10000
 SAVEHIST=10000
 setopt appendhistory autocd extendedglob nomatch ignoreeof interactivecomments \
        append_history extended_history hist_expire_dups_first hist_ignore_dups \
-       hist_ignore_space hist_verify inc_append_history share_history
+       hist_ignore_all_dups hist_ignore_space hist_verify inc_append_history   \
+       share_history
 
 set -o shwordsplit
 unsetopt beep
@@ -214,8 +215,6 @@ fi
 # autocomplete in irb
 alias irb="irb -r 'irb/completion'"
 
-tmux() { if [[ $1 == "-ss"  ]]; then command tmuxss.sh "$2"; else command tmux "$@"; fi; }
-
 #local configs
 if [ -f ~/.profile ]; then
   source ~/.profile
@@ -226,14 +225,6 @@ fi
 if [ -f ~/.fzf.zsh ]; then
   source ~/.fzf.zsh
 fi
-
-# fzf config
-export FZF_DEFAULT_OPTS="--filepath-word --reverse
---bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
---bind=ctrl-w:backward-kill-word
---height 40%
---cycle
-"
 
 #git branch in prompt
 setopt prompt_subst
@@ -267,17 +258,9 @@ if [[ ! -z "$TMUX"  ]]; then
   export ZLE_RPROMPT_INDENT=0
 fi
 
-vim() {
-    vim_suspended=$(jobs | head -n 1 | grep 'vim')
-    if [[ $vim_suspended == "" ]]; then
-        $(which $EDITOR) "$@"
-    else
-        fg
-    fi
-}
-
 # default editor
 if type "nvim" > /dev/null; then
+  alias vim=nvim
   export EDITOR=nvim
 else
   export EDITOR=vim

@@ -1,0 +1,10 @@
+priority -50
+
+snippet tosql "Ecto query to sql"
+${0:query} |> (fn q -> Ecto.Adapters.SQL.to_sql(:all, Repo, q) end).() |> IO.inspect
+endsnippet
+
+snippet insp "Inspect"
+${0:variable} |> IO.inspect
+endsnippet
+

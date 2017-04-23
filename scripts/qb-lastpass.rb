@@ -31,14 +31,33 @@ end
 
 # get only top part of domain
 site_parts = []
-ENV['QUTE_URL'].gsub(/^.*?\/\/(.*?)[\/:].*/, '\1').split('.').reverse.each do |p|
+url = ENV['QUTE_URL'] || ''
+url.gsub(/^.*?\/\/(.*?)[\/:].*/, '\1').split('.').reverse.each do |p|
   site_parts << p
   break unless p.length < 5
 end
 site_url = site_parts.reverse.join('.')
 
+prompt = case action
+  when "--copy-user"
+    "cpuser"
+  when "--copy-pass"
+    "cppass"
+  when "--copy-user-and-pass"
+    "copy"
+  when "--type-user-and-pass"
+    "login"
+  when "--type-user"
+    "user"
+  when "--type-pass"
+    "pass"
+  else
+    "acc"
+end
+
+
 cmd = "(sleep 0.2s; xdotool keyup Ctrl; xdotool type '#{site_url}')" +
-      " & rofi -dmenu -p 'acc:'"
+      " & rofi -dmenu -p '#{prompt}:'"
 selection, _, _ = Open3.capture3(cmd, stdin_data: formated_list)
 
 index = selection.gsub(/(\d+).*/, '\1').to_i
@@ -55,7 +74,7 @@ sleep 0.2
 
 
 if action == '--copy-user'
-  _, _, _ = Open3.capture3('xsel -p -i', stdin_data: user)
+  _, _, _ = Open3.capture3('xsel -b -i', stdin_data: user)
 end
 if action == '--copy-pass'
   _, _, _ = Open3.capture3('xsel -p -i', stdin_data: pass)
@@ -76,7 +95,7 @@ if action == '--type-pass'
     # file.write("fake-key -g <esc>i\n")
   end
 end
-if action == '--type-user-and-pass' or action.blank?
+if action == '--type-user-and-pass' or action.empty?
   File.open(ENV['QUTE_FIFO'], 'w') do |file|
     file.write("fake-key #{user}\n")
     file.write("fake-key <tab>\n")
@@ -84,4 +103,3 @@ if action == '--type-user-and-pass' or action.blank?
     # file.write("fake-key -g <esc>i\n")
   end
 end
-

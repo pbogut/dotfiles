@@ -2,7 +2,7 @@ priority -50
 
 snippet _t_skel "Elixir Module Skeleton" b
 defmodule ${1:`!v
-templates#stfile('\(^lib/\|^web/\|^test/\)', 'camelcase|dot')`} do
+templates#stfile('\(^lib/\|^web/\|^test/\)', 'camelcase|capitalize|dot')`} do
 	def ${2:function_name()} do
 		$0
 	end
@@ -13,7 +13,7 @@ snippet _t_test "Elixir Test Skeleton" b
 defmodule ${1:`!v
 templates#stfile('\(^lib/\|^web/\|^test/\)', 'camelcase|dot')`} do
 	use ExUnit.Case
-	doctest ${2:`!v templates#stfile(['\(^lib/\|^web/\|^test/\)\(.*\)_test','\2'], 'camelcase|dot')`}
+	doctest ${2:`!v templates#stfile(['\(^lib/\|^web/\|^test/\)\(.*\)_test','\2'], 'camelcase|capitalize|dot')`}
 
 	alias $2
 

@@ -7,20 +7,29 @@ let s:composer =
       \   }
 let s:laravel =
       \   {
+      \     "*": {
+      \       "logwatch": "tail -n 500 -f storage/logs/*.log"
+      \     },
       \     "*.php": {
       \       "console": "php artisan tinker"
       \     },
       \     "app/*.php": {
-      \       "alternate": "tests/{}Test.php"
-      \     },
-      \     "lib/*.php": {
-      \       "alternate": "tests/{}Test.php"
+      \       "alternate": [
+      \         "tests/Unit/{}Test.php",
+      \         "tests/Feature/{}Test.php"
+      \       ],
+      \       "skeleton": "laravel_class"
       \     },
       \     "app/Http/Controllers/*Controller.php": {
       \       "skeleton": "laravel_controller",
       \     },
-      \     "tests/*Test.php": {
-      \       "alternate": ["app/{}.php", "lib/{}.php"],
+      \     "tests/Unit/*Test.php": {
+      \       "alternate": "app/{}.php",
+      \       "skeleton": "laravel_test",
+      \       "type": "test"
+      \     },
+      \     "tests/Feature/*Test.php": {
+      \       "alternate": "app/{}.php",
       \       "skeleton": "laravel_test",
       \       "type": "test"
       \     },
