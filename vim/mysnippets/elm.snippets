@@ -1,0 +1,50 @@
+priority -50
+
+snippet mod "mod"
+module ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z][a-zA-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '.') + "." + snip.basename
+`} exposing (${2:..})$0
+endsnippet
+
+snippet im "import"
+import ${1:Module}$0
+endsnippet
+
+snippet ima "import as"
+import ${1:Module} as ${2:Alias}$0
+endsnippet
+
+snippet ime "import exposing"
+import ${1:Module} exposing (${2:..})$0
+endsnippet
+
+snippet imae "import as exposing"
+import ${1:Module} as ${2:Alias} exposing (${3:..})$0
+endsnippet
+
+snippet case "case"
+case ${1:variable} of
+	${2:condition} ->
+		${3:result}$0
+endsnippet
+
+snippet ! "model ! []"
+${1:model} ! [$2]$0
+endsnippet
+
+snippet set "setter"
+{ ${1:model} | ${2:property} = ${3:value} }$0
+endsnippet
+
+snippet let "let in"
+let
+	$1
+in$0
+endsnippet
+
+snippet t "tag"
+${1:Html.${2:div}} [$3] [$4]$0
+endsnippet

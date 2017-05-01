@@ -2,7 +2,7 @@
 # Author: pbogut
 
 while :; do
-    khal agenda | grep -v 'Today:' | sed '/[A-Z][a-z]*:/,$d' | (while read l; do
+    khal list | grep -v 'Today ' | sed '/[A-Z][a-z]*:/,$d' | (while read l; do
         endtime=$(echo $l | sed 's/[^-]*-\([0-9]*\):\([0-9]*\).*/\1\2/')
         curtime=$(date '+%H%M')
         # display event only if not fineshed yet

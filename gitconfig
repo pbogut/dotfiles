@@ -61,6 +61,7 @@
 
     # Divergence (commits we added and commits remote added)
     div = divergence.sh
+    fdiv = !git fetch && git divergence.sh
 
     # Goodness (summary of diff lines added/removed/total)
     gn = goodness

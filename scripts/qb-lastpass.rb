@@ -20,7 +20,7 @@ list.each_line do |line|
     line = CSV.parse(line)[0]
     url = line[0]
     user = line[1]
-    pass= line[2]
+    # pass= line[2]
     name = line[4]
     cat = line[5]
     cat = "#{cat}/" if cat
@@ -37,6 +37,11 @@ url.gsub(/^.*?\/\/(.*?)[\/:].*/, '\1').split('.').reverse.each do |p|
   break unless p.length < 5
 end
 site_url = site_parts.reverse.join('.')
+
+if action == "--add"
+  _, _, _ = Open3.capture3('urxvt -e lpass add ' + (site_url.empty? ? 'new-site' : site_url))
+  exit
+end
 
 prompt = case action
   when "--copy-user"

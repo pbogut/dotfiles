@@ -5,8 +5,15 @@ let g:deoplete#enable_debug=1
 let g:deoplete#sources#padawan#add_parentheses = 1
 let g:deoplete#sources#padawan#auto_update = 1
 let g:deoplete#skip_chars = ['$']
+" let g:deoplete#skip_chars = ['$']
 " let g:deoplete#sources = {}
 " let g:deoplete#sources._ = ['buffer']
 " let g:deoplete#sources.php = ['buffer', 'tag', 'member', 'file']
 " let g:deoplete#ignore_sources = {}
 " let g:deoplete#ignore_sources.php = ['omni']
+command! PadawanStart call deoplete#sources#padawan#StartServer()
+command! PadawanStop call deoplete#sources#padawan#StopServer()
+command! PadawanRestart call deoplete#sources#padawan#RestartServer()
+command! PadawanInstall call deoplete#sources#padawan#InstallServer()
+command! PadawanUpdate call deoplete#sources#padawan#UpdatePadawan()
+command! -bang PadawanGenerate call deoplete#sources#padawan#Generate(<bang>0)

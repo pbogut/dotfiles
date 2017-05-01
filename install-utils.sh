@@ -11,20 +11,20 @@ install_pacaur() {
 
     # If you didn't install the "base-devil" group,
     # we'll need those.
-    sudo pacman -S binutils make gcc fakeroot --noconfirm
+    sudo pacman -S binutils make gcc fakeroot --noconfirm --needed
 
     # Install pacaur dependencies from arch repos
-    sudo pacman -S expac yajl git --noconfirm
+    sudo pacman -S expac yajl git --noconfirm -needed
 
     # Install "cower" from AUR
     curl -o PKGBUILD https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=cower
     makepkg PKGBUILD --skippgpcheck
-    sudo pacman -U cower*.tar.xz --noconfirm
+    sudo pacman -U cower*.tar.xz --noconfirm -needed
 
     # Install "pacaur" from AUR
     curl -o PKGBUILD https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=pacaur
     makepkg PKGBUILD
-    sudo pacman -U pacaur*.tar.xz --noconfirm
+    sudo pacman -U pacaur*.tar.xz --noconfirm -needed
 
     # Clean up...
     cd ~
@@ -72,7 +72,7 @@ pacaur -S \
     xcape \
     xrandr \
     xtitle \
-    --noconfirm
+    --noconfirm -needed
 
 pip install \
     i3-py \
@@ -99,3 +99,14 @@ yarn global add \
     html-beautify \
     jshint \
     -y
+
+git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.3.0
+source ~/.asdf/asdf.sh
+source ~/.asdf/completions/asdf.bash
+asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
+asdf plugin-add php https://github.com/odarriba/asdf-php.git
+asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+
+# Imports Node.js release team's OpenPGP keys to main keyring
+bash ~/.asdf/plugins/nodejs/bin/import-release-team-keyring
+

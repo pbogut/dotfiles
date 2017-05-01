@@ -35,7 +35,7 @@ def formatPropertyAssign(argument):
 	return "$this->{0} = {1};".format(property.replace('$', ''), property)
 endglobal
 
-snippet doc "Add class documentation" "re.match('.*\\bclass\\b.*', snip.buffer[snip.line+1])" e
+snippet doc "Add class documentation" "re.match('.*\\bclass\\b.*', snip.buffer[snip.line+1]) if len(snip.buffer) > snip.line+1 else False" e
 /**
  * ${1:`!p
 if snip.c == "":
@@ -48,7 +48,7 @@ if snip.c == "":
  */$0
 endsnippet
 
-snippet doc "Add function documentation" "re.match('.*\\bfunction\\b.*', snip.buffer[snip.line+1])" e
+snippet doc "Add function documentation" "re.match('.*\\bfunction\\b.*', snip.buffer[snip.line+1]) if len(snip.buffer) > snip.line+1 else False" e
 /**
  * ${1:Documentation}`!p
 if snip.c == "":
@@ -77,8 +77,10 @@ if len(arguments):
 			snip += prop
 `}`!p
 if len(t[3].strip()):
-  snip += ''
-  snip += ''
+	snip << 1
+	snip += ''
+	snip >> 1
+	snip += ''
 `/**
  * Constructor
 `!p

@@ -3,6 +3,8 @@ let g:fzf_layout = { 'down': '~35%' }
 let g:fzf_command_prefix = "FZF"
 " let g:fzf_mru_relative = 1
 let g:fzf_mru_max = 50
+let g:fzf_mru_per_session = 1
+
 let g:fzf_action = {
       \ 'ctrl-t': 'tab split',
       \ 'ctrl-x': 'rightbelow split',

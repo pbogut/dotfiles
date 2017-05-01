@@ -42,7 +42,7 @@ set nowritebackup
 set nobackup " well, thats the only way to prevent guard from running tests twice ;/
 " toggle invisible characters
 set invlist
-set listchars=tab:▸\ ,eol:¬,trail:⋅,extends:❯,precedes:❮
+set listchars=tab:▸\ ,eol:¬,trail:⋅,extends:❯,precedes:❮,nbsp:%
 set showbreak=↪
 set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
@@ -67,6 +67,7 @@ endif
 let mapleader = "\<space>" " life changer
 
 let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
+set guicursor=n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor
 
 if has('nvim')
   augroup configgroup_nvim
@@ -79,6 +80,9 @@ if has('nvim')
 endif
 augroup configgroup
   autocmd!
+  autocmd FileType *
+        \  call matchadd('Todo', '@todo\>')
+        \| call matchadd('Todo', '@fixme\>')
   autocmd FileType html
         \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType elixir
@@ -124,7 +128,7 @@ augroup configgroup
   autocmd BufEnter lpass.*
         \  if search('^Password: $')
         \|   execute('r !apg -m16 -n1')
-        \|   normal kJkk
+        \|   execute('normal kJkk')
         \| endif
   " autocmd BufEnter * normal! zR
   " check shada to share vim info between instances
@@ -260,6 +264,7 @@ source ~/.vim/plugin/config/autoformat.vimrc
 source ~/.vim/plugin/config/autopairs.vimrc
 source ~/.vim/plugin/config/composer.vimrc
 source ~/.vim/plugin/config/deoplete.vimrc
+source ~/.vim/plugin/config/dirvish.vimrc
 source ~/.vim/plugin/config/fzf.vimrc
 source ~/.vim/plugin/config/gutentags.vimrc
 " source ~/.vim/plugin/config/neomake.vimrc
@@ -273,16 +278,6 @@ augroup after_load
   autocmd VimEnter *
         \  source ~/.vim/plugin/config/abolish.vimrc
         \| source ~/.vim/plugin/config/cmdalias.vimrc
-  autocmd FileType dirvish
-        \  nmap <buffer> <bs> <Plug>(dirvish_up)
-        \| nmap <buffer> H <Plug>(dirvish_up)
-        \| nmap <buffer> dd :!rm <c-r><c-a>
-        \| nmap <buffer> cc :!cp <c-r><c-a> <c-r><c-a><left><left><left><left>
-        \| nmap <buffer> mm :!mv <c-r><c-a> <c-r><c-a><left><left><left><left>
-        \| nmap <buffer> K :!mkdir -p %
-        \| nmap <buffer> A :e %
-        \| nnoremap <buffer> / /\ze[^\/]*[\/]\=$<Home>\c
-        \| nnoremap <buffer> ? ?\ze[^\/]*[\/]\=$<Home>\c
 augroup END
 
 silent! colorscheme solarized
@@ -397,6 +392,15 @@ nnoremap <silent> <leader>W :call WriteOrCr(1)<cr>
 nnoremap <silent> <leader>a :Autoformat<cr>
 nnoremap <silent> <leader>z za
 nnoremap <silent> <leader><leader>z zA
+" selection mode (for easy snippets parts move)
+" removes selection as block
+smap <c-d> <esc>`<V`>x
+smap <c-c> <esc>`<V`>c
+" removes selection as it is
+smap <c-x> <esc>gvd
+smap <c-s> <esc>gvc
+" append to selection
+smap <c-a> <esc>a
 " nnoremap <silent> <leader>z :call PHP__Fold()<cr>
 " vim is getting ^_ when pressing ^/, so I've mapped both
 nmap <C-_> gcc<down>^
@@ -734,3 +738,4 @@ silent! exec(":source ~/.vim/" . hostname() . ".vim")
 " dirvish
 let g:dirvish_mode = ':sort r /[^\/]$/'
 let g:echodoc_enable_at_startup = 1
+hi SpecialKey guibg=none
