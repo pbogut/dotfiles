@@ -490,24 +490,6 @@ imap <C-@> <C-Space>
 
 " nvim now can map alt without terminal issues, new cool shortcuts commin
 if has('nvim')
-  noremap <silent> <M-r> :call local#i3focus#switch('down', 'j')<cr>
-  noremap <silent> <M-w> :call local#i3focus#switch('up', 'k')<cr>
-  noremap <silent> <M-t> :call local#i3focus#switch('right', 'l')<cr>
-  noremap <silent> <M-a> :call local#i3focus#switch('left', 'h')<cr>
-  inoremap <silent> <M-r> <end>:call local#i3focus#switch('down', 'j')<cr>
-  inoremap <silent> <M-w> <esc>:call local#i3focus#switch('up', 'k')<cr>
-  inoremap <silent> <M-t> <esc>:call local#i3focus#switch('right', 'l')<cr>
-  inoremap <silent> <M-a> <esc>:call local#i3focus#switch('left', 'h')<cr>
-  cnoremap <silent> <M-r> <end><c-u>:call local#i3focus#switch('down', 'j')<cr>
-  cnoremap <silent> <M-w> <end><c-u>:call local#i3focus#switch('up', 'k')<cr>
-  cnoremap <silent> <M-t> <end><c-u>:call local#i3focus#switch('right', 'l')<cr>
-  cnoremap <silent> <M-a> <end><c-u>:call local#i3focus#switch('left', 'h')<cr>
-  " escape terminal and move switch focus
-  tnoremap <silent> <M-r> <C-\><C-n> :call local#i3focus#switch('down', 'j')<cr>
-  tnoremap <silent> <M-w> <C-\><C-n>:call local#i3focus#switch('up', 'k')<cr>
-  tnoremap <silent> <M-t> <C-\><C-n> :call local#i3focus#switch('right', 'l')<cr>
-  tnoremap <silent> <M-a> <C-\><C-n> :call local#i3focus#switch('left', 'h')<cr>
-
   tnoremap <silent> <c-q> <C-\><C-n>
 
   noremap <silent> <M-l> :vertical resize +1<cr>

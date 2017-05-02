@@ -3,6 +3,7 @@ import re
 import i3
 import subprocess
 import argparse
+from pathlib import Path
 
 
 def validate_direction(parser, val):
@@ -95,6 +96,12 @@ if __name__ == '__main__':
         'up': 'm-w',
         'right': 'm-t'
     }
+    vim_i3 = {
+        'left': 'h',
+        'down': 'j',
+        'up': 'k',
+        'right': 'l'
+    }
 
     current = i3.filter(nodes=[], focused=True)[0]
     name = current['name']
@@ -121,10 +128,16 @@ if __name__ == '__main__':
     else:
         if bool(re.match(r'.*:nvim:..*:', name)) and not args.skip_vim:
             vim_id = "/tmp/nvim" + \
-                    re.search(r".*:nvim:(.*?):.*", name).group(1) + "/0"
-            subprocess.Popen("nvr --servername " + vim_id +
-                             " --remote-send '<" + vim_dir[direction] +
-                             ">'", shell=True)
+                re.search(r".*:nvim:(.*?):.*", name).group(1) + "/0"
+            if Path(vim_id).exists():
+                subprocess.Popen("nvr --servername " + vim_id +
+                                 " -c ':call local#i3focus#switch(\"" +
+                                 direction + "\", \"" + vim_i3[direction] +
+                                 "\")'", shell=True)
+            else:
+                i3.focus(direction)
+                subprocess.Popen("~/.scripts/i3-current-window.sh", shell=True)
+
         else:
             i3.focus(direction)
             subprocess.Popen("~/.scripts/i3-current-window.sh", shell=True)

@@ -9,6 +9,7 @@ augroup pb_dirvish
         \| nmap <buffer> dd :DirvishDelete<cr>
         \| nmap <buffer> K :DirvishMkdir<cr>
         \| nmap <buffer> A :DirvishFile<cr>
+        \| nmap <buffer> a :DirvishFile<cr>
         \| nnoremap <buffer> / /\ze[^\/]*[\/]\=$<Home>\c
         \| nnoremap <buffer> ? ?\ze[^\/]*[\/]\=$<Home>\c
 augroup END

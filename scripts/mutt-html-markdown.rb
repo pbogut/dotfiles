@@ -52,7 +52,7 @@ result = <<HTML
 p, li, div { font-size:11.0pt; font-family:"Calibri","sans-serif"; }
 code { font-family: 'Andale Mono', 'Lucida Console', 'Bitstream Vera Sans Mono', 'Courier New', monospace; }
 pre { border-left: 20px solid #ddd; margin-left: 10px; padding-left: 5px; }
-pre.quoted { border-left: 5px solid #ddd; margin-left: 0; }
+pre.quoted { white-space: normal; border-left: 5px solid #ddd; margin-left: 0; }
 </style>
 </head>
 <body>

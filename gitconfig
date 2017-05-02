@@ -28,13 +28,13 @@
     nau = "update-index --no-assume-unchanged" #  no assume unchanged
     sau = "!git ls-files -v | grep '^[a-z]' | cut -f2 -d' '" # show assumed unchanged
     pushup = "!. ~/.githelpers && git_push_upstream"
+    push-with-tags = "!git push && git push --tags"
     diffls = diff-tree --no-commit-id --name-only -r
     ls = "!. ~/.githelpers && git_ls"
     fst = "!. ~/.githelpers && git_fzf_st"
 
     #Create branch
     cb = checkout -b
-    #Gary's aliases
     st = status
     ci = commit --verbose
     co = checkout
