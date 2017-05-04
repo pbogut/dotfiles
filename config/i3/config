@@ -194,7 +194,7 @@ bindsym $mod+r mode "$mode_resize"
 
 # screen lock with delay after, so suspend / hibernate with locked screen
 set $Locker ~/.scripts/i3-lock.sh -i ~/Pictures/lockscreen.png && sleep 1
-set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown, (Esc) cancel
+set $mode_system System (l) lock, (w) switch, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown, (Esc) cancel
 mode "$mode_system" {
 
     # lock screen, then go back to default mode
@@ -202,6 +202,7 @@ mode "$mode_system" {
     bindsym e exec --no-startup-id i3-msg exit, mode "default"
     bindsym s exec --no-startup-id $Locker && sudo pm-suspend, mode "default"
     bindsym h exec --no-startup-id $Locker && sudo pm-hibernate, mode "default"
+    bindsym w exec --no-startup-id dm-tool switch-to-greeter, mode "default"
     bindsym r exec --no-startup-id systemctl reboot, mode "default"
     bindsym Shift+s exec --no-startup-id systemctl poweroff -i, mode "default"
 
@@ -226,10 +227,11 @@ bar {
 }
 
 # client.focused          #4c7899 #285577 #ffffff #2e9ef4   #452877
-new_window pixel 1
+# new_window pixel 1
+new_window normal 1
 
-# thicker border in some applications
-for_window [class="^qutebrowser$"] border pixel 2
+# tabbed by default
+workspace_layout tabbed
 
 # assign apps to specific workspaces
 assign [title="^DBeaver" class="^SWT$"] $wsdb
@@ -269,7 +271,7 @@ bindsym $mod+i $sh '~/.scripts/vim-anywhere.sh'
 # move workspace to another monitor
 bindsym $mod+m move workspace to output left
 # swap workspaces between two monitors
-bindsym $mod+Shift+M $sh "~/.scripts/i3-swap-workspaces.py"
+# bindsym $mod+Shift+M $sh "~/.scripts/i3-swap-workspaces.py"
 # anamnesis clip board
 bindsym $mod+apostrophe $sh "~/.scripts/i3-dmenu-anamnesis.sh"
 # browser shortcut

@@ -15,8 +15,9 @@ bind editor \cT complete
 bind index,pager r group-reply
 
 # some vim bindings
-bind index gg first-entry
-bind index G last-entry
+bind generic,browser,attach,index N search-opposite
+bind generic,browser,attach,index gg first-entry
+bind generic,browser,attach,index G last-entry
 bind pager gg top
 bind pager G bottom
 

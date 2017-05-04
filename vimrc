@@ -243,6 +243,7 @@ if exists(':Plug')
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
     Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
     Plug 'pbogut/deoplete-elm', { 'for': 'elm' }
+    Plug 'carlitux/deoplete-ternjs', { 'for': ['javascript', 'javascript.jsx'], 'do': 'yarn global add tern' }
     " Plug 'roxma/nvim-completion-manager'
     Plug 'autozimu/LanguageClient-neovim', { 'do': ':UpdateRemotePlugins' }
     " Plug 'roxma/LanguageServer-php-neovim',  {'do': 'composer install && composer run-script parse-stubs'}
@@ -487,6 +488,8 @@ omap <silent> ia <plug>SidewaysArgumentTextobjI
 xmap <silent> ia <plug>SidewaysArgumentTextobjI
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
+" emmet
+imap <c-e> <c-y>,
 
 " nvim now can map alt without terminal issues, new cool shortcuts commin
 if has('nvim')
@@ -502,9 +505,11 @@ if has('nvim')
 endif
 
 for keys in ['w', 'iw', 'aw', 'e', 'W', 'iW', 'aW']
+  if keys == 'w' | let motion = 'e' | else | let motion = keys | endif
   " quick change and search for naxt, change can be repeaded by . N and n will
   " search for the same selection, gn gN will select same selection
-  exe('nnoremap cg' . keys . ' y' . keys . ':exe("let @/=@+")<bar><esc>cgn')
+  exe('nnoremap cg' . keys . ' y' . motion . ':exe("let @/=@+")<bar><esc>cgn')
+  exe('nnoremap <leader>s' . keys . ' y' . motion . ':s/<c-r>+//g<left><left>')
 endfor
 
 nmap <silent> grr :Rg<cr>

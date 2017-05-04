@@ -43,6 +43,7 @@ read -d '' files <<"EOF"
     config/i3/workspaces
     config/ncmpcpp/config
     config/nvim/init.vim
+    config/nvim/ginit.vim
     config/pip/pip.conf
     config/qutebrowser/keys.conf
     config/qutebrowser/qutebrowser.conf

@@ -129,6 +129,12 @@ ${1:public} function ${2:name}(${3})
 }
 endsnippet
 
+snippet bn "base name"
+${1:`!p
+snip.rv = snip.basename
+`}
+endsnippet
+
 snippet ans "namespace declaration" b
 namespace ${1:`!p
 relpath = os.path.relpath(path)
