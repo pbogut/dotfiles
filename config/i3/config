@@ -194,7 +194,7 @@ bindsym $mod+r mode "$mode_resize"
 
 # screen lock with delay after, so suspend / hibernate with locked screen
 set $Locker ~/.scripts/i3-lock.sh -i ~/Pictures/lockscreen.png && sleep 1
-set $mode_system System (l) lock, (w) switch, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown, (Esc) cancel
+set $mode_system System (l) lock, (w) switch, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (p) suspend w/o lock, (Shift+s) shutdown, (Esc) cancel
 mode "$mode_system" {
 
     # lock screen, then go back to default mode
@@ -203,6 +203,7 @@ mode "$mode_system" {
     bindsym s exec --no-startup-id $Locker && sudo pm-suspend, mode "default"
     bindsym h exec --no-startup-id $Locker && sudo pm-hibernate, mode "default"
     bindsym w exec --no-startup-id dm-tool switch-to-greeter, mode "default"
+    bindsym p exec --no-startup-id sudo pm-suspend, mode "default"
     bindsym r exec --no-startup-id systemctl reboot, mode "default"
     bindsym Shift+s exec --no-startup-id systemctl poweroff -i, mode "default"
 
