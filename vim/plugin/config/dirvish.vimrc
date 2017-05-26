@@ -5,7 +5,7 @@ augroup pb_dirvish
         \| nmap <buffer> H <Plug>(dirvish_up)
         \| nmap <buffer> cc :DirvishCopy<cr>
         \| nmap <buffer> rr :DirvishRename<cr>
-        \| nmap <buffer> mm :DirvishRename<cr>
+        \| nmap <buffer> mm :DirvishMove<cr>
         \| nmap <buffer> dd :DirvishDelete<cr>
         \| nmap <buffer> K :DirvishMkdir<cr>
         \| nmap <buffer> A :DirvishFile<cr>
@@ -16,8 +16,10 @@ augroup END
 
 function! s:copy()
   let from = getline('.')
+  let extension = substitute(l:from, '.*/[^\.]*\(.\{-}\)$', '\1', '')
+  let move_cursor = substitute(l:extension, '.', "\<left>", 'g')
   call inputsave()
-  let to = input('!cp -r ' . l:from . ' -> ', l:from, 'file')
+  let to = input('!cp -r ' . l:from . ' -> ', l:from . l:move_cursor, 'file')
   call inputrestore()
   redraw!
   if !empty(l:to)
@@ -28,15 +30,33 @@ function! s:copy()
   endif
 endfunction
 
-function! s:rename()
+function! s:move()
   let from = getline('.')
+  let extension = substitute(l:from, '.*/\(.\{-}\)$', '\1', '')
+  let move_cursor = substitute(l:extension, '.', "\<left>", 'g')
   call inputsave()
-  let to = input('!mv ' . l:from . ' -> ', l:from, 'file')
+  let to = input('!mv ' . l:from . ' -> ', l:from . l:move_cursor, 'file')
   call inputrestore()
   redraw!
   if !empty(l:to)
     silent exec ('!mv ' . l:from . ' ' . l:to)
     call setline('.', l:to)
+  endif
+endfunction
+
+function! s:rename()
+  let from = getline('.')
+  let dir_name = substitute(l:from, '\(.*/\).\{-}$', '\1', '')
+  let file_name = substitute(l:from, '.*/\(.\{-}\)$', '\1', '')
+  let extension = substitute(l:from, '.*/[^\.]*\(.\{-}\)$', '\1', '')
+  let move_cursor = substitute(l:extension, '.', "\<left>", 'g')
+  call inputsave()
+  let to = input('!mv ' . l:from . ' -> '. l:dir_name, l:file_name . l:move_cursor, 'file')
+  call inputrestore()
+  redraw!
+  if !empty(l:to)
+    silent exec ('!mv ' . l:from . ' ' . l:dir_name . l:to)
+    call setline('.', l:dir_name . l:to)
   endif
 endfunction
 
@@ -79,5 +99,6 @@ endfunction
 command! DirvishMkdir call s:mkdir()
 command! DirvishCopy call s:copy()
 command! DirvishRename call s:rename()
+command! DirvishMove call s:move()
 command! DirvishDelete call s:delete()
 command! DirvishFile call s:file()

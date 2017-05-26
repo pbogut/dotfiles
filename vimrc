@@ -16,9 +16,9 @@ set completeopt=menuone
 silent! set completeopt=menuone,noselect
 set cmdheight=2
 " show existing tab with 2 spaces width
-set tabstop=4
+set tabstop=2
 " when indenting with '>', use 2 spaces width
-set shiftwidth=4
+set shiftwidth=2
 " On pressing tab, insert 2 spaces
 set expandtab
 " scroll
@@ -27,7 +27,7 @@ set scrolloff=3
 " line numering
 set number
 set relativenumber
-set lazyredraw
+set nolazyredraw
 set wildmenu
 set incsearch
 set showcmd
@@ -44,6 +44,7 @@ set nobackup " well, thats the only way to prevent guard from running tests twic
 set invlist
 set listchars=tab:▸\ ,eol:¬,trail:⋅,extends:❯,precedes:❮,nbsp:%
 set showbreak=↪
+set fillchars=fold:\ ,vert:\│
 set history=1000         " remember more commands and search history
 set undolevels=1000      " use many muchos levels of undo
 set wildignore=*.swp,*.bak,*.pyc,*.class
@@ -74,8 +75,9 @@ if has('nvim')
     autocmd!
     " fix terminal display
     autocmd TermOpen *
-          \  setlocal nocursorline
-          \| setlocal nocursorcolumn
+          \  :silent! normal! <c-\><c-n>a
+          " \| setlocal nocursorline
+          " \| setlocal nocursorcolumn
   augroup END
 endif
 augroup configgroup
@@ -83,10 +85,14 @@ augroup configgroup
   autocmd FileType *
         \  call matchadd('Todo', '@todo\>')
         \| call matchadd('Todo', '@fixme\>')
-  autocmd FileType html
-        \  setlocal tabstop=4 shiftwidth=4
-  autocmd FileType elixir
-        \  setlocal tabstop=2 shiftwidth=2
+  " autocmd FileType html
+  "       \  setlocal tabstop=4 shiftwidth=4
+  " autocmd FileType vue
+  "       \  setlocal tabstop=2 shiftwidth=2
+  " autocmd FileType javascript
+  "       \  setlocal tabstop=2 shiftwidth=2
+  " autocmd FileType elixir
+  "       \  setlocal tabstop=2 shiftwidth=2
   autocmd FileType c
         \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType php
@@ -96,20 +102,20 @@ augroup configgroup
         \| setlocal kp=:PhpDoc
   autocmd FileType go
         \  setlocal noexpandtab
-        \| setlocal tabstop=2 shiftwidth=2
-  autocmd FileType ruby
-        \  setlocal tabstop=2 shiftwidth=2
-  autocmd FileType vim
-        \  setlocal tabstop=2 shiftwidth=2
-        \| setlocal kp=:help
-  autocmd FileType xml
-        \  setlocal tabstop=4 shiftwidth=4
-  autocmd FileType sh
-        \  setlocal tabstop=4 shiftwidth=4
-  autocmd FileType css
-        \  setlocal tabstop=4 shiftwidth=4
-  autocmd FileType scss
-        \  setlocal tabstop=4 shiftwidth=4
+        " \| setlocal tabstop=2 shiftwidth=2
+  " autocmd FileType ruby
+  "       \  setlocal tabstop=2 shiftwidth=2
+  " autocmd FileType vim
+  "       \  setlocal tabstop=2 shiftwidth=2
+  "       \| setlocal kp=:help
+  " autocmd FileType xml
+  "       \  setlocal tabstop=4 shiftwidth=4
+  " autocmd FileType sh
+  "       \  setlocal tabstop=4 shiftwidth=4
+  " autocmd FileType css
+  "       \  setlocal tabstop=4 shiftwidth=4
+  " autocmd FileType scss
+  "       \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType blade
         \  let b:commentary_format='{{-- %s --}}'
   autocmd FileType markdown
@@ -150,6 +156,7 @@ augroup configgroup
         \| nmap <buffer> <leader>fd q <bar> :call local#fzf#buffer_dir_files()<cr>
         \| nmap <buffer> <leader>ff q <bar> :call local#fzf#all_files()<cr>
         \| nmap <buffer> <leader>fg q <bar> :call local#fzf#git_ls()<cr>
+        \| nmap <buffer> <leader>ft q <bar> :FZFTages<cr>
         \| nmap <buffer> <leader>fb q <bar> :FZFBuffers<cr>
         \| nmap <buffer> <leader> q
         \| nnoremap <buffer> : <c-w>q:
@@ -209,7 +216,7 @@ if exists(':Plug')
   Plug 'janko-m/vim-test'
   Plug 'benmills/vimux'
   Plug 'elmcast/elm-vim', { 'for': 'elm' }
-  Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
+  Plug 'elixir-lang/vim-elixir', { 'for': ['elixir', 'eelixir'] }
   Plug 'kana/vim-operator-user'
   Plug 'rhysd/vim-grammarous'
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
@@ -220,8 +227,7 @@ if exists(':Plug')
   Plug 'AndrewRadev/sideways.vim'
   Plug 'godlygeek/tabular'
   Plug 'vim-scripts/cmdalias.vim'
-  Plug 'Shougo/unite.vim'
-  Plug 'Shougo/vimfiler.vim'
+  " Plug 'Shougo/unite.vim'
   Plug 'Shougo/echodoc.vim'
   Plug 'chrisbra/NrrwRgn'
   Plug 'andyl/vim-textobj-elixir'
@@ -229,15 +235,20 @@ if exists(':Plug')
   Plug 'justinmk/vim-dirvish'
   Plug 'pbogut/dbext.vim'
   Plug 'w0rp/ale'
-  Plug 'Rican7/php-doc-modded', { 'for': 'php' }
+  Plug 'wakatime/vim-wakatime'
+
+  " testing
+  Plug 'vimwiki/vimwiki'
+  Plug 'MattesGroeger/vim-bookmarks'
+
   if has('nvim')
     Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
     Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
     Plug 'pbogut/fzf-mru.vim'
-    Plug 'slashmili/alchemist.vim', { 'for': 'elixir' }
-    Plug 'powerman/vim-plugin-AnsiEsc', { 'for': 'elixir' }
+    Plug 'slashmili/alchemist.vim', { 'for': ['elixir', 'eelixir'] }
+    Plug 'powerman/vim-plugin-AnsiEsc', { 'for': ['elixir', 'eelixir'] }
     Plug 'zchee/deoplete-go', { 'do': 'go get github.com/nsf/gocode && make', 'for': 'go'}
     Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
@@ -263,6 +274,7 @@ source ~/.vim/plugin/config/airline.vimrc
 source ~/.vim/plugin/config/ale.vimrc
 source ~/.vim/plugin/config/autoformat.vimrc
 source ~/.vim/plugin/config/autopairs.vimrc
+source ~/.vim/plugin/config/bookmarks.vimrc
 source ~/.vim/plugin/config/composer.vimrc
 source ~/.vim/plugin/config/deoplete.vimrc
 source ~/.vim/plugin/config/dirvish.vimrc
@@ -282,6 +294,8 @@ augroup after_load
 augroup END
 
 silent! colorscheme solarized
+" nicer vertical split
+hi VertSplit guibg=#073642 guifg=fg
 
 " vdebug
 let g:vdebug_keymap = {
@@ -315,7 +329,7 @@ endif
 " ansi esc
 let g:no_plugin_maps = 1
 " vim polyglot
-let g:polyglot_disabled = ['elixir']
+let g:polyglot_disabled = ['eelixir', 'elixir']
 " vim filer
 let g:vimfiler_safe_mode_by_default = 0
 let g:vimfiler_ignore_pattern = []
@@ -379,6 +393,7 @@ nnoremap <silent> <leader>fc :call local#fzf#clip()<cr>
 nnoremap <silent> <leader>fd :call local#fzf#buffer_dir_files()<cr>
 nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
 nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
+nnoremap <silent> <leader>ft :FZFTags<cr>
 nnoremap <silent> <leader>fb :FZFBuffers<cr>
 nnoremap <silent> <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
 nnoremap <silent> <leader>gF :call local#fzf#all_files(expand('<cfile>'))<cr>
@@ -392,7 +407,9 @@ nnoremap <silent> <leader>w :W!<cr>
 nnoremap <silent> <leader>W :call WriteOrCr(1)<cr>
 nnoremap <silent> <leader>a :Autoformat<cr>
 nnoremap <silent> <leader>z za
-nnoremap <silent> <leader><leader>z zA
+nnoremap <silent> <esc> :set nohls<cr>
+nnoremap n :set hls<cr>n
+nnoremap N :set hls<cr>N
 " selection mode (for easy snippets parts move)
 " removes selection as block
 smap <c-d> <esc>`<V`>x
@@ -426,10 +443,8 @@ nmap <silent> <c-w>s :rightbelow split<cr>
 nmap <silent> <c-w>V :vsplit<cr>
 nmap <silent> <c-w>S :split<cr>
 map Y y$
-nnoremap <leader> "+
-nnoremap <leader><leader> "*
-vnoremap <leader> "+
-vnoremap <leader><leader> "*
+nnoremap <leader> "*
+vnoremap <leader> "*
 noremap <leader>sc :execute(':rightbelow 10split \| te scspell %')<cr>
 " nicer wrapline navigation
 for [key1, key2] in [['j', 'gj'], ['k', 'gk']]
@@ -463,14 +478,17 @@ cnoremap \\- \(.\{-}\)
 snoremap p "_dP
 vnoremap p "_dP
 " case insensitive search by default
-nnoremap / /\c
-nnoremap c/ c/\c
-nnoremap d/ d/\c
-nnoremap y/ y/\c
-nnoremap ? ?\c
-nnoremap c? c?\c
-nnoremap d? d?\c
-nnoremap y? y?\c
+nnoremap / :set hls<cr>/\c
+nnoremap ? :set hls<cr>?\c
+nnoremap * :set hls<cr>*
+nnoremap # :set hls<cr>#
+nnoremap <leader><leader> :let @/='\<<c-r><c-w>\>'<cr>:set hls<cr>
+" nnoremap c/ c/\c
+" nnoremap d/ d/\c
+" nnoremap y/ y/\c
+" nnoremap c? c?\c
+" nnoremap d? d?\c
+" nnoremap y? y?\c
 nnoremap <silent> <leader>= migg=G`i
 nmap <silent> <leader>gp <Plug>GitGutterPreviewHunk
 nmap <silent> <leader>gu <Plug>GitGutterUndoHunk
@@ -623,7 +641,6 @@ endfunction
 " disable double save (cousing file watchers issues)
 
 " fold adjust
-set fillchars="vert:|,fold: "
 " remove underline
 hi Folded term=NONE cterm=NONE gui=NONE
 " new fold                   style
@@ -726,3 +743,18 @@ silent! exec(":source ~/.vim/" . hostname() . ".vim")
 let g:dirvish_mode = ':sort r /[^\/]$/'
 let g:echodoc_enable_at_startup = 1
 hi SpecialKey guibg=none
+
+" vimwiki
+let g:vimwiki_map_prefix = '-w'
+let g:vimwiki_list = [{'path': '~/pawel.bogut@gmail.com/vimwiki/',
+                     \ 'syntax': 'markdown', 'ext': '.md'}]
+
+" vim bookmarks
+highlight BookmarkSign guibg=#073642 guifg=#93a1a1
+highlight BookmarkAnnotationSign guibg=#073642 guifg=#93a1a1
+
+" ALe
+
+highlight ALEErrorSign guibg=#073642 guifg=#dc322f
+highlight ALEWarningSign guibg=#073642 guifg=#d33682
+

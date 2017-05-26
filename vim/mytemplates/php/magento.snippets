@@ -1,0 +1,52 @@
+priority -50
+
+global !p
+def snake(name):
+	s1 = re.sub('(\w)([A-Z][a-z]+)', r'\1_\2', name)
+	return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+endglobal
+
+snippet _t_magento_class "Magento class" b
+<?php
+
+/**
+ * Class ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '_')  + '_' + snip.basename
+`}
+ *
+ * @author ${2:`!v g:snips_author`}
+ */
+class $1
+{
+	$0
+}
+endsnippet
+
+
+snippet _t_magento_block "Magento block" b
+<?php
+
+/**
+ * Class ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '_')  + '_' + snip.basename
+`}
+ *
+ * @author ${2:`!v g:snips_author`}
+ */
+class $1 extends Mage_Core_Block_Template
+{
+	protected $_template = '${3:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	parts = snake(m.group() + '/' + snip.basename).split('/block/')
+	snip.rv = parts[0] + '/' + parts[1] + '.phtml'
+`}';$0
+}
+endsnippet

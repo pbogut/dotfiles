@@ -1,5 +1,15 @@
 priority -50
 
+
+global !p
+def last(text):
+	return re.sub('.*?(\w*);?$', r'\1', text)
+
+def last_lower(text):
+	return re.sub('.*?(\w*);?$', r'\1', text).downcase()
+endglobal
+
+
 snippet _t_laravel_class "Laravel Test" b
 <?php
 
@@ -76,7 +86,7 @@ class $2 extends Controller
 endsnippet
 
 
-snippet _t_laravel_controller_crud "Laravel CRUD Controller" b
+snippet _t_laravel_controller_crud_html "Laravel CRUD HTML Controller" b
 <?php
 
 namespace ${1:`!p
@@ -88,7 +98,8 @@ if m:
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use ${4:App\Entity};
+$0
 /**
  * Class ${2:`!p snip.rv=snip.basename`}
  *
@@ -96,32 +107,117 @@ use Illuminate\Http\Request;
  */
 class $2 extends Controller
 {
-	public function getIndex(Request $request)
-	{$0
+	/**
+	 * Display a listing of the resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function index(${5:`!p snip.rv = last(t[4])`} $${6:`!p snip.rv = last(t[4]).lower()`})
+	{
+		return view('${7:$6}.index', [
+			'${8:$6s}' => $$6::all()
+		]);
 	}
 
-	public function getNew(Request $request)
+	/**
+	 * Show the form for creating a new resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function create(Request $request, $5 $$6)
 	{
+		$$6->fill($request->old());
+		$request->session()->reflash();
+
+		return view('$7.create', [
+			'${9:$6}' => $$6
+		]);
 	}
 
-	public function postCreate(Request $request)
+	/**
+	 * Store a newly created resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request $request
+	 * @return \Illuminate\Http\Response
+	 */
+	public function store(Request $request, $5 $$6)
 	{
+		return $this->update($request, $$6);
 	}
 
-	public function getShow(Request $request)
+	/**
+	 * Display the specified resource.
+	 *
+	 * @param  $5 $$6
+	 * @return \Illuminate\Http\Response
+	 */
+	public function show($5 $$6)
 	{
+		return view('$7.show', [
+			'$9' => $$6
+		]);
 	}
 
-	public function getEdit(Request $request)
+	/**
+	 * Show the form for editing the specified resource.
+	 *
+	 * @param  $5 $$6
+	 * @return \Illuminate\Http\Response
+	 */
+	public function edit(Request $request, $5 $$6)
 	{
+		$$6->fill($request->old());
+		$request->session()->reflash();
+
+		return view('$7.edit', [
+			'$9' => $$6
+		]);
 	}
 
-	public function postUpdate(Request $request)
+	/**
+	 * Update the specified resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request $request
+	 * @param  $5 $$6
+	 * @return \Illuminate\Http\Response
+	 */
+	public function update(Request $request, $5 $$6)
 	{
+		$request->flash();
+
+		$this->validate$5($request);
+
+		$$6
+			->fill($this->get$5Params($request))
+			->save();
+
+		return redirect(route('$7.show', $$6));
 	}
 
-	public function postDelete(Request $request)
+	/**
+	 * Remove the specified resource from storage.
+	 *
+	 * @param  $5 $$6
+	 * @return \Illuminate\Http\Response
+	 */
+	public function destroy($5 $$6)
 	{
+		$$6->delete();
+		return redirect(route('$7.index'));
+	}
+
+	protected function get$5Params(Request $request)
+	{
+		return array_only($request->input(), [
+			${10:// 'name',}
+		]);
+	}
+
+	protected function validate$5(Request $request)
+	{
+		return $this->validate($request, [
+			${11:// 'name' => 'required|max:20',}
+		]);
 	}
 }
 endsnippet

@@ -127,6 +127,7 @@ macro index A "<modify-labels-then-hide>+archive -inbox -unread\n" # tag as Arch
 macro pager A "<modify-labels-then-hide>+archive -inbox -unread\nq" # tag as Archived
 macro attach A "qA"                                                # tag as Archived
 macro index T "<modify-labels>+todo -inbox\n"                      # tag as Todo
+macro index \cT ":set editor=cat<enter><forward-message>`gpg-config get todoist-default-project-email`<enter><enter>Y:set editor=`echo $EDITOR`<enter>" # tag as Todo
 macro index I "<modify-labels>-inbox\n"                            # remove from inbox
 macro index B "<modify-labels>+inbox -archive -todo\n"             # remove from inbox
 #macro index I "<modify-labels>-inbox -unread\\n"                  # removed from inbox

@@ -1,4 +1,63 @@
-" switch between class and test file
+" transformations
+let g:projectionist_transformations = get(g:, "projectionist_transformations", {})
+function! g:projectionist_transformations.mag_add_block(input, o) abort
+  return substitute(a:input, '\([^/]*/[^/]*\)', '\1/Block', '')
+endfunction
+function! g:projectionist_transformations.mag_rm_pool(input, o) abort
+  return substitute(a:input, '^\(core/\|community/\|local/\)', '', '')
+endfunction
+
+let s:space_4 =
+      \   {
+      \     "tabstop": 4,
+      \     "shiftwidth": 4,
+      \     "expandtab": 1
+      \   }
+
+let s:space_2 =
+      \   {
+      \     "tabstop": 2,
+      \     "shiftwidth": 2,
+      \     "expandtab": 1
+      \   }
+
+let s:tab_4 =
+      \   {
+      \     "tabstop": 4,
+      \     "shiftwidth": 4,
+      \     "expandtab": 0
+      \   }
+
+let s:tab_2 =
+      \   {
+      \     "tabstop": 2,
+      \     "shiftwidth": 2,
+      \     "expandtab": 0
+      \   }
+
+" heuristics
+let s:magento_module =
+      \   {
+      \     "*": {
+      \       "project_root": 1,
+      \       "setlocal": s:space_4
+      \     },
+      \     "app/code/**/Block/*.php": {
+      \       "skeleton": "magento_block",
+      \       "alternate": "app/design/frontend/base/default/template/{mag_rm_pool|snakecase}.phtml"
+      \     },
+      \     "app/design/frontend/base/default/template/*.phtml": {
+      \       "alternate": [
+      \         "app/code/core/{camelcase|capitalize|mag_add_block}.php",
+      \         "app/code/community/{camelcase|capitalize|mag_add_block}.php",
+      \         "app/code/local/{camelcase|capitalize|mag_add_block}.php"
+      \       ]
+      \     },
+      \     "*.php": {
+      \       "console": "n98 dev:console",
+      \       "skeleton": "magento_class"
+      \     }
+      \   }
 let s:composer =
       \   {
       \     "*": {
@@ -8,7 +67,8 @@ let s:composer =
 let s:laravel =
       \   {
       \     "*": {
-      \       "logwatch": "tail -n 500 -f storage/logs/*.log"
+      \       "logwatch": "tail -n 500 -f storage/logs/*.log",
+      \       "setlocal": s:space_4
       \     },
       \     "*.php": {
       \       "console": "php artisan tinker"
@@ -118,6 +178,7 @@ let s:codeception =
       \     },
       \   }
 let g:projectionist_heuristics = {}
+let g:projectionist_heuristics["composer.json&modman&app/"] = s:magento_module
 let g:projectionist_heuristics["composer.json"] = s:composer
 let g:projectionist_heuristics["artisan&composer.json"] = s:laravel
 let g:projectionist_heuristics["mix.exs"] = s:elixir

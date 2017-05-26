@@ -18,6 +18,7 @@ read -d '' files <<"EOF"
     emacs.d/init.el
     gitconfig
     githelpers
+    gitignore
     inputrc
     jshintrc
     npmrc
@@ -53,6 +54,7 @@ read -d '' files <<"EOF"
     config/ranger/rifle.conf
     config/roxterm.sourceforge.net
     config/twmn/twmn.conf
+    config/Franz/Plugins/todoist
     i3blocks.conf
     local/share/applications/ranger.desktop
     mutt/mailcap

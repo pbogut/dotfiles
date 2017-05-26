@@ -68,9 +68,19 @@ vim_vis_mode="%F{005}%K{005}%B%F{255} VISUAL %k%b%{$reset_color%}"
 
 GIT_BRANCH=$'$(__git_ps1 "  %s")'
 
+email_counter() {
+    mail=$(mailx 2>/dev/null &)
+    count=$(echo $mail |grep -o '[0-9]* message [0-9]* unread' | head -n 1)
+    count=$(echo $count | sed 's,\([0-9]*\) [a-z]* \([0-9]*\).*,\1/\2,')
+    if [[ ! $count == "" ]]; then
+        echo "M:"$count" "
+    fi
+}
+EMAIL_COUNT=$'$(email_counter)'
+
 VIMODE_COLOR="003"
 vim_ps1() {
-    PS1="%B%F{001}(%b%F{012}%~%B%F{001}) %b%F{004}${GIT_BRANCH}%f
+    PS1="${EMAIL_COUNT}%B%F{001}(%b%F{012}%~%B%F{001}) %b%F{004}${GIT_BRANCH}%f
 %F{${VIMODE_COLOR}} %k%(!.%F{001}.%F{012})%n%F{001}@${HOST_COLOR}%M %B%F{001}%(!.#.$) %b%f%k"
 }
 precmd() {
@@ -251,6 +261,8 @@ export PATH="$PATH:$HOME/.gem/ruby/2.4.0/bin"
 [[ -f ~/.nix-profile/etc/profile.d/nix.sh ]] && source ~/.nix-profile/etc/profile.d/nix.sh
 
 export LPASS_AGENT_TIMEOUT=0
+
+export LD_PRELOAD="/usr/lib/libstderred.so${LD_PRELOAD:+:$LD_PRELOAD}"
 
 # make colors compatibile with tmux
 export TERM=xterm-256color

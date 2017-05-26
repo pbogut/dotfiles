@@ -102,6 +102,26 @@ git_fzf_st() {
     git st
 }
 
+git_pull_pull_request() {
+    current_branch=$(git branch | grep '^\*' | awk '{ print $2 }')
+    pr=$(git branch | grep '^\*' | awk '{ print $2 }' | sed 's,pull_request/\([0-9]*\)$,\1,' | sed 's,[^0-9]*,,')
+    if [[ ! $pr == "" ]]; then
+        git pull ${1:-origin} "pull/$pr/head:pull_request/$pr"
+    else
+        echo "I don't think this is a pr branch"
+    fi
+}
+
+git_checkout_pull_request() {
+    current_branch=$(git branch | grep '^\*' | awk '{ print $2 }')
+    if [[ $current_branch == "pull_request/$1" ]]; then
+        git fetch
+    else
+        git fetch ${3:-origin} "pull/$1/head:${2:-pull_request/$1}"
+    fi
+    git checkout "pull_request/$1"
+}
+
 git_ls() {
     git ls-files \
         | while read l; do echo -e "\033[0;34mG\033[0m  $l";done

@@ -9,6 +9,7 @@
     email = pawel.bogut@gmail.com
 [core]
     autocrlf = input
+    excludesfile = ~/.gitignore
 [push]
     default = simple
 [github]
@@ -54,6 +55,10 @@
     b = branch
     ds = diff --stat=160,120
     dh1 = diff HEAD~1
+
+    # Get pull request locally
+    cpr = "!. ~/.githelpers && git_checkout_pull_request"
+    pullpr = "!. ~/.githelpers && git_pull_pull_request"
 
     # funny
     whatthecommit = "!git commit --verbose -m \"`curl -qs http://whatthecommit.com/index.txt`\""

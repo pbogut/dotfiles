@@ -231,8 +231,9 @@ bar {
 # new_window pixel 1
 new_window normal 1
 
-# tabbed by default
-workspace_layout tabbed
+# stacked by default
+# workspace_layout tabbed
+workspace_layout stacked
 
 # assign apps to specific workspaces
 assign [title="^DBeaver" class="^SWT$"] $wsdb
