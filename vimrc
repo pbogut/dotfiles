@@ -240,10 +240,12 @@ if exists(':Plug')
   " testing
   Plug 'vimwiki/vimwiki'
   Plug 'MattesGroeger/vim-bookmarks'
+  Plug 'justinmk/vim-sneak'
 
   if has('nvim')
     Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
     Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+    Plug 'Shougo/neco-vim', { 'for': 'vim' }
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
     Plug 'junegunn/fzf.vim'
     Plug 'pbogut/fzf-mru.vim'

@@ -11,7 +11,12 @@ function! s:try_insert(skel)
 endfunction
 
 function! templates#InsertSkeleton(...) abort
-  let template = get(a:, 1)
+  let filetype = get(a:, 1)
+  if !empty(filetype)
+    exec('set ft=' . l:filetype)
+  endif
+
+  let template = get(a:, 2)
   let filename = expand('%')
 
   " Abort on non-empty buffer or extant file
@@ -21,7 +26,7 @@ function! templates#InsertSkeleton(...) abort
   endif
 
   " try selected template
-  if !empty(a:000) && s:try_insert(template)
+  if !empty(l:template) && s:try_insert(l:template)
     return
   endif
 

@@ -71,7 +71,7 @@ module.exports = (Franz, options) => {
 
     timer = setTimeout(function() {
       keychain = ''
-    }, 200)
+    }, 300)
 
     if (keymap[keychain]) {
       keymap[keychain]()
