@@ -1,0 +1,9 @@
+#!/bin/bash
+#=================================================
+# name:   ls-project
+# author: Pawel Bogut <pbogut@ukpos.com> <http://pbogut.me>
+# date:   09/06/2017
+#=================================================
+
+find ~/projects -maxdepth 3 -mindepth 3 -printf "%T+\t%p\n" -type d | sort -r | sed 's,.*\t'"$HOME"'/projects/,,g'
+

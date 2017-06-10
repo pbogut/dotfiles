@@ -1,6 +1,6 @@
 " Deoplete
 let g:deoplete#enable_at_startup = 1
-let g:deoplete#auto_completion_start_length = 1
+let g:deoplete#auto_complete_start_length = 1
 let g:deoplete#enable_debug=1
 let g:deoplete#sources#padawan#add_parentheses = 1
 let g:deoplete#sources#padawan#auto_update = 1
@@ -15,5 +15,5 @@ command! PadawanStart call deoplete#sources#padawan#StartServer()
 command! PadawanStop call deoplete#sources#padawan#StopServer()
 command! PadawanRestart call deoplete#sources#padawan#RestartServer()
 command! PadawanInstall call deoplete#sources#padawan#InstallServer()
-command! PadawanUpdate call deoplete#sources#padawan#UpdatePadawan()
+command! PadawanUpdate call deoplete#sources#padawan#UpdateServer()
 command! -bang PadawanGenerate call deoplete#sources#padawan#Generate(<bang>0)

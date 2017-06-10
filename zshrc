@@ -16,6 +16,7 @@ autoload -U colors && colors
 # The following lines were added by compinstall
 zstyle :compinstall filename '~/.zshrc'
 zstyle ':completion:*' menu select
+zstyle ':completion:*' rehash true
 
 autoload -Uz compinit
 compinit

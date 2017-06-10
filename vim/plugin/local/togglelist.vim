@@ -25,6 +25,9 @@ function! local#togglelist#locationlist()
   let nextbufnr = winbufnr(winnr + 1)
   try
     lopen
+    wincmd j
+    wincmd J
+    resize 10
   catch /E776/
       echohl ErrorMsg
       echo "Location List is Empty."
@@ -58,6 +61,8 @@ function! local#togglelist#quickfixlist()
     exec(g:toggle_list_copen_command)
   else
     copen
+    wincmd j
+    wincmd J
   endif
   if winnr() != winnr
     wincmd p

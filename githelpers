@@ -68,13 +68,19 @@ pretty_git_log() {
 }
 
 git_clone_to_projects() {
+  repo=$1
+  if [[ ! "$1" =~ ^(http://|https://|git@) ]]; then
+    # use github by default
+    repo="git@github.com:$repo.git"
+  fi
+
   if [[ "$2" == "" ]];then
-    dest="$HOME/projects/`echo "$1" | sed 's#[^@]*@##' | sed 's#^\(https\|http\)://##g' | sed 's#:#/#g' | sed 's#\.git$##g'`"
+    dest="$HOME/projects/`echo "$repo" | sed 's#[^@]*@##' | sed 's#^\(https\|http\)://##g' | sed 's#:#/#g' | sed 's#\.git$##g'`"
   else
     dest="$2"
   fi
-  if [[ -n $1 ]];then
-      git clone $1 $dest
+  if [[ -n $repo ]];then
+      git clone $repo $dest
   else
       echo "You must specify a repository to clone."
       echo

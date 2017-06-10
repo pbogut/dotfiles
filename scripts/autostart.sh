@@ -14,6 +14,15 @@ function demonize {
     fi
 }
 
+function network_status() {
+  wget -q --tries=10 --timeout=20 --spider http://google.com
+  if [[ $? -eq 0 ]]; then
+          echo "Online"
+  else
+          echo "Offline"
+  fi
+}
+
 # numlock
 numlockx on
 # make use of the useless capslock
@@ -33,11 +42,15 @@ insync start > /dev/null 2>&1
 compton -b --xrender-sync-fence --xrender-sync
 demonize redshift 'redshift-gtk'
 demonize textaid "perl $scriptpath/edit-server.pl"
-demonize mopidy mopidy
 demonize rescuetime rescuetime
 demonize nm-applet nm-applet
 demonize twmnd twmnd
 demonize udisksvm "udisksvm -a"
+
+if [[ "$(network_status)" == "Offline" ]]; then sleep 5s; fi
+if [[ "$(network_status)" == "Offline" ]]; then sleep 10s; fi
+if [[ "$(network_status)" == "Offline" ]]; then sleep 15s; fi
+demonize mopidy mopidy
 
 # sepcific for the computer
 if [ "$host_name" == "darkbox" ]; then # pc at work

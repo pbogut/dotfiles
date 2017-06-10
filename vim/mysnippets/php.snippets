@@ -279,7 +279,7 @@ endsnippet
 
 snippet schcr "Laravel Schema::create"
 Schema::create('${1:table_name}', function (Blueprint $table) {
-	$table->${2:string('new_field');}$0
+	${2:$table->${3:increments}('${4:id}')};$0
 });
 endsnippet
 
@@ -289,7 +289,7 @@ endsnippet
 
 snippet schtab "Laravel Schema::table"
 Schema::table('${1:table_name}', function (Blueprint $table) {
-	$table->${2:increments('id');}$0
+	${2:$table->${3:increments}('${4:id}')};$0
 });
 endsnippet
 

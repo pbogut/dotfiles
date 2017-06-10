@@ -2,6 +2,7 @@ function! local#changepaste#init()
   " This allows for change paste motion cp{motion}
   nmap <silent> cp :let b:changepaste_register = v:register<cr>:set opfunc=local#changepaste#cp<CR>g@
   nmap <silent> cpp :exec "normal! V\"_d\"" . v:register . "P"<cr>
+  nmap <silent> cp= :exec "normal! V\"_d\"" . v:register . "P=="<cr>
   nmap <silent> cP cp$
 endfunction
 

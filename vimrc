@@ -240,7 +240,6 @@ if exists(':Plug')
   " testing
   Plug 'vimwiki/vimwiki'
   Plug 'MattesGroeger/vim-bookmarks'
-  Plug 'justinmk/vim-sneak'
 
   if has('nvim')
     Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -379,10 +378,10 @@ nnoremap <leader>sv :source $MYVIMRC<CR>
 " open list / quickfix
 nnoremap <silent> <leader>l :call local#togglelist#locationlist()<cr>
 nnoremap <silent> <leader>q :call local#togglelist#quickfixlist()<cr>
-nnoremap <silent> <leader>ot :belowright 20split \| terminal<cr>
+" nnoremap <silent> <leader>ot :belowright 20split \| terminal<cr>
 nnoremap <silent> <leader>of :let g:pwd = expand('%:h') \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
 nnoremap <silent> <leader>op :let g:pwd = projectroot#guess() \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
-nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
+" nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
 nnoremap <silent> <leader>ov :belowright 20split \| terminal vagrant ssh<cr>
 
 nnoremap <silent> <leader>r :echo "Currently not mapped, try backspace instead"<cr>
@@ -391,6 +390,7 @@ nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
 " fzf
 nnoremap <silent> <leader>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
 nnoremap <silent> <leader>fa :call local#fzf#files()<cr>
+nnoremap <silent> <leader>fp :FZFProject<cr>
 nnoremap <silent> <leader>fc :call local#fzf#clip()<cr>
 nnoremap <silent> <leader>fd :call local#fzf#buffer_dir_files()<cr>
 nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
@@ -448,6 +448,9 @@ map Y y$
 nnoremap <leader> "*
 vnoremap <leader> "*
 noremap <leader>sc :execute(':rightbelow 10split \| te scspell %')<cr>
+nmap yaf :let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>
+nmap yif :let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>
+
 " nicer wrapline navigation
 for [key1, key2] in [['j', 'gj'], ['k', 'gk']]
   for maptype in ['noremap', 'vnoremap', 'onoremap']
@@ -480,8 +483,8 @@ cnoremap \\- \(.\{-}\)
 snoremap p "_dP
 vnoremap p "_dP
 " case insensitive search by default
-nnoremap / :set hls<cr>/\c
-nnoremap ? :set hls<cr>?\c
+nnoremap / :let @/=""<cr>:set hls<cr>/\c
+nnoremap ? :let @/=""<cr>:set hls<cr>?\c
 nnoremap * :set hls<cr>*
 nnoremap # :set hls<cr>#
 nnoremap <leader><leader> :let @/='\<<c-r><c-w>\>'<cr>:set hls<cr>
@@ -492,7 +495,7 @@ nnoremap <leader><leader> :let @/='\<<c-r><c-w>\>'<cr>:set hls<cr>
 " nnoremap d? d?\c
 " nnoremap y? y?\c
 nnoremap <silent> <leader>= migg=G`i
-nmap <silent> <leader>gp <Plug>GitGutterPreviewHunk
+nmap <silent> <leader>gp <Plug>GitGutterPreviewHunk<bar>:exec('wincmd j')<bar>:exec('nnoremap q :wincmd q<lt>cr>')<cr>
 nmap <silent> <leader>gu <Plug>GitGutterUndoHunk
 nmap <silent> <leader>gs <Plug>GitGutterStageHunk
 " keep ga functionality as gas
@@ -500,8 +503,8 @@ nnoremap gas ga
 " Sideways
 nmap <silent> ga< :SidewaysLeft<cr>
 nmap <silent> ga> :SidewaysRight<cr>
-nmap <silent> gab :SidewaysJumpLeft<cr>
-nmap <silent> gaw :SidewaysJumpRight<cr>
+nmap <silent> gap :SidewaysJumpLeft<cr>
+nmap <silent> gan :SidewaysJumpRight<cr>
 omap <silent> aa <plug>SidewaysArgumentTextobjA
 xmap <silent> aa <plug>SidewaysArgumentTextobjA
 omap <silent> ia <plug>SidewaysArgumentTextobjI
@@ -559,7 +562,7 @@ nnoremap <leader>sf :set filetype=
 nnoremap <leader>ss :set spell!<cr>
 nnoremap <leader>sp :set paste!<cr>
 
-nnoremap S :suspend<cr>
+" nnoremap S :suspend<cr>
 
 nnoremap <leader>S :call SpellCheckToggle()<cr>
 function! SpellCheckToggle()
@@ -756,7 +759,6 @@ highlight BookmarkSign guibg=#073642 guifg=#93a1a1
 highlight BookmarkAnnotationSign guibg=#073642 guifg=#93a1a1
 
 " ALe
-
 highlight ALEErrorSign guibg=#073642 guifg=#dc322f
 highlight ALEWarningSign guibg=#073642 guifg=#d33682
 

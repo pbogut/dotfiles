@@ -17,10 +17,11 @@ let g:terminal_color_14 = '#93a1a1'
 let g:terminal_color_15 = '#fdf6e3'
 
 " got gof goT goF
+" nnoremap <silent> <leader>ot :belowright 20split \| terminal<cr>
 if has("nvim")
-  nnoremap <silent> goF :te ranger<cr>
-  nnoremap <silent> got :te cd %:p:h && $SHELL<cr>
-  nnoremap <silent> goT :te<cr>
+  " nnoremap <silent> goF :te ranger<cr>
+  " nnoremap <silent> got :te cd %:p:h && $SHELL<cr>
+  " nnoremap <silent> goT :te<cr>
 
   fun! s:ranger_open_ohoosen_file(...)
     silent! exec("Bdelete!")
@@ -39,16 +40,34 @@ if has("nvim")
   fun! s:close_term_window(...)
     exec("Bdelete!")
   endfun
-  fun! s:open_terminal(path)
+  fun! s:close_term_split(...)
+    exec("Bdelete!")
+    wincmd q
+  endfun
+  fun! s:open_terminal(path, ...)
+    let split = get(a:, 1, 0)
+    if (l:split)
+      belowright 20split
+      wincmd J
+      resize 20
+    endif
     enew
-    call termopen("cd ". a:path . " && " . $SHELL, {
-          \ 'on_exit' : function('s:close_term_window')
-          \ })
+    if (l:split)
+      call termopen("cd ". a:path . " && " . $SHELL, {
+            \ 'on_exit' : function('s:close_term_split')
+            \ })
+    else
+      call termopen("cd ". a:path . " && " . $SHELL, {
+            \ 'on_exit' : function('s:close_term_window')
+            \ })
+    endif
     startinsert
   endfun
 
   nnoremap <silent> gof :call <sid>ranger(expand("%:p:h"), expand("%:t"))<cr>
   nnoremap <silent> goF :call <sid>ranger(getcwd(), expand("%:t"))<cr>
-  nnoremap <silent> got :call <sid>open_terminal(expand("%:p:h"))<cr>
-  nnoremap <silent> goT :call <sid>open_terminal(getcwd())<cr>
+  nnoremap <silent> gOt :call <sid>open_terminal(expand("%:p:h"))<cr>
+  nnoremap <silent> gOT :call <sid>open_terminal(getcwd())<cr>
+  nnoremap <silent> got :call <sid>open_terminal(expand("%:p:h"), 1)<cr>
+  nnoremap <silent> goT :call <sid>open_terminal(getcwd(), 1)<cr>
 endif

@@ -103,6 +103,15 @@ function! s:fzf_clip_sink(line)
   echo system('anamnesis.sh to_clip', a:line)
 endfunction
 
+function! s:fzf_project_sink(line)
+  if !empty(a:line)
+    let path = $HOME . "/projects/" . a:line
+    silent! exec('cd ' . l:path)
+    silent! exec('Prosession ' . l:path)
+    " echo a:line
+  endif
+endfunction
+
 function! local#fzf#clip(...) abort
   let options = {
         \   'source': 'anamnesis.sh list',
@@ -112,6 +121,18 @@ function! local#fzf#clip(...) abort
   let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
   call fzf#run(fzf#wrap('name', extra, 0))
 endfunction
+
+function! local#fzf#project(...) abort
+  let options = {
+        \   'source': 'ls-project',
+        \   'sink': function('s:fzf_project_sink'),
+        \   'options': '--ansi --prompt "Project> " ' . s:params(a:000, 0),
+        \ }
+  let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
+  call fzf#run(fzf#wrap('name', extra, 0))
+endfunction
+
+command! -nargs=* -bang -complete=dir FZFProject call local#fzf#project(<f-args>)
 
 command! -nargs=* -bang -complete=dir Ag call local#fzf#ag(<bang>0,<f-args>)
 command! -nargs=* -bang -complete=dir Agg call local#fzf#agg(<bang>0,<f-args>)
