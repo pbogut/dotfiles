@@ -1,0 +1,10 @@
+#!/bin/bash
+#=================================================
+# name:   myown
+# author: Pawel Bogut <http://pbogut.me>
+# date:   11/06/2017
+#=================================================
+inotifywait -rqme create --format '%w%f' ${1:-.} | while read l; do
+  sudo chown $(id -un):$(id -gn) $l
+  echo chown $(id -un):$(id -gn) $l
+done
