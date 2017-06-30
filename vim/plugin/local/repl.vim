@@ -9,6 +9,7 @@ function! s:activate() abort
   for [root, value] in projectionist#query('console')
     let b:_repl_console_command = value
     let b:_repl_project_root = root
+    break
   endfor
 endfunction
 

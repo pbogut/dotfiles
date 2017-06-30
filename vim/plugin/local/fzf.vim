@@ -106,9 +106,9 @@ endfunction
 function! s:fzf_project_sink(line)
   if !empty(a:line)
     let path = $HOME . "/projects/" . a:line
-    silent! exec('cd ' . l:path)
     silent! exec('Prosession ' . l:path)
-    " echo a:line
+    exec('cd ' . l:path)
+    echo l:path
   endif
 endfunction
 

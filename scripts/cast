@@ -1,0 +1,7 @@
+#!/bin/bash
+#=================================================
+# name:   cast
+# author: Pawel Bogut <http://pbogut.me>
+# date:   29/06/2017
+#=================================================
+mkchromecast --encoder-backend node --video  -i $1 $2 $3 $4 $5 $6 $7 $8 $9

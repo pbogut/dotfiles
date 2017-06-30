@@ -4,4 +4,10 @@
 # author: Pawel Bogut <http://pbogut.me>
 # date:   11/06/2017
 #=================================================
-docker-compose "$@"
+if [[ $1 == "reup" ]]; then
+  docker-compose down && docker-compose up
+elif [[ $1 == "run" ]]; then
+  docker-compose run --rm "${@:2}"
+else
+  docker-compose "$@"
+fi

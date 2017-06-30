@@ -6,20 +6,20 @@ script=$(readlink -f "$0")
 scriptpath=$(dirname "$script")
 
 function demonize {
-    pid="/tmp/__$1.pid"
-    # if no pid file or no process
-    if [ ! -f "$pid" ] || ! kill -0 `cat $pid` 2>/dev/null; then
-        $2 > /dev/null 2>&1 &
-        echo $! > $pid
-    fi
+  pid="/tmp/__$1.pid"
+  # if no pid file or no process
+  if [ ! -f "$pid" ] || ! kill -0 `cat $pid` 2>/dev/null; then
+    $2 > /dev/null 2>&1 &
+    echo $! > $pid
+  fi
 }
 
 function network_status() {
   wget -q --tries=10 --timeout=20 --spider http://google.com
   if [[ $? -eq 0 ]]; then
-          echo "Online"
+    echo "Online"
   else
-          echo "Offline"
+    echo "Offline"
   fi
 }
 
@@ -29,10 +29,10 @@ numlockx on
 killall xcape -9 > /dev/null 2>&1
 # only if run with xcape option (its not playing nicely with my ergodox)
 if [[ $1 == "--xcape" ]]; then
-    xcape -e 'Caps_Lock=Escape'
-    xcape -e 'Control_L=Escape'
-    xcape -e 'Shift_L=parenleft'
-    xcape -e 'Shift_R=parenright'
+  xcape -e 'Caps_Lock=Escape'
+  xcape -e 'Control_L=Escape'
+  xcape -e 'Shift_L=parenleft'
+  xcape -e 'Shift_R=parenright'
 fi
 
 # daemons
@@ -53,6 +53,6 @@ if [[ "$(network_status)" == "Offline" ]]; then sleep 15s; fi
 demonize mopidy mopidy
 
 # sepcific for the computer
-if [ "$host_name" == "darkbox" ]; then # pc at work
-    demonize davmail davmail
+if [[ -f "$HOME/.$host_name.autostart.sh" ]]; then
+  source "$HOME/.$host_name.autostart.sh"
 fi

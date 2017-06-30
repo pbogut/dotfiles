@@ -5,33 +5,59 @@
 # date:   18/05/2017
 #=================================================
 dnsip=$(ifconfig docker0 | awk '/inet /{print $2}')
+hosts="$HOME/.docnet"
 
 echo ""
-echo "Run your docker images with "'`'"--dns=$dnsip"'`'" flag"
-echo ""
+echo "In order to get it working run:"
+#echo "Run your docker images with "'`'"--dns=$dnsip"'`'" flag"
+echo -e "\n\tdnsmasq --hostsdir=$hosts -d --cache-size=0\n"
+echo "or add this lines to your /etc/dnsmasq.d/docnet"
+echo -e "\n\taddn-hosts=$hosts"
+echo -e "\tcache-size=0"
+echo -e "\nand restart dnsmasq:"
+echo -e "\n\tsystemctl restart dnsmasq\n"
 
-hosts="/tmp/docnet.hosts/"
+rm "$hosts/*" > /dev/null 2>&1
+mkdir -p $hosts > /dev/null 2>&1
 
-mkdir -p $hosts
-sudo killall -9 dnsmasq > /dev/null 2>&1
-(sudo dnsmasq --hostsdir=$hosts -d --cache-size=0) > /dev/null 2>&1 &
+__connect() {
+      hash=$1
+      inspect=$(docker inspect $hash 2>/dev/null)
+      if [[ $? == 0 ]]; then
+        host=$(echo $inspect | jq '.[0].Config.Hostname' -r)
+        domain=$(echo $inspect | jq '.[0].Config.Domainname' -r)
+        if [[ $domain == "" ]]; then
+          url=$host
+        else
+          url=$host.$domain
+        fi
 
-docker events | while read line; do
-  echo $line | grep 'network \(connect\|disconnect\)' | sed 's,.*network \(disconnect\|connect\).*container=\([0-9a-z]*\)\,.*,\1 \2,' | (read action hash
-    if [[ $action == "connect" ]]; then
-      inspect=$(docker inspect $hash)
-      host=$(echo $inspect | jq '.[0].Config.Hostname' -r)
-      ip=$(echo $inspect | jq '.[0].NetworkSettings.IPAddress' -r)
-      if [[ $ip == "" ]]; then
-        ip=$(echo $inspect |jq '.[0].NetworkSettings.Networks | map(.IPAddress) | first' -r)
+        ip=$(echo $inspect | jq '.[0].NetworkSettings.IPAddress' -r)
+        if [[ $ip == "" ]]; then
+          ip=$(echo $inspect |jq '.[0].NetworkSettings.Networks | map(.IPAddress) | first' -r)
+        fi
+        echo $ip $url | tee $hosts/$hash
       fi
-      echo $ip $host | tee /tmp/docnet.hosts/$hash
-    elif [[ $action == "disconnect" ]]; then
-      echo disconnected $(echo $hash |sed 's,^\(.\{12\}\).*,\1,')
-      rm /tmp/docnet.hosts/$hash
-    fi
-    sudo killall -s SIGHUP dnsmasq
-  )
+}
+
+while :; do # in case something crashes we want to restart it
+
+  # set up already started containers
+  docker ps | awk '{print $1}' | while read hash; do
+    hash=$(echo $hash |sed 's,^\(.\{12\}\).*,\1,')
+    __connect $hash
+  done
+
+  docker events | while read line; do
+    echo $line | grep 'network \(connect\|disconnect\)' | sed 's,.*network \(disconnect\|connect\).*container=\([0-9a-z]*\)\,.*,\1 \2,' | (read action hash
+      hash=$(echo $hash |sed 's,^\(.\{12\}\).*,\1,')
+      if [[ $action == "connect" ]]; then
+        __connect $hash
+      elif [[ $action == "disconnect" ]]; then
+        echo disconnected $hash
+        rm "$hosts/$hash" 2>/dev/null
+      fi
+      sudo killall -s SIGHUP dnsmasq
+    )
+  done
 done
-
-

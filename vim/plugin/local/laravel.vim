@@ -6,8 +6,16 @@ endfun
 
 function! local#laravel#run(bang, command)
   let root = projectroot#guess()
+  let artisan = get(b:, 'laravel_artisan_command', 'php {}/artisan')
+
+  for [p_root, p_artisan] in projectionist#query('artisan_command')
+    let root = p_root
+    let artisan = p_artisan
+  endfor
+
+  let artisan = substitute(artisan, '{}', root, '')
   if filereadable(root . '/artisan')
-    rightbelow 11split | execute(":te php " . root . "/artisan " . a:command)
+    rightbelow 11split | execute(":te " . artisan . " " . a:command)
   else
     echo "It looks like it's not a Laravel project (artisan missing in " . root . ")."
   endif

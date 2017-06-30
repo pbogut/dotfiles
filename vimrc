@@ -141,26 +141,6 @@ augroup configgroup
   " autocmd CursorHold * rshada | wshada
   " autocmd FocusLost * wshada
   " autocmd FocusGained * sleep 100m | rshada
-  autocmd FileType vimfiler
-        \  nunmap <buffer> <leader>
-        \| nunmap <buffer> a
-        \| nunmap <buffer> N
-        \| nmap <buffer> A <Plug>(vimfiler_new_file)
-        \| nmap <buffer> H <Plug>(vimfiler_switch_to_parent_directory)
-        \| nmap <buffer> <leader>r q
-        \| nmap <buffer> <esc> q
-        \| nmap <buffer> v <Plug>(vimfiler_toggle_mark_current_line)
-        \| nmap <buffer> <leader>fm q <bar> :execute(':FZFFreshMru '. g:fzf_preview)<cr>
-        \| nmap <buffer> <leader>fa q <bar> :call local#fzf#files()<cr>
-        \| nmap <buffer> <leader>fc q <bar> :call local#fzf#clip()<cr>
-        \| nmap <buffer> <leader>fd q <bar> :call local#fzf#buffer_dir_files()<cr>
-        \| nmap <buffer> <leader>ff q <bar> :call local#fzf#all_files()<cr>
-        \| nmap <buffer> <leader>fg q <bar> :call local#fzf#git_ls()<cr>
-        \| nmap <buffer> <leader>ft q <bar> :FZFTages<cr>
-        \| nmap <buffer> <leader>fb q <bar> :FZFBuffers<cr>
-        \| nmap <buffer> <leader> q
-        \| nnoremap <buffer> : <c-w>q:
-        \| nnoremap <buffer> ;;; :
   autocmd FileType tagbar
         \  nmap <buffer> <leader>n q
   autocmd InsertLeave *
@@ -196,7 +176,7 @@ if exists(':Plug')
   Plug 'vim-airline/vim-airline'
   Plug 'vim-airline/vim-airline-themes'
   Plug 'airblade/vim-gitgutter'
-  Plug 'terryma/vim-expand-region'
+  " Plug 'terryma/vim-expand-region'
   Plug 'MarcWeber/vim-addon-mw-utils'
   Plug 'ludovicchabant/vim-gutentags'
   Plug 'gioele/vim-autoswap'
@@ -211,14 +191,14 @@ if exists(':Plug')
   Plug 'alvan/vim-closetag'
   Plug 'k-takata/matchit.vim'
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
-  Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
+  " Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
   Plug 'noahfrederick/vim-composer', { 'for': 'php' }
   Plug 'janko-m/vim-test'
-  Plug 'benmills/vimux'
+  " Plug 'benmills/vimux'
   Plug 'elmcast/elm-vim', { 'for': 'elm' }
   Plug 'elixir-lang/vim-elixir', { 'for': ['elixir', 'eelixir'] }
   Plug 'kana/vim-operator-user'
-  Plug 'rhysd/vim-grammarous'
+  " Plug 'rhysd/vim-grammarous'
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   Plug 'will133/vim-dirdiff'
   Plug 'dbakker/vim-projectroot'
@@ -229,7 +209,7 @@ if exists(':Plug')
   Plug 'vim-scripts/cmdalias.vim'
   " Plug 'Shougo/unite.vim'
   Plug 'Shougo/echodoc.vim'
-  Plug 'chrisbra/NrrwRgn'
+  " Plug 'chrisbra/NrrwRgn'
   Plug 'andyl/vim-textobj-elixir'
   Plug 'kana/vim-textobj-user'
   Plug 'justinmk/vim-dirvish'
@@ -240,6 +220,9 @@ if exists(':Plug')
   " testing
   Plug 'vimwiki/vimwiki'
   Plug 'MattesGroeger/vim-bookmarks'
+  Plug 'vim-scripts/ReplaceWithRegister'
+  Plug 'kassio/neoterm'
+  Plug 'beloglazov/vim-textobj-quotes'
 
   if has('nvim')
     Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -331,9 +314,6 @@ endif
 let g:no_plugin_maps = 1
 " vim polyglot
 let g:polyglot_disabled = ['eelixir', 'elixir']
-" vim filer
-let g:vimfiler_safe_mode_by_default = 0
-let g:vimfiler_ignore_pattern = []
 " closetag
 let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml,*.blade.php,*.html.eex"
 " notes
@@ -611,6 +591,16 @@ command! BCloseAll execute "%bd"
 command! BCloseOther execute "%bd | e#"
 command! BCloseOtherForce execute "%bd! | e#"
 
+"Git
+command! Gan execute "!git an %"
+function! s:gap()
+  let file = expand('%')
+  belowright 30split
+  enew
+  exec "te git ap " . file
+endfunction
+command! Gap call s:gap()
+
 " tabularize shortcut alias
 command! -nargs=* -range T Tabularize <args>
 
@@ -637,11 +627,22 @@ let g:paranoic_backup_dir="~/.vim/backupfiles/"
 command! -bang W :call CreateFoldersAndWrite(<bang>0)
 function! CreateFoldersAndWrite(bang)
   silent execute('!mkdir -p %:h')
-  if (a:bang)
-    execute(':w!')
-  else
-    execute(':w')
-  endif
+  try
+    if (a:bang)
+      execute(':w!')
+    else
+      execute(':w')
+    endif
+  catch "E166: Can't open linked file for writing"
+    redraw!
+    let sudo_write = confirm(
+          \ "Can't open linked file for writing, should I try SudoWrite?",
+          \ "&Yes\n&No", 2)
+    " call inputrestore()
+    if sudo_write == 1
+      SudoWrite
+    endif
+  endtry
 endfunction
 " disable double save (cousing file watchers issues)
 
@@ -703,40 +704,40 @@ let g:snips_author_url = "http://pbogut.me"
 let g:snips_github = "https://github.com/pbogut"
 
 
-nmap <leader>ni :call NarrowCodeBlock(1)<cr>
-nmap <leader>nb :call NarrowCodeBlock()<cr>
+" nmap <leader>ni :call NarrowCodeBlock(1)<cr>
+" nmap <leader>nb :call NarrowCodeBlock()<cr>
 
-let s:code_blocks = [
-      \ ['<style', '</style>', 'css'],
-      \ ['<script', '</script>', 'javascript.jsx'],
-      \ ['@sql\>', '@sqlend\>', 'sql'],
-      \ ['@css\>', '@cssend\>', 'css'],
-      \ ['@js\>', '@jsend\>', 'javascript.jsx'],
-      \ ['```bash', '```', 'sh'],
-      \ ['```sh', '```', 'sh'],
-      \ ['```php', '```', 'php'],
-      \ ['```js', '```', 'javascript.jsx'],
-      \ ['```javascript', '```', 'javascript.jsx'],
-      \ ]
+" let s:code_blocks = [
+"       \ ['<style', '</style>', 'css'],
+"       \ ['<script', '</script>', 'javascript.jsx'],
+"       \ ['@sql\>', '@sqlend\>', 'sql'],
+"       \ ['@css\>', '@cssend\>', 'css'],
+"       \ ['@js\>', '@jsend\>', 'javascript.jsx'],
+"       \ ['```bash', '```', 'sh'],
+"       \ ['```sh', '```', 'sh'],
+"       \ ['```php', '```', 'php'],
+"       \ ['```js', '```', 'javascript.jsx'],
+"       \ ['```javascript', '```', 'javascript.jsx'],
+"       \ ]
 
-function! NarrowCodeBlock(...) abort
-  for [match_start, match_end, set_type] in s:code_blocks
-      let inner = get(a:, 1, 0)
-      let start = searchpair(match_start, '', match_end, 'bW')
-      if !empty(l:start)
-          let end = searchpair(match_start, '', match_end, 'W') - l:inner
-          let start = l:start + l:inner
-          if l:start > l:end
-            echom "Block is empty, inner mode is not possible"
-            return
-          endif
-          execute(l:start . ',' . l:end . ' call nrrwrgn#NrrwRgn("", 0)')
-              \ | execute('set ft=' . set_type)
-          return
-      endif
-  endfor
-  echom "No block found"
-endfunction
+" function! NarrowCodeBlock(...) abort
+"   for [match_start, match_end, set_type] in s:code_blocks
+"       let inner = get(a:, 1, 0)
+"       let start = searchpair(match_start, '', match_end, 'bW')
+"       if !empty(l:start)
+"           let end = searchpair(match_start, '', match_end, 'W') - l:inner
+"           let start = l:start + l:inner
+"           if l:start > l:end
+"             echom "Block is empty, inner mode is not possible"
+"             return
+"           endif
+"           execute(l:start . ',' . l:end . ' call nrrwrgn#NrrwRgn("", 0)')
+"               \ | execute('set ft=' . set_type)
+"           return
+"       endif
+"   endfor
+"   echom "No block found"
+" endfunction
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
 
@@ -747,7 +748,9 @@ silent! exec(":source ~/.vim/" . hostname() . ".vim")
 " dirvish
 let g:dirvish_mode = ':sort r /[^\/]$/'
 let g:echodoc_enable_at_startup = 1
-hi SpecialKey guibg=none
+if has('nvim')
+  hi SpecialKey guibg=none
+endif
 
 " vimwiki
 let g:vimwiki_map_prefix = '-w'
@@ -762,3 +765,9 @@ highlight BookmarkAnnotationSign guibg=#073642 guifg=#93a1a1
 highlight ALEErrorSign guibg=#073642 guifg=#dc322f
 highlight ALEWarningSign guibg=#073642 guifg=#d33682
 
+" replace with register
+nmap cp <Plug>ReplaceWithRegisterOperator
+nmap cP cp$
+nmap cp= cpp==
+nmap cpp <Plug>ReplaceWithRegisterLine
+xmap cp <Plug>ReplaceWithRegisterVisual

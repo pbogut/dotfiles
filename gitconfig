@@ -45,6 +45,7 @@
     aa = add --all
     ff = merge --ff-only --no-commit
     pullff = pull --ff-only
+    pullrb = pull --rebase=interactive
     noff = merge --no-ff --no-commit
     noffci = merge --no-ff
     mesq =  merge --squash
