@@ -32,6 +32,51 @@ class $2
 }
 endsnippet
 
+snippet _t_laravel_command "Laravel Command" b
+<?php
+
+namespace ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[a-zA-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '\\')
+	snip.rv = snip.rv[0].upper() + snip.rv[1:]
+`};
+
+use Illuminate\Console\Command;
+
+/**
+ * Class ${2:`!p snip.rv=snip.basename`}
+ *
+ * @author ${3:`!v g:snips_author`}
+ */
+class $2 extends Command
+{
+	/**
+	 * The name and signature of the console command.
+	 *
+	 * @var string
+	 */
+	protected $signature = '${4:command:signature}';
+
+	/**
+	 * The console command description.
+	 *
+	 * @var string
+	 */
+	protected $description = '${5:Command description}';
+
+	/**
+	 * Execute the console command.
+	 *
+	 * @return mixed
+	 */
+	public function handle()
+	{
+		${0://handle}
+	}
+}
+endsnippet
 
 snippet _t_laravel_test "Laravel Test" b
 <?php

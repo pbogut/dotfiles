@@ -16,4 +16,9 @@ query=$(cat "$email_content"      |
     sed 's#[^<]*<\(.*\)>.*#\1#g'  |   # extract message id
     ruby -ne 'require "cgi"; puts CGI.escape($_)') # escape id so it fits in
 
-(qutebrowser_webengine --target window "http://localhost:6245?q=$query" &) > /dev/null 2>&1         # open in browser
+if [[ "$2" == "-" ]]; then
+  echo "http://localhost:6245?q=$query"
+else
+  (qutebrowser_webengine --target window "http://localhost:6245?q=$query" &) > /dev/null 2>&1         # open in browser
+fi
+

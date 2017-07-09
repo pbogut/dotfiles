@@ -93,6 +93,10 @@ let s:laravel =
       \       "skeleton": "laravel_test",
       \       "type": "test"
       \     },
+      \     "app/Console/Commands/*.php": {
+      \       "skeleton": "laravel_command",
+      \       "type": "command"
+      \     },
       \   }
 let s:elixir =
       \   {
