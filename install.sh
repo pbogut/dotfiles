@@ -57,6 +57,7 @@ read -d '' files <<"EOF"
     config/Franz/Plugins/todoist
     i3blocks.conf
     local/share/applications/ranger.desktop
+    local/share/applications/browser.desktop
     mutt/mailcap
     mutt/muttrc
     mutt/solarized-dark-16.muttrc
@@ -129,6 +130,11 @@ echo "done"
 echo -en "\tSet ranger as default manager (xdg-mime) ... "
 [[ -n `command -v xdg-mime` ]] && xdg-mime default ranger.desktop inode/directory
 echo "done"
+
+echo -en "\tSet browser script as default browser (xdg-settings) ... "
+[[ -n `command -v xdg-mime` ]] && xdg-settings set default-web-browser browser.desktop
+echo "done"
+
 echo -en "\t"$([[ -n `command -v gvfs-mime` ]] && gvfs-mime --set inode/directory ranger.desktop) && echo " ... done"
 
 echo -en "\tInstall vim/neovim plugins ... "

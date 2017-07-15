@@ -45,7 +45,6 @@ bindsym $mod+Shift+q kill
 # bindsym $mod+colon $sh "dmenu_run -l 20 -p open"
 bindsym $mod+colon $sh "rofi -show run"
 bindsym $mod+Ctrl+colon $sh "rofi -show drun"
-bindsym $mod+b $sh "rofi -show window"
 
 bindsym $mod+Shift+colon $sh "~/.scripts/i3-dmenu-start-at-new-workspace.sh"
 # There also is the (new) i3-dmenu-desktop which only displays applications
@@ -153,6 +152,8 @@ set $wscode 0: code
 set $wsdb   0: db
 set $wsterm 0: term
 set $wsbrow 0: browser
+set $wscomm 0:/ comm
+
 
 bindsym $hype+c workspace $wscode
 bindsym $hype+t workspace $wsterm
@@ -238,6 +239,7 @@ workspace_layout stacked
 # assign apps to specific workspaces
 assign [title="^DBeaver" class="^SWT$"] $wsdb
 assign [title="^Dbeaver$"] $wsdb
+assign [title="^Franz$"] $wscomm
 
 for_window [class="Skype"] floating enable
 # for_window [class="^nvim-qt$"] floating enable
@@ -269,6 +271,11 @@ bindsym $mod+Ctrl+w $sh "~/.scripts/i3-dmenu-workspaces.sh --send"
 bindsym --release $mod+v $sh 'xdotool keyup Super && xdotool type "$(xsel)"'
 bindsym $mod+Ctrl+i $sh '~/.scripts/vim-anywhere.sh --selection'
 bindsym $mod+i $sh '~/.scripts/vim-anywhere.sh'
+
+bindsym $mod+Ctrl+t $sh "~/.scripts/switch-or-launch.sh '\<Todoist$' 'todoist'"
+bindsym $mod+Ctrl+b $sh "~/.scripts/switch-or-launch.sh '\<qutebrowser$' 'browser'"
+bindsym $mod+Ctrl+f $sh "~/.scripts/switch-or-launch.sh '\<Franz$' 'todoist'"
+bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
 
 # move workspace to another monitor
 bindsym $mod+m move workspace to output left

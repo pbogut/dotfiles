@@ -1,0 +1,11 @@
+#!/bin/bash
+#=================================================
+# name:   qutebrowser_ukpos.sh
+# author: Pawel Bogut <http://pbogut.me>
+# date:   16/01/2017
+#=================================================
+if [[ $1 =~ ^https://appear.in/ || $1 =~ url=https%3A%2F%2Fappear.in%2F ]]; then
+  chromium --kiosk "$@"
+else
+  qutebrowser --backend webengine --enable-webengine-inspector "$@"
+fi

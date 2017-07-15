@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=browser
+GenericName=Web Browser
+Icon=browser
+Type=Application
+Categories=Network;WebBrowser;
+Exec=~/.scripts/browser %u
+Terminal=false
+StartupNotify=false
+MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;
+Keywords=Browser
