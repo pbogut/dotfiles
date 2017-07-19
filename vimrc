@@ -118,6 +118,8 @@ augroup configgroup
   "       \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType blade
         \  let b:commentary_format='{{-- %s --}}'
+  autocmd FileType crontab\|nginx\|resolv
+        \  let b:commentary_format='# %s'
   autocmd FileType markdown
         \  setlocal spell spelllang=en_gb
   autocmd FileType qf
