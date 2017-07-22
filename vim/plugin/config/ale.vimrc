@@ -1,4 +1,7 @@
 " Ale -- to be moved!!!!! START
+if !has('nvim')
+  finish
+endif
 
 augroup pb_alegroup
   autocmd!
@@ -81,22 +84,11 @@ function! s:ale_filtered_credo(buffer, lines) abort
   return l:output
 endfunction
 
-" function s:ale_filtered_credo(buffer, lines) abort
-"   let l:messages = ale_linters#elixir#credo#Handle(a:buffer, a:lines)
-
-"   let l:output = []
-"   for l:message in l:messages
-"     if l:message.text == "Functions should have a @spec type specification."
-"       continue
-"     endif
-"     call add(l:output, l:message)
-"   endfor
-
-"   return l:output
-" endfunction
-
 call ale#linter#Define('elixir', {
       \ 'name': 'filtered_credo',
       \ 'executable': 'mix',
       \ 'command': 'mix credo suggest --format=flycheck --read-from-stdin %s',
       \ 'callback': function('s:ale_filtered_credo') })
+
+highlight ALEErrorSign guibg=#073642 guifg=#dc322f
+highlight ALEWarningSign guibg=#073642 guifg=#d33682

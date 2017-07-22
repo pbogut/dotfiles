@@ -31,3 +31,7 @@ function! s:bookmark_move()
   endif
 endfunction
 command! BookmarkMove call s:bookmark_move()
+
+" vim bookmarks
+highlight BookmarkSign guibg=#073642 guifg=#93a1a1
+highlight BookmarkAnnotationSign guibg=#073642 guifg=#93a1a1

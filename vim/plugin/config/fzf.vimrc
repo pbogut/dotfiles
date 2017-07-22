@@ -1,4 +1,8 @@
 " fzf
+if !has('nvim')
+  finish
+endif
+
 let g:fzf_layout = { 'down': '~35%' }
 let g:fzf_command_prefix = "FZF"
 " let g:fzf_mru_relative = 1

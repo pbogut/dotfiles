@@ -153,7 +153,6 @@ augroup configgroup
   "       \| execute('sign place 98913 line=1 name=dummy buffer=' . bufnr(''))
 augroup END
 
-
 silent! call plug#begin()
 if exists(':Plug')
   Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
@@ -178,7 +177,6 @@ if exists(':Plug')
   Plug 'vim-airline/vim-airline'
   Plug 'vim-airline/vim-airline-themes'
   Plug 'airblade/vim-gitgutter'
-  " Plug 'terryma/vim-expand-region'
   Plug 'MarcWeber/vim-addon-mw-utils'
   Plug 'ludovicchabant/vim-gutentags'
   Plug 'gioele/vim-autoswap'
@@ -193,14 +191,11 @@ if exists(':Plug')
   Plug 'alvan/vim-closetag'
   Plug 'k-takata/matchit.vim'
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
-  " Plug 'docteurklein/php-getter-setter.vim', { 'for': 'php' }
   Plug 'noahfrederick/vim-composer', { 'for': 'php' }
   Plug 'janko-m/vim-test'
-  " Plug 'benmills/vimux'
   Plug 'elmcast/elm-vim', { 'for': 'elm' }
   Plug 'elixir-lang/vim-elixir', { 'for': ['elixir', 'eelixir'] }
   Plug 'kana/vim-operator-user'
-  " Plug 'rhysd/vim-grammarous'
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   Plug 'will133/vim-dirdiff'
   Plug 'dbakker/vim-projectroot'
@@ -211,7 +206,6 @@ if exists(':Plug')
   Plug 'vim-scripts/cmdalias.vim'
   " Plug 'Shougo/unite.vim'
   Plug 'Shougo/echodoc.vim'
-  " Plug 'chrisbra/NrrwRgn'
   Plug 'andyl/vim-textobj-elixir'
   Plug 'kana/vim-textobj-user'
   Plug 'justinmk/vim-dirvish'
@@ -255,6 +249,7 @@ if exists(':Plug')
 endif "
 silent! call plug#end()      " requiredc
 filetype plugin indent on    " required
+silent! colorscheme solarized
 "
 source ~/.vim/plugin/config/airline.vimrc
 source ~/.vim/plugin/config/ale.vimrc
@@ -262,12 +257,12 @@ source ~/.vim/plugin/config/autoformat.vimrc
 source ~/.vim/plugin/config/autopairs.vimrc
 source ~/.vim/plugin/config/bookmarks.vimrc
 source ~/.vim/plugin/config/composer.vimrc
+source ~/.vim/plugin/config/denite.vimrc
 source ~/.vim/plugin/config/deoplete.vimrc
 source ~/.vim/plugin/config/dirvish.vimrc
 source ~/.vim/plugin/config/fzf.vimrc
 source ~/.vim/plugin/config/gutentags.vimrc
 " source ~/.vim/plugin/config/neomake.vimrc
-source ~/.vim/plugin/config/phpgetset.vimrc
 source ~/.vim/plugin/config/projectionist.vimrc
 source ~/.vim/plugin/config/switch.vimrc
 source ~/.vim/plugin/config/terminal.vimrc
@@ -279,7 +274,6 @@ augroup after_load
         \| source ~/.vim/plugin/config/cmdalias.vimrc
 augroup END
 
-silent! colorscheme solarized
 " nicer vertical split
 hi VertSplit guibg=#073642 guifg=fg
 
@@ -298,20 +292,6 @@ let g:vdebug_keymap = {
       \    "eval_visual" : "<leader>vv",
       \}
 
-" denite
-if has('nvim')
-  call denite#custom#map('insert', '<M-j>', '<denite:assign_next_matched_text>')
-  call denite#custom#map('insert', '<M-k>', '<denite:assign_previous_matched_text>')
-  call denite#custom#map('insert', '<C-n>', '<denite:move_to_next_line>')
-  call denite#custom#map('insert', '<C-p>', '<denite:move_to_previous_line>')
-
-  call denite#custom#alias('source', 'file_rec/git', 'file_rec')
-  call denite#custom#var('file_rec/git', 'command',
-        \ ['git', 'ls-files', '-co', '--exclude-standard'])
-  call denite#custom#alias('source', 'file_rec/ag', 'file_rec')
-  call denite#custom#var('file_rec/ag', 'command',
-        \ ['ag', '-g', ''])
-endif
 " ansi esc
 let g:no_plugin_maps = 1
 " vim polyglot
@@ -323,33 +303,6 @@ let g:notes_directories = [ $HOME . "/Notes/" ]
 " projectroot
 let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
       \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
-" write or select when in command mode
-function! WriteOrCr(...)
-  if get(a:, 1, 0)
-    let bang = '!'
-  else
-    let bang = ''
-  endif
-
-  if &buftype == 'nofile'
-    call feedkeys("\<cr>")
-  elseif @% != ''
-    try
-      exec "w" . bang
-    catch /E45: 'readonly' option is set (add ! to override)/
-      " prevents multiline error and vim's "Press key to continue..." bullshit
-      echohl ErrorMsg
-      echom "E45: 'readonly' option is set (add ! to override)"
-      echohl NONE
-    catch /E212: Can't open file for writing/
-      echohl ErrorMsg
-      echom "E212: Can't open file for writing"
-      echohl NONE
-    endtry
-  else
-    echo 'Nothing to save...'
-  endif
-endfunction
 " macros
 nnoremap <leader>em :tabnew ~/.vim/macros.vim<cr>
 nnoremap <leader>sm :source ~/.vim/macros.vim<cr>
@@ -388,7 +341,6 @@ nnoremap <silent> <leader>gr :Rg<cr>
 vnoremap <silent> <leader>ga "ay :Ag <c-r>a<cr>
 vnoremap <silent> <leader>gr "ay :Rg <c-r>a<cr>
 nnoremap <silent> <leader>w :W!<cr>
-nnoremap <silent> <leader>W :call WriteOrCr(1)<cr>
 nnoremap <silent> <leader>a :Autoformat<cr>
 nnoremap <silent> <leader>z za
 nnoremap <silent> <esc> :set nohls<cr>
@@ -470,12 +422,6 @@ nnoremap ? :let @/=""<cr>:set hls<cr>?\c
 nnoremap * :set hls<cr>*
 nnoremap # :set hls<cr>#
 nnoremap <leader><leader> :let @/='\<<c-r><c-w>\>'<cr>:set hls<cr>
-" nnoremap c/ c/\c
-" nnoremap d/ d/\c
-" nnoremap y/ y/\c
-" nnoremap c? c?\c
-" nnoremap d? d?\c
-" nnoremap y? y?\c
 nnoremap <silent> <leader>= migg=G`i
 nmap <silent> <leader>gp <Plug>GitGutterPreviewHunk<bar>:exec('wincmd j')<bar>:exec('nnoremap q :wincmd q<lt>cr>')<cr>
 nmap <silent> <leader>gu <Plug>GitGutterUndoHunk
@@ -544,8 +490,6 @@ nnoremap <leader>sf :set filetype=
 nnoremap <leader>ss :set spell!<cr>
 nnoremap <leader>sp :set paste!<cr>
 
-" nnoremap S :suspend<cr>
-
 nnoremap <leader>S :call SpellCheckToggle()<cr>
 function! SpellCheckToggle()
   let b:spell_check = get(b:, 'spell_check', 0)
@@ -561,7 +505,6 @@ function! SpellCheckToggle()
     hi SpellBad guifg=lightred
     set spell
   endif
-
 endfunction
 
 " global variables used by modules {{{
@@ -575,11 +518,6 @@ let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnippets", "mytemplates"]
 let g:EclimFileTypeValidate = 0
 let g:EclimCompletionMethod = 'omnifunc'
 let g:strip_whitespace_on_save = 1
-" NrrwRgn
-let g:nrrw_rgn_pad=40
-" let g:nrrw_rgn_wdth = 50
-" let g:nrrw_rgn_resize_window = 'absolute'
-let g:nrrw_rgn_resize_window = 'relative'
 
 let g:formatdef_blade = '"html-beautify -s ".&shiftwidth'
 let g:formatters_blade = ['blade']
@@ -671,17 +609,7 @@ function! NeatFoldText()
   let foldtextlength = strlen(substitute(foldtextstart . foldtextend, '.', 'x', 'g')) + &foldcolumn
   return foldtextstart . repeat(foldchar, l:winwidth-foldtextlength) . foldtextend
 endfunction
-" function! PHP__Fold()
-"   if (get(b:, '_php__flod__initiated', 0))
-"     silent! normal za
-"   else
-"     silent! execute 'EnableFastPHPFolds'
-"     silent! normal zRza
-"     let b:_php__flod__initiated = 1
-"   endif
-" endfunction
 set foldtext=NeatFoldText()
-" let g:DisableAutoPHPFolding = 1
 
 augroup set_title_group
     autocmd!
@@ -705,67 +633,16 @@ let g:snips_author = "Pawel Bogut"
 let g:snips_author_url = "http://pbogut.me"
 let g:snips_github = "https://github.com/pbogut"
 
-
-" nmap <leader>ni :call NarrowCodeBlock(1)<cr>
-" nmap <leader>nb :call NarrowCodeBlock()<cr>
-
-" let s:code_blocks = [
-"       \ ['<style', '</style>', 'css'],
-"       \ ['<script', '</script>', 'javascript.jsx'],
-"       \ ['@sql\>', '@sqlend\>', 'sql'],
-"       \ ['@css\>', '@cssend\>', 'css'],
-"       \ ['@js\>', '@jsend\>', 'javascript.jsx'],
-"       \ ['```bash', '```', 'sh'],
-"       \ ['```sh', '```', 'sh'],
-"       \ ['```php', '```', 'php'],
-"       \ ['```js', '```', 'javascript.jsx'],
-"       \ ['```javascript', '```', 'javascript.jsx'],
-"       \ ]
-
-" function! NarrowCodeBlock(...) abort
-"   for [match_start, match_end, set_type] in s:code_blocks
-"       let inner = get(a:, 1, 0)
-"       let start = searchpair(match_start, '', match_end, 'bW')
-"       if !empty(l:start)
-"           let end = searchpair(match_start, '', match_end, 'W') - l:inner
-"           let start = l:start + l:inner
-"           if l:start > l:end
-"             echom "Block is empty, inner mode is not possible"
-"             return
-"           endif
-"           execute(l:start . ',' . l:end . ' call nrrwrgn#NrrwRgn("", 0)')
-"               \ | execute('set ft=' . set_type)
-"           return
-"       endif
-"   endfor
-"   echom "No block found"
-" endfunction
-
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
 
 " nnoremap <silent> K :call LanguageClient_textDocument_hover()<CR>
 " nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
 " nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
 
-" dirvish
-let g:dirvish_mode = ':sort r /[^\/]$/'
-let g:echodoc_enable_at_startup = 1
-if has('nvim')
-  hi SpecialKey guibg=none
-endif
-
 " vimwiki
 let g:vimwiki_map_prefix = '-w'
 let g:vimwiki_list = [{'path': '~/pawel.bogut@gmail.com/vimwiki/',
                      \ 'syntax': 'markdown', 'ext': '.md'}]
-
-" vim bookmarks
-highlight BookmarkSign guibg=#073642 guifg=#93a1a1
-highlight BookmarkAnnotationSign guibg=#073642 guifg=#93a1a1
-
-" ALe
-highlight ALEErrorSign guibg=#073642 guifg=#dc322f
-highlight ALEWarningSign guibg=#073642 guifg=#d33682
 
 " replace with register
 nmap cp <Plug>ReplaceWithRegisterOperator

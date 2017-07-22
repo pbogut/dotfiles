@@ -1,4 +1,8 @@
 " Deoplete
+if !has('nvim')
+  finish
+endif
+
 let g:deoplete#enable_at_startup = 1
 let g:deoplete#auto_complete_start_length = 1
 let g:deoplete#enable_debug=1

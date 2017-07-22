@@ -14,6 +14,13 @@ augroup pb_dirvish
         \| nnoremap <buffer> ? ?\ze[^\/]*[\/]\=$<Home>\c
 augroup END
 
+" dirvish
+let g:dirvish_mode = ':sort r /[^\/]$/'
+let g:echodoc_enable_at_startup = 1
+if has('nvim')
+  hi SpecialKey guibg=none
+endif
+
 function! s:copy()
   let from = getline('.')
   let extension = substitute(l:from, '.*/[^\.]*\(.\{-}\)$', '\1', '')

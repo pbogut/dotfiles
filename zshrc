@@ -263,7 +263,7 @@ export PATH="$PATH:$HOME/.gem/ruby/2.4.0/bin"
 
 export LPASS_AGENT_TIMEOUT=0
 
-export LD_PRELOAD="/usr/lib/libstderred.so${LD_PRELOAD:+:$LD_PRELOAD}"
+[[ -f /usr/lib/libstderred.so ]] && export LD_PRELOAD="/usr/lib/libstderred.so${LD_PRELOAD:+:$LD_PRELOAD}"
 
 # make colors compatibile with tmux
 export TERM=xterm-256color
