@@ -313,33 +313,10 @@ nnoremap <leader>sv :source $MYVIMRC<CR>
 " open list / quickfix
 nnoremap <silent> <leader>l :call local#togglelist#locationlist()<cr>
 nnoremap <silent> <leader>q :call local#togglelist#quickfixlist()<cr>
-" nnoremap <silent> <leader>ot :belowright 20split \| terminal<cr>
-nnoremap <silent> <leader>of :let g:pwd = expand('%:h') \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
-nnoremap <silent> <leader>op :let g:pwd = projectroot#guess() \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
-" nnoremap <silent> <leader>oT :belowright split \| terminal<cr>
-nnoremap <silent> <leader>ov :belowright 20split \| terminal vagrant ssh<cr>
 
-nnoremap <silent> <leader>r :echo "Currently not mapped, try backspace instead"<cr>
 nnoremap <silent> <bs> :Dirvish %:p:h<cr>
 nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
 " fzf
-nnoremap <silent> <leader>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
-nnoremap <silent> <leader>fa :call local#fzf#files()<cr>
-nnoremap <silent> <leader>fp :FZFProject<cr>
-nnoremap <silent> <leader>fc :call local#fzf#clip()<cr>
-nnoremap <silent> <leader>fd :call local#fzf#buffer_dir_files()<cr>
-nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
-nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
-nnoremap <silent> <leader>ft :FZFTags<cr>
-nnoremap <silent> <leader>fb :FZFBuffers<cr>
-nnoremap <silent> <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
-nnoremap <silent> <leader>gF :call local#fzf#all_files(expand('<cfile>'))<cr>
-nnoremap <silent> <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
-nnoremap <silent> <leader>gw :Rg <cword><cr>
-nnoremap <silent> <leader>ga :Ag<cr>
-nnoremap <silent> <leader>gr :Rg<cr>
-vnoremap <silent> <leader>ga "ay :Ag <c-r>a<cr>
-vnoremap <silent> <leader>gr "ay :Rg <c-r>a<cr>
 nnoremap <silent> <leader>w :W!<cr>
 nnoremap <silent> <leader>a :Autoformat<cr>
 nnoremap <silent> <leader>z za
@@ -381,7 +358,6 @@ nmap <silent> <c-w>S :split<cr>
 map Y y$
 nnoremap <leader> "*
 vnoremap <leader> "*
-noremap <leader>sc :execute(':rightbelow 10split \| te scspell %')<cr>
 nmap yaf :let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>
 nmap yif :let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>
 
@@ -442,8 +418,32 @@ imap <C-@> <C-Space>
 " emmet
 imap <c-e> <c-y>,
 
-" nvim now can map alt without terminal issues, new cool shortcuts commin
 if has('nvim')
+  nnoremap <silent> <leader>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
+  nnoremap <silent> <leader>fa :call local#fzf#files()<cr>
+  nnoremap <silent> <leader>fp :FZFProject<cr>
+  nnoremap <silent> <leader>fc :call local#fzf#clip()<cr>
+  nnoremap <silent> <leader>fd :call local#fzf#buffer_dir_files()<cr>
+  nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
+  nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
+  nnoremap <silent> <leader>ft :FZFTags<cr>
+  nnoremap <silent> <leader>fb :FZFBuffers<cr>
+  nnoremap <silent> <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
+  nnoremap <silent> <leader>gF :call local#fzf#all_files(expand('<cfile>'))<cr>
+  nnoremap <silent> <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
+  nnoremap <silent> <leader>gw :Rg <cword><cr>
+  nnoremap <silent> <leader>ga :Ag<cr>
+  nnoremap <silent> <leader>gr :Rg<cr>
+  vnoremap <silent> <leader>ga "ay :Ag <c-r>a<cr>
+  vnoremap <silent> <leader>gr "ay :Rg <c-r>a<cr>
+
+  nnoremap <silent> <leader>of :let g:pwd = expand('%:h') \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
+  nnoremap <silent> <leader>op :let g:pwd = projectroot#guess() \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
+  nnoremap <silent> <leader>ov :belowright 20split \| terminal vagrant ssh<cr>
+
+  noremap <leader>sc :execute(':rightbelow 10split \| te scspell %')<cr>
+
+  " nvim now can map alt without terminal issues, new cool shortcuts commin
   tnoremap <silent> <c-q> <C-\><C-n>
 
   noremap <silent> <M-l> :vertical resize +1<cr>

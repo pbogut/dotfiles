@@ -11,7 +11,7 @@ URxvt.urgentOnBell:         false
 URxvt.visualBell:           false
 URxvt.loginShell:           true
 URxvt.fading:               15
-URxvt.saveLines:            1000000
+URxvt.saveLines:            100000
 ! URxvt.internalBorder:       3
 ! URxvt.lineSpace:            0
 

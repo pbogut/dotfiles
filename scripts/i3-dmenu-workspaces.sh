@@ -1,6 +1,6 @@
 #!/bin/bash
 current=$(i3-msg -t get_workspaces | jq -r '.[].name')
-static=$(cat ~/.config/i3/workspaces | sed 's/\(.*\)/0:\1/')
+static=$(cat ~/.config/i3/workspaces ~/.config/i3/workspaces-local 2> /dev/null | sed 's/\(.*\)/0:\1/')
 if [[ $1 == '--move' ]];then
     label="move:"
 elif [[ $1 == '--send' ]]; then
