@@ -27,8 +27,6 @@ read -d '' files <<"EOF"
     screenrc
     scripts
     terminfo
-    tmux
-    tmux.conf
     urlview
     vimrc
     yaourtrc
@@ -135,7 +133,13 @@ echo -en "\tSet browser script as default browser (xdg-settings) ... "
 [[ -n `command -v xdg-mime` ]] && xdg-settings set default-web-browser browser.desktop
 echo "done"
 
-echo -en "\t"$([[ -n `command -v gvfs-mime` ]] && gvfs-mime --set inode/directory ranger.desktop) && echo " ... done"
+echo -en "\t"$(
+  if [[ -n `command -v gio` ]]; then
+    gio mime inode/directory ranger.desktop
+  elif [[ -n `command -v gvfs-mime` ]]; then
+    gvfs-mime --set inode/directory ranger.desktop
+  fi
+) && echo " ... done"
 
 echo -en "\tInstall vim/neovim plugins ... "
 [[ -n `command -v /bin/vim` ]] && /bin/vim -u ./vim/silent.vimrc +PlugInstall +qa

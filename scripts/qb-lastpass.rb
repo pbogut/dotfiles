@@ -34,6 +34,7 @@ site_parts = []
 url = ENV['QUTE_URL'] || ''
 url.gsub(/^.*?\/\/(.*?)[\/:].*/, '\1').split('.').reverse.each do |p|
   site_parts << p
+  break if site_parts.reverse.join('.').length > 8
   break unless p.length < 5 or !p.match(/\./)
 end
 site_url = site_parts.reverse.join('.')

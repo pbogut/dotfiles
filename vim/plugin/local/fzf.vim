@@ -108,7 +108,7 @@ function! s:fzf_project_sink(line)
     let path = $HOME . "/projects/" . a:line
     silent! exec('Prosession ' . l:path)
     exec('cd ' . l:path)
-    echo l:path
+    echo 'Prosession ' . getcwd()
   endif
 endfunction
 

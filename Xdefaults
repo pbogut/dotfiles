@@ -11,7 +11,7 @@ URxvt.urgentOnBell:         false
 URxvt.visualBell:           false
 URxvt.loginShell:           true
 URxvt.fading:               15
-URxvt.saveLines:            100000
+URxvt.saveLines:            1000000
 ! URxvt.internalBorder:       3
 ! URxvt.lineSpace:            0
 
@@ -36,7 +36,7 @@ URxvt.pointerBlank:         true
 
 ! Perl scripts
 URxvt.perl-ext-common:      default,clipboard,url-select,keyboard-select
-URxvt.url-select.launcher:  qutebrowser_webengine --target window
+URxvt.url-select.launcher:  browser --target window
 URxvt.url-select.underline: true
 URxvt.keysym.M-u:           perl:url-select:select_next
 URxvt.keysym.M-Escape:      perl:keyboard-select:activate
