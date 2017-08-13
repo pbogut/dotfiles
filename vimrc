@@ -236,7 +236,7 @@ if exists(':Plug')
     Plug 'pbogut/deoplete-elm', { 'for': 'elm' }
     Plug 'carlitux/deoplete-ternjs', { 'for': ['javascript', 'javascript.jsx'], 'do': 'yarn global add tern' }
     " Plug 'roxma/nvim-completion-manager'
-    Plug 'autozimu/LanguageClient-neovim', { 'do': ':UpdateRemotePlugins' }
+    " Plug 'autozimu/LanguageClient-neovim', { 'do': ':UpdateRemotePlugins' }
     " Plug 'roxma/LanguageServer-php-neovim',  {'do': 'composer install && composer run-script parse-stubs'}
   endif " if Plug installed
   if (!has('nvim') || $STY != '')
