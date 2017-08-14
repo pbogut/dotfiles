@@ -6,6 +6,7 @@
 #=================================================
 dnsip=$(ifconfig docker0 | awk '/inet /{print $2}')
 hosts="$HOME/.docnet"
+hosts="/tmp/__docnet_hosts"
 
 echo ""
 echo "In order to get it working run:"
