@@ -279,6 +279,7 @@ bindsym $mod+Ctrl+t $sh "~/.scripts/switch-or-launch.sh '\<Todoist$' 'todoist'"
 bindsym $mod+Ctrl+b $sh "~/.scripts/switch-or-launch.sh '\<qutebrowser$' 'browser'"
 bindsym $mod+Ctrl+f $sh "~/.scripts/switch-or-launch.sh '\<Franz$' 'franz-bin'"
 bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
+bindsym $mod+Ctrl+g $sh "~/.scripts/switch-or-launch.sh '\<Toggl$' 'toggl'"
 
 # move workspace to another monitor
 bindsym $mod+m move workspace to output left
