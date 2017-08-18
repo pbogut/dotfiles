@@ -57,6 +57,8 @@
     ds = diff --stat=160,120
     dh1 = diff HEAD~1
 
+    ri = rebase --interactive
+
     # Get pull request locally
     cpr = "!. ~/.githelpers && git_checkout_pull_request"
     pullpr = "!. ~/.githelpers && git_pull_pull_request"

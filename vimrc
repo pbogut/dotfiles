@@ -27,7 +27,8 @@ set scrolloff=3
 " line numering
 set number
 set relativenumber
-set nolazyredraw
+" set nolazyredraw
+set lazyredraw
 set wildmenu
 set incsearch
 set showcmd
