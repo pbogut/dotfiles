@@ -151,6 +151,7 @@ bindsym $mod+Ctrl+0 move container to workspace 10
 # named workspaces
 set $wscode 0: code
 set $wsdb   0: db
+set $wsdash 0: dash
 set $wsterm 0: term
 set $wsbrow 0: browser
 set $wscomm 0:/ comm
@@ -241,7 +242,10 @@ workspace_layout stacked
 assign [title="^DBeaver" class="^SWT$"] $wsdb
 assign [title="^Dbeaver$"] $wsdb
 assign [title="^Franz$"] $wscomm
+assign [title="^toggl$"] $wsdash
+assign [title="^todoist$"] $wsdash
 
+for_window [class="Toggl Desktop"] floating enable
 for_window [class="Skype"] floating enable
 # for_window [class="^nvim-qt$"] floating enable
 for_window [class="^feh$"] fullscreen enable

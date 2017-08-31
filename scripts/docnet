@@ -49,6 +49,8 @@ while :; do # in case something crashes we want to restart it
     __connect $hash
   done
 
+  sudo systemctl restart dnsmasq
+
   docker events | while read line; do
     echo $line | grep 'network \(connect\|disconnect\)' | sed 's,.*network \(disconnect\|connect\).*container=\([0-9a-z]*\)\,.*,\1 \2,' | (read action hash
       hash=$(echo $hash |sed 's,^\(.\{12\}\).*,\1,')
@@ -58,7 +60,8 @@ while :; do # in case something crashes we want to restart it
         echo disconnected $hash
         rm "$hosts/$hash" 2>/dev/null
       fi
-      sudo killall -s SIGHUP dnsmasq
+      # sudo killall -s SIGHUP dnsmasq
+      sudo systemctl restart dnsmasq
     )
   done
 done
