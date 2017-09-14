@@ -56,6 +56,7 @@ set colorcolumn=81
 set foldmethod=manual
 set foldnestmax=10
 set foldlevelstart=99
+" set cscopetag "search both cscopes db and the tags file
 " color scheme
 set background=dark
 if exists('&inccommand') | set inccommand=split | endif
@@ -136,7 +137,7 @@ augroup configgroup
         \| setlocal textwidth=72
   autocmd BufEnter lpass.*
         \  if search('^Password: $')
-        \|   execute('r !apg -m16 -n1')
+        \|   execute('r !apg -m16 -n1 -MSNCL')
         \|   execute('normal kJkk')
         \| endif
   " autocmd BufEnter * normal! zR
@@ -325,6 +326,7 @@ nnoremap <silent> <leader>w :W!<cr>
 nnoremap <silent> <leader>a :Autoformat<cr>
 nnoremap <silent> <leader>z za
 nnoremap <silent> <esc> :set nohls<cr>
+nnoremap R ddO
 nnoremap n :set hls<cr>n
 nnoremap N :set hls<cr>N
 " selection mode (for easy snippets parts move)
