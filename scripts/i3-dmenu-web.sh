@@ -12,6 +12,7 @@
 #         qutebrowser_webengine "$query"
 #     ) &
 # )
-(cat ~/.local/share/qutebrowser/history | sort -r | while read date url; do echo $(date -d "@$date" '+%Y-%m-%d') $url; done) | rofi -dmenu -p "web:" | (
-    read date query; [[ $query == "" ]] || qutebrowser_webengine "$query" &
+(cat ~/.local/share/qutebrowser/history | grep -v '^[0-9]*\-r' | sort -r | while read date url name; do echo $(date -d "@${date}" '+%Y-%m-%d'
+) $url; done) | uniq | rofi -dmenu -p "web:" | (
+    read date query; [[ $query == "" ]] || browser "$query" &
 )
