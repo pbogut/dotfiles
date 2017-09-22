@@ -44,6 +44,7 @@ read -d '' files <<"EOF"
     config/nvim/init.vim
     config/nvim/ginit.vim
     config/pip/pip.conf
+    config/qutebrowser/config.py
     config/qutebrowser/keys.conf
     config/qutebrowser/qutebrowser.conf
     config/ranger/devicons.py
