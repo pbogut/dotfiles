@@ -32,6 +32,11 @@ let s:switch_php_array =
             \   '\<array(\(.*\))':      '[\1]',
             \   '\(\s*\|^\)\[\(.*\)\]': '\1array(\2)',
             \ }
+let s:switch_php_comment =
+            \ {
+            \   '^\(\s*\)/\* \(.*\) \*/$':      '\1// \2',
+            \   '^\(\s*\)// \(.*\)': '\1/* \2 */',
+            \ }
 let s:switch_elixir_assert =
             \ {
             \   '\(assert\)': 'refute',
@@ -58,6 +63,7 @@ augroup swich_vim
             \   s:switch_c_like_if,
             \   s:switch_c_like_while,
             \   s:switch_php_array,
+            \   s:switch_php_comment,
             \   s:switch_php_scope,
             \ ]
   autocmd FileType javascript let b:switch_custom_definitions =

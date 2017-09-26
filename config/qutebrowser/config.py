@@ -1,5 +1,5 @@
 c.url.start_pages = ["https://google.com"]
-c.downloads.open_dispatcher = "sh -c '~/.scripts/i3-open \"{}\"'"
+c.downloads.open_dispatcher = '/bin/bash -c "~/.scripts/i3-open {}"'
 c.editor.command = ["nvim-qt", "--nofork", "--geometry", "900x55", "--", "-f", "{}"]
 c.content.developer_extras = True
 c.downloads.position = "bottom"
@@ -59,6 +59,10 @@ config.bind('xO', 'open -b {url:pretty}', force=True)
 config.bind('<Ctrl-q>', 'tab-close', force=True)
 config.bind('<Ctrl-n>', 'tab-next', force=True)
 config.bind('<Ctrl-p>', 'tab-prev', force=True)
+config.bind('<Return>', 'enter-mode insert', force=True)
+config.bind('do', 'download-open', force=True)
+config.bind('dc', 'download-clear', force=True)
+config.bind('dr', 'download-remove', force=True)
 
 config.bind('<Ctrl-i>', 'open-editor', mode='insert')
 config.bind('<ctrl-j>', 'spawn --userscript ~/.scripts/qb-lastpass.rb --add', mode='insert')
