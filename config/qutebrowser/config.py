@@ -87,3 +87,9 @@ config.bind('ys', 'spawn --userscript ~/.scripts/qb-copy-text.sh -b')
 config.bind('yH', 'spawn --userscript ~/.scripts/qb-copy-html.sh -p')
 config.bind('yS', 'spawn --userscript ~/.scripts/qb-copy-text.sh -p')
 config.bind('eu', 'edit-url')
+
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
+if os.path.exists(dir_path + '/secure_config.py'):
+    import secure_config
+    secure_config.init(config)
