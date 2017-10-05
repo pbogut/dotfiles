@@ -237,7 +237,7 @@ if exists(':Plug')
     Plug 'zchee/deoplete-go', { 'do': 'go get github.com/nsf/gocode && make', 'for': 'go'}
     Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
     Plug 'zchee/deoplete-jedi', { 'for': 'python' }
-    " Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
+    Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
     Plug 'pbogut/deoplete-elm', { 'for': 'elm' }
     Plug 'carlitux/deoplete-ternjs', { 'for': ['javascript', 'javascript.jsx'], 'do': 'yarn global add tern' }
     " Plug 'roxma/nvim-completion-manager'

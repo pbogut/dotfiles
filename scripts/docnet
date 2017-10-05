@@ -64,8 +64,8 @@ while :; do # in case something crashes we want to restart it
         echo disconnected $hash
         rm "$hosts/$hash" 2>/dev/null
       fi
-      # killall -s SIGHUP dnsmasq
-      systemctl restart dnsmasq
+      killall -s SIGHUP dnsmasq
+      # systemctl restart dnsmasq
     )
   done
 done
