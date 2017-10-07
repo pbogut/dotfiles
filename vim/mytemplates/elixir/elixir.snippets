@@ -1,19 +1,44 @@
 priority -50
 
+
+global !p
+def snake_to_mixed(column):
+   words = column.split('_')
+   return ''.join(word.capitalize() for word in words)
+
+def module_name(text, strip_test=False, add_app=True):
+	text = text.replace(vim.eval('getcwd()') + '/', '')
+	text = re.sub('^(lib|web|test)?/?(.*).ex.?$', r'\2', text)
+	appmod = vim.eval('templates#elixir#appmod()').lower()
+	parts = text.split('/')
+	if len(parts) >= 2 and parts[-1] == parts[-2]:
+		parts.pop()
+	if len(parts) >= 2 and parts[-1] == parts[-2] + '_test':
+		parts.remove(parts[-2])
+	if add_app and appmod:
+		parts.insert(0, appmod)
+	if parts[0] == appmod:
+		parts.remove(parts[0])
+	if strip_test:
+		parts[-1] = re.sub('_test$', '', parts[-1])
+
+	return '.'.join(snake_to_mixed(part) for part in parts)
+endglobal
+
+
 snippet _t_skel "Elixir Module Skeleton" b
-defmodule ${1:`!v
-templates#stfile('\(^lib/\|^web/\|^test/\)', 'camelcase|capitalize|dot')`} do
+defmodule ${1:`!p snip.rv = module_name(path) `} do
 	def ${2:function_name()} do
 		$0
 	end
 end
 endsnippet
 
+
 snippet _t_test "Elixir Test Skeleton" b
-defmodule ${1:`!v
-templates#stfile('\(^lib/\|^web/\|^test/\)', 'camelcase|dot')`} do
+defmodule ${1:`!p snip.rv = module_name(path)`} do
 	use ExUnit.Case
-	doctest ${2:`!v templates#stfile(['\(^lib/\|^web/\|^test/\)\(.*\)_test','\2'], 'camelcase|capitalize|dot')`}
+	doctest ${2:`!p snip.rv = module_name(path, strip_test=True) `}
 
 	alias $2
 

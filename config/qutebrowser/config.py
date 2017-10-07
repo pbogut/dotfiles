@@ -1,4 +1,5 @@
 c.url.start_pages = ["https://google.com"]
+c.url.default_page = 'https://google.com'
 c.downloads.open_dispatcher = '/bin/bash -c "~/.scripts/i3-open {}"'
 c.editor.command = ["nvim-qt", "--nofork", "--geometry", "900x55", "--", "-f", "{}"]
 c.content.developer_extras = True
@@ -54,8 +55,9 @@ config.unbind('d', mode='normal')
 config.unbind('D', mode='normal')
 config.unbind('T', mode='normal')
 config.unbind('<back>', mode='normal')
-config.bind('gO', 'open -t {url:pretty}', force=True)
-config.bind('xO', 'open -b {url:pretty}', force=True)
+config.bind('gp', 'open -p', force=True)
+config.bind('gO', 'set-cmd-text :open -t {url:pretty}', force=True)
+config.bind('xO', 'set-cmd-text :open -b {url:pretty}', force=True)
 config.bind('<Ctrl-q>', 'tab-close', force=True)
 config.bind('<Ctrl-n>', 'tab-next', force=True)
 config.bind('<Ctrl-p>', 'tab-prev', force=True)
