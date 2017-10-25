@@ -529,6 +529,9 @@ let g:strip_whitespace_on_save = 1
 
 let g:formatdef_blade = '"html-beautify -s ".&shiftwidth'
 let g:formatters_blade = ['blade']
+let g:formatdef_elixir = '"mix format -"'
+let g:formatters_elixir = ['elixir']
+
 " despatch hax to not cover half screen
 let g:dispatch_quickfix_height = 10
 let g:dispatch_tmux_height = 1

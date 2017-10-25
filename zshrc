@@ -178,7 +178,7 @@ dirdiff() {
   if [[ -z  $2 ]]; then
     echo "Usage: dirdiff /path/to/dir/one /path/to/dir/two"
   else
-    echo ":bw! | DirDiff $1 $2" | $(which $EDITOR) /tmp/skip_session
+    echo ":bw! | DirDiff $1 $2" | $(which $EDITOR) $TMP/skip_session
   fi
 }
 

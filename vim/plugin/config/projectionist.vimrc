@@ -111,8 +111,11 @@ let s:elixir =
       \     "*.exs": {
       \       "alternate": "{}_test.exs"
       \     },
+      \     "*.ex": {
+      \       "alternate": "{}_test.exs"
+      \     },
       \     "*_test.exs": {
-      \       "alternate": "{}.exs",
+      \       "alternate": ["{}.exs", "{}.ex"],
       \       "skeleton": "test",
       \       "type": "test",
       \     },
@@ -202,6 +205,6 @@ let g:projectionist_heuristics = {}
 let g:projectionist_heuristics["composer.json&modman&app/"] = s:magento_module
 let g:projectionist_heuristics["composer.json"] = s:composer
 let g:projectionist_heuristics["artisan&composer.json"] = s:laravel
-let g:projectionist_heuristics["mix.exs|*.exs"] = s:elixir
+let g:projectionist_heuristics["*.ex|*.exs"] = s:elixir
 let g:projectionist_heuristics["mix.exs&deps/phoenix/"] = s:phoenixframework
 let g:projectionist_heuristics["codeception.yml"] = s:codeception
