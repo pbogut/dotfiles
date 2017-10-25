@@ -69,10 +69,10 @@ endif
 
 let mapleader = "\<space>" " life changer
 
-let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
-set guicursor=n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor
-
 if has('nvim')
+  " let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
+  set guicursor=n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor
+
   augroup configgroup_nvim
     autocmd!
     " fix terminal display
@@ -189,7 +189,7 @@ if exists(':Plug')
   Plug 'sirver/ultisnips'
   Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
   " Plug 'benekastah/neomake'
-  Plug 'Chiel92/vim-autoformat'
+  " Plug 'Chiel92/vim-autoformat'
   Plug 'alvan/vim-closetag'
   Plug 'k-takata/matchit.vim'
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
@@ -216,6 +216,7 @@ if exists(':Plug')
   Plug 'wakatime/vim-wakatime'
 
   " testing
+  Plug 'sbdchd/neoformat'
   Plug 'vimwiki/vimwiki'
   Plug 'MattesGroeger/vim-bookmarks'
   Plug 'vim-scripts/ReplaceWithRegister'
@@ -323,7 +324,7 @@ nnoremap <silent> <bs> :Dirvish %:p:h<cr>
 nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
 " fzf
 nnoremap <silent> <leader>w :W!<cr>
-nnoremap <silent> <leader>a :Autoformat<cr>
+nnoremap <silent> <leader>a :Neoformat<cr>
 nnoremap <silent> <leader>z za
 nnoremap <silent> <esc> :set nohls<cr>
 nnoremap R ddO
@@ -432,7 +433,8 @@ if has('nvim')
   nnoremap <silent> <leader>fd :call local#fzf#buffer_dir_files()<cr>
   nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
   nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
-  nnoremap <silent> <leader>ft :FZFTags<cr>
+  nnoremap <silent> <leader>ft :FZFTags <cword><cr>
+  nnoremap <silent> <leader>] :FZFTags<cr>
   nnoremap <silent> <leader>fb :FZFBuffers<cr>
   nnoremap <silent> <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
   nnoremap <silent> <leader>gF :call local#fzf#all_files(expand('<cfile>'))<cr>

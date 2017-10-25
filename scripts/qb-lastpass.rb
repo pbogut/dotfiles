@@ -57,6 +57,8 @@ prompt = case action
     "user"
   when "--type-pass"
     "pass"
+  when "--remove"
+    "remove"
   else
     "acc"
 end
@@ -78,6 +80,8 @@ result = CSV.parse(result_line)[0]
 
 user = result[1]
 pass = result[2]
+cat = result[5]
+name = result[4]
 
 sleep 0.2
 
@@ -111,4 +115,9 @@ if action == '--type-user-and-pass' or action.empty?
     file.write("fake-key #{pass}\n")
     # file.write("fake-key -g <esc>i\n")
   end
+end
+if action == "--remove"
+  fullname = [cat, name].join("/").gsub(/^\//, "")
+  out, _, _ = Open3.capture3("lpass rm '#{fullname}'")
+  puts out
 end
