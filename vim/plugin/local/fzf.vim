@@ -47,7 +47,7 @@ endfunction
 
 function! local#fzf#git_ls(...) abort
   let options = {
-        \   'source': '{git -c color.status=always status --short; git ls-files | while read l; do echo -e "\033[0;34mG\033[0m  $l";done }',
+        \   'source': 'git-ls',
         \   'sink': function('s:fzf_git_ls_sink'),
         \   'options': '--ansi --prompt "Git> " ' . s:params(a:000, 1),
         \ }

@@ -1,6 +1,6 @@
 c.url.start_pages = ["https://google.com"]
 c.url.default_page = 'https://google.com'
-c.downloads.open_dispatcher = '/bin/bash -c "~/.scripts/i3-open {}"'
+c.downloads.open_dispatcher = '/bin/bash -c "~/.scripts/i3-open \'{}\'"'
 c.editor.command = ["nvim-qt", "--nofork", "--geometry", "900x55", "--", "-f", "{}"]
 c.content.developer_extras = True
 c.downloads.position = "bottom"
