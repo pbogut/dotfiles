@@ -7,9 +7,20 @@ augroup pb_alegroup
   autocmd!
   autocmd InsertEnter php call s:ale_init_php()
   autocmd FileType php call s:ale_init_php()
+  autocmd TextChanged * call s:ale_lint('normal')
+  autocmd TextChangedI * call s:ale_lint('insert')
 augroup END
 
 let g:ale_lint_on_save = 1
+" to disable autocommand set up by ale
+let g:ale_lint_on_text_changed = 'never'
+
+let g:ale_lint_on_text_changed_default = 'always'
+" file needs to be saved anyway, so dont do anything on change
+let g:ale_lint_on_text_changed_eelixir = 'never'
+let g:ale_lint_on_text_changed_elixir = 'never'
+" linting elm takes too long to do this when file chaneg
+let g:ale_lint_on_text_changed_elm = 'never'
 
 let g:ale_sign_error = '✖'
 let g:ale_sign_error = ''
@@ -21,6 +32,18 @@ let g:ale_sign_column_always = 1
 let g:ale_echo_msg_error_str = 'E'
 let g:ale_echo_msg_warning_str = 'W'
 let g:ale_echo_msg_format = '[%severity%][%linter%] %s'
+
+" wrapper around ale linting to allow lint setup by file tyep
+function! s:ale_lint(type)
+  let action = get(g:, 'ale_lint_on_text_changed_' . &ft)
+  if empty(l:action)
+    let action = g:ale_lint_on_text_changed_default
+  endif
+
+  if l:action == 'always' || l:action == a:type
+    call ale#Queue(g:ale_lint_delay)
+  endif
+endfunction
 
 function! s:ale_init_php()
   if !empty(get(b:, 'ale_php_phpmd_ruleset'))
@@ -41,7 +64,7 @@ endfunction
 
 let g:ale_linters =
       \{
-      \ 'elixir': ['dialyzer', 'mix']
+      \ 'elixir': ['mix', 'dialyzer']
       \}
 
 function! s:ale_dialyzer(buffer, lines) abort
@@ -86,7 +109,12 @@ function! s:ale_dialyzer(buffer, lines) abort
   return l:output
 endfunction
 
+let g:ale_elixir_mix_compile_current_app = ''
 function! s:ale_mix_compile(buffer, lines) abort
+
+
+  let l:app_pattern = '\v^\=\=\> (.+)$'
+
   " Matches patterns line the following:
   "
   " ** (SyntaxError) lib/issues.ex:18: syntax error before: kota
@@ -94,7 +122,16 @@ function! s:ale_mix_compile(buffer, lines) abort
   let l:pattern = '\v(\(.*\) )(.*):(\d+): (.+)$'
   let l:output = []
 
+  let l:app_path = ''
+
   for l:line in a:lines
+    let l:app_pattern = '\v^\=\=\> (.+)$'
+    let l:app_match = matchlist(l:line, l:app_pattern)
+    if len(l:app_match) != 0
+      let l:app_path = 'apps/' . l:app_match[1] . '/'
+      continue
+    endif
+
     let l:match = matchlist(l:line, l:pattern)
 
     if len(l:match) == 0
@@ -111,8 +148,8 @@ function! s:ale_mix_compile(buffer, lines) abort
       let l:type = 'W'
     endif
 
-    if bufname(a:buffer) != l:match[2]
-      " continue
+    if bufname(a:buffer) != l:app_path . l:match[2]
+      continue
     endif
 
     " vcol is Needed to indicate that the column is a character.
@@ -128,57 +165,11 @@ function! s:ale_mix_compile(buffer, lines) abort
   return l:output
 endfunction
 
-function! s:ale_filtered_credo(buffer, lines) abort
-  " Matches patterns line the following:
-  "
-  " lib/filename.ex:19:7: F: Pipe chain should start with a raw value.
-  let l:pattern = '\v:(\d+):?(\d+)?: (.): (.+)$'
-  let l:output = []
-
-  for l:line in a:lines
-    let l:match = matchlist(l:line, l:pattern)
-
-    if len(l:match) == 0
-        continue
-    endif
-
-    let l:type = l:match[3]
-    let l:text = l:match[4]
-
-    if l:text == "Functions should have a @spec type specification."
-      continue
-    endif
-
-    if l:type ==# 'C'
-      let l:type = 'E'
-    elseif l:type ==# 'R'
-      let l:type = 'W'
-    endif
-
-    " vcol is Needed to indicate that the column is a character.
-    call add(l:output, {
-    \   'bufnr': a:buffer,
-    \   'lnum': l:match[1] + 0,
-    \   'col': l:match[2] + 0,
-    \   'type': l:type,
-    \   'text': l:text,
-    \})
-  endfor
-
-  return l:output
-endfunction
-
 call ale#linter#Define('elixir', {
       \ 'name': 'mix',
       \ 'executable': 'mix',
       \ 'command': 'mix compile --warnings-as-errors%s',
       \ 'callback': function('s:ale_mix_compile') })
-
-call ale#linter#Define('elixir', {
-      \ 'name': 'filtered_credo',
-      \ 'executable': 'mix',
-      \ 'command': 'mix credo suggest --format=flycheck --read-from-stdin %s',
-      \ 'callback': function('s:ale_filtered_credo') })
 
 call ale#linter#Define('elixir', {
       \ 'name': 'dialyzer',

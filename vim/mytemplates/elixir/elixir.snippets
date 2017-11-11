@@ -7,7 +7,7 @@ def snake_to_mixed(column):
    return ''.join(word.capitalize() for word in words)
 
 def module_name(text, strip_test=False, add_app=True):
-	text = text.replace(vim.eval('getcwd()') + '/', '')
+	text = text.replace(vim.eval('templates#elixir#approot()') + '/', '')
 	text = re.sub('^(lib|web|test)?/?(.*).ex.?$', r'\2', text)
 	appmod = vim.eval('templates#elixir#appmod()').lower()
 	parts = text.split('/')
@@ -15,10 +15,10 @@ def module_name(text, strip_test=False, add_app=True):
 		parts.pop()
 	if len(parts) >= 2 and parts[-1] == parts[-2] + '_test':
 		parts.remove(parts[-2])
-	if add_app and appmod:
-		parts.insert(0, appmod)
 	if parts[0] == appmod:
 		parts.remove(parts[0])
+	if add_app and appmod:
+		parts.insert(0, appmod)
 	if strip_test:
 		parts[-1] = re.sub('_test$', '', parts[-1])
 
