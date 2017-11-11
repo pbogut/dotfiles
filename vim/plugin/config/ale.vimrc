@@ -41,8 +41,92 @@ endfunction
 
 let g:ale_linters =
       \{
-      \ 'elixir': ['filtered_credo']
+      \ 'elixir': ['dialyzer', 'mix']
       \}
+
+function! s:ale_dialyzer(buffer, lines) abort
+  " Matches patterns line the following:
+  "
+  " lib/calc.ex:2: Invalid type specification for function 'Elixir.Calc':sum/1. The success typing is (binary()) -> integer()
+  " lib/filename.ex:19:7: Pipe chain should start with a raw value.
+  let l:pattern = '\v(.*):(\d+): (.+)$'
+  let l:output = []
+
+  for l:line in a:lines
+    let l:match = matchlist(l:line, l:pattern)
+
+    if len(l:match) == 0
+        continue
+    endif
+
+    " let l:type = "F"
+    let l:type = "W"
+    let l:text = l:match[3]
+
+    if l:type ==# 'C'
+      let l:type = 'E'
+    elseif l:type ==# 'R'
+      let l:type = 'W'
+    endif
+
+    if bufname(a:buffer) != l:match[1]
+      continue
+    endif
+
+    " vcol is Needed to indicate that the column is a character.
+    call add(l:output, {
+    \   'bufnr': a:buffer,
+    \   'lnum': l:match[2] + 0,
+    \   'col': 0,
+    \   'type': l:type,
+    \   'text': l:text,
+    \})
+  endfor
+
+  return l:output
+endfunction
+
+function! s:ale_mix_compile(buffer, lines) abort
+  " Matches patterns line the following:
+  "
+  " ** (SyntaxError) lib/issues.ex:18: syntax error before: kota
+  " (elixir) lib/kernel/parallel_compiler.ex:198: anonymous fn/4 in Kernel.ParallelCompiler.spawn_workers/6
+  let l:pattern = '\v(\(.*\) )(.*):(\d+): (.+)$'
+  let l:output = []
+
+  for l:line in a:lines
+    let l:match = matchlist(l:line, l:pattern)
+
+    if len(l:match) == 0
+        continue
+    endif
+
+    " let l:type = "F"
+    let l:type = "W"
+    let l:text = l:match[1] . l:match[4]
+
+    if l:type ==# 'C'
+      let l:type = 'E'
+    elseif l:type ==# 'R'
+      let l:type = 'W'
+    endif
+
+    if bufname(a:buffer) != l:match[2]
+      " continue
+    endif
+
+    " vcol is Needed to indicate that the column is a character.
+    call add(l:output, {
+    \   'bufnr': a:buffer,
+    \   'lnum': l:match[3] + 0,
+    \   'col': 0,
+    \   'type': l:type,
+    \   'text': l:text,
+    \})
+  endfor
+
+  return l:output
+endfunction
 
 function! s:ale_filtered_credo(buffer, lines) abort
   " Matches patterns line the following:
@@ -85,10 +169,22 @@ function! s:ale_filtered_credo(buffer, lines) abort
 endfunction
 
 call ale#linter#Define('elixir', {
+      \ 'name': 'mix',
+      \ 'executable': 'mix',
+      \ 'command': 'mix compile --warnings-as-errors%s',
+      \ 'callback': function('s:ale_mix_compile') })
+
+call ale#linter#Define('elixir', {
       \ 'name': 'filtered_credo',
       \ 'executable': 'mix',
       \ 'command': 'mix credo suggest --format=flycheck --read-from-stdin %s',
       \ 'callback': function('s:ale_filtered_credo') })
+
+call ale#linter#Define('elixir', {
+      \ 'name': 'dialyzer',
+      \ 'executable': 'mix',
+      \ 'command': 'mix dialyzer %s',
+      \ 'callback': function('s:ale_dialyzer') })
 
 highlight ALEErrorSign guibg=#073642 guifg=#dc322f
 highlight ALEWarningSign guibg=#073642 guifg=#d33682
