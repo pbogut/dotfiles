@@ -37,7 +37,7 @@ demonize rescuetime rescuetime
 demonize nm-applet nm-applet
 demonize twmnd twmnd
 demonize udisksvm "udisksvm -a"
-demonize mopidy mopidy
+demonize mopidy "mopidy -o mpd/port=${MOPIDY_PORT:-6600}"
 
 # sepcific for the computer
 if [[ -f "$HOME/.$host_name.autostart.sh" ]]; then

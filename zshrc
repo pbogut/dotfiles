@@ -189,7 +189,7 @@ alias clone="~/.scripts/term-in-current-dir.sh"
 alias c="clone"
 
 alias mutt="LC_ALL=en_GB.utf8 screen -U -D -RR mutt mutt"
-alias ncmpcpp="LC_ALL=en_GB.utf8 screen -U -D -RR ncmpcpp ncmpcpp"
+alias ncmpcpp="LC_ALL=en_GB.utf8 screen -U -D -RR ncmpcpp ncmpcpp -p $MOPIDY_PORT"
 
 alias php_debug_on="export XDEBUG_CONFIG=\"idekey=PHPSTORM\""
 alias php_debug_off="export XDEBUG_CONFIG="

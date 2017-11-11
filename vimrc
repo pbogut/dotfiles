@@ -102,6 +102,8 @@ augroup configgroup
         \| let b:commentary_format='// %s'
         \| nmap <buffer> gD <plug>(composer-find)
         \| setlocal kp=:PhpDoc
+        \| exec("map get mz0wwwyw/getters<cr>jo/**<cr>Gets <esc>pb~yiwo<cr>@return mixed<cr><cr>/<cr>public function get<esc>pa()<cr>{<cr>return $this-><esc>pb~A;<esc>jo<esc>`zj")
+        \| exec("map set mz0wwwyw/setters<cr>jo/**<cr>Sets <esc>pb~yiwo<cr>@return $this<cr><cr>/<cr>public function set<esc>pa(<esc>pbi$<esc>~~ea)<cr>{<cr>$this-><esc>pb~A = $<esc>pb~A;<cr>return $this;<esc>jo<esc>`zj")
   autocmd FileType go
         \  setlocal noexpandtab
         " \| setlocal tabstop=2 shiftwidth=2
@@ -218,6 +220,7 @@ if exists(':Plug')
 
   " testing
   Plug 'sbdchd/neoformat'
+  Plug 'autozimu/LanguageClient-neovim', { 'do': ':UpdateRemotePlugins' }
   Plug 'vimwiki/vimwiki'
   Plug 'MattesGroeger/vim-bookmarks'
   Plug 'vim-scripts/ReplaceWithRegister'
@@ -322,6 +325,7 @@ nnoremap <silent> <leader>l :call local#togglelist#locationlist()<cr>
 nnoremap <silent> <leader>q :call local#togglelist#quickfixlist()<cr>
 
 nnoremap <silent> <bs> :Dirvish %:p:h<cr>
+nnoremap <silent> _ :Dirvish %:p:h<cr>
 nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
 " fzf
 nnoremap <silent> <leader>w :W!<cr>
