@@ -48,7 +48,7 @@ show_git_head() {
 }
 
 pretty_git_log() {
-    git log --graph --pretty="tformat:${FORMAT}" $* |
+    git log --color=always --graph --pretty="tformat:${FORMAT}" $* |
         # Replace (2 years ago) with (2 years)
         sed -Ee 's/(^[^<]*) ago\)/\1)/' |
         # Replace (2 years, 5 months) with (2 years)
@@ -56,7 +56,7 @@ pretty_git_log() {
         # Line columns up based on } delimiter
         # Disabled due to column issue with colors
         # column -s '}' -t |
-        sed 's,\(\s\{20\}\), ,g' |
+        sed -Ee 's,\(\s\{20\}\), ,g' |
         # sed 's,},\t\t,' |
         # sed 's,\(.*\)}\(.*\)}\(.*\)}\(.*\),\1\t\t\2\t\3\t\t\4,g' |
         # Color merge commits specially
