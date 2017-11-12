@@ -21,7 +21,7 @@ function! local#paranoicbackup#write()
         \ . substitute(l:fullpath, '^.\{4,}\(.\{27}\)$', '...\1','')
   silent execute "!mkdir -p " . l:escdir
   silent execute "keepalt w! " . l:escfile
-  silent execute "!(cd " . l:escdir .
+  silent execute "!sh -c \"cd " . l:escdir .
         \ " && git add " . l:escfile .
-        \ " && git commit ". l:escfile . " -m'" . l:message . "') > /dev/null &"
+        \ " && git commit ". l:escfile . " -m'" . l:message . "'\" > /dev/null &"
 endfunction
