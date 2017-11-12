@@ -24,6 +24,7 @@ read -d '' files <<"EOF"
     npmrc
     offlineimap-hooks
     offlineimap.py
+    profile
     screenrc
     scripts
     terminfo
@@ -37,6 +38,7 @@ read -d '' files <<"EOF"
     config/autostart/autostart.desktop
     config/dircolors-solarized
     config/feh/keys
+    config/fish
     config/i3/config
     config/i3/i3status.conf
     config/i3/workspaces
@@ -147,35 +149,6 @@ echo -en "\tInstall vim/neovim plugins ... "
 [[ -n `command -v /bin/nvim` ]] && /bin/nvim -u ./vim/silent.vimrc +PlugInstall +qa
 echo "done"
 
-install_zsh () {
-    # Test to see if zshell is installed.  If it is:
-    if [ -f /bin/zsh -o -f /usr/bin/zsh ]; then
-        # Set the default shell to zsh if it isn't currently set to zsh
-        if [[ ! $(echo $SHELL) == *"/zsh" ]]; then
-            chsh -s $(which zsh)
-        fi
-    else
-        # If zsh isn't installed, get the platform of the current machine
-        platform=$(uname);
-        # If the platform is Linux, try an apt-get to install zsh and then recurse
-        if [[ $platform == 'Linux' ]]; then
-            if [[ -f /etc/redhat-release ]]; then
-                sudo yum install zsh
-                install_zsh
-            fi
-            if [[ -f /etc/debian_version ]]; then
-                sudo apt-get install zsh
-                install_zsh
-            fi
-            if [[ -f /etc/arch-release ]]; then
-                sudo pacman -S zsh
-            fi
-            # If the platform is OS X, tell the user to install zsh :)
-        elif [[ $platform == 'Darwin' ]]; then
-            echo "Please install zsh, then re-run this script!"
-            exit
-        fi
-    fi
-}
-
-install_zsh
+echo -e "\nChange your shell if you wish:\n"
+which fish > /dev/null && echo -e "\tchsh $(id -un) -s $(which fish)"
+which zsh > /dev/null && echo -e "\tchsh $(id -un) -s $(which zsh)"

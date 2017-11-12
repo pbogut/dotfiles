@@ -1,0 +1,36 @@
+function colors
+    set_color black
+    echo black
+    set_color red
+    echo red
+    set_color green
+    echo green
+    set_color yellow
+    echo yellow
+    set_color blue
+    echo blue
+    set_color magenta
+    echo magenta
+    set_color cyan
+    echo cyan
+    set_color white
+    echo white
+    set_color brblack
+    echo brblack
+    set_color brred
+    echo brred
+    set_color brgreen
+    echo brgreen
+    set_color bryellow
+    echo bryellow
+    set_color brblue
+    echo brblue
+    set_color brmagenta
+    echo brmagenta
+    set_color brcyan
+    echo brcyan
+    set_color brwhite
+    echo brwhite
+    set_color normal
+    echo normal
+end

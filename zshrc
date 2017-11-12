@@ -252,7 +252,6 @@ if [ -n "$SSH_CLIENT"  ] || [ -n "$SSH_TTY"  ]; then
   fi
 fi
 
-export PATH="$PATH:$HOME/bin:$HOME/.bin:$HOME/.scripts"
 export PATH="$PATH:$HOME/.composer/vendor/bin"
 export PATH="$PATH:$HOME/.gocode/bin"
 export PATH="$PATH:$HOME/.local/bin"
