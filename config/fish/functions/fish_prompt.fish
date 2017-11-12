@@ -4,6 +4,9 @@ function fish_prompt
     echo -n "["
     set_color normal
     set_color brblue
+    if test (id -un) = 'root'
+      set_color red
+    end
     echo -n (id -un)
     set_color --bold red
     echo -n "@"
