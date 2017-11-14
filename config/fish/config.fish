@@ -20,5 +20,6 @@ end
 
 # load profile if not already loaded
 if test "$PROFILE_LOADED" != true
+    or test "$FORCE_PROFILE_LOAD" = true
     source $HOME/.profile
 end

@@ -4,8 +4,19 @@
 # author: Pawel Bogut <http://pbogut.me>
 # date:   11/11/2017
 #=================================================
-export PATH="$HOME/projects/github.com/elixir-lang/elixir/bin:$PATH"
+export PROFILE_LOADED=true
+
 export PATH="$HOME/.scripts:$PATH"
 export PATH="$HOME/.bin:$PATH"
 
-[ -f ~/.profile.local ] && source ~/.profile.local
+export FZF_DEFAULT_OPTS="
+  --filepath-word --reverse
+  --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
+  --bind=ctrl-w:backward-kill-word
+  --height 40%
+  --cycle
+  "
+
+# that should work with bash / zsh and fish
+source ~/.profile.local > /dev/null 2>&1
+
