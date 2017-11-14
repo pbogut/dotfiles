@@ -9,6 +9,8 @@ export PROFILE_LOADED=true
 export PATH="$HOME/.scripts:$PATH"
 export PATH="$HOME/.bin:$PATH"
 
+export PATH="$PATH:$HOME/.local/bin"
+
 export FZF_DEFAULT_OPTS="
   --filepath-word --reverse
   --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
