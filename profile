@@ -11,6 +11,8 @@ export PATH="$HOME/.bin:$PATH"
 
 export PATH="$PATH:$HOME/.local/bin"
 
+export EDITOR="nvim"
+
 export FZF_DEFAULT_OPTS="
   --filepath-word --reverse
   --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview

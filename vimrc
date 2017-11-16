@@ -84,6 +84,8 @@ if has('nvim')
 endif
 augroup configgroup
   autocmd!
+  autocmd BufRead,BufNewFile *.phtml
+        \  setfiletype php.phtml
   autocmd FileType *
         \  call matchadd('Todo', '@todo\>')
         \| call matchadd('Todo', '@fixme\>')
@@ -102,8 +104,8 @@ augroup configgroup
         \| let b:commentary_format='// %s'
         \| nmap <buffer> gD <plug>(composer-find)
         \| setlocal kp=:PhpDoc
-        \| exec("map get mz0wwwyw/getters<cr>jo/**<cr>Gets <esc>pb~yiwo<cr>@return mixed<cr><cr>/<cr>public function get<esc>pa()<cr>{<cr>return $this-><esc>pb~A;<esc>jo<esc>`zj")
-        \| exec("map set mz0wwwyw/setters<cr>jo/**<cr>Sets <esc>pb~yiwo<cr>@return $this<cr><cr>/<cr>public function set<esc>pa(<esc>pbi$<esc>~~ea)<cr>{<cr>$this-><esc>pb~A = $<esc>pb~A;<cr>return $this;<esc>jo<esc>`zj")
+        \| exec("map cgget mz0wwwyw/getters<cr>jo/**<cr>Gets <esc>pb~yiwo<cr>@return mixed<cr><cr>/<cr>public function get<esc>pa()<cr>{<cr>return $this-><esc>pb~A;<esc>jo<esc>`zj")
+        \| exec("map cgset mz0wwwyw/setters<cr>jo/**<cr>Sets <esc>pb~yiwo<cr>@return $this<cr><cr>/<cr>public function set<esc>pa(<esc>pbi$<esc>~~ea)<cr>{<cr>$this-><esc>pb~A = $<esc>pb~A;<cr>return $this;<esc>jo<esc>`zj")
   autocmd FileType go
         \  setlocal noexpandtab
         " \| setlocal tabstop=2 shiftwidth=2
@@ -193,7 +195,7 @@ if exists(':Plug')
   Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
   " Plug 'benekastah/neomake'
   " Plug 'Chiel92/vim-autoformat'
-  Plug 'alvan/vim-closetag'
+  " Plug 'alvan/vim-closetag'
   Plug 'k-takata/matchit.vim'
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
   Plug 'noahfrederick/vim-composer', { 'for': 'php' }
@@ -306,7 +308,7 @@ let g:no_plugin_maps = 1
 " vim polyglot
 let g:polyglot_disabled = ['eelixir', 'elixir']
 " closetag
-let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml,*.blade.php,*.html.eex"
+" let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml,*.blade.php,*.html.eex"
 " notes
 let g:notes_directories = [ $HOME . "/Notes/" ]
 " projectroot

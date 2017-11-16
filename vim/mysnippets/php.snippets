@@ -43,6 +43,12 @@ snippet = "echo" i
 <?php echo ${VISUAL}$0 ?>
 endsnippet
 
+snippet =if "template if" i
+<?php if(${1:true}): ?>
+	${VISUAL}$0
+<?php endif ?>
+endsnippet
+
 snippet doc "Add class documentation" "re.match('.*\\bclass\\b.*', snip.buffer[snip.line+1]) if len(snip.buffer) > snip.line+1 else False" e
 /**
  * ${1:`!p
@@ -567,4 +573,3 @@ endsnippet
 snippet suppressufp "Suppress PHPMD.UnusedFormalParameter"
 @SuppressWarnings(PHPMD.UnusedFormalParameter)
 endsnippet
-

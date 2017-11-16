@@ -17,7 +17,7 @@ function export --description 'Set env variable. Alias for `set -gx` for bash co
                     set -gx $v[1] $v[2]
                 end
             case '*'
-              set -gx $v[1] $v[2..-1]
+              set -gx $v[1] "$v[2..-1]"
         end
     end
 end
