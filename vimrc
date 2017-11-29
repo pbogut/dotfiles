@@ -142,7 +142,10 @@ augroup configgroup
   autocmd BufEnter lpass.*
         \  if search('^Password: $')
         \|   execute('r !apg -m16 -n1 -MSNCL')
-        \|   execute('normal kJkk')
+        \|   execute('normal kJk')
+        \|   execute('r !gpg-config get gmail-user')
+        \|   execute('normal kJk$p')
+        \|   execute('normal kJ')
         \| endif
   " autocmd BufEnter * normal! zR
   " check shada to share vim info between instances
