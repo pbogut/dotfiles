@@ -53,11 +53,11 @@ if has("nvim")
     endif
     enew
     if (l:split)
-      call termopen("cd ". a:path . " && " . $SHELL, {
+      call termopen("cd ". a:path . "; " . $SHELL, {
             \ 'on_exit' : function('s:close_term_split')
             \ })
     else
-      call termopen("cd ". a:path . " && " . $SHELL, {
+      call termopen("cd ". a:path . "; " . $SHELL, {
             \ 'on_exit' : function('s:close_term_window')
             \ })
     endif
