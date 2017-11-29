@@ -19,7 +19,12 @@ function ncmpcpp
 end
 
 # load profile if not already loaded
-if test "$PROFILE_LOADED" != true
-    or test "$FORCE_PROFILE_LOAD" = true
-    source $HOME/.profile
+source $HOME/.profile
+set -l temp_path
+for i in (seq (count $PATH))
+  if test -n $PATH[$i]; and not contains $PATH[$i] $temp_path
+    set temp_path $temp_path $PATH[$i]
+  end
 end
+set -xg PATH $temp_path
+set -e temp_path
