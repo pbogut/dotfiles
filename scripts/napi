@@ -1,0 +1,13 @@
+#!/bin/bash
+#=================================================
+# name:   napi
+# author: Pawel Bogut <http://pbogut.me>
+# date:   01/11/2017
+#=================================================
+file=$1
+filename="${file%.*}"
+ext="${file##*.}"
+napi-bash $file
+subtitles=$(ls "$filename"* |grep -v "$ext"'$\|nfo$' | head -n1)
+enconv -L polish -c -V -x UTF8 "$subtitles"
+ffmpeg -i "$subtitles" "${filename}.vtt"
