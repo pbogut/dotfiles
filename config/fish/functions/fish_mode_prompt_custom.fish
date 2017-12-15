@@ -26,5 +26,7 @@ function __fish_mode_prompt_color
             echo red
         case visual
             echo magenta
+        case '*'
+            echo yellow
     end
 end
