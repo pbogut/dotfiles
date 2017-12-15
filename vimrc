@@ -86,6 +86,7 @@ augroup configgroup
   autocmd!
   autocmd BufRead,BufNewFile *.phtml
         \  setfiletype php.phtml
+        \| let b:commentary_format='<?php /* %s */ ?>'
   autocmd FileType *
         \  call matchadd('Todo', '@todo\>')
         \| call matchadd('Todo', '@fixme\>')
@@ -154,6 +155,9 @@ augroup configgroup
   " autocmd FocusGained * sleep 100m | rshada
   autocmd FileType tagbar
         \  nmap <buffer> <leader>n q
+  autocmd  FileType fzf
+        \  set laststatus=0 noshowmode noruler
+        \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
   autocmd InsertLeave *
               \ if &buftype == 'acwrite' | execute('WidenRegion') | endif
   " always show gutter column to avoid blinking and jumping
@@ -478,6 +482,7 @@ for keys in ['w', 'iw', 'aw', 'e', 'W', 'iW', 'aW']
   " search for the same selection, gn gN will select same selection
   exe('nnoremap cg' . keys . ' y' . motion . ':exe("let @/=@+")<bar><esc>cgn')
   exe('nnoremap <leader>s' . keys . ' y' . motion . ':s/<c-r>+//g<left><left>')
+  exe('nnoremap <leader>%' . keys . ' y' . motion . ':%s/<c-r>+//g<left><left>')
 endfor
 
 nmap <silent> grr :Rg<cr>
