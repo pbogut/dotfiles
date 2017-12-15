@@ -21,3 +21,9 @@ command! PadawanRestart call deoplete#sources#padawan#RestartServer()
 command! PadawanInstall call deoplete#sources#padawan#InstallServer()
 command! PadawanUpdate call deoplete#sources#padawan#UpdateServer()
 command! -bang PadawanGenerate call deoplete#sources#padawan#Generate(<bang>0)
+
+" dont use enter to select item
+inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+function! s:my_cr_function() abort
+  return deoplete#close_popup() . "\<CR>"
+endfunction

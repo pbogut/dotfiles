@@ -98,6 +98,8 @@ augroup configgroup
   "       \  setlocal tabstop=2 shiftwidth=2
   " autocmd FileType elixir
   "       \  setlocal tabstop=2 shiftwidth=2
+  autocmd FileType elm
+        \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType c
         \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType php

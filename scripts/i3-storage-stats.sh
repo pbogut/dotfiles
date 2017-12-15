@@ -5,7 +5,7 @@
 # date:   14/12/2017
 #=================================================
 
-if [[ $(df -h | grep '/run/media/') ]]; then
+if [[ $(mount | grep '/run/media/') ]]; then
   grep -e Dirty: -e Writeback: /proc/meminfo |sed -E 'N;s,.* ([0-9]+) (kB)\n.* ([0-9]+) (kB),\1/\3,g'
 else
   echo ''
