@@ -52,7 +52,13 @@ function! s:move()
 endfunction
 
 function! s:rename()
-  let from = getline('.')
+  if getline('.')[-1:-1] == '/'
+    let l:suffix = '/'
+    let from = getline('.')[:-2]
+  else
+    let l:suffix = ''
+    let from = getline('.')
+  endif
   let dir_name = substitute(l:from, '\(.*/\).\{-}$', '\1', '')
   let file_name = substitute(l:from, '.*/\(.\{-}\)$', '\1', '')
   let extension = substitute(l:from, '.*/[^\.]*\(.\{-}\)$', '\1', '')
@@ -63,7 +69,7 @@ function! s:rename()
   redraw!
   if !empty(l:to)
     silent exec ('!mv ' . l:from . ' ' . l:dir_name . l:to)
-    call setline('.', l:dir_name . l:to)
+    call setline('.', l:dir_name . l:to . l:suffix)
   endif
 endfunction
 
