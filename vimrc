@@ -167,7 +167,7 @@ if exists(':Plug')
   Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
   Plug 'xolox/vim-misc'
   Plug 'xolox/vim-notes'
-  Plug 'jiangmiao/auto-pairs'
+  " Plug 'jiangmiao/auto-pairs'
   Plug 'tpope/vim-scriptease'
   " Plug 'tpope/vim-fugitive'
   Plug 'pbogut/vim-fugitive'
@@ -413,7 +413,7 @@ nnoremap / :let @/=""<cr>:set hls<cr>/\c
 nnoremap ? :let @/=""<cr>:set hls<cr>?\c
 nnoremap * :set hls<cr>*
 nnoremap # :set hls<cr>#
-nnoremap <leader><leader> :let @/='\<<c-r><c-w>\>'<cr>:set hls<cr>
+nnoremap <leader><leader> *``:set hls<cr>
 nnoremap <silent> <leader>= migg=G`i
 nmap <silent> <leader>gp <Plug>GitGutterPreviewHunk<bar>:exec('wincmd j')<bar>:exec('nnoremap q :wincmd q<lt>cr>')<cr>
 nmap <silent> <leader>gu <Plug>GitGutterUndoHunk
