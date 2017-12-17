@@ -100,6 +100,8 @@ augroup configgroup
   "       \  setlocal tabstop=2 shiftwidth=2
   autocmd FileType elm
         \  setlocal tabstop=4 shiftwidth=4
+        \| setlocal makeprg=elm-make
+        \| let b:my_make_cmd = "elm-make --output /dev/null {file_name}"
   autocmd FileType c
         \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType php
@@ -394,6 +396,9 @@ endfor
 " nice to have
 inoremap <c-d> <del>
 cnoremap <c-d> <del>
+" vim make
+nmap <leader>mf <leader>w:call QuickTerm(substitute(b:my_make_cmd, '{file_name}', expand('%'), ''))<cr>
+nmap <leader>ms <leader>w:make<cr>
 " vim-test
 nmap <silent> <leader>tn :call FixTestFileMod() <bar> TestNearest<CR>
 nmap <silent> <leader>tf :call FixTestFileMod() <bar> TestFile<CR>
@@ -612,6 +617,9 @@ function! CreateFoldersAndWrite(bang)
   endtry
 endfunction
 " disable double save (cousing file watchers issues)
+
+" elm-vim
+let g:elm_format_autosave = 0
 
 " fold adjust
 " remove underline

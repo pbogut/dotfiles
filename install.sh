@@ -37,6 +37,7 @@ read -d '' files <<"EOF"
     composer/composer.json
     config/autostart/autostart.desktop
     config/dircolors-solarized
+    config/dunst/dunstrc
     config/feh/keys
     config/fish
     config/i3/config
@@ -54,7 +55,6 @@ read -d '' files <<"EOF"
     config/ranger/rc.conf
     config/ranger/rifle.conf
     config/roxterm.sourceforge.net
-    config/twmn/twmn.conf
     config/Franz/Plugins/todoist
     i3blocks.conf
     local/share/applications/ranger.desktop

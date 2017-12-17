@@ -35,7 +35,7 @@ demonize redshift 'redshift-gtk'
 demonize textaid "perl $scriptpath/edit-server.pl"
 demonize rescuetime rescuetime
 demonize nm-applet nm-applet
-demonize twmnd twmnd
+demonize dunst dunst
 demonize udisksvm "udisksvm -a"
 demonize mopidy "mopidy -o mpd/port=${MOPIDY_PORT:-6600}"
 
