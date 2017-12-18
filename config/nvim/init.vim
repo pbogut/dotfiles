@@ -60,6 +60,8 @@ set foldlevelstart=99
 " color scheme
 set termguicolors
 set background=dark
+set guicursor=n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor
+
 if exists('&inccommand') | set inccommand=split | endif
 if has("patch-7.4.314") | set shortmess+=c | endif
 if executable('ag') | set grepprg=ag | endif
@@ -70,9 +72,6 @@ endif
 
 let mapleader = "\<space>" " life changer
 
-if has('nvim')
-  " let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
-  set guicursor=n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor
 
   augroup configgroup_nvim
     autocmd!
@@ -82,7 +81,6 @@ if has('nvim')
           " \| setlocal nocursorline
           " \| setlocal nocursorcolumn
   augroup END
-endif
 augroup configgroup
   autocmd!
   autocmd BufRead,BufNewFile *.phtml
@@ -153,11 +151,6 @@ augroup configgroup
         \|   execute('normal kJk$p')
         \|   execute('normal kJ')
         \| endif
-  " autocmd BufEnter * normal! zR
-  " check shada to share vim info between instances
-  " autocmd CursorHold * rshada | wshada
-  " autocmd FocusLost * wshada
-  " autocmd FocusGained * sleep 100m | rshada
   autocmd FileType tagbar
         \  nmap <buffer> <leader>n q
   autocmd  FileType fzf
@@ -176,7 +169,7 @@ if exists(':Plug')
   Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
   Plug 'xolox/vim-misc'
   Plug 'xolox/vim-notes'
-  " Plug 'jiangmiao/auto-pairs'
+    let g:notes_directories = [ $HOME . "/Notes/" ]
   Plug 'tpope/vim-scriptease'
   " Plug 'tpope/vim-fugitive'
   Plug 'pbogut/vim-fugitive'
@@ -184,131 +177,172 @@ if exists(':Plug')
   Plug 'tpope/vim-git'
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-surround'
+    vmap s S
   Plug 'tpope/vim-repeat'
   Plug 'tpope/vim-rails', { 'for': 'ruby' }
   Plug 'tpope/vim-endwise'
   Plug 'tpope/vim-unimpaired'
   Plug 'tpope/vim-obsession'
-  " Plug 'tpope/vim-dispatch'
   Plug 'tpope/vim-abolish'
+    autocmd User after_vim_load source ~/.vim/plugin/config/abolish.vimrc
   Plug 'tpope/vim-projectionist'
+    source ~/.vim/plugin/config/projectionist.vimrc
+    noremap <leader>ta :A<cr>
   Plug 'dhruvasagar/vim-prosession'
+    let g:prosession_per_branch = 1
   Plug 'vim-airline/vim-airline'
+    source ~/.vim/plugin/config/airline.vimrc
   Plug 'vim-airline/vim-airline-themes'
   Plug 'airblade/vim-gitgutter'
+    nmap <silent> <leader>gp <Plug>GitGutterPreviewHunk<bar>:exec('wincmd j')<bar>:exec('nnoremap q :wincmd q<lt>cr>')<cr>
+    nmap <silent> <leader>gu <Plug>GitGutterUndoHunk
+    nmap <silent> <leader>gs <Plug>GitGutterStageHunk
+    command! Grevert
+          \  execute ":Gread"
+          \| execute ":noautocmd w"
+          \| execute ":GitGutter"
   Plug 'MarcWeber/vim-addon-mw-utils'
   Plug 'ludovicchabant/vim-gutentags'
+    source ~/.vim/plugin/config/gutentags.vimrc
   Plug 'gioele/vim-autoswap'
   Plug 'ntpeters/vim-better-whitespace'
   Plug 'honza/vim-snippets'
   Plug 'mattn/emmet-vim'
+    imap <c-e> <c-y>,
   Plug 'majutsushi/tagbar'
+    nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
   Plug 'sirver/ultisnips'
+    let g:UltiSnipsExpandTrigger = "<tab>"
+    let g:UltiSnipsJumpForwardTrigger = "<tab>"
+    let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+    let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnippets", "mytemplates"]
+    let g:snips_author = "Pawel Bogut"
+    let g:snips_author_url = "http://pbogut.me"
+    let g:snips_github = "https://github.com/pbogut"
   Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
+    let g:vdebug_keymap = {
+          \    "run" : "<leader>vr",
+          \    "run_to_cursor" : "<leader>vc",
+          \    "step_over" : "<leader>vn",
+          \    "step_into" : "<leader>vi",
+          \    "step_out" : "<leader>vo",
+          \    "close" : "<leader>vq",
+          \    "detach" : "<leader>vd",
+          \    "set_breakpoint" : "<leader>vb",
+          \    "get_context" : "<leader>vx",
+          \    "eval_under_cursor" : "<leader>ve",
+          \    "eval_visual" : "<leader>vv",
+          \}
   Plug 'sbdchd/neoformat'
   Plug 'k-takata/matchit.vim'
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
   Plug 'noahfrederick/vim-composer', { 'for': 'php' }
   Plug 'janko-m/vim-test'
+    let g:test#strategy = 'neovim'
+    function! FixTestFileMod() abort
+      if &ft == 'elixir'
+        let g:test#filename_modifier = ':p'
+      elseif (!empty(get(g:, 'test#filename_modifier')))
+        unlet g:test#filename_modifier
+      endif
+    endfunction
+    nmap <silent> <leader>tn :call FixTestFileMod() <bar> TestNearest<CR>
+    nmap <silent> <leader>tf :call FixTestFileMod() <bar> TestFile<CR>
+    nmap <silent> <leader>ts :call FixTestFileMod() <bar> TestSuite<CR>
+    nmap <silent> <leader>tl :call FixTestFileMod() <bar> TestLast<CR>
+    nmap <silent> <leader>tt :call FixTestFileMod() <bar> TestLast<CR>
+    nmap <silent> <leader>tv :call FixTestFileMod() <bar> TestVisit<CR>
   Plug 'elmcast/elm-vim', { 'for': 'elm' }
+    let g:elm_format_autosave = 0
   Plug 'elixir-lang/vim-elixir', { 'for': ['elixir', 'eelixir'] }
   Plug 'kana/vim-operator-user'
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   Plug 'will133/vim-dirdiff'
   Plug 'dbakker/vim-projectroot'
+    let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
+          \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
   Plug 'AndrewRadev/switch.vim'
+    autocmd User after_plug_end source ~/.vim/plugin/config/switch.vimrc
   Plug 'AndrewRadev/splitjoin.vim'
   Plug 'AndrewRadev/sideways.vim'
+    nmap <silent> ga< :SidewaysLeft<cr>
+    nmap <silent> ga> :SidewaysRight<cr>
+    nmap <silent> gap :SidewaysJumpLeft<cr>
+    nmap <silent> gan :SidewaysJumpRight<cr>
+    omap <silent> aa <plug>SidewaysArgumentTextobjA
+    xmap <silent> aa <plug>SidewaysArgumentTextobjA
+    omap <silent> ia <plug>SidewaysArgumentTextobjI
+    xmap <silent> ia <plug>SidewaysArgumentTextobjI
   Plug 'godlygeek/tabular'
+    command! -nargs=* -range T Tabularize <args>
   Plug 'vim-scripts/cmdalias.vim'
+    autocmd User after_vim_load source ~/.vim/plugin/config/cmdalias.vimrc
   " Plug 'Shougo/unite.vim'
   Plug 'Shougo/echodoc.vim'
   Plug 'andyl/vim-textobj-elixir'
   Plug 'kana/vim-textobj-user'
   Plug 'justinmk/vim-dirvish'
-  " Plug 'pbogut/dbext.vim'
+    source ~/.vim/plugin/config/dirvish.vimrc
   Plug 'w0rp/ale'
+    autocmd User after_plug_end source ~/.vim/plugin/config/ale.vimrc
   Plug 'wakatime/vim-wakatime'
-
-  " testing
   Plug 'vimwiki/vimwiki'
+    let g:vimwiki_map_prefix = '-w'
+    let g:vimwiki_list = [{'path': '~/pawel.bogut@gmail.com/vimwiki/',
+                         \ 'syntax': 'markdown', 'ext': '.md'}]
   Plug 'vim-scripts/ReplaceWithRegister'
+    nmap cp <Plug>ReplaceWithRegisterOperator
+    nmap cP cp$
+    nmap cp= cpp==
+    nmap cpp <Plug>ReplaceWithRegisterLine
+    xmap cp <Plug>ReplaceWithRegisterVisual
   Plug 'beloglazov/vim-textobj-quotes'
-
   Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
   Plug 'joereynolds/gtags-scope'
-
-  if has('nvim')
-    " Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
-    Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-    Plug 'Shougo/neco-vim', { 'for': 'vim' }
-    Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-    Plug 'junegunn/fzf.vim'
-    Plug 'pbogut/fzf-mru.vim'
-    Plug 'slashmili/alchemist.vim', { 'for': ['elixir', 'eelixir'] }
-    Plug 'powerman/vim-plugin-AnsiEsc', { 'for': ['elixir', 'eelixir'] }
-    Plug 'zchee/deoplete-go', { 'do': 'go get github.com/nsf/gocode && make', 'for': 'go'}
-    Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
-    Plug 'zchee/deoplete-jedi', { 'for': 'python' }
-    Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
-    Plug 'pbogut/deoplete-elm', { 'for': 'elm' }
-    Plug 'carlitux/deoplete-ternjs', { 'for': ['javascript', 'javascript.jsx'], 'do': 'yarn global add tern' }
-    Plug 'frankier/neovim-colors-solarized-truecolor-only'
-  endif
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+    source ~/.vim/plugin/config/deoplete.vimrc
+  Plug 'Shougo/neco-vim', { 'for': 'vim' }
+  Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+  Plug 'junegunn/fzf.vim'
+  Plug 'pbogut/fzf-mru.vim'
+    source ~/.vim/plugin/config/fzf.vimrc
+  Plug 'slashmili/alchemist.vim', { 'for': ['elixir', 'eelixir'] }
+  Plug 'powerman/vim-plugin-AnsiEsc', { 'for': ['elixir', 'eelixir'] }
+  Plug 'zchee/deoplete-go', { 'do': 'go get github.com/nsf/gocode && make', 'for': 'go'}
+  Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
+  Plug 'zchee/deoplete-jedi', { 'for': 'python' }
+  Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
+  Plug 'pbogut/deoplete-elm', { 'for': 'elm' }
+  Plug 'carlitux/deoplete-ternjs', { 'for': ['javascript', 'javascript.jsx'], 'do': 'yarn global add tern' }
+  Plug 'frankier/neovim-colors-solarized-truecolor-only'
   Plug 'sheerun/vim-polyglot'
+    let g:polyglot_disabled = ['eelixir', 'elixir']
 endif "
 silent! call plug#end()      " requiredc
 filetype plugin indent on    " required
-silent! colorscheme solarized
-"
-source ~/.vim/plugin/config/airline.vimrc
-source ~/.vim/plugin/config/ale.vimrc
-source ~/.vim/plugin/config/autopairs.vimrc
-source ~/.vim/plugin/config/composer.vimrc
-source ~/.vim/plugin/config/deoplete.vimrc
-source ~/.vim/plugin/config/dirvish.vimrc
-source ~/.vim/plugin/config/fzf.vimrc
-source ~/.vim/plugin/config/gutentags.vimrc
-source ~/.vim/plugin/config/projectionist.vimrc
-source ~/.vim/plugin/config/switch.vimrc
-source ~/.vim/plugin/config/terminal.vimrc
+
+doautocmd User after_plug_end
+autocmd! User after_plug_end " clear after_plug_end command list
 
 augroup after_load
   autocmd!
   autocmd VimEnter *
-        \  source ~/.vim/plugin/config/abolish.vimrc
-        \| source ~/.vim/plugin/config/cmdalias.vimrc
+        \  doautocmd User after_vim_load
+        \| autocmd! User after_vim_load " clear after_plug_end command list
 augroup END
+
+silent! colorscheme solarized
+"
+source ~/.vim/plugin/config/autopairs.vimrc
+source ~/.vim/plugin/config/composer.vimrc
+source ~/.vim/plugin/config/terminal.vimrc
 
 " nicer vertical split
 hi VertSplit guibg=#073642 guifg=fg
 
-" vdebug
-let g:vdebug_keymap = {
-      \    "run" : "<leader>vr",
-      \    "run_to_cursor" : "<leader>vc",
-      \    "step_over" : "<leader>vn",
-      \    "step_into" : "<leader>vi",
-      \    "step_out" : "<leader>vo",
-      \    "close" : "<leader>vq",
-      \    "detach" : "<leader>vd",
-      \    "set_breakpoint" : "<leader>vb",
-      \    "get_context" : "<leader>vx",
-      \    "eval_under_cursor" : "<leader>ve",
-      \    "eval_visual" : "<leader>vv",
-      \}
-
-" ansi esc
+" dont mess with me!
 let g:no_plugin_maps = 1
-" vim polyglot
-let g:polyglot_disabled = ['eelixir', 'elixir']
-" closetag
-" let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.xml,*.blade.php,*.html.eex"
-" notes
-let g:notes_directories = [ $HOME . "/Notes/" ]
-" projectroot
-let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
-      \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
+
 " macros
 nnoremap <leader>em :tabnew ~/.vim/macros.vim<cr>
 nnoremap <leader>sm :source ~/.vim/macros.vim<cr>
@@ -322,8 +356,6 @@ nnoremap <silent> <leader>q :call local#togglelist#quickfixlist()<cr>
 
 nnoremap <silent> <bs> :Dirvish %:p:h<cr>
 nnoremap <silent> _ :Dirvish %:p:h<cr>
-nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
-" fzf
 nnoremap <silent> <leader>w :W!<cr>
 nnoremap <silent> <leader>a :Neoformat<cr>
 nnoremap <silent> <leader>z za
@@ -346,13 +378,6 @@ nmap <C-_> gcc<down>^
 nmap <C-/> gcc<down>^
 vmap <C-_> gc
 vmap <C-/> gc
-" projectionist - alternate
-noremap <leader>ta :A<cr>
-" surround
-vmap s S
-" expand region
-vmap v <Plug>(expand_region_expand)
-vmap V <Plug>(expand_region_shrink)
 " remap delete to c-d because on hardware level Im sending del when c-d (ergodox)
 nmap <silent> <del> <c-d>
 map <silent> <C-w>d :silent! Bdelete<cr>
@@ -383,20 +408,6 @@ cnoremap <c-d> <del>
 " vim make
 nmap <leader>mf <leader>w:call QuickTerm(substitute(b:my_make_cmd, '{file_name}', expand('%'), ''))<cr>
 nmap <leader>ms <leader>w:make<cr>
-" vim-test
-nmap <silent> <leader>tn :call FixTestFileMod() <bar> TestNearest<CR>
-nmap <silent> <leader>tf :call FixTestFileMod() <bar> TestFile<CR>
-nmap <silent> <leader>ts :call FixTestFileMod() <bar> TestSuite<CR>
-nmap <silent> <leader>tl :call FixTestFileMod() <bar> TestLast<CR>
-nmap <silent> <leader>tt :call FixTestFileMod() <bar> TestLast<CR>
-nmap <silent> <leader>tv :call FixTestFileMod() <bar> TestVisit<CR>
-function! FixTestFileMod() abort
-  if &ft == 'elixir'
-    let g:test#filename_modifier = ':p'
-  elseif (!empty(get(g:, 'test#filename_modifier')))
-    unlet g:test#filename_modifier
-  endif
-endfunction
 " regex helpers
 cnoremap \\* \(.*\)
 cnoremap \\- \(.\{-}\)
@@ -410,62 +421,44 @@ nnoremap * :set hls<cr>*
 nnoremap # :set hls<cr>#
 nnoremap <leader><leader> *``:set hls<cr>
 nnoremap <silent> <leader>= migg=G`i
-nmap <silent> <leader>gp <Plug>GitGutterPreviewHunk<bar>:exec('wincmd j')<bar>:exec('nnoremap q :wincmd q<lt>cr>')<cr>
-nmap <silent> <leader>gu <Plug>GitGutterUndoHunk
-nmap <silent> <leader>gs <Plug>GitGutterStageHunk
-" keep ga functionality as gas
-nnoremap gas ga
-" Sideways
-nmap <silent> ga< :SidewaysLeft<cr>
-nmap <silent> ga> :SidewaysRight<cr>
-nmap <silent> gap :SidewaysJumpLeft<cr>
-nmap <silent> gan :SidewaysJumpRight<cr>
-omap <silent> aa <plug>SidewaysArgumentTextobjA
-xmap <silent> aa <plug>SidewaysArgumentTextobjA
-omap <silent> ia <plug>SidewaysArgumentTextobjI
-xmap <silent> ia <plug>SidewaysArgumentTextobjI
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
-" emmet
-imap <c-e> <c-y>,
 
-if has('nvim')
-  nnoremap <silent> <leader>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
-  nnoremap <silent> <leader>fa :call local#fzf#files()<cr>
-  nnoremap <silent> <leader>fp :FZFProject<cr>
-  nnoremap <silent> <leader>fc :call local#fzf#clip()<cr>
-  nnoremap <silent> <leader>fd :call local#fzf#buffer_dir_files()<cr>
-  nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
-  nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
-  nnoremap <silent> <leader>ft :FZFTags <cword><cr>
-  nnoremap <silent> <leader>] :FZFTags<cr>
-  nnoremap <silent> <leader>fb :FZFBuffers<cr>
-  nnoremap <silent> <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
-  nnoremap <silent> <leader>gF :call local#fzf#all_files(expand('<cfile>'))<cr>
-  nnoremap <silent> <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
-  nnoremap <silent> <leader>gw :Rg <cword><cr>
-  nnoremap <silent> <leader>ga :Ag<cr>
-  nnoremap <silent> <leader>gr :Rg<cr>
-  vnoremap <silent> <leader>ga "ay :Ag <c-r>a<cr>
-  vnoremap <silent> <leader>gr "ay :Rg <c-r>a<cr>
+nnoremap <silent> <leader>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
+nnoremap <silent> <leader>fa :call local#fzf#files()<cr>
+nnoremap <silent> <leader>fp :FZFProject<cr>
+nnoremap <silent> <leader>fc :call local#fzf#clip()<cr>
+nnoremap <silent> <leader>fd :call local#fzf#buffer_dir_files()<cr>
+nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
+nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
+nnoremap <silent> <leader>ft :FZFTags <cword><cr>
+nnoremap <silent> <leader>] :FZFTags<cr>
+nnoremap <silent> <leader>fb :FZFBuffers<cr>
+nnoremap <silent> <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
+nnoremap <silent> <leader>gF :call local#fzf#all_files(expand('<cfile>'))<cr>
+nnoremap <silent> <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
+nnoremap <silent> <leader>gw :Rg <cword><cr>
+nnoremap <silent> <leader>ga :Ag<cr>
+nnoremap <silent> <leader>gr :Rg<cr>
+vnoremap <silent> <leader>ga "ay :Ag <c-r>a<cr>
+vnoremap <silent> <leader>gr "ay :Rg <c-r>a<cr>
 
-  nnoremap <silent> <leader>of :let g:pwd = expand('%:h') \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
-  nnoremap <silent> <leader>op :let g:pwd = projectroot#guess() \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
-  nnoremap <silent> <leader>ov :belowright 20split \| terminal vagrant ssh<cr>
+nnoremap <silent> <leader>of :let g:pwd = expand('%:h') \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
+nnoremap <silent> <leader>op :let g:pwd = projectroot#guess() \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
+nnoremap <silent> <leader>ov :belowright 20split \| terminal vagrant ssh<cr>
 
-  noremap <leader>sc :execute(':rightbelow 10split \| te scspell %')<cr>
+noremap <leader>sc :execute(':rightbelow 10split \| te scspell %')<cr>
 
-  " nvim now can map alt without terminal issues, new cool shortcuts commin
-  tnoremap <silent> <c-q> <C-\><C-n>
+" nvim now can map alt without terminal issues, new cool shortcuts commin
+tnoremap <silent> <c-q> <C-\><C-n>
 
-  noremap <silent> <M-l> :vertical resize +1<cr>
-  noremap <silent> <M-h> :vertical resize -1<cr>
-  noremap <silent> <M-j> :resize +1<cr>
-  noremap <silent> <M-k> :resize -1<cr>
+noremap <silent> <M-l> :vertical resize +1<cr>
+noremap <silent> <M-h> :vertical resize -1<cr>
+noremap <silent> <M-j> :resize +1<cr>
+noremap <silent> <M-k> :resize -1<cr>
 
-  cnoremap <A-k> <Up>
-  cnoremap <A-j> <Down>
-endif
+cnoremap <A-k> <Up>
+cnoremap <A-j> <Down>
 
 for keys in ['w', 'iw', 'aw', 'e', 'W', 'iW', 'aW']
   if keys == 'w' | let motion = 'e' | else | let motion = keys | endif
@@ -520,27 +513,6 @@ function! SpellCheckToggle()
   endif
 endfunction
 
-" global variables used by modules {{{
-" better key bindings for UltiSnipsExpandTrigger
-let g:UltiSnipsExpandTrigger = "<tab>"
-let g:UltiSnipsJumpForwardTrigger = "<tab>"
-let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
-
-let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnippets", "mytemplates"]
-" eclim
-let g:EclimFileTypeValidate = 0
-let g:EclimCompletionMethod = 'omnifunc'
-let g:strip_whitespace_on_save = 1
-
-let g:formatdef_blade = '"html-beautify -s ".&shiftwidth'
-let g:formatters_blade = ['blade']
-let g:formatdef_elixir = '"mix format -"'
-let g:formatters_elixir = ['elixir']
-
-" despatch hax to not cover half screen
-let g:dispatch_quickfix_height = 10
-let g:dispatch_tmux_height = 1
-" }}}
 " custom commands
 " close all buffers but current
 command! BCloseAll execute "%bd"
@@ -557,14 +529,6 @@ function! s:gap()
 endfunction
 command! Gap call s:gap()
 
-" tabularize shortcut alias
-command! -nargs=* -range T Tabularize <args>
-
-command! Grevert
-            \  execute ":Gread"
-            \| execute ":noautocmd w"
-            \| execute ":GitGutter"
-
 command! -nargs=1 PhpDoc split
     \| silent! execute("e phpdoc://<args>")
     \| silent! setlocal noswapfile
@@ -576,7 +540,6 @@ command! -nargs=1 PhpDoc split
     \| silent! setlocal nomodifiable
     \| silent! map <buffer> q :q<cr>
 
-let g:test#strategy = 'neovim'
 
 let g:paranoic_backup_dir="~/.vim/backupfiles/"
 
@@ -602,8 +565,6 @@ function! CreateFoldersAndWrite(bang)
 endfunction
 " disable double save (cousing file watchers issues)
 
-" elm-vim
-let g:elm_format_autosave = 0
 
 " fold adjust
 " remove underline
@@ -648,26 +609,4 @@ endfunction
 let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, '/tmp/nvim\(.*\)\/0$', '\1', 'g') . ":" . substitute(getcwd(),$HOME,'~', 'g')
 set title
 
-let g:snips_author = "Pawel Bogut"
-let g:snips_author_url = "http://pbogut.me"
-let g:snips_github = "https://github.com/pbogut"
-
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
-
-" nnoremap <silent> K :call LanguageClient_textDocument_hover()<CR>
-" nnoremap <silent> gd :call LanguageClient_textDocument_definition()<CR>
-" nnoremap <silent> <F2> :call LanguageClient_textDocument_rename()<CR>
-
-" vimwiki
-let g:vimwiki_map_prefix = '-w'
-let g:vimwiki_list = [{'path': '~/pawel.bogut@gmail.com/vimwiki/',
-                     \ 'syntax': 'markdown', 'ext': '.md'}]
-
-" replace with register
-nmap cp <Plug>ReplaceWithRegisterOperator
-nmap cP cp$
-nmap cp= cpp==
-nmap cpp <Plug>ReplaceWithRegisterLine
-xmap cp <Plug>ReplaceWithRegisterVisual
-
-let g:prosession_per_branch = 1
