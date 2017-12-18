@@ -187,20 +187,13 @@ if exists(':Plug')
     autocmd User after_vim_load source ~/.vim/plugin/config/abolish.vimrc
   Plug 'tpope/vim-projectionist'
     source ~/.vim/plugin/config/projectionist.vimrc
-    noremap <leader>ta :A<cr>
   Plug 'dhruvasagar/vim-prosession'
     let g:prosession_per_branch = 1
   Plug 'vim-airline/vim-airline'
     source ~/.vim/plugin/config/airline.vimrc
   Plug 'vim-airline/vim-airline-themes'
   Plug 'airblade/vim-gitgutter'
-    nmap <silent> <leader>gp <Plug>GitGutterPreviewHunk<bar>:exec('wincmd j')<bar>:exec('nnoremap q :wincmd q<lt>cr>')<cr>
-    nmap <silent> <leader>gu <Plug>GitGutterUndoHunk
-    nmap <silent> <leader>gs <Plug>GitGutterStageHunk
-    command! Grevert
-          \  execute ":Gread"
-          \| execute ":noautocmd w"
-          \| execute ":GitGutter"
+    source ~/.vim/plugin/config/gitgutter.vim
   Plug 'MarcWeber/vim-addon-mw-utils'
   Plug 'ludovicchabant/vim-gutentags'
     source ~/.vim/plugin/config/gutentags.vimrc
@@ -212,46 +205,15 @@ if exists(':Plug')
   Plug 'majutsushi/tagbar'
     nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
   Plug 'sirver/ultisnips'
-    let g:UltiSnipsExpandTrigger = "<tab>"
-    let g:UltiSnipsJumpForwardTrigger = "<tab>"
-    let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
-    let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnippets", "mytemplates"]
-    let g:snips_author = "Pawel Bogut"
-    let g:snips_author_url = "http://pbogut.me"
-    let g:snips_github = "https://github.com/pbogut"
+    source ~/.vim/plugin/config/ultisnips.vim
   Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
-    let g:vdebug_keymap = {
-          \    "run" : "<leader>vr",
-          \    "run_to_cursor" : "<leader>vc",
-          \    "step_over" : "<leader>vn",
-          \    "step_into" : "<leader>vi",
-          \    "step_out" : "<leader>vo",
-          \    "close" : "<leader>vq",
-          \    "detach" : "<leader>vd",
-          \    "set_breakpoint" : "<leader>vb",
-          \    "get_context" : "<leader>vx",
-          \    "eval_under_cursor" : "<leader>ve",
-          \    "eval_visual" : "<leader>vv",
-          \}
+    source ~/.vim/plugin/config/vdebug.vim
   Plug 'sbdchd/neoformat'
   Plug 'k-takata/matchit.vim'
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
   Plug 'noahfrederick/vim-composer', { 'for': 'php' }
   Plug 'janko-m/vim-test'
-    let g:test#strategy = 'neovim'
-    function! FixTestFileMod() abort
-      if &ft == 'elixir'
-        let g:test#filename_modifier = ':p'
-      elseif (!empty(get(g:, 'test#filename_modifier')))
-        unlet g:test#filename_modifier
-      endif
-    endfunction
-    nmap <silent> <leader>tn :call FixTestFileMod() <bar> TestNearest<CR>
-    nmap <silent> <leader>tf :call FixTestFileMod() <bar> TestFile<CR>
-    nmap <silent> <leader>ts :call FixTestFileMod() <bar> TestSuite<CR>
-    nmap <silent> <leader>tl :call FixTestFileMod() <bar> TestLast<CR>
-    nmap <silent> <leader>tt :call FixTestFileMod() <bar> TestLast<CR>
-    nmap <silent> <leader>tv :call FixTestFileMod() <bar> TestVisit<CR>
+    source ~/.vim/plugin/config/test.vim
   Plug 'elmcast/elm-vim', { 'for': 'elm' }
     let g:elm_format_autosave = 0
   Plug 'elixir-lang/vim-elixir', { 'for': ['elixir', 'eelixir'] }
@@ -265,14 +227,7 @@ if exists(':Plug')
     autocmd User after_plug_end source ~/.vim/plugin/config/switch.vimrc
   Plug 'AndrewRadev/splitjoin.vim'
   Plug 'AndrewRadev/sideways.vim'
-    nmap <silent> ga< :SidewaysLeft<cr>
-    nmap <silent> ga> :SidewaysRight<cr>
-    nmap <silent> gap :SidewaysJumpLeft<cr>
-    nmap <silent> gan :SidewaysJumpRight<cr>
-    omap <silent> aa <plug>SidewaysArgumentTextobjA
-    xmap <silent> aa <plug>SidewaysArgumentTextobjA
-    omap <silent> ia <plug>SidewaysArgumentTextobjI
-    xmap <silent> ia <plug>SidewaysArgumentTextobjI
+    source ~/.vim/plugin/config/sideways.vim
   Plug 'godlygeek/tabular'
     command! -nargs=* -range T Tabularize <args>
   Plug 'vim-scripts/cmdalias.vim'
@@ -291,11 +246,7 @@ if exists(':Plug')
     let g:vimwiki_list = [{'path': '~/pawel.bogut@gmail.com/vimwiki/',
                          \ 'syntax': 'markdown', 'ext': '.md'}]
   Plug 'vim-scripts/ReplaceWithRegister'
-    nmap cp <Plug>ReplaceWithRegisterOperator
-    nmap cP cp$
-    nmap cp= cpp==
-    nmap cpp <Plug>ReplaceWithRegisterLine
-    xmap cp <Plug>ReplaceWithRegisterVisual
+    source ~/.vim/plugin/config/replacewithregister.vim
   Plug 'beloglazov/vim-textobj-quotes'
   Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
   Plug 'joereynolds/gtags-scope'
@@ -526,6 +477,7 @@ function! s:gap()
   belowright 30split
   enew
   exec "te git ap " . file
+  startinsert
 endfunction
 command! Gap call s:gap()
 

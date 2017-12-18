@@ -7,6 +7,9 @@ function! g:projectionist_transformations.mag_rm_pool(input, o) abort
   return substitute(a:input, '^\(core/\|community/\|local/\)', '', '')
 endfunction
 
+" mapping
+noremap <leader>ta :A<cr>
+
 let s:space_4 =
       \   {
       \     "tabstop": 4,
