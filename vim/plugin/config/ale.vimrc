@@ -1,4 +1,3 @@
-" Ale -- to be moved!!!!! START
 if !has('nvim')
   finish
 endif
