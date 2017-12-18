@@ -58,6 +58,7 @@ set foldnestmax=10
 set foldlevelstart=99
 " set cscopetag "search both cscopes db and the tags file
 " color scheme
+set termguicolors
 set background=dark
 if exists('&inccommand') | set inccommand=split | endif
 if has("patch-7.4.314") | set shortmess+=c | endif
@@ -188,7 +189,7 @@ if exists(':Plug')
   Plug 'tpope/vim-endwise'
   Plug 'tpope/vim-unimpaired'
   Plug 'tpope/vim-obsession'
-  Plug 'tpope/vim-dispatch'
+  " Plug 'tpope/vim-dispatch'
   Plug 'tpope/vim-abolish'
   Plug 'tpope/vim-projectionist'
   Plug 'dhruvasagar/vim-prosession'
@@ -204,9 +205,7 @@ if exists(':Plug')
   Plug 'majutsushi/tagbar'
   Plug 'sirver/ultisnips'
   Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
-  " Plug 'benekastah/neomake'
-  " Plug 'Chiel92/vim-autoformat'
-  " Plug 'alvan/vim-closetag'
+  Plug 'sbdchd/neoformat'
   Plug 'k-takata/matchit.vim'
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
   Plug 'noahfrederick/vim-composer', { 'for': 'php' }
@@ -227,23 +226,20 @@ if exists(':Plug')
   Plug 'andyl/vim-textobj-elixir'
   Plug 'kana/vim-textobj-user'
   Plug 'justinmk/vim-dirvish'
-  Plug 'pbogut/dbext.vim'
+  " Plug 'pbogut/dbext.vim'
   Plug 'w0rp/ale'
   Plug 'wakatime/vim-wakatime'
 
   " testing
-  Plug 'sbdchd/neoformat'
   Plug 'vimwiki/vimwiki'
-  Plug 'MattesGroeger/vim-bookmarks'
   Plug 'vim-scripts/ReplaceWithRegister'
-  Plug 'kassio/neoterm'
   Plug 'beloglazov/vim-textobj-quotes'
 
   Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
   Plug 'joereynolds/gtags-scope'
 
   if has('nvim')
-    Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
+    " Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
     Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
     Plug 'Shougo/neco-vim', { 'for': 'vim' }
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -257,14 +253,6 @@ if exists(':Plug')
     Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
     Plug 'pbogut/deoplete-elm', { 'for': 'elm' }
     Plug 'carlitux/deoplete-ternjs', { 'for': ['javascript', 'javascript.jsx'], 'do': 'yarn global add tern' }
-    " Plug 'roxma/nvim-completion-manager'
-    " Plug 'autozimu/LanguageClient-neovim', { 'do': ':UpdateRemotePlugins' }
-    " Plug 'roxma/LanguageServer-php-neovim',  {'do': 'composer install && composer run-script parse-stubs'}
-  endif " if Plug installed
-  if (!has('nvim') || $STY != '')
-    Plug 'altercation/vim-colors-solarized'
-  else
-    set termguicolors
     Plug 'frankier/neovim-colors-solarized-truecolor-only'
   endif
   Plug 'sheerun/vim-polyglot'
@@ -275,16 +263,12 @@ silent! colorscheme solarized
 "
 source ~/.vim/plugin/config/airline.vimrc
 source ~/.vim/plugin/config/ale.vimrc
-source ~/.vim/plugin/config/autoformat.vimrc
 source ~/.vim/plugin/config/autopairs.vimrc
-source ~/.vim/plugin/config/bookmarks.vimrc
 source ~/.vim/plugin/config/composer.vimrc
-source ~/.vim/plugin/config/denite.vimrc
 source ~/.vim/plugin/config/deoplete.vimrc
 source ~/.vim/plugin/config/dirvish.vimrc
 source ~/.vim/plugin/config/fzf.vimrc
 source ~/.vim/plugin/config/gutentags.vimrc
-" source ~/.vim/plugin/config/neomake.vimrc
 source ~/.vim/plugin/config/projectionist.vimrc
 source ~/.vim/plugin/config/switch.vimrc
 source ~/.vim/plugin/config/terminal.vimrc
