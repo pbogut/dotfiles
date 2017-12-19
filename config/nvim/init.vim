@@ -72,15 +72,16 @@ endif
 
 let mapleader = "\<space>" " life changer
 
+let $TMPDIR = "/tmp/" . $USER
 
-  augroup configgroup_nvim
-    autocmd!
-    " fix terminal display
-    autocmd TermOpen *
-          \  :silent! normal! <c-\><c-n>a
-          " \| setlocal nocursorline
-          " \| setlocal nocursorcolumn
-  augroup END
+augroup configgroup_nvim
+  autocmd!
+  " fix terminal display
+  autocmd TermOpen *
+        \  :silent! normal! <c-\><c-n>a
+        " \| setlocal nocursorline
+        " \| setlocal nocursorcolumn
+augroup END
 augroup configgroup
   autocmd!
   autocmd BufRead,BufNewFile *.phtml
@@ -240,6 +241,9 @@ if exists(':Plug')
     source ~/.vim/plugin/config/dirvish.vimrc
   Plug 'w0rp/ale'
     autocmd User after_plug_end source ~/.vim/plugin/config/ale.vimrc
+    autocmd User after_vim_load
+          \  highlight ALEErrorSign guibg=#073642 guifg=#dc322f
+          \| highlight ALEWarningSign guibg=#073642 guifg=#d33682
   Plug 'wakatime/vim-wakatime'
   Plug 'vimwiki/vimwiki'
     let g:vimwiki_map_prefix = '-w'
@@ -473,7 +477,7 @@ command! BCloseOtherForce execute "%bd! | e#"
 "Git
 command! Gan execute "!git an %"
 function! s:gap()
-  let file = expand('%')
+  let file = expand('%:p')
   belowright 30split
   enew
   exec "te git ap " . file
