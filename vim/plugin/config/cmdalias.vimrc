@@ -10,6 +10,8 @@ Alias git Git
 Alias gan Gan
 Alias gst Gst
 Alias gap Gap
+Alias ge Gedit
+Alias gedit Gedit
 Alias grev Grev
 Alias mix Mix
 Alias repl Repl

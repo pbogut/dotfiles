@@ -152,3 +152,7 @@ echo "done"
 echo -e "\nChange your shell if you wish:\n"
 which fish > /dev/null && echo -e "\tchsh $(id -un) -s $(which fish)"
 which zsh > /dev/null && echo -e "\tchsh $(id -un) -s $(which zsh)"
+
+read -p "Do you want to update bin folder? [yN]" -n 1 -s ask
+echo ""
+[[ $ask == "y" ]] && ./install-bin.sh

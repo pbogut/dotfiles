@@ -190,7 +190,7 @@ action=$1; shift
 
 # Fix GNU inconsistencies with Mac
 case $OSTYPE in
-  darwin*|*bsd*)
+  darwin*|*bsd*|*BSD*)
     stat_type="bsd_stat"
     readlink_missing="echo" # readlink -m not supported
     ;;
@@ -393,8 +393,16 @@ set_skipped ()
 
 get_abs_filename() {
   if [ -d "$(dirname "$1")" ]; then
-    echo "$(cd "$(dirname "$1")/$(dirname "$(readlink "$1")")" && pwd)/$(basename "$1")"
-  fi
+      SOURCE="$1"
+      while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+          DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+          SOURCE="$(readlink "$SOURCE")"
+          [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+      done
+      DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+      fname=`basename $1`
+      echo $DIR"/"$fname
+ fi
 }
 
 remove_module_links ()
@@ -648,18 +656,20 @@ run_automodman () #"$module" "$mm" "$wc_dir" "$wc_desc"
       #first f tends to be empty because of our stripping the path down so test for it -n is default operator
       if [ "$pathname" ]; then
 
-        prevmatch=0
-        #todo: possibly there is a neater way to do this without a loop??
-        for incPath in "${incpaths[@]}" #loop through incpaths
-        do  
-          if [[ "$pathname" != "${pathname/$incPath/}" ]]; then
-            prevmatch=1
-          fi
-        done
-        
+		  prevmatch=0
+		  
+		if [[ ${incpaths[@]} ]]; then
+  		  for i in "${incpaths[@]}"
+  		  do
+  		    if [[ "$pathname" =~ "$i" ]] ; then
+  		      prevmatch=1
+			fi  
+  		  done
+		fi
+		
         #if substring then do recurse        
-        if [[ $prevmatch -eq 0 ]]; then #make sure we have not previously matched
-
+        if [[ $prevmatch -eq 0 ]]; then #make sure we have not previously matched to prevent subpaths
+        
           #pre-existing path: yes | no?      
           if grep -rq "^[^#].*\s$pathname$" "${amm}/"*"/modman" #target is what is important so find end line not beginning line
           then #pre-existing path: yes
