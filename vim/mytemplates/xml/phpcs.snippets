@@ -1,0 +1,9 @@
+priority -50
+
+snippet _t_phpcs_skel "PHP CS Init config" b
+<?xml version="1.0"?>
+<ruleset name="${1:Project}">
+	<description>${2:Standard for $1}</description>
+	<rule ref="${3:PSR2}" />$0
+</ruleset>
+endsnippet

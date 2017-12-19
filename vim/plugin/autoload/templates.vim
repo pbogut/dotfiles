@@ -42,6 +42,10 @@ function! templates#InsertSkeleton(...) abort
     endfor
   endif
 
+  if s:try_insert(expand('%:t:r') . '_skel')
+    return
+  endif
+
   call s:try_insert('skel')
 endfunction
 
