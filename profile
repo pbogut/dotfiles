@@ -24,5 +24,9 @@ export FZF_DEFAULT_OPTS="
 
 export LPASS_AGENT_TIMEOUT=0
 
+# set up unique TMPDIR per user
+export TMPDIR="/tmp/$USER"
+mkdir $TMPDIR -p
+
 # that should work with bash / zsh and fish
 # source ~/.profile.local > /dev/null 2>&1

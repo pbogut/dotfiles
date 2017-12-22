@@ -1,10 +1,10 @@
 #!/usr/bin/python
 import re
+import os
 import i3
 import subprocess
 import argparse
 from pathlib import Path
-
 
 def validate_direction(parser, val):
     if val not in ['left', 'right', 'up', 'down']:
@@ -127,8 +127,9 @@ if __name__ == '__main__':
                                  pane_dir[direction], shell=True)
     else:
         if bool(re.match(r'.*:nvim:..*:', name)) and not args.skip_vim:
-            vim_id = "/tmp/nvim" + \
+            vim_id = os.environ['TMPDIR'] + "/nvim" + \
                 re.search(r".*:nvim:(.*?):.*", name).group(1) + "/0"
+            print(vim_id)
             if Path(vim_id).exists():
                 subprocess.Popen("nvr --servername " + vim_id +
                                  " -c ':call local#i3focus#switch(\"" +

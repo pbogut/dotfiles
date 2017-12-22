@@ -136,3 +136,28 @@ git_ls() {
         | while read l; do echo -e "\033[0;34mG\033[0m  $l";done
     git -c color.status=always status --short
 }
+git_add_and_apply_patch() {
+  echo $1 $2 $3 $4
+  echo `pwd`
+  git add -N $1
+  git add -p $1
+}
+
+git_add_parent_upstream() {
+  git remote -v |grep 'github\.com' | sed -E 's,.*\s.*github\.com.(.*)/(.*)\s.*,\1 \2,'  | (read user repo
+    parent=$(curl https://api.github.com/repos/$user/$repo 2>/dev/null | jq -r .parent.ssh_url)
+    if [[ -z "$user" || -z "$repo" || -z "$parent" ]]; then
+      echo "Cant find parent repo."
+      exit 1
+    fi
+    echo -n "Adding $parent as upstream ..."
+    git remote add upstream $parent
+    if [[ $? -eq 0 ]]; then
+      echo "done"
+    fi
+  )
+}
+
+git_sync_upstream() {
+  git pull upstream $(git branch | grep '^\* ' | sed 's,^\* ,,')
+}

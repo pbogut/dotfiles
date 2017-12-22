@@ -72,8 +72,6 @@ endif
 
 let mapleader = "\<space>" " life changer
 
-let $TMPDIR = "/tmp/" . $USER
-
 augroup configgroup_nvim
   autocmd!
   " fix terminal display
@@ -200,6 +198,7 @@ if exists(':Plug')
     source ~/.vim/plugin/config/gutentags.vimrc
   Plug 'gioele/vim-autoswap'
   Plug 'ntpeters/vim-better-whitespace'
+    let g:strip_whitespace_on_save = 1
   Plug 'honza/vim-snippets'
   Plug 'mattn/emmet-vim'
     imap <c-e> <c-y>,
@@ -557,12 +556,12 @@ function! s:set_title_string()
     let file = substitute(getcwd(),$HOME,'~', 'g')
   endif
   if empty($SSH_CLIENT) && empty($SSH_TTY)
-    let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, '/tmp/nvim\(.*\)\/0$', '\1', 'g') . ":" . l:file
+    let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, $TMPDIR . '/nvim\(.*\)\/0$', '\1', 'g') . ":" . l:file
   else
     let &titlestring = $USER . '@' . hostname() . ":nvim:" . l:file
   endif
 endfunction
-let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, '/tmp/nvim\(.*\)\/0$', '\1', 'g') . ":" . substitute(getcwd(),$HOME,'~', 'g')
+let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, $TMPDIR . '/nvim\(.*\)\/0$', '\1', 'g') . ":" . substitute(getcwd(),$HOME,'~', 'g')
 set title
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")

@@ -63,6 +63,10 @@
     cpr = "!. ~/.githelpers && git_checkout_pull_request"
     pullpr = "!. ~/.githelpers && git_pull_pull_request"
 
+
+    add-upstream = "!. ~/.githelpers && git_add_parent_upstream"
+    sync-upstream = "!. ~/.githelpers && git_sync_upstream"
+
     # funny
     whatthecommit = "!git commit --verbose -m \"`curl -qs http://whatthecommit.com/index.txt`\""
     wtc = "!echo \"`curl -qs http://whatthecommit.com/index.txt`\""
