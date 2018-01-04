@@ -77,50 +77,53 @@ augroup configgroup_nvim
   " fix terminal display
   autocmd TermOpen *
         \  :silent! normal! <c-\><c-n>a
-        " \| setlocal nocursorline
-        " \| setlocal nocursorcolumn
+  " \| setlocal nocursorline
+  " \| setlocal nocursorcolumn
 augroup END
 augroup configgroup
   autocmd!
   autocmd BufRead,BufNewFile *.phtml
         \  setfiletype php.phtml
-        \| let b:commentary_format='<?php /* %s */ ?>'
   autocmd FileType *
         \  call matchadd('Todo', '@todo\>')
         \| call matchadd('Todo', '@fixme\>')
-  " autocmd FileType html
-  "       \  setlocal tabstop=4 shiftwidth=4
-  " autocmd FileType vue
-  "       \  setlocal tabstop=2 shiftwidth=2
-  " autocmd FileType javascript
-  "       \  setlocal tabstop=2 shiftwidth=2
-  " autocmd FileType elixir
-  "       \  setlocal tabstop=2 shiftwidth=2
+  autocmd FileType html
+        \  call s:set_indent(4, v:false, v:true)
+  autocmd FileType vue
+        \  call s:set_indent(2, v:false, v:true)
+  autocmd FileType javascript
+        \  call s:set_indent(2, v:false, v:true)
+  autocmd FileType elixir
+        \  call s:set_indent(2, v:false, v:true)
   autocmd FileType elm
-        \  setlocal tabstop=4 shiftwidth=4
+        \  call s:set_indent(4, v:false, v:true)
         \| setlocal makeprg=elm-make
-        \| let b:my_make_cmd = "elm-make --output /dev/null {file_name}"
+        \| let b:my_make_cmd = "elm-make --warn --output /dev/null {file_name}"
   autocmd FileType c
         \  setlocal tabstop=4 shiftwidth=4
   autocmd FileType php
-        \  setlocal tabstop=4 shiftwidth=4
+        \| call s:set_indent(4, v:false, v:true)
         \| let b:commentary_format='// %s'
         \| nmap <buffer> gD <plug>(composer-find)
         \| setlocal kp=:PhpDoc
         \| exec("map cgget mz0wwwyw/getters<cr>jo/**<cr>Gets <esc>pb~yiwo<cr>@return mixed<cr><cr>/<cr>public function get<esc>pa()<cr>{<cr>return $this-><esc>pb~A;<esc>jo<esc>`zj")
         \| exec("map cgset mz0wwwyw/setters<cr>jo/**<cr>Sets <esc>pb~yiwo<cr>@return $this<cr><cr>/<cr>public function set<esc>pa(<esc>pbi$<esc>~~ea)<cr>{<cr>$this-><esc>pb~A = $<esc>pb~A;<cr>return $this;<esc>jo<esc>`zj")
+  autocmd FileType php.phtml
+        \  call s:set_indent(4, v:false, v:true)
+        \| let b:commentary_format='<?php /* %s */ ?>'
   autocmd FileType go
-        \  setlocal noexpandtab
-        " \| setlocal tabstop=2 shiftwidth=2
+        \  call s:set_indent(2, v:true, v:true)
+  " \| setlocal tabstop=2 shiftwidth=2
   " autocmd FileType ruby
   "       \  setlocal tabstop=2 shiftwidth=2
-  " autocmd FileType vim
-  "       \  setlocal tabstop=2 shiftwidth=2
+  autocmd FileType vim
+        \  call s:set_indent(2, v:false, v:true)
+        \| let b:neoformat_basic_format_align = 1
   "       \| setlocal kp=:help
   " autocmd FileType xml
   "       \  setlocal tabstop=4 shiftwidth=4
-  " autocmd FileType sh
-  "       \  setlocal tabstop=4 shiftwidth=4
+  autocmd FileType sh
+        \  call s:set_indent(2, v:false, v:true)
   " autocmd FileType css
   "       \  setlocal tabstop=4 shiftwidth=4
   " autocmd FileType scss
@@ -131,6 +134,8 @@ augroup configgroup
         \  let b:commentary_format='# %s'
   autocmd FileType markdown
         \  setlocal spell spelllang=en_gb
+        \| let b:neoformat_disabled = 1
+        \| let b:whitespace_trim_disabled = 1
   autocmd FileType qf
         \  nnoremap <buffer> o <cr>
         \| nnoremap <buffer> q :q
@@ -156,11 +161,15 @@ augroup configgroup
         \  set laststatus=0 noshowmode noruler
         \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
   autocmd InsertLeave *
-              \ if &buftype == 'acwrite' | execute('WidenRegion') | endif
+        \ if &buftype == 'acwrite' | execute('WidenRegion') | endif
   " always show gutter column to avoid blinking and jumping
   " autocmd BufEnter *
   "       \  execute('sign define dummy')
   "       \| execute('sign place 98913 line=1 name=dummy buffer=' . bufnr(''))
+  autocmd BufWritePre *
+        \  silent! Format
+  autocmd BufWritePost *
+        \  silent! Whitespace
 augroup END
 
 silent! call plug#begin()
@@ -168,7 +177,7 @@ if exists(':Plug')
   Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
   Plug 'xolox/vim-misc'
   Plug 'xolox/vim-notes'
-    let g:notes_directories = [ $HOME . "/Notes/" ]
+  let g:notes_directories = [ $HOME . "/Notes/" ]
   Plug 'tpope/vim-scriptease'
   " Plug 'tpope/vim-fugitive'
   Plug 'pbogut/vim-fugitive'
@@ -176,90 +185,92 @@ if exists(':Plug')
   Plug 'tpope/vim-git'
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-surround'
-    vmap s S
+  vmap s S
   Plug 'tpope/vim-repeat'
   Plug 'tpope/vim-rails', { 'for': 'ruby' }
   Plug 'tpope/vim-endwise'
   Plug 'tpope/vim-unimpaired'
   Plug 'tpope/vim-obsession'
   Plug 'tpope/vim-abolish'
-    autocmd User after_vim_load source ~/.vim/plugin/config/abolish.vimrc
+  autocmd User after_vim_load source ~/.vim/plugin/config/abolish.vimrc
   Plug 'tpope/vim-projectionist'
-    source ~/.vim/plugin/config/projectionist.vimrc
+  source ~/.vim/plugin/config/projectionist.vimrc
   Plug 'dhruvasagar/vim-prosession'
-    let g:prosession_per_branch = 1
+  let g:prosession_per_branch = 1
   Plug 'vim-airline/vim-airline'
-    source ~/.vim/plugin/config/airline.vimrc
+  source ~/.vim/plugin/config/airline.vimrc
   Plug 'vim-airline/vim-airline-themes'
   Plug 'airblade/vim-gitgutter'
-    source ~/.vim/plugin/config/gitgutter.vim
+  source ~/.vim/plugin/config/gitgutter.vim
   Plug 'MarcWeber/vim-addon-mw-utils'
   Plug 'ludovicchabant/vim-gutentags'
-    source ~/.vim/plugin/config/gutentags.vimrc
+  source ~/.vim/plugin/config/gutentags.vimrc
   Plug 'gioele/vim-autoswap'
   Plug 'ntpeters/vim-better-whitespace'
-    let g:strip_whitespace_on_save = 1
+  let g:strip_whitespace_on_save = 0 " Use Whitespace wrapper instead
   Plug 'honza/vim-snippets'
   Plug 'mattn/emmet-vim'
-    imap <c-e> <c-y>,
+  imap <c-e> <c-y>,
   Plug 'majutsushi/tagbar'
-    nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
+  nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
   Plug 'sirver/ultisnips'
-    source ~/.vim/plugin/config/ultisnips.vim
+  source ~/.vim/plugin/config/ultisnips.vim
   Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
-    source ~/.vim/plugin/config/vdebug.vim
+  source ~/.vim/plugin/config/vdebug.vim
   Plug 'sbdchd/neoformat'
+  let g:neoformat_only_msg_on_error = 1
   Plug 'k-takata/matchit.vim'
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
   Plug 'noahfrederick/vim-composer', { 'for': 'php' }
   Plug 'janko-m/vim-test'
-    source ~/.vim/plugin/config/test.vim
+  source ~/.vim/plugin/config/test.vim
   Plug 'elmcast/elm-vim', { 'for': 'elm' }
-    let g:elm_format_autosave = 0
+  Plug 'pbogut/vim-elmper', { 'for': 'elm' }
+  let g:elm_format_autosave = 0
   Plug 'elixir-lang/vim-elixir', { 'for': ['elixir', 'eelixir'] }
   Plug 'kana/vim-operator-user'
   Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
   Plug 'will133/vim-dirdiff'
   Plug 'dbakker/vim-projectroot'
-    let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
-          \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
+  let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
+        \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
   Plug 'AndrewRadev/switch.vim'
-    autocmd User after_plug_end source ~/.vim/plugin/config/switch.vimrc
+  autocmd User after_plug_end source ~/.vim/plugin/config/switch.vimrc
   Plug 'AndrewRadev/splitjoin.vim'
   Plug 'AndrewRadev/sideways.vim'
-    source ~/.vim/plugin/config/sideways.vim
+  source ~/.vim/plugin/config/sideways.vim
   Plug 'godlygeek/tabular'
-    command! -nargs=* -range T Tabularize <args>
+  command! -nargs=* -range T Tabularize <args>
   Plug 'vim-scripts/cmdalias.vim'
-    autocmd User after_vim_load source ~/.vim/plugin/config/cmdalias.vimrc
+  autocmd User after_vim_load source ~/.vim/plugin/config/cmdalias.vimrc
   " Plug 'Shougo/unite.vim'
   Plug 'Shougo/echodoc.vim'
   Plug 'andyl/vim-textobj-elixir'
   Plug 'kana/vim-textobj-user'
   Plug 'justinmk/vim-dirvish'
-    source ~/.vim/plugin/config/dirvish.vimrc
+  source ~/.vim/plugin/config/dirvish.vimrc
   Plug 'w0rp/ale'
-    autocmd User after_plug_end source ~/.vim/plugin/config/ale.vimrc
-    autocmd User after_vim_load
-          \  highlight ALEErrorSign guibg=#073642 guifg=#dc322f
-          \| highlight ALEWarningSign guibg=#073642 guifg=#d33682
+  autocmd User after_plug_end source ~/.vim/plugin/config/ale.vimrc
+  autocmd User after_vim_load
+        \  highlight ALEErrorSign guibg=#073642 guifg=#dc322f
+        \| highlight ALEWarningSign guibg=#073642 guifg=#d33682
   Plug 'wakatime/vim-wakatime'
   Plug 'vimwiki/vimwiki'
-    let g:vimwiki_map_prefix = '-w'
-    let g:vimwiki_list = [{'path': '~/pawel.bogut@gmail.com/vimwiki/',
-                         \ 'syntax': 'markdown', 'ext': '.md'}]
+  let g:vimwiki_map_prefix = '-w'
+  let g:vimwiki_list = [{'path': '~/pawel.bogut@gmail.com/vimwiki/',
+        \ 'syntax': 'markdown', 'ext': '.md'}]
   Plug 'vim-scripts/ReplaceWithRegister'
-    source ~/.vim/plugin/config/replacewithregister.vim
+  source ~/.vim/plugin/config/replacewithregister.vim
   Plug 'beloglazov/vim-textobj-quotes'
   Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
   Plug 'joereynolds/gtags-scope'
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-    source ~/.vim/plugin/config/deoplete.vimrc
+  source ~/.vim/plugin/config/deoplete.vimrc
   Plug 'Shougo/neco-vim', { 'for': 'vim' }
   Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
   Plug 'junegunn/fzf.vim'
   Plug 'pbogut/fzf-mru.vim'
-    source ~/.vim/plugin/config/fzf.vimrc
+  source ~/.vim/plugin/config/fzf.vimrc
   Plug 'slashmili/alchemist.vim', { 'for': ['elixir', 'eelixir'] }
   Plug 'powerman/vim-plugin-AnsiEsc', { 'for': ['elixir', 'eelixir'] }
   Plug 'zchee/deoplete-go', { 'do': 'go get github.com/nsf/gocode && make', 'for': 'go'}
@@ -270,7 +281,7 @@ if exists(':Plug')
   Plug 'carlitux/deoplete-ternjs', { 'for': ['javascript', 'javascript.jsx'], 'do': 'yarn global add tern' }
   Plug 'frankier/neovim-colors-solarized-truecolor-only'
   Plug 'sheerun/vim-polyglot'
-    let g:polyglot_disabled = ['eelixir', 'elixir']
+  let g:polyglot_disabled = ['eelixir', 'elixir']
 endif "
 silent! call plug#end()      " requiredc
 filetype plugin indent on    " required
@@ -311,7 +322,7 @@ nnoremap <silent> <leader>q :call local#togglelist#quickfixlist()<cr>
 nnoremap <silent> <bs> :Dirvish %:p:h<cr>
 nnoremap <silent> _ :Dirvish %:p:h<cr>
 nnoremap <silent> <leader>w :W!<cr>
-nnoremap <silent> <leader>a :Neoformat<cr>
+nnoremap <silent> <leader>a :Format<cr>
 nnoremap <silent> <leader>z za
 nnoremap <silent> <esc> :set nohls<cr>
 nnoremap R ddO
@@ -485,15 +496,15 @@ endfunction
 command! Gap call s:gap()
 
 command! -nargs=1 PhpDoc split
-    \| silent! execute("e phpdoc://<args>")
-    \| silent! setlocal noswapfile
-    \| silent! setlocal ft=php
-    \| silent! setlocal syntax=man
-    \| silent! execute("read !psysh <<< 'doc <args>' | head -n -2 | tail -n +2")
-    \| silent! execute("normal! ggdd")
-    \| silent! setlocal buftype=nofile
-    \| silent! setlocal nomodifiable
-    \| silent! map <buffer> q :q<cr>
+      \| silent! execute("e phpdoc://<args>")
+      \| silent! setlocal noswapfile
+      \| silent! setlocal ft=php
+      \| silent! setlocal syntax=man
+      \| silent! execute("read !psysh <<< 'doc <args>' | head -n -2 | tail -n +2")
+      \| silent! execute("normal! ggdd")
+      \| silent! setlocal buftype=nofile
+      \| silent! setlocal nomodifiable
+      \| silent! map <buffer> q :q<cr>
 
 
 let g:paranoic_backup_dir="~/.vim/backupfiles/"
@@ -547,8 +558,8 @@ endfunction
 set foldtext=NeatFoldText()
 
 augroup set_title_group
-    autocmd!
-    autocmd BufEnter * call s:set_title_string()
+  autocmd!
+  autocmd BufEnter * call s:set_title_string()
 augroup END
 function! s:set_title_string()
   let file = expand('%:~')
@@ -563,5 +574,50 @@ function! s:set_title_string()
 endfunction
 let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, $TMPDIR . '/nvim\(.*\)\/0$', '\1', 'g') . ":" . substitute(getcwd(),$HOME,'~', 'g')
 set title
+
+function! s:set_indent(width, ...) " width:int, hardtab:bool, init:bool
+  let l:hardtab = get(a:000, 0, v:false)
+  let l:init = get(a:000, 1, v:false)
+
+  if l:init && get(b:, 'Set_indent_inited', v:false) " init only once
+    return
+  elseif l:init
+    let b:Set_indent_inited = v:true
+  endif
+
+  " show existing tab with spaces
+  let &tabstop = a:width
+  " when indenting with '>', use 2 spaces width
+  let &shiftwidth = a:width
+  " On pressing tab, insert 2 spaces
+  if empty(l:hardtab)
+    set expandtab
+  else
+    set noexpandtab
+  end
+endfunction
+command! -bang -nargs=1 SetIndentWidth call s:set_indent(<args>, <bang>0)
+
+function! s:format()
+  let g:neoformat_run_all_formatters = get(b:, 'neoformat_run_all_formatters')
+  let g:neoformat_basic_format_align = get(b:, 'neoformat_basic_format_align')
+  let g:neoformat_basic_format_trim = get(b:, 'neoformat_basic_format_trim')
+
+  if !empty(get(b:, 'neoformat_disabled'))
+    return
+  endif
+
+  silent! Neoformat
+endfunction
+command! Format call s:format()
+
+function! s:whitespace()
+  if !empty(get(b:, 'whitespace_trim_disabled'))
+    return
+  endif
+
+  silent! StripWhitespace
+endfunction
+command! Whitespace call s:whitespace()
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
