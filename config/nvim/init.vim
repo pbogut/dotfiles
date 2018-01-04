@@ -167,7 +167,7 @@ augroup configgroup
   "       \  execute('sign define dummy')
   "       \| execute('sign place 98913 line=1 name=dummy buffer=' . bufnr(''))
   autocmd BufWritePre *
-        \  silent! Format
+        \  silent! Format auto
   autocmd BufWritePost *
         \  silent! Whitespace
 augroup END
@@ -598,10 +598,14 @@ function! s:set_indent(width, ...) " width:int, hardtab:bool, init:bool
 endfunction
 command! -bang -nargs=1 SetIndentWidth call s:set_indent(<args>, <bang>0)
 
-function! s:format()
+function! s:format(...)
   let g:neoformat_run_all_formatters = get(b:, 'neoformat_run_all_formatters')
   let g:neoformat_basic_format_align = get(b:, 'neoformat_basic_format_align')
   let g:neoformat_basic_format_trim = get(b:, 'neoformat_basic_format_trim')
+
+  if a:0 && a:1 == "auto" && !empty(get(b:, 'neoformat_disable_on_save'))
+    return
+  endif
 
   if !empty(get(b:, 'neoformat_disabled'))
     return
@@ -609,7 +613,9 @@ function! s:format()
 
   silent! Neoformat
 endfunction
-command! Format call s:format()
+command! -nargs=? Format call s:format(<q-args>)
+command! FormatOnSaveDisable let b:neoformat_disable_on_save = 1
+command! FormatOnSaveEnable unlet b:neoformat_disable_on_save
 
 function! s:whitespace()
   if !empty(get(b:, 'whitespace_trim_disabled'))
