@@ -31,7 +31,6 @@ install_pacaur() {
     rm -r /tmp/pacaur_install
 }
 
-
 echo "Installing pacaur..."
 install_pacaur
 echo "Installing neovim..."
@@ -65,6 +64,7 @@ pacaur -S \
     redshift \
     rescuetime \
     rofi \
+    shfmt \
     texlive-most \
     twmn-git \
     udevil \
@@ -109,4 +109,3 @@ asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
 
 # Imports Node.js release team's OpenPGP keys to main keyring
 bash ~/.asdf/plugins/nodejs/bin/import-release-team-keyring
-
