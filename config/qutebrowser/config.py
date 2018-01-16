@@ -11,8 +11,8 @@ c.qt.args = [('ppapi-widevine-path='
 c.url.start_pages = ["https://google.com"]
 c.url.default_page = 'https://google.com'
 c.downloads.open_dispatcher = '/bin/bash -c "~/.scripts/i3-open \'{}\'"'
-c.editor.command = ["nvim-qt", "--nofork",
-                    "--geometry", "900x55", "--", "-f", "{}"]
+c.editor.command = ["urxvt", "--geometry", "120x32",
+                    "--title", "NVIM_FOR_QB", "-e", "nvim", "{}"]
 c.downloads.position = "bottom"
 c.confirm_quit = ["multiple-tabs", "downloads"]
 c.scrolling.bar = True

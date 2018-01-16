@@ -11,4 +11,4 @@ fi
 if [[ $1 == "--clipboard" ]]; then
     xsel -b > $file
 fi
-nvim-qt --nofork $file && cat $file | xsel -b
+urxvt -e nvim $file && cat $file | xsel -b

@@ -602,8 +602,10 @@ function! s:format(...)
   let g:neoformat_run_all_formatters = get(b:, 'neoformat_run_all_formatters')
   let g:neoformat_basic_format_align = get(b:, 'neoformat_basic_format_align')
   let g:neoformat_basic_format_trim = get(b:, 'neoformat_basic_format_trim')
+  let l:disabled = !empty(get(b:, 'neoformat_disable_on_save'))
+        \ || !empty(get(g:, 'neoformat_disable_on_save'))
 
-  if a:0 && a:1 == "auto" && !empty(get(b:, 'neoformat_disable_on_save'))
+  if a:0 && a:1 == "auto" && l:disabled
     return
   endif
 
@@ -614,8 +616,8 @@ function! s:format(...)
   silent! Neoformat
 endfunction
 command! -nargs=? Format call s:format(<q-args>)
-command! FormatOnSaveDisable let b:neoformat_disable_on_save = 1
-command! FormatOnSaveEnable unlet b:neoformat_disable_on_save
+command! -bang FormatOnSaveDisable :exec 'let ' . (empty("<bang>") ? 'b' : 'g' ) . ':neoformat_disable_on_save = 1'
+command! -bang FormatOnSaveEnable :exec 'unlet ' . (empty("<bang>") ? 'b' : 'g' ) . ':neoformat_disable_on_save'
 
 function! s:whitespace()
   if !empty(get(b:, 'whitespace_trim_disabled'))
@@ -625,5 +627,32 @@ function! s:whitespace()
   silent! StripWhitespace
 endfunction
 command! Whitespace call s:whitespace()
+
+nmap <C-_> :call Comment()<cr><down>
+nmap <C-/> :call Comment()<cr><down>
+vmap <C-_> :call Comment()<cr><down>
+vmap <C-/> :call Comment()<cr><down>
+
+function! Comment()
+  if &ft == 'php.phtml'
+    if Phtml_scope() == 'php'
+      let b:commentary_format = '/* %s */'
+    else
+      let b:commentary_format = '<?php /* %s */ ?>'
+    endif
+  endif
+  normal gcc
+endfunction
+
+function! Phtml_scope()
+  let [l1, c1] = searchpos('?>', 'bnW')
+  let [l2, c2] = searchpos('<?php', 'bnW')
+
+  if l1 < l2 || l1 == l2 && c1 < c2
+    return 'php'
+  else
+    return 'html'
+  endif
+endfunction
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")

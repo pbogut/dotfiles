@@ -1,6 +1,7 @@
 #!/bin/bash
-track=`mpc current -f '%title% - %artist% - %album%'`
-track_id=`mpc current -f '%file%' | sed 's/.*:track:\(.*\)/\1/g'`
+mpc="mpc -p ${MOPIDY_PORT:-6600}"
+track=`$mpc current -f '%title% - %artist% - %album%'`
+track_id=`$mpc current -f '%file%' | sed 's/.*:track:\(.*\)/\1/g'`
 token=`cat ~/.spotify-api-token`
 if [ -z $token ]; then
     echo "Token not found, you need to place token in ~/.spotify-api-token file"
