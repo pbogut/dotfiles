@@ -250,6 +250,8 @@ assign [title="^todoist$"] $wsdash
 for_window [title="NVIM_FOR_QB"] floating enable
 for_window [class="Toggl Desktop"] floating enable
 for_window [class="Skype"] floating enable
+for_window [class="explorer.exe"] floating enable
+
 # for_window [class="^nvim-qt$"] floating enable
 for_window [class="^feh$"] fullscreen enable
 
