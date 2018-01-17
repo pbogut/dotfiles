@@ -14,9 +14,9 @@ let s:options = {
 function! s:activate() abort
   for [l:root, l:map] in projectionist#query('let')
     for [l:variable, l:value] in items(l:map)
-      let l:test_var = substitute(l:variable, '.*\([bgl]:[A-Za-z_\-]\).*', '\1', 'g')
+      let l:test_var = substitute(l:variable, '.*\([bgl]:[A-Za-z_\-]*\).*', '\1', 'g')
       if l:test_var != l:variable
-        echom "l:variable is not valid variable name"
+        echom "l:variable `" . l:variable . "` != `" . l:test_var . "` is not valid variable name"
       endif
       exec('let ' . l:variable . ' = "' . escape(l:value, '"') . '"')
     endfor
