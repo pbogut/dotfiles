@@ -90,7 +90,7 @@ function! local#fzf#rg(raw, ...) abort
   echo "!rg -i " . params
   " call fzf#vim#ag_raw(params)
   call fzf#vim#grep(
-  \   'rg --column --line-number --no-heading --color=always -i '.params, 1)
+        \   'rg --column --line-number --no-heading --color=always -i '.params, 1)
 endfunction
 
 function! local#fzf#agg(raw, ...) abort
@@ -132,9 +132,41 @@ function! local#fzf#project(...) abort
   call fzf#run(fzf#wrap('name', extra, 0))
 endfunction
 
+function! s:fzf_ft_sink(line)
+  if !empty(a:line)
+    let &ft=a:line
+  endif
+endfunction
+
+function! local#fzf#ft(...) abort
+  let options = {
+        \   'source': [
+        \       "css",
+        \       "elixir",
+        \       "go",
+        \       "html",
+        \       "javascript",
+        \       "javascript.jsx",
+        \       "php",
+        \       "php.phtml",
+        \       "ruby",
+        \       "scss",
+        \       "sh",
+        \       "vim",
+        \       "xml",
+        \   ],
+        \   'sink': function('s:fzf_ft_sink'),
+        \   'options': '--print-query --ansi --prompt "FileType> " ' . s:params(a:000, 0),
+        \ }
+  let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
+  call fzf#run(fzf#wrap('name', extra, 0))
+endfunction
+
 command! -nargs=* -bang -complete=dir FZFProject call local#fzf#project(<f-args>)
 
 command! -nargs=* -bang -complete=dir Ag call local#fzf#ag(<bang>0,<f-args>)
 command! -nargs=* -bang -complete=dir Agg call local#fzf#agg(<bang>0,<f-args>)
 command! -nargs=* -bang -complete=dir Rg call local#fzf#rg(<bang>0,<f-args>)
 command! -nargs=* -bang -complete=dir Rgg call local#fzf#agg(<bang>0,<f-args>)
+
+command! -nargs=* -complete=dir FZFFileType call local#fzf#ft(<f-args>)

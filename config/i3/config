@@ -37,6 +37,10 @@ floating_modifier $mod
 set $update_keylayout exec --no-startup-id pkill -SIGRTMIN+12 i3blocks
 set $update_volume exec --no-startup-id pkill -SIGRTMIN+11 i3blocks
 
+# popups
+popup_during_fullscreen leave_fullscreen
+
+
 # start a terminal
 bindsym $mod+Return $exec "~/.scripts/i3-term-in-current-dir.sh"
 bindsym $mod+Shift+Return $exec "~/.scripts/i3-term-in-current-dir.sh --new-workspace"
@@ -298,7 +302,7 @@ bindsym $mod+m move workspace to output left
 # anamnesis clip board
 bindsym $mod+apostrophe $exec "~/.scripts/i3-dmenu-anamnesis.sh"
 # browser shortcut
-bindsym $mod+slash $exec "~/.scripts/i3-dmenu-web.sh"
+bindsym $mod+slash $exec "~/.scripts/quickbrowser.sh"
 # screen shots
 # full screen (image magick required)
 bindsym Print $exec "import -window root ~/Pictures/Screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"

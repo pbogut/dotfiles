@@ -174,6 +174,8 @@ augroup END
 
 silent! call plug#begin()
 if exists(':Plug')
+  Plug 'pbogut/dbext.vim'
+  let g:dbext_map_prefix = '\s'
   Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
   Plug 'xolox/vim-misc'
   Plug 'xolox/vim-notes'
@@ -457,7 +459,7 @@ vmap <leader><cr> zf
 
 " quick set
 nnoremap <leader>s  :set
-nnoremap <leader>sf :set filetype=
+nnoremap <leader>sf :FZFFileType<cr>
 nnoremap <leader>ss :set spell!<cr>
 nnoremap <leader>sp :set paste!<cr>
 
