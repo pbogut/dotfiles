@@ -134,8 +134,6 @@ augroup configgroup
         \  let b:commentary_format='# %s'
   autocmd FileType markdown
         \  setlocal spell spelllang=en_gb
-        \| let b:neoformat_disabled = 1
-        \| let b:whitespace_trim_disabled = 1
   autocmd FileType qf
         \  nnoremap <buffer> o <cr>
         \| nnoremap <buffer> q :q
@@ -257,7 +255,7 @@ if exists(':Plug')
         \  highlight ALEErrorSign guibg=#073642 guifg=#dc322f
         \| highlight ALEWarningSign guibg=#073642 guifg=#d33682
   Plug 'wakatime/vim-wakatime'
-  Plug 'vimwiki/vimwiki'
+  Plug 'vimwiki/vimwiki', { 'branch': 'dev' }
   let g:vimwiki_map_prefix = '-w'
   let g:vimwiki_list = [{'path': '~/pawel.bogut@gmail.com/vimwiki/',
         \ 'syntax': 'markdown', 'ext': '.md'}]
@@ -600,6 +598,14 @@ function! s:set_indent(width, ...) " width:int, hardtab:bool, init:bool
 endfunction
 command! -bang -nargs=1 SetIndentWidth call s:set_indent(<args>, <bang>0)
 
+
+let g:neoformat_vimwiki_prettier = {
+      \ 'exe': 'prettier',
+      \ 'args': ['--stdin', '--stdin-filepath', '%:p'],
+      \ 'stdin': 1,
+      \ }
+
+let g:neoformat_enabled_vimwiki = ['prettier']
 function! s:format(...)
   let g:neoformat_run_all_formatters = get(b:, 'neoformat_run_all_formatters')
   let g:neoformat_basic_format_align = get(b:, 'neoformat_basic_format_align')
