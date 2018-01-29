@@ -22,7 +22,7 @@ c.tabs.background = True
 c.tabs.last_close = "close"
 c.tabs.show = "multiple"
 c.tabs.position = "right"
-c.tabs.width.bar = 200
+c.tabs.width = 200
 c.tabs.padding = {"top": 2, "bottom": 2, "left": 5, "right": 5}
 c.downloads.location.directory = "~/Downloads"
 c.content.plugins = True
@@ -128,6 +128,12 @@ config.bind('ys', 'spawn --userscript ~/.scripts/qb-copy-text.sh -b')
 config.bind('yH', 'spawn --userscript ~/.scripts/qb-copy-html.sh -p')
 config.bind('yS', 'spawn --userscript ~/.scripts/qb-copy-text.sh -p')
 config.bind('eu', 'edit-url')
+
+config.bind(',pp', ("jseval (function(){var s = document.createElement('script"
+                    "');s.type='text/javascript';s.src='https://dsheiko.github"
+                    ".io/pixel-perfect-bookmarklet/bookmarklet.js?v='+parseInt"
+                    "(Math.random()*99999999);document.body.appendChild(s);voi"
+                    "d(0);}());"))
 
 dir_path = os.path.dirname(__file__)
 if os.path.exists(dir_path + '/secure_config.py'):
