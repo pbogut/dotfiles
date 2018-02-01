@@ -291,7 +291,7 @@ bindsym $mod+i $exec '~/.scripts/vim-anywhere.sh'
 bindsym $mod+Ctrl+t $exec "~/.scripts/switch-or-launch.sh '\<[Tt]odoist$' 'todoist'"
 bindsym $mod+Ctrl+b $exec "~/.scripts/switch-or-launch.sh '\<qutebrowser$' 'browser'"
 bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '\<Franz$' 'franz-bin'"
-bindsym $mod+Ctrl+r $exec "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
+bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
 bindsym $mod+Ctrl+g $exec "~/.scripts/switch-or-launch.sh '\<[Tt]oggl$' 'toggl'"
 bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh '\<Volume Control$' 'pavucontrol'"
 
