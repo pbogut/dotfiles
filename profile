@@ -6,11 +6,14 @@
 #=================================================
 export PROFILE_LOADED=true
 
+export GOPATH="$HOME/.gocode"
+
 export PATH="$HOME/.scripts:$PATH"
 export PATH="$HOME/.bin:$PATH"
 
 export PATH="$PATH:$HOME/.local/bin"
 export PATH="$PATH:$HOME/.npm/bin"
+export PATH="$PATH:$HOME/.gocode/bin"
 
 export EDITOR="nvim"
 
@@ -29,4 +32,4 @@ export TMPDIR="/tmp/$USER"
 mkdir $TMPDIR -p
 
 # that should work with bash / zsh and fish
-source ~/.profile.local > /dev/null 2>&1
+source ~/.profile.local >/dev/null 2>&1
