@@ -638,10 +638,10 @@ command! Whitespace call s:whitespace()
 
 nmap <C-_> :call Comment()<cr><down>
 nmap <C-/> :call Comment()<cr><down>
-vmap <C-_> :call Comment()<cr><down>
-vmap <C-/> :call Comment()<cr><down>
+vmap <C-_> :call Comment(v:true)<cr><down>
+vmap <C-/> :call Comment(v:true)<cr><down>
 
-function! Comment()
+function! Comment(...)
   if &ft == 'php.phtml'
     if Phtml_scope() == 'php'
       let b:commentary_format = '/* %s */'
@@ -649,7 +649,11 @@ function! Comment()
       let b:commentary_format = '<?php /* %s */ ?>'
     endif
   endif
-  normal gcc
+  if empty(get(a:, 1))
+    normal gcc
+  else
+    normal gvgc
+  endif
 endfunction
 
 function! Phtml_scope()
