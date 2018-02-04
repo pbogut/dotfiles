@@ -1,7 +1,7 @@
 #!/bin/bash
 #=================================================
 # name:   .profile
-# author: Pawel Bogut <http://pbogut.me>
+# author: Pawel Bogut <pbogut@pbogut.net>
 # date:   11/11/2017
 #=================================================
 export PROFILE_LOADED=true

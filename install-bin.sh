@@ -1,23 +1,23 @@
 #!/bin/bash
 #=================================================
 # name:   __get.sh
-# author: Pawel Bogut <http://pbogut.me>
+# author: Pawel Bogut <pbogut@pbogut.me>
 # date:   19/12/2017
 #=================================================
-dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # dotfiles directory
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # dotfiles directory
 cd bin
 get() {
   echo -n "Downloading $1 from $2 ..."
-  if hash curl 2>&- ; then
-      curl -s -L "$2" -o "$1"
-  elif hash wget 2>&- ; then
-      wget -q --no-check-certificate -O "$2" "$1"
+  if hash curl 2>&-; then
+    curl -s -L "$2" -o "$1"
+  elif hash wget 2>&-; then
+    wget -q --no-check-certificate -O "$2" "$1"
   else
-     echo "error! You need to have curl or wget installed."
-     exit 1
-   fi
-   chmod +x $1
-   echo "done"
+    echo "error! You need to have curl or wget installed."
+    exit 1
+  fi
+  chmod +x $1
+  echo "done"
 }
 
 get composer 'http://getcomposer.org/composer.phar'

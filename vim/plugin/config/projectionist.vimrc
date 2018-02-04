@@ -8,7 +8,7 @@ function! g:projectionist_transformations.mag_rm_pool(input, o) abort
 endfunction
 
 " mapping
-noremap <leader>ta :A<cr>
+noremap <space>ta :A<cr>
 
 let s:space_4 =
       \   {

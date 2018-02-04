@@ -1,7 +1,7 @@
 #!/bin/bash
 #=================================================
 # name:   mix.zsh
-# author: Pawel Bogut <http://pbogut.me>
+# author: Pawel Bogut <pbogut@pbogut.me>
 # date:   27/06/2017
 #=================================================
 #

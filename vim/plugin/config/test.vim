@@ -6,9 +6,9 @@ function! FixTestFileMod() abort
     unlet g:test#filename_modifier
   endif
 endfunction
-nmap <silent> <leader>tn :call FixTestFileMod() <bar> TestNearest<CR>
-nmap <silent> <leader>tf :call FixTestFileMod() <bar> TestFile<CR>
-nmap <silent> <leader>ts :call FixTestFileMod() <bar> TestSuite<CR>
-nmap <silent> <leader>tl :call FixTestFileMod() <bar> TestLast<CR>
-nmap <silent> <leader>tt :call FixTestFileMod() <bar> TestLast<CR>
-nmap <silent> <leader>tv :call FixTestFileMod() <bar> TestVisit<CR>
+nmap <silent> <space>tn :call FixTestFileMod() <bar> TestNearest<CR>
+nmap <silent> <space>tf :call FixTestFileMod() <bar> TestFile<CR>
+nmap <silent> <space>ts :call FixTestFileMod() <bar> TestSuite<CR>
+nmap <silent> <space>tl :call FixTestFileMod() <bar> TestLast<CR>
+nmap <silent> <space>tt :call FixTestFileMod() <bar> TestLast<CR>
+nmap <silent> <space>tv :call FixTestFileMod() <bar> TestVisit<CR>

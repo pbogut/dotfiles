@@ -17,7 +17,7 @@ let g:terminal_color_14 = '#93a1a1'
 let g:terminal_color_15 = '#fdf6e3'
 
 " got gof goT goF
-" nnoremap <silent> <leader>ot :belowright 20split \| terminal<cr>
+" nnoremap <silent> <space>ot :belowright 20split \| terminal<cr>
 if has("nvim")
   " nnoremap <silent> goF :te ranger<cr>
   " nnoremap <silent> got :te cd %:p:h && $SHELL<cr>

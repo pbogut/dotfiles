@@ -6,7 +6,7 @@
 # ================================================================ #
 [user]
     name = Pawel Bogut
-    email = pawel.bogut@gmail.com
+    email = pbogut@pbogut.me
 [core]
     autocrlf = input
     excludesfile = ~/.gitignore
