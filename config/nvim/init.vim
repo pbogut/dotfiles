@@ -70,7 +70,8 @@ if executable('rg')
   set grepformat=%f:%l:%c:%m,%f:%l:%m
 endif
 
-let mapleader = "\<space>" " life changer
+" Keep mapleader as backspack "\" for plugins not mess with my space leader
+" let mapleader = "\<space>" " life changer
 
 augroup configgroup_nvim
   autocmd!
@@ -154,7 +155,7 @@ augroup configgroup
         \|   execute('normal kJ')
         \| endif
   autocmd FileType tagbar
-        \  nmap <buffer> <leader>n q
+        \  nmap <buffer> <space>n q
   autocmd  FileType fzf
         \  set laststatus=0 noshowmode noruler
         \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
@@ -212,7 +213,7 @@ if exists(':Plug')
   Plug 'mattn/emmet-vim'
   imap <c-e> <c-y>,
   Plug 'majutsushi/tagbar'
-  nnoremap <silent> <leader>n :TagbarOpenAutoClose<cr>
+  nnoremap <silent> <space>n :TagbarOpenAutoClose<cr>
   Plug 'sirver/ultisnips'
   source ~/.vim/plugin/config/ultisnips.vim
   Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
@@ -309,21 +310,21 @@ hi VertSplit guibg=#073642 guifg=fg
 let g:no_plugin_maps = 1
 
 " macros
-nnoremap <leader>em :tabnew ~/.vim/macros.vim<cr>
-nnoremap <leader>sm :source ~/.vim/macros.vim<cr>
+nnoremap <space>em :tabnew ~/.vim/macros.vim<cr>
+nnoremap <space>sm :source ~/.vim/macros.vim<cr>
 " edit vimrc/zshrc and load vimrc bindings
-nnoremap <leader>ev :tabnew $MYVIMRC<CR>
-nnoremap <leader>ez :tabnew ~/.zshrc<CR>
-nnoremap <leader>sv :source $MYVIMRC<CR>
+nnoremap <space>ev :tabnew $MYVIMRC<CR>
+nnoremap <space>ez :tabnew ~/.zshrc<CR>
+nnoremap <space>sv :source $MYVIMRC<CR>
 " open list / quickfix
-nnoremap <silent> <leader>l :call local#togglelist#locationlist()<cr>
-nnoremap <silent> <leader>q :call local#togglelist#quickfixlist()<cr>
+nnoremap <silent> <space>l :call local#togglelist#locationlist()<cr>
+nnoremap <silent> <space>q :call local#togglelist#quickfixlist()<cr>
 
 nnoremap <silent> <bs> :Dirvish %:p:h<cr>
 nnoremap <silent> _ :Dirvish %:p:h<cr>
-nnoremap <silent> <leader>w :W!<cr>
-nnoremap <silent> <leader>a :Format<cr>
-nnoremap <silent> <leader>z za
+nnoremap <silent> <space>w :W!<cr>
+nnoremap <silent> <space>a :Format<cr>
+nnoremap <silent> <space>z za
 nnoremap <silent> <esc> :set nohls<cr>
 nnoremap R ddO
 nnoremap n :set hls<cr>n
@@ -337,7 +338,7 @@ smap <c-x> <esc>gvd
 smap <c-s> <esc>gvc
 " append to selection
 smap <c-a> <esc>a
-" nnoremap <silent> <leader>z :call PHP__Fold()<cr>
+" nnoremap <silent> <space>z :call PHP__Fold()<cr>
 " vim is getting ^_ when pressing ^/, so I've mapped both
 nmap <C-_> gcc<down>^
 nmap <C-/> gcc<down>^
@@ -354,8 +355,8 @@ nmap <silent> <c-w>s :rightbelow split<cr>
 nmap <silent> <c-w>V :vsplit<cr>
 nmap <silent> <c-w>S :split<cr>
 map Y y$
-nnoremap <leader> "*
-vnoremap <leader> "*
+nnoremap <space> "*
+vnoremap <space> "*
 nmap yaf :let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>
 nmap yif :let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>
 
@@ -371,8 +372,8 @@ endfor
 inoremap <c-d> <del>
 cnoremap <c-d> <del>
 " vim make
-nmap <leader>mf <leader>w:call QuickTerm(substitute(b:my_make_cmd, '{file_name}', expand('%'), ''))<cr>
-nmap <leader>ms <leader>w:make<cr>
+nmap <space>mf <space>w:call QuickTerm(substitute(b:my_make_cmd, '{file_name}', expand('%'), ''))<cr>
+nmap <space>ms <space>w:make<cr>
 " regex helpers
 cnoremap \\* \(.*\)
 cnoremap \\- \(.\{-}\)
@@ -384,35 +385,35 @@ nnoremap / :let @/=""<cr>:set hls<cr>/\c
 nnoremap ? :let @/=""<cr>:set hls<cr>?\c
 nnoremap * :set hls<cr>*
 nnoremap # :set hls<cr>#
-nnoremap <leader><leader> *``:set hls<cr>
-nnoremap <silent> <leader>= migg=G`i
+nnoremap <space><space> *``:set hls<cr>
+nnoremap <silent> <space>= migg=G`i
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
 
-nnoremap <silent> <leader>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
-nnoremap <silent> <leader>fa :call local#fzf#files()<cr>
-nnoremap <silent> <leader>fp :FZFProject<cr>
-nnoremap <silent> <leader>fc :call local#fzf#clip()<cr>
-nnoremap <silent> <leader>fd :call local#fzf#buffer_dir_files()<cr>
-nnoremap <silent> <leader>ff :call local#fzf#all_files()<cr>
-nnoremap <silent> <leader>fg :call local#fzf#git_ls()<cr>
-nnoremap <silent> <leader>ft :FZFTags <cword><cr>
-nnoremap <silent> <leader>] :FZFTags<cr>
-nnoremap <silent> <leader>fb :FZFBuffers<cr>
-nnoremap <silent> <leader>gf :call local#fzf#files(expand('<cfile>'))<cr>
-nnoremap <silent> <leader>gF :call local#fzf#all_files(expand('<cfile>'))<cr>
-nnoremap <silent> <leader>gt :call fzf#vim#tags(expand('<cword>'))<cr>
-nnoremap <silent> <leader>gw :Rg <cword><cr>
-nnoremap <silent> <leader>ga :Ag<cr>
-nnoremap <silent> <leader>gr :Rg<cr>
-vnoremap <silent> <leader>ga "ay :Ag <c-r>a<cr>
-vnoremap <silent> <leader>gr "ay :Rg <c-r>a<cr>
+nnoremap <silent> <space>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
+nnoremap <silent> <space>fa :call local#fzf#files()<cr>
+nnoremap <silent> <space>fp :FZFProject<cr>
+nnoremap <silent> <space>fc :call local#fzf#clip()<cr>
+nnoremap <silent> <space>fd :call local#fzf#buffer_dir_files()<cr>
+nnoremap <silent> <space>ff :call local#fzf#all_files()<cr>
+nnoremap <silent> <space>fg :call local#fzf#git_ls()<cr>
+nnoremap <silent> <space>ft :FZFTags <cword><cr>
+nnoremap <silent> <space>] :FZFTags<cr>
+nnoremap <silent> <space>fb :FZFBuffers<cr>
+nnoremap <silent> <space>gf :call local#fzf#files(expand('<cfile>'))<cr>
+nnoremap <silent> <space>gF :call local#fzf#all_files(expand('<cfile>'))<cr>
+nnoremap <silent> <space>gt :call fzf#vim#tags(expand('<cword>'))<cr>
+nnoremap <silent> <space>gw :Rg <cword><cr>
+nnoremap <silent> <space>ga :Ag<cr>
+nnoremap <silent> <space>gr :Rg<cr>
+vnoremap <silent> <space>ga "ay :Ag <c-r>a<cr>
+vnoremap <silent> <space>gr "ay :Rg <c-r>a<cr>
 
-nnoremap <silent> <leader>of :let g:pwd = expand('%:h') \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
-nnoremap <silent> <leader>op :let g:pwd = projectroot#guess() \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
-nnoremap <silent> <leader>ov :belowright 20split \| terminal vagrant ssh<cr>
+nnoremap <silent> <space>of :let g:pwd = expand('%:h') \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
+nnoremap <silent> <space>op :let g:pwd = projectroot#guess() \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
+nnoremap <silent> <space>ov :belowright 20split \| terminal vagrant ssh<cr>
 
-noremap <leader>sc :execute(':rightbelow 10split \| te scspell %')<cr>
+noremap <space>sc :execute(':rightbelow 10split \| te scspell %')<cr>
 
 " nvim now can map alt without terminal issues, new cool shortcuts commin
 tnoremap <silent> <c-q> <C-\><C-n>
@@ -430,8 +431,8 @@ for keys in ['w', 'iw', 'aw', 'e', 'W', 'iW', 'aW']
   " quick change and search for naxt, change can be repeaded by . N and n will
   " search for the same selection, gn gN will select same selection
   exe('nnoremap cg' . keys . ' y' . motion . ':exe("let @/=@+")<bar><esc>cgn')
-  exe('nnoremap <leader>s' . keys . ' y' . motion . ':s/<c-r>+//g<left><left>')
-  exe('nnoremap <leader>%' . keys . ' y' . motion . ':%s/<c-r>+//g<left><left>')
+  exe('nnoremap <space>s' . keys . ' y' . motion . ':s/<c-r>+//g<left><left>')
+  exe('nnoremap <space>%' . keys . ' y' . motion . ':%s/<c-r>+//g<left><left>')
 endfor
 
 nmap <silent> grr :Rg<cr>
@@ -452,16 +453,16 @@ function! s:ripgrep_from_motion(type, ...)
   let @a = l:tmp
 endfunction
 
-nmap <leader><cr> za
-vmap <leader><cr> zf
+nmap <space><cr> za
+vmap <space><cr> zf
 
 " quick set
-nnoremap <leader>s  :set
-nnoremap <leader>sf :FZFFileType<cr>
-nnoremap <leader>ss :set spell!<cr>
-nnoremap <leader>sp :set paste!<cr>
+nnoremap <space>s  :set
+nnoremap <space>sf :FZFFileType<cr>
+nnoremap <space>ss :set spell!<cr>
+nnoremap <space>sp :set paste!<cr>
 
-nnoremap <leader>S :call SpellCheckToggle()<cr>
+nnoremap <space>S :call SpellCheckToggle()<cr>
 function! SpellCheckToggle()
   let b:spell_check = get(b:, 'spell_check', 0)
   if b:spell_check == 1
