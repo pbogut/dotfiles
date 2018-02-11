@@ -642,7 +642,7 @@ nmap <C-/> :call Comment()<cr><down>
 vmap <C-_> :call Comment(v:true)<cr><down>
 vmap <C-/> :call Comment(v:true)<cr><down>
 
-function! Comment(...)
+function! Comment(...) range
   if &ft == 'php.phtml'
     if Phtml_scope() == 'php'
       let b:commentary_format = '/* %s */'
