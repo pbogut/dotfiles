@@ -286,7 +286,7 @@ bindsym $mod+Ctrl+w $exec "~/.scripts/i3-dmenu-workspaces.sh --send"
 
 bindsym --release $mod+v $sh 'xdotool keyup Super && xdotool type "$(xsel)"'
 bindsym $mod+Ctrl+i $sh '~/.scripts/vim-anywhere.sh --selection'
-bindsym $mod+i $exec '~/.scripts/vim-anywhere.sh'
+bindsym $mod+i $sh '~/.scripts/vim-anywhere.sh'
 
 bindsym $mod+Ctrl+t $exec "~/.scripts/switch-or-launch.sh '\<[Tt]odoist$' 'todoist'"
 bindsym $mod+Ctrl+b $exec "~/.scripts/switch-or-launch.sh '\<qutebrowser$' 'browser'"

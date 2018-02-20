@@ -67,7 +67,7 @@ if !action
   action = "--copy-user-and-pass"
 end
 
-cmd = "(sleep 0.2s; xdotool keyup Ctrl; xdotool type '#{site_url}')" +
+cmd = "(sleep 0.2s; xdotool keyup Ctrl; xdotool type '#{site_url} ')" +
       " & rofi -dmenu -p '#{prompt}:'"
 selection, _, _ = Open3.capture3(cmd, stdin_data: formated_list)
 
