@@ -7,8 +7,10 @@ def snake_to_mixed(column):
    return ''.join(word.capitalize() for word in words)
 
 def module_name(text, strip_test=False, add_app=True):
+	prefix = '.'
 	text = text.replace(vim.eval('templates#elixir#approot()') + '/', '')
 	appmod = vim.eval('templates#elixir#appmod()').lower()
+	appname = vim.eval('templates#elixir#appname()').lower()
 	text = re.sub('^(lib|web|test)?/?(.*).ex.?$', r'\2', text)
 	parts = text.split('/')
 	if len(parts) >= 2 and parts[-1] == parts[-2]:
@@ -19,6 +21,11 @@ def module_name(text, strip_test=False, add_app=True):
 		parts.insert(0, appmod)
 	if parts[0] == appmod:
 		parts.remove(parts[0])
+	if parts[0] == appname:
+		parts.remove(parts[0])
+	if parts[0] == appname + '_web':
+		parts.remove(parts[0])
+		prefix = 'Web.'
 	if strip_test:
 		parts[-1] = re.sub('_test$', '', parts[-1])
 
@@ -29,13 +36,13 @@ def module_name(text, strip_test=False, add_app=True):
 	if re.match('.*_socket(_test)?$', parts[-1]):
 	  parts = [x for x in parts if x != 'channels']
 
-	return '.'.join(snake_to_mixed(part) for part in parts)
+	return prefix + '.'.join(snake_to_mixed(part) for part in parts)
 endglobal
 
 
 snippet _t_phoenix_skel "Phoenix Module Skeleton" b
 defmodule ${1:`!v
-templates#elixir#appmod()`}.${2:`!p
+templates#elixir#appmod()`}${2:`!p
 snip.rv = module_name(path, add_app=False)`} do
 	def ${3:function_name()} do
 		$0
@@ -46,7 +53,7 @@ endsnippet
 
 snippet _t_phoenix_test_model "Phoenix Model Test" b
 defmodule ${1:`!v
-templates#elixir#appmod()`}.${2:`!p
+templates#elixir#appmod()`}${2:`!p
 snip.rv = module_name(path, strip_test=True)`} do
 	use $1.ModelCase
 
@@ -61,7 +68,7 @@ endsnippet
 
 snippet _t_phoenix_test_controller "Phoenix Controller Test" b
 defmodule ${1:`!v
-templates#elixir#appmod()`}.${2:`!p
+templates#elixir#appmod()`}${2:`!p
 snip.rv = module_name(path, add_app=False)`} do
 	use $1.ConnCase
 
@@ -76,7 +83,7 @@ endsnippet
 
 snippet _t_phoenix_test_view "Phoenix View Test" b
 defmodule ${1:`!v
-templates#elixir#appmod()`}.${2:`!p
+templates#elixir#appmod()`}${2:`!p
 snip.rv = module_name(path, add_app=False)`} do
 	use $1.ConnCase, async: true
 
@@ -89,7 +96,7 @@ endsnippet
 
 snippet _t_phoenix_view "Phoenix View Test" b
 defmodule ${1:`!v
-templates#elixir#appmod()`}.${2:`!p
+templates#elixir#appmod()`}${2:`!p
 snip.rv = module_name(path, add_app=False)`} do
 	use $1.Web, :view
 end

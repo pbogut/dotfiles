@@ -38,6 +38,7 @@ c.url.searchengines = {
     "g": "https://google.com/search?q={}",
     "aw": "https://wiki.archlinux.org/?search={}",
     "al": "https://allegro.pl/listing?string={}",
+    "yt": "https://www.youtube.com/results?search_query={}",
 }
 # c.colors.completion.even.bg = "#333333"
 c.colors.completion.odd.bg = "#1f1f1f"
