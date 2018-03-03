@@ -250,6 +250,7 @@ assign [title="^Dbeaver$"] $wsdb
 assign [title="^Franz$"] $wscomm
 assign [title="^toggl$"] $wsdash
 assign [title="^todoist$"] $wsdash
+assign [title="^jira$"] $wsdash
 
 for_window [title="NVIM_FOR_QB"] floating enable
 for_window [class="Toggl Desktop"] floating enable
@@ -294,6 +295,8 @@ bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '\<Franz$' 'franz-bin'
 bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
 bindsym $mod+Ctrl+g $exec "~/.scripts/switch-or-launch.sh '\<[Tt]oggl$' 'toggl'"
 bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh '\<Volume Control$' 'pavucontrol'"
+
+bindsym $mod+Ctrl+j $exec "~/.scripts/switch-or-launch.sh '\<[Jj]ira$' 'jira'"
 
 # move workspace to another monitor
 bindsym $mod+m move workspace to output left
