@@ -8,6 +8,9 @@ file=$1
 filename="${file%.*}"
 ext="${file##*.}"
 napi-bash $file
-subtitles=$(ls "$filename"* |grep -v "$ext"'$\|nfo$' | head -n1)
-enconv -L polish -c -V -x UTF8 "$subtitles"
+subtitles=$(ls "$filename"* | grep -v "$ext"'$\|nfo$' | head -n1)
+# enconv -L polish -c -V -x UTF8 "$subtitles"
+encoding=$(enconv -L polish -gi "$subtitles")
+iconv -f $encoding -t UTF-8 <"$subtitles" >"$subtitles.new"
+mv "$subtitles.new" "$subtitles"
 ffmpeg -i "$subtitles" "${filename}.vtt"
