@@ -14,13 +14,15 @@ if [ "$hostname" == "v3engine" ]; then # my laptop
     if [[ $? == 0 ]]; then
       LAPTOP='eDP-1'
       MONITOR1='HDMI-1'
+      MONITOR2='VGA-1'
     else
       xrandr --addmode eDP1 "1408x790"
       LAPTOP='eDP1'
       MONITOR1='HDMI1'
+      MONITOR2='VGA1'
     fi
-    # xrandr --output $MONITOR1 --primary --mode 1920x1080 --pos 1408x0 --output $LAPTOP --mode 1408x790 --pos 0x290
-    xrandr --output $MONITOR1 --primary --mode 1920x1080 --pos 0x0 --output $LAPTOP --mode 1408x790 --pos 1920x290
+    xrandr --output $MONITOR2 --mode 1920x1080 --pos 0x0 --output $MONITOR1 --primary --mode 1920x1080 --pos 1920x0 --output $LAPTOP --mode 1408x790 --pos 3840x290
+    # xrandr --output $MONITOR1 --primary --mode 1920x1080 --pos 0x0 --output $LAPTOP --mode 1408x790 --pos 1920x290
     i3-msg restart
     set_walpaper
   ) &

@@ -301,7 +301,8 @@ bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh '\<Volume Control$' 'p
 bindsym $mod+Ctrl+j $exec "~/.scripts/switch-or-launch.sh '\<[Jj]ira$' 'jira'"
 
 # move workspace to another monitor
-bindsym $mod+m move workspace to output left
+bindsym $mod+m move workspace to output right
+bindsym $mod+Shift+M move workspace to output left
 # swap workspaces between two monitors
 # bindsym $mod+Shift+M $exec "~/.scripts/i3-swap-workspaces.py"
 # anamnesis clip board
