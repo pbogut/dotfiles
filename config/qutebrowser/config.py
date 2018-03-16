@@ -71,10 +71,12 @@ c.fonts.completion.category = "bold 8pt monospace"
 c.fonts.statusbar = "8pt monospace"
 c.fonts.tabs = "8pt monospace"
 
+config.unbind('<ctrl-v>', mode='normal')
 config.unbind('d', mode='normal')
 config.unbind('D', mode='normal')
 config.unbind('T', mode='normal')
 config.unbind('<back>', mode='normal')
+config.bind('<ctrl-escape>', 'enter-mode passthrough', mode='normal')
 config.bind('gp', 'open -p')
 config.bind('gO', 'set-cmd-text :open -t {url:pretty}')
 config.bind('xO', 'set-cmd-text :open -b {url:pretty}')

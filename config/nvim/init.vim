@@ -424,6 +424,9 @@ noremap <silent> <M-h> :vertical resize -1<cr>
 noremap <silent> <M-j> :resize +1<cr>
 noremap <silent> <M-k> :resize -1<cr>
 
+" emmet quick shortcut
+imap <M-Tab> <c-y>,
+
 cnoremap <A-k> <Up>
 cnoremap <A-j> <Down>
 
