@@ -7,6 +7,7 @@ set fish_greeting
 alias q exit
 alias so source
 alias o i3-open
+alias fo fzf-open
 
 alias vim nvim
 alias m ncmpcpp

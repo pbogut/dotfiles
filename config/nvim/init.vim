@@ -180,6 +180,7 @@ if exists(':Plug')
   Plug 'xolox/vim-notes'
   let g:notes_directories = [ $HOME . "/Notes/" ]
   Plug 'tpope/vim-scriptease'
+  Plug 'tpope/vim-dadbod'
   " Plug 'tpope/vim-fugitive'
   Plug 'pbogut/vim-fugitive'
   Plug 'tpope/vim-eunuch'
