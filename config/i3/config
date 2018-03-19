@@ -256,11 +256,7 @@ for_window [title="NVIM_FOR_QB"] floating enable
 for_window [class="Toggl Desktop"] floating enable
 for_window [class="Skype"] floating enable
 for_window [class="explorer.exe"] floating enable
-
-# for_window [class="^nvim-qt$"] floating enable
 for_window [class="^feh$"] fullscreen enable
-for_window [title="Google Chrome"] fullscreen disable
-
 
 # fake-outputs 3288x1080+0+0
 $exec "setxkbmap pl"

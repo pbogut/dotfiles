@@ -8,9 +8,9 @@ echo "$@" >/tmp/last_url-$USER
 
 if [[ $1 =~ ^https://appear.in/ || $1 =~ url=https%3A%2F%2Fappear.in%2F ]] \
   ; then
-  chromium --kiosk "$@"
+  chromium --app="$1" "${@:2}"
 elif [[ $1 =~ ^http://chromecast.smplayer.info/ ]]; then
-  google-chrome-stable --kiosk "$@"
+  google-chrome-stable --app="$1" "${@:2}"
 else
   qutebrowser --target window --backend webengine --enable-webengine-inspector "$@"
 fi
