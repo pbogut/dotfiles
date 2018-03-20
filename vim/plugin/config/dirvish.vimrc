@@ -8,8 +8,7 @@ augroup pb_dirvish
         \| nmap <buffer> mm :DirvishMove<cr>
         \| nmap <buffer> dd :DirvishDelete<cr>
         \| nmap <buffer> K :DirvishMkdir<cr>
-        \| nmap <buffer> A :DirvishFile<cr>
-        \| nmap <buffer> a :DirvishFile<cr>
+        \| nmap <buffer> A :DirvishCreate<cr>
         \| nnoremap <buffer> / /\ze[^\/]*[\/]\=$<Home>\c
         \| nnoremap <buffer> ? ?\ze[^\/]*[\/]\=$<Home>\c
 augroup END
@@ -109,6 +108,24 @@ function! s:mkdir()
   endif
 endfunction
 
+function! s:file_or_mkdir()
+  let from = expand('%:p')
+  call inputsave()
+  let to = input('create: ', l:from, 'file')
+  call inputrestore()
+  redraw!
+  if empty(l:to)
+    return
+  endif
+  if l:to =~ '/$'
+    silent exec ('!mkdir -p ' . l:to)
+    Dirvish %
+  else
+    silent exec ('e ' . l:to)
+  endif
+endfunction
+
+command! DirvishCreate call s:file_or_mkdir()
 command! DirvishMkdir call s:mkdir()
 command! DirvishCopy call s:copy()
 command! DirvishRename call s:rename()

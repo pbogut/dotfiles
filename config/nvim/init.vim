@@ -181,6 +181,10 @@ if exists(':Plug')
   let g:notes_directories = [ $HOME . "/Notes/" ]
   Plug 'tpope/vim-scriptease'
   Plug 'tpope/vim-dadbod'
+  Plug 'tpope/vim-sleuth'
+  autocmd User after_plug_end
+        \  call airline#parts#define_function('sleuth', 'SleuthIndicator')
+        \| let g:airline_section_y = airline#section#create_right(['sleuth'])
   " Plug 'tpope/vim-fugitive'
   Plug 'pbogut/vim-fugitive'
   Plug 'tpope/vim-eunuch'
@@ -426,6 +430,8 @@ noremap <silent> <M-k> :resize -1<cr>
 
 " emmet quick shortcut
 imap <M-Tab> <c-y>,
+imap <M-n> <c-y>n
+imap <M-N> <c-y>N
 
 cnoremap <A-k> <Up>
 cnoremap <A-j> <Down>
