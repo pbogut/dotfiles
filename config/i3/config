@@ -12,7 +12,7 @@
 set $mod Mod4
 set $hype Mod4+Mod1+Ctrl+Shift
 
-# set $sh exec --no-startup-id fish -ic
+set $fish exec --no-startup-id fish -ic
 set $sh exec --no-startup-id sh -c
 set $exec exec
 # Font for window titles. Will also be used by the bar unless a different font
@@ -268,6 +268,10 @@ bindsym XF86MonBrightnessUp $exec "~/.scripts/i3-brightness.sh up"
 bindsym XF86MonBrightnessDown $exec "~/.scripts/i3-brightness.sh down"
 bindsym XF86AudioRaiseVolume $exec "pulsemixer --change-volume +1" ; $update_volume
 bindsym XF86AudioLowerVolume $exec "pulsemixer --change-volume -1" ; $update_volume
+bindsym XF86AudioStop $fish "mpc pause"
+bindsym XF86AudioPlay $fish "mpc play"
+bindsym XF86AudioNext $fish "mpc next"
+bindsym XF86AudioPrev $fish "mpc prev"
 
 bindsym $mod+n $exec "~/.scripts/i3-switch-workspace.py --next --same-output"
 bindsym $mod+p $exec "~/.scripts/i3-switch-workspace.py --prev --same-output"

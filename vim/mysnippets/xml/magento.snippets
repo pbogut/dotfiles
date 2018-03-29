@@ -1,0 +1,114 @@
+priority -50
+
+global !p
+def module_name(text):
+	parts = text.split('/')
+	return parts[-4] + '_' + parts[-3]
+
+def module_key(text):
+	parts = text.split('/')
+	return parts[-4].lower() + '_' + parts[-3].lower()
+endglobal
+
+snippet mconfig "Magento Events"
+<?xml version="1.0"?>
+<config>
+	<modules>
+		<${1:`!p snip.rv = module_name(path)`}>
+			<version>${2:0.1.0}</version>
+		</$1>
+	</modules>
+	mglobal$3
+	mdefault$4
+</config>
+endsnippet
+
+snippet mglobal "Magento Global Section"
+<global>
+	mhelpers$1
+	mmodels$2
+	msetup$3
+</global>
+endsnippet
+
+snippet mdefault "Magento Setup Resource"
+<default>
+	<${1:`!p snip.rv = module_key(path)`}>
+		<${2:section}>
+			<${3:field}>${4:value}</$3>
+		</$2>
+	</$1>
+</default>
+endsnippet
+
+snippet msetup "Magento Setup Resource"
+<resources>
+	<${1:`!p snip.rv = module_key(path)`}_setup>
+		<setup>
+			<module>${2:`!p snip.rv = module_name(path)`}</module>
+		</setup>
+	</$1_setup>
+</resources>
+endsnippet
+
+snippet mhelpers "Magento Helpers"
+<helpers>
+	mhelper$0
+</helpers>
+endsnippet
+
+snippet mhelper "Magento Helper"
+<${1:`!p snip.rv = module_key(path)`}>
+	<class>${2:`!p snip.rv = module_name(path)`}_Helper</class>
+</$1>
+endsnippet
+
+snippet mmodels "Magento Models"
+<models>
+	mmodel$1
+	mmodelresource$2
+</models>
+endsnippet
+
+snippet mmodel "Magento Model"
+<${1:`!p snip.rv = module_key(path)`}>
+	<class>${2:`!p snip.rv = module_name(path)`}_Model</class>
+	<resourceModel>$1_resource</resourceModel>
+</$1>
+endsnippet
+
+snippet mmodelresource "Magento Model Resource"
+<${1:`!p snip.rv = module_key(path)`}_resource>
+	<class>${2:`!p snip.rv = module_name(path)`}_Model_Resource</class>
+</$1>
+endsnippet
+
+snippet mentities "Magento Model Resource"
+<entities>
+	mentity$0
+</entities>
+endsnippet
+
+snippet mentity "Magento Model Resource"
+<${1:entity}>
+	<table>${2:${3:`!p snip.rv = module_key(path)`}_${4:$1}}</table>
+</$1>
+endsnippet
+
+snippet mevents "Magento Events"
+<events>
+	mevent$0
+</events>
+endsnippet
+
+snippet mevent "Magento Events"
+<${1:core_block_abstract_to_html_before}>
+	<observers>
+		<${2:${3:`!p snip.rv = module_key(path)`}_${4:$1}}>
+			<class>${5:${6:`!p snip.rv = module_key(path)`}/${7:observer}}</class>
+			<method>${8:yourMethod}</method>
+			<type>${9:singleton}</type>
+		</$2>
+	</observers>
+</$1>
+endsnippet

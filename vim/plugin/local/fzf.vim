@@ -69,14 +69,42 @@ function! s:fzf_ag_params(raw, params) abort
     return get(s:, 'last_ag_params', '')
   endif
 
-  let dir = a:params[-1]
-  if dir=~ '/$' && isdirectory(dir)
-    let params = s:fzf_ag_process(join(a:params[0:-2], ' '), !a:raw) . ' ' . dir
+  let l:dir = a:params[-1]
+  if l:dir=~ '/$' && isdirectory(dir)
+    let l:params = a:params[0:-2]
+    let l:suffix = ' ' . l:dir
   else
-    let params = s:fzf_ag_process(join(a:params, ' '), !a:raw)
+    let l:params = a:params
+    let l:suffix = ''
   endif
-  let s:last_ag_params = l:params
-  return l:params
+
+  let l:flags = []
+  let l:query = []
+
+  let l:query_started = v:false
+  for l:param in l:params
+    if !l:query_started && l:param[0] == '-'
+      call add(l:flags, l:param)
+    else
+      let l:query_started = v:true
+      call add(l:query, l:param)
+    endif
+  endfor
+
+  let l:query = join(l:query, ' ')
+  let l:flags = join(l:flags, ' ')
+
+  if (!a:raw)
+    let l:quote = l:query[0] =~ "[^\"']"
+  else
+    let l:quote = !a:raw
+  endif
+
+  echom l:query[0] =~ "[\"']"
+  let l:query = s:fzf_ag_process(l:query, l:quote)
+
+  let s:last_ag_params = l:flags . ' ' . l:query . l:suffix
+  return s:last_ag_params
 endfunction
 
 function! local#fzf#ag(raw, ...) abort

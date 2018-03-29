@@ -38,6 +38,7 @@ demonize nm-applet nm-applet
 demonize dunst dunst
 demonize udisksvm "udisksvm -a"
 demonize mopidy "mopidy -o mpd/port=${MOPIDY_PORT:-6600}"
+demonize pomodoro "i3-gnome-pomodoro daemon"
 
 # sepcific for the computer
 if [[ -f "$HOME/.$host_name.autostart.sh" ]]; then

@@ -119,10 +119,8 @@ function! s:file_or_mkdir()
   endif
   if l:to =~ '/$'
     silent exec ('!mkdir -p ' . l:to)
-    Dirvish %
-  else
-    silent exec ('e ' . l:to)
   endif
+  silent exec ('e ' . l:to)
 endfunction
 
 command! DirvishCreate call s:file_or_mkdir()

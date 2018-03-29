@@ -416,16 +416,56 @@ snippet [] "Expand array" i
 ]
 endsnippet
 
+snippet array "Expand old array without parents" i
+array($1)$0
+endsnippet
+
+snippet array() "Expand old array" i
+array(
+	$0
+)
+endsnippet
+
 snippet []; "Expand array with colon" i
 [
 	$0
 ];
 endsnippet
 
+snippet [], "Expand array with coma" i
+[
+	$0
+],
+endsnippet
+
 snippet []) "Expand last param array" i
 [
 	$0
 ])
+endsnippet
+
+snippet array()) "Expand last param old array" i
+array(
+	$0
+))
+endsnippet
+
+snippet array()); "Expand last param old array with colon" i
+array(
+	$0
+));
+endsnippet
+
+snippet array(); "Expand array with colon" i
+array(
+	$0
+);
+endsnippet
+
+snippet array(), "Expand array with coma" i
+array(
+	$0
+),
 endsnippet
 
 snippet []); "Expand last param array with colon" i

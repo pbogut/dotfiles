@@ -3,29 +3,3 @@ priority -50
 snippet cdata "CDATA tag" wm
 <![CDATA[${1:${VISUAL:content}}]]>
 endsnippet
-
-snippet mevents "Magento Events"
-<events>
-	<${1:core_block_abstract_to_html_before}>
-		<observers>
-			<${2:your_module_unique_event_handle}>
-				<class>${3:your_module}/${4:observer}</class>
-				<method>${5:yourMethod}</method>
-				<type>${6:singleton}</type>
-			</$2>
-		</observers>
-	</$1>
-</events>
-endsnippet
-
-snippet mevent "Magento Events"
-<${1:core_block_abstract_to_html_before}>
-	<observers>
-		<${2:your_module_unique_event_handle}>
-			<class>${3:your_module}/${4:observer}</class>
-			<method>${5:yourMethod}</method>
-			<type>${6:singleton}</type>
-		</$2>
-	</observers>
-</$1>
-endsnippet

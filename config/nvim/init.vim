@@ -428,6 +428,9 @@ noremap <silent> <M-h> :vertical resize -1<cr>
 noremap <silent> <M-j> :resize +1<cr>
 noremap <silent> <M-k> :resize -1<cr>
 
+imap <M-o> <esc>O
+nmap <M-o> O
+
 " emmet quick shortcut
 imap <M-Tab> <c-y>,
 imap <M-n> <c-y>n
@@ -637,6 +640,9 @@ endfunction
 command! -nargs=? Format call s:format(<q-args>)
 command! -bang FormatOnSaveDisable :exec 'let ' . (empty("<bang>") ? 'b' : 'g' ) . ':neoformat_disable_on_save = 1'
 command! -bang FormatOnSaveEnable :exec 'unlet ' . (empty("<bang>") ? 'b' : 'g' ) . ':neoformat_disable_on_save'
+
+" Simulate vim-dispatch
+command! -nargs=? -bang Start :!urxvt -e "<q-args>"
 
 function! s:whitespace()
   if !empty(get(b:, 'whitespace_trim_disabled'))
