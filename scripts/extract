@@ -1,0 +1,33 @@
+#!/bin/bash
+#=================================================
+# name:   extract
+# author: Pawel Bogut <https://pbogut.me>
+# date:   12/04/2018
+#=================================================
+if [[ $1 != 'x' ]] && [[ $1 != "r" ]] && [[ $1 != "u" ]]; then
+    echo Extract files from archive
+    echo
+    echo Ussage:
+    echo "    extract <action> file1 [file2...]"
+    echo
+    echo actions:
+    echo "    x - extract in place to new directory"
+    echo "    u - extract in place to new directory with _ before"
+    echo "    r - extract in place to new directory and open in ranger"
+    exit 1
+fi
+for var in "${@:2}"; do
+    file=$var
+    ext=${file##*.}
+    name=${file%.*}
+
+    if [[ $1 == 'u' ]]; then
+        name="_$file"
+    fi
+
+    mkdir -p "$name"
+    aunpack -X "$name" $file
+    if [[ $1 == 'r' ]]; then
+        ranger $name
+    fi
+done
