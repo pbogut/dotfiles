@@ -32,4 +32,5 @@ export TMPDIR="/tmp/$USER"
 mkdir $TMPDIR -p
 
 # that should work with bash / zsh and fish
+touch ~/.profile.local
 source ~/.profile.local >/dev/null 2>&1
