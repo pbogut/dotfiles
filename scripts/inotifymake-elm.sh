@@ -19,7 +19,7 @@ options=${@:3}
 
 echo -e "Watching dir: \t$srcdir\nCommand to run:\telm-make $mainfile $options"
 
-inotifywait -rqme close_write --format '%w%f' . | while read -r file; do {
+inotifywait -rqme close_write --format '%w%f' $srcdir | while read -r file; do {
 
   # only process *.php files - ignore all other files
   test "${file%.elm}" = "$file" && continue
@@ -35,4 +35,3 @@ inotifywait -rqme close_write --format '%w%f' . | while read -r file; do {
 
 } </dev/null
 done
-

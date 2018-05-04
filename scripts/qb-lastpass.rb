@@ -29,17 +29,21 @@ list.each_line do |line|
   end
 end
 
+search_parts = []
 # get only top part of domain
 site_parts = []
 url = ENV['QUTE_URL'] || ''
 url.gsub(/^.*?\/\/(.*?)[\/:].*/, '\1').split('.').reverse.each do |p|
-  site_parts << p
-  break if site_parts.reverse.join('.').length > 8
-  break unless p.length < 5 or !p.match(/\./)
+  if (p.length < 5 or !p.match(/\./)) and site_parts.reverse.join('.').length < 8
+    site_parts << p
+  end
+  # search_parts << p
 end
 site_url = site_parts.reverse.join('.')
+search_urls = site_parts.join(' ')
 
 if action == "--add"
+  open(ENV['TMPDIR'] + '/_lpass_url', 'w') { |f| f << url }
   _, _, _ = Open3.capture3('urxvt -e lpass add ' + (site_url.empty? ? 'new-site' : site_url))
   exit
 end
@@ -67,7 +71,7 @@ if !action
   action = "--copy-user-and-pass"
 end
 
-cmd = "(sleep 0.2s; xdotool keyup Ctrl; xdotool type '#{site_url} ')" +
+cmd = "(sleep 0.2s; xdotool keyup Ctrl; xdotool type '#{search_urls} ')" +
       " & rofi -dmenu -p '#{prompt}:'"
 selection, _, _ = Open3.capture3(cmd, stdin_data: formated_list)
 
