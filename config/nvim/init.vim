@@ -150,8 +150,9 @@ augroup configgroup
         \  if search('^Password: $')
         \|   execute('r !apg -m16 -n1 -MSNCL')
         \|   execute('normal kJk')
-        \|   execute('r !gpg-config get gmail-user')
-        \|   execute('normal kJk$p')
+        \|   execute('r !gpg-config get default-email')
+        \|   execute('normal kJk')
+        \|   execute('r !cat ' . $TMPDIR . '/_lpass_url')
         \|   execute('normal kJ')
         \| endif
   autocmd FileType tagbar
@@ -287,6 +288,7 @@ if exists(':Plug')
   Plug 'carlitux/deoplete-ternjs', { 'for': ['javascript', 'javascript.jsx'], 'do': 'yarn global add tern' }
   Plug 'frankier/neovim-colors-solarized-truecolor-only'
   Plug 'sheerun/vim-polyglot'
+  Plug 'sirtaj/vim-openscad'
   let g:polyglot_disabled = ['eelixir', 'elixir']
 endif "
 silent! call plug#end()      " requiredc

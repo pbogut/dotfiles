@@ -9,6 +9,24 @@ function! templates#elixir#appmod() abort
   return "App"
 endfunction
 
+function! templates#elixir#appname() abort
+  let mix_file = templates#elixir#approot() . '/mix.exs'
+  let pattern =  '.*app: :\([a-zA-Z0-9_]*\).*'
+
+
+  if filereadable(l:mix_file)
+    for l:line in readfile(l:mix_file)
+      if match(l:line, l:pattern) != -1
+        echom l:line
+        return substitute(l:line, l:pattern, '\1', '')
+      endif
+    endfor
+    return ''
+  endif
+
+  return "App"
+endfunction
+
 function! templates#elixir#approot() abort
   let path = expand('%:h')
   let parts = split(expand('%:h'), '/')
@@ -25,4 +43,3 @@ function! templates#elixir#approot() abort
 
   return getcwd()
 endfunction
-

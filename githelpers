@@ -145,7 +145,9 @@ git_add_and_apply_patch() {
 git_add_parent_upstream() {
   git remote -v | grep 'github\.com' | sed -E 's,.*\s.*github\.com.(.*)/(.*)\s.*,\1 \2,' | (
     read user repo
+    repo=${repo%%.git}
     parent=$(curl https://api.github.com/repos/$user/$repo 2>/dev/null | jq -r .parent.ssh_url)
+    echo $parent $user $repo
     if [[ -z "$user" || -z "$repo" || -z "$parent" ]]; then
       echo "Cant find parent repo."
       exit 1
