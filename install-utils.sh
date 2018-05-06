@@ -77,6 +77,7 @@ pacaur -S \
 pip install \
     i3-py \
     i3ipc \
+    flake8 \
     khal \
     neovim \
     neovim-remote \

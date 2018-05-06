@@ -41,110 +41,110 @@ ANSI_WHITE='\033[37m'
 ANSI_WHITE_BOLD='\033[0;37;1m'
 ANSI_RESET='\033[0m'
 
-
 show_git_head() {
-    pretty_git_log -1
-    git show -p --pretty="tformat:"
+  pretty_git_log -1
+  git show -p --pretty="tformat:"
 }
 
 pretty_git_log() {
-    git log --color=always --graph --pretty="tformat:${FORMAT}" $* |
-        # Replace (2 years ago) with (2 years)
-        sed -Ee 's/(^[^<]*) ago\)/\1)/' |
-        # Replace (2 years, 5 months) with (2 years)
-        sed -Ee 's/(^[^<]*), [[:digit:]]+ .*months?\)/\1)/' |
-        # Line columns up based on } delimiter
-        # Disabled due to column issue with colors
-        # column -s '}' -t |
-        sed -Ee 's,\(\s\{20\}\), ,g' |
-        # sed 's,},\t\t,' |
-        # sed 's,\(.*\)}\(.*\)}\(.*\)}\(.*\),\1\t\t\2\t\3\t\t\4,g' |
-        # Color merge commits specially
-        sed -Ee "s/(Merge (branch|remote-tracking branch|pull request) .*$)/$(printf $ANSI_RED)\1$(printf $ANSI_RESET)/" |
-        # Page only if we're asked to.
-        if [ -n "$GIT_NO_PAGER" ]; then
-            cat
-        else
-            # Page only if needed.
-            less --quit-if-one-screen --no-init --RAW-CONTROL-CHARS --chop-long-lines
-        fi
+  git log --color=always --graph --pretty="tformat:${FORMAT}" $* |
+    # Replace (2 years ago) with (2 years)
+    sed -Ee 's/(^[^<]*) ago\)/\1)/' |
+    # Replace (2 years, 5 months) with (2 years)
+    sed -Ee 's/(^[^<]*), [[:digit:]]+ .*months?\)/\1)/' |
+    # Line columns up based on } delimiter
+    # Disabled due to column issue with colors
+    # column -s '}' -t |
+    sed -Ee 's,\(\s\{20\}\), ,g' |
+    # sed 's,},\t\t,' |
+    # sed 's,\(.*\)}\(.*\)}\(.*\)}\(.*\),\1\t\t\2\t\3\t\t\4,g' |
+    # Color merge commits specially
+    sed -Ee "s/(Merge (branch|remote-tracking branch|pull request) .*$)/$(printf $ANSI_RED)\1$(printf $ANSI_RESET)/" |
+    # Page only if we're asked to.
+    if [ -n "$GIT_NO_PAGER" ]; then
+      cat
+    else
+      # Page only if needed.
+      less --quit-if-one-screen --no-init --RAW-CONTROL-CHARS --chop-long-lines
+    fi
 }
 
 git_clone_to_projects() {
   repo=$1
-  if [[ ! "$1" =~ ^(http://|https://|git@) ]]; then
+  if [[ ! "$1" =~ (@) ]]; then
     # use github by default
     repo="git@github.com:$repo.git"
   fi
 
-  if [[ "$2" == "" ]];then
-    dest="$HOME/projects/`echo "$repo" | sed 's#[^@]*@##' | sed 's#^\(https\|http\)://##g' | sed 's#:#/#g' | sed 's#\.git$##g'`"
+  if [[ "$2" == "" ]]; then
+    dest="$HOME/projects/$(echo "$repo" | sed 's#[^@]*@##' | sed 's#^\(https\|http\)://##g' | sed 's#:#/#g' | sed 's#\.git$##g')"
   else
     dest="$2"
   fi
-  if [[ -n $repo ]];then
-      git clone $repo $dest
+  if [[ -n $repo ]]; then
+    git clone $repo $dest
   else
-      echo "You must specify a repository to clone."
-      echo
-      echo "usage: git cl <repo> [<dir>]"
-      echo
-      echo "If no dir provided then ~/projects/<git-host>/<repo-owner>/<repo-name> is used."
-      echo
+    echo "You must specify a repository to clone."
+    echo
+    echo "usage: git cl <repo> [<dir>]"
+    echo
+    echo "If no dir provided then ~/projects/<git-host>/<repo-owner>/<repo-name> is used."
+    echo
   fi
 }
 git_push_upstream() {
-    git push --set-upstream origin `git branch | grep \* | cut -d ' ' -f2`
+  git push --set-upstream origin $(git branch | grep \* | cut -d ' ' -f2)
 }
 
 git_fzf_st() {
-    git -c color.status=always status --short | fzf \
-      --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview,ctrl-w:backward-kill-word \
-      --ansi \
-      --preview 'sh -c "[ -f {-1} ] && (
+  git -c color.status=always status --short | fzf \
+    --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview,ctrl-w:backward-kill-word \
+    --ansi \
+    --preview 'sh -c "[ -f {-1} ] && (
         (
           (
              git diff {-1} > /dev/null 2>&1 && git diff --color=always -- {-1} || cat {-1}
           ) | sed 1,4d; ccat --color=always {-1}
         ) | head -n 250
-      ) || echo Preview is not available."' | tee > /dev/null
-    git st
+      ) || echo Preview is not available."' | tee >/dev/null
+  git st
 }
 
 git_pull_pull_request() {
-    current_branch=$(git branch | grep '^\*' | awk '{ print $2 }')
-    pr=$(git branch | grep '^\*' | awk '{ print $2 }' | sed 's,pull_request/\([0-9]*\)$,\1,' | sed 's,[^0-9]*,,')
-    if [[ ! $pr == "" ]]; then
-        git pull ${1:-origin} "pull/$pr/head:pull_request/$pr"
-    else
-        echo "I don't think this is a pr branch"
-    fi
+  current_branch=$(git branch | grep '^\*' | awk '{ print $2 }')
+  pr=$(git branch | grep '^\*' | awk '{ print $2 }' | sed 's,pull_request/\([0-9]*\)$,\1,' | sed 's,[^0-9]*,,')
+  if [[ ! $pr == "" ]]; then
+    git pull ${1:-origin} "pull/$pr/head:pull_request/$pr"
+  else
+    echo "I don't think this is a pr branch"
+  fi
 }
 
 git_checkout_pull_request() {
-    current_branch=$(git branch | grep '^\*' | awk '{ print $2 }')
-    if [[ $current_branch == "pull_request/$1" ]]; then
-        git fetch
-    else
-        git fetch ${3:-origin} "pull/$1/head:${2:-pull_request/$1}"
-    fi
-    git checkout "pull_request/$1"
+  current_branch=$(git branch | grep '^\*' | awk '{ print $2 }')
+  if [[ $current_branch == "pull_request/$1" ]]; then
+    git fetch
+  else
+    git fetch ${3:-origin} "pull/$1/head:${2:-pull_request/$1}"
+  fi
+  git checkout "pull_request/$1"
 }
 
 git_ls() {
-    git ls-files \
-        | while read l; do echo -e "\033[0;34mG\033[0m  $l";done
-    git -c color.status=always status --short
+  git ls-files |
+    while read l; do echo -e "\033[0;34mG\033[0m  $l"; done
+  git -c color.status=always status --short
 }
 git_add_and_apply_patch() {
   echo $1 $2 $3 $4
-  echo `pwd`
+  echo $(pwd)
   git add -N $1
   git add -p $1
 }
 
 git_add_parent_upstream() {
-  git remote -v |grep 'github\.com' | sed -E 's,.*\s.*github\.com.(.*)/(.*)\s.*,\1 \2,'  | (read user repo
+  git remote -v | grep 'github\.com' | sed -E 's,.*\s.*github\.com.(.*)/(.*)\s.*,\1 \2,' | (
+    read user repo
     parent=$(curl https://api.github.com/repos/$user/$repo 2>/dev/null | jq -r .parent.ssh_url)
     if [[ -z "$user" || -z "$repo" || -z "$parent" ]]; then
       echo "Cant find parent repo."
