@@ -8,6 +8,7 @@ config = config  # noqa: F821 pylint: disable=E0602,C0103
 c.qt.args = [('ppapi-widevine-path='
               '/usr/lib/qt/plugins/ppapi/libwidevinecdmadapter.so')]
 
+c.spellcheck.languages = ['pl-PL', 'en-GB']
 c.url.start_pages = ["https://google.com"]
 c.url.default_page = 'https://google.com'
 c.downloads.open_dispatcher = '/bin/bash -c "~/.scripts/i3-open \'{}\'"'
@@ -91,20 +92,20 @@ config.bind('dr', 'download-remove')
 config.bind('<Ctrl-i>', 'open-editor', mode='insert')
 config.bind(
     '<ctrl-j>',
-    'spawn --userscript ~/.scripts/qb-lastpass.rb --add', mode='insert')
+    'spawn --userscript ~/.scripts/keepass.rb --add', mode='insert')
 config.bind(
     '<ctrl-k>',
-    'spawn --userscript ~/.scripts/qb-lastpass.rb --add', mode='insert')
+    'spawn --userscript ~/.scripts/keepass.rb --add', mode='insert')
 config.bind(
     '<ctrl-l>',
-    'spawn --userscript ~/.scripts/qb-lastpass.rb --type-user-and-pass',
+    'spawn --userscript ~/.scripts/keepass.rb --type-user-and-pass',
     mode='insert')
 config.bind(
     '<ctrl-u>',
-    'spawn --userscript ~/.scripts/qb-lastpass.rb --type-user', mode='insert')
+    'spawn --userscript ~/.scripts/keepass.rb --type-user', mode='insert')
 config.bind(
     '<ctrl-y>',
-    'spawn --userscript ~/.scripts/qb-lastpass.rb --type-pass', mode='insert')
+    'spawn --userscript ~/.scripts/keepass.rb --type-pass', mode='insert')
 config.bind('<ctrl-n>', 'fake-key <down>', mode='insert')
 config.bind('<ctrl-p>', 'fake-key <up>', mode='insert')
 config.bind(

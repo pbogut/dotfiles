@@ -1,0 +1,40 @@
+#!/bin/bash
+#=================================================
+# name:   keepass
+# author: Pawel Bogut <https://pbogut.me>
+# date:   17/05/2018
+#=================================================
+db="$HOME/pawel.bogut@gmail.com/Sync/KeePass/passwords.kdbx"
+pass=$(gpg-config get keepass-pass)
+if [[ $# -gt 1 ]]; then
+    for last; do true; done
+fi
+if [[ $# -gt 2 ]]; then
+    params=${@:2:$#-2}
+fi
+
+if [[ $1 == 'new' ]]; then
+    temp=$(mktemp)
+    echo "Name: $2" >$temp
+    echo "URL: $3" >>$temp
+    echo "User: $(gpg-config get default-email)" >>$temp
+    echo "Password: $(apg -m16 -n1 -MSNCL)" >>$temp
+    vim $temp
+    name=$(grep '^Name: ' $temp | sed 's,^Name: ,,')
+    url=$(grep '^URL: ' $temp | sed 's,^URL: ,,')
+    user=$(grep '^User: ' $temp | sed 's,^User: ,,')
+    npass=$(grep '^Password: ' $temp | sed 's,^Password: ,,')
+    if [[ -z $name ]] || [[ -z $npass ]]; then
+        exit 1
+    else
+
+        (
+            echo $pass
+            echo $npass
+        ) | keepassxc-cli add -p -u "$user" --url "$url" $db "$name" | tail -n +3
+        exit 0
+    fi
+fi
+
+echo keepassxc-cli $1 $params $db $last >/dev/stderr
+echo $pass | keepassxc-cli $1 $params "$db" $last | tail -n +2
