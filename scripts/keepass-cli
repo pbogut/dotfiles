@@ -4,7 +4,7 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   17/05/2018
 #=================================================
-db="$HOME/pawel.bogut@gmail.com/Sync/KeePass/passwords.kdbx"
+db="$KEEPASS_DB"
 pass=$(gpg-config get keepass-pass)
 if [[ $# -gt 1 ]]; then
     for last; do true; done
@@ -37,4 +37,8 @@ if [[ $1 == 'new' ]]; then
 fi
 
 echo keepassxc-cli $1 $params $db $last >/dev/stderr
-echo $pass | keepassxc-cli $1 $params "$db" $last | tail -n +2
+if [[ -z $last ]]; then
+    echo $pass | keepassxc-cli $1 $params "$db" | tail -n +2
+else
+    echo $pass | keepassxc-cli $1 $params "$db" "$last" | tail -n +2
+fi

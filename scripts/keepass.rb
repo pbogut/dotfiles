@@ -88,7 +88,7 @@ index = selection.gsub(/(\d+).*/, '\1').to_i
 exit unless index > 0
 
 name = indexes[index]
-result = `keepass-cli show "#{name}"`
+result, _, _ = Open3.capture3("keepass-cli", "show", name)
 pass = ''
 user = ''
 result.gsub(/^Password: (.*)$/) do |match|
