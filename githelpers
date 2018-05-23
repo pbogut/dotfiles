@@ -163,3 +163,12 @@ git_add_parent_upstream() {
 git_sync_upstream() {
   git pull upstream $(git branch | grep '^\* ' | sed 's,^\* ,,')
 }
+
+git_diff_export() {
+  master="${1:-master}"
+  branch="${2:-$(git branch | grep '^\* ' | sed 's,^\* ,,')}"
+  file="$branch.diff"
+  echo "git diff \$(git merge-base $master $branch) > $file"
+  echo git diff $(git merge-base $master $branch) '>' $file
+  git diff $(git merge-base $master $branch) >$file
+}
