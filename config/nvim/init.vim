@@ -366,6 +366,7 @@ nnoremap <space> "*
 vnoremap <space> "*
 nmap yaf :let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>
 nmap yif :let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>
+nmap yrf :let @+=expand('%:.')<bar>echo 'Yanked: '.expand('%:.')<cr>
 
 " nicer wrapline navigation
 for [key1, key2] in [['j', 'gj'], ['k', 'gk']]
