@@ -15,7 +15,7 @@ xml = `keepass-cli extract`
 formated_list = ''
 no = 0
 doc = Nokogiri::XML(xml)
-entries = doc.xpath('//Root//Group//Entry')
+entries = doc.xpath('//Root//Group/Entry')
 indexes = Hash.new
 entries.each do |entry|
   no += 1
