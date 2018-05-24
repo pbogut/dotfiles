@@ -11,6 +11,23 @@ require "nokogiri"
 
 action, = ARGV
 
+if !action
+  cmd = "rofi -dmenu -p 'select mode:'"
+  selection, _, _ = Open3.capture3(cmd, stdin_data: [
+    "--copy-user-and-pass",
+    "--copy-user",
+    "--copy-pass",
+    "--type-user-and-pass",
+    "--type-user",
+    "--type-pass",
+    "--remove",
+    "--add"
+  ].join("\n"))
+  selection, _, _ = Open3.capture3('keepass.rb ' + selection)
+  exit
+end
+
+
 xml = `keepass-cli extract`
 formated_list = ''
 no = 0

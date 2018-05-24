@@ -38,7 +38,15 @@ fi
 
 echo keepassxc-cli $1 $params $db $last >/dev/stderr
 if [[ -z $last ]]; then
-    echo $pass | keepassxc-cli $1 $params "$db" | tail -n +2
+    if [[ -z $params ]]; then
+        echo $pass | keepassxc-cli $1 "$db" | tail -n +2
+    else
+        echo $pass | keepassxc-cli $1 "$params" "$db" | tail -n +2
+    fi
 else
-    echo $pass | keepassxc-cli $1 $params "$db" "$last" | tail -n +2
+    if [[ -z $params ]]; then
+        echo $pass | keepassxc-cli $1 "$db" "$last" | tail -n +2
+    else
+        echo $pass | keepassxc-cli $1 "$params" "$db" "$last" | tail -n +2
+    fi
 fi
