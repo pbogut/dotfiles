@@ -64,7 +64,6 @@ endfunction
 let g:ale_linters =
       \{
       \ 'elixir': ['mix'],
-      \ 'vint': ['vi']
       \}
 " \ 'elixir': ['mix', 'dialyzer']
 
