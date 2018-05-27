@@ -11,9 +11,9 @@ export GOPATH="$HOME/.gocode"
 export PATH="$HOME/.scripts:$PATH"
 export PATH="$HOME/.bin:$PATH"
 
-export PATH="$PATH:$HOME/.local/bin"
-export PATH="$PATH:$HOME/.npm/bin"
-export PATH="$PATH:$HOME/.gocode/bin"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.npm/bin:$PATH"
+export PATH="$HOME/.gocode/bin:$PATH"
 
 export EDITOR="nvim"
 
