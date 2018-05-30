@@ -34,3 +34,6 @@ for i in (seq (count $PATH))
 end
 set -xg PATH $temp_path
 set -e temp_path
+
+# dircolors
+eval "export "(dircolors  $HOME/.config/dircolors-solarized/dircolors.256dark)
