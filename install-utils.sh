@@ -81,6 +81,8 @@ pip install \
     khal \
     neovim \
     neovim-remote \
+    vim-vint \
+    visidata \
     --upgrade
 
 pip2 install \

@@ -135,6 +135,8 @@ augroup configgroup
         \  let b:commentary_format='# %s'
   autocmd FileType markdown
         \  setlocal spell spelllang=en_gb
+  autocmd FileType openscad
+        \  command! OpenScad silent! !openscad % > /dev/null 2>&1 &
   autocmd FileType qf
         \  nnoremap <buffer> o <cr>
         \| nnoremap <buffer> q :q
