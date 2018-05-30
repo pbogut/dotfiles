@@ -148,6 +148,8 @@ augroup configgroup
         \ execute("normal /^$/\n")
         \| setlocal spell spelllang=en_gb
         \| setlocal textwidth=72
+  autocmd BufEnter *.keepass
+        \ nmap gp /^Password:<cr>:read !apg -m16 -n1 -MSNCL<cr>:%s/Password:.*\n/Password: /<cr><esc>
   autocmd BufEnter lpass.*
         \  if search('^Password: $')
         \|   execute('r !apg -m16 -n1 -MSNCL')

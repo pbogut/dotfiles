@@ -21,6 +21,7 @@ if !action
     "--type-user",
     "--type-pass",
     "--remove",
+    "--edit",
     "--add"
   ].join("\n"))
   selection, _, _ = Open3.capture3('keepass.rb ' + selection)
@@ -88,6 +89,8 @@ prompt = case action
     "pass"
   when "--remove"
     "remove"
+  when "--edit"
+    "edit"
   else
     "acc"
 end
@@ -146,6 +149,11 @@ if action == '--type-user-and-pass' or action.empty?
     file.write("fake-key #{pass}\n")
     # file.write("fake-key -g <esc>i\n")
   end
+end
+if action == "--edit"
+  puts "keepass-cli change '#{name}'"
+  out, _, _ = Open3.capture3("urxvt -e keepass-cli change '#{name}'")
+  puts out
 end
 if action == "--remove"
   puts "keepass-cli rm '#{name}'"
