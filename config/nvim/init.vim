@@ -532,6 +532,12 @@ let g:paranoic_backup_dir="~/.vim/backupfiles/"
 
 command! -bang W :call CreateFoldersAndWrite(<bang>0)
 function! CreateFoldersAndWrite(bang)
+  let l:one = expand('%:p')
+  let l:two = substitute(l:one, '^[A-Za-z]*', '', '')
+  if l:one != l:two
+    echo "Sorry but buffer is not a real file"
+    return
+  endif
   silent execute('!mkdir -p %:h')
   try
     if (a:bang)
