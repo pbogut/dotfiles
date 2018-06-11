@@ -39,6 +39,7 @@ demonize dunst dunst
 demonize udisksvm "udisksvm -a"
 demonize mopidy "mopidy -o mpd/port=${MOPIDY_PORT:-6600}"
 demonize pomodoro "i3-gnome-pomodoro daemon"
+demonize toggldesktop "toggldesktop -b"
 
 # sepcific for the computer
 if [[ -f "$HOME/.$host_name.autostart.sh" ]]; then

@@ -34,6 +34,10 @@ c.content.developer_extras = True
 c.hints.border = "1px solid #E3BE23"
 c.hints.chars = "arstdhneifuwy"
 # c.hints.find_implementation = "javascript"
+
+c.input.insert_mode.auto_enter = True
+c.input.insert_mode.auto_leave = False
+
 c.url.searchengines = {
     "DEFAULT": "https://google.com/search?q={}",
     "g": "https://google.com/search?q={}",
@@ -133,16 +137,27 @@ config.bind('yH', 'spawn --userscript ~/.scripts/qb-copy-html.sh -p')
 config.bind('yS', 'spawn --userscript ~/.scripts/qb-copy-text.sh -p')
 config.bind('eu', 'edit-url')
 
-config.bind(',pp', ("jseval (function(){var s = document.createElement('script"
-                    "');s.type='text/javascript';s.src='https://dsheiko.github"
-                    ".io/pixel-perfect-bookmarklet/bookmarklet.js?v='+parseInt"
-                    "(Math.random()*99999999);document.body.appendChild(s);voi"
-                    "d(0);}());"))
+config.bind(',jpp', ("jseval (function(){var s = document.createElement('script"
+                     "');s.type='text/javascript';s.src='https://dsheiko.github"
+                     ".io/pixel-perfect-bookmarklet/bookmarklet.js?v='+parseInt"
+                     "(Math.random()*99999999);document.body.appendChild(s);voi"
+                     "d(0);}());"))
+
+config.bind(',jve', ("jseval (function() {var protocol = window.location.protoc"
+                     "ol === 'file:' ?'http:' : '';var url = protocol+'//www.sp"
+                     "rymedia.co.uk/VisualEvent/VisualEvent_Loader.js';if( type"
+                     "of VisualEvent!='undefined' ) {if ( VisualEvent.instance "
+                     "!== null ) {VisualEvent.close();}else {new VisualEvent();"
+                     "}}else {var n=document.createElement('script');n.setAttri"
+                     "bute('language','JavaScript');n.setAttribute('src',url+'?"
+                     "rand='+new Date().getTime());document.body.appendChild(n)"
+                     ";}})();"))
 
 dir_path = os.path.dirname(__file__)
 if os.path.exists(dir_path + '/secure_config.py'):
     import secure_config
     secure_config.init(config)
+
 
 # load yaml config
 config.load_autoconfig()

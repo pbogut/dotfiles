@@ -164,6 +164,15 @@ git_sync_upstream() {
   git pull upstream $(git branch | grep '^\* ' | sed 's,^\* ,,')
 }
 
+git_chockout_or_create_branch() {
+  output=$(git checkout $1 2>&1 >/dev/null)
+  if [[ $? != 0 ]]; then
+    git checkout -b $1
+  else
+    echo -n $output
+  fi
+}
+
 git_diff_export() {
   master="${1:-master}"
   branch="${2:-$(git branch | grep '^\* ' | sed 's,^\* ,,')}"

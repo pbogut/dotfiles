@@ -13,8 +13,9 @@ augroup END
 let g:ale_lint_on_save = 1
 " to disable autocommand set up by ale
 let g:ale_lint_on_text_changed = 'never'
+let g:ale_command_wrapper = 'nice -n15'
 
-let g:ale_lint_on_text_changed_default = 'always'
+let g:ale_lint_on_text_changed_default = 'never'
 " file needs to be saved anyway, so dont do anything on change
 let g:ale_lint_on_text_changed_eelixir = 'never'
 let g:ale_lint_on_text_changed_elixir = 'never'
