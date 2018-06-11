@@ -13,6 +13,10 @@ if [[ $# -gt 2 ]]; then
     params=${@:2:$#-2}
 fi
 
+if [[ $1 == 'gui' ]]; then
+    echo $pass | keepassxc --pw-stdin $db
+    exit $?
+fi
 if [[ $1 == 'new' ]]; then
     temp=$(mktemp)
     echo "Name: $2" >$temp
