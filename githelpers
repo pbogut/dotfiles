@@ -167,7 +167,12 @@ git_sync_upstream() {
 git_chockout_or_create_branch() {
   output=$(git checkout $1 2>&1 >/dev/null)
   if [[ $? != 0 ]]; then
-    git checkout -b $1
+    output2=$(git checkout -b $1 2>&1 >/dev/null)
+    if [[ $? != 0 ]]; then
+      echo $output
+    else
+      echo $output2
+    fi
   else
     echo -n $output
   fi
