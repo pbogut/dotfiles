@@ -61,6 +61,7 @@ set foldlevelstart=99
 set termguicolors
 set background=dark
 set guicursor=n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor
+set shell=/bin/bash
 
 if exists('&inccommand') | set inccommand=split | endif
 if has("patch-7.4.314") | set shortmess+=c | endif
@@ -273,8 +274,12 @@ if exists(':Plug')
   Plug 'vim-scripts/ReplaceWithRegister'
   source ~/.vim/plugin/config/replacewithregister.vim
   Plug 'beloglazov/vim-textobj-quotes'
-  Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
+  " Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
   Plug 'joereynolds/gtags-scope'
+  Plug 'autozimu/LanguageClient-neovim', {
+        \ 'branch': 'next',
+        \ 'do': 'bash install.sh',
+        \ }
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
   source ~/.vim/plugin/config/deoplete.vimrc
   Plug 'Shougo/neco-vim', { 'for': 'vim' }

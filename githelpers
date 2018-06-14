@@ -169,12 +169,12 @@ git_chockout_or_create_branch() {
   if [[ $? != 0 ]]; then
     output2=$(git checkout -b $1 2>&1 >/dev/null)
     if [[ $? != 0 ]]; then
-      echo $output
+      echo "$output"
     else
-      echo $output2
+      echo "$output2"
     fi
   else
-    echo -n $output
+    echo "$output"
   fi
 }
 
