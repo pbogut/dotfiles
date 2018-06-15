@@ -8,8 +8,9 @@ tmp="/tmp/users"
 if [[ $1 == '--register' ]]; then
     user=$(id -un)
     touch $tmp
-    chmod 777 $tmp
-    sed -i "/^$user:/d" $tmp
+    chmod 777 $tmp >/dev/null 2>&1
+    filtered=$(cat $tmp | sed "/^$user:/d")
+    echo "$filtered" >$tmp
     echo "$user:$XDG_VTNR" >>$tmp
 fi
 if [[ $1 == '--switch' ]]; then
