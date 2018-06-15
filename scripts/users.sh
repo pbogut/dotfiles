@@ -16,7 +16,7 @@ fi
 if [[ $1 == '--switch' ]]; then
     # users=$(cat /etc/passwd | grep ':x:[0-9]*:100:' | sed 's,\([^:]*\).*,\1,')
     users=$(dm-tool list-seats | grep UserName | sed 's/.*UserName=.\(.*\).$/\1/' | grep -v $(id -un))
-    user=$(echo "$users" | rofi -dmenu)
+    user=$(echo "$users" | rofi -dmenu -p "switch user")
     [[ -z $user ]] && exit 0
     islogged=$(dm-tool list-seats 2>/dev/null | grep "UserName='$user'")
     if [[ -z $islogged ]]; then
