@@ -186,6 +186,7 @@ if exists(':Plug')
   Plug 'xolox/vim-notes'
   let g:notes_directories = [ $HOME . "/Notes/" ]
   Plug 'tpope/vim-scriptease'
+  Plug 'tpope/vim-rsi'
   Plug 'tpope/vim-dadbod'
   Plug 'tpope/vim-sleuth'
   autocmd User after_plug_end
@@ -222,7 +223,6 @@ if exists(':Plug')
   let g:strip_whitespace_on_save = 0 " Use Whitespace wrapper instead
   Plug 'honza/vim-snippets'
   Plug 'mattn/emmet-vim'
-  imap <c-e> <c-y>,
   Plug 'majutsushi/tagbar'
   nnoremap <silent> <space>n :TagbarOpenAutoClose<cr>
   Plug 'sirver/ultisnips'
