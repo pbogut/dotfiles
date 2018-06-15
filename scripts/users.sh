@@ -26,6 +26,7 @@ if [[ $1 == '--switch' ]]; then
     fi
     if [[ -n $vtn ]]; then
         sudo chvt $vtn
+    else
         dm-tool switch-to-user $user
     fi
 fi
