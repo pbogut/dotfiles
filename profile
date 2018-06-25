@@ -25,8 +25,6 @@ export FZF_DEFAULT_OPTS="
   --cycle
   "
 
-export LPASS_AGENT_TIMEOUT=0
-
 # set up unique TMPDIR per user
 export TMPDIR="/tmp/$USER"
 mkdir $TMPDIR -p

@@ -62,57 +62,6 @@ bindkey '^k' history-beginning-search-backward
 bindkey '^[j' history-beginning-search-forward
 bindkey '^[k' history-beginning-search-backward
 
-# solarized colors
-vim_ins_mode="%F{003}%K{003}%B%F{255} INSERT %k%b%{$reset_color%}"
-vim_cmd_mode="%F{014}%K{014}%B%F{255} NORMAL %k%b%{$reset_color%}"
-vim_vis_mode="%F{005}%K{005}%B%F{255} VISUAL %k%b%{$reset_color%}"
-
-GIT_BRANCH=$'$(__git_ps1 "  %s")'
-
-# email_counter() {
-#     mail=$(mailx 2>/dev/null &)
-#     count=$(echo $mail |grep -o '[0-9]* message [0-9]* unread' | head -n 1)
-#     count=$(echo $count | sed 's,\([0-9]*\) [a-z]* \([0-9]*\).*,\1/\2,')
-#     if [[ ! $count == "" ]]; then
-#         echo "M:"$count" "
-#     fi
-# }
-# EMAIL_COUNT=$'$(email_counter)'
-
-VIMODE_COLOR="003"
-vim_ps1() {
-    PS1="%B%F{001}(%b%F{012}%~%B%F{001}) %b%F{004}${GIT_BRANCH}%f
-%F{${VIMODE_COLOR}} %k%(!.%F{001}.%F{012})%n%F{001}@${HOST_COLOR}%M %B%F{001}%(!.#.$) %b%f%k"
-}
-precmd() {
-  RPROMPT=$vim_ins_mode && VIMODE_COLOR="003"
-  vim_ps1
-  # set title
-  print -Pn "\e]0;%n@%m:%~\a"
-}
-preexec() {
-  print -Pn "\033]0;%n@%m:$1:%~\a\007"
-}
-zle-keymap-select() {
-  RPROMPT=$vim_ins_mode && VIMODE_COLOR="003"
-  [[ $KEYMAP = vicmd ]] && RPROMPT=$vim_cmd_mode && VIMODE_COLOR="014"
-  [[ $KEYMAP = vivis ]] && RPROMPT=$vim_vis_mode && VIMODE_COLOR="005"
-  vim_ps1
-  zle reset-prompt
-}
-zle-line-init() {
-  VIMODE_COLOR="003" && vim_ps1
-  typeset -g __prompt_status="$?"
-}
-
-noop () { }
-
-zle -N noop
-bindkey -M vicmd '\e' noop
-
-zle -N zle-keymap-select
-zle -N zle-line-init
-
 # End of lines configured by zsh-newuser-install
 
 # create a zkbd compatible hash;
@@ -230,45 +179,24 @@ alias irb="irb -r 'irb/completion'"
 if [ -f ~/.profile ]; then
   source ~/.profile
 fi
-if [ -f ~/.localsh ]; then
-  source ~/.localsh
-fi
 if [ -f ~/.fzf.zsh ]; then
   source ~/.fzf.zsh
 fi
 
-#git branch in prompt
 setopt prompt_subst
-HOST_COLOR="%F{012}"
-#ssh session settings
-if [ -n "$SSH_CLIENT"  ] || [ -n "$SSH_TTY"  ]; then
-  #diferent host color when ssh
-  HOST_COLOR="%F{003}"
-  #default tmux bind when ssh (so I can use it remotly and localy)
-  if [[ ! -z "$TMUX"  ]]; then
-    tmux unbind C-a 2>&1 > /dev/null
-    tmux set -g prefix C-b 2>&1 > /dev/null
-    tmux bind C-b send-prefix 2>&1 > /dev/null
-  fi
-fi
-
-export PATH="$PATH:$HOME/.composer/vendor/bin"
-export PATH="$PATH:$HOME/.gocode/bin"
-export PATH="$PATH:$HOME/.local/bin"
-export PATH="$PATH:$HOME/.npm/bin"
-export PATH="$PATH:$HOME/.gem/ruby/2.4.0/bin"
-
-[[ -f ~/.nix-profile/etc/profile.d/nix.sh ]] && source ~/.nix-profile/etc/profile.d/nix.sh
-
-export LPASS_AGENT_TIMEOUT=0
 
 [[ -f /usr/lib/libstderred.so ]] && export LD_PRELOAD="/usr/lib/libstderred.so${LD_PRELOAD:+:$LD_PRELOAD}"
 
 # make colors compatibile with tmux
 export TERM=xterm-256color
-if [[ ! -z "$TMUX"  ]]; then
-  export ZLE_RPROMPT_INDENT=0
-fi
+
+export FZF_DEFAULT_OPTS="
+  --filepath-word --reverse
+  --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
+  --bind=ctrl-w:backward-kill-word
+  --height 40%
+  --cycle
+  "
 
 alias qvim=nvim-qt
 # default editor
