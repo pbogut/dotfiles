@@ -209,10 +209,10 @@ mode "$mode_system" {
     # lock screen, then go back to default mode
     bindsym l exec --no-startup-id $Locker, mode "default"
     bindsym e exec --no-startup-id i3-msg exit, mode "default"
-    bindsym s exec --no-startup-id $Locker && systemctl suspend, mode "default"
+    bindsym s exec --no-startup-id $Locker && systemctl suspend -i, mode "default"
     bindsym h exec --no-startup-id $Locker && sudo pm-hibernate, mode "default"
     bindsym w exec --no-startup-id dm-tool switch-to-greeter, mode "default"
-    bindsym p exec --no-startup-id systemctl suspend, mode "default"
+    bindsym p exec --no-startup-id systemctl suspend -i, mode "default"
     bindsym r exec --no-startup-id systemctl reboot, mode "default"
     bindsym Shift+s exec --no-startup-id systemctl poweroff -i, mode "default"
 
