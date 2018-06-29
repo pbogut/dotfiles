@@ -9,12 +9,13 @@
 #=================================================
 
 # fzf config
-export FZF_DEFAULT_OPTS="--filepath-word --reverse
---bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
---bind=ctrl-w:backward-kill-word
---height 40%
---cycle
-"
+export FZF_DEFAULT_OPTS="
+  --filepath-word --reverse
+  --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
+  --bind=ctrl-w:backward-kill-word
+  --height 40%
+  --cycle
+  "
 
 fe() {
     # fe - Open the selected files with the default editor

@@ -448,6 +448,9 @@ imap <M-Tab> <c-y>,
 imap <M-n> <c-y>n
 imap <M-N> <c-y>N
 
+" diffmode
+noremap du :diffupdate<cr>
+
 cnoremap <A-k> <Up>
 cnoremap <A-j> <Down>
 

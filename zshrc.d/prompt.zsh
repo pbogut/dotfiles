@@ -4,7 +4,6 @@
 # date:   25/06/2018
 #=================================================
 GIT_BRANCH=$'$(__git_ps1 " %s ")'
-
 VIMODE_COLOR="003"
 
 vim_ins_short="%K{003}%B%F{0} I%k%b%{$reset_color%}"
@@ -18,11 +17,19 @@ fi
 
 vim_ps1() {
   USERHOST="%B%F{001}[%b%k%(!.%F{001}.%F{012})%n%F{001}@${HOST_COLOR}%M%B%F{001}]%b"
-  TIME="%F{002}[$(date +'%H:%M:%S %Y-%m-%d')]"
+  if [[ $LAST_EXIT_CODE == 0 ]]; then
+    ERROR_COLOR="%F{002}"
+    ERROR_CODE=""
+  else
+    ERROR_COLOR="%F{001}"
+    ERROR_CODE=" [ ERROR $LAST_EXIT_CODE ]"
+  fi
+  TIME="${ERROR_COLOR}[$(date +'%H:%M:%S %Y-%m-%d')]${ERROR_CODE}"
   PS1="$USERHOST %B%F{001}(%b%F{012}%~%B%F{001}) %b%F{004}${GIT_BRANCH}%f${TIME}
 ${VIMODE_LETTER}%F{${VIMODE_COLOR}} %B%F{001}%(!.#.λ) %b%f%k"
 }
 precmd() {
+  LAST_EXIT_CODE=$?
   # RPROMPT=$vim_ins_mode && VIMODE_COLOR="003"
   VIMODE_LETTER=$vim_ins_short && VIMODE_COLOR="003"
   vim_ps1

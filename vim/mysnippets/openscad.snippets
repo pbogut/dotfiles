@@ -1,0 +1,60 @@
+priority -50
+
+snippet cube "cube"
+cube([${1:5}, ${2:$1}, ${3:$2}]);
+$0
+endsnippet
+
+snippet translate "translate"
+translate([${1:5}, ${2:$1}, ${3:$2}]) ${VISUAL}$0
+endsnippet
+
+snippet sphere "sphere"
+sphere(${1:5});
+endsnippet
+
+snippet cylinder "cylinder"
+cylinder(${1:5}${2:, r=${3:10}});
+endsnippet
+
+snippet {} "block"
+{
+	${VISUAL}$0
+}
+endsnippet
+
+snippet hull "hull"
+hull() {
+	${VISUAL}$0
+}
+endsnippet
+
+snippet rotate "rotate"
+rotate(${1:90}, [${2:0}, ${3:0}, ${4:0}]) ${VISUAL}$0
+endsnippet
+
+snippet module "module"
+module ${1:name}() {
+	${VISUAL}$0
+}
+endsnippet
+
+snippet diff "difference"
+difference() {
+	${VISUAL}$0
+}
+endsnippet
+
+snippet difference "difference"
+difference {
+	${VISUAL}$0
+}
+endsnippet
+
+snippet vec "vector"
+[${1:5}, ${2:$1}, ${3:$2}]
+endsnippet
+
+snippet [] "vector"
+[${1:5}, ${2:$1}, ${3:$2}]
+endsnippet

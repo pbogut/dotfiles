@@ -26,11 +26,11 @@ c.tabs.position = "right"
 c.tabs.width = 200
 c.tabs.padding = {"top": 2, "bottom": 2, "left": 5, "right": 5}
 c.downloads.location.directory = "~/Downloads"
+c.content.headers.user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"
 c.content.plugins = True
 c.content.host_blocking.whitelist = [
     "piwik.org", "analytics.google.com", "apis.google.com"]
 c.content.pdfjs = True
-c.content.developer_extras = True
 c.hints.border = "1px solid #E3BE23"
 c.hints.chars = "arstdhneifuwy"
 # c.hints.find_implementation = "javascript"
@@ -44,6 +44,7 @@ c.url.searchengines = {
     "aw": "https://wiki.archlinux.org/?search={}",
     "al": "https://allegro.pl/listing?string={}",
     "yt": "https://www.youtube.com/results?search_query={}",
+    "th": "https://www.thingiverse.com/search?q={}",
 }
 # c.colors.completion.even.bg = "#333333"
 c.colors.completion.odd.bg = "#1f1f1f"

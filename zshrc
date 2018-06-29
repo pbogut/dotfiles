@@ -31,16 +31,11 @@ if [ -d $HOME/.zshrc.d ]; then
   for file in $HOME/.zshrc.d/*.zsh; do
     source $file
   done
+  export FPATH="$FPATH:$HOME/.zshrc.d/functions"
+  for file in "$HOME/.zshrc.d/functions/"*; do
+    autoload -Uz $(basename $file)
+  done
 fi
-
-# Prompt
-BGREEN=$'%{\e[1;32m%}'
-GREEN=$'%{\e[0;32m%}'
-BRED=$'%{\e[1;31m%}'
-RED=$'%{\e[0;31m%}'
-BBLUE=$'%{\e[1;34m%}'
-BLUE=$'%{\e[0;34m%}'
-NORMAL=$'%{\e[00m%}'
 
 #vim mode
 setopt transientrprompt
@@ -106,30 +101,9 @@ fi
 
 eval `dircolors ~/.config/dircolors-solarized/dircolors.256dark`
 
-alias se="sudoedit"
-
 alias ls="ls --color=auto"
 alias ll="ls -lhA --color=auto"
 alias pacman="pacman --color=auto"
-alias ssh-weechat="ssh smeagol@weechat.pbogut.me -t LC_ALL=en_GB.utf8 screen -U -D -RR weechat weechat"
-
-notes() {
-    if [ ! -z $1 ];then
-        $(which $EDITOR) ~/Notes/ +"Note $@"
-    else
-        note=$(find $HOME/Notes/ | sed "s#^$HOME/Notes/##" | grep -v '^$' | fzf)
-        if [[ ! -z $note ]];then
-            $(which $EDITOR) ~/Notes/ +"Note $note"
-        fi
-    fi
-}
-dirdiff() {
-  if [[ -z  $2 ]]; then
-    echo "Usage: dirdiff /path/to/dir/one /path/to/dir/two"
-  else
-    echo ":bw! | DirDiff $1 $2" | $(which $EDITOR) $TMP/skip_session
-  fi
-}
 
 alias xo="xdg-open"
 alias ro="rifle" #rifle open
@@ -144,18 +118,7 @@ alias php_debug_on="export XDEBUG_CONFIG=\"idekey=PHPSTORM\""
 alias php_debug_off="export XDEBUG_CONFIG="
 alias ctags_php="ctags -h \".php\" -R --exclude=\".git\" --exclude=\"tests\" --exclude=\"*.js\" --PHP-kinds=+cf"
 
-alias update="yaourt -Syu --aur"
-
-alias tunnelssh_gb="sshuttle --dns -vr centipede.pbogut.me 0/0"
-
-# rifle open ask
-roa() {
-  if [[ -z $2 ]] && [[ `/usr/bin/rifle -l "$1" | wc -l` -gt 1 ]]; then
-      /usr/bin/rifle -l "$1" | fzf | sed 's/\([0-9]*\).*/\1/' | xargs /usr/bin/rifle "$1" -p
-  else
-    /usr/bin/rifle "$@"
-  fi
-}
+alias o="i3-open"
 
 # shortcuts
 alias sc="bash -c \"\`cat ~/.commands | fzf | sed 's,[^;]*;;; ,,'\`\""
@@ -167,19 +130,14 @@ alias e="mutt"
 alias vssh="vagrant ssh"
 alias vup="vagrant up"
 
-# rlwrap aliases to get vi like input, thats just awesome
-# note that completion wont work with rlwrap
-if type rlwrap > /dev/null; then
-  alias viex="rlwrap -a iex"
-fi
 # autocomplete in irb
 alias irb="irb -r 'irb/completion'"
 
 #local configs
-if [ -f ~/.profile ]; then
+if [[ $PROFILE_LOADED != true ]] && [[ -f ~/.profile ]]; then
   source ~/.profile
 fi
-if [ -f ~/.fzf.zsh ]; then
+if [[ -f ~/.fzf.zsh ]]; then
   source ~/.fzf.zsh
 fi
 
@@ -190,15 +148,6 @@ setopt prompt_subst
 # make colors compatibile with tmux
 export TERM=xterm-256color
 
-export FZF_DEFAULT_OPTS="
-  --filepath-word --reverse
-  --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
-  --bind=ctrl-w:backward-kill-word
-  --height 40%
-  --cycle
-  "
-
-alias qvim=nvim-qt
 # default editor
 if type "nvim" > /dev/null; then
   alias vim=nvim
@@ -208,13 +157,7 @@ else
 fi
 export PAGER="less"
 export TERMINAL="urxvt"
-# golang
-export GOPATH="$HOME/.gocode"
-# chruby
-[[ -s "/usr/local/share/chruby/chruby.sh" ]] && . "/usr/local/share/chruby/chruby.sh"
-# its slow as hell and I'm not using it too offen, so lazy loading should be fine
-export NVM_DIR="$HOME/.nvm"
-lazy_source nvm "$NVM_DIR/nvm.sh"
+
 alias myip="wget http://ipinfo.io/ip -qO -"
 
 # host specific config

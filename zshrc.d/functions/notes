@@ -1,0 +1,16 @@
+#!/bin/zsh
+#=================================================
+# name:   notes
+# author: Pawel Bogut <https://pbogut.me>
+# date:   29/06/2018
+#=================================================
+notes() {
+    if [ ! -z $1 ]; then
+        $(which $EDITOR) ~/Notes/ +"Note $@"
+    else
+        note=$(find $HOME/Notes/ | sed "s#^$HOME/Notes/##" | grep -v '^$' | fzf)
+        if [[ ! -z $note ]]; then
+            $(which $EDITOR) ~/Notes/ +"Note $note"
+        fi
+    fi
+}
