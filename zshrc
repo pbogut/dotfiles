@@ -57,6 +57,14 @@ bindkey '^k' history-beginning-search-backward
 bindkey '^[j' history-beginning-search-forward
 bindkey '^[k' history-beginning-search-backward
 
+# rsi
+bindkey '^a' beginning-of-line
+bindkey '^e' end-of-line
+bindkey '^f' forward-char
+bindkey '^b' backward-char
+bindkey '^[f' forward-word
+bindkey '^[b' backward-word
+
 # End of lines configured by zsh-newuser-install
 
 # create a zkbd compatible hash;
