@@ -1,0 +1,118 @@
+#!/usr/bin/env zsh
+
+_ABBREV_ALIAS_VERSION='0.1.0'
+
+typeset -Ag _abbrev_aliases
+
+__abbrev_alias::magic_abbrev_expand() {
+  local MATCH
+  LBUFFER=${LBUFFER%%(#m)[-_a-zA-Z0-9]#}
+  local abbr=${_abbrev_aliases[$MATCH]:- $MATCH}
+  local kind=${abbr[1,1]}
+  local newbuffer=${abbr[2,-1]}
+  if [[ $kind == "f" ]]; then
+    newbuffer=$(eval $newbuffer)
+  elif [[ $kind == "c" && $LBUFFER != "" ]]; then
+    newbuffer=$MATCH
+  fi
+  LBUFFER+=$newbuffer
+  zle self-insert
+}
+
+__abbrev_alias::no_magic_abbrev_expand() {
+  LBUFFER+=' '
+}
+
+__abbrev_alias::init() {
+  setopt extended_glob
+  zle -N __abbrev_alias::magic_abbrev_expand
+  zle -N __abbrev_alias::no_magic_abbrev_expand
+  bindkey " "   __abbrev_alias::magic_abbrev_expand
+  bindkey "^x " __abbrev_alias::no_magic_abbrev_expand
+}
+
+__abbrev_alias::list() {
+  local kind_filter=$1
+  local key value kind
+  for key in ${(k)_abbrev_aliases}; do
+    value=${_abbrev_aliases[$key]}
+    kind=${value[1,1]}
+    value=${value[2,-1]}
+    if [[ $kind_filter == a || $kind_filter == $kind ]]; then
+      echo "$key='$value'"
+    fi
+  done
+}
+
+__abbrev_alias::version() {
+  echo "abbrev-alias ${_ABBREV_ALIAS_VERSION}"
+}
+
+__abbrev_alias::help() {
+  __abbrev_alias::version
+  echo "usage: abbrev-alias [OPTIONS] {name=value ...}"
+  echo "       abbrev-alias -u {name ...}"
+  echo "       abbrev-alias --init"
+  echo
+  echo "options:"
+  echo "  -c, --command   register alias as 'alias name=value'"
+  echo "  -g, --global    register alias as 'alias -g name=value'"
+  echo "  -f, --function  register alias as 'alias -g name=\$(value)'"
+  echo "  -u, --unset     unregister alias"
+  echo "  -i, --init      initialize abbrev-alias. execute with .zshrc"
+  echo "  -h, --help      show this help"
+  echo "  -v, --version   show version"
+}
+
+__abbrev_alias::unregist() {
+  local key=$1
+  if [[ -n "${_abbrev_aliases[$key]}" ]]; then
+    unalias $key
+    unset "_abbrev_aliases[$key]"
+  else
+    echo "no such alias: $key" >&2
+  fi
+}
+
+__abbrev_alias::regist() {
+  local kind=$1 key=${2%%=*} value=${2#*=}
+  case "$kind" in
+    u) unalias $key;;
+    g) alias -g $key="$value";;
+    f) alias -g $key="\$($value)";;
+    c) alias    $key="$value";;
+  esac
+  _abbrev_aliases[$key]="$kind$value"
+}
+
+# option parse & execute
+local kind
+local -a args
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -i|--init)      __abbrev_alias::init; return;;
+    -h|--help)      __abbrev_alias::help; return;;
+    -v|--version)   __abbrev_alias::version; return;;
+    -u|--unset)     kind=u;;
+    -c|--command)   kind=c;;
+    -g|--global)    kind=g;;
+    -f|--function)  kind=f;;
+    *) args=("${args[@]}" $1) ;;
+  esac
+  shift
+done
+
+local value
+if [[ $#args == 0 ]]; then
+  __abbrev_alias::list ${kind:-a}
+  return
+fi
+if [[ "$kind" == "u" ]]; then
+  for value in ${args[@]}; do
+    __abbrev_alias::unregist $value
+  done
+else
+  for value in ${args[@]}; do
+    __abbrev_alias::regist ${kind:-c} $value
+  done
+fi

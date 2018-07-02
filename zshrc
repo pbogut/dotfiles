@@ -101,6 +101,10 @@ fi
 
 eval `dircolors ~/.config/dircolors-solarized/dircolors.256dark`
 
+abbrev-alias --init
+abbrev-alias -g G='|rg'
+abbrev-alias -g dc='docker-compose'
+
 alias ls="ls --color=auto"
 alias ll="ls -lhA --color=auto"
 alias pacman="pacman --color=auto"
@@ -139,6 +143,12 @@ if [[ $PROFILE_LOADED != true ]] && [[ -f ~/.profile ]]; then
 fi
 if [[ -f ~/.fzf.zsh ]]; then
   source ~/.fzf.zsh
+fi
+
+if [[ -f ~/.zshrc.d/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  source ~/.zshrc.d/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+  export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=240"
+  export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
 fi
 
 setopt prompt_subst
