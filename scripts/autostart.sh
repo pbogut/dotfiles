@@ -41,8 +41,6 @@ demonize mopidy "mopidy -o mpd/port=${MOPIDY_PORT:-6600}"
 demonize pomodoro "i3-gnome-pomodoro daemon"
 demonize toggldesktop "toggldesktop -b"
 
-~/.scripts/users.sh --register
-
 # sepcific for the computer
 if [[ -f "$HOME/.$host_name.autostart.sh" ]]; then
   source "$HOME/.$host_name.autostart.sh"
