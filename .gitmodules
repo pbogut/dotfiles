@@ -6,4 +6,4 @@
 	url = https://github.com/seebi/dircolors-solarized
 [submodule "zshrc.d/plugins/zsh-autosuggestions"]
 	path = zshrc.d/plugins/zsh-autosuggestions
-	url = git@github.com:zsh-users/zsh-autosuggestions.git
+	url = https://github.com/zsh-users/zsh-autosuggestions.git
