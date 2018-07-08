@@ -11,7 +11,7 @@ if [[ $1 == '--switch' ]]; then
     islogged=$(who -u | grep "^$user")
     if [[ -z $islogged ]]; then
         # not loggod
-        dm-tool switch-to-user $user
+        dm-tool switch-to-greeter
     else
         # logged
         vtn=$(who -u | grep "^$user" | sed 's,^.*tty\([0-9]*\).*$,\1,')
@@ -19,7 +19,7 @@ if [[ $1 == '--switch' ]]; then
     if [[ -n $vtn ]]; then
         sudo chvt $vtn
     else
-        dm-tool switch-to-user $user
+        dm-tool switch-to-greeter
     fi
 fi
 if [[ $1 == '--kill' ]]; then
