@@ -280,6 +280,12 @@ if exists(':Plug')
         \ 'branch': 'next',
         \ 'do': 'bash install.sh',
         \ }
+  " cd ~/.composer/packages && composer create-project felixfbecker/language-server
+  let g:LanguageClient_loggingLevel = 'DEBUG'
+  let g:LanguageClient_loggingFile = $TMPDIR . '/LanguageClient.log'
+  let g:LanguageClient_serverCommands = {
+        \'php': [ 'php', $HOME . '/.composer/packages/language-server/bin/php-language-server.php' ]
+        \ }
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
   source ~/.vim/plugin/config/deoplete.vimrc
   Plug 'Shougo/neco-vim', { 'for': 'vim' }
@@ -640,6 +646,7 @@ let g:neoformat_vimwiki_prettier = {
       \ 'stdin': 1,
       \ }
 
+let g:neoformat_disable_on_save = 1
 let g:neoformat_enabled_vimwiki = ['prettier']
 function! s:format(...)
   let g:neoformat_run_all_formatters = get(b:, 'neoformat_run_all_formatters')
