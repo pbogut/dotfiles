@@ -14,6 +14,11 @@ function demonize() {
   fi
 }
 
+function rerun() {
+  killall $1 >/dev/null 2>&1
+  $2 >/dev/null 2>&1
+}
+
 # numlock
 numlockx on
 # make use of the useless capslock
@@ -27,10 +32,11 @@ if [[ $1 == "--xcape" ]]; then
 fi
 
 # daemons
-mails-go-web -r 'notmuch search --output=files id:%s' >/dev/null 2>&1 &
-anamnesis --start >/dev/null 2>&1
-insync start >/dev/null 2>&1
-compton -b --xrender-sync-fence --xrender-sync
+rerun insync "insync start"
+rerun anamnesis "anamnesis --start"
+rerun compton "compton -b --xrender-sync-fence --xrender-sync"
+rerun TogglDesktop "toggldesktop -b"
+
 demonize redshift 'redshift-gtk'
 demonize textaid "perl $scriptpath/edit-server.pl"
 demonize rescuetime rescuetime
@@ -39,7 +45,6 @@ demonize dunst dunst
 demonize udisksvm "udisksvm -a"
 demonize mopidy "mopidy -o mpd/port=${MOPIDY_PORT:-6600}"
 demonize pomodoro "i3-gnome-pomodoro daemon"
-demonize toggldesktop "toggldesktop -b"
 
 # sepcific for the computer
 if [[ -f "$HOME/.$host_name.autostart.sh" ]]; then
