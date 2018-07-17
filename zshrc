@@ -124,7 +124,12 @@ alias clone="~/.scripts/term-in-current-dir.sh"
 alias c="clone"
 
 alias mutt="LC_ALL=en_GB.utf8 screen -U -D -RR mutt mutt"
-alias ncmpcpp="LC_ALL=en_GB.utf8 screen -U -D -RR ncmpcpp ncmpcpp -p $MOPIDY_PORT"
+ncmpcpp() {
+  LC_ALL=en_GB.utf8 screen -U -D -RR ncmpcpp ncmpcpp -p $MOPIDY_PORT
+}
+cht() {
+  curl "cht.sh/$1" 2>/dev/null | less
+}
 
 alias php_debug_on="export XDEBUG_CONFIG=\"idekey=PHPSTORM\""
 alias php_debug_off="export XDEBUG_CONFIG="
@@ -139,8 +144,6 @@ alias :q="exit"
 alias m="ncmpcpp"
 alias i="ssh-weechat"
 alias e="mutt"
-alias vssh="vagrant ssh"
-alias vup="vagrant up"
 
 # autocomplete in irb
 alias irb="irb -r 'irb/completion'"
@@ -175,6 +178,8 @@ else
 fi
 export PAGER="less"
 export TERMINAL="urxvt"
+
+export LESS="-RXe"
 
 alias myip="wget http://ipinfo.io/ip -qO -"
 

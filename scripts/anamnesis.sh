@@ -19,7 +19,7 @@ param_or_stdin() {
 
 if [[ $1 == "list" ]]; then
     # display clipboard text
-    echo "select docid, replace(c0text, '\n', '¬ ') \
+    echo "select docid, replace(substr(c0text, 0, 255), '\n', '¬ ') \
         from clips_content \
         order by docid desc \
         limit 50;" \

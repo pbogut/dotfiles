@@ -192,8 +192,9 @@ if exists(':Plug')
   autocmd User after_plug_end
         \  call airline#parts#define_function('sleuth', 'SleuthIndicator')
         \| let g:airline_section_y = airline#section#create_right(['sleuth'])
-  " Plug 'tpope/vim-fugitive'
-  Plug 'pbogut/vim-fugitive'
+  Plug 'tpope/vim-fugitive'
+  Plug 'pbogut/vim-dadbod-ssh'
+  " Plug 'pbogut/vim-fugitive'
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-git'
   Plug 'tpope/vim-commentary'
@@ -213,11 +214,10 @@ if exists(':Plug')
   Plug 'vim-airline/vim-airline'
   source ~/.vim/plugin/config/airline.vimrc
   Plug 'vim-airline/vim-airline-themes'
-  Plug 'airblade/vim-gitgutter'
-  source ~/.vim/plugin/config/gitgutter.vim
+  Plug 'mhinz/vim-signify'
+  source ~/.vim/plugin/config/signify.vim
   Plug 'MarcWeber/vim-addon-mw-utils'
   Plug 'ludovicchabant/vim-gutentags'
-  source ~/.vim/plugin/config/gutentags.vimrc
   Plug 'gioele/vim-autoswap'
   Plug 'ntpeters/vim-better-whitespace'
   let g:strip_whitespace_on_save = 0 " Use Whitespace wrapper instead
@@ -260,6 +260,7 @@ if exists(':Plug')
   Plug 'andyl/vim-textobj-elixir'
   Plug 'kana/vim-textobj-user'
   Plug 'justinmk/vim-dirvish'
+  Plug 'kristijanhusak/vim-dirvish-git'
   source ~/.vim/plugin/config/dirvish.vimrc
   Plug 'w0rp/ale'
   autocmd User after_plug_end source ~/.vim/plugin/config/ale.vimrc
@@ -268,7 +269,7 @@ if exists(':Plug')
         \| highlight ALEWarningSign guibg=#073642 guifg=#d33682
   Plug 'wakatime/vim-wakatime'
   Plug 'vimwiki/vimwiki', { 'branch': 'dev' }
-  let g:vimwiki_map_prefix = '-w'
+  let g:vimwiki_map_prefix = '\w'
   let g:vimwiki_list = [{'path': '~/pawel.bogut@gmail.com/vimwiki/',
         \ 'syntax': 'markdown', 'ext': '.md'}]
   Plug 'vim-scripts/ReplaceWithRegister'
@@ -342,6 +343,7 @@ nnoremap <space>sv :source $MYVIMRC<CR>
 nnoremap <silent> <space>l :call local#togglelist#locationlist()<cr>
 nnoremap <silent> <space>q :call local#togglelist#quickfixlist()<cr>
 
+nnoremap <silent> \won <Plug>(dirvish_up)
 nnoremap <silent> <bs> :Dirvish %:p:h<cr>
 nnoremap <silent> _ :Dirvish %:p:h<cr>
 nnoremap <silent> <space>w :W!<cr>
