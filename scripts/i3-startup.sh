@@ -21,8 +21,9 @@ if [ "$hostname" == "v3engine" ]; then # my laptop
       MONITOR1='VGA1'
       MONITOR2='HDMI1'
     fi
-    xrandr --output $MONITOR2 --mode 1920x1080 --pos 0x0 --output $MONITOR1 --primary --mode 1920x1080 --pos 1920x0 --output $LAPTOP --mode 1408x790 --pos 3840x290
+    # xrandr --output $MONITOR2 --primary --mode 1920x1080 --pos 0x0 --output $MONITOR1 --mode 1920x1080 --pos 1920x0 --output $LAPTOP --mode 1408x790 --pos 3840x290
     # xrandr --output $MONITOR1 --primary --mode 1920x1080 --pos 0x0 --output $LAPTOP --mode 1408x790 --pos 1920x290
+    xrandr --output $MONITOR2 --primary --mode 1920x1080 --pos 0x0 --output $MONITOR1 --mode 1920x1080 --pos 1920x0 --output $LAPTOP --mode 1408x790 --pos -1408x290
     i3-msg restart
     set_walpaper
   ) &
