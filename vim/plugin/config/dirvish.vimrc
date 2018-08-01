@@ -7,7 +7,7 @@ augroup pb_dirvish
         \| nmap <buffer> rr :DirvishRename<cr>
         \| nmap <buffer> mm :DirvishMove<cr>
         \| nmap <buffer> dd :DirvishDelete<cr>
-        \| nmap <buffer> K :DirvishMkdir<cr>
+        \| nmap <buffer> K :DirvishCreate<cr>
         \| nmap <buffer> A :DirvishCreate<cr>
         \| nnoremap <buffer> / /\ze[^\/]*[\/]\=$<Home>\c
         \| nnoremap <buffer> ? ?\ze[^\/]*[\/]\=$<Home>\c
@@ -118,8 +118,11 @@ function! s:file_or_mkdir()
     return
   endif
   if l:to =~ '/$'
-    silent exec ('!mkdir -p ' . l:to)
+    let dir = l:to
+  else
+    let dir = substitute(l:to, '\(.*\)/[^/]\+', '\1', '')
   endif
+  silent exec ('!mkdir -p ' . l:dir)
   silent exec ('e ' . l:to)
 endfunction
 

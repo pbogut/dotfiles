@@ -267,11 +267,7 @@ if exists(':Plug')
   autocmd User after_vim_load
         \  highlight ALEErrorSign guibg=#073642 guifg=#dc322f
         \| highlight ALEWarningSign guibg=#073642 guifg=#d33682
-  Plug 'wakatime/vim-wakatime'
-  Plug 'vimwiki/vimwiki', { 'branch': 'dev' }
-  let g:vimwiki_map_prefix = '\w'
-  let g:vimwiki_list = [{'path': '~/pawel.bogut@gmail.com/vimwiki/',
-        \ 'syntax': 'markdown', 'ext': '.md'}]
+  Plug 'chmp/mdnav'
   Plug 'vim-scripts/ReplaceWithRegister'
   source ~/.vim/plugin/config/replacewithregister.vim
   Plug 'beloglazov/vim-textobj-quotes'
@@ -306,6 +302,10 @@ if exists(':Plug')
   Plug 'sheerun/vim-polyglot'
   Plug 'sirtaj/vim-openscad'
   let g:polyglot_disabled = ['eelixir', 'elixir']
+
+  if (exists('~/.wakatime.cfg'))
+    Plug 'wakatime/vim-wakatime'
+  endif
 endif "
 silent! call plug#end()      " requiredc
 filetype plugin indent on    " required
