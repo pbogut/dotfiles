@@ -107,7 +107,7 @@ rofi.modi: run,drun,ssh,window
 rofi.separator-style: solid
 rofi.location: 1
 rofi.width: 100
-rofi.font: Droid Sans Mono for Powerline Nerd Font 10
+rofi.font: Droid Sans Mono 10
 rofi.padding: 3
 rofi.hide-scrollbar: true
 rofi.terminal: urxvt -e zsh -ic

@@ -20,6 +20,15 @@ if has('nvim')
   hi SpecialKey guibg=none
 endif
 
+function! s:mkdir_parent(to)
+  if a:to =~ '/$'
+    let dir = substitute(a:to, '\(.*\)/[^/]\+/$', '\1', '')
+  else
+    let dir = substitute(a:to, '\(.*\)/[^/]\+', '\1', '')
+  endif
+  silent exec ('!mkdir -p ' . l:dir)
+endfunction
+
 function! s:copy()
   let from = getline('.')
   let extension = substitute(l:from, '.*/[^\.]*\(.\{-}\)$', '\1', '')
@@ -29,6 +38,7 @@ function! s:copy()
   call inputrestore()
   redraw!
   if !empty(l:to)
+    call s:mkdir_parent(l:to)
     silent exec ('!cp -r ' . l:from . ' ' . l:to)
     call append(line('.') - 1, l:to)
     normal k

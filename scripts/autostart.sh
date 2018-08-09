@@ -50,3 +50,7 @@ demonize pomodoro "i3-gnome-pomodoro daemon"
 if [[ -f "$HOME/.$host_name.autostart.sh" ]]; then
   source "$HOME/.$host_name.autostart.sh"
 fi
+# just local one, not versioned
+if [[ -f "$HOME/.autostart.local.sh" ]]; then
+  source "$HOME/.autostart.local.sh"
+fi

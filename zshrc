@@ -125,7 +125,7 @@ alias c="clone"
 
 alias mutt="LC_ALL=en_GB.utf8 screen -U -D -RR mutt mutt"
 ncmpcpp() {
-  LC_ALL=en_GB.utf8 screen -U -D -RR ncmpcpp ncmpcpp -p $MOPIDY_PORT
+  LC_ALL=en_GB.utf8 screen -U -D -RR ncmpcpp ncmpcpp -p ${MOPIDY_PORT:-6600}
 }
 cht() {
   curl "cht.sh/$1" 2>/dev/null | less
