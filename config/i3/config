@@ -256,6 +256,7 @@ for_window [title="NVIM_FOR_QB"] floating enable
 for_window [class="Toggl Desktop"] floating enable
 for_window [class="Skype"] floating enable
 for_window [class="explorer.exe"] floating enable
+for_window [class="krusader"] floating disable
 for_window [class="^feh$"] fullscreen enable
 
 # fake-outputs 3288x1080+0+0
@@ -319,3 +320,6 @@ bindsym $mod+Print $exec "import -window $(xprop -root | awk '/_NET_ACTIVE_WINDO
 bindsym Shift+Print $exec "maim -s ~/Pictures/Screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
 bindsym Shift+Ctrl+Print $exec "~/.scripts/record.sh ~/Videos/Capture_from_$(date +%Y-%m-%d_%H-%M-%S).mp4"
 bindsym Ctrl+Print $exec "killall ffmpeg; notify-send 'Recording has been stoped'"
+
+for_window [class="^looking.*"] move scratchpad
+bindsym $mod+g scratchpad show

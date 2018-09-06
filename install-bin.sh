@@ -27,5 +27,7 @@ get phpcbf 'https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar'
 get phpcs 'https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar'
 get phpmd 'http://static.phpmd.org/php/latest/phpmd.phar'
 get robo 'http://robo.li/robo.phar'
+get psysh 'https://git.io/psysh'
+get dep 'https://deployer.org/deployer.phar'
 
 cd ..

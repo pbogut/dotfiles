@@ -22,7 +22,8 @@ if !action
     "--type-pass",
     "--remove",
     "--edit",
-    "--add"
+    "--add",
+    "--show"
   ].join("\n"))
   selection, _, _ = Open3.capture3('keepass.rb ' + selection)
   exit
@@ -91,6 +92,8 @@ prompt = case action
     "remove"
   when "--edit"
     "edit"
+  when "--show"
+    "show"
   else
     "acc"
 end
@@ -159,4 +162,28 @@ if action == "--remove"
   puts "keepass-cli rm '#{name}'"
   out, _, _ = Open3.capture3("keepass-cli rm '#{name}'")
   puts out
+end
+if action == "--show"
+  puts "keepass-cli show '#{name}'"
+  out, _, _ = Open3.capture3("keepass-cli show '#{name}'")
+
+  i = 0
+  lines = []
+  out.split("\n").each do |line|
+    lines << line
+    if line.match(/Password: .*/)
+      pass = line.gsub(/Password: (.*)/, '\1')
+      numbers = ""
+      passwds = ""
+      pass.split("").each do |c|
+        i = i + 1
+        numbers << "#{i}\t"
+        passwds << "#{c}\t"
+      end
+      lines << numbers
+      lines << passwds
+    end
+  end
+  width = 100 + (i * 20)
+  out, _, _ = Open3.capture3("zenity --info --width=#{width} --text=\"#{lines.join("\n")}\"")
 end

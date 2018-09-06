@@ -6,8 +6,9 @@
 #=================================================
 
 find ~/projects -maxdepth 5 -mindepth 3 -printf "%T+\t%p\n" -type d |
-    grep '\.git$\|CVS$\|\.svn$' |
+    grep '\.git$\|CVS$\|\.svn$\|docker-compose.yml$\|composer.lock$' |
     sort -r |
     sed 's,.*\t'"$HOME"'/projects/,,g' |
-    sed 's,\(.*\)/\(\.git\|CVS\|\.svn\)$,\1,'
+    sed 's,\(.*\)/\(\.git\|CVS\|\.svn\|docker-compose.yml\|composer.lock\)$,\1,' |
+    awk '!x[$0]++'
 

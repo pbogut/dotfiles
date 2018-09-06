@@ -42,6 +42,12 @@ __connect() {
           ip=$(echo $inspect |jq '.[0].NetworkSettings.Networks | map(.IPAddress) | first' -r)
         fi
         echo $ip $url | tee $hosts/$hash
+
+        docker inspect $hash 2>/dev/null |
+          jq  '.[0].NetworkSettings.Networks | map(select(.Aliases)) | map(.Aliases[])[]' -r |
+          grep '\.' | while read alias; do
+            echo $ip $alias | tee -a $hosts/$hash
+          done
       fi
 }
 

@@ -81,6 +81,7 @@ git_clone_to_projects() {
   else
     dest="$2"
   fi
+  dest="$(echo $dest | awk '{print tolower($0)}')"
   if [[ -n $repo ]]; then
     git clone $repo $dest
   else

@@ -13,7 +13,7 @@ set cursorcolumn
 " space instead of tab
 set laststatus=2
 set completeopt=menuone
-silent! set completeopt=menuone,noselect
+silent! set completeopt=menuone,noselect,noinsert
 set cmdheight=2
 " show existing tab with 2 spaces width
 set tabstop=2
@@ -273,37 +273,46 @@ if exists(':Plug')
   Plug 'beloglazov/vim-textobj-quotes'
   " Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
   Plug 'joereynolds/gtags-scope'
-  Plug 'autozimu/LanguageClient-neovim', {
-        \ 'branch': 'next',
-        \ 'do': 'bash install.sh',
-        \ }
-  " cd ~/.composer/packages && composer create-project felixfbecker/language-server
-  let g:LanguageClient_loggingLevel = 'DEBUG'
-  let g:LanguageClient_loggingFile = $TMPDIR . '/LanguageClient.log'
-  let g:LanguageClient_serverCommands = {
-        \'php': [ 'php', $HOME . '/.composer/packages/language-server/bin/php-language-server.php' ]
-        \ }
-  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-  source ~/.vim/plugin/config/deoplete.vimrc
-  Plug 'Shougo/neco-vim', { 'for': 'vim' }
+  " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+  " source ~/.vim/plugin/config/deoplete.vimrc
+  " Plug 'Shougo/neco-vim', { 'for': 'vim' }
+
+  Plug 'roxma/nvim-yarp'
+  Plug 'ncm2/ncm2'
+  autocmd User after_plug_end autocmd BufEnter * call ncm2#enable_for_buffer()
+  Plug 'ncm2/ncm2-bufword'
+  Plug 'ncm2/ncm2-path'
+  Plug 'ncm2/ncm2-tagprefix'
+  Plug 'ncm2/ncm2-jedi', {'for': 'python'}
+  Plug 'ncm2/ncm2-cssomni', {'for': ['css', 'scss', 'less']}
+  Plug 'ncm2/ncm2-tern', {'do': 'npm install'}
+  Plug 'ncm2/ncm2-go', {'for': 'golang'}
+  Plug 'ncm2/ncm2-vim' | Plug 'Shougo/neco-vim'
+  Plug 'ncm2/ncm2-ultisnips'
+  Plug 'ncm2/ncm2-html-subscope'
+  Plug 'ncm2/ncm2-markdown-subscope'
+  Plug 'phpactor/phpactor' ,  {'do': 'composer install'}
+  Plug 'phpactor/ncm2-phpactor'
+
+  Plug 'rrethy/vim-illuminate'
   Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
   Plug 'junegunn/fzf.vim'
   Plug 'pbogut/fzf-mru.vim'
   source ~/.vim/plugin/config/fzf.vimrc
   Plug 'slashmili/alchemist.vim', { 'for': ['elixir', 'eelixir'] }
   Plug 'powerman/vim-plugin-AnsiEsc', { 'for': ['elixir', 'eelixir'] }
-  Plug 'zchee/deoplete-go', { 'do': 'go get github.com/nsf/gocode && make', 'for': 'go'}
-  Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
-  Plug 'zchee/deoplete-jedi', { 'for': 'python' }
-  Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
-  Plug 'pbogut/deoplete-elm', { 'for': 'elm' }
-  Plug 'carlitux/deoplete-ternjs', { 'for': ['javascript', 'javascript.jsx'], 'do': 'yarn global add tern' }
+  " Plug 'zchee/deoplete-go', { 'do': 'go get github.com/nsf/gocode && make', 'for': 'go'}
+  " Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
+  " Plug 'zchee/deoplete-jedi', { 'for': 'python' }
+  " Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
+  " Plug 'pbogut/deoplete-elm', { 'for': 'elm' }
+  " Plug 'carlitux/deoplete-ternjs', { 'for': ['javascript', 'javascript.jsx'], 'do': 'yarn global add tern' }
   Plug 'frankier/neovim-colors-solarized-truecolor-only'
   Plug 'sheerun/vim-polyglot'
   Plug 'sirtaj/vim-openscad'
   let g:polyglot_disabled = ['eelixir', 'elixir']
 
-  if (exists('~/.wakatime.cfg'))
+  if filereadable($HOME . '/.wakatime.cfg')
     Plug 'wakatime/vim-wakatime'
   endif
 endif "

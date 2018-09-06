@@ -37,7 +37,8 @@ rerun anamnesis "anamnesis --start"
 rerun compton "compton -b --xrender-sync-fence --xrender-sync"
 rerun TogglDesktop "toggldesktop -b"
 
-demonize redshift 'redshift-gtk -l manual'
+demonize geoclue /usr/lib/geoclue-2.0/demos/agent
+demonize redshift redshift-gtk
 demonize textaid "perl $scriptpath/edit-server.pl"
 demonize rescuetime rescuetime
 demonize nm-applet nm-applet
