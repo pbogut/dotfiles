@@ -9,8 +9,8 @@ c.qt.args = [('ppapi-widevine-path='
               '/usr/lib/qt/plugins/ppapi/libwidevinecdmadapter.so')]
 
 c.spellcheck.languages = ['pl-PL', 'en-GB']
-c.url.start_pages = ["https://google.com"]
-c.url.default_page = 'https://google.com'
+c.url.start_pages = ["https://duckduckgo.com/"]
+c.url.default_page = 'https://duckduckgo.com/'
 c.downloads.open_dispatcher = '/bin/bash -c "~/.scripts/i3-open \'{}\'"'
 c.editor.command = ["urxvt", "--geometry", "120x32",
                     "--title", "NVIM_FOR_QB", "-e", "nvim", "{}"]
@@ -39,8 +39,10 @@ c.input.insert_mode.auto_enter = True
 c.input.insert_mode.auto_leave = False
 
 c.url.searchengines = {
-    "DEFAULT": "https://google.com/search?q={}",
-    "g": "https://google.com/search?q={}",
+    "DEFAULT": "https://duckduckgo.com/?q={}",
+    "d":  "https://duckduckgo.com/?q={}",
+    "s":  "https://www.startpage.com/do/asearch?q={}",
+    "g":  "https://google.com/search?q={}",
     "aw": "https://wiki.archlinux.org/?search={}",
     "al": "https://allegro.pl/listing?string={}",
     "yt": "https://www.youtube.com/results?search_query={}",
