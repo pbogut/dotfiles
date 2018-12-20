@@ -313,11 +313,11 @@ bindsym $mod+apostrophe $exec "~/.scripts/i3-dmenu-anamnesis.sh"
 bindsym $mod+slash $exec "~/.scripts/quickbrowser.sh"
 # screen shots
 # full screen (image magick required)
-bindsym Print $exec "import -window root ~/Pictures/Screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
+bindsym Print $exec "import -window root ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
 # focused window (image magick required)
-bindsym $mod+Print $exec "import -window $(xprop -root | awk '/_NET_ACTIVE_WINDOW\(WINDOW\)/{print $NF}') ~/Pictures/Screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
+bindsym $mod+Print $exec "import -window $(xprop -root | awk '/_NET_ACTIVE_WINDOW\(WINDOW\)/{print $NF}') ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
 # area (maim and slop required)
-bindsym Shift+Print $exec "maim -s ~/Pictures/Screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
+bindsym Shift+Print $exec "maim -s ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
 bindsym Shift+Ctrl+Print $exec "~/.scripts/record.sh ~/Videos/Capture_from_$(date +%Y-%m-%d_%H-%M-%S).mp4"
 bindsym Ctrl+Print $exec "killall ffmpeg; notify-send 'Recording has been stoped'"
 
