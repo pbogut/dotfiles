@@ -123,9 +123,8 @@ alias so="source"
 alias clone="~/.scripts/term-in-current-dir.sh"
 alias c="clone"
 
-alias mutt="LC_ALL=en_GB.utf8 screen -U -D -RR mutt mutt"
 ncmpcpp() {
-  LC_ALL=en_GB.utf8 screen -U -D -RR ncmpcpp ncmpcpp -p ${MOPIDY_PORT:-6600}
+  LC_ALL=en_US.utf8 screen -U -D -RR ncmpcpp ncmpcpp -p ${MOPIDY_PORT:-6600}
 }
 cht() {
   curl "cht.sh/$1" 2>/dev/null | less
@@ -143,7 +142,7 @@ alias q="exit"
 alias :q="exit"
 alias m="ncmpcpp"
 alias i="ssh-weechat"
-alias e="mutt"
+alias e="killall neomutt > /dev/null 2>&1; neomutt"
 
 # autocomplete in irb
 alias irb="irb -r 'irb/completion'"
