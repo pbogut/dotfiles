@@ -323,3 +323,4 @@ bindsym Ctrl+Print $exec "killall ffmpeg; notify-send 'Recording has been stoped
 
 for_window [class="^looking.*"] move scratchpad
 bindsym $mod+g scratchpad show
+bindsym $mod+Shift+G move scratchpad
