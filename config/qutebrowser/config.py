@@ -16,7 +16,7 @@ c.editor.command = ["urxvt", "--geometry", "120x32",
                     "--title", "NVIM_FOR_QB", "-e", "nvim", "{}"]
 c.downloads.position = "bottom"
 c.confirm_quit = ["multiple-tabs", "downloads"]
-c.scrolling.bar = True
+c.scrolling.bar = "always"
 c.scrolling.smooth = True
 c.prompt.radius = 5
 c.tabs.background = True
@@ -26,11 +26,13 @@ c.tabs.position = "right"
 c.tabs.width = 200
 c.tabs.padding = {"top": 2, "bottom": 2, "left": 5, "right": 5}
 c.downloads.location.directory = "~/Downloads"
-c.content.headers.user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"
+#c.content.headers.user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"
+c.content.headers.user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
 c.content.plugins = True
 c.content.host_blocking.whitelist = [
-    "piwik.org", "analytics.google.com", "apis.google.com"]
-c.content.pdfjs = True
+    "piwik.org", "analytics.google.com", "apis.google.com", "thepiratebay.org",
+    "googleadservices.com"]
+c.content.pdfjs = False
 c.hints.border = "1px solid #E3BE23"
 c.hints.chars = "arstdhneifuwy"
 # c.hints.find_implementation = "javascript"
@@ -96,6 +98,8 @@ config.bind('do', 'download-open')
 config.bind('dc', 'download-clear')
 config.bind('dr', 'download-remove')
 
+config.bind('gc', 'spawn google-chrome-stable {url:pretty}')
+
 config.bind('<Ctrl-i>', 'open-editor', mode='insert')
 config.bind(
     '<ctrl-j>',
@@ -155,6 +159,37 @@ config.bind(',jve', ("jseval (function() {var protocol = window.location.protoc"
                      "bute('language','JavaScript');n.setAttribute('src',url+'?"
                      "rand='+new Date().getTime());document.body.appendChild(n)"
                      ";}})();"))
+
+config.bind(',de', ("jseval (function() { if (window.location.href.indexOf('dev"
+                    "eloper_mode=true') == -1) { window.location = window.locat"
+                    "ion.href + (window.location.href.indexOf('?') != -1 ? '&' "
+                    ": '?' ) + 'developer_mode=true' } })();"))
+
+config.bind(',dd', ("jseval (function() { if (window.location.href.indexOf('&de"
+                    "veloper_mode=true') != -1) { window.location = window.loca"
+                    "tion.href.replace('&developer_mode=true', '') } else if (w"
+                    "indow.location.href.indexOf('developer_mode=true&') != -1)"
+                    "{ window.location = window.location.href.replace('develope"
+                    "r_mode=true&', '') } else if (window.location.href.indexOf"
+                    "('?developer_mode=true') != -1) { window.location = window"
+                    ".location.href.replace('?developer_mode=true', '') } })();"
+                    ))
+config.bind(',el', ("jseval (function(){location.href=location.href.replace(/:"
+                    "\/\/www\./,'://local.').replace(/:\/\/staging\./,'://loca"
+                    "l.')})();"))
+config.bind(',es', ("jseval (function(){location.href=location.href.replace(/:"
+                    "\/\/local\./,'://staging.').replace(/:\/\/www\./,'://stag"
+                    "ing.')})();"))
+config.bind(',ep', ("jseval (function(){location.href=location.href.replace(/:"
+                    "\/\/staging\./,'://www.').replace(/:\/\/local\./,'://www."
+                    "')})();"))
+config.bind(',et', ("jseval (function(){if(location.href.match(/:\/\/local\./))"
+                    "{location.href=location.href.replace(/:\/\/local\./,'://st"
+                    "aging.')}else if(location.href.match(/:\/\/staging\./)){lo"
+                    "cation.href=location.href.replace(/:\/\/staging\./,'://www"
+                    ".')}else if(location.href.match(/:\/\/www\./)){location.hr"
+                    "ef=location.href.replace(/:\/\/www\./, '://local.')}})();"))
+
 
 dir_path = os.path.dirname(__file__)
 if os.path.exists(dir_path + '/secure_config.py'):
