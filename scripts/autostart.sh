@@ -16,7 +16,7 @@ function demonize() {
 
 function rerun() {
   killall $1 >/dev/null 2>&1
-  $2 >/dev/null 2>&1
+  $2 >/dev/null 2>&1 &
 }
 
 # numlock
@@ -36,6 +36,7 @@ rerun insync "insync start"
 rerun anamnesis "anamnesis --start"
 rerun compton "compton -b --xrender-sync-fence --xrender-sync"
 rerun TogglDesktop "toggldesktop -b"
+rerun megasync megasync
 
 demonize geoclue /usr/lib/geoclue-2.0/demos/agent
 demonize redshift redshift-gtk
@@ -46,6 +47,8 @@ demonize dunst dunst
 demonize udisksvm "udisksvm -a"
 demonize mopidy "mopidy -o mpd/port=${MOPIDY_PORT:-6600}"
 demonize pomodoro "i3-gnome-pomodoro daemon"
+demonize memwatch ~/.scripts/memwatch.sh
+demonize mailsgoweb ~/.scripts/mailsgoweb.sh
 
 # sepcific for the computer
 if [[ -f "$HOME/.$host_name.autostart.sh" ]]; then

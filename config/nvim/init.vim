@@ -420,6 +420,7 @@ nnoremap ? :let @/=""<cr>:set hls<cr>?\c
 nnoremap * :set hls<cr>*
 nnoremap # :set hls<cr>#
 nnoremap <space><space> *``:set hls<cr>
+nnoremap <space><cr> "xy$:let @/=@x<cr>
 nnoremap <silent> <space>= migg=G`i
 inoremap <C-Space> <c-x><c-o>
 imap <C-@> <C-Space>
@@ -466,7 +467,7 @@ imap <M-n> <c-y>n
 imap <M-N> <c-y>N
 
 " diffmode
-noremap du :diffupdate<cr>
+nnoremap du :diffupdate<cr>
 
 cnoremap <A-k> <Up>
 cnoremap <A-j> <Down>
@@ -498,8 +499,8 @@ function! s:ripgrep_from_motion(type, ...)
   let @a = l:tmp
 endfunction
 
-nmap <space><cr> za
-vmap <space><cr> zf
+" nmap <space><cr> za
+" vmap <space><cr> zf
 
 " quick set
 nnoremap <space>s  :set
