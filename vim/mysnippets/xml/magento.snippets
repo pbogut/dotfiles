@@ -7,10 +7,19 @@ def module_name(text):
 
 def module_key(text):
 	parts = text.split('/')
+	return parts[-3].lower()
+
+def vendor_key(text):
+	parts = text.split('/')
+	return parts[-4].lower()
+
+def vendor_module_key(text):
+	parts = text.split('/')
 	return parts[-4].lower() + '_' + parts[-3].lower()
+
 endglobal
 
-snippet mconfig "Magento Events"
+snippet mconfig "Magento Config"
 <?xml version="1.0"?>
 <config>
 	<modules>
@@ -20,6 +29,7 @@ snippet mconfig "Magento Events"
 	</modules>
 	mglobal$3
 	mdefault$4
+	madminhtml$4
 </config>
 endsnippet
 
@@ -33,22 +43,50 @@ endsnippet
 
 snippet mdefault "Magento Setup Resource"
 <default>
-	<${1:`!p snip.rv = module_key(path)`}>
-		<${2:section}>
-			<${3:field}>${4:value}</$3>
-		</$2>
-	</$1>
+	<${1:`!p snip.rv = vendor_key(path)`}_${2:`!p snip.rv = module_key(path)`}>
+		<${3:section}>
+			<${4:field}>${5:value}</$3>
+		</$3>
+	</$1_$2>
 </default>
 endsnippet
 
 snippet msetup "Magento Setup Resource"
 <resources>
-	<${1:`!p snip.rv = module_key(path)`}_setup>
+	<${1:`!p snip.rv = vendor_key(path)`}_${2:`!p snip.rv = module_key(path)`}_setup>
 		<setup>
-			<module>${2:`!p snip.rv = module_name(path)`}</module>
+			<module>${3:`!p snip.rv = module_name(path)`}</module>
 		</setup>
-	</$1_setup>
+	</$1_$2_setup>
 </resources>
+endsnippet
+
+snippet madminhtml "Magento Adminhtml Section"
+<adminhtml>
+	macl$1
+</adminhtml>
+endsnippet
+
+snippet macl "Magento ACL Section"
+<acl>
+	<resources>
+		<admin>
+			<children>
+				<system>
+					<children>
+						<config>
+							<children>
+								<${1:`!p snip.rv = vendor_key(path)`}_${2:`!p snip.rv = module_key(path)`}>
+									<title>${3:Module Name}</title>
+								</$1_$2>
+							</children>
+						</config>
+					</children>
+				</system>
+			</children>
+		</admin>
+	</resources>
+</acl>
 endsnippet
 
 snippet mhelpers "Magento Helpers"
@@ -58,9 +96,9 @@ snippet mhelpers "Magento Helpers"
 endsnippet
 
 snippet mhelper "Magento Helper"
-<${1:`!p snip.rv = module_key(path)`}>
-	<class>${2:`!p snip.rv = module_name(path)`}_Helper</class>
-</$1>
+<${1:`!p snip.rv = vendor_key(path)`}_${2:`!p snip.rv = module_key(path)`}>
+	<class>${3:`!p snip.rv = module_name(path)`}_Helper</class>
+</$1_$2>
 endsnippet
 
 snippet mmodels "Magento Models"
@@ -71,16 +109,16 @@ snippet mmodels "Magento Models"
 endsnippet
 
 snippet mmodel "Magento Model"
-<${1:`!p snip.rv = module_key(path)`}>
-	<class>${2:`!p snip.rv = module_name(path)`}_Model</class>
-	<resourceModel>$1_resource</resourceModel>
-</$1>
+<${1:`!p snip.rv = vendor_key(path)`}_${2:`!p snip.rv = module_key(path)`}>
+	<class>${3:`!p snip.rv = module_name(path)`}_Model</class>
+	<resourceModel>$1_$2_resource</resourceModel>
+</$1_$2>
 endsnippet
 
 snippet mmodelresource "Magento Model Resource"
-<${1:`!p snip.rv = module_key(path)`}_resource>
-	<class>${2:`!p snip.rv = module_name(path)`}_Model_Resource</class>
-</$1>
+<${1:`!p snip.rv = vendor_key(path)`}_${2:`!p snip.rv = module_key(path)`}_resource>
+	<class>${3:`!p snip.rv = module_name(path)`}_Model_Resource</class>
+</$1_$2>
 endsnippet
 
 snippet mentities "Magento Model Resource"
@@ -91,7 +129,7 @@ endsnippet
 
 snippet mentity "Magento Model Resource"
 <${1:entity}>
-	<table>${2:${3:`!p snip.rv = module_key(path)`}_${4:$1}}</table>
+	<table>${2:${3:`!p snip.rv = vendor_module_key(path)`}_${4:$1}}</table>
 </$1>
 endsnippet
 
@@ -104,11 +142,78 @@ endsnippet
 snippet mevent "Magento Events"
 <${1:core_block_abstract_to_html_before}>
 	<observers>
-		<${2:${3:`!p snip.rv = module_key(path)`}_${4:$1}}>
-			<class>${5:${6:`!p snip.rv = module_key(path)`}/${7:observer}}</class>
-			<method>${8:yourMethod}</method>
-			<type>${9:singleton}</type>
+		<${2:${3:`!p snip.rv = vendor_key(path)`}_${4:`!p snip.rv = module_key(path)`}_${5:$1}}>
+			<class>${6:${7:`!p snip.rv = module_key(path)`}/${8:observer}}</class>
+			<method>${9:yourMethod}</method>
+			<type>${10:singleton}</type>
 		</$2>
 	</observers>
 </$1>
+endsnippet
+
+snippet mtabs "Magento System Tabs"
+<tabs>
+	mtab$1
+</tabs>
+endsnippet
+
+snippet mtab "Magento System Tab"
+<${1:`!p snip.rv = vendor_key(path)`}_${2:`!p snip.rv = module_key(path)`}>
+	<label>${3:Tab Name}</label>
+	<sort_order>${4:100}</sort_order>
+	<show_in_default>${5:1}</show_in_default>
+	<show_in_website>${6:1}</show_in_website>
+	<show_in_store>${7:1}</show_in_store>
+</$1_$2>
+endsnippet
+
+snippet msections "Magento Sections"
+<sections>
+	msection$1
+</sections>
+endsnippet
+
+snippet msection "Magento Section"
+<${1:`!p snip.rv = vendor_key(path)`}_${2:`!p snip.rv = module_key(path)`}>
+	<label>${3:Section Name}</label>
+	<tab>${4:General}</tab>
+	<sort_order>${5:100}</sort_order>
+	<show_in_default>${6:1}</show_in_default>
+	<show_in_website>${7:1}</show_in_website>
+	<show_in_store>${8:1}</show_in_store>
+	<groups>
+		mgroup$9
+	</groups>
+</$1_$2>
+endsnippet
+
+snippet mgroup "Magento Group"
+<${1:group_key}>
+	<label>${2:Group Label}</label>
+	<sort_order>${3:100}</sort_order>
+	<show_in_default>${4:1}</show_in_default>
+	<show_in_website>${5:1}</show_in_website>
+	<show_in_store>${6:1}</show_in_store>
+	<fields>
+		mfield$7
+	</fields>
+</$1>
+endsnippet
+
+snippet mfield "Magento Group"
+<${1:field_key}>
+	<label>${2:Group Label}</label>
+	<sort_order>${3:10}</sort_order>
+	<frontend_type>${4:text}</frontend_type>
+	<show_in_default>${5:1}</show_in_default>
+	<show_in_website>${6:1}</show_in_website>
+	<show_in_store>${7:1}</show_in_store>
+</$1>
+endsnippet
+
+snippet msystem "Magento System"
+<?xml version="1.0"?>
+<config>
+	msections$3
+</config>
 endsnippet
