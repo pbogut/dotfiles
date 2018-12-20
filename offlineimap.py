@@ -11,11 +11,8 @@ Reads config from local storage
 Used mostly for sensitive data like passwords or email address
 """
 def get_config(key):
-    value = subprocess.Popen("~/.scripts/get-config.sh %s" % key,
+    value = subprocess.Popen("~/.scripts/gpg-config get %s" % key,
                      shell=True, stdout=subprocess.PIPE).stdout.read()
     value = value.strip("\n")
 
     return value
-
-
-
