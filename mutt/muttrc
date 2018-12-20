@@ -1,7 +1,7 @@
 # IMAP: offlineimap
 set folder = "`echo $HOME`/Maildir"
 set mailcap_path=~/.mutt/mailcap
-set sendmail = "msmtp.sh `get-config.sh email-default-account`"
+set sendmail = "msmtp.sh"
 set postponed = ~/.mutt/postponed
 mailboxes = `echo $MAIL` `ls -1d --color=never ~/Maildir/*/* | grep 'INBOX\|sent\|drafts\|archive\|trash' | sed 's#.*Maildir/#+#' | while read line; do echo -n " $line"; done`
 
