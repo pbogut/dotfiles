@@ -19,6 +19,6 @@ query=$(cat "$email_content"      |
 if [[ "$2" == "-" ]]; then
   echo "http://localhost:6245?q=$query"
 else
-  (qutebrowser_webengine --target window "http://localhost:6245?q=$query" &) > /dev/null 2>&1         # open in browser
+  (browser --target window "http://localhost:6245?q=$query" &) > /dev/null 2>&1         # open in browser
 fi
 
