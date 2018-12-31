@@ -276,10 +276,16 @@ if exists(':Plug')
   " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
   " source ~/.vim/plugin/config/deoplete.vimrc
   " Plug 'Shougo/neco-vim', { 'for': 'vim' }
+  Plug 'prabirshrestha/async.vim'
+  Plug 'prabirshrestha/vim-lsp'
+  autocmd User after_plug_end source ~/.vim/plugin/config/lsp.vim
 
   Plug 'roxma/nvim-yarp'
+  Plug 'felixfbecker/php-language-server', {'do': 'composer install && composer run-script parse-stubs'}
+
   Plug 'ncm2/ncm2'
   autocmd User after_plug_end autocmd BufEnter * call ncm2#enable_for_buffer()
+  Plug 'ncm2/ncm2-vim-lsp'
   Plug 'ncm2/ncm2-bufword'
   Plug 'ncm2/ncm2-path'
   Plug 'ncm2/ncm2-tagprefix'
