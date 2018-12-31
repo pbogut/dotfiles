@@ -31,7 +31,7 @@ c.content.headers.user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.
 c.content.plugins = True
 c.content.host_blocking.whitelist = [
     "piwik.org", "analytics.google.com", "apis.google.com", "thepiratebay.org",
-    "googleadservices.com"]
+    "googleadservices.com", "cache.addthiscdn.com"]
 c.content.pdfjs = False
 c.hints.border = "1px solid #E3BE23"
 c.hints.chars = "arstdhneifuwy"
