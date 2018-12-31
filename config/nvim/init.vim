@@ -286,7 +286,7 @@ if exists(':Plug')
   Plug 'ncm2/ncm2-jedi', {'for': 'python'}
   Plug 'ncm2/ncm2-cssomni', {'for': ['css', 'scss', 'less']}
   Plug 'ncm2/ncm2-tern', {'do': 'npm install'}
-  Plug 'ncm2/ncm2-go', {'for': 'golang'}
+  Plug 'ncm2/ncm2-go', {'for': 'go'}
   Plug 'ncm2/ncm2-vim' | Plug 'Shougo/neco-vim'
   Plug 'ncm2/ncm2-ultisnips'
   Plug 'ncm2/ncm2-html-subscope'
