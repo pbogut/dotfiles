@@ -285,6 +285,7 @@ if exists(':Plug')
 
   Plug 'ncm2/ncm2'
   autocmd User after_plug_end autocmd BufEnter * call ncm2#enable_for_buffer()
+  Plug 'ncm2/ncm2-ultisnips'
   Plug 'ncm2/ncm2-vim-lsp'
   Plug 'ncm2/ncm2-bufword'
   Plug 'ncm2/ncm2-path'
@@ -297,6 +298,7 @@ if exists(':Plug')
   Plug 'ncm2/ncm2-ultisnips'
   Plug 'ncm2/ncm2-html-subscope'
   Plug 'ncm2/ncm2-markdown-subscope'
+  Plug 'pbogut/ncm2-alchemist'
   Plug 'phpactor/phpactor' ,  {'do': 'composer install'}
   Plug 'phpactor/ncm2-phpactor'
 
