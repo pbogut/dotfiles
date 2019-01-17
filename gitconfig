@@ -34,7 +34,7 @@
     diffls = diff-tree --no-commit-id --name-only -r
     ls = "!. ~/.githelpers && git_ls"
     fst = "!. ~/.githelpers && git_fzf_st"
-    cc = "!. ~/.githelpers && git_chockout_or_create_branch"
+    cc = "!. ~/.githelpers && git_checkout_or_create_branch"
 
     #Create branch
     cb = checkout -b

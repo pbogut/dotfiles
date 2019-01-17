@@ -2,7 +2,12 @@
 
 require 'mail'
 
-mail = Mail.new($stdin.read)
+payload = $stdin.read
+begin
+  mail = Mail.new(payload)
+rescue
+  mail = Mail.new(payload.encode!('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: ''))
+end
 
 if mail.parts.map(&:filename).include?("html-markdown-alternative.html")
   new_mail = Mail.new

@@ -253,11 +253,16 @@ assign [title="^todoist$"] $wsdash
 assign [title="^jira$"] $wsdash
 
 for_window [title="NVIM_FOR_QB"] floating enable
+for_window [title="FLOATING_WINDOW"] floating enable
 for_window [class="Toggl Desktop"] floating enable
 for_window [class="Skype"] floating enable
 for_window [class="explorer.exe"] floating enable
 for_window [class="krusader"] floating disable
 for_window [class="^feh$"] fullscreen enable
+
+#for_window [title="^fzf-dmenu$"] floating enable
+#for_window [title="^fzf-dmenu$"] move absolute position 0px -16px
+#for_window [title="^fzf-dmenu$"] resize set width 1920px
 
 # fake-outputs 3288x1080+0+0
 $exec "setxkbmap pl"
@@ -308,7 +313,7 @@ bindsym $mod+Shift+M move workspace to output left
 # swap workspaces between two monitors
 # bindsym $mod+Shift+M $exec "~/.scripts/i3-swap-workspaces.py"
 # anamnesis clip board
-bindsym $mod+apostrophe $exec "~/.scripts/i3-dmenu-anamnesis.sh"
+bindsym $mod+apostrophe $exec "~/.scripts/i3-dmenu-copyq.sh"
 # browser shortcut
 bindsym $mod+slash $exec "~/.scripts/quickbrowser.sh"
 # screen shots

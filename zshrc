@@ -142,7 +142,7 @@ alias q="exit"
 alias :q="exit"
 alias m="ncmpcpp"
 alias i="ssh-weechat"
-alias e="killall neomutt > /dev/null 2>&1; neomutt"
+alias e="killall neomutt > /dev/null 2>&1; cd ~/temp/mutt && neomutt && cd -"
 
 # autocomplete in irb
 alias irb="irb -r 'irb/completion'"

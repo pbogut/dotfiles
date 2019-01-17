@@ -49,6 +49,7 @@ c.url.searchengines = {
     "al": "https://allegro.pl/listing?string={}",
     "yt": "https://www.youtube.com/results?search_query={}",
     "th": "https://www.thingiverse.com/search?q={}",
+    "at": "https://alternativeto.net/browse/search?q={}",
 }
 # c.colors.completion.even.bg = "#333333"
 c.colors.completion.odd.bg = "#1f1f1f"
@@ -87,6 +88,7 @@ config.unbind('D', mode='normal')
 config.unbind('T', mode='normal')
 config.unbind('<back>', mode='normal')
 config.bind('<ctrl-escape>', 'enter-mode passthrough', mode='normal')
+config.bind('<ctrl-escape>', 'enter-mode normal', mode='passthrough')
 config.bind('gp', 'open -p')
 config.bind('gO', 'set-cmd-text :open -t {url:pretty}')
 config.bind('xO', 'set-cmd-text :open -b {url:pretty}')
@@ -143,6 +145,9 @@ config.bind('ys', 'spawn --userscript ~/.scripts/qb-copy-text.sh -b')
 config.bind('yH', 'spawn --userscript ~/.scripts/qb-copy-html.sh -p')
 config.bind('yS', 'spawn --userscript ~/.scripts/qb-copy-text.sh -p')
 config.bind('eu', 'edit-url')
+
+config.bind('sje', 'set content.javascript.enabled true')
+config.bind('sjd', 'set content.javascript.enabled false')
 
 config.bind(',jpp', ("jseval (function(){var s = document.createElement('script"
                      "');s.type='text/javascript';s.src='https://dsheiko.github"

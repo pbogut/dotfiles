@@ -3,7 +3,7 @@ function! templates#elixir#appmod() abort
 
   if filereadable(l:mix_file)
     let line = get(readfile(l:mix_file), 0)
-    return substitute(line, 'defmodule \(.*\)\.Mixfile.*', '\1', '')
+    return substitute(line, 'defmodule \(.*\)\.Mix.*', '\1', '')
   endif
 
   return "App"

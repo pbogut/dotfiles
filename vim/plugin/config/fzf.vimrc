@@ -24,8 +24,8 @@ let $FZF_DEFAULT_OPTS=
 
 " preview
 function! s:cat_cmd() abort
-  if executable('ccat')
-    return ' ccat --color=always '
+  if executable('bat')
+    return ' bat -p --color=always '
   else
     return ' cat '
   endif
@@ -38,7 +38,7 @@ let g:fzf_preview =
       \ . '('
       \ .   '('
       \ .     '('
-      \ .        'git diff {-1} > /dev/null 2>&1 && git diff --color=always -- {-1} || cat {-1}'
+      \ .        'git diff {-1} > /dev/null 2>&1 && git diff --color=always -- {-1} || echo ""'
       \ .     ') | sed 1,4d; ' . s:cat_cmd() . ' {-1}'
       \ .   ') | head -n 250'
       \ . ') '

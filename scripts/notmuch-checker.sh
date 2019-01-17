@@ -4,8 +4,10 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   18/12/2018
 #=================================================
-unread="$(notmuch count -- tag:unread)"
-inbox="$(notmuch count -- tag:inbox)"
+# unread="$(notmuch count -- tag:unread)"
+# inbox="$(notmuch count -- tag:inbox)"
+unread="$(notmuch search tag:unread | wc -l)"
+inbox="$(notmuch search tag:inbox | wc -l)"
 last_count_file="$TMPDIR/__notmuch_last_email_count"
 last_message_file="$TMPDIR/__notmuch_last_email_message"
 touch $last_count_file

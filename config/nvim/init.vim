@@ -301,7 +301,6 @@ if exists(':Plug')
   Plug 'pbogut/ncm2-alchemist'
   Plug 'phpactor/phpactor' ,  {'do': 'composer install'}
   Plug 'phpactor/ncm2-phpactor'
-
   Plug 'rrethy/vim-illuminate'
   Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
   Plug 'junegunn/fzf.vim'
@@ -471,6 +470,7 @@ nmap <M-o> O
 
 " emmet quick shortcut
 imap <M-Tab> <c-y>,
+imap <M-CR> <cr><esc>O
 imap <M-n> <c-y>n
 imap <M-N> <c-y>N
 
@@ -731,5 +731,7 @@ function! Phtml_scope()
     return 'html'
   endif
 endfunction
+
+" inoremap <silent> <expr> <CR> ncm2_ultisnips#expand_or("\<CR>", 'n')
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
