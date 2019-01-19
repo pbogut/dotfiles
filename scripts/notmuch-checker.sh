@@ -26,8 +26,7 @@ if [[ "$timestamp" > "$last_timestamp" ]]; then
         head -n1 |
         sed 's,thread:[a-z0-9]*\s*\(.*\) \[[^]]*\] \([^;]*\); \(.*\) (.*)$,Date:\t \1\nFrom:\t \2\nSubject: \3,')
 
-    notify-send -i /usr/share/icons/gnome/48x48/emblems/emblem-mail.png \
-        "$(echo -e "You have new message ($unread/$inbox)\n\n$message")"
+    notify-send -i mail-unread "$(echo -e "You have new message ($unread/$inbox)\n\n$message")"
 
     echo $timestamp > $last_timestamp_file
 fi
