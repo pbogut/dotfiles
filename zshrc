@@ -36,6 +36,8 @@ if [ -d $HOME/.zshrc.d ]; then
     autoload -Uz $(basename $file)
   done
 fi
+# cdr already exists in zsh apparently, so override right away
+source $HOME/.zshrc.d/functions/cdr
 
 #vim mode
 setopt transientrprompt
@@ -126,6 +128,13 @@ alias c="clone"
 ncmpcpp() {
   LC_ALL=en_US.utf8 screen -U -D -RR ncmpcpp ncmpcpp -p ${MOPIDY_PORT:-6600}
 }
+mutt() {
+  dest="$HOME"
+  if [[ -n $1 ]]; then
+    dest="$1"
+  fi
+  cd $dest && neomutt && cd - && pkill -SIGRTMIN+13 i3blocks
+}
 cht() {
   curl "cht.sh/$1" 2>/dev/null | less
 }
@@ -142,7 +151,7 @@ alias q="exit"
 alias :q="exit"
 alias m="ncmpcpp"
 alias i="ssh-weechat"
-alias e="killall neomutt > /dev/null 2>&1; cd ~/temp/mutt && neomutt && cd -"
+alias e="mutt"
 
 # autocomplete in irb
 alias irb="irb -r 'irb/completion'"

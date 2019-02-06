@@ -36,7 +36,6 @@ install_pacaur
 echo "Installing neovim..."
 pacaur -S \
     abook \
-    anamnesis \
     cava \
     compton \
     dmenu \
@@ -49,7 +48,7 @@ pacaur -S \
     mopidy mpc \
     ncmpcpp \
     neomutt \
-    neovim-git \
+    neovim \
     neovim-qt \
     network-manager-applet \
     nm-applet \
@@ -66,27 +65,26 @@ pacaur -S \
     rofi \
     shfmt \
     texlive-most \
-    twmn-git \
     udevil \
     udisksvm \
     xcape \
     xrandr \
     xtitle \
+    dunst \
     --noconfirm -needed
 
 pip install \
     i3-py \
     i3ipc \
     flake8 \
-    khal \
-    neovim \
+    pynvim \
     neovim-remote \
     vim-vint \
     visidata \
     --upgrade
 
 pip2 install \
-    neovim \
+    pynvim \
     --upgrade
 
 gem install redcarpet
@@ -94,6 +92,7 @@ gem pristine --all
 
 go get github.com/nsf/gocode
 go get github.com/pbogut/mails-go-web
+go get github.com/pbogut/exail
 
 [[ $(command -v yarn) ]] || npm install -g yarn
 yarn global add \
@@ -103,12 +102,12 @@ yarn global add \
     jshint \
     -y
 
-git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.3.0
-source ~/.asdf/asdf.sh
-source ~/.asdf/completions/asdf.bash
-asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
-asdf plugin-add php https://github.com/odarriba/asdf-php.git
-asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+# git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.3.0
+# source ~/.asdf/asdf.sh
+# source ~/.asdf/completions/asdf.bash
+# asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
+# asdf plugin-add php https://github.com/odarriba/asdf-php.git
+# asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
 
 # Imports Node.js release team's OpenPGP keys to main keyring
-bash ~/.asdf/plugins/nodejs/bin/import-release-team-keyring
+# bash ~/.asdf/plugins/nodejs/bin/import-release-team-keyring

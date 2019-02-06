@@ -133,7 +133,7 @@ endfunction
 
 function! s:fzf_project_sink(line)
   if !empty(a:line)
-    let path = $HOME . "/projects/" . a:line
+    let path = $HOME . "/Projects/" . a:line
     silent! exec('Prosession ' . l:path)
     exec('cd ' . l:path)
     echo 'Prosession ' . getcwd()

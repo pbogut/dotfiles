@@ -44,6 +44,7 @@ read -d '' files <<"EOF"
     config/i3/i3status.conf
     config/i3/workspaces
     config/ncmpcpp/config
+    config/ncmpcpp/bindings
     config/nvim/init.vim
     config/nvim/ginit.vim
     config/pip/pip.conf
@@ -62,7 +63,6 @@ read -d '' files <<"EOF"
     mutt/mailcap
     mutt/muttrc
     mutt/solarized-dark-16.muttrc
-    ncmpcpp/bindings
     scspell/dictionary.txt
     vim/autoload/plug.vim
     vim/ftplugin
@@ -114,7 +114,7 @@ for file in $files; do
   echo -en "\t~/.$file "
   # crate directory if not exists
   mkdir -p $(dirname $HOME/.$file)
-  ln -s $dir/$file $HOME/.$file
+  ln -sf $dir/$file $HOME/.$file
   echo "done"
 done
 
@@ -144,10 +144,10 @@ echo -en "\t"$(
   fi
 ) && echo " ... done"
 
-echo -en "\tInstall vim/neovim plugins ... "
-[[ -n $(command -v /bin/vim) ]] && /bin/vim -u ./vim/silent.vimrc +PlugInstall +qa
-[[ -n $(command -v /bin/nvim) ]] && /bin/nvim -u ./vim/silent.vimrc +PlugInstall +qa
-echo "done"
+# echo -en "\tInstall vim/neovim plugins ... "
+# [[ -n $(command -v /bin/vim) ]] && /bin/vim -u ./vim/silent.vimrc +PlugInstall +qa
+# [[ -n $(command -v /bin/nvim) ]] && /bin/nvim -u ./vim/silent.vimrc +PlugInstall +qa
+# echo "done"
 
 echo -e "\nChange your shell if you wish:\n"
 which fish >/dev/null && echo -e "\tchsh $(id -un) -s $(which fish)"

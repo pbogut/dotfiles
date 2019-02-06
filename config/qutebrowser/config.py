@@ -7,7 +7,7 @@ config = config  # noqa: F821 pylint: disable=E0602,C0103
 # load widevine
 c.qt.args = [('ppapi-widevine-path='
               '/usr/lib/qt/plugins/ppapi/libwidevinecdmadapter.so')]
-
+# /usr/share/qutebrowser/scripts/dictcli.py install pl-PL en-GB
 c.spellcheck.languages = ['pl-PL', 'en-GB']
 c.url.start_pages = ["https://duckduckgo.com/"]
 c.url.default_page = 'https://duckduckgo.com/'
@@ -145,6 +145,8 @@ config.bind('ys', 'spawn --userscript ~/.scripts/qb-copy-text.sh -b')
 config.bind('yH', 'spawn --userscript ~/.scripts/qb-copy-html.sh -p')
 config.bind('yS', 'spawn --userscript ~/.scripts/qb-copy-text.sh -p')
 config.bind('eu', 'edit-url')
+
+config.bind('gs', 'spawn --userscript ~/.scripts/qb-switch-search.sh')
 
 config.bind('sje', 'set content.javascript.enabled true')
 config.bind('sjd', 'set content.javascript.enabled false')

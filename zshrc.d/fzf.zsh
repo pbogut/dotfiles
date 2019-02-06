@@ -69,6 +69,6 @@ fclip() {
 cdp() {
     project=$(ls-project | fzf -q "$1")
     if [[ ! $project == "" ]]; then
-        cd "$HOME/projects/$project"
+        cd "$HOME/Projects/$project"
     fi
 }

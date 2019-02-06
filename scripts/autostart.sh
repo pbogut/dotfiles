@@ -9,7 +9,8 @@ function demonize() {
   pid="/tmp/__$(id -un)__$1.pid"
   # if no pid file or no process
   if [ ! -f "$pid" ] || ! kill -0 $(cat $pid) 2>/dev/null; then
-    $2 >/dev/null 2>&1 &
+    # $2 >/dev/null 2>&1 &
+    $2 &
     echo $! >$pid
   fi
 }

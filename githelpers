@@ -77,11 +77,10 @@ git_clone_to_projects() {
   fi
 
   if [[ "$2" == "" ]]; then
-    dest="$HOME/projects/$(echo "$repo" | sed 's#[^@]*@##' | sed 's#^\(https\|http\)://##g' | sed 's#:#/#g' | sed 's#\.git$##g')"
+    dest="$HOME/Projects/$(echo "$repo" | sed 's#[^@]*@##' | sed 's#^\(https\|http\)://##g' | sed 's#:#/#g' | sed 's#\.git$##g' | awk '{print tolower($0)}')"
   else
     dest="$2"
   fi
-  dest="$(echo $dest | awk '{print tolower($0)}')"
   if [[ -n $repo ]]; then
     git clone $repo $dest
   else
@@ -89,7 +88,7 @@ git_clone_to_projects() {
     echo
     echo "usage: git cl <repo> [<dir>]"
     echo
-    echo "If no dir provided then ~/projects/<git-host>/<repo-owner>/<repo-name> is used."
+    echo "If no dir provided then ~/Projects/<git-host>/<repo-owner>/<repo-name> is used."
     echo
   fi
 }

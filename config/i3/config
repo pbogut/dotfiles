@@ -202,7 +202,7 @@ mode "$mode_resize" {
 bindsym $mod+r mode "$mode_resize"
 
 # screen lock with delay after, so suspend / hibernate with locked screen
-set $Locker ~/.scripts/i3-lock.sh -i ~/Pictures/lockscreen.png && sleep 1
+set $Locker ~/.scripts/i3-lock.sh -i ~/Pictures/locktile.png -t && sleep 1
 set $mode_system System (l) lock, (w) switch, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (p) suspend w/o lock, (Shift+s) shutdown, (Esc) cancel
 mode "$mode_system" {
 
@@ -255,7 +255,7 @@ assign [title="^jira$"] $wsdash
 for_window [title="NVIM_FOR_QB"] floating enable
 for_window [title="FLOATING_WINDOW"] floating enable
 for_window [class="Toggl Desktop"] floating enable
-for_window [class="Skype"] floating enable
+# for_window [class="Skype"] floating enable
 for_window [class="explorer.exe"] floating enable
 for_window [class="krusader"] floating disable
 for_window [class="^feh$"] fullscreen enable

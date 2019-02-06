@@ -32,7 +32,7 @@ function! s:cat_cmd() abort
 endfunction
 
 let g:fzf_preview =
-      \   "--preview '"
+      \   "-1 --preview '"
       \ . 'sh -c "[ -f {-1} ] '
       \ . '&& '
       \ . '('

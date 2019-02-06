@@ -8,12 +8,12 @@ mailboxes = `echo $MAIL` `ls -1d --color=never ~/Maildir/*/* | grep 'INBOX\|sent
 set query_command="khard email --parsable '%s'"
 macro index,pager \cv "<pipe-message>urlview<return>" "url view"
 macro index,pager \ci "<pipe-message>~/.scripts/mail-to-web.sh<return>" "html view in browser"
-macro index,pager \ca "<pipe-message>khard add-email" "add the sender address to abook"
+macro index,pager \ca "<pipe-message>khard add-email<return>" "add the sender address to khard"
 
 macro index,pager \ctp "<pipe-message>email-to-vtodo -f - -p `gpg-config get calendar-personal-path` -c email\n" # add todo entry to personal calendar
 macro index,pager \ctw "<pipe-message>email-to-vtodo -f - -p `gpg-config get calendar-work-path` -c email\n"     # add todo entry to work calendar
 
-macro generic,index,pager a "<shell-escape>abook<return>" "launch abook"
+#macro generic,index,pager a "<shell-escape>abook<return>" "launch abook"
 bind editor <Tab> complete-query
 bind editor \cT complete
 bind index,pager r group-reply
@@ -167,8 +167,8 @@ macro index gt "<change-vfolder> Todo<enter>" "Go to Drafts"
 macro index gp "<change-vfolder> Projects<enter>" "Go to Projects"
 
 auto_view text/html                                      # view html automatically
-# auto_view text/calendar                                  # view ics automatically
-alternative_order text/plain text/enriched text/html     # save html for last
+auto_view text/calendar                                  # view ics automatically
+alternative_order text/calendar text/plain text/enriched text/html     # save html for last
 set implicit_autoview
 
 # theme

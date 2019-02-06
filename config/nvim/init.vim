@@ -138,6 +138,8 @@ augroup configgroup
         \  setlocal spell spelllang=en_gb
   autocmd FileType openscad
         \  command! OpenScad silent! !openscad % > /dev/null 2>&1 &
+        \| command! -nargs=1 -complete=file ExportStl !openscad % -o <args>
+
   autocmd FileType qf
         \  nnoremap <buffer> o <cr>
         \| nnoremap <buffer> q :q
@@ -182,9 +184,6 @@ if exists(':Plug')
   Plug 'pbogut/dbext.vim'
   let g:dbext_map_prefix = '\s'
   Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
-  Plug 'xolox/vim-misc'
-  Plug 'xolox/vim-notes'
-  let g:notes_directories = [ $HOME . "/Notes/" ]
   Plug 'tpope/vim-scriptease'
   Plug 'tpope/vim-rsi'
   Plug 'tpope/vim-dadbod'
