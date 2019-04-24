@@ -60,6 +60,7 @@ read -d '' files <<"EOF"
     i3blocks.conf
     local/share/applications/ranger.desktop
     local/share/applications/browser.desktop
+    local/share/applications/email.desktop
     mutt/mailcap
     mutt/muttrc
     mutt/solarized-dark-16.muttrc
@@ -134,6 +135,10 @@ echo "done"
 
 echo -en "\tSet browser script as default browser (xdg-settings) ... "
 [[ -n $(command -v xdg-mime) ]] && xdg-settings set default-web-browser browser.desktop
+echo "done"
+
+echo -en "\tSet email script as default emial (xdg-settings) ... "
+[[ -n $(command -v xdg-mime) ]] && xdg-settings set default-url-scheme-handler mailto email.desktop                            
 echo "done"
 
 echo -en "\t"$(

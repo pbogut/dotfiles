@@ -99,7 +99,9 @@
     la = !git l --all
     pull-stash-rebase = !git stash && git pullrb && git stash apply
 [merge]
-    tool = nvimdiff_nomod2
+    ; tool = nvimdiff_nomod2
+    tool = vim_mergetool
+    conflictStyle = diff3
 [mergetool "nvimdiff"]
     cmd = nvim -d $LOCAL $BASE $REMOTE $MERGED -c '$wincmd w' -c 'wincmd J'
 [mergetool "nvimdiff2"]
@@ -110,3 +112,6 @@
     cmd = nvim -d $LOCAL $BASE $REMOTE $MERGED -c 'set nomodifiable' -c 'wincmd l' -c 'set nomodifiable' -c 'wincmd l' -c 'set nomodifiable' -c 'wincmd l' -c 'wincmd J'
 [mergetool "nvimdiff_nomod2"]
     cmd = nvim -d $LOCAL $MERGED $REMOTE -c 'set nomodifiable' -c 'wincmd l' -c 'wincmd l' -c 'set nomodifiable'
+[mergetool "vim_mergetool"]
+    cmd = nvim -f -c "MergetoolStart" "$MERGED" "$BASE" "$LOCAL" "$REMOTE"
+    trustExitCode = true

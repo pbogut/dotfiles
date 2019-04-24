@@ -8,6 +8,10 @@ let g:switch_custom_definitions =
       \     '\(!==\)': '!=',
       \     '\(!=\)':  '!==',
       \   },
+      \   {
+      \     'show': 'hide',
+      \     'hide':  'show',
+      \   },
       \ ]
 let s:switch_c_like_if =
       \ {

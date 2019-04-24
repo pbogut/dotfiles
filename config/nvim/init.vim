@@ -78,12 +78,15 @@ augroup configgroup_nvim
   autocmd!
   " fix terminal display
   autocmd TermOpen *
-        \  :silent! normal! <c-\><c-n>a
+        \  :exec('silent! normal! <c-\><c-n>a')
+        \| :startinsert
   " \| setlocal nocursorline
   " \| setlocal nocursorcolumn
 augroup END
 augroup configgroup
   autocmd!
+  autocmd BufNewFile,BufRead *
+        \  inoremap <silent> <buffer> <expr> <cr> ncm2_ultisnips#expand_or("\<CR>", 'n')
   autocmd BufRead,BufNewFile *.phtml
         \  setfiletype php.phtml
   autocmd FileType *
@@ -136,14 +139,11 @@ augroup configgroup
         \  let b:commentary_format='# %s'
   autocmd FileType markdown
         \  setlocal spell spelllang=en_gb
-  autocmd FileType openscad
-        \  command! OpenScad silent! !openscad % > /dev/null 2>&1 &
-        \| command! -nargs=1 -complete=file ExportStl !openscad % -o <args>
-
   autocmd FileType qf
         \  nnoremap <buffer> o <cr>
         \| nnoremap <buffer> q :q
-  autocmd FileType gitcommit
+  " autocmd FileType gitcommit
+  autocmd FileType fugitiveeee
         \  execute("wincmd J")
         \| if(winnr() != 1) | execute("resize 20") | endif
   " start mutt file edit on first empty line
@@ -267,6 +267,10 @@ if exists(':Plug')
         \  highlight ALEErrorSign guibg=#073642 guifg=#dc322f
         \| highlight ALEWarningSign guibg=#073642 guifg=#d33682
   Plug 'chmp/mdnav'
+  Plug 'samoshkin/vim-mergetool'
+  source ~/.vim/plugin/config/vim-mergetool.vim
+
+
   Plug 'vim-scripts/ReplaceWithRegister'
   source ~/.vim/plugin/config/replacewithregister.vim
   Plug 'beloglazov/vim-textobj-quotes'
@@ -512,8 +516,33 @@ endfunction
 " quick set
 nnoremap <space>s  :set
 nnoremap <space>sf :FZFFileType<cr>
-nnoremap <space>ss :set spell!<cr>
 nnoremap <space>sp :set paste!<cr>
+
+nnoremap <space>ss :call SpellToggle()<cr>
+function! SpellToggle()
+  let l:get_next = v:false
+  for [l:spell, l:lang] in [[1, 'en_gb'], [1, 'pl'], [0, 'en_gb']]
+    if l:get_next
+      if l:spell == 0
+        set nospell
+        echom "Disable spell checking"
+      else
+        set spell
+        echom "Set spell to " . l:lang
+      endif
+      exec('set spelllang=' . l:lang)
+      return
+    endif
+    if &spell == l:spell && &spelllang == l:lang
+      let l:get_next = v:true
+      continue
+    endif
+  endfor
+  " default if something is set up different
+  echom "Set spell to en_gb"
+  set spelllang=en_gb
+  set spell
+endfunction
 
 nnoremap <space>S :call SpellCheckToggle()<cr>
 function! SpellCheckToggle()

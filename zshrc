@@ -125,9 +125,6 @@ alias so="source"
 alias clone="~/.scripts/term-in-current-dir.sh"
 alias c="clone"
 
-ncmpcpp() {
-  LC_ALL=en_US.utf8 screen -U -D -RR ncmpcpp ncmpcpp -p ${MOPIDY_PORT:-6600}
-}
 mutt() {
   dest="$HOME"
   if [[ -n $1 ]]; then

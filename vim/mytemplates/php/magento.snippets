@@ -5,13 +5,27 @@ def snake(name):
 	s1 = re.sub('(\w)([A-Z][a-z]+)', r'\1_\2', name)
 	return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
+def part_name(text, part_no=-1):
+	parts = text.split('/')
+	return parts[part_no]
+
+def first_lower(string):
+	return string[:1].lower() + string[1:] if string else ''
+
 def module_name(text):
 	parts = text.split('/')
 	return parts[-4] + '_' + parts[-3]
 
-def module_key(text):
+def module_key(text, depth=0):
 	parts = text.split('/')
-	return parts[-4].lower() + '_' + parts[-3].lower()
+
+	company = parts[-(4+depth)]
+	abbrev = re.sub(r'[^A-Z]', '', company).lower()
+
+	if len(abbrev) > 1:
+		company = abbrev
+
+	return company + '_' + parts[-(3+depth)].lower()
 endglobal
 
 snippet _t_magento_class "Magento class" b
@@ -33,6 +47,90 @@ class $1
 }
 endsnippet
 
+snippet _t_magento_helper "Magento helper" b
+<?php
+
+/**
+ * Class ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '_')  + '_' + snip.basename
+`}
+ *
+ * @author ${2:`!v g:snips_author`}
+ */
+class $1 extends Mage_Core_Model_Abstract
+{
+	$0
+}
+endsnippet
+
+snippet _t_magento_model "Magento Model" b
+<?php
+
+/**
+ * Class ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '_')  + '_' + snip.basename
+`}
+ *
+ * @author ${2:`!v g:snips_author`}
+ */
+class $1 extends Mage_Core_Model_Abstract
+{
+	protected function _construct()
+	{
+		$this->_init('${3:`!p snip.rv = module_key(path)`}/${4:`!p snip.rv = first_lower(snip.basename) `}');
+	}$0
+}
+endsnippet
+
+snippet _t_magento_resource "Magento Model Resource" b
+<?php
+
+/**
+ * Class ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '_')  + '_' + snip.basename
+`}
+ *
+ * @author ${2:`!v g:snips_author`}
+ */
+class $1 extends Mage_Core_Model_Resource_Db_Abstract
+{
+	protected function _construct()
+	{
+		$this->_init('${3:`!p snip.rv = module_key(path, depth=1)`}/${4:`!p snip.rv = snake(snip.basename) `}', '${5:id}');
+	}$0
+}
+endsnippet
+
+snippet _t_magento_collection "Magento Model Collection" b
+<?php
+
+/**
+ * Class ${1:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	snip.rv = m.group().replace('/', '_')  + '_' + snip.basename
+`}
+ *
+ * @author ${2:`!v g:snips_author`}
+ */
+class $1 extends Mage_Core_Model_Resource_Db_Collection_Abstract
+{
+	protected function _construct()
+	{
+		$this->_init('${3:`!p snip.rv = module_key(path, depth=2)`}/${4:`!p snip.rv = first_lower(part_name(path, part_no=-2)) `}');
+	}$0
+}
+endsnippet
 
 snippet _t_magento_block "Magento block" b
 <?php

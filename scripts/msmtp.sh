@@ -10,6 +10,7 @@ from=$(cat $tmp_file |
     sed 's,From: \([^\s]*\),\1,')
 acc=$(echo $from | sed 's,.*@,,')
 
+    # mail-check-attachments.rb |
 cat $tmp_file |
     mutt-html-mime.rb |
     msmtp -a $acc --passwordeval="~/.scripts/get-config.sh email-$from-passwd" --user=`gpg-config get email-$from-user` --from=$from ${@:1}

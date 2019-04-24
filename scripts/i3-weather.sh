@@ -25,3 +25,4 @@ if($values[0] eq "Flurries" || $values[0] eq "Mostly Cloudy w/ Flurries" || $val
 if($values[0] eq "Clear" || $values[0] eq "Mostly Clear" || $values[0] eq "Partly Cloudy"|| $values[0] eq "Intermittent Clouds"|| $values[0] eq "Hazy Moonlight"|| $values[0] eq "Mostly Cloudy"|| $values[0] eq "Partly Cloudy w/ Showers"|| $values[0] eq "Mostly Cloudy w/ Showers"|| $values[0] eq "Partly Cloudy w/ T-Storms"|| $values[0] eq "Mostly Cloudy w/ Flurries" || $values[0] eq "Mostly Cloudy w/ Snow")
 {my $night = "";binmode(STDOUT, ":utf8");print "$night";}
 print"$values[1]"; }'
+echo '' # new line for new i3blocks compatibility

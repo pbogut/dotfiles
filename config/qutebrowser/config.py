@@ -146,6 +146,8 @@ config.bind('yH', 'spawn --userscript ~/.scripts/qb-copy-html.sh -p')
 config.bind('yS', 'spawn --userscript ~/.scripts/qb-copy-text.sh -p')
 config.bind('eu', 'edit-url')
 
+config.bind('ds', 'open -t https://dissenter.com/discussion/begin?url={url}')
+
 config.bind('gs', 'spawn --userscript ~/.scripts/qb-switch-search.sh')
 
 config.bind('sje', 'set content.javascript.enabled true')

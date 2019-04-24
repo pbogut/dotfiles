@@ -23,8 +23,9 @@ if !action
     "--remove",
     "--edit",
     "--add",
-    "--show"
+    "--show",
   ].join("\n"))
+  selection = "--exit" if selection == ""
   selection, _, _ = Open3.capture3('keepass.rb ' + selection)
   exit
 end
@@ -95,7 +96,7 @@ prompt = case action
   when "--show"
     "show"
   else
-    "acc"
+    exit
 end
 
 if !action
@@ -134,15 +135,26 @@ if action == '--copy-user-and-pass'
   _, _, _ = Open3.capture3('xsel -p -i', stdin_data: pass)
 end
 if action == '--type-user'
-  File.open(ENV['QUTE_FIFO'], 'w') do |file|
-    file.write("fake-key #{user}\n")
-    # file.write("fake-key -g <esc>i\n")
+  if ENV['QUTE_FIFO']
+    File.open(ENV['QUTE_FIFO'], 'w') do |file|
+      file.write("fake-key #{user}\n")
+      # file.write("fake-key -g <esc>i\n")
+    end
+  else
+    cmd = "sleep 0.5s; xdotool type --clearmodifiers '#{user}'"
+    Open3.capture3(cmd)
   end
+
 end
 if action == '--type-pass'
-  File.open(ENV['QUTE_FIFO'], 'w') do |file|
-    file.write("fake-key #{pass}\n")
-    # file.write("fake-key -g <esc>i\n")
+  if ENV['QUTE_FIFO']
+    File.open(ENV['QUTE_FIFO'], 'w') do |file|
+      file.write("fake-key #{pass}\n")
+      # file.write("fake-key -g <esc>i\n")
+    end
+  else
+    cmd = "sleep 0.5s; xdotool type --clearmodifiers '#{pass}'"
+    Open3.capture3(cmd)
   end
 end
 if action == '--type-user-and-pass' or action.empty?

@@ -85,6 +85,7 @@ macro index \e1 ":set from=`gpg-config get email-default-from`\n:set status_form
 my_hdr Bcc: `gpg-config get email-default-from`
 # alternates `gpg-config get email-alternates`
 source ~/.mutt/accounts
+set reverse_name
 
 # notmuch
 set nm_default_uri="notmuch://`echo $HOME`/Maildir" # path to the maildir
@@ -103,6 +104,7 @@ virtual-mailboxes \
     " `expr $(date +'%Y') - 1`" "notmuch://?query=tag:archive and date:`expr $(date +'%Y') - 1`"\
     " `expr $(date +'%Y') - 2`.." "notmuch://?query=tag:archive and date:..`expr $(date +'%Y') - 2`"\
     " sent"         "notmuch://?query=tag:sent and tag:archive"\
+    `cat ~/.mutt/vfolders.local 2>/dev/null` \
     "Other"         "notmuch://?query=not tag:archive and not tag:drafts and not tag:sent and not tag:todo and not tag:* and not tag:unread and not tag:inbox" # sets up queries for
 
     # project / github (disabled coz slow)

@@ -1,6 +1,8 @@
 let g:UltiSnipsExpandTrigger = "<tab>"
-let g:UltiSnipsJumpForwardTrigger = "<tab>"
-let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+" let g:UltiSnipsJumpForwardTrigger = "<tab>"
+" let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+let g:UltiSnipsJumpForwardTrigger	= "<c-j>"
+let g:UltiSnipsJumpBackwardTrigger	= "<c-k>"
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnippets", "mytemplates"]
 let g:snips_author = "Pawel Bogut"
 let g:snips_email = "<pbogut@pbogut.me"

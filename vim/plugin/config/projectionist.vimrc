@@ -49,6 +49,18 @@ let s:magento_module =
       \       "skeleton": "magento_block",
       \       "alternate": "app/design/frontend/base/default/template/{mag_rm_pool|snakecase}.phtml"
       \     },
+      \     "app/code/**/Helper/*.php": {
+      \       "skeleton": "magento_helper",
+      \     },
+      \     "app/code/**/Model/Resource/*/Collection.php": {
+      \       "skeleton": "magento_collection",
+      \     },
+      \     "app/code/**/Model/Resource/*.php": {
+      \       "skeleton": "magento_resource",
+      \     },
+      \     "app/code/**/Model/*.php": {
+      \       "skeleton": "magento_model",
+      \     },
       \     "app/design/frontend/base/default/template/*.phtml": {
       \       "alternate": [
       \         "app/code/core/{camelcase|capitalize|mag_add_block}.php",
