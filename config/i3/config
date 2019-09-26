@@ -184,16 +184,21 @@ mode "$mode_resize" {
         # Pressing right will grow the window’s width.
         # Pressing up will shrink the window’s height.
         # Pressing down will grow the window’s height.
-        bindsym h resize shrink width 10 px or 10 ppt
-        bindsym k resize grow height 10 px or 10 ppt
-        bindsym j resize shrink height 10 px or 10 ppt
-        bindsym l resize grow width 10 px or 10 ppt
 
-        # same bindings, but for the arrow keys
-        bindsym Left resize shrink width 10 px or 10 ppt
-        bindsym Down resize grow height 10 px or 10 ppt
-        bindsym Up resize shrink height 10 px or 10 ppt
-        bindsym Right resize grow width 10 px or 10 ppt
+        bindsym Mod1+h resize shrink width 1 px
+        bindsym Mod1+k resize grow height 1 px
+        bindsym Mod1+j resize shrink height 1 px
+        bindsym Mod1+l resize grow width 1 px
+
+        bindsym Shift+h resize shrink width 50 px
+        bindsym Shift+k resize grow height 50 px
+        bindsym Shift+j resize shrink height 50 px
+        bindsym Shift+l resize grow width 50 px
+
+        bindsym h resize shrink width 100 px
+        bindsym k resize grow height 100 px
+        bindsym j resize shrink height 100 px
+        bindsym l resize grow width 100 px
 
         # back to normal: Enter or Escape
         bindsym Return mode "default"
@@ -202,7 +207,8 @@ mode "$mode_resize" {
 bindsym $mod+r mode "$mode_resize"
 
 # screen lock with delay after, so suspend / hibernate with locked screen
-set $Locker ~/.scripts/i3-lock.sh -i ~/Pictures/locktile.png -t && sleep 1
+# set $Locker ~/.scripts/i3-lock.sh -i ~/Pictures/locktile.png -t && sleep 1
+set $Locker gllock
 set $mode_system System (l) lock, (w) switch, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (p) suspend w/o lock, (Shift+s) shutdown, (Esc) cancel
 mode "$mode_system" {
 
@@ -298,14 +304,18 @@ bindsym $mod+Ctrl+i $sh '~/.scripts/vim-anywhere.sh --selection'
 bindsym $mod+i $sh '~/.scripts/vim-anywhere.sh'
 bindsym $mod+u $sh '~/.scripts/users.sh --switch'
 
-bindsym $mod+Ctrl+t $exec "~/.scripts/switch-or-launch.sh '\<[Tt]odoist$' 'todoist'"
 bindsym $mod+Ctrl+b $exec "~/.scripts/switch-or-launch.sh '\<qutebrowser$' 'browser'"
 bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '\<Franz$' 'franz'"
 bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
 bindsym $mod+Ctrl+g $exec "~/.scripts/switch-or-launch.sh '\<[Tt]oggl$' 'toggl'"
-bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh '\<Volume Control$' 'pavucontrol'"
-
 bindsym $mod+Ctrl+j $exec "~/.scripts/switch-or-launch.sh '\<[Jj]ira$' 'jira'"
+bindsym $mod+Ctrl+Shift+M $exec "~/.scripts/switch-or-launch.sh '\<Volume Control$' 'pavucontrol'"
+
+bindsym $mod+Ctrl+c $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
+bindsym $mod+Ctrl+k $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
+bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
+bindsym $mod+Ctrl+m $exec "~/.scripts/audio-device-switch.sh"
+bindsym $mod+Ctrl+e $exec "urxvt -e neomutt && pkill -SIGRTMIN+13 i3blocks"
 
 # move workspace to another monitor
 bindsym $mod+m move workspace to output right

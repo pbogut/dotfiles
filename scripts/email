@@ -1,0 +1,7 @@
+#!/bin/bash
+#=================================================
+# name:   email
+# author: Pawel Bogut <https://pbogut.me>
+# date:   01/03/2019
+#=================================================
+urxvt -e neomutt && pkill -SIGRTMIN+13 i3blocks

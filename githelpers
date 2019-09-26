@@ -46,6 +46,10 @@ show_git_head() {
   git show -p --pretty="tformat:"
 }
 
+create_clean_staging() {
+  git co master && git branch -D staging && git cc staging
+}
+
 pretty_git_log() {
   git log --color=always --graph --pretty="tformat:${FORMAT}" $* |
     # Replace (2 years ago) with (2 years)

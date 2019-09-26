@@ -12,6 +12,13 @@ notmuch search --output=files tag:archive |grep '/INBOX/\|/sent/' |while read li
 # move sent emails out of inbox folder
 notmuch search --output=files tag:sent |grep '/INBOX/' |while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/cur#Maildir/\1/sent/cur#'`" 2>&1 > /dev/null ;done;
 
+# remove spam emails
+notmuch search --output=files tag:spam | while read line; do
+  mv "$line" ~/Temp/spam/ 2>&1 > /dev/null
+done
+
+notmuch tag +archive -- not date:`date +%Y` and not date:`expr $(date +%Y) - 1` and not tag:archive and tag:sent
+
 # move sent item to coresponding folder
 # maybe I should do someting with that, like... config array...
 # notmuch search --output=files folder:sent and from:email@address |while read line;do echo mv "$line" "`echo $line | sed 's#Maildir/sent/#Maildir/folder/sent/#'`" 2>&1 > /dev/null ;done;

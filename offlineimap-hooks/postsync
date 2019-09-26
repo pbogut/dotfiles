@@ -22,6 +22,9 @@ notmuch search --output=files from:notifications@github.com and tag:new | while 
 done
 # tag gitlab messages (try to figure how to tag them by project @see github)
 notmuch tag +gitlab -- tag:new and from:gitlab@mg.gitlab.com
+# tag jira messages
+notmuch tag +jira -- "tag:new and from:jira@assuredpharmacy.atlassian.net"
+notmuch tag -inbox -- "(tag:jira and tag:inbox) and not tag:unread"
 
 # emails from myself
 notmuch tag -new -inbox -unread +sent -- from:"Pawel Bogut" and tag:new
@@ -36,7 +39,7 @@ ls -1d --color=never ~/Maildir/*/INBOX | sed "s#$HOME/Maildir/#folder:#g" | xarg
 ls -1d --color=never ~/Maildir/*/drafts | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +drafts +draft -- tag:new and
 ls -1d --color=never ~/Maildir/*/sent | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +sent -- tag:new and
 ls -1d --color=never ~/Maildir/*/trash | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +trash -- tag:new and
-ls -1d --color=never ~/Maildir/*/spam | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +spam -- tag:new and
+ls -1d --color=never ~/Maildir/*/spam | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +spamish -- tag:new and
 # in gmail everything is in archive, so we do this at the end
 ls -1d --color=never ~/Maildir/*/archive | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +archive -- tag:new and
 

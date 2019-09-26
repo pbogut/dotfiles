@@ -25,6 +25,7 @@
     rmc = rm --cached
     cob = checkout -b
     cl = "!. ~/.githelpers && git_clone_to_projects"
+    ccstaging = "!. ~/.githelpers && create_clean_staging"
     au = "update-index --assume-unchanged" #  assume unchanged
     nau = "update-index --no-assume-unchanged" #  no assume unchanged
     sau = "!git ls-files -v | grep '^[a-z]' | cut -f2 -d' '" # show assumed unchanged

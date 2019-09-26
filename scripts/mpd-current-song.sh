@@ -4,8 +4,9 @@
 # author: Pawel Bogut <http://pbogut.me>
 # date:   09/11/2017
 #=================================================
-mpc="mpc -p ${MOPIDY_PORT:-6600}"
-while :; do
+
+(while :; do
+  mpc="mpc -p ${MOPIDY_PORT:-6600}"
   $mpc current \
     | sed 's/"/'"'"'/g' \
     | sed 's/\(.*\)/{"full_text": "'"`$mpc | grep paused | sed 's/.*/   /g'`"'\1"}/g'
@@ -17,4 +18,14 @@ while :; do
         | sed 's/\(.*\)/{"full_text": "'"`$mpc | grep paused | sed 's/.*/   /g'`"'\1"}/g'
     done
   sleep 1s
+done) &
+
+sleep 3s;
+
+while read line; do
+  mpc="mpc -p ${MOPIDY_PORT:-6600}"
+  $mpc toggle > /dev/null
+  $mpc current \
+    | sed 's/"/'"'"'/g' \
+    | sed 's/\(.*\)/{"full_text": "'"`$mpc | grep paused | sed 's/.*/   /g'`"'\1"}/g'
 done

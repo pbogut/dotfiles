@@ -22,20 +22,19 @@ if [[ $1 == 'new' ]]; then
     echo "Name: $2" >$temp
     echo "URL: $3" >>$temp
     echo "UserName: $(gpg-config get default-email)" >>$temp
-    echo "Password: $(apg -m16 -n1 -MSNCL)" >>$temp
+    #echo "Password: $(apg -m16 -n1 -MSNCL)" >>$temp
     vim $temp
     name=$(grep '^Name: ' $temp | sed 's,^Name: ,,')
     url=$(grep '^URL: ' $temp | sed 's,^URL: ,,')
     user=$(grep '^UserName: ' $temp | sed 's,^UserName: ,,')
-    npass=$(grep '^Password: ' $temp | sed 's,^Password: ,,')
-    if [[ -z $name ]] || [[ -z $npass ]]; then
+    #npass=$(grep '^Password: ' $temp | sed 's,^Password: ,,')
+    if [[ -z $name ]]; then
         exit 1
     else
 
         (
             echo $pass
-            echo $npass
-        ) | keepassxc-cli add -p -u "$user" --url "$url" $db "$name" | tail -n +3
+        ) | keepassxc-cli add -g -u "$user" --url "$url" $db "$name" | tail -n +3
         exit 0
     fi
 fi

@@ -113,3 +113,4 @@ rofi.hide-scrollbar: true
 rofi.terminal: urxvt -e zsh -ic
 rofi.kb-remove-word-back: Control+w
 rofi.kb-clear-line: Control+Alt+h
+rofi.case-sensitive: false

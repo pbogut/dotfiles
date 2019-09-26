@@ -1,7 +1,6 @@
 syntax on
 set nocompatible              " be improved, required
 filetype off                  " required
-
 set noshowmode
 set runtimepath+=~/.vim
 set timeoutlen=1000 ttimeoutlen=0   " eliminate esc timeout
@@ -208,6 +207,8 @@ if exists(':Plug')
   autocmd User after_vim_load source ~/.vim/plugin/config/abolish.vimrc
   Plug 'tpope/vim-projectionist'
   source ~/.vim/plugin/config/projectionist.vimrc
+  Plug 'rhysd/git-messenger.vim'
+  nmap <space>gm <Plug>(git-messenger)
   Plug 'dhruvasagar/vim-prosession'
   let g:prosession_per_branch = 1
   Plug 'vim-airline/vim-airline'
@@ -261,11 +262,11 @@ if exists(':Plug')
   Plug 'justinmk/vim-dirvish'
   Plug 'kristijanhusak/vim-dirvish-git'
   source ~/.vim/plugin/config/dirvish.vimrc
-  Plug 'w0rp/ale'
-  autocmd User after_plug_end source ~/.vim/plugin/config/ale.vimrc
-  autocmd User after_vim_load
-        \  highlight ALEErrorSign guibg=#073642 guifg=#dc322f
-        \| highlight ALEWarningSign guibg=#073642 guifg=#d33682
+  "Plug 'w0rp/ale'
+  "autocmd User after_plug_end source ~/.vim/plugin/config/ale.vimrc
+  "autocmd User after_vim_load
+  "      \  highlight ALEErrorSign guibg=#073642 guifg=#dc322f
+  "      \| highlight ALEWarningSign guibg=#073642 guifg=#d33682
   Plug 'chmp/mdnav'
   Plug 'samoshkin/vim-mergetool'
   source ~/.vim/plugin/config/vim-mergetool.vim
@@ -763,3 +764,10 @@ endfunction
 " inoremap <silent> <expr> <CR> ncm2_ultisnips#expand_or("\<CR>", 'n')
 
 silent! exec(":source ~/.vim/" . hostname() . ".vim")
+
+
+function! MagentoModel(path, model)
+  exec('e ' + a:model + '.php')
+  exec('e Resource/' + a:model + '.php')
+  exec('e Resource/' + a:model + '/Collection.php')
+endfunction

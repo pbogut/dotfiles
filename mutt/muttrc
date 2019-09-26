@@ -98,12 +98,13 @@ virtual-mailboxes \
     "Todo"          "notmuch://?query=tag:todo and not (tag:done or tag:archive)"\
     "Projects"      "notmuch://?query=tag:project and not tag:archive"\
     "Github/Gitlab" "notmuch://?query=(tag:github or tag:gitlab) and not tag:archive"\
+    "JIRA"          "notmuch://?query=tag:jira and not tag:archive"\
     "Drafts"        "notmuch://?query=tag:drafts"\
     "Archive"       "notmuch://?query=tag:archive"\
-    " `date +'%Y'`" "notmuch://?query=tag:archive and date:`date +'%Y'`"\
-    " `expr $(date +'%Y') - 1`" "notmuch://?query=tag:archive and date:`expr $(date +'%Y') - 1`"\
-    " `expr $(date +'%Y') - 2`.." "notmuch://?query=tag:archive and date:..`expr $(date +'%Y') - 2`"\
-    " sent"         "notmuch://?query=tag:sent and tag:archive"\
+    " `date +'%Y'`" "notmuch://?query=tag:archive and date:`date +'%Y'`"\
+    " `expr $(date +'%Y') - 1`" "notmuch://?query=tag:archive and date:`expr $(date +'%Y') - 1`"\
+    " `expr $(date +'%Y') - 2`.." "notmuch://?query=tag:archive and date:..`expr $(date +'%Y') - 2`"\
+    " sent"         "notmuch://?query=tag:sent and tag:archive"\
     `cat ~/.mutt/vfolders.local 2>/dev/null` \
     "Other"         "notmuch://?query=not tag:archive and not tag:drafts and not tag:sent and not tag:todo and not tag:* and not tag:unread and not tag:inbox" # sets up queries for
 
@@ -162,7 +163,7 @@ macro attach P "qP"                                                 # tag as pro
 # quick jump between boxes
 macro index gi "<change-vfolder> Inbox<enter>" "Go to Inbox"
 macro index gu "<change-vfolder> Unread<enter>" "Go to Unread"
-macro index ga "<change-vfolder> Archive<enter>" "Go to Archive"
+macro index ga "<change-vfolder>  `date +'%Y'`<enter>" "Go to Archive"
 macro index gs "<change-vfolder> Sent<enter>" "Go to Sent Mail"
 macro index gd "<change-vfolder> Drafts<enter>" "Go to Drafts"
 macro index gt "<change-vfolder> Todo<enter>" "Go to Drafts"
