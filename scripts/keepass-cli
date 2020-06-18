@@ -21,7 +21,7 @@ if [[ $1 == 'new' ]]; then
     temp=$(mktemp)
     echo "Name: $2" >$temp
     echo "URL: $3" >>$temp
-    echo "UserName: $(gpg-config get default-email)" >>$temp
+    echo "UserName: $4$(gpg-config get acc-email-server)" >>$temp
     #echo "Password: $(apg -m16 -n1 -MSNCL)" >>$temp
     vim $temp
     name=$(grep '^Name: ' $temp | sed 's,^Name: ,,')

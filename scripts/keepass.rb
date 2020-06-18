@@ -8,6 +8,7 @@
 require "csv"
 require "open3"
 require "nokogiri"
+require "clipboard"
 
 action, = ARGV
 
@@ -31,7 +32,7 @@ if !action
 end
 
 
-xml = `keepass-cli extract`
+xml = `keepass-cli export`
 formated_list = ''
 no = 0
 doc = Nokogiri::XML(xml)
@@ -62,17 +63,37 @@ search_parts = []
 site_parts = []
 url = ENV['QUTE_URL'] || ''
 url.gsub(/^.*?\/\/(.*?)[\/:].*/, '\1').split('.').reverse.each do |p|
-  if (p.length < 5 or !p.match(/\./)) and site_parts.reverse.join('.').length < 8
-    site_parts << p
+  # if (p.length < 5 or !p.match(/\./)) and site_parts.reverse.join('.').length < 8
+  #   site_parts << p
+  # end
+  should_add = true
+  [
+    /^www/,
+    /^local/,
+    /^dev/,
+    /^staging/,
+    /^online/,
+    /^system/,
+    /^app/,
+    /^panel/,
+    /^dashboard/,
+  ].each do |pattern|
+    if (p.match(pattern))
+      should_add = false
+    end
   end
-  # search_parts << p
+  if (should_add)
+     site_parts << p
+  end
 end
 site_url = site_parts.reverse.join('.')
+site_base_url = url.gsub(/^(.*?\/\/.*?[\/:].*?\/?)+.*/, '\1')
 search_urls = site_parts.join(' ')
+user_name = site_url.gsub(/\...\...$/, '').gsub(/\...$/, '').gsub(/\....$/, '').gsub(/[^a-z0-9]/, '_')
 
 if action == "--add"
   open(ENV['TMPDIR'] + '/_lpass_url', 'w') { |f| f << url }
-  _, _, _ = Open3.capture3('urxvt -e keepass-cli new "' + (site_url.empty? ? 'new-site' : site_url) + '" "' + url + '"')
+  _, _, _ = Open3.capture3('urxvt', '-e', 'keepass-cli', 'new', (site_url.empty? ? 'new-site' : site_url), site_base_url, user_name)
   exit
 end
 
@@ -103,8 +124,7 @@ if !action
   action = "--copy-user-and-pass"
 end
 
-cmd = "(sleep 0.5s; xdotool type --clearmodifiers '#{search_urls} ')" +
-      " & rofi -dmenu -p '#{prompt}:'"
+cmd = "rofi -filter '#{search_urls} ' -dmenu -p '#{prompt}:'"
 selection, _, _ = Open3.capture3(cmd, stdin_data: formated_list)
 
 index = selection.gsub(/(\d+).*/, '\1').to_i
@@ -113,11 +133,11 @@ exit unless index > 0
 
 name = indexes[index]
 result, _, _ = Open3.capture3("keepass-cli", "show", name)
-pass = ''
+Open3.capture3('copyq', 'disable') # disable copyq from storing password
+Open3.capture3('keepass-cli', 'clip', name)
+Open3.capture3('copyq', 'enable') # allow copyq keep working after password was coppied
+pass = Clipboard.paste
 user = ''
-result.gsub(/^Password: (.*)$/) do |match|
-  pass = match.gsub(/^Password: (.*)$/, '\1')
-end
 result.gsub(/^UserName: (.*)$/) do |match|
   user = match.gsub(/^UserName: (.*)$/, '\1')
 end
@@ -153,8 +173,8 @@ if action == '--type-pass'
       # file.write("fake-key -g <esc>i\n")
     end
   else
-    cmd = "sleep 0.5s; xdotool type --clearmodifiers '#{pass}'"
-    Open3.capture3(cmd)
+    Open3.capture3('sleep', '0.5s')
+    Open3.capture3('xdotool', 'type', '--clearmodifiers', pass)
   end
 end
 if action == '--type-user-and-pass' or action.empty?
@@ -167,24 +187,22 @@ if action == '--type-user-and-pass' or action.empty?
 end
 if action == "--edit"
   puts "keepass-cli change '#{name}'"
-  out, _, _ = Open3.capture3("urxvt -e keepass-cli change '#{name}'")
+  out, _, _ = Open3.capture3('urxvt', '-e', 'keepass-cli', 'change', name)
   puts out
 end
 if action == "--remove"
   puts "keepass-cli rm '#{name}'"
-  out, _, _ = Open3.capture3("keepass-cli rm '#{name}'")
+  out, _, _ = Open3.capture3('keepass-cli', 'rm', name)
   puts out
 end
 if action == "--show"
   puts "keepass-cli show '#{name}'"
-  out, _, _ = Open3.capture3("keepass-cli show '#{name}'")
+  out, _, _ = Open3.capture3('keepass-cli', 'show', name)
 
   i = 0
   lines = []
   out.split("\n").each do |line|
-    lines << line
     if line.match(/Password: .*/)
-      pass = line.gsub(/Password: (.*)/, '\1')
       numbers = ""
       passwds = ""
       pass.split("").each do |c|
@@ -192,8 +210,11 @@ if action == "--show"
         numbers << "#{i}\t"
         passwds << "#{c}\t"
       end
+      lines << "Password:"
       lines << numbers
       lines << passwds
+    else
+      lines << line
     end
   end
   width = 100 + (i * 20)
