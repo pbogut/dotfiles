@@ -4,13 +4,24 @@ import os
 c = c  # noqa: F821 pylint: disable=E0602,C0103
 config = config  # noqa: F821 pylint: disable=E0602,C0103
 
+def bind_js(binding, js_name):
+    dir_path = os.path.dirname(__file__)
+    js_path = dir_path + "/js/" + js_name + ".js"
+    file = open(js_path, "r")
+    js_content = str(file.read())
+    js_content = js_content.replace("\n", "")
+    file.close()
+    config.bind(binding, ("jseval " + js_content))
+
 # load widevine
 c.qt.args = [('ppapi-widevine-path='
               '/usr/lib/qt/plugins/ppapi/libwidevinecdmadapter.so')]
 # /usr/share/qutebrowser/scripts/dictcli.py install pl-PL en-GB
 c.spellcheck.languages = ['pl-PL', 'en-GB']
-c.url.start_pages = ["https://duckduckgo.com/"]
-c.url.default_page = 'https://duckduckgo.com/'
+c.url.start_pages = ["http://localhost:46637"]
+c.url.default_page = 'http://localhost:46637'
+# c.url.start_pages = ["https://duckduckgo.com/"]
+# c.url.default_page = 'https://duckduckgo.com/'
 c.downloads.open_dispatcher = '/bin/bash -c "~/.scripts/i3-open \'{}\'"'
 c.editor.command = ["urxvt", "--geometry", "120x32",
                     "--title", "NVIM_FOR_QB", "-e", "nvim", "{}"]
@@ -48,8 +59,9 @@ c.url.searchengines = {
     "aw": "https://wiki.archlinux.org/?search={}",
     "al": "https://allegro.pl/listing?string={}",
     "yt": "https://www.youtube.com/results?search_query={}",
-    "th": "https://www.thingiverse.com/search?q={}",
+    # "th": "https://www.thingiverse.com/search?q={}",
     "at": "https://alternativeto.net/browse/search?q={}",
+    "th":  "https://duckduckgo.com/?q={} site:thingiverse.com",
 }
 # c.colors.completion.even.bg = "#333333"
 c.colors.completion.odd.bg = "#1f1f1f"
@@ -71,16 +83,17 @@ c.colors.tabs.selected.even.bg = c.colors.completion.category.bg
 c.colors.tabs.bar.bg = "#1c1c1c"
 c.colors.messages.error.bg = "#dc322f"
 c.colors.prompts.bg = c.colors.tabs.bar.bg
-c.fonts.monospace = ('"Sauce Code Pro Nerd Fonts", Terminus, Monospace, '
-                     '"DejaVu Sans Mono", Monaco, "Bitstream Vera Sans Mono", '
-                     '"Andale Mono", "Courier New", Courier, '
-                     '"Liberation Mono", monospace, Fixed, Consolas, Terminal')
+# c.fonts.monospace = ('"Sauce Code Pro Nerd Fonts", Terminus, Monospace, '
+#                      '"DejaVu Sans Mono", Monaco, "Bitstream Vera Sans Mono", '
+#                      '"Andale Mono", "Courier New", Courier, '
+#                      '"Liberation Mono", monospace, Fixed, Consolas, Terminal')
 c.fonts.hints = "12pt monospace"
 c.fonts.prompts = "10pt sans-serif"
 c.fonts.completion.entry = "8pt monospace"
 c.fonts.completion.category = "bold 8pt monospace"
 c.fonts.statusbar = "8pt monospace"
-c.fonts.tabs = "8pt monospace"
+c.fonts.tabs.selected = "8pt monospace"
+c.fonts.tabs.unselected = "8pt monospace"
 
 config.unbind('<ctrl-v>', mode='normal')
 config.unbind('d', mode='normal')
@@ -154,52 +167,14 @@ config.bind('gs', 'spawn --userscript ~/.scripts/qb-switch-search.sh')
 config.bind('sje', 'set content.javascript.enabled true')
 config.bind('sjd', 'set content.javascript.enabled false')
 
-config.bind(',jpp', ("jseval (function(){var s = document.createElement('script"
-                     "');s.type='text/javascript';s.src='https://dsheiko.github"
-                     ".io/pixel-perfect-bookmarklet/bookmarklet.js?v='+parseInt"
-                     "(Math.random()*99999999);document.body.appendChild(s);voi"
-                     "d(0);}());"))
+config.bind('es',  'spawn --userscript ~/.scripts/qb-switch-enviroment.php')
 
-config.bind(',jve', ("jseval (function() {var protocol = window.location.protoc"
-                     "ol === 'file:' ?'http:' : '';var url = protocol+'//www.sp"
-                     "rymedia.co.uk/VisualEvent/VisualEvent_Loader.js';if( type"
-                     "of VisualEvent!='undefined' ) {if ( VisualEvent.instance "
-                     "!== null ) {VisualEvent.close();}else {new VisualEvent();"
-                     "}}else {var n=document.createElement('script');n.setAttri"
-                     "bute('language','JavaScript');n.setAttribute('src',url+'?"
-                     "rand='+new Date().getTime());document.body.appendChild(n)"
-                     ";}})();"))
+bind_js(',jpp', 'pixel_perfect')
+bind_js(',jve', 'visual_event')
+bind_js(',dd', 'developer_mode')
 
-config.bind(',de', ("jseval (function() { if (window.location.href.indexOf('dev"
-                    "eloper_mode=true') == -1) { window.location = window.locat"
-                    "ion.href + (window.location.href.indexOf('?') != -1 ? '&' "
-                    ": '?' ) + 'developer_mode=true' } })();"))
-
-config.bind(',dd', ("jseval (function() { if (window.location.href.indexOf('&de"
-                    "veloper_mode=true') != -1) { window.location = window.loca"
-                    "tion.href.replace('&developer_mode=true', '') } else if (w"
-                    "indow.location.href.indexOf('developer_mode=true&') != -1)"
-                    "{ window.location = window.location.href.replace('develope"
-                    "r_mode=true&', '') } else if (window.location.href.indexOf"
-                    "('?developer_mode=true') != -1) { window.location = window"
-                    ".location.href.replace('?developer_mode=true', '') } })();"
-                    ))
-config.bind(',el', ("jseval (function(){location.href=location.href.replace(/:"
-                    "\/\/www\./,'://local.').replace(/:\/\/staging\./,'://loca"
-                    "l.')})();"))
-config.bind(',es', ("jseval (function(){location.href=location.href.replace(/:"
-                    "\/\/local\./,'://staging.').replace(/:\/\/www\./,'://stag"
-                    "ing.')})();"))
-config.bind(',ep', ("jseval (function(){location.href=location.href.replace(/:"
-                    "\/\/staging\./,'://www.').replace(/:\/\/local\./,'://www."
-                    "')})();"))
-config.bind(',et', ("jseval (function(){if(location.href.match(/:\/\/local\./))"
-                    "{location.href=location.href.replace(/:\/\/local\./,'://st"
-                    "aging.')}else if(location.href.match(/:\/\/staging\./)){lo"
-                    "cation.href=location.href.replace(/:\/\/staging\./,'://www"
-                    ".')}else if(location.href.match(/:\/\/www\./)){location.hr"
-                    "ef=location.href.replace(/:\/\/www\./, '://local.')}})();"))
-
+bind_js(',pp', 'pocket')
+bind_js(',pt', 'pocket_tag')
 
 dir_path = os.path.dirname(__file__)
 if os.path.exists(dir_path + '/secure_config.py'):
