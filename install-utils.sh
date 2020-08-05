@@ -36,8 +36,8 @@ install_pacaur
 echo "Installing neovim..."
 pacaur -S \
     abook \
-    cava \
-    compton \
+    net-utils \
+    picom \
     dmenu \
     go \
     gtk3-print-backends \
