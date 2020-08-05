@@ -52,8 +52,7 @@ yay -S \
     xcape \
     xrandr \
     xtitle \
-    dunst \
-    --noconfirm -needed
+    dunst
 
 pip install \
     i3-py \
