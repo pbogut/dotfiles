@@ -4,37 +4,19 @@ sudo pacman -Sy
 # $ curl https://nixos.org/nix/install | sh
 #
 
-install_pacaur() {
-    # Create a tmp-working-dir an navigate into it
-    mkdir -p /tmp/pacaur_install
-    cd /tmp/pacaur_install
-
-    # If you didn't install the "base-devil" group,
-    # we'll need those.
-    sudo pacman -S binutils make gcc fakeroot --noconfirm --needed
-
-    # Install pacaur dependencies from arch repos
-    sudo pacman -S expac yajl git --noconfirm -needed
-
-    # Install "cower" from AUR
-    curl -o PKGBUILD https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=cower
-    makepkg PKGBUILD --skippgpcheck
-    sudo pacman -U cower*.tar.xz --noconfirm -needed
-
-    # Install "pacaur" from AUR
-    curl -o PKGBUILD https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=pacaur
-    makepkg PKGBUILD
-    sudo pacman -U pacaur*.tar.xz --noconfirm -needed
-
-    # Clean up...
-    cd ~
-    rm -r /tmp/pacaur_install
+install_yay() {
+    if [[ "$(which yay)" == "yay not found" ]]; then
+        wget https://storage.pbogut.me/yay-9.4.2-1-x86_64.pkg.tar.xz
+        sudo pacman -U yay-9.4.2-1-x86_64.pkg.tar.xz
+        rm -fr yay-9.4.2-1-x86_64.pkg.tar.xz
+    fi
 }
 
-echo "Installing pacaur..."
-install_pacaur
+echo "Installing yay..."
+sudo pacman -S wget which
+install_yay
 echo "Installing neovim..."
-pacaur -S \
+yay -S \
     abook \
     net-utils \
     picom \
