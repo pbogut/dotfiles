@@ -3,15 +3,16 @@ set folder = "`echo $HOME`/Maildir"
 set mailcap_path=~/.mutt/mailcap
 set sendmail = "msmtp.sh"
 set postponed = ~/.mutt/postponed
-mailboxes = `echo $MAIL` `ls -1d --color=never ~/Maildir/*/* | grep 'INBOX\|sent\|drafts\|archive\|trash' | sed 's#.*Maildir/#+#' | while read line; do echo -n " $line"; done`
+#mailboxes = `echo $MAIL` `ls -1d --color=never ~/Maildir/*/* | grep 'INBOX\|sent\|drafts\|archive\|trash' | sed 's#.*Maildir/#+#' | while read line; do echo -n " $line"; done`
 
 set query_command="khard email --parsable '%s'"
 macro index,pager \cv "<pipe-message>urlview<return>" "url view"
 macro index,pager \ci "<pipe-message>~/.scripts/mail-to-web.sh<return>" "html view in browser"
 macro index,pager \ca "<pipe-message>khard add-email<return>" "add the sender address to khard"
 
-macro index,pager \ctp "<pipe-message>email-to-vtodo -f - -p `gpg-config get calendar-personal-path` -c email\n" # add todo entry to personal calendar
-macro index,pager \ctw "<pipe-message>email-to-vtodo -f - -p `gpg-config get calendar-work-path` -c email\n"     # add todo entry to work calendar
+#macro index,pager \ctp "<pipe-message>email-to-vtodo -m - -l personal -c email\n" # add todo entry to personal calendar
+#macro index,pager \ctw "<pipe-message>email-to-vtodo -m - -l work -c email\n"     # add todo entry to work calendar
+macro index,pager \ct "<pipe-message>email-to-vtodo -m - -c email\n"     # add todo entry to work calendar
 
 #macro generic,index,pager a "<shell-escape>abook<return>" "launch abook"
 bind editor <Tab> complete-query
@@ -27,6 +28,7 @@ bind pager gg top
 bind pager G bottom
 
 set sort = threads
+set sort_aux = last-date-received
 set edit_headers = yes
 # set record = "+sent"
 set record = ~/.mutt/sent
@@ -98,7 +100,12 @@ virtual-mailboxes \
     "Todo"          "notmuch://?query=tag:todo and not (tag:done or tag:archive)"\
     "Projects"      "notmuch://?query=tag:project and not tag:archive"\
     "Github/Gitlab" "notmuch://?query=(tag:github or tag:gitlab) and not tag:archive"\
-    "JIRA"          "notmuch://?query=tag:jira and not tag:archive"\
+    "Work"          "notmuch://?query=tag:work and not tag:archive"\
+    " AP"           "notmuch://?query=tag:work/ap not tag:archive"\
+    "Subscriptions" "notmuch://?query=tag:newsletter not tag:archive"\
+    " Tech"         "notmuch://?query=tag:newsletter and tag:tech not tag:archive"\
+    " Leisure"      "notmuch://?query=tag:newsletter and tag:leisure not tag:archive"\
+    " Job"          "notmuch://?query=tag:newsletter and tag:jobs not tag:archive"\
     "Drafts"        "notmuch://?query=tag:drafts"\
     "Archive"       "notmuch://?query=tag:archive"\
     " `date +'%Y'`" "notmuch://?query=tag:archive and date:`date +'%Y'`"\
@@ -145,6 +152,7 @@ macro pager,index \` "<modify-labels>"                              # change not
 macro index A "<modify-labels-then-hide>+archive -inbox -unread\n"  # tag as Archived
 macro pager A "<modify-labels-then-hide>+archive -inbox -unread\nq" # tag as Archived
 macro attach A "qA"                                                 # tag as Archived
+macro index R "<modify-labels>-unread\n"  # mark as read
 
 macro index T "<modify-labels>+todo -done -inbox\n"                 # tag as Todo
 macro index d "<modify-labels>+done\n"                              # tag as Done
@@ -168,6 +176,7 @@ macro index gs "<change-vfolder> Sent<enter>" "Go to Sent Mail"
 macro index gd "<change-vfolder> Drafts<enter>" "Go to Drafts"
 macro index gt "<change-vfolder> Todo<enter>" "Go to Drafts"
 macro index gp "<change-vfolder> Projects<enter>" "Go to Projects"
+macro index gw "<change-vfolder> Work<enter>" "Go to Work"
 
 auto_view text/html                                      # view html automatically
 auto_view text/calendar                                  # view ics automatically

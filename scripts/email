@@ -4,4 +4,30 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   01/03/2019
 #=================================================
-urxvt -e neomutt && pkill -SIGRTMIN+13 i3blocks
+if [[ "$1" =~ ^mailto: ]]; then
+    mailto_url="$1"
+
+    #Strip off the protocol
+    mail_data=$(echo "$mailto_url" | /bin/sed -s 's/^[Mm][Aa][Ii][Ll][Tt][Oo]://')
+
+    #Get Recipient and strip it off
+    recipient=$(echo "$mail_data" | cut -d? -f1 -)
+    mail_data=$(echo "$mail_data" | /bin/sed -s s/^$recipient//)
+
+    #Get Subject, BCC and CC
+    subject=$(echo "$mail_data" |
+        /bin/sed -s 's/.*?[Ss][Uu][Bb][Jj][Ee][Cc][Tt]=//' | /bin/sed -s 's/?.*//')
+    bcc=$(echo "$mail_data" | /bin/sed -s 's/.*?[Bb][Cc][Cc]=//' |
+        /bin/sed -s 's/?.*//')
+    cc=$(echo "$mail_data" | /bin/sed -s 's/.*?[Cc][Cc]=//' |
+        /bin/sed -s 's/?.*//')
+
+    urxvt -e neomutt "$recipient" -b "$bcc" -c "$cc" -s "$subject" \
+        && pkill -SIGRTMIN+13 i3blocks
+elif [[ -f "$1" ]]; then
+    urxvt -e neomutt -a "$1" \
+        && pkill -SIGRTMIN+13 i3blocks
+else
+    urxvt -e neomutt \
+        && pkill -SIGRTMIN+13 i3blocks
+fi

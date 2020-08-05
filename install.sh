@@ -51,10 +51,12 @@ read -d '' files <<"EOF"
     config/qutebrowser/config.py
     config/qutebrowser/keys.conf
     config/qutebrowser/qutebrowser.conf
+    config/qutebrowser/js
     config/ranger/devicons.py
     config/ranger/plugins/devicons_linemode.py
     config/ranger/rc.conf
     config/ranger/rifle.conf
+    config/rofi/config.rasi
     config/roxterm.sourceforge.net
     config/Franz/Plugins/todoist
     i3blocks.conf
@@ -130,7 +132,7 @@ chmod +x ~/.offlineimap-hooks/* >/dev/null 2>&1
 echo "done"
 
 echo -en "\tSet ranger as default manager (xdg-mime) ... "
-[[ -n $(command -v xdg-mime) ]] && xdg-mime default ranger.desktop inode/directory
+[[ -n $(command -v xdg-mime) ]] && xdg-mime default ranger.desktop 'inode/directory'
 echo "done"
 
 echo -en "\tSet browser script as default browser (xdg-settings) ... "
@@ -138,7 +140,11 @@ echo -en "\tSet browser script as default browser (xdg-settings) ... "
 echo "done"
 
 echo -en "\tSet email script as default emial (xdg-settings) ... "
-[[ -n $(command -v xdg-mime) ]] && xdg-settings set default-url-scheme-handler mailto email.desktop                            
+[[ -n $(command -v xdg-mime) ]] && xdg-settings set default-url-scheme-handler mailto email.desktop
+echo "done"
+
+echo -en "\tSet email script as default mailto handler (xdg-mime) ... "
+[[ -n $(command -v xdg-mime) ]] && xdg-mime default email.desktop 'x-scheme-handler/mailto'
 echo "done"
 
 echo -en "\t"$(

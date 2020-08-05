@@ -69,11 +69,18 @@ let s:switch_vimwiki_checkbox =
       \   '\[O\]':   '[X]',
       \   '\[X\]':   '[ ]',
       \ }
+let s:switch_quotes =
+      \ {
+      \   '"\([^"]*\)"': "'\\1'",
+      \   "'\\([^']*\\)'": '"\1"',
+      \ }
+
 augroup swich_vim
   autocmd!
   autocmd FileType blade let b:switch_custom_definitions =
         \ [
         \   s:switch_blade_echo,
+        \   s:switch_quotes,
         \ ]
   autocmd FileType php let b:switch_custom_definitions =
         \ [
@@ -82,26 +89,36 @@ augroup swich_vim
         \   s:switch_php_array,
         \   s:switch_php_comment,
         \   s:switch_php_scope,
+        \   s:switch_quotes,
         \ ]
   autocmd FileType javascript let b:switch_custom_definitions =
         \ [
         \   s:switch_c_like_if,
+        \   s:switch_quotes,
         \ ]
   autocmd FileType javascript.jsx let b:switch_custom_definitions =
         \ [
         \   s:switch_c_like_if,
+        \   s:switch_quotes,
         \ ]
   autocmd FileType elixir let b:switch_custom_definitions =
         \ [
         \   s:switch_elixir_assert,
         \   s:switch_elixir_map,
+        \   s:switch_quotes,
         \ ]
   autocmd FileType markdown,md let b:switch_custom_definitions =
         \ [
-        \   s:switch_md_checkbox
+        \   s:switch_md_checkbox,
+        \   s:switch_quotes,
         \ ]
   autocmd FileType vimwiki let b:switch_custom_definitions =
         \ [
-        \   s:switch_vimwiki_checkbox
+        \   s:switch_vimwiki_checkbox,
+        \   s:switch_quotes,
+        \ ]
+  autocmd FileType email let b:switch_custom_definitions =
+        \ [
+        \   s:switch_quotes,
         \ ]
 augroup END

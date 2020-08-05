@@ -253,14 +253,24 @@ workspace_layout stacked
 # assign apps to specific workspaces
 assign [title="^DBeaver" class="^SWT$"] $wsdb
 assign [title="^Dbeaver$"] $wsdb
-assign [title="^Franz$"] $wscomm
+assign [title="^Ferdi$"] $wscomm
 assign [title="^toggl$"] $wsdash
 assign [title="^todoist$"] $wsdash
 assign [title="^jira$"] $wsdash
 
+# assign [title="^urxvt$"] $wsterm
+# for_window [title="^urxvt$"] workspace --no-auto-back-and-forth $wsterm
+# for_window [title="^urxvt$"] focus
+#
+# assign [class="^qutebrowser$" workspace="$wscode"] $wsbrow
+# assign [class="^qutebrowser$" workspace="1"] $wsbrow
+# for_window [class="^qutebrowser$" workspace="$wscode"] workspace --no-auto-back-and-forth $wsterm
+# for_window [class="^qutebrowser$" workspace="$wscode"] focus
+
 for_window [title="NVIM_FOR_QB"] floating enable
 for_window [title="FLOATING_WINDOW"] floating enable
 for_window [class="Toggl Desktop"] floating enable
+for_window [class="^Yad$"] floating enable
 # for_window [class="Skype"] floating enable
 for_window [class="explorer.exe"] floating enable
 for_window [class="krusader"] floating disable
@@ -276,14 +286,22 @@ $exec "~/.scripts/i3-startup.sh"
 
 bindsym Mod1+Shift+Ctrl+space exec --no-startup-id ~/.scripts/i3-keyboard-layout-toggle.sh; $update_keylayout
 
+
+bindsym Mod1+Shift+Ctrl+p $exec "~/.scripts/microphone.sh unmute"
+bindsym Mod1+Shift+Ctrl+r $exec "~/.scripts/microphone.sh mute"
+
 bindsym XF86MonBrightnessUp $exec "~/.scripts/i3-brightness.sh up"
 bindsym XF86MonBrightnessDown $exec "~/.scripts/i3-brightness.sh down"
 bindsym XF86AudioRaiseVolume $exec "pulsemixer --change-volume +1" ; $update_volume
 bindsym XF86AudioLowerVolume $exec "pulsemixer --change-volume -1" ; $update_volume
-bindsym XF86AudioStop $fish "mpc pause"
-bindsym XF86AudioPlay $fish "mpc play"
-bindsym XF86AudioNext $fish "mpc next"
-bindsym XF86AudioPrev $fish "mpc prev"
+# bindsym XF86AudioStop $exec "mpc pause"
+# bindsym XF86AudioPlay $exec "mpc play"
+# bindsym XF86AudioNext $exec "mpc next"
+# bindsym XF86AudioPrev $exec "mpc prev"
+#bindsym XF86AudioPause $exec "notify-send -i printer-error 'Presssed'"
+bindsym XF86AudioPlay $exec "xdotool key --clearmodifiers space"
+bindsym XF86AudioPause $exec "xdotool key --clearmodifiers space"
+
 
 bindsym $mod+n $exec "~/.scripts/i3-switch-workspace.py --next --same-output"
 bindsym $mod+p $exec "~/.scripts/i3-switch-workspace.py --prev --same-output"
@@ -305,7 +323,7 @@ bindsym $mod+i $sh '~/.scripts/vim-anywhere.sh'
 bindsym $mod+u $sh '~/.scripts/users.sh --switch'
 
 bindsym $mod+Ctrl+b $exec "~/.scripts/switch-or-launch.sh '\<qutebrowser$' 'browser'"
-bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '\<Franz$' 'franz'"
+bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '\<Ferdi$' 'ferdi'"
 bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
 bindsym $mod+Ctrl+g $exec "~/.scripts/switch-or-launch.sh '\<[Tt]oggl$' 'toggl'"
 bindsym $mod+Ctrl+j $exec "~/.scripts/switch-or-launch.sh '\<[Jj]ira$' 'jira'"
@@ -313,9 +331,14 @@ bindsym $mod+Ctrl+Shift+M $exec "~/.scripts/switch-or-launch.sh '\<Volume Contro
 
 bindsym $mod+Ctrl+c $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
 bindsym $mod+Ctrl+k $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
+# bindsym $mod+Ctrl+s $exec "urxvt -geometry 190x55 -T FLOATING_WINDOW -e spt"
+bindsym $mod+Ctrl+s $exec "~/.scripts/switch-or-launch.sh 'open.spotify.com.Google-chrome' 'google-chrome-stable --app=https://open.spotify.com'"
+bindsym $mod+Ctrl+n $exec "~/.scripts/switch-or-launch.sh '\<Netflix$' 'google-chrome-stable --app=https://netflix.com'"
 bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
 bindsym $mod+Ctrl+m $exec "~/.scripts/audio-device-switch.sh"
-bindsym $mod+Ctrl+e $exec "urxvt -e neomutt && pkill -SIGRTMIN+13 i3blocks"
+# bindsym $mod+Ctrl+e $exec "urxvt -e neomutt && pkill -SIGRTMIN+13 i3blocks"
+bindsym $mod+Ctrl+e $exec "~/.scripts/switch-or-launch.sh '\<neomutt$' 'email'"
+# bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
 
 # move workspace to another monitor
 bindsym $mod+m move workspace to output right

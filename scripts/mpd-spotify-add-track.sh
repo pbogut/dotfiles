@@ -1,5 +1,6 @@
 #!/bin/bash
-mpc="mpc -p ${MOPIDY_PORT:-6600}"
+# mpc="mpc -p ${MOPIDY_PORT:-6600}"
+mpc="mpc"
 track=`$mpc current -f '%title% - %artist% - %album%'`
 track_id=`$mpc current -f '%file%' | sed 's/.*:track:\(.*\)/\1/g'`
 token=`cat ~/.spotify-api-token`

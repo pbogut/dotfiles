@@ -5,7 +5,7 @@
 # date:   09/06/2017
 #=================================================
 
-find ~/Projects -maxdepth 5 -mindepth 3 -printf "%T+\t%p\n" -type d |
+find -L ~/Projects -maxdepth 5 -mindepth 3 -printf "%T+\t%p\n" -type d |
     grep '\.git$\|CVS$\|\.svn$\|docker-compose.yml$\|composer.lock$' |
     sort -r |
     sed 's,.*\t'"$HOME"'/Projects/,,g' |

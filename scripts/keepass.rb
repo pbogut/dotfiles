@@ -70,11 +70,13 @@ url.gsub(/^.*?\/\/(.*?)[\/:].*/, '\1').split('.').reverse.each do |p|
   [
     /^www/,
     /^local/,
+    /^login/,
     /^dev/,
     /^staging/,
     /^online/,
     /^system/,
     /^app/,
+    /^dash/,
     /^panel/,
     /^dashboard/,
   ].each do |pattern|

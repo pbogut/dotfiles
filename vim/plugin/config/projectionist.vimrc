@@ -67,12 +67,18 @@ let s:magento_module =
       \         "app/code/community/{camelcase|capitalize|mag_add_block}.php",
       \         "app/code/local/{camelcase|capitalize|mag_add_block}.php"
       \       ]
-      \     },
-      \     "*.php": {
-      \       "console": "n98 dev:console",
-      \       "skeleton": "magento_class"
       \     }
       \   }
+let s:magento_2_module =
+      \   {
+      \     "*": {
+      \       "project_root": 1,
+      \       "setlocal": s:space_4
+      \     },
+      \     "registration.php": {
+      \       "skeleton": "magento2_registration"
+      \     }
+      \  }
 let s:composer =
       \   {
       \     "*": {
@@ -219,7 +225,7 @@ let s:codeception =
       \   }
 let g:projectionist_heuristics = {}
 let g:projectionist_heuristics["composer.json&modman&app/"] = s:magento_module
-let g:projectionist_heuristics["composer.json"] = s:composer
+let g:projectionist_heuristics["composer.json&bin/magento"] = s:magento_2_module
 let g:projectionist_heuristics["artisan&composer.json"] = s:laravel
 let g:projectionist_heuristics["*.ex|*.exs"] = s:elixir
 let g:projectionist_heuristics["mix.exs&deps/phoenix/"] = s:phoenixframework

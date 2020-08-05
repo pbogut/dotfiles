@@ -17,6 +17,8 @@ export PATH="$HOME/.gocode/bin:$PATH"
 
 export EDITOR="nvim"
 
+export QT_QPA_PLATFORMTHEME=qt5ct
+
 export FZF_DEFAULT_OPTS="
   --filepath-word --reverse
   --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview

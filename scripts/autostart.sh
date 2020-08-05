@@ -35,8 +35,8 @@ fi
 # daemons
 rerun insync "insync start"
 rerun copyq copyq
-rerun compton "compton -b --xrender-sync-fence --xrender-sync"
-rerun TogglDesktop "toggldesktop -b"
+rerun picom "picom -b --xrender-sync-fence --xrender-sync"
+# rerun TogglDesktop "toggldesktop -b"
 rerun megasync megasync
 
 demonize geoclue /usr/lib/geoclue-2.0/demos/agent
@@ -45,10 +45,12 @@ demonize textaid "perl $scriptpath/edit-server.pl"
 demonize nm-applet nm-applet
 demonize dunst dunst
 demonize udisksvm "udisksvm -a"
-demonize mopidy "mopidy -o mpd/port=${MOPIDY_PORT:-6600}"
+demonize mopidy "mopidy"
 demonize pomodoro "i3-gnome-pomodoro daemon"
 demonize memwatch ~/.scripts/memwatch.sh
 demonize mailsgoweb ~/.scripts/mailsgoweb.sh
+demonize TogglDesktop TogglDesktop
+demonize kdeconnect kdeconnect-indicator
 
 # sepcific for the computer
 if [[ -f "$HOME/.$host_name.autostart.sh" ]]; then

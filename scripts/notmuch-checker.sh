@@ -6,7 +6,7 @@
 #=================================================
 # unread="$(notmuch count -- tag:unread)"
 # inbox="$(notmuch count -- tag:inbox)"
-unread="$(notmuch search tag:unread | wc -l)"
+unread="$(notmuch search tag:unread and tag:inbox | wc -l)"
 inbox="$(notmuch search tag:inbox | wc -l)"
 last_count_file="$TMPDIR/__notmuch_last_email_count"
 last_timestamp_file="$TMPDIR/__notmuch_last_email_timestamp"

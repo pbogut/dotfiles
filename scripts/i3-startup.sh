@@ -28,7 +28,7 @@ if [ "$hostname" == "v3engine" ]; then # my laptop
     set_walpaper
   ) &
 elif [ "$hostname" == "redeye" ]; then # pc
-  xrandr --output VGA-0 --off --output DVI-D-0 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-0 --mode 1920x1080 --pos 1920x0 --rotate normal
+  xrandr --output VGA-0 --off --output DVI-D-0 --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-0 --primary --mode 1920x1080 --pos 1920x0 --rotate normal
   set_walpaper
 elif [ "$hostname" == "darkbox" ]; then # pc at work
   xrandr --output HDMI-1 --mode 1920x1080 --pos 1920x0 --output HDMI-2 --primary --mode 1920x1080 --pos 0x0

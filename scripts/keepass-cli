@@ -14,7 +14,7 @@ if [[ $# -gt 2 ]]; then
 fi
 
 if [[ $1 == 'gui' ]]; then
-    echo $pass | keepassxc --pw-stdin $db
+    echo $pass | keepass --pw-stdin $db
     exit $?
 fi
 if [[ $1 == 'new' ]]; then

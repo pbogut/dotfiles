@@ -45,4 +45,28 @@ function! local#laravel#run(bang, command)
   endif
 endfun
 
+
+function! local#laravel#find_template_usage(...)
+  let bang = get(a:000, 0, 0)
+  if !empty(get(a:000, 1, 1))
+    let temp_file = a:1
+  else
+    let temp_file = expand('%')
+  endif
+  let template = substitute(l:temp_file, '.blade.php$', '', '')
+  let template = substitute(l:template, '^resources/views/', '', '')
+  let template = substitute(l:template, '/', '\\.', 'g')
+
+  if (temp_file =~ '.blade.php$')
+    exec('Rg ' . template)
+  else
+    echom('Not a blade template file')
+  endif
+
+
+endfunction
+
 command! -nargs=* -bang -complete=custom,local#laravel#complete Artisan call local#laravel#run(<bang>0,<q-args>)
+command! -nargs=* -bang FindTemplateUsage call local#laravel#find_template_usage(<bang>0,<q-args>)
+
+map gu :FindTemplateUsage<cr>

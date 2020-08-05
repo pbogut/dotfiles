@@ -1,5 +1,17 @@
 #!/bin/bash
 
+if [[ ! -z "$(ps -e | grep neomutt)" ]]; then
+  exit 0
+fi
+
+account="$1"
+
+if [[ $account == "" ]]; then
+  _account_filter="."
+else
+  _account_filter="/Maildir/$account/"
+fi
+
 # if something is archive, then it should not be inbox
 notmuch tag -unread -inbox -- tag:archive
 
@@ -7,21 +19,19 @@ notmuch tag -unread -inbox -- tag:archive
 # but only if they are in inbox or sent, other are in archive
 # already (at least on gmail, but that one actually make sense).
 
-notmuch search --output=files tag:archive |grep '/INBOX/\|/sent/' |while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/cur#Maildir/\1/archive/cur#'`" 2>&1 > /dev/null ;done;
+notmuch search --output=files tag:archive | grep "$_account_filter" | grep '/INBOX/\|/sent/' |while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null  2>&1;done;
+
+notmuch search --output=files "not tag:inbox and not tag:sent" | grep "$_account_filter" | grep INBOX | while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null 2>&1 ;done;
 
 # move sent emails out of inbox folder
-notmuch search --output=files tag:sent |grep '/INBOX/' |while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/cur#Maildir/\1/sent/cur#'`" 2>&1 > /dev/null ;done;
+notmuch search --output=files tag:sent | grep "$_account_filter" |grep '/INBOX/' |while read line; do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/sent/\3#'`"  > /dev/null 2>&1 ;done;
 
 # remove spam emails
-notmuch search --output=files tag:spam | while read line; do
-  mv "$line" ~/Temp/spam/ 2>&1 > /dev/null
-done
+# notmuch search --output=files tag:spam | while read line; do
+#   mv "$line" ~/Temp/spam/ 2>&1 > /dev/null
+# done
 
 notmuch tag +archive -- not date:`date +%Y` and not date:`expr $(date +%Y) - 1` and not tag:archive and tag:sent
-
-# move sent item to coresponding folder
-# maybe I should do someting with that, like... config array...
-# notmuch search --output=files folder:sent and from:email@address |while read line;do echo mv "$line" "`echo $line | sed 's#Maildir/sent/#Maildir/folder/sent/#'`" 2>&1 > /dev/null ;done;
 
 # detect moved files and update database
 notmuch new

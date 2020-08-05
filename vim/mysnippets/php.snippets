@@ -364,7 +364,16 @@ require_once('psysh'); eval(\Psy\sh()); #make sure psysh is in your include path
 endsnippet
 
 snippet zd "Zend_Debug dump"
-Zend_Debug::dump($1);
+Zend_Debug::dump
+endsnippet
+snippet zd( "Zend_Debug dump"
+Zend_Debug::dump(${VISUAL})
+endsnippet
+snippet zd(); "Zend_Debug dump"
+Zend_Debug::dump(${VISUAL});
+endsnippet
+snippet zd; "Zend_Debug dump"
+Zend_Debug::dump(${VISUAL});
 endsnippet
 
 snippet schcr "Laravel Schema::create"

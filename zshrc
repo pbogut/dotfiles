@@ -115,6 +115,7 @@ abbrev-alias --init
 abbrev-alias -g G='|rg'
 abbrev-alias -g dc='docker-compose'
 
+alias opti='LD_PRELOAD="libpthread.so.0 libGL.so.1" __GL_THREADED_OPTIMIZATIONS=1 optirun'
 alias ls="ls --color=auto"
 alias ll="ls -lhA --color=auto"
 alias pacman="pacman --color=auto"
@@ -147,6 +148,7 @@ alias sc="bash -c \"\`cat ~/.commands | fzf | sed 's,[^;]*;;; ,,'\`\""
 alias q="exit"
 alias :q="exit"
 alias m="ncmpcpp"
+alias s="spt"
 alias i="ssh-weechat"
 alias e="mutt"
 
@@ -187,6 +189,10 @@ export TERMINAL="urxvt"
 export LESS="-RXe"
 
 alias myip="wget http://ipinfo.io/ip -qO -"
+
+covid() {
+  curl -L http://covid19.trackercli.com/$1
+}
 
 # host specific config
 if [ -f $HOME/.$hostname.zsh ]; then

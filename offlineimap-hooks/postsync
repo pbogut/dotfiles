@@ -1,9 +1,32 @@
 #!/bin/bash
 hostname=`hostname`
+
+notmuch new
+
+if [[ ! -z "$(ps -e | grep neomutt)" ]]; then
+  exit 0
+fi
+
+# tags as directories
+# im removing new tag so I can set everything
+# before archive, which in gmails contain all mails by default (fy Google)
+notmuch tag +sort_directories -- tag:new
+ls -1d --color=never ~/Maildir/*/INBOX | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +inbox -- tag:sort_directories and
+ls -1d --color=never ~/Maildir/*/drafts | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +drafts +draft -- tag:sort_directories and
+ls -1d --color=never ~/Maildir/*/sent | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +sent -- tag:sort_directories and
+ls -1d --color=never ~/Maildir/*/trash | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +trash -- tag:sort_directories and
+ls -1d --color=never ~/Maildir/*/spam | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +spam -- tag:sort_directories and
+# in gmail everything is in archive, so we do this at the end
+ls -1d --color=never ~/Maildir/*/archive | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +archive -- tag:sort_directories and
+# sorted, get rid of remaining (if any?)
+notmuch tag -sort_directories -- tag:sort_directories
+
+# hook up after directories are sorted, so we dont mess with them anymore
 begin_hook="$HOME/.offlineimap-hooks-pre-postsync-$hostname.sh"
 [[ -f $begin_hook ]] && $begin_hook
 
-notmuch new
+notmuch tag +spam -inbox -- 'tag:new and subject:^[SPAM]'
+
 # add image tag
 notmuch tag +image -- tag:new and mimetype:image
 notmuch tag +attachment -- tag:new and attachment
@@ -22,26 +45,19 @@ notmuch search --output=files from:notifications@github.com and tag:new | while 
 done
 # tag gitlab messages (try to figure how to tag them by project @see github)
 notmuch tag +gitlab -- tag:new and from:gitlab@mg.gitlab.com
-# tag jira messages
-notmuch tag +jira -- "tag:new and from:jira@assuredpharmacy.atlassian.net"
-notmuch tag -inbox -- "(tag:jira and tag:inbox) and not tag:unread"
+
+notmuch tag -inbox -- "(tag:work and tag:inbox) and not tag:unread"
 
 # emails from myself
-notmuch tag -new -inbox -unread +sent -- from:"Pawel Bogut" and tag:new
-notmuch tag -new -inbox -unread +sent -- from:"Paweł Bogut" and tag:new
+notmuch tag -inbox -unread +sent -- from:"Pawel Bogut" and tag:new
+notmuch tag -inbox -unread +sent -- from:"Paweł Bogut" and tag:new
 # todoist tasks
-notmuch tag -new -inbox -unread +archive -- to:add.task%todoist.net and tag:new
+notmuch tag -inbox -unread +archive -- to:add.task%todoist.net and tag:new
 
-# tags as directories
-# im removing new tag so I can set everything
-# before archive, which in gmails contain all mails by default (fy Google)
-ls -1d --color=never ~/Maildir/*/INBOX | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +inbox -- tag:new and
-ls -1d --color=never ~/Maildir/*/drafts | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +drafts +draft -- tag:new and
-ls -1d --color=never ~/Maildir/*/sent | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +sent -- tag:new and
-ls -1d --color=never ~/Maildir/*/trash | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +trash -- tag:new and
-ls -1d --color=never ~/Maildir/*/spam | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +spamish -- tag:new and
-# in gmail everything is in archive, so we do this at the end
-ls -1d --color=never ~/Maildir/*/archive | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -new +archive -- tag:new and
+# custom spam filter +spam tag
+if [[ -f ~/.offlineimap-hooks/spam-filter ]]; then
+    ~/.offlineimap-hooks/spam-filter
+fi
 
 # add senders to abook
 # notmuch search --output=files tag:new | while read l; do cat "$l" | abook --add-email-quiet; done
@@ -50,10 +66,11 @@ ls -1d --color=never ~/Maildir/*/archive | sed "s#$HOME/Maildir/#folder:#g" | xa
 
 # auto archivie couses issues with gmail - wrrrr....
 #notmuch tag +archive -- date:..`date --date='6 month ago' +%Y-%m-%d`
-notmuch tag -new -- tag:new #clear new tag
 
 # Thread view - Add sent items to inbox if part of the thread is in inbox
 notmuch tag +inbox -- tag:inbox $(echo $(notmuch search tag:inbox | awk '{print "or " $1}'))
 
 end_hook="$HOME/.offlineimap-hooks-post-postsync-$hostname.sh"
 [[ -f $end_hook ]] && $end_hook
+
+notmuch tag -new -- tag:new #clear new tag

@@ -2,6 +2,11 @@ if !has('nvim')
   finish
 endif
 
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_lint_on_enter = 0
+let g:ale_php_phpcs_executable = $HOME . '/.bin/phpcs'
+let g:ale_php_phpcs_use_global = 1
+
 augroup pb_alegroup
   autocmd!
   autocmd InsertEnter php call s:ale_init_php()
@@ -180,3 +185,7 @@ call ale#linter#Define('elixir', {
 
 highlight ALEErrorSign guibg=#073642 guifg=#dc322f
 highlight ALEWarningSign guibg=#073642 guifg=#d33682
+
+autocmd User after_vim_load
+      \  highlight ALEErrorSign guibg=#073642 guifg=#dc322f
+      \| highlight ALEWarningSign guibg=#073642 guifg=#d33682

@@ -4,6 +4,7 @@ if !has('nvim')
 endif
 
 let g:fzf_layout = { 'down': '~35%' }
+" let g:fzf_layout = { 'window': {'width': 1, 'height': 0.35, 'yoffset': 1} }
 let g:fzf_command_prefix = "FZF"
 " let g:fzf_mru_relative = 1
 let g:fzf_mru_max = 50

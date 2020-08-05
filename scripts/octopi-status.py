@@ -10,7 +10,16 @@ from subprocess import call
 
 session = cachemere.start('octopi-status', autosave=True)
 
-click = argv[1] if len(argv) == 2 else False
+click = argv[2] if len(argv) == 3 else False
+printer = argv[1] if len(argv) >= 2 else False
+port = 80
+switch_id = 0
+if printer == 'redfactory':
+    switch_id = 3
+    port = 8081
+elif printer == 'patchwork':
+    switch_id = 4
+    port = 8082
 
 
 def nice_time(seconds):
@@ -28,7 +37,7 @@ def nice_time(seconds):
         return str(s) + 's'
 
 
-api_url = os.getenv('OCTOPI_URL')
+api_url = os.getenv('OCTOPI_URL') + ':' + str(port)
 api_key = os.getenv('OCTOPI_API')
 
 color = '#FFFFFF'
@@ -74,7 +83,7 @@ elif state.find('Error') == 0:
 message = None
 
 if click == "1" and (state == 'Offline' or state == 'Error'):
-    call(['ssh', 'pi@192.168.0.107', '-t', 'switch.sh', '3', 'on'])
+    call(['ssh', 'pi@192.168.1.107', '-t', 'switch.sh', switch_id, 'on'])
     time.sleep(2)
     requests.post(api_url + '/api/connection',
                   headers=headers, json={'command': 'connect'})
@@ -83,10 +92,10 @@ if click == "2" and state != 'Printing':
     r = call(['zenity', '--width=300', '--question',
               '--text=Are you sure you want to shut down printer?'])
     if str(r) == "0":
-        call(['ssh', 'pi@192.168.0.107', '-t', 'switch.sh', '3', 'off'])
+        call(['ssh', 'pi@192.168.1.107', '-t', 'switch.sh', switch_id, 'off'])
 
 if click == "3":
-    call(['browser', 'http://192.168.0.107/#control'])
+    call(['browser', 'http://192.168.1.107:' + str(port) + '/#control'])
 
 
 time_passed = nice_time(data['progress']['printTime'])
@@ -95,15 +104,12 @@ time_last_print = nice_time(data['job']['lastPrintTime'])
 
 if progress == 100 and file_name and state != 'Printing' and progress != session.get('last_progress'):
     session.set('last_progress', progress)
-    message = "Print finished!\n" + file_name + ': ' + \
-        str(progress) + '%' + "\nTotal time: " + \
-        time_last_print
+    message = "Print finished! " + time_last_print
     call(['notify-send', '-i', 'printer-printing', message])
 
 if state == 'Printing':
     session.set('last_progress', None)
-    message = file_name + ': ' + \
-        str(progress) + '% (' + time_passed + ' / ' + time_left + ')'
+    message = str(progress) + '% (' + time_passed + ' / ' + time_left + ')'
 
 if not message:
     message = state
@@ -118,6 +124,6 @@ color = "#06ea06" if progress >= 99 else color
 if bed_temp and tool_temp:
     message = message + ' (B:' + str(bed_temp) + '° T:' + str(tool_temp) + '°)'
 
-response = {'full_text': ' ' + message, 'color': color}
+response = {'full_text': message.strip(), 'color': color}
 
 print(json.dumps(response))

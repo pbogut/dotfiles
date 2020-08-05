@@ -31,11 +31,11 @@ if [[ $1 == "3" && $percent == 100 ]]; then
 fi
 
 if [[ $message == "" && $state =~ "Offline" ]]; then
-    echo '{"full_text": " Offline", "color": "'$color'"}'
+    echo '{"full_text": "Offline", "color": "'$color'"}'
 fi
 
 if [[ $message == "" && $state =~ "Online" ]]; then
-    echo '{"full_text": " Online", "color": "'$color'"}'
+    echo '{"full_text": "Online", "color": "'$color'"}'
 fi
 
 if [[ $last_message == $message ]]; then

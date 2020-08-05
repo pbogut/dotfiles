@@ -5,4 +5,6 @@
 # date:   24/06/2017
 #=================================================
 export PRIMUS_libGLa='/usr/$LIB/libGL.so.1'
-optirun "$@"
+echo optirun "$@" > /tmp/optirun.log
+export >> /tmp/optirun.log
+optirun "$@" >> /tmp/optirun.log

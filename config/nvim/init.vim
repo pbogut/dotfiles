@@ -91,6 +91,7 @@ augroup configgroup
   autocmd FileType *
         \  call matchadd('Todo', '@todo\>')
         \| call matchadd('Todo', '@fixme\>')
+        \| call matchadd('Error', '@debug\>')
   autocmd FileType html
         \  call s:set_indent(4, v:false, v:true)
   autocmd FileType vue
@@ -105,11 +106,14 @@ augroup configgroup
         \| let b:my_make_cmd = "elm-make --warn --output /dev/null {file_name}"
   autocmd FileType c
         \  setlocal tabstop=4 shiftwidth=4
+  autocmd FileType sql
+        \  setlocal tabstop=4 shiftwidth=4
+        \| let b:commentary_format='-- %s'
   autocmd FileType php
-        \| call s:set_indent(4, v:false, v:true)
+        \  call s:set_indent(4, v:false, v:true)
         \| let b:commentary_format='// %s'
-        \| nmap <buffer> gD <plug>(composer-find)
         \| setlocal kp=:PhpDoc
+        \| exec("nmap <buffer> gD <plug>(composer-find)")
         \| exec("map cgget mz0wwwyw/getters<cr>jo/**<cr>Gets <esc>pb~yiwo<cr>@return mixed<cr><cr>/<cr>public function get<esc>pa()<cr>{<cr>return $this-><esc>pb~A;<esc>jo<esc>`zj")
         \| exec("map cgset mz0wwwyw/setters<cr>jo/**<cr>Sets <esc>pb~yiwo<cr>@return $this<cr><cr>/<cr>public function set<esc>pa(<esc>pbi$<esc>~~ea)<cr>{<cr>$this-><esc>pb~A = $<esc>pb~A;<cr>return $this;<esc>jo<esc>`zj")
   autocmd FileType php.phtml
@@ -147,9 +151,11 @@ augroup configgroup
         \| if(winnr() != 1) | execute("resize 20") | endif
   " start mutt file edit on first empty line
   autocmd FileType mail
-        \ execute("normal /^$/\n")
+        \  execute("normal /^$/\n")
         \| setlocal spell spelllang=en_gb
         \| setlocal textwidth=72
+  autocmd BufEnter .i3blocks.conf
+        \ let b:whitespace_trim_disabled = 1
   autocmd BufEnter *.keepass
         \ nmap gp /^Password:<cr>:read !apg -m16 -n1 -MSNCL<cr>:%s/Password:.*\n/Password: /<cr><esc>
   autocmd BufEnter lpass.*
@@ -186,18 +192,18 @@ if exists(':Plug')
   Plug 'tpope/vim-scriptease'
   Plug 'tpope/vim-rsi'
   Plug 'tpope/vim-dadbod'
+  autocmd User after_vim_load source ~/.vim/plugin/config/dadbod.vimrc
   Plug 'tpope/vim-sleuth'
   autocmd User after_plug_end
         \  call airline#parts#define_function('sleuth', 'SleuthIndicator')
         \| let g:airline_section_y = airline#section#create_right(['sleuth'])
   Plug 'tpope/vim-fugitive'
-  Plug 'pbogut/vim-dadbod-ssh'
+  " Plug 'pbogut/vim-dadbod-ssh'
   " Plug 'pbogut/vim-fugitive'
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-git'
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-surround'
-  vmap s S
   Plug 'tpope/vim-repeat'
   Plug 'tpope/vim-rails', { 'for': 'ruby' }
   Plug 'tpope/vim-endwise'
@@ -262,11 +268,8 @@ if exists(':Plug')
   Plug 'justinmk/vim-dirvish'
   Plug 'kristijanhusak/vim-dirvish-git'
   source ~/.vim/plugin/config/dirvish.vimrc
-  "Plug 'w0rp/ale'
-  "autocmd User after_plug_end source ~/.vim/plugin/config/ale.vimrc
-  "autocmd User after_vim_load
-  "      \  highlight ALEErrorSign guibg=#073642 guifg=#dc322f
-  "      \| highlight ALEWarningSign guibg=#073642 guifg=#d33682
+  Plug 'w0rp/ale'
+  autocmd User after_plug_end source ~/.vim/plugin/config/ale.vimrc
   Plug 'chmp/mdnav'
   Plug 'samoshkin/vim-mergetool'
   source ~/.vim/plugin/config/vim-mergetool.vim
@@ -277,16 +280,17 @@ if exists(':Plug')
   Plug 'beloglazov/vim-textobj-quotes'
   " Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
   Plug 'joereynolds/gtags-scope'
+  Plug 'MattesGroeger/vim-bookmarks'
+  let g:bookmark_save_per_working_dir = 1
   " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
   " source ~/.vim/plugin/config/deoplete.vimrc
   " Plug 'Shougo/neco-vim', { 'for': 'vim' }
   Plug 'prabirshrestha/async.vim'
-  Plug 'prabirshrestha/vim-lsp'
-  autocmd User after_plug_end source ~/.vim/plugin/config/lsp.vim
-
+  Plug 'neovim/nvim-lsp'
+  Plug 'haorenW1025/diagnostic-nvim'
+  Plug 'haorenW1025/completion-nvim'
+  autocmd User after_plug_end source ~/.vim/plugin/config/lsp.vimrc
   Plug 'roxma/nvim-yarp'
-  Plug 'felixfbecker/php-language-server', {'do': 'composer install && composer run-script parse-stubs'}
-
   Plug 'ncm2/ncm2'
   autocmd User after_plug_end autocmd BufEnter * call ncm2#enable_for_buffer()
   Plug 'ncm2/ncm2-ultisnips'
@@ -343,7 +347,7 @@ augroup END
 silent! colorscheme solarized
 "
 source ~/.vim/plugin/config/autopairs.vimrc
-source ~/.vim/plugin/config/composer.vimrc
+" source ~/.vim/plugin/config/composer.vimrc
 source ~/.vim/plugin/config/terminal.vimrc
 
 " nicer vertical split
@@ -626,26 +630,24 @@ endfunction
 " remove underline
 hi Folded term=NONE cterm=NONE gui=NONE
 " new fold                   style
-function! NeatFoldText()
-  let line = ' ' . substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
-  let line = ' ' . substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
-  let line = ' ' . substitute(getline(v:foldstart), '^\s\s\s\s', '', 'g') . ' '
-  let g:line = line
-  let lines_count = v:foldend - v:foldstart + 1
-  let lines_count_text = '| ' . printf("%10s", lines_count . ' lines') . ' |'
-  " let foldchar = matchstr(&fillchars, 'fold:\zs.')
-  let foldchar = ' ' " use the space
-  let winwidth = winwidth(0)
-  if l:winwidth > 88
-    let winwidth = 88
-  endif
-  let foldtextstart = strpart('+++' . repeat(foldchar, v:foldlevel*3) . line, 0, (l:winwidth*2)/3)
-  let foldtextstart = strpart('+++' . line, 0, (l:winwidth*2)/3)
-  let foldtextend = lines_count_text . repeat(foldchar, 8)
-  let foldtextlength = strlen(substitute(foldtextstart . foldtextend, '.', 'x', 'g')) + &foldcolumn
-  return foldtextstart . repeat(foldchar, l:winwidth-foldtextlength) . foldtextend
-endfunction
-set foldtext=NeatFoldText()
+" function! NeatFoldText()
+"   " let line = substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
+"   " let line = substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
+"   " let line = substitute(getline(v:foldstart), '^\s\s\s\s', '', 'g') . ' '
+"   let line = getline(v:foldstart)
+"   let g:line = line
+"   let lines_count = v:foldend - v:foldstart + 1
+"   let foldtextend = ' | ' . printf("%10s", lines_count . ' lines') . ' |'
+"   let foldchar = ' ' " use the space
+"   let winwidth = winwidth(0)
+"   if l:winwidth > 80
+"     let winwidth = 80
+"   endif
+"   let foldtextstart = strpart(line, 0, l:winwidth - strlen(foldtextend))
+"   let foldtextlength = strlen(foldtextstart . foldtextend) + &foldcolumn
+"   return foldtextstart . repeat(foldchar, l:winwidth-foldtextlength) . foldtextend
+" endfunction
+" set foldtext=NeatFoldText()
 
 augroup set_title_group
   autocmd!
@@ -738,9 +740,9 @@ vmap <C-/> :call Comment(v:true)<cr><down>
 function! Comment(...) range
   if &ft == 'php.phtml'
     if Phtml_scope() == 'php'
-      let b:commentary_format = '/* %s */'
+      let b:commentary_format = '// %s'
     else
-      let b:commentary_format = '<?php /* %s */ ?>'
+      let b:commentary_format = '<?php // %s ?>'
     endif
   endif
   if empty(get(a:, 1))
@@ -770,4 +772,27 @@ function! MagentoModel(path, model)
   exec('e ' + a:model + '.php')
   exec('e Resource/' + a:model + '.php')
   exec('e Resource/' + a:model + '/Collection.php')
+endfunction
+
+function! InvertArgs(...)
+    " Get the arguments of the current line (remove the spaces)
+    let args=substitute(matchstr(getline('.'), '(\zs.*\ze)'), '\s', '', 'g')
+    if !empty(get(a:, 1))
+      let args=substitute(matchstr(getline('.'), '\s\+.*'), '\s', '', 'g')
+    endif
+    echom(args)
+
+    " Split the arguments as a list and reverse the list
+    let argsList=split(args, ',')
+    call reverse(argsList)
+
+    " Join the reversed list with a comma and a space separing the arguments
+    let invertedArgs=join(argsList, ', ')
+
+    " Remove the old arguments and put the new list
+    if !empty(get(a:, 1))
+      execute "normal! ^c$". invertedArgs
+    else
+      execute "normal! 0f(ci(" . invertedArgs
+    endif
 endfunction
