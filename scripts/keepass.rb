@@ -10,6 +10,27 @@ require "open3"
 require "nokogiri"
 require "clipboard"
 
+
+def has_otp(notes)
+  notes.split("\n").each do |line|
+    if line.match(/^otpauth:\/\//)
+      return true
+    end
+  end
+  return false
+end
+
+def get_otp(notes)
+  result = ""
+  notes.split("\n").each do |line|
+    if line.match(/^otpauth:\/\//)
+      result, _, _ = Open3.capture3('authy.py', line)
+      break
+    end
+  end
+  return result.delete "\n"
+end
+
 action, = ARGV
 
 if !action
@@ -21,6 +42,7 @@ if !action
     "--type-user-and-pass",
     "--type-user",
     "--type-pass",
+    "--type-otpauth",
     "--remove",
     "--edit",
     "--add",
@@ -50,11 +72,13 @@ entries.each do |entry|
   name = entry.xpath('./String/Key[text()="Title"]/../Value').text
   url = entry.xpath('./String/Key[text()="URL"]/../Value').text
   user = entry.xpath('./String/Key[text()="UserName"]/../Value').text
+  notes = entry.xpath('./String/Key[text()="Notes"]/../Value').text
+  otp = " 2FA" if has_otp(notes)
   cat = "#{cat}/" if cat
 
   indexes[no] = name
   if name
-    formated_list <<  ('%3.3s| %-50.50s %-50.50s %s' % [no, "#{cat}#{name}" , user, url]) + "\n"
+    formated_list <<  ('%3.3s| %-50.50s %-50.50s %-8.8s %s' % [no, "#{cat}#{name}" , user, otp, url]) + "\n"
   end
 end
 
@@ -112,6 +136,8 @@ prompt = case action
     "user"
   when "--type-pass"
     "pass"
+  when "--type-otpauth"
+    "otpauth"
   when "--remove"
     "remove"
   when "--edit"
@@ -134,14 +160,23 @@ index = selection.gsub(/(\d+).*/, '\1').to_i
 exit unless index > 0
 
 name = indexes[index]
-result, _, _ = Open3.capture3("keepass-cli", "show", name)
-Open3.capture3('copyq', 'disable') # disable copyq from storing password
-Open3.capture3('keepass-cli', 'clip', name)
-Open3.capture3('copyq', 'enable') # allow copyq keep working after password was coppied
-pass = Clipboard.paste
-user = ''
+result, _, _ = Open3.capture3("keepass-cli", "show", "-s", name)
+# Open3.capture3('copyq', 'disable') # disable copyq from storing password
+# Open3.capture3('keepass-cli', 'clip', name)
+# Open3.capture3('copyq', 'enable') # allow copyq keep working after password was coppied
+# pass = Clipboard.paste
+pass = ''
+user = 'am'
+otpauth = 'ym'
 result.gsub(/^UserName: (.*)$/) do |match|
   user = match.gsub(/^UserName: (.*)$/, '\1')
+end
+result.gsub(/^Password: (.*)$/) do |match|
+  pass = match.gsub(/^Password: (.*)$/, '\1')
+end
+result.gsub(/^(Notes: )?otpauth:\/\/(.*)$/) do |match|
+  otpurl = match.gsub(/^(Notes: )?(otpauth:\/\/.*)$/, '\2')
+  otpauth = get_otp(otpurl)
 end
 
 sleep 0.2
@@ -166,7 +201,6 @@ if action == '--type-user'
     cmd = "sleep 0.5s; xdotool type --clearmodifiers '#{user}'"
     Open3.capture3(cmd)
   end
-
 end
 if action == '--type-pass'
   if ENV['QUTE_FIFO']
@@ -185,6 +219,16 @@ if action == '--type-user-and-pass' or action.empty?
     file.write("fake-key <tab>\n")
     file.write("fake-key #{pass}\n")
     # file.write("fake-key -g <esc>i\n")
+  end
+end
+if action == '--type-otpauth'
+  if ENV['QUTE_FIFO']
+    File.open(ENV['QUTE_FIFO'], 'w') do |file|
+      file.write("fake-key #{otpauth}\n")
+    end
+  else
+    cmd = "sleep 0.5s; xdotool type --clearmodifiers '#{otpauth}'"
+    Open3.capture3(cmd)
   end
 end
 if action == "--edit"
