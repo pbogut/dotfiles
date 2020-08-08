@@ -22,27 +22,27 @@ if [[ $1 == 'new' ]]; then
     echo "Name: $2" >$temp
     echo "URL: $3" >>$temp
     echo "UserName: $4$(gpg-config get acc-email-server)" >>$temp
-    #echo "Password: $(apg -m16 -n1 -MSNCL)" >>$temp
-    vim $temp
+    echo "Password: $(apg -m16 -n1 -MSNCL)" >>$temp
+    nvim $temp
     name=$(grep '^Name: ' $temp | sed 's,^Name: ,,')
     url=$(grep '^URL: ' $temp | sed 's,^URL: ,,')
     user=$(grep '^UserName: ' $temp | sed 's,^UserName: ,,')
-    #npass=$(grep '^Password: ' $temp | sed 's,^Password: ,,')
-    if [[ -z $name ]]; then
+    npass=$(grep '^Password: ' $temp | sed 's,^Password: ,,')
+    if [[ -z $name ]] || [[ -z $npass ]]; then
         exit 1
     else
-
-        (
-            echo $pass
-        ) | keepassxc-cli add -g -u "$user" --url "$url" $db "$name" | tail -n +3
+        ( echo $pass
+          echo $npass
+        ) | keepassxc-cli add -p -u "$user" --url "$url" $db "$name" | tail -n +3
         exit 0
     fi
 fi
 
 if [[ $1 == 'change' ]]; then
     temp=$(mktemp)".keepass"
-    $0 show "$2" | grep -v '^Notes' >$temp
-    vim $temp
+    echo "Title: $2" > $temp
+    $0 show -s "$2" | sed '/^Notes:/Q' >> $temp
+    nvim $temp
     name=$(grep '^Title: ' $temp | sed 's,^Title: ,,')
     url=$(grep '^URL: ' $temp | sed 's,^URL: ,,')
     user=$(grep '^UserName: ' $temp | sed 's,^UserName: ,,')
@@ -50,10 +50,8 @@ if [[ $1 == 'change' ]]; then
     if [[ -z $name ]] || [[ -z $npass ]]; then
         exit 1
     else
-
-        (
-            echo $pass
-            echo $npass
+        ( echo $pass
+          echo $npass
         ) | keepassxc-cli edit -p -u "$user" --url "$url" $db "$name" | tail -n +3
         exit 0
     fi
