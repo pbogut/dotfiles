@@ -40,6 +40,26 @@ function! templates#InsertSkeleton(...) abort
         return
       endif
     endfor
+    " didnt do anything so lets try regexp
+    for root in keys(b:projectionist)
+      for config in b:projectionist[root]
+        for pattern in keys(config)
+          if has_key(config[pattern], 'skeleton')
+            let value = config[pattern]['skeleton']
+            if !empty(a:000) | let value .= '_' . template | endif
+            try
+              if l:pattern =~# '^r\!' && l:filename =~# substitute(l:pattern, '^r\!', '', '')
+                if s:try_insert(value)
+                  return
+                endif
+              end
+            catch
+              " not really regexp, no harm I guess
+            endtry
+          endif
+        endfor
+      endfor
+    endfor
   endif
 
   if s:try_insert(expand('%:t:r') . '_skel')

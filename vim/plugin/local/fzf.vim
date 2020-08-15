@@ -190,6 +190,33 @@ function! local#fzf#ft(...) abort
   call fzf#run(fzf#wrap('name', extra, 0))
 endfunction
 
+function! local#fzf#vim_config(...) abort
+  let options = {
+        \   'source': 'ag -l -g "" ~/.config/nvim/init.vim ~/.vim/plugin/',
+        \   'options': '--prompt "All files> " ' . s:params(a:000, 1),
+        \ }
+  let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
+  call fzf#run(fzf#wrap('name', extra, 0))
+endfunction
+
+function! local#fzf#mysnippets(...) abort
+  let options = {
+        \   'source': 'ag -l -g "" ~/.vim/mysnippets',
+        \   'options': '--prompt "All files> " ' . s:params(a:000, 1),
+        \ }
+  let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
+  call fzf#run(fzf#wrap('name', extra, 0))
+endfunction
+
+function! local#fzf#mytemplates(...) abort
+  let options = {
+        \   'source': 'ag -l -g "" ~/.vim/mytemplates ~/.config/nvim/config/projectionist.vimrc',
+        \   'options': '--prompt "All files> " ' . s:params(a:000, 1),
+        \ }
+  let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
+  call fzf#run(fzf#wrap('name', extra, 0))
+endfunction
+
 command! -nargs=* -bang -complete=dir FZFProject call local#fzf#project(<f-args>)
 
 command! -nargs=* -bang -complete=dir Ag call local#fzf#ag(<bang>0,<f-args>)

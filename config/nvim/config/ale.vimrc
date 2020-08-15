@@ -27,18 +27,19 @@ let g:ale_lint_on_text_changed_elixir = 'never'
 " linting elm takes too long to do this when file chaneg
 let g:ale_lint_on_text_changed_elm = 'never'
 
-let g:ale_sign_error = '✖'
-let g:ale_sign_error = ''
-let g:ale_sign_warning = '⚠'
+let g:ale_sign_error = ''
 let g:ale_sign_warning = ''
 
+let g:ale_virtualtext_cursor = 1
+
+let g:ale_virtualtext_prefix = '   '
 let g:ale_sign_column_always = 1
 
 let g:ale_echo_msg_error_str = 'E'
 let g:ale_echo_msg_warning_str = 'W'
 let g:ale_echo_msg_format = '[%severity%][%linter%] %s'
 
-" wrapper around ale linting to allow lint setup by file tyep
+" wrapper around ale linting to allow lint setup by file type
 function! s:ale_lint(type)
   let action = get(g:, 'ale_lint_on_text_changed_' . &ft)
   if empty(l:action)
@@ -189,3 +190,8 @@ highlight ALEWarningSign guibg=#073642 guifg=#d33682
 autocmd User after_vim_load
       \  highlight ALEErrorSign guibg=#073642 guifg=#dc322f
       \| highlight ALEWarningSign guibg=#073642 guifg=#d33682
+      \| highlight ALEVirtualTextError guibg=#073642 guifg=#dc322f gui=italic
+      \| highlight ALEVirtualTextWarning guibg=#073642 guifg=#d33682 gui=italic
+      \| highlight ALEVirtualTextInfo gui=italic
+      \| highlight ALEVirtualTextStyleError guibg=#073642 guifg=#dc322f gui=italic
+      \| highlight ALEVirtualTextStyleWarning guibg=#073642 guifg=#d33682 gui=italic

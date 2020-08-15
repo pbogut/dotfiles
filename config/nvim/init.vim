@@ -105,9 +105,9 @@ augroup configgroup
         \| setlocal makeprg=elm-make
         \| let b:my_make_cmd = "elm-make --warn --output /dev/null {file_name}"
   autocmd FileType c
-        \  setlocal tabstop=4 shiftwidth=4
+        \  call s:set_indent(4, v:false, v:true)
   autocmd FileType sql
-        \  setlocal tabstop=4 shiftwidth=4
+        \  call s:set_indent(4, v:false, v:true)
         \| let b:commentary_format='-- %s'
   autocmd FileType php
         \  call s:set_indent(4, v:false, v:true)
@@ -121,23 +121,22 @@ augroup configgroup
         \| let b:commentary_format='<?php /* %s */ ?>'
   autocmd FileType go
         \  call s:set_indent(2, v:true, v:true)
-  " \| setlocal tabstop=2 shiftwidth=2
-  " autocmd FileType ruby
-  "       \  setlocal tabstop=2 shiftwidth=2
+  autocmd FileType ruby
+        \  call s:set_indent(2, v:true, v:true)
   autocmd FileType vim
         \  call s:set_indent(2, v:false, v:true)
         \| let b:neoformat_basic_format_align = 1
-  "       \| setlocal kp=:help
-  " autocmd FileType xml
-  "       \  setlocal tabstop=4 shiftwidth=4
+  autocmd FileType xml
+        \  call s:set_indent(4, v:false, v:true)
   autocmd FileType sh
         \  call s:set_indent(2, v:false, v:true)
-  " autocmd FileType css
-  "       \  setlocal tabstop=4 shiftwidth=4
-  " autocmd FileType scss
-  "       \  setlocal tabstop=4 shiftwidth=4
+  autocmd FileType css
+        \  call s:set_indent(4, v:false, v:true)
+  autocmd FileType scss
+        \  call s:set_indent(4, v:false, v:true)
   autocmd FileType blade
-        \  let b:commentary_format='{{-- %s --}}'
+        \  call s:set_indent(4, v:false, v:true)
+        \| let b:commentary_format='{{-- %s --}}'
   autocmd FileType crontab\|nginx\|resolv
         \  let b:commentary_format='# %s'
   autocmd FileType markdown
@@ -145,7 +144,6 @@ augroup configgroup
   autocmd FileType qf
         \  nnoremap <buffer> o <cr>
         \| nnoremap <buffer> q :q
-  " autocmd FileType gitcommit
   autocmd FileType fugitiveeee
         \  execute("wincmd J")
         \| if(winnr() != 1) | execute("resize 20") | endif
@@ -158,15 +156,6 @@ augroup configgroup
         \ let b:whitespace_trim_disabled = 1
   autocmd BufEnter *.keepass
         \ nmap gp /^Password:<cr>:read !apg -m16 -n1 -MSNCL<cr>:%s/Password:.*\n/Password: /<cr><esc>
-  autocmd BufEnter lpass.*
-        \  if search('^Password: $')
-        \|   execute('r !apg -m16 -n1 -MSNCL')
-        \|   execute('normal kJk')
-        \|   execute('r !gpg-config get default-email')
-        \|   execute('normal kJk')
-        \|   execute('r !cat ' . $TMPDIR . '/_lpass_url')
-        \|   execute('normal kJ')
-        \| endif
   autocmd FileType tagbar
         \  nmap <buffer> <space>n q
   autocmd  FileType fzf
@@ -174,10 +163,6 @@ augroup configgroup
         \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
   autocmd InsertLeave *
         \ if &buftype == 'acwrite' | execute('WidenRegion') | endif
-  " always show gutter column to avoid blinking and jumping
-  " autocmd BufEnter *
-  "       \  execute('sign define dummy')
-  "       \| execute('sign place 98913 line=1 name=dummy buffer=' . bufnr(''))
   autocmd BufWritePre *
         \  silent! Format auto
   autocmd BufWritePost *
@@ -186,20 +171,16 @@ augroup END
 
 silent! call plug#begin()
 if exists(':Plug')
+  Plug 'editorconfig/editorconfig-vim'
+  let g:EditorConfig_exclude_patterns = ['fugitive://.*', 'scp://.*']
   Plug 'pbogut/dbext.vim'
   let g:dbext_map_prefix = '\s'
   Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
   Plug 'tpope/vim-scriptease'
   Plug 'tpope/vim-rsi'
   Plug 'tpope/vim-dadbod'
-  autocmd User after_vim_load source ~/.vim/plugin/config/dadbod.vimrc
-  Plug 'tpope/vim-sleuth'
-  autocmd User after_plug_end
-        \  call airline#parts#define_function('sleuth', 'SleuthIndicator')
-        \| let g:airline_section_y = airline#section#create_right(['sleuth'])
+  autocmd User after_vim_load source ~/.config/nvim/config/dadbod.vimrc
   Plug 'tpope/vim-fugitive'
-  " Plug 'pbogut/vim-dadbod-ssh'
-  " Plug 'pbogut/vim-fugitive'
   Plug 'tpope/vim-eunuch'
   Plug 'tpope/vim-git'
   Plug 'tpope/vim-commentary'
@@ -210,18 +191,18 @@ if exists(':Plug')
   Plug 'tpope/vim-unimpaired'
   Plug 'tpope/vim-obsession'
   Plug 'tpope/vim-abolish'
-  autocmd User after_vim_load source ~/.vim/plugin/config/abolish.vimrc
+  autocmd User after_vim_load source ~/.config/nvim/config/abolish.vimrc
   Plug 'tpope/vim-projectionist'
-  source ~/.vim/plugin/config/projectionist.vimrc
+  source ~/.config/nvim/config/projectionist.vimrc
   Plug 'rhysd/git-messenger.vim'
   nmap <space>gm <Plug>(git-messenger)
   Plug 'dhruvasagar/vim-prosession'
   let g:prosession_per_branch = 1
   Plug 'vim-airline/vim-airline'
-  source ~/.vim/plugin/config/airline.vimrc
+  source ~/.config/nvim/config/airline.vimrc
   Plug 'vim-airline/vim-airline-themes'
   Plug 'mhinz/vim-signify'
-  source ~/.vim/plugin/config/signify.vim
+  source ~/.config/nvim/config/signify.vim
   Plug 'MarcWeber/vim-addon-mw-utils'
   Plug 'ludovicchabant/vim-gutentags'
   Plug 'gioele/vim-autoswap'
@@ -229,19 +210,19 @@ if exists(':Plug')
   let g:strip_whitespace_on_save = 0 " Use Whitespace wrapper instead
   Plug 'honza/vim-snippets'
   Plug 'mattn/emmet-vim'
-  Plug 'majutsushi/tagbar'
+  Plug 'majutsushi/tagbar', { 'on': 'TagbarOpenAutoClose' }
   nnoremap <silent> <space>n :TagbarOpenAutoClose<cr>
   Plug 'sirver/ultisnips'
-  source ~/.vim/plugin/config/ultisnips.vim
+  source ~/.config/nvim/config/ultisnips.vim
   Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
-  source ~/.vim/plugin/config/vdebug.vim
+  source ~/.config/nvim/config/vdebug.vim
   Plug 'sbdchd/neoformat'
   let g:neoformat_only_msg_on_error = 1
   Plug 'k-takata/matchit.vim'
   Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
   Plug 'noahfrederick/vim-composer', { 'for': 'php' }
   Plug 'janko-m/vim-test'
-  source ~/.vim/plugin/config/test.vim
+  source ~/.config/nvim/config/test.vim
   Plug 'elmcast/elm-vim', { 'for': 'elm' }
   Plug 'pbogut/vim-elmper', { 'for': 'elm' }
   let g:elm_format_autosave = 0
@@ -253,48 +234,43 @@ if exists(':Plug')
   let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
         \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
   Plug 'AndrewRadev/switch.vim'
-  autocmd User after_plug_end source ~/.vim/plugin/config/switch.vimrc
+  autocmd User after_plug_end source ~/.config/nvim/config/switch.vimrc
   Plug 'AndrewRadev/splitjoin.vim'
   Plug 'AndrewRadev/sideways.vim'
-  source ~/.vim/plugin/config/sideways.vim
+  source ~/.config/nvim/config/sideways.vim
   Plug 'godlygeek/tabular'
   command! -nargs=* -range T Tabularize <args>
   Plug 'vim-scripts/cmdalias.vim'
-  autocmd User after_vim_load source ~/.vim/plugin/config/cmdalias.vimrc
+  autocmd User after_vim_load source ~/.config/nvim/config/cmdalias.vimrc
   " Plug 'Shougo/unite.vim'
   Plug 'Shougo/echodoc.vim'
   Plug 'andyl/vim-textobj-elixir'
   Plug 'kana/vim-textobj-user'
   Plug 'justinmk/vim-dirvish'
   Plug 'kristijanhusak/vim-dirvish-git'
-  source ~/.vim/plugin/config/dirvish.vimrc
+  source ~/.config/nvim/config/dirvish.vimrc
   Plug 'w0rp/ale'
-  autocmd User after_plug_end source ~/.vim/plugin/config/ale.vimrc
+  autocmd User after_plug_end source ~/.config/nvim/config/ale.vimrc
   Plug 'chmp/mdnav'
   Plug 'samoshkin/vim-mergetool'
-  source ~/.vim/plugin/config/vim-mergetool.vim
+  source ~/.config/nvim/config/vim-mergetool.vim
 
 
   Plug 'vim-scripts/ReplaceWithRegister'
-  source ~/.vim/plugin/config/replacewithregister.vim
+  source ~/.config/nvim/config/replacewithregister.vim
   Plug 'beloglazov/vim-textobj-quotes'
   " Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
   Plug 'joereynolds/gtags-scope'
   Plug 'MattesGroeger/vim-bookmarks'
   let g:bookmark_save_per_working_dir = 1
   " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-  " source ~/.vim/plugin/config/deoplete.vimrc
+  " source ~/.config/nvim/config/deoplete.vimrc
   " Plug 'Shougo/neco-vim', { 'for': 'vim' }
   Plug 'prabirshrestha/async.vim'
-  Plug 'neovim/nvim-lsp'
-  Plug 'haorenW1025/diagnostic-nvim'
-  Plug 'haorenW1025/completion-nvim'
-  autocmd User after_plug_end source ~/.vim/plugin/config/lsp.vimrc
   Plug 'roxma/nvim-yarp'
   Plug 'ncm2/ncm2'
   autocmd User after_plug_end autocmd BufEnter * call ncm2#enable_for_buffer()
   Plug 'ncm2/ncm2-ultisnips'
-  Plug 'ncm2/ncm2-vim-lsp'
   Plug 'ncm2/ncm2-bufword'
   Plug 'ncm2/ncm2-path'
   Plug 'ncm2/ncm2-tagprefix'
@@ -302,7 +278,6 @@ if exists(':Plug')
   Plug 'ncm2/ncm2-cssomni', {'for': ['css', 'scss', 'less']}
   Plug 'ncm2/ncm2-tern', {'do': 'npm install'}
   Plug 'ncm2/ncm2-go', {'for': 'go'}
-  Plug 'ncm2/ncm2-vim' | Plug 'Shougo/neco-vim'
   Plug 'ncm2/ncm2-ultisnips'
   Plug 'ncm2/ncm2-html-subscope'
   Plug 'ncm2/ncm2-markdown-subscope'
@@ -313,7 +288,7 @@ if exists(':Plug')
   Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
   Plug 'junegunn/fzf.vim'
   Plug 'pbogut/fzf-mru.vim'
-  source ~/.vim/plugin/config/fzf.vimrc
+  source ~/.config/nvim/config/fzf.vimrc
   Plug 'slashmili/alchemist.vim', { 'for': ['elixir', 'eelixir'] }
   Plug 'powerman/vim-plugin-AnsiEsc', { 'for': ['elixir', 'eelixir'] }
   " Plug 'zchee/deoplete-go', { 'do': 'go get github.com/nsf/gocode && make', 'for': 'go'}
@@ -329,6 +304,14 @@ if exists(':Plug')
 
   if filereadable($HOME . '/.wakatime.cfg')
     Plug 'wakatime/vim-wakatime'
+  endif
+
+  if exists(':lua')
+    Plug 'neovim/nvim-lsp'
+    Plug 'nvim-lua/diagnostic-nvim'
+    autocmd User after_plug_end source ~/.config/nvim/config/diagnostic.vimrc
+    Plug 'nvim-lua/completion-nvim'
+    autocmd User after_plug_end source ~/.config/nvim/config/lsp.vimrc
   endif
 endif "
 silent! call plug#end()      " requiredc
@@ -346,9 +329,9 @@ augroup END
 
 silent! colorscheme solarized
 "
-source ~/.vim/plugin/config/autopairs.vimrc
-" source ~/.vim/plugin/config/composer.vimrc
-source ~/.vim/plugin/config/terminal.vimrc
+source ~/.config/nvim/config/autopairs.vimrc
+" source ~/.config/nvim/config/composer.vimrc
+source ~/.config/nvim/config/terminal.vimrc
 
 " nicer vertical split
 hi VertSplit guibg=#073642 guifg=fg
@@ -363,6 +346,10 @@ nnoremap <space>sm :source ~/.vim/macros.vim<cr>
 nnoremap <space>ev :tabnew $MYVIMRC<CR>
 nnoremap <space>ez :tabnew ~/.zshrc<CR>
 nnoremap <space>sv :source $MYVIMRC<CR>
+
+nnoremap <space>et :call local#fzf#mytemplates()<CR>
+nnoremap <space>es :call local#fzf#mysnippets()<CR>
+
 " open list / quickfix
 nnoremap <silent> <space>l :call local#togglelist#locationlist()<cr>
 nnoremap <silent> <space>q :call local#togglelist#quickfixlist()<cr>
@@ -422,7 +409,9 @@ inoremap <c-d> <del>
 cnoremap <c-d> <del>
 " vim make
 nmap <space>mf <space>w:call QuickTerm(substitute(b:my_make_cmd, '{file_name}', expand('%'), ''))<cr>
-nmap <space>ms <space>w:make<cr>
+nmap <space>ms <space>w:QuickTerm make<cr>
+nmap <space>mm <space>w:QuickTerm make<space>
+nmap <space>md <space>w:QuickTerm make deploy<cr>
 " regex helpers
 cnoremap \\* \(.*\)
 cnoremap \\- \(.\{-}\)
@@ -450,6 +439,7 @@ nnoremap <silent> <space>fg :call local#fzf#git_ls()<cr>
 nnoremap <silent> <space>ft :FZFTags <cword><cr>
 nnoremap <silent> <space>] :FZFTags<cr>
 nnoremap <silent> <space>fb :FZFBuffers<cr>
+nnoremap <silent> <space>ec :call local#fzf#vim_config()<cr>
 nnoremap <silent> <space>gf :call local#fzf#files(expand('<cfile>'))<cr>
 nnoremap <silent> <space>gF :call local#fzf#all_files(expand('<cfile>'))<cr>
 nnoremap <silent> <space>gt :call fzf#vim#tags(expand('<cword>'))<cr>
@@ -629,25 +619,6 @@ endfunction
 " fold adjust
 " remove underline
 hi Folded term=NONE cterm=NONE gui=NONE
-" new fold                   style
-" function! NeatFoldText()
-"   " let line = substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
-"   " let line = substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
-"   " let line = substitute(getline(v:foldstart), '^\s\s\s\s', '', 'g') . ' '
-"   let line = getline(v:foldstart)
-"   let g:line = line
-"   let lines_count = v:foldend - v:foldstart + 1
-"   let foldtextend = ' | ' . printf("%10s", lines_count . ' lines') . ' |'
-"   let foldchar = ' ' " use the space
-"   let winwidth = winwidth(0)
-"   if l:winwidth > 80
-"     let winwidth = 80
-"   endif
-"   let foldtextstart = strpart(line, 0, l:winwidth - strlen(foldtextend))
-"   let foldtextlength = strlen(foldtextstart . foldtextend) + &foldcolumn
-"   return foldtextstart . repeat(foldchar, l:winwidth-foldtextlength) . foldtextend
-" endfunction
-" set foldtext=NeatFoldText()
 
 augroup set_title_group
   autocmd!
@@ -668,6 +639,16 @@ let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN
 set title
 
 function! s:set_indent(width, ...) " width:int, hardtab:bool, init:bool
+  if filereadable('.editorconfig')
+    return
+  endif
+  let l:rootmakers = g:rootmarkers
+  call add(g:rootmarkers, '.editorconfig')
+  let l:root = projectroot#guess()
+  let g:rootmarkers = l:rootmakers
+  if filereadable(l:root . '/.editorconfig')
+    return
+  endif
   let l:hardtab = get(a:000, 0, v:false)
   let l:init = get(a:000, 1, v:false)
 
@@ -775,24 +756,24 @@ function! MagentoModel(path, model)
 endfunction
 
 function! InvertArgs(...)
-    " Get the arguments of the current line (remove the spaces)
-    let args=substitute(matchstr(getline('.'), '(\zs.*\ze)'), '\s', '', 'g')
-    if !empty(get(a:, 1))
-      let args=substitute(matchstr(getline('.'), '\s\+.*'), '\s', '', 'g')
-    endif
-    echom(args)
+  " Get the arguments of the current line (remove the spaces)
+  let args=substitute(matchstr(getline('.'), '(\zs.*\ze)'), '\s', '', 'g')
+  if !empty(get(a:, 1))
+    let args=substitute(matchstr(getline('.'), '\s\+.*'), '\s', '', 'g')
+  endif
+  echom(args)
 
-    " Split the arguments as a list and reverse the list
-    let argsList=split(args, ',')
-    call reverse(argsList)
+  " Split the arguments as a list and reverse the list
+  let argsList=split(args, ',')
+  call reverse(argsList)
 
-    " Join the reversed list with a comma and a space separing the arguments
-    let invertedArgs=join(argsList, ', ')
+  " Join the reversed list with a comma and a space separing the arguments
+  let invertedArgs=join(argsList, ', ')
 
-    " Remove the old arguments and put the new list
-    if !empty(get(a:, 1))
-      execute "normal! ^c$". invertedArgs
-    else
-      execute "normal! 0f(ci(" . invertedArgs
-    endif
+  " Remove the old arguments and put the new list
+  if !empty(get(a:, 1))
+    execute "normal! ^c$". invertedArgs
+  else
+    execute "normal! 0f(ci(" . invertedArgs
+  endif
 endfunction

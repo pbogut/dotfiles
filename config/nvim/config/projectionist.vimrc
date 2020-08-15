@@ -7,6 +7,14 @@ function! g:projectionist_transformations.mag_rm_pool(input, o) abort
   return substitute(a:input, '^\(core/\|community/\|local/\)', '', '')
 endfunction
 
+
+" NOTES:
+" Templates
+" `skeleton` key is used for creating templates, @see vim/plugin/templates.vim
+" for skeleton only it is also possible to use regexp to match files to do so
+" prefix file pattern with r! and follow with vim regexp. =~# will be used to
+" match pattern against relative file name
+
 " mapping
 noremap <space>ta :A<cr>
 
@@ -69,14 +77,38 @@ let s:magento_module =
       \       ]
       \     }
       \   }
-let s:magento_2_module =
+let s:magento2_module =
       \   {
       \     "*": {
       \       "project_root": 1,
-      \       "setlocal": s:space_4
+      \       "setlocal": s:space_4,
       \     },
-      \     "registration.php": {
+      \     "*.php": {
+      \       "base_skeleton": "magento2_class"
+      \     },
+      \     "app/code/*/registration.php": {
       \       "skeleton": "magento2_registration"
+      \     },
+      \     "r!app/code/.*/Controller/.*\.php": {
+      \       "skeleton": "magento2_controller"
+      \     },
+      \     "r!app/code/.*/Observer/.*\.php": {
+      \       "skeleton": "magento2_observer"
+      \     },
+      \     "app/code/*/etc/module.xml": {
+      \       "skeleton": "magento2_module"
+      \     },
+      \     "app/code/*/etc/di.xml": {
+      \       "skeleton": "magento2_di"
+      \     },
+      \     "app/code/*/etc/frontend/events.xml": {
+      \       "skeleton": "magento2_events"
+      \     },
+      \     "app/code/*/etc/backend/events.xml": {
+      \       "skeleton": "magento2_events"
+      \     },
+      \     "app/code/*/etc/frontend/routes.xml": {
+      \       "skeleton": "magento2_frontend_routes"
       \     }
       \  }
 let s:composer =
@@ -224,8 +256,8 @@ let s:codeception =
       \     },
       \   }
 let g:projectionist_heuristics = {}
-let g:projectionist_heuristics["composer.json&modman&app/"] = s:magento_module
-let g:projectionist_heuristics["composer.json&bin/magento"] = s:magento_2_module
+let g:projectionist_heuristics["composer.json&app/Mage.php"] = s:magento_module
+let g:projectionist_heuristics["composer.json&bin/magento"] = s:magento2_module
 let g:projectionist_heuristics["artisan&composer.json"] = s:laravel
 let g:projectionist_heuristics["*.ex|*.exs"] = s:elixir
 let g:projectionist_heuristics["mix.exs&deps/phoenix/"] = s:phoenixframework
