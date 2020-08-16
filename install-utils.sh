@@ -18,7 +18,7 @@ install_yay
 echo "Installing neovim..."
 yay -S \
     abook \
-    net-utils \
+    inetutils \
     picom \
     dmenu \
     go \
@@ -52,6 +52,7 @@ yay -S \
     xcape \
     xrandr \
     xtitle \
+    ruby \
     dunst
 
 pip install \

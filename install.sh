@@ -47,6 +47,7 @@ read -d '' files <<"EOF"
     config/ncmpcpp/bindings
     config/nvim/init.vim
     config/nvim/ginit.vim
+    config/nvim/config
     config/pip/pip.conf
     config/qutebrowser/config.py
     config/qutebrowser/keys.conf
