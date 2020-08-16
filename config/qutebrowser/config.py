@@ -118,9 +118,6 @@ config.bind('gc', 'spawn google-chrome-stable {url:pretty}')
 
 config.bind('<Ctrl-i>', 'open-editor', mode='insert')
 config.bind(
-    '<ctrl-j>',
-    'spawn --userscript ~/.scripts/keepass.rb --add', mode='insert')
-config.bind(
     '<ctrl-k>',
     'spawn --userscript ~/.scripts/keepass.rb --add', mode='insert')
 config.bind(
@@ -133,6 +130,11 @@ config.bind(
 config.bind(
     '<ctrl-y>',
     'spawn --userscript ~/.scripts/keepass.rb --type-pass', mode='insert')
+config.bind(
+    '<ctrl-;>',
+    'spawn --userscript ~/.scripts/keepass.rb --type-otpauth', mode='insert')
+
+
 config.bind('<ctrl-n>', 'fake-key <down>', mode='insert')
 config.bind('<ctrl-p>', 'fake-key <up>', mode='insert')
 config.bind(

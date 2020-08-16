@@ -115,6 +115,9 @@ end
 site_url = site_parts.reverse.join('.')
 site_base_url = url.gsub(/^(.*?\/\/.*?[\/:].*?\/?)+.*/, '\1')
 search_urls = site_parts.join(' ')
+if action == "--type-otpauth"
+  search_urls = ' ' + search_urls
+end
 user_name = site_url.gsub(/\...\...$/, '').gsub(/\...$/, '').gsub(/\....$/, '').gsub(/[^a-z0-9]/, '_')
 
 if action == "--add"
@@ -166,8 +169,8 @@ result, _, _ = Open3.capture3("keepass-cli", "show", "-s", name)
 # Open3.capture3('copyq', 'enable') # allow copyq keep working after password was coppied
 # pass = Clipboard.paste
 pass = ''
-user = 'am'
-otpauth = 'ym'
+user = ''
+otpauth = ''
 result.gsub(/^UserName: (.*)$/) do |match|
   user = match.gsub(/^UserName: (.*)$/, '\1')
 end
