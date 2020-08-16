@@ -3,6 +3,7 @@
 from otpauth import OtpAuth
 import base64
 import os
+import sys
 from urllib import parse
 
 
@@ -29,8 +30,15 @@ def get_code(secret):
     return code
 
 
-with open(os.environ['AUTH_ACCOUNTS_FILE']) as f:
-    accounts = f.readlines()
+accounts = []
+just_codes = False
+if len(sys.argv) > 1:
+    just_codes = True
+    accounts = sys.argv[1:]
+else:
+    with open(os.environ['AUTH_ACCOUNTS_FILE']) as f:
+        accounts = f.readlines()
+
 
 acclist = []
 max_len = 0
@@ -45,5 +53,8 @@ for account in accounts:
             acclist.append((uri.path.strip('/'), code))
 
 for (name, code) in acclist:
-    print(name.ljust(max_len) + "\t" + code)
+    if just_codes:
+        print(code)
+    else:
+        print(name.ljust(max_len) + "\t" + code)
 
