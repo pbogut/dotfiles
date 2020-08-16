@@ -1,0 +1,96 @@
+priority -50
+
+global !p
+def namespace(path):
+	import re
+	parts = re.sub(r'.*?/?app/code/', '', path).split('/')
+	return '\\'.join(parts[:-1])
+
+def snake(name):
+	s1 = re.sub('(\w)([A-Z][a-z]+)', r'\1_\2', name)
+	return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+def part_name(text, part_no=-1):
+	parts = text.split('/')
+	return parts[part_no]
+
+def first_lower(string):
+	return string[:1].lower() + string[1:] if string else ''
+
+def module_name(text):
+	parts = text.split('/')
+	return parts[-3] + '_' + parts[-2]
+
+def module_key(text, depth=0):
+	parts = text.split('/')
+
+	company = parts[-(4+depth)]
+	abbrev = re.sub(r'[^A-Z]', '', company).lower()
+
+	if len(abbrev) > 1:
+		company = abbrev
+
+	return company + '_' + parts[-(3+depth)].lower()
+endglobal
+
+snippet _t_magento2_class "Magento Class" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+class `!p snip.rv = snip.basename`
+{
+	${0://class}
+}
+endsnippet
+
+snippet _t_magento2_registration "Magento registration file" b
+<?php
+
+\Magento\Framework\Component\ComponentRegistrar::register(
+	\Magento\Framework\Component\ComponentRegistrar::MODULE,
+	'${1:`!p snip.rv = module_name(path)`}',
+	__DIR__
+);
+endsnippet
+
+snippet _t_magento2_controller "Magento Controller" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Framework\App\Action\Action;
+use Magento\Framework\App\Action\Context as ActionContext;
+use Magento\Framework\App\Action\Http${1:Get}ActionInterface;
+
+class `!p snip.rv = snip.basename` extends Action implements Http$1ActionInterface
+{
+	public function __construct(
+		ActionContext $context
+	) {
+		parent::__construct($context);
+	}
+
+	public function execute()
+	{
+		${0://action}
+	}
+}
+endsnippet
+
+snippet _t_magento2_observer "Magento Observer" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\Event\Observer;
+
+class `!p snip.rv = snip.basename` implements ObserverInterface
+{
+	public function execute(Observer $observer)
+	{
+		${0://observer}
+	}
+}
+endsnippet

@@ -1,0 +1,70 @@
+priority -50
+
+global !p
+def snake(name):
+	s1 = re.sub('(\w)([A-Z][a-z]+)', r'\1_\2', name)
+	return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+def part_name(text, part_no=-1):
+	parts = text.split('/')
+	return parts[part_no]
+
+def first_lower(string):
+	return string[:1].lower() + string[1:] if string else ''
+
+def module_name(text):
+	text = text.replace('/etc', '')
+	text = text.replace('/frontend', '')
+	text = text.replace('/backend', '')
+	parts = text.split('/')
+	return parts[-3] + '_' + parts[-2]
+
+def module_key(text, depth=0):
+	parts = text.split('/')
+
+	company = parts[-(4+depth)]
+	abbrev = re.sub(r'[^A-Z]', '', company).lower()
+
+	if len(abbrev) > 1:
+		company = abbrev
+
+	return company + '_' + parts[-(3+depth)].lower()
+endglobal
+
+snippet _t_magento2_module "Magento module file" b
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+	<module name="${1:`!p snip.rv = module_name(path) `}">
+		<!-- <sequence>
+			<module name="Module_Name"/>
+		</sequence> -->
+	</module>
+</config>
+endsnippet
+
+snippet _t_magento2_frontend_routes "Magento frontend routes file" b
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+	<router id="standard">
+		<route id="${1:`!p snip.rv = module_name(path).lower() `}" frontName="$1">
+			<module name="${2:`!p snip.rv = module_name(path) `}" />
+		</route>
+	</router>
+</config>
+endsnippet
+
+snippet _t_magento2_events "Magento events" b
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+	<event name="${1:event_name}">
+		<observer name="`!p snip.rv = module_name(path).lower() `_$1"
+		      instance="${2:Observer\Class}" />
+	</event>
+</config>
+endsnippet
+
+snippet _t_magento2_di "Magento di" b
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/ObjectManager/etc/config.xsd">
+</config>
+endsnippet
