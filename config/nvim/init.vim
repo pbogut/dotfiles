@@ -123,6 +123,8 @@ augroup configgroup
         \  call s:set_indent(2, v:true, v:true)
   autocmd FileType ruby
         \  call s:set_indent(2, v:true, v:true)
+  autocmd FileType yaml,yaml.docker-compose
+        \  call s:set_indent(2, v:true, v:true)
   autocmd FileType vim
         \  call s:set_indent(2, v:false, v:true)
         \| let b:neoformat_basic_format_align = 1
