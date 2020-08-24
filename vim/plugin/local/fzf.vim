@@ -192,7 +192,7 @@ endfunction
 
 function! local#fzf#vim_config(...) abort
   let options = {
-        \   'source': 'ag -l -g "" ~/.config/nvim/init.vim ~/.vim/plugin/',
+        \   'source': 'ag -l -g "" ~/.config/nvim/init.vim ~/.config/nvim/config ~/.vim/plugin/',
         \   'options': '--prompt "All files> " ' . s:params(a:000, 1),
         \ }
   let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
