@@ -157,7 +157,7 @@ command! -bang -nargs=? -range=-1 -complete=custom,s:db_command_complete DB
 
 function! s:db_export(file, ...) abort
   let dir = trim(system('mktemp -d'))
-  exec ('!~/.scripts/db-output-conv/mysql-to-csv.php ' . shellescape(expand('%')) . ' ' . shellescape(l:dir . '/db.csv') . ' | unoconv -d spreadsheet -o ' . shellescape(a:file) . ' ' . shellescape(l:dir . '/db.csv'))
+  exec ('!~/.scripts/db-output-conv/conv.php ' . shellescape(expand('%')) . ' ' . shellescape(l:dir . '/db.csv') . ' | unoconv -d spreadsheet -o ' . shellescape(a:file) . ' ' . shellescape(l:dir . '/db.csv'))
 endfunction
 
 "Export result window
