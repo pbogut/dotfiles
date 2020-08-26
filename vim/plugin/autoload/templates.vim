@@ -1,5 +1,50 @@
 " templates
 
+" {{{ - copied from projectionist to support its pattern matching
+function! s:match(file, pattern) abort
+  if a:pattern =~# '^r\!'
+    " treat like regexp
+    if a:file =~# substitute(a:pattern, '^r\!', '', '')
+      return 'we have a match, and api of this functions suck balls'
+    else
+      return ''
+    end
+  end
+  " not a regexp, lets try original
+
+  if a:pattern =~# '^[^*{}]*\*[^*{}]*$'
+    let pattern = s:slash(substitute(a:pattern, '\*', '**/*', ''))
+  elseif a:pattern =~# '^[^*{}]*\*\*[^*{}]\+\*[^*{}]*$'
+    let pattern = s:slash(a:pattern)
+  else
+    return ''
+  endif
+  let [prefix, infix, suffix] = split(pattern, '\*\*\=', 1)
+  let file = s:slash(a:file)
+  if !s:startswith(file, prefix) || !s:endswith(file, suffix)
+    return ''
+  endif
+  let match = file[strlen(prefix) : -strlen(suffix)-1]
+  if infix ==# '/'
+    return match
+  endif
+  let clean = substitute('/'.match, '\V'.infix.'\ze\[^/]\*\$', '/', '')[1:-1]
+  return clean ==# match ? '' : clean
+endfunction
+
+function! s:slash(str) abort
+  return tr(a:str, projectionist#slash(), '/')
+endfunction
+
+function! s:startswith(str, prefix) abort
+  return strpart(a:str, 0, len(a:prefix)) ==# a:prefix
+endfunction
+
+function! s:endswith(str, suffix) abort
+  return strpart(a:str, len(a:str) - len(a:suffix)) ==# a:suffix
+endfunction
+" }}} - copied from projectionist to support its pattern matching
+"
 function! s:try_insert(skel)
   execute "normal! i_t_" . a:skel . "\<C-r>=UltiSnips#ExpandSnippet()\<CR>"
 
@@ -8,6 +53,28 @@ function! s:try_insert(skel)
   endif
 
   return g:ulti_expand_res
+endfunction
+
+" let s:priority = 0
+function! s:add_with_priority(list, element)
+  if empty(get(a:element, "priority"))
+    let s:priority += 1
+    let a:element.priority = s:priority
+  endif
+
+  call add(a:list, a:element)
+endfunction
+
+function! s:sort_by_priority(el1, el2)
+  if (a:el1.priority == a:el2.priority)
+    return 0
+  endif
+
+  if (a:el1.priority > a:el2.priority)
+    return 1
+  else
+    return -1
+  endif
 endfunction
 
 function! templates#InsertSkeleton(...) abort
@@ -31,34 +98,29 @@ function! templates#InsertSkeleton(...) abort
   endif
 
   if !empty(get(b:,'projectionist'))
-    " Loop through projections with 'skeleton' key and try each one until the
-    " snippet expands
-    for [root, value] in projectionist#query('skeleton')
-      " try varian if provided
-      if !empty(a:000) | let value .= '_' . template | endif
-      if s:try_insert(value)
-        return
-      endif
-    endfor
-    " didnt do anything so lets try regexp
+    let template_candidates = []
+    let s:priority = -1000
+
+    " Loop through projections with 'skeleton' key and remember
+    " each one candidate
     for root in keys(b:projectionist)
       for config in b:projectionist[root]
         for pattern in keys(config)
           if has_key(config[pattern], 'skeleton')
-            let value = config[pattern]['skeleton']
-            if !empty(a:000) | let value .= '_' . template | endif
-            try
-              if l:pattern =~# '^r\!' && l:filename =~# substitute(l:pattern, '^r\!', '', '')
-                if s:try_insert(value)
-                  return
-                endif
-              end
-            catch
-              " not really regexp, no harm I guess
-            endtry
+            if !empty(s:match(l:filename, l:pattern))
+              call s:add_with_priority(l:template_candidates, config[l:pattern])
+            endif
           endif
         endfor
       endfor
+    endfor
+    " now loop through sorted candidates and pick first that expands
+    for element in sort(l:template_candidates, 's:sort_by_priority')
+      let value = l:element.skeleton
+      if !empty(a:000) | let value .= '_' . template | endif
+      if s:try_insert(value)
+        return
+      endif
     endfor
   endif
 
