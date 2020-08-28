@@ -2,6 +2,7 @@
 
 let s:url_pattern = '\%([abgltvw]:\w\+\|\a[[:alnum:].+-]\+:\S*\|\$[[:alpha:]_]\S*\|[.~]\=/\S*\|[.~]\|\%(type\|profile\)=\S\+\)\S\@!'
 let s:tunnels = {}
+let s:wait = v:false
 
 function! s:cmd_split(cmd) abort
   let url = matchstr(a:cmd, '^'.s:url_pattern)
@@ -13,7 +14,13 @@ function! s:on_event(job_id, data, event) dict
   if a:event == 'stdout'
     let str = self.tunnel_id . ' stdout: '.join(a:data)
     if str =~ 'ssh_connected'
-      return call('db#execute_command', self.params)
+      let s:wait = v:false
+      if !empty(self.params)
+        return call('db#execute_command', self.params)
+      else
+        " if no params do nothing
+        return
+      endif
     endif
   elseif a:event == 'stderr'
     let str = self.tunnel_id . ' stderr: '.join(a:data)
@@ -21,6 +28,7 @@ function! s:on_event(job_id, data, event) dict
       return
     endif
   else
+    let s:wait = v:false
     if (!empty(get(s:tunnels, self.tunnel_id)))
       call remove(s:tunnels, self.tunnel_id)
     endif
@@ -31,6 +39,67 @@ function! s:on_event(job_id, data, event) dict
     echom str
   endif
 endfunction
+
+function! s:prepare_url(url) abort
+  let first_port = 7000
+  let default_ports = {
+        \   'mysql': 3306
+        \ }
+
+  " let [url, cmd] = s:cmd_split(a:cmd)
+  let url = a:url
+
+  if url =~# '^\%([abgltwv]:\|\$\)\w\+$'
+    let url = eval(url)
+  endif
+
+  let ssh = substitute(l:url, '^ssh:\(.\{-}\):.*', '\1', '')
+  let clean_url = substitute(l:url, '^ssh:.\{-}:\(.*\)', '\1', '')
+
+  if clean_url == url
+    return url
+  endif
+
+  let result = db#url#parse(clean_url)
+  let scheme = get(result, 'scheme')
+  let port = get(result, 'port', get(default_ports, scheme))
+  let host = get(result, 'host', '127.0.0.1')
+  let tunnel_id = host . ':' . port
+
+  let result['host'] = '127.0.0.1'
+
+  let current_port = get(s:tunnels, tunnel_id)
+  if (!empty(current_port))
+    let redirect_port = current_port
+  else
+    let redirect_port = system('get-free-port.php ' . l:first_port)
+  endif
+
+
+  let ssh_redirect = redirect_port . ':' . host . ':' .port
+  let result['port'] = redirect_port
+
+  if empty(current_port)
+    let s:tunnels[tunnel_id] = redirect_port
+    let s:wait = v:true
+    let job = jobstart(['ssh', '-L', ssh_redirect, ssh, '-t', 'echo ssh_connected; read'], extend({
+          \   'tunnel_id': tunnel_id,
+          \   'params': []
+          \ }, s:callbacks))
+
+    "max wait 100 * 100ms = 10s
+    let max_wait = 100
+    while s:wait && l:max_wait > 0
+      " wait for ssh connectiont
+      sleep 100m
+      let max_wait -= 1
+    endwhile
+  endif
+
+  let new_url = db#url#format(result)
+  return l:new_url
+endfunction
+
 
 let s:callbacks = {
       \ 'on_stdout': function('s:on_event'),
@@ -50,7 +119,8 @@ function! s:db_command_complete(A, L, P) abort
   if cmd =~# '^<'
     return join(s:glob(a:A, 0), "\n")
   elseif a:A !=# arg
-    let conn = db#connect(url)
+    let clean_url = s:prepare_url(url)
+    let conn = db#connect(clean_url)
     return join(db#adapter#call(conn, 'tables', [conn], []), "\n")
   elseif a:A =~# '^[[:alpha:]]:[\/]\|^[.\/~$]'
     return join(s:glob(a:A, 0), "\n")
