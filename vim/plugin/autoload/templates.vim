@@ -104,10 +104,11 @@ function! templates#InsertSkeleton(...) abort
     " Loop through projections with 'skeleton' key and remember
     " each one candidate
     for root in keys(b:projectionist)
+      let l:localname = substitute(l:filename, '^' . l:root . '/', '', '')
       for config in b:projectionist[root]
         for pattern in keys(config)
           if has_key(config[pattern], 'skeleton')
-            if !empty(s:match(l:filename, l:pattern))
+            if !empty(s:match(l:localname, l:pattern))
               call s:add_with_priority(l:template_candidates, config[l:pattern])
             endif
           endif
