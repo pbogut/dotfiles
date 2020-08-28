@@ -41,11 +41,6 @@ function! s:on_event(job_id, data, event) dict
 endfunction
 
 function! s:prepare_url(url) abort
-  let first_port = 7000
-  let default_ports = {
-        \   'mysql': 3306
-        \ }
-
   " let [url, cmd] = s:cmd_split(a:cmd)
   let url = a:url
 
@@ -62,7 +57,7 @@ function! s:prepare_url(url) abort
 
   let result = db#url#parse(clean_url)
   let scheme = get(result, 'scheme')
-  let port = get(result, 'port', get(default_ports, scheme))
+  let port = get(result, 'port', get(s:default_ports, scheme))
   let host = get(result, 'host', '127.0.0.1')
   let tunnel_id = host . ':' . port
 
@@ -72,7 +67,7 @@ function! s:prepare_url(url) abort
   if (!empty(current_port))
     let redirect_port = current_port
   else
-    let redirect_port = system('get-free-port.php ' . l:first_port)
+    let redirect_port = system('get-free-port.php ' . s:first_port)
   endif
 
 
@@ -107,6 +102,12 @@ let s:callbacks = {
       \ 'on_exit': function('s:on_event')
       \ }
 
+let s:first_port = 7000
+let s:default_ports = {
+      \   'mysql': 3306,
+      \   'postgresql': 5432
+      \ }
+
 " for connection completion
 let g:db_adapters = {'ssh': 'ssh'}
 
@@ -131,29 +132,8 @@ function! s:db_command_complete(A, L, P) abort
 endfunction
 
 function! s:db_execute_command(mods, bang, line1, line2, cmd) abort
-  " need some configuration for remotes and then
-  " as first argument remote name should be passed, then
-  " job control thing has to check if that one is already opened and if so
-  " then do nothing and if its not then start tunnel in the background
-  "
-  " all tunnels would be closed after vim close, configuration has to hav
-  " internal port, and maybe if port alredy taken treat it like it was opend
-  " before (different vim instance for example)
-  "
-  " ssh -n -L 3001:10.2.28.84:3306 developer@31.28.66.75
-
-  " DB ssh:3001:10.2.28.84:3306:developer@31.28.66.75:mysql://dev_ap:temporaryPa55wordForTesting@10.2.28.84/ap_wordpress_dev select 1
-  " DB ssh:developer@31.28.66.75:mysql://dev_ap:temporaryPa55wordForTesting@10.2.28.84/ap_wordpress_dev select 1
-
-  " let ssh1 = substitute(a:cmd, '^ssh:\(.\{-}\):\(.\{-}\):\(.\{-}\):\(.\{-}\):.*', '\1:\2:\3', '')
-  " let ssh2 = substitute(a:cmd, '^ssh:\(.\{-}\):\(.\{-}\):\(.\{-}\):\(.\{-}\):.*', '\4', '')
-  " let cmd = substitute(a:cmd, '^ssh:.\{-}:.\{-}:.\{-}:.\{-}:\(.*\)', '\1', '')
-
-  let first_port = 7000
-  let default_ports = {
-        \   'mysql': 3306
-        \ }
-
+  " it creates ssh port tunnel and then changes url to use tunnel port
+  " this way adapters works nativly with no issues
   let [url, cmd] = s:cmd_split(a:cmd)
 
   if cmd =~# '^=' && a:line2 <= 0
@@ -186,7 +166,7 @@ function! s:db_execute_command(mods, bang, line1, line2, cmd) abort
   let result = db#url#parse(clean_url)
 
   let scheme = get(result, 'scheme')
-  let port = get(result, 'port', get(default_ports, scheme))
+  let port = get(result, 'port', get(s:default_ports, scheme))
   let host = get(result, 'host', '127.0.0.1')
   let tunnel_id = host . ':' . port
 
@@ -196,7 +176,7 @@ function! s:db_execute_command(mods, bang, line1, line2, cmd) abort
   if (!empty(current_port))
     let redirect_port = current_port
   else
-    let redirect_port = system('get-free-port.php ' . l:first_port)
+    let redirect_port = system('get-free-port.php ' . s:first_port)
   endif
 
 
@@ -233,7 +213,6 @@ endfunction
 "Export result window
 command! -bang -nargs=? -range=-1 -complete=file DBExport
       \ exe s:db_export(<q-args>, <bang>0)
-
 
 
 function! s:db_report(cmd, bang) abort
