@@ -1,0 +1,43 @@
+#!/bin/bash
+#=================================================
+# name:   archive
+# author: Pawel Bogut <https://pbogut.me>
+# date:   09/12/2020
+#=================================================
+daysago=1095
+todate=$(date --date="$daysago days ago" '+%Y-%m-%d')
+search="date:..$todate"
+
+echo ""
+echo " > archive $search"
+
+notmuch search --output files $search | grep -v '\.archive' |
+    while read line; do
+        origdir=$(dirname $line)
+        archdir=$(echo $origdir | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/\2.archive/\3#')
+        filename=$(basename $line)
+
+        mkdir -p $archdir
+
+        if [[ "$origdir" == "$archdir" ]]; then
+            # already archived
+            continue
+        fi
+
+        if [[ ! -f "$origdir/$filename" ]]; then
+            # file do not exist
+            continue
+        fi
+
+        echo "$filename:"
+        echo "    move $origdir" '->' "$archdir"
+        mv "$origdir/$filename" "$archdir/$filename" > /dev/null 2>&1
+    done
+
+find $HOME/Maildir -iname '*.archive' -type d | while read source; do
+    dest=$HOME/.Maildir-megasync${source##$HOME/Maildir}
+    destdir=$(dirname $dest)
+    mkdir -p $destdir
+    mv $source $dest
+    ln -s $dest $source
+done
