@@ -1,0 +1,13 @@
+#!/bin/bash
+#=================================================
+# name:   trash
+# author: Pawel Bogut <https://pbogut.me>
+# date:   16/08/2020
+#=================================================
+if [[ $1 == "--list" ]]; then
+  ls ~/Trash/*.zip | while read filena; do als $filena; done
+  exit 0
+fi
+
+trashfile=$(date '+%Y_%M_%d.%s%N')
+zip -r -0 ~/Trash/$trashfile.zip "$@" && rm "$@" -fr
