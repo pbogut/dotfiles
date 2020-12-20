@@ -10,12 +10,14 @@ from=$(cat $tmp_file |
     sed 's,From: \([^\s]*\),\1,')
 acc=$(echo $from | sed 's,.*@,,')
 
+# mutt-pre-process.rb -- adds html version of email using markdown
+# mutt-put-on-imap.rb -- puts copy of email on the imap server
+# mutt-add-tracking-pixel.rb -- adds tracking pixel
+# (because pixel is added after email is placed on imap server,
+#  you wont triger pixel event yourself)
+
 cat $tmp_file |
-    mutt-html-mime.rb |
-    msmtp -a $acc --passwordeval="gpg-config get email-$from-passwd" --user=`gpg-config get email-$from-user` --from=$from ${@:1}
-
-
-echo $tmp_file > /tmp/__email_file
-echo $from >> /tmp/__email_var
-echo $acc >> /tmp/__email_var
-echo msmtp -a $acc --passwordeval="gpg-config get email-$from-passwd" --user=`gpg-config get email-$from-user` --from=$from ${@:1} >> /tmp/__email_var
+    mutt-pre-process.rb |
+    mutt-put-on-imap.rb |
+    mutt-add-tracking-pixel.rb |
+    msmtp -a $acc --passwordeval="config email/$from/pass" --user=`config email/$from/user $from` --from=$from ${@:1}
