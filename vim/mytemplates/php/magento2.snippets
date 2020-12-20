@@ -2,7 +2,6 @@ priority -50
 
 global !p
 def namespace(path):
-	import re
 	parts = re.sub(r'.*?/?app/code/', '', path).split('/')
 	return '\\'.join(parts[:-1])
 
@@ -17,9 +16,21 @@ def part_name(text, part_no=-1):
 def first_lower(string):
 	return string[:1].lower() + string[1:] if string else ''
 
-def module_name(text):
+def resource_name(text):
 	parts = text.split('/')
-	return parts[-3] + '_' + parts[-2]
+	return parts[-2].lower()
+
+def entity_name(text):
+	parts = text.split('/')
+	return parts[-2]
+
+def module_name(text):
+	parts = re.sub(r'.*?/?app/code/', '', path).split('/')
+	return parts[0] + '_' + parts[1]
+
+def module_ns(text):
+	parts = re.sub(r'.*?/?app/code/', '', path).split('/')
+	return parts[0] + '\\' + parts[1]
 
 def module_key(text, depth=0):
 	parts = text.split('/')
@@ -78,6 +89,215 @@ class `!p snip.rv = snip.basename` extends Action implements Http$1ActionInterfa
 }
 endsnippet
 
+
+snippet _t_magento2_adminhtml_controller_index "Magento Adminhtml Index Controller" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context as ActionContext;
+use Magento\Framework\App\Action\Http${1:Get}ActionInterface;
+use Magento\Framework\View\Result\PageFactory as ResultPageFactory;
+
+class `!p snip.rv = snip.basename` extends Action implements Http$1ActionInterface
+{
+	const ADMIN_RESOURCE = '${2:`!p snip.rv = module_name(path)`}::${3:`!p snip.rv = resource_name(path)`}';
+
+	/** @var ResultPageFactory **/
+	protected $_resultPageFactory;
+
+	public function __construct(
+		ActionContext $context,
+		ResultPageFactory $resultPageFactory
+	) {
+		$this->_resultPageFactory = $resultPageFactory;
+		parent::__construct($context);
+	}
+
+	public function execute()
+	{
+		$resultPage = $this->_resultPageFactory->create();
+		$this->_setActiveMenu('$2::${4:$3}');
+		$resultPage->getConfig()->getTitle()->prepend((__('${5:$3}')));
+
+		return $resultPage;$0
+	}
+}
+endsnippet
+
+snippet _t_magento2_adminhtml_controller_edit "Magento Adminhtml Edit Controller" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context as ActionContext;
+use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\View\Result\PageFactory as ResultPageFactory;
+use `!p snip.rv = module_ns(path)`\Model\\${1:`!p snip.rv = entity_name(path)`};
+
+class `!p snip.rv = snip.basename` extends Action implements HttpGetActionInterface
+{
+	const ADMIN_RESOURCE = '${2:`!p snip.rv = module_name(path)`}::${3:`!p snip.rv = resource_name(path)`}';
+
+	/** @var ResultPageFactory **/
+	protected $_resultPageFactory;
+
+	public function __construct(
+		ActionContext $context,
+		ResultPageFactory $resultPageFactory
+	) {
+		$this->_resultPageFactory = $resultPageFactory;
+		parent::__construct($context);
+	}
+
+	public function execute()
+	{
+		$resultPage = $this->_resultPageFactory->create();
+		$this->_setActiveMenu('$2::${5:$3}');
+
+		$id = $this->_request->getParam('${4:`p snip.rv = resource_name(path)`_id}');
+		$model = $this->_objectManager->create($1::class);
+
+		if ($id) {
+			$model->load($id);
+			if (!$model->getMapId()) {
+				$this->messageManager->addErrorMessage(__('This ${5:`p snip.rv = resource_name(path).title()`} no longer exists.'));
+				$this->_redirect('*/*/index');
+				return;
+			}
+		}
+
+		return $resultPage;$0
+	}
+}
+endsnippet
+
+snippet _t_magento2_adminhtml_controller_new "Magento Adminhtml New Controller" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context as ActionContext;
+use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Backend\Model\View\Result\ForwardFactory as ResultForwardFactory;
+
+class `!p snip.rv = snip.basename` extends Action implements HttpGetActionInterface
+{
+	const ADMIN_RESOURCE = '${2:`!p snip.rv = module_name(path)`}::${3:`!p snip.rv = resource_name(path)`}';
+
+	/** @var ResultForwardFactory **/
+	protected $_resultForwardFactory;
+
+	public function __construct(
+		ActionContext $context,
+		ResultForwardFactory $resultForwardFactory
+	) {
+		$this->_resultForwardFactory = $resultForwardFactory;
+		parent::__construct($context);
+	}
+
+	public function execute()
+	{
+		$resultForward = $this->_resultForwardFactory->create();
+		return $resultForward->forward('edit');$0
+	}
+}
+endsnippet
+
+snippet _t_magento2_adminhtml_controller_save "Magento Adminhtml Save Controller" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context as ActionContext;
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\View\Result\PageFactory as ResultPageFactory;
+use `!p snip.rv = module_ns(path)`\Model\\${1:`!p snip.rv = entity_name(path)`};
+
+class `!p snip.rv = snip.basename` extends Action implements HttpPostActionInterface
+{
+	const ADMIN_RESOURCE = '${2:`!p snip.rv = module_name(path)`}::${3:`!p snip.rv = resource_name(path)`}';
+
+	/** @var ResultPageFactory **/
+	protected $_resultPageFactory;
+
+	public function __construct(
+		ActionContext $context,
+		ResultPageFactory $resultPageFactory
+	) {
+		$this->_resultPageFactory = $resultPageFactory;
+		parent::__construct($context);
+	}
+
+	public function execute()
+	{
+		$resultPage = $this->_resultPageFactory->create();
+		$this->_setActiveMenu('$2::${4:$3}');
+
+		$id = $this->_request->getParam('${5:$3_id}');
+		$model = $this->_objectManager->create($1::class);
+
+		if ($id) {
+			$model->load($id);
+			if (!$model->get${6:$1}Id()) {
+				$this->messageManager->addErrorMessage(__('This ${7:$3} no longer exists.'));
+				$this->_redirect('*/*/index');
+				return $resultPage;
+			}
+		}
+
+		foreach ($model->getData() as $key => $value) {
+			$model->setData($key, $this->_request->getParam($key, $value));
+		}
+		$model->save();
+
+		if ($this->_request->getParam('back') == 'edit') {
+			$this->_redirect('*/*/edit', ['id' => $id]);
+		} else {
+			$this->_redirect('*/*/index');
+		}
+
+		return $resultPage;
+	}
+}
+endsnippet
+
+snippet _t_magento2_adminhtml_controller "Magento Adminhtml Controller" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context as ActionContext;
+use Magento\Framework\App\Action\Http${1:Get}ActionInterface;
+use Magento\Framework\View\Result\PageFactory as ResultPageFactory;
+
+class `!p snip.rv = snip.basename` extends Action implements Http$1ActionInterface
+{
+	const ADMIN_RESOURCE = '${2:`!p snip.rv = module_name(path)`}::${3:`!p snip.rv = resource_name(path)`}';
+
+	/** @var ResultPageFactory **/
+	protected $resultPageFactory;
+
+	public function __construct(
+		ActionContext $context,
+		ResultPageFactory $resultPageFactory
+	) {
+		$this->_resultPageFactory = $resultPageFactory;
+		parent::__construct($context);
+	}
+
+	public function execute()
+	{
+		${0://action}
+	}
+}
+endsnippet
+
 snippet _t_magento2_observer "Magento Observer" b
 <?php
 
@@ -91,6 +311,204 @@ class `!p snip.rv = snip.basename` implements ObserverInterface
 	public function execute(Observer $observer)
 	{
 		${0://observer}
+	}
+}
+endsnippet
+
+snippet _t_magento2_helper "Magento Helper" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Framework\App\Helper\AbstractHelper;
+
+class `!p snip.rv = snip.basename` extends AbstractHelper
+{
+	${0://helper}
+}
+endsnippet
+
+snippet _t_magento2_model_entity "Magento2 Model Entity" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\DataObject\IdentityInterface;
+
+class `!p snip.rv = snip.basename` extends AbstractModel implements IdentityInterface
+{
+	protected $_cacheTag = '${1:`!p snip.rv = module_name(path).lower()`}_${2:`!p snip.rv = snip.basename.lower()`}';
+
+	protected $_eventPrefix = '$1_$2';
+
+	protected function _construct()
+	{
+		$this->_init(ResourceModel\\`!p snip.rv = snip.basename`::class);
+	}
+
+	public function getIdentities()
+	{
+		return [$this->_cacheTag . '_' . $this->getId()];
+	}
+
+	public function getDefaultValues()
+	{
+		$values = [];
+		return $values;
+	}
+}
+endsnippet
+
+snippet _t_magento2_resource_model_entity "Magento2 Resource Model Entity" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
+
+class `!p snip.rv = snip.basename` extends AbstractDb
+{
+	public function __construct(
+		DbContext $context
+	) {
+		parent::__construct($context);
+	}
+
+	protected function _construct()
+	{
+		$this->_init('${1:`!p snip.rv = module_name(path).lower()`}_${2:`!p snip.rv = snip.basename.lower()`}', '${3:$2_id}');
+	}
+}
+endsnippet
+
+snippet _t_magento2_resource_model_collection "Magento2 Resource Model Collection" b
+<?php
+namespace `!p snip.rv = namespace(path)`;
+
+use `!p snip.rv = module_ns(path)`\Model\\${1:`!p snip.rv = resource_name(path).title()`};
+use `!p snip.rv = module_ns(path)`\Model\ResourceModel\\${2:`!p snip.rv = resource_name(path).title()`} as ${3:$2Resource};
+
+class `!p snip.rv = snip.basename` extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
+{
+	protected $_idFieldName = '${4:`!p snip.rv = resource_name(path)`_id}';
+	protected $_eventPrefix = '${5:`!p snip.rv = module_name(path).lower()`}_${6:`!p snip.rv = resource_name(path)`}_collection';
+	protected $_eventObject = '`!p snip.rv = resource_name(path)`_collection';
+
+	protected function _construct()
+	{
+		$this->_init($1::class, $3::class);
+	}
+}
+endsnippet
+
+snippet _t_magento2_resource_model_collection_factory "Magento2 Resource Model Collection Factory" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Framework\ObjectManagerInterface;
+
+class `!p snip.rv = snip.basename`
+{
+	/** @var ObjectManagerInterface **/
+	protected $_objectManager = null;
+	/** @var Collection **/
+	protected $_instanceName = null;
+
+	public function __construct(ObjectManagerInterface $objectManager, $instanceName = Collection::class)
+	{
+		$this->_objectManager = $objectManager;
+		$this->_instanceName = $instanceName;
+	}
+
+	public function create(array $data = [])
+	{
+		return $this->_objectManager->create($this->_instanceName, $data);
+	}
+}
+endsnippet
+
+snippet _t_magento2_resource_model_data_provider "Magento2 Resource Model Data Provider" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Ui\DataProvider\AbstractDataProvider;
+
+class `!p snip.rv = snip.basename` extends AbstractDataProvider
+{
+	protected $_loadedData;
+
+	/**
+	 * @param string $name
+	 * @param string $primaryFieldName
+	 * @param string $requestFieldName
+	 * @param CollectionFactory $collectionFactory
+	 * @param array $meta
+	 * @param array $data
+	 */
+	public function __construct(
+		$name,
+		$primaryFieldName,
+		$requestFieldName,
+		CollectionFactory $collectionFactory,
+		array $meta = [],
+		array $data = []
+	) {
+		$this->collection = $collectionFactory->create();
+		parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
+	}
+
+	/**
+	 * Get data
+	 *
+	 * @return array
+	 */
+	public function getData()
+	{
+		if (isset($this->_loadedData)) {
+			return $this->_loadedData;
+		}
+		$items = $this->collection->getItems();
+		foreach ($items as $item) {
+			$this->_loadedData[$item->getId()] = $item->getData();
+		}
+		return $this->_loadedData;
+	}
+}
+endsnippet
+
+snippet _t_magento2_resource_model_source "Magento2 Source Model" b
+<?php
+
+namespace `!p snip.rv = namespace(path)`;
+
+use Magento\Framework\Data\OptionSourceInterface;
+
+/**
+ * Class Status
+ */
+class `!p snip.rv = snip.basename` implements OptionSourceInterface
+{
+	protected $options = [];
+
+	/**
+	 * Get options
+	 *
+	 * @return array
+	 */
+	public function toOptionArray()
+	{
+		$options = [];
+		foreach ($this->options as $key => $value) {
+			$options[] = [
+				'label' => $value,
+				'value' => $key,
+			];
+		}
+		return $options;$0
 	}
 }
 endsnippet

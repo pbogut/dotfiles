@@ -84,16 +84,82 @@ let s:magento2_module =
       \       "setlocal": s:space_4,
       \     },
       \     "*.php": {
-      \       "base_skeleton": "magento2_class"
+      \       "skeleton": "magento2_class",
+      \       "priority": 9999999
       \     },
       \     "app/code/*/registration.php": {
       \       "skeleton": "magento2_registration"
       \     },
-      \     "r!app/code/.*/Controller/.*\.php": {
-      \       "skeleton": "magento2_controller"
+      \     'r!app/code/.*/Model/ResourceModel/.*/Collection.php': {
+      \       "skeleton": "magento2_resource_model_collection",
+      \       "priority": 100
       \     },
-      \     "r!app/code/.*/Observer/.*\.php": {
-      \       "skeleton": "magento2_observer"
+      \     'r!app/code/.*/Model/ResourceModel/.*/CollectionFactory.php': {
+      \       "skeleton": "magento2_resource_model_collection_factory",
+      \       "priority": 100
+      \     },
+      \     'r!app/code/.*/Model/ResourceModel/.*/DataProvider.php': {
+      \       "skeleton": "magento2_resource_model_data_provider",
+      \       "priority": 100
+      \     },
+      \     "r!app/code/.*/Model/ResourceModel/.*\.php": {
+      \       "skeleton": "magento2_resource_model_entity",
+      \       "priority": 200
+      \     },
+      \     "r!app/code/.*/Model/Source/.*\.php": {
+      \       "skeleton": "magento2_resource_model_source",
+      \       "priority": 100
+      \     },
+      \     "r!app/code/.*/Helper/.*\.php": {
+      \       "skeleton": "magento2_helper",
+      \       "priority": 100
+      \     },
+      \     "r!app/code/.*/Model/.*\.php": {
+      \       "skeleton": "magento2_model_entity",
+      \       "priority": 300
+      \     },
+      \     "app/code/**/view/adminhtml/layout/*_index.xml": {
+      \       "skeleton": "magento2_layout_entity_index"
+      \     },
+      \     "app/code/**/view/adminhtml/layout/*_new.xml": {
+      \       "skeleton": "magento2_layout_entity_new"
+      \     },
+      \     "app/code/**/view/adminhtml/layout/*_edit.xml": {
+      \       "skeleton": "magento2_layout_entity_edit"
+      \     },
+      \     "app/code/**/view/adminhtml/ui_component/*_listing.xml": {
+      \       "skeleton": "magento2_layout_ui_component_listing"
+      \     },
+      \     "app/code/**/view/adminhtml/ui_component/*_form.xml": {
+      \       "skeleton": "magento2_layout_ui_component_form"
+      \     },
+      \     'r!app/code/.*/Controller/Adminhtml/.*/Index\.php': {
+      \       "skeleton": "magento2_adminhtml_controller_index",
+      \       "priority": 100
+      \     },
+      \     'r!app/code/.*/Controller/Adminhtml/.*/Edit\.php': {
+      \       "skeleton": "magento2_adminhtml_controller_edit",
+      \       "priority": 100
+      \     },
+      \     'r!app/code/.*/Controller/Adminhtml/.*/NewAction\.php': {
+      \       "skeleton": "magento2_adminhtml_controller_new",
+      \       "priority": 100
+      \     },
+      \     'r!app/code/.*/Controller/Adminhtml/.*/Save\.php': {
+      \       "skeleton": "magento2_adminhtml_controller_save",
+      \       "priority": 100
+      \     },
+      \     'r!app/code/.*/Controller/Adminhtml/.*\.php': {
+      \       "skeleton": "magento2_adminhtml_controller",
+      \       "priority": 1000
+      \     },
+      \     'r!app/code/.*/Controller/.*\.php': {
+      \       "skeleton": "magento2_controller",
+      \       "priority": 200
+      \     },
+      \     'r!app/code/.*/Observer/.*\.php': {
+      \       "skeleton": "magento2_observer",
+      \       "priority": 100
       \     },
       \     "app/code/*/etc/module.xml": {
       \       "skeleton": "magento2_module"
@@ -104,11 +170,14 @@ let s:magento2_module =
       \     "app/code/*/etc/frontend/events.xml": {
       \       "skeleton": "magento2_events"
       \     },
-      \     "app/code/*/etc/backend/events.xml": {
+      \     "app/code/*/etc/adminhtml/events.xml": {
       \       "skeleton": "magento2_events"
       \     },
       \     "app/code/*/etc/frontend/routes.xml": {
       \       "skeleton": "magento2_frontend_routes"
+      \     },
+      \     "app/code/*/etc/adminhtml/routes.xml": {
+      \       "skeleton": "magento2_adminhtml_routes"
       \     }
       \  }
 let s:composer =
