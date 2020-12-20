@@ -156,9 +156,8 @@ alias e="mutt"
 alias irb="irb -r 'irb/completion'"
 
 #local configs
-if [[ $PROFILE_LOADED != true ]] && [[ -f ~/.profile ]]; then
-  source ~/.profile
-fi
+source ~/.profile
+
 if [[ -f ~/.fzf.zsh ]]; then
   source ~/.fzf.zsh
 fi

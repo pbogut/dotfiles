@@ -32,6 +32,7 @@ read -d '' files <<"EOF"
     vimrc
     yaourtrc
     zshrc
+    zprofile
     zshrc.d
     Xdefaults
     composer/composer.json
