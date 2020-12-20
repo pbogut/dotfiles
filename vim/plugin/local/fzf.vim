@@ -217,6 +217,118 @@ function! local#fzf#mytemplates(...) abort
   call fzf#run(fzf#wrap('name', extra, 0))
 endfunction
 
+function! local#fzf#tag_under_coursor() abort
+  let current_line = line(".")
+  let current_col = col(".")
+  let line_content = get(getline(current_line, current_line), 0)
+  call search('[^A-Za-z0-9\\]', '')
+  let end_tag = col(".")
+  call search('[^A-Za-z0-9\\]', 'b')
+  let start_tag = col(".")
+  let tag = line_content[start_tag:end_tag-2]
+  call cursor(current_line, current_col)
+  call fzf#vim#tags(tag)
+endfunction
+
+function! local#fzf#file_under_coursor() abort
+  let file = local#fzf#get_vague_file_under_coursor()
+  call local#fzf#files(file)
+endfunction
+
+function! local#fzf#file_under_coursor_all() abort
+  let file = local#fzf#get_vague_file_under_coursor()
+  call local#fzf#all_files(file)
+endfunction
+
+function! local#fzf#get_file_under_coursor() abort
+  let current_line = line(".")
+  let current_col = col(".")
+  let line_content = get(getline(current_line, current_line), 0)
+  call search('[^A-Za-z0-9\\\.]', '')
+  let end_file = col(".")
+  call search('[^A-Za-z0-9\\\.]', 'b')
+  let start_file = col(".")
+  let file = line_content[start_file:end_file-2]
+  call cursor(current_line, current_col)
+  return file
+endfunction
+
+function! local#fzf#get_vague_file_under_coursor() abort
+  let file = local#fzf#get_file_under_coursor()
+  let file = substitute(file, '\', ' ', 'g')
+  let file = substitute(file, '\.', ' ', 'g')
+  return file
+endfunction
+
+function! s:fzf_db_source()
+  return split(GetDBs('g'))
+endfunction
+
+function! s:fzf_db_sink(list)
+  let result = get(a:list, 0)
+  " execute('normal :DB ' . result)
+  " echo('->>>:DB ' . result)
+  call jobstart(['bash', '-c', 'sleep 0.1s'], {'on_exit': function('s:fzf_db_sink_job', [result]) })
+endfunction
+
+function! s:fzf_db_sink_job(line, ...)
+  call feedkeys(':DB! ' . a:line . ' ')
+endfunction
+
+function! s:fzf_db_sink_range(list)
+  let result = get(a:list, 0)
+  call jobstart(['bash', '-c', 'sleep 0.1s'], {'on_exit': function('s:fzf_db_sink_job_range', [result]) })
+endfunction
+
+function! s:fzf_db_sink_job_range(line, ...)
+  call feedkeys('gv:DB! ' . a:line . ' ')
+endfunction
+
+function! s:fzf_db_sink_buf(list)
+  let result = get(a:list, 0)
+  call jobstart(['bash', '-c', 'sleep 0.1s'], {'on_exit': function('s:fzf_db_sink_job_buf', [result]) })
+endfunction
+
+function! s:fzf_db_sink_job_buf(line, ...)
+  call feedkeys(':%DB! ' . a:line . ' ')
+endfunction
+
+function! local#fzf#db_range() range
+  let dbs = s:fzf_db_source()
+
+  let options = {
+        \   'source': dbs,
+        \   'sink*': function('s:fzf_db_sink_range'),
+        \   'options': '--prompt "DB> " ' . s:params(a:000, 1),
+        \ }
+  let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
+  call fzf#run(fzf#wrap('name', extra, 0))
+endfunction
+
+function! local#fzf#db_buf() range
+  let dbs = s:fzf_db_source()
+
+  let options = {
+        \   'source': dbs,
+        \   'sink*': function('s:fzf_db_sink_buf'),
+        \   'options': '--prompt "DB> " ' . s:params(a:000, 1),
+        \ }
+  let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
+  call fzf#run(fzf#wrap('name', extra, 0))
+endfunction
+
+function! local#fzf#db() abort
+  let dbs = s:fzf_db_source()
+
+  let options = {
+        \   'source': dbs,
+        \   'sink*': function('s:fzf_db_sink'),
+        \   'options': '--prompt "DB> " ' . s:params(a:000, 1),
+        \ }
+  let extra = extend(copy(get(g:, 'fzf_layout', {'down': '~40%'})), options)
+  call fzf#run(fzf#wrap('name', extra, 0))
+endfunction
+
 command! -nargs=* -bang -complete=dir FZFProject call local#fzf#project(<f-args>)
 
 command! -nargs=* -bang -complete=dir Ag call local#fzf#ag(<bang>0,<f-args>)

@@ -20,6 +20,18 @@ function! s:sink(cmd, winnr, c, lines, stream)
   endif
 endfunction
 
+function! local#laravel#file_under_coursor() abort
+  let file = local#fzf#get_file_under_coursor()
+  let vague_file = local#fzf#get_vague_file_under_coursor()
+  let template_file = "'resources/views/" . substitute(file, '\.', '/', 'g') . '.blade.php'
+
+  let search = template_file . ' | ' . vague_file
+  if (getline(line('.')) =~ 'view(.' . file)
+    let search = template_file
+  endif
+  call local#fzf#files(search)
+endfunction
+
 function! local#laravel#run(bang, command)
   let root = projectroot#guess()
   let artisan = get(b:, 'laravel_artisan_command', 'php {}/artisan')
@@ -55,7 +67,7 @@ function! local#laravel#find_template_usage(...)
   endif
   let template = substitute(l:temp_file, '.blade.php$', '', '')
   let template = substitute(l:template, '^resources/views/', '', '')
-  let template = substitute(l:template, '/', '\\.', 'g')
+  let template = substitute(l:template, '/', '\.', 'g')
 
   if (temp_file =~ '.blade.php$')
     exec('Rg ' . template)
@@ -69,4 +81,4 @@ endfunction
 command! -nargs=* -bang -complete=custom,local#laravel#complete Artisan call local#laravel#run(<bang>0,<q-args>)
 command! -nargs=* -bang FindTemplateUsage call local#laravel#find_template_usage(<bang>0,<q-args>)
 
-map gu :FindTemplateUsage<cr>
+map <space>gu :FindTemplateUsage<cr>

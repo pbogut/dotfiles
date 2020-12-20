@@ -4,6 +4,14 @@ let s:url_pattern = '\%([abgltvw]:\w\+\|\a[[:alnum:].+-]\+:\S*\|\$[[:alpha:]_]\S
 let s:tunnels = {}
 let s:wait = v:false
 
+function! GetDBs(...) abort
+  let scope = 'g'
+  if a:0 == 1 && len(a:1) == 1
+    let scope = a:1
+  endif
+  return s:db_command_complete(scope . ':', 'DB ' . scope . ':', 5)
+endfunction
+
 function! s:cmd_split(cmd) abort
   let url = matchstr(a:cmd, '^'.s:url_pattern)
   let cmd = substitute(a:cmd, '^'.s:url_pattern.'\s*', '', '')
