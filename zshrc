@@ -172,23 +172,6 @@ setopt prompt_subst
 
 [[ -f /usr/lib/libstderred.so ]] && export LD_PRELOAD="/usr/lib/libstderred.so${LD_PRELOAD:+:$LD_PRELOAD}"
 
-# make colors compatibile with tmux
-export TERM=xterm-256color
-
-# default editor
-if type "nvim" > /dev/null; then
-  alias vim=nvim
-  export EDITOR=nvim
-else
-  export EDITOR=vim
-fi
-export PAGER="less"
-export TERMINAL="urxvt"
-
-export LESS="-RXe"
-
-alias myip="wget http://ipinfo.io/ip -qO -"
-
 # host specific config
 if [ -f $HOME/.$hostname.zsh ]; then
   source $HOME/.$hostname.zsh
