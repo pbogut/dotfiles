@@ -444,9 +444,10 @@ nnoremap <silent> <space>ft :FZFTags <cword><cr>
 nnoremap <silent> <space>] :FZFTags<cr>
 nnoremap <silent> <space>fb :FZFBuffers<cr>
 nnoremap <silent> <space>ec :call local#fzf#vim_config()<cr>
-nnoremap <silent> <space>gf :call local#fzf#files(expand('<cfile>'))<cr>
-nnoremap <silent> <space>gF :call local#fzf#all_files(expand('<cfile>'))<cr>
-nnoremap <silent> <space>gt :call fzf#vim#tags(expand('<cword>'))<cr>
+nnoremap <silent> <space>gf :call local#fzf#file_under_coursor()<cr>
+ProjectType laravel nnoremap <silent> <space>gf :call local#laravel#file_under_coursor()<cr>
+nnoremap <silent> <space>gF :call local#fzf#file_under_coursor_all()<cr>
+nnoremap <silent> <space>gt :call local#fzf#tag_under_coursor()<cr>
 nnoremap <silent> <space>gw :Rg <cword><cr>
 nnoremap <silent> <space>ga :Ag<cr>
 nnoremap <silent> <space>gr :Rg<cr>

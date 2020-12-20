@@ -120,6 +120,7 @@ let s:composer =
 let s:laravel =
       \   {
       \     "*": {
+      \       "project": "laravel",
       \       "logwatch": "tail -n 500 -f storage/logs/*.log",
       \       "env": {'APP_ENV': 'testing'},
       \       "setlocal": s:space_4
