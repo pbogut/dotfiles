@@ -56,10 +56,11 @@ function! s:prepare_url(url) abort
   endif
 
   let result = db#url#parse(clean_url)
+
   let scheme = get(result, 'scheme')
   let port = get(result, 'port', get(s:default_ports, scheme))
   let host = get(result, 'host', '127.0.0.1')
-  let tunnel_id = host . ':' . port
+  let tunnel_id = ssh . ':' . host . ':' . port
 
   let result['host'] = '127.0.0.1'
 
@@ -168,7 +169,7 @@ function! s:db_execute_command(mods, bang, line1, line2, cmd) abort
   let scheme = get(result, 'scheme')
   let port = get(result, 'port', get(s:default_ports, scheme))
   let host = get(result, 'host', '127.0.0.1')
-  let tunnel_id = host . ':' . port
+  let tunnel_id = ssh . ':' . host . ':' . port
 
   let result['host'] = '127.0.0.1'
 
