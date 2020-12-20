@@ -72,3 +72,51 @@ cdp() {
         cd "$HOME/Projects/$project"
     fi
 }
+
+#vim backup
+vb() {
+    dir="$1"
+    if [[ "$1" == "" ]]; then
+        dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    fi
+
+    backup_dir="$HOME/.vim/backupfiles"
+
+    file=$(cd $backup_dir && fzf -q "'${dir##/} " --preview='bat -f {} | head -n 2500')
+
+    if [[ $file == "" ]]; then
+        return
+    fi
+
+    back_file="$backup_dir/$file"
+    orig_file="/$file"
+
+    if [[ -f "$orig_file" ]]; then
+        diff --color=always $orig_file $back_file
+        diff=$?
+        if [[ $diff -eq 0 ]]; then
+            echo "File is same as copy, nothing to do here."
+        else
+            echo -n "Do you want to restore this file (apply diff)? [y/N] "
+            read result
+            if [[ $result == "Y" ]] || [[ $result == "y" ]]; then
+                mkdir -p "$(dirname $orig_file)"
+                cp "$orig_file" "$orig_file.$(date +%s).orig"
+                cp "$back_file" "$orig_file"
+            fi
+        fi
+    else
+        echo -n "No file exists, should restore? [y/N] "
+        read result
+        if [[ $result == "Y" ]] || [[ $result == "y" ]]; then
+            mkdir -p "$(dirname $orig_file)"
+            cp "$back_file" "$orig_file"
+        fi
+    fi
+}
+restore() { vb $@ }
+
+history() {
+    echo 'Use ctrl + r'
+    # cat $HISTFILE | grep '^:' | sed 's/^: [0-9]*:.;//' | fzf
+}
