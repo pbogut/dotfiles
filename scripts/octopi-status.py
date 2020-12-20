@@ -6,7 +6,10 @@ import time
 import cachemere
 from sys import argv
 from subprocess import call
+from subprocess import check_output
 
+octopi_url = check_output(['config', 'octopi/url']).decode().strip()
+api_key = check_output(['config', 'octopi/key']).decode().strip()
 
 session = cachemere.start('octopi-status', autosave=True)
 
@@ -37,8 +40,7 @@ def nice_time(seconds):
         return str(s) + 's'
 
 
-api_url = os.getenv('OCTOPI_URL') + ':' + str(port)
-api_key = os.getenv('OCTOPI_API')
+api_url = octopi_url + ':' + str(port)
 
 color = '#FFFFFF'
 headers = {'X-Api-Key': api_key}

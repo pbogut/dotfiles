@@ -4,8 +4,8 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   17/05/2018
 #=================================================
-db="$KEEPASS_DB"
-pass=$(gpg-config get keepass-pass)
+db=$(config keepass/db)
+pass=$(config keepass/pass)
 if [[ $# -gt 1 ]]; then
     for last; do true; done
 fi
