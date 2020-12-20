@@ -115,17 +115,6 @@ abbrev-alias --init
 abbrev-alias -g G='|rg'
 abbrev-alias -g dc='docker-compose'
 
-alias opti='LD_PRELOAD="libpthread.so.0 libGL.so.1" __GL_THREADED_OPTIMIZATIONS=1 optirun'
-alias ls="ls --color=auto"
-alias ll="ls -lhA --color=auto"
-alias pacman="pacman --color=auto"
-
-alias xo="xdg-open"
-alias ro="rifle" #rifle open
-alias so="source"
-alias clone="~/.scripts/term-in-current-dir.sh"
-alias c="clone"
-
 mutt() {
   dest="$HOME"
   if [[ -n $1 ]]; then
@@ -137,26 +126,8 @@ cht() {
   curl "cht.sh/$1" 2>/dev/null | less
 }
 
-alias php_debug_on="export XDEBUG_CONFIG=\"idekey=PHPSTORM\""
-alias php_debug_off="export XDEBUG_CONFIG="
-alias ctags_php="ctags -h \".php\" -R --exclude=\".git\" --exclude=\"tests\" --exclude=\"*.js\" --PHP-kinds=+cf"
-
-alias o="i3-open"
-
 # shortcuts
-alias sc="bash -c \"\`cat ~/.commands | fzf | sed 's,[^;]*;;; ,,'\`\""
-alias q="exit"
-alias :q="exit"
-alias m="ncmpcpp"
-alias s="spt"
-alias i="ssh-weechat"
-alias e="mutt"
-
-# autocomplete in irb
-alias irb="irb -r 'irb/completion'"
-
-#local configs
-source ~/.profile
+source ~/.aliases
 
 if [[ -f ~/.fzf.zsh ]]; then
   source ~/.fzf.zsh
@@ -169,7 +140,6 @@ if [[ -f ~/.zshrc.d/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
 fi
 
 setopt prompt_subst
-
 [[ -f /usr/lib/libstderred.so ]] && export LD_PRELOAD="/usr/lib/libstderred.so${LD_PRELOAD:+:$LD_PRELOAD}"
 
 # host specific config
