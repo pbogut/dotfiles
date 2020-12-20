@@ -32,6 +32,7 @@ read -d '' files <<"EOF"
     vimrc
     yaourtrc
     zshrc
+    zshenv
     zprofile
     zshrc.d
     bashrc

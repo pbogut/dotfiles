@@ -4,6 +4,8 @@
 # author: Pawel Bogut <pbogut@pbogut.net>
 # date:   11/11/2017
 #=================================================
+export PROFILE_LOADED=true
+
 export GOPATH="$HOME/.gocode"
 
 export PATH="$HOME/.scripts:$PATH"
