@@ -190,11 +190,10 @@ export LESS="-RXe"
 
 alias myip="wget http://ipinfo.io/ip -qO -"
 
-covid() {
-  curl -L http://covid19.trackercli.com/$1
-}
-
 # host specific config
 if [ -f $HOME/.$hostname.zsh ]; then
   source $HOME/.$hostname.zsh
 fi
+
+[[ -f /opt/asdf-vm/asdf.sh ]] && source /opt/asdf-vm/asdf.sh
+alias arst="asdf" # for colemak
