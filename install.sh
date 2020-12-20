@@ -34,6 +34,8 @@ read -d '' files <<"EOF"
     zshrc
     zprofile
     zshrc.d
+    bashrc
+    bash_profile
     Xdefaults
     composer/composer.json
     config/autostart/autostart.desktop
