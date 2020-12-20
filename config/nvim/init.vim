@@ -73,6 +73,8 @@ endif
 " Keep mapleader as backspack "\" for plugins not mess with my space leader
 " let mapleader = "\<space>" " life changer
 
+source ~/.config/nvim/config/perproject.vimrc
+
 augroup configgroup_nvim
   autocmd!
   " fix terminal display
