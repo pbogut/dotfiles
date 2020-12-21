@@ -18,6 +18,10 @@ macro index \cu "<current-bottom><previous-page><current-top>" "page-up vim styl
 bind pager \cd next-page
 bind pager \cu previous-page
 
+# setup headers visibility
+unignore folder
+unignore tags
+
 bind index <space> tag-entry
 
 #macro index,pager \ctp "<pipe-message>email-to-vtodo -m - -l personal -c email\n" # add todo entry to personal calendar
