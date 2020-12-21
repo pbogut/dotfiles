@@ -10,8 +10,7 @@ macro index,pager \cv "<pipe-message>urlview<return>" "url view"
 macro index,pager \ci "<pipe-message>~/.scripts/mail-to-web.sh<return>" "html view in browser"
 macro index,pager \ca "<pipe-message>khard add-email<return>" "add the sender address to khard"
 
-macro index,pager \cd "<current-top><next-page><current-bottom>" "blah"
-macro index,pager \cu "<current-bottom><previous-page><current-top>" "ahh"
+bind index <space> tag-entry
 
 #macro index,pager \ctp "<pipe-message>email-to-vtodo -m - -l personal -c email\n" # add todo entry to personal calendar
 #macro index,pager \ctw "<pipe-message>email-to-vtodo -m - -l work -c email\n"     # add todo entry to work calendar
