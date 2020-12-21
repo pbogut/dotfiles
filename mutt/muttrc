@@ -61,7 +61,7 @@ set mime_forward
 set mime_forward_rest=yes
 
 set realname = "Pawel Bogut"
-set from = "`gpg-config get email-default-from`"
+set from = "`config email/default/from`"
 # Sidebar
 set sidebar_visible = yes
 set sidebar_format="%D%?F? [%F]?%* %?N?%N/?%S"
@@ -92,15 +92,13 @@ macro attach \CO '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<ente
 macro compose \CO '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>i3-open /tmp/.mutt-tmp/* <enter>'
 macro attach \CI '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/tmp-file.html<enter><shell-escape>i3-open /tmp/.mutt-tmp/*<enter>'
 # status format with current account info
-set status_format="-%r-`gpg-config get email-default-from`: %f [Msgs:%?M?%M/?%m%?n? New:%n?%?o? Old:%o?%?d? Del:%d?%?F? Flag:%F?%?t? Tag:%t?%?p? Post:%p?%?b? Inc:%b?%?l? %l?]---(%s/%S)-%>-(%P)---"
+set status_format="-%r-`config email/default/from`: %f [Msgs:%?M?%M/?%m%?n? New:%n?%?o? Old:%o?%?d? Del:%d?%?F? Flag:%F?%?t? Tag:%t?%?p? Post:%p?%?b? Inc:%b?%?l? %l?]---(%s/%S)-%>-(%P)---"
 
 # this can be copied to accounts file to set up different accounts on different machines
 # with things that I dont want to keep in public git repository
 # switch between accounts
-macro index \e1 ":set from=`gpg-config get email-default-from`\n:set status_format=\"-%r-`gpg-config get email-default-from`: %f [Msgs:%?M?%M/?%m%?n? New:%n?%?o? Old:%o?%?d? Del:%d?%?F? Flag:%F?%?t? Tag:%t?%?p? Post:%p?%?b? Inc:%b?%?l? %l?]---(%s/%S)-%>-(%P)---\"\n:my_hdr Bcc: `gpg-config get email-default-from`\n" "Switch to default (`gpg-config get email-default-from`)"
-# account specific settings
-my_hdr Bcc: `gpg-config get email-default-from`
-# alternates `gpg-config get email-alternates`
+macro index \e1 ":set from=`config email/default/from`\n:set status_format=\"-%r-`config email/default/from`: %f [Msgs:%?M?%M/?%m%?n? New:%n?%?o? Old:%o?%?d? Del:%d?%?F? Flag:%F?%?t? Tag:%t?%?p? Post:%p?%?b? Inc:%b?%?l? %l?]---(%s/%S)-%>-(%P)---\"\n" "Switch to default (`config email/default/from`)"
+
 source ~/.mutt/accounts
 set reverse_name
 
