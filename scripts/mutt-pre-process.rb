@@ -15,6 +15,8 @@ rescue
   mail = Mail.new(payload.encode!('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: ''))
 end
 
+@html_only = ARGV.count == 1 and ARGV[0] == "--html-only"
+
 @tags = mail.header['X-Mutt'].to_s.split(",").map { |tag| tag.strip.to_sym }
 
 def to_markdown(part)
@@ -81,6 +83,11 @@ def process_text_part(part)
     if @tags.include?(:markdown)
       html_text = to_markdown(part)
       html_text = wrap_html(html_text)
+
+      if @html_only
+        puts html_text
+        exit 0
+      end
 
       html_part = Mail::Part.new
       html_part.content_type = 'text/html; charset=UTF-8'
