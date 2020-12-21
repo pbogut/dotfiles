@@ -21,8 +21,8 @@ URxvt.allow_bold:           false
 ! URxvt.font:                 xft:DejaVu Sans Mono Nerd Font:pixelsize=14
 /* URxvt.font:                 xft:Sauce Code Pro Nerd Font:pixelsize=14 */
 /* URxvt.font:                 xft:Fantasque Sans Mono Nerd Font:pixelsize=14 */
-URxvt.font:                 xft:Input Nerd Font:pixelsize=13
-
+URxvt.font:                 xft:Input Nerd Font Mono:pixelsize=13
+xterm*faceName:             xft:Input Nerd Font Mono:pixelsize=13
 
 ! Scrollbar
 URxvt.scrollStyle:          rxvt
