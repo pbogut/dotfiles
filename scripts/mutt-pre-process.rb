@@ -22,11 +22,11 @@ end
 def to_markdown(part)
   body = part.body.to_s
   # body = text.gsub(/\A.*?^$\n/m, '')
-  body.gsub!(/^(.*)$/,'\1  ') # force line break everywhere
-
+  tmp_body = body.gsub(/\r\n/,"\n") # clean up line breaks
+  tmp_body = tmp_body.gsub(/^(.*)$/,'\1  ') # force line break everywhere
   new_body =  ''
   pre_block = false
-  body.split("\n").each do |line|
+  tmp_body.split("\n").each do |line|
     if line.match(/^>.*$/) && !pre_block
       new_body << "<pre class=\"quoted\">\n"
       pre_block = true
