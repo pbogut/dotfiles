@@ -146,30 +146,32 @@ macro index gw "<change-vfolder>  Work<enter>" "Go to Work"
 macro index gb "<change-vfolder>  Bookkeeping<enter>" "Go to Bookkeeping"
 
 # index format
-tag-transforms "inbox"   "i"    \
-               "unread"  "✉"    \
-               "replied" "↻"    \
-               "sent"    "→"    \
-               "todo"    "☑"    \
-               "archive" "⚛"    \
-               "attachment" "⚒" \
-               "invites" "≣"
+#"opened"  "✓"
+tag-transforms "inbox"      "i"  \
+               "unread"     "✉"  \
+               "opened"     ""  \
+               "replied"    "↻"  \
+               "sent"       "→"  \
+               "todo"       "☑"  \
+               "archive"    ""  \
+               "attachment" ""  \
+               "invites"    "≣"
 
-tag-formats "inbox"   "GI" \
-            "unread"  "GU" \
-            "replied" "GR" \
-            "sent"    "GS" \
-            "todo"    "GT" \
-            "archive" "GA" \
-            "attachment" "Ga" \
-            "deleted" "GD" \
-            "invites" "Gi"
+tag-formats    "inbox"      "GI" \
+               "unread"     "GU" \
+               "opened"     "GO" \
+               "replied"    "GR" \
+               "sent"       "GS" \
+               "todo"       "GT" \
+               "archive"    "GA" \
+               "attachment" "Ga" \
+               "deleted"    "GD" \
+               "invites"    "Gi"
 
 set to_chars=" +TCFL"
 
-# date-cond patch used for conditional date formating
-# notmuch tags indicators for todo and archive
-set index_format="%4C %T%?GR?%GR& ?%?GT?%GT& ?%?Ga?%Ga& ?%?GA?%GA& ? %<[y?%<[m?%<[d?%[ %H:%M]&%[%a %d]>&%[%b %d]>&%[%m/%y ]> %-15.15L (%<l?%4l&%4c>) %s"
+# notmuch tags indicators
+set index_format="%4C %zt%?GR?%GR& ?%?GO?%GO& ?%?Ga?%Ga& ?%?GA?%GA& ? %<[y?%<[m?%<[d?%[ %H:%M]&%[%a %d]>&%[%b %d]>&%[%m/%y ]> %-15.15L (%<l?%4l&%4c>) %s"
 
 # notmuch bindings
 macro pager,index \\ "<vfolder-from-query>"                       # looks up a hand made query
