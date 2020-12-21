@@ -12,6 +12,12 @@ macro index,pager \ca "<pipe-message>khard add-email<return>" "add the sender ad
 
 macro index,pager \cs "<pipe-message>~/.scripts/notmuch-open-status.sh --mutt-pipe<return>" "check open status"
 
+macro index \cd "<current-top><next-page><current-bottom>" "page-down vim style"
+macro index \cu "<current-bottom><previous-page><current-top>" "page-up vim style"
+
+bind pager \cd next-page
+bind pager \cu previous-page
+
 bind index <space> tag-entry
 
 #macro index,pager \ctp "<pipe-message>email-to-vtodo -m - -l personal -c email\n" # add todo entry to personal calendar
