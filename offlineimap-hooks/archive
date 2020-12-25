@@ -4,6 +4,11 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   09/12/2020
 #=================================================
+hosname=$(hostname)
+if [[ $hostname != "redeye" ]]; then
+    # only archive on a main PC
+    exit 0
+fi
 daysago=1095
 todate=$(date --date="$daysago days ago" '+%Y-%m-%d')
 search="date:..$todate"
