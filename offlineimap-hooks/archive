@@ -7,11 +7,12 @@
 daysago=1095
 todate=$(date --date="$daysago days ago" '+%Y-%m-%d')
 search="date:..$todate"
+account_filter=${1:-.}
 
 echo ""
-echo " > archive $search"
+echo " > archive $search in $account_filter"
 
-notmuch search --output files $search | grep -v '\.archive' |
+notmuch search --output files $search | grep $account_filter | grep -v '\.archive' |
     while read line; do
         origdir=$(dirname $line)
         archdir=$(echo $origdir | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/\2.archive/\3#')
