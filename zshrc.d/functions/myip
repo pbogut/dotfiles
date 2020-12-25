@@ -1,0 +1,9 @@
+#!/bin/bash
+#=================================================
+# name:   myip
+# author: Pawel Bogut <https://pbogut.me>
+# date:   20/12/2020
+#=================================================
+myip() {
+  wget http://ipinfo.io/ip -qO -
+}
