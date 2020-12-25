@@ -336,4 +336,6 @@ command! -nargs=* -bang -complete=dir Agg call local#fzf#agg(<bang>0,<f-args>)
 command! -nargs=* -bang -complete=dir Rg call local#fzf#rg(<bang>0,<f-args>)
 command! -nargs=* -bang -complete=dir Rgg call local#fzf#agg(<bang>0,<f-args>)
 
+command! -nargs=* -bang -complete=dir Fdb call local#fzf#agg(<bang>0,<f-args>)
+
 command! -nargs=* -complete=dir FZFFileType call local#fzf#ft(<f-args>)
