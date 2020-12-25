@@ -29,6 +29,8 @@ get phpmd 'http://static.phpmd.org/php/latest/phpmd.phar'
 get robo 'http://robo.li/robo.phar'
 get dep 'https://deployer.org/deployer.phar'
 
+go get -u -v github.com/go-shiori/go-readability/cmd/...
+
 psylocal="$HOME/.local/share/psysh/"
 mkdir -p $psylocal && cd $psylocal && wget 'http://psysh.org/manual/en/php_manual.sqlite' && cd -
 
