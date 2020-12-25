@@ -13,6 +13,7 @@ echo "done"
 olddir=~/.dotfiles_backup/$(date +%s%N) # old dotfiles backup directory
 read -d '' files <<"EOF"
     ackrc
+    aliases
     bin
     ctags
     emacs.d/init.el

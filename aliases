@@ -1,3 +1,5 @@
+alias vim=nvim
+
 alias irb="irb -r 'irb/completion'"
 alias sc="bash -c \"\`cat ~/.commands | fzf | sed 's,[^;]*;;; ,,'\`\""
 alias q="exit"
@@ -22,3 +24,6 @@ alias c="clone"
 alias php_debug_on="export XDEBUG_CONFIG=\"idekey=PHPSTORM\""
 alias php_debug_off="export XDEBUG_CONFIG="
 alias ctags_php="ctags -h \".php\" -R --exclude=\".git\" --exclude=\"tests\" --exclude=\"*.js\" --PHP-kinds=+cf"
+
+# built in zsh kill suck ballz
+alias kill=/usr/bin/kill
