@@ -1,5 +1,5 @@
 :lua << EOF
-  local nvim_lsp = require('nvim_lsp')
+  local lspconfig = require('lspconfig')
 
   local on_attach = function(_, bufnr)
     vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
@@ -25,22 +25,22 @@
 
   -- local servers = {'rust_analyzer', 'sumneko_lua'}
   -- local servers = {}
-  local servers = {'intelephense', 'vimls', 'vuels', 'jsonls', 'bashls', 'pyls_ms', 'elixirls', 'gopls', 'sumneko_lua'}
+  local servers = {'intelephense', 'vimls', 'vuels', 'jsonls', 'bashls', 'pyls_ms', 'elixirls', 'gopls', 'sumneko_lua', 'tsserver'}
   for _, lsp in ipairs(servers) do
-    nvim_lsp[lsp].setup {
+    lspconfig[lsp].setup {
       on_attach = on_attach,
     }
   end
 
-  -- nvim_lsp['intelephense'].setup { on_attach = on_attach }
-  -- nvim_lsp['vimls'].setup { on_attach = on_attach }
-  -- nvim_lsp['vuels'].setup { on_attach = on_attach }
-  -- nvim_lsp['jsonls'].setup { on_attach = on_attach }
-  -- nvim_lsp['bashls'].setup { on_attach = on_attach }
-  -- nvim_lsp['pyls_ms'].setup { on_attach = on_attach }
-  -- nvim_lsp['elixirls'].setup { on_attach = on_attach }
-  -- nvim_lsp['gopls'].setup { on_attach = on_attach, cmd = { "typescript-language-server", "--stdio" } }
-  -- nvim_lsp['tsserver'].setup { on_attach = on_attach, cmd = { "typescript-language-server", "--stdio" } }
+  -- lspconfig['intelephense'].setup { on_attach = on_attach }
+  -- lspconfig['vimls'].setup { on_attach = on_attach }
+  -- lspconfig['vuels'].setup { on_attach = on_attach }
+  -- lspconfig['jsonls'].setup { on_attach = on_attach }
+  -- lspconfig['bashls'].setup { on_attach = on_attach }
+  -- lspconfig['pyls_ms'].setup { on_attach = on_attach }
+  -- lspconfig['elixirls'].setup { on_attach = on_attach }
+  -- lspconfig['gopls'].setup { on_attach = on_attach, cmd = { "typescript-language-server", "--stdio" } }
+  -- lspconfig['tsserver'].setup { on_attach = on_attach, cmd = { "typescript-language-server", "--stdio" } }
 
   local client_list = {}
 
