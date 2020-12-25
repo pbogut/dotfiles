@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [[ ! -z "$(ps -e | grep neomutt)" ]]; then
-  exit 0
-fi
+# if [[ ! -z "$(ps -e | grep neomutt)" ]]; then
+#   exit 0
+# fi
 
 account="$1"
 
@@ -33,7 +33,7 @@ notmuch search --output=files tag:sent | grep "$_account_filter" |grep '/INBOX/'
 
 notmuch tag +archive -- not date:`date +%Y` and not date:`expr $(date +%Y) - 1` and not tag:archive and tag:sent
 
-$HOME/.offlineimap-hooks/archive
+$HOME/.offlineimap-hooks/archive $_account_filter
 
 # detect moved files and update database
 notmuch new

@@ -3,9 +3,9 @@ hostname=`hostname`
 
 notmuch new
 
-if [[ ! -z "$(ps -e | grep neomutt)" ]]; then
-  exit 0
-fi
+# if [[ ! -z "$(ps -e | grep neomutt)" ]]; then
+#   exit 0
+# fi
 
 # tags as directories
 # im removing new tag so I can set everything
@@ -27,6 +27,11 @@ begin_hook="$HOME/.offlineimap-hooks-pre-postsync-$hostname.sh"
 
 notmuch tag +spam -inbox -- 'tag:new and subject:^[SPAM]'
 
+notmuch tag +drafts -- folder:/drafts/ tag:new
+notmuch tag +sent -- folder:/sent/ tag:new
+notmuch tag +trash -- folder:/trash/ tag:new
+notmuch tag +spam -- folder:/spam/ tag:new
+
 # add image tag
 notmuch tag +image -- tag:new and mimetype:image
 notmuch tag +attachment -- tag:new and attachment
@@ -40,11 +45,15 @@ done
 notmuch search --output=files from:notifications@github.com and tag:new | while read f; do
     tag=`cat "$f" | grep '^To: ' | sed 's/^To: \([^ ]*\).*/\1/g' | sed 's/^"\(.*\)"$/\1/'`
     id=`cat "$f" | grep '^Message-ID: ' | sed 's/^Message-ID: <\([^ ]*\)>.*/\1/g'`
-    notmuch tag +github/$tag -- id:$id
-    # notmuch tag -inbox +github/$tag -- id:$id
+    notmuch tag +github/$tag +github -- id:$id
 done
-# tag gitlab messages (try to figure how to tag them by project @see github)
-notmuch tag +gitlab -- tag:new and from:gitlab@mg.gitlab.com
+
+# tag gitlab messages
+notmuch search --output=files from:gitlab@mg.gitlab.com and tag:new | while read f; do
+    tag=`cat "$f" | grep '^X-GitLab-Project-Path: ' | sed 's/^X-GitLab-Project-Path: \([^ ]*\).*/\1/g'`
+    id=`cat "$f" | grep '^Message-ID: ' | sed 's/^Message-ID: <\([^ ]*\)>.*/\1/g'`
+    notmuch tag +gitlab/$tag +gitlab -- id:$id
+done
 
 notmuch tag -inbox -- "(tag:work and tag:inbox) and not tag:unread"
 
@@ -67,8 +76,8 @@ fi
 # auto archivie couses issues with gmail - wrrrr....
 #notmuch tag +archive -- date:..`date --date='6 month ago' +%Y-%m-%d`
 
-# Thread view - Add sent items to inbox if part of the thread is in inbox
-notmuch tag +inbox -- tag:inbox $(echo $(notmuch search tag:inbox | awk '{print "or " $1}'))
+# Thread view - Add sent and archive items to inbox if part of the thread is in inbox
+notmuch tag +inbox -archive -- tag:inbox $(echo $(notmuch search --output=threads tag:inbox | awk '{print "or " $1}'))
 
 end_hook="$HOME/.offlineimap-hooks-post-postsync-$hostname.sh"
 [[ -f $end_hook ]] && $end_hook
