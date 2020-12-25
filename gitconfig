@@ -12,6 +12,8 @@
     excludesfile = ~/.gitignore
 [push]
     default = simple
+[pull]
+    rebase = false
 [github]
     user = pbogut
 [diff]
