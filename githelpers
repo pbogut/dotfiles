@@ -81,7 +81,12 @@ git_clone_to_projects() {
   fi
 
   if [[ "$2" == "" ]]; then
-    dest="$HOME/Projects/$(echo "$repo" | sed 's#[^@]*@##' | sed 's#^\(https\|http\)://##g' | sed 's#:#/#g' | sed 's#\.git$##g' | awk '{print tolower($0)}')"
+    dest="$HOME/Projects/$(echo "$repo" | 
+      sed 's#[^@]*@##' | 
+      sed 's#^\(https\|http\)://##g' | 
+      sed 's#:#/#g' | 
+      sed 's#\.git$##g' | 
+      awk '{print tolower($0)}')"
   else
     dest="$2"
   fi

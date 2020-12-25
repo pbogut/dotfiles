@@ -4,7 +4,6 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   16/02/2020
 #=================================================
-scrsave="$(xset q | grep 'timeout:  0')"
 button=$1
 
 state="on"
@@ -25,5 +24,3 @@ if [[ $state == "on" ]]; then
 else
     echo 
 fi
-
-
