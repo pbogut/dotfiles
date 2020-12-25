@@ -1,0 +1,28 @@
+#!/bin/bash
+#=================================================
+# name:   move-file
+# author: Pawel Bogut <https://pbogut.me>
+# date:   18/12/2020
+#=================================================
+tmpfile=$(mktemp)
+file=$1
+ranger --choosedir="$tmpfile" --selectfile="$file"
+filename=$(basename "$file")
+destination=$(cat $tmpfile)
+should_move=$((echo "move";  echo "move and open"; echo "do nothing";) |
+    rofi -dmenu -p "Move file $filename to $destination?")
+
+handle_qb() {
+    if [[ "$QB_DOWNLOAD_FILE" == "1" ]]; then
+        browser :download-remove
+    fi
+}
+
+if [[ $should_move == "move" ]]; then
+    mv "$file" "$destination/$filename"
+    handle_qb
+elif [[ $should_move == "move and open" ]]; then
+    mv "$file" "$destination/$filename"
+    i3-open "$destination/$filename"
+    handle_qb
+fi
