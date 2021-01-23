@@ -100,153 +100,75 @@ augroup configgroup
         \  silent! Whitespace
 augroup END
 
-silent! call plug#begin()
-if exists(':Plug')
-  Plug 'editorconfig/editorconfig-vim'
-  let g:EditorConfig_exclude_patterns = ['fugitive://.*', 'scp://.*']
-  Plug 'pbogut/dbext.vim'
-  let g:dbext_map_prefix = '\s'
-  Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
-  Plug 'tpope/vim-scriptease'
-  Plug 'tpope/vim-rsi'
-  Plug 'tpope/vim-dadbod'
-  autocmd User after_vim_load source ~/.config/nvim/config/dadbod.vimrc
-  Plug 'tpope/vim-fugitive'
-  Plug 'tpope/vim-eunuch'
-  Plug 'tpope/vim-git'
-  Plug 'tpope/vim-commentary'
-  Plug 'tpope/vim-surround'
-  Plug 'tpope/vim-repeat'
-  Plug 'tpope/vim-rails', { 'for': 'ruby' }
-  Plug 'tpope/vim-endwise'
-  Plug 'tpope/vim-unimpaired'
-  Plug 'tpope/vim-obsession'
-  Plug 'tpope/vim-abolish'
-  autocmd User after_vim_load source ~/.config/nvim/config/abolish.vimrc
-  Plug 'tpope/vim-projectionist'
-  source ~/.config/nvim/config/projectionist.vimrc
-  Plug 'rhysd/git-messenger.vim'
-  nmap <space>gm <Plug>(git-messenger)
-  Plug 'dhruvasagar/vim-prosession'
-  let g:prosession_per_branch = 1
-  Plug 'vim-airline/vim-airline'
-  source ~/.config/nvim/config/airline.vimrc
-  Plug 'vim-airline/vim-airline-themes'
-  Plug 'mhinz/vim-signify'
-  source ~/.config/nvim/config/signify.vim
-  Plug 'MarcWeber/vim-addon-mw-utils'
-  Plug 'ludovicchabant/vim-gutentags'
-  Plug 'gioele/vim-autoswap'
-  Plug 'ntpeters/vim-better-whitespace'
-  let g:strip_whitespace_on_save = 0 " Use Whitespace wrapper instead
-  Plug 'honza/vim-snippets'
-  Plug 'mattn/emmet-vim'
-  Plug 'majutsushi/tagbar', { 'on': 'TagbarOpenAutoClose' }
-  nnoremap <silent> <space>n :TagbarOpenAutoClose<cr>
-  Plug 'sirver/ultisnips'
-  source ~/.config/nvim/config/ultisnips.vim
-  Plug 'joonty/vdebug', { 'on': 'PlugLoadVdebug' }
-  source ~/.config/nvim/config/vdebug.vim
-  Plug 'sbdchd/neoformat'
-  let g:neoformat_only_msg_on_error = 1
-  Plug 'k-takata/matchit.vim'
-  Plug 'captbaritone/better-indent-support-for-php-with-html', { 'for': 'php' }
-  Plug 'noahfrederick/vim-composer', { 'for': 'php' }
-  Plug 'janko-m/vim-test'
-  source ~/.config/nvim/config/test.vim
-  Plug 'elmcast/elm-vim', { 'for': 'elm' }
-  Plug 'pbogut/vim-elmper', { 'for': 'elm' }
-  let g:elm_format_autosave = 0
-  Plug 'elixir-lang/vim-elixir', { 'for': ['elixir', 'eelixir'] }
-  Plug 'kana/vim-operator-user'
-  Plug 'moll/vim-bbye', { 'on': 'Bdelete' }
-  Plug 'will133/vim-dirdiff'
-  Plug 'dbakker/vim-projectroot'
-  let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
-        \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
-  Plug 'AndrewRadev/switch.vim'
-  autocmd User after_plug_end source ~/.config/nvim/config/switch.vimrc
-  Plug 'AndrewRadev/splitjoin.vim'
-  Plug 'AndrewRadev/sideways.vim'
-  source ~/.config/nvim/config/sideways.vim
-  Plug 'godlygeek/tabular'
-  command! -nargs=* -range T Tabularize <args>
-  Plug 'vim-scripts/cmdalias.vim'
-  autocmd User after_vim_load source ~/.config/nvim/config/cmdalias.vimrc
-  " Plug 'Shougo/unite.vim'
-  Plug 'Shougo/echodoc.vim'
-  Plug 'andyl/vim-textobj-elixir'
-  Plug 'kana/vim-textobj-user'
-  Plug 'justinmk/vim-dirvish'
-  Plug 'kristijanhusak/vim-dirvish-git'
-  source ~/.config/nvim/config/dirvish.vimrc
-  Plug 'w0rp/ale'
-  autocmd User after_plug_end source ~/.config/nvim/config/ale.vimrc
-  Plug 'chmp/mdnav'
-  Plug 'samoshkin/vim-mergetool'
-  source ~/.config/nvim/config/vim-mergetool.vim
+" Plug 'editorconfig/editorconfig-vim'
+let g:EditorConfig_exclude_patterns = ['fugitive://.*', 'scp://.*']
+" Plug 'tpope/vim-dadbod'
+autocmd User after_vim_load source ~/.config/nvim/config/dadbod.vimrc
+" Plug 'tpope/vim-fugitive'
+command! Gst 0Gstatus
+command! XGst call XGst()
+command! Gl 0Glog
+function! XGst()
+  autocmd FileType fugitive
+        \  map q <c-w>q
+        \| nmap q <c-w>q
+        \| map <buffer> q <c-w>q
+        \| nmap <buffer> q <c-w>q
+  execute(':Gst')
+endfunction
+" Plug 'tpope/vim-abolish'
+autocmd User after_vim_load source ~/.config/nvim/config/abolish.vimrc
+" Plug 'tpope/vim-projectionist'
+source ~/.config/nvim/config/projectionist.vimrc
+" Plug 'rhysd/git-messenger.vim'
+nmap <space>gm <Plug>(git-messenger)
+" Plug 'vim-airline/vim-airline'
+source ~/.config/nvim/config/airline.vimrc
+" Plug 'mhinz/vim-signify'
+source ~/.config/nvim/config/signify.vim
+" Plug 'ntpeters/vim-better-whitespace'
+let g:strip_whitespace_on_save = 0 " Use Whitespace wrapper instead
+" Plug 'sirver/ultisnips'
+source ~/.config/nvim/config/ultisnips.vim
+" Plug 'sbdchd/neoformat'
+let g:neoformat_only_msg_on_error = 1
+" Plug 'janko-m/vim-test'
+source ~/.config/nvim/config/test.vim
+" Plug 'elmcast/elm-vim', { 'for': 'elm' }
+" Plug 'pbogut/vim-elmper', { 'for': 'elm' }
+let g:elm_format_autosave = 0
+" Plug 'dbakker/vim-projectroot'
+let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
+      \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
+" Plug 'AndrewRadev/switch.vim'
+autocmd User after_plug_end source ~/.config/nvim/config/switch.vimrc
+" Plug 'AndrewRadev/sideways.vim'
+source ~/.config/nvim/config/sideways.vim
+" Plug 'godlygeek/tabular'
+command! -nargs=* -range T Tabularize <args>
+" Plug 'vim-scripts/cmdalias.vim'
+autocmd User after_vim_load source ~/.config/nvim/config/cmdalias.vimrc
+" Plug 'kristijanhusak/vim-dirvish-git'
+source ~/.config/nvim/config/dirvish.vimrc
+" Plug 'w0rp/ale'
+autocmd User after_plug_end source ~/.config/nvim/config/ale.vimrc
+" Plug 'samoshkin/vim-mergetool'
+source ~/.config/nvim/config/vim-mergetool.vim
+" Plug 'vim-scripts/ReplaceWithRegister'
+source ~/.config/nvim/config/replacewithregister.vim
+" Plug 'MattesGroeger/vim-bookmarks'
+let g:bookmark_save_per_working_dir = 1
+" Plug 'ncm2/ncm2'
+autocmd User after_plug_end autocmd BufEnter * call ncm2#enable_for_buffer()
+" Plug 'pbogut/fzf-mru.vim'
+source ~/.config/nvim/config/fzf.vimrc
+" Plug 'sheerun/vim-polyglot'
 
+lua require('plugins')
 
-  Plug 'vim-scripts/ReplaceWithRegister'
-  source ~/.config/nvim/config/replacewithregister.vim
-  Plug 'beloglazov/vim-textobj-quotes'
-  " Plug 'lvht/phpcd.vim', { 'for': 'php', 'do': 'composer install' }
-  Plug 'joereynolds/gtags-scope'
-  Plug 'MattesGroeger/vim-bookmarks'
-  let g:bookmark_save_per_working_dir = 1
-  " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-  " source ~/.config/nvim/config/deoplete.vimrc
-  " Plug 'Shougo/neco-vim', { 'for': 'vim' }
-  Plug 'prabirshrestha/async.vim'
-  Plug 'roxma/nvim-yarp'
-  Plug 'ncm2/ncm2'
-  autocmd User after_plug_end autocmd BufEnter * call ncm2#enable_for_buffer()
-  Plug 'ncm2/ncm2-ultisnips'
-  Plug 'ncm2/ncm2-bufword'
-  Plug 'ncm2/ncm2-path'
-  Plug 'ncm2/ncm2-tagprefix'
-  Plug 'ncm2/ncm2-jedi', {'for': 'python'}
-  Plug 'ncm2/ncm2-cssomni', {'for': ['css', 'scss', 'less']}
-  Plug 'ncm2/ncm2-tern', {'do': 'npm install'}
-  Plug 'ncm2/ncm2-go', {'for': 'go'}
-  Plug 'ncm2/ncm2-ultisnips'
-  Plug 'ncm2/ncm2-html-subscope'
-  Plug 'ncm2/ncm2-markdown-subscope'
-  Plug 'pbogut/ncm2-alchemist'
-  Plug 'phpactor/phpactor' ,  {'do': 'composer install'}
-  Plug 'phpactor/ncm2-phpactor'
-  Plug 'rrethy/vim-illuminate'
-  Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-  Plug 'junegunn/fzf.vim'
-  Plug 'pbogut/fzf-mru.vim'
-  source ~/.config/nvim/config/fzf.vimrc
-  Plug 'slashmili/alchemist.vim', { 'for': ['elixir', 'eelixir'] }
-  Plug 'powerman/vim-plugin-AnsiEsc', { 'for': ['elixir', 'eelixir'] }
-  " Plug 'zchee/deoplete-go', { 'do': 'go get github.com/nsf/gocode && make', 'for': 'go'}
-  " Plug 'zchee/deoplete-zsh', { 'for': 'zsh' }
-  " Plug 'zchee/deoplete-jedi', { 'for': 'python' }
-  " Plug 'padawan-php/deoplete-padawan', { 'for': 'php' }
-  " Plug 'pbogut/deoplete-elm', { 'for': 'elm' }
-  " Plug 'carlitux/deoplete-ternjs', { 'for': ['javascript', 'javascript.jsx'], 'do': 'yarn global add tern' }
-  Plug 'frankier/neovim-colors-solarized-truecolor-only'
-  Plug 'sheerun/vim-polyglot'
-  Plug 'sirtaj/vim-openscad'
-  let g:polyglot_disabled = ['eelixir', 'elixir']
-
-  if filereadable($HOME . '/.wakatime.cfg')
-    Plug 'wakatime/vim-wakatime'
-  endif
-
-  if exists(':lua')
-    Plug 'neovim/nvim-lsp'
-    Plug 'nvim-lua/diagnostic-nvim'
-    autocmd User after_plug_end source ~/.config/nvim/config/diagnostic.vimrc
-    Plug 'nvim-lua/completion-nvim'
-    autocmd User after_plug_end source ~/.config/nvim/config/lsp.vimrc
-  endif
-endif "
-silent! call plug#end()      " requiredc
-filetype plugin indent on    " required
+" Plug 'neovim/nvim-lsp'
+" Plug 'nvim-lua/completion-nvim'
+autocmd User after_plug_end source ~/.config/nvim/config/lsp.vimrc
 
 doautocmd User after_plug_end
 autocmd! User after_plug_end " clear after_plug_end command list
