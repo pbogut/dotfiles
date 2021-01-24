@@ -103,7 +103,7 @@ return require('packer').startup({
       use { 'sirtaj/vim-openscad' }
       use { '/home/pbogut/Projects/github.com/pbogut/simple-fold' }
       -- lsp
-      use { 'neovim/nvim-lsp' }
+      use { 'neovim/nvim-lsp', config = 'require "plugins.nvim_lsp"' }
       use { 'nvim-lua/completion-nvim' }
 
       use { 'wakatime/vim-wakatime', cond = function()
