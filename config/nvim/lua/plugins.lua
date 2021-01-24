@@ -1,5 +1,7 @@
+local U = require('utils')
 local execute = vim.api.nvim_command
 local fn = vim.fn
+local cmd = vim.cmd
 
 local install_path = fn.stdpath('data')..'/site/pack/packer/opt/packer.nvim'
 
@@ -9,13 +11,18 @@ end
 
 execute 'packadd packer.nvim'
 
+-- reload and recompile this file (plugins.lua) after change
+U.augroups('cfg_plugins_save', { BufWritePost = { 'plugins.lua', function()
+  cmd('luafile ' .. os.getenv("HOME") .. '/.config/nvim/lua/plugins.lua')
+  cmd('PackerCompile')
+end } } )
+
 return require('packer').startup({
     function()
       -- Packer can manage itself as an optional plugin
       use { 'wbthomason/packer.nvim', opt = true }
       use { 'editorconfig/editorconfig-vim' }
       use { 'vim-ruby/vim-ruby', ft = { 'ruby' } }
-
       use { 'tpope/vim-scriptease' }
       use { 'tpope/vim-rsi' }
       use { 'tpope/vim-dadbod' }
@@ -74,7 +81,7 @@ return require('packer').startup({
       use { 'prabirshrestha/async.vim' }
       use { 'roxma/nvim-yarp' }
       use { 'ncm2/ncm2' }
-      use { 'ncm2/ncm2-ultisnips' }
+      use { 'ncm2/ncm2-ultisnips', config = 'require "plugins.ncm2_ultisnips"' }
       use { 'ncm2/ncm2-bufword' }
       use { 'ncm2/ncm2-path' }
       use { 'ncm2/ncm2-tagprefix' }
@@ -92,7 +99,7 @@ return require('packer').startup({
       use { 'slashmili/alchemist.vim', ft = { 'elixir', 'eelixir' } }
       use { 'powerman/vim-plugin-AnsiEsc', ft = { 'elixir', 'eelixir' } }
       use { 'frankier/neovim-colors-solarized-truecolor-only' }
-      use { 'sheerun/vim-polyglot', setup = "vim.g.polyglot_disabled = {'eelixir', 'elixir'}" }
+      use { 'sheerun/vim-polyglot', setup = 'require "plugins.polyglot"' }
       use { 'sirtaj/vim-openscad' }
       use { '/home/pbogut/Projects/github.com/pbogut/simple-fold' }
       -- lsp
@@ -100,8 +107,8 @@ return require('packer').startup({
       use { 'nvim-lua/completion-nvim' }
 
       use { 'wakatime/vim-wakatime', cond = function()
-        local f = io.open(os.getenv("HOME") .. '/.wakatime.cfg')
-        if f==nil then return false else io.close(f) return true end
+        local f = os.getenv("HOME") .. '/.wakatime.cfg'
+        return vim.fn.filereadable(f) > 0
       end }
     end
   })

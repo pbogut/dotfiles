@@ -1,6 +1,10 @@
+" basic settings
 lua require('settings')
 
 source ~/.config/nvim/config/perproject.vimrc
+
+" autogroups
+lua require('autogroups')
 
 augroup configgroup_nvim
   autocmd!
@@ -13,74 +17,18 @@ augroup configgroup_nvim
 augroup END
 augroup configgroup
   autocmd!
-  autocmd BufNewFile,BufRead *
-        \  inoremap <silent> <buffer> <expr> <cr> ncm2_ultisnips#expand_or("\<CR>", 'n')
-  autocmd BufRead,BufNewFile *.phtml
-        \  setfiletype php.phtml
-  autocmd FileType *
-        \  call matchadd('Todo', '@todo\>')
-        \| call matchadd('Todo', '@fixme\>')
-        \| call matchadd('Error', '@debug\>')
-  autocmd FileType html
-        \  call s:set_indent(4, v:false, v:true)
-  autocmd FileType vue
-        \  call s:set_indent(2, v:false, v:true)
-  autocmd FileType javascript
-        \  call s:set_indent(2, v:false, v:true)
-  autocmd FileType elixir
-        \  call s:set_indent(2, v:false, v:true)
   autocmd FileType elm
-        \  call s:set_indent(4, v:false, v:true)
-        \| setlocal makeprg=elm-make
-        \| let b:my_make_cmd = "elm-make --warn --output /dev/null {file_name}"
-  autocmd FileType c
-        \  call s:set_indent(4, v:false, v:true)
-  autocmd FileType sql
-        \  call s:set_indent(4, v:false, v:true)
-        \| let b:commentary_format='-- %s'
+        \  let b:my_make_cmd = "elm-make --warn --output /dev/null {file_name}"
   autocmd FileType php
-        \  call s:set_indent(4, v:false, v:true)
-        \| let b:commentary_format='// %s'
-        \| setlocal kp=:PhpDoc
-        \| exec("nmap <buffer> gD <plug>(composer-find)")
-        \| exec("map cgget mz0wwwyw/getters<cr>jo/**<cr>Gets <esc>pb~yiwo<cr>@return mixed<cr><cr>/<cr>public function get<esc>pa()<cr>{<cr>return $this-><esc>pb~A;<esc>jo<esc>`zj")
-        \| exec("map cgset mz0wwwyw/setters<cr>jo/**<cr>Sets <esc>pb~yiwo<cr>@return $this<cr><cr>/<cr>public function set<esc>pa(<esc>pbi$<esc>~~ea)<cr>{<cr>$this-><esc>pb~A = $<esc>pb~A;<cr>return $this;<esc>jo<esc>`zj")
-  autocmd FileType php.phtml
-        \  call s:set_indent(4, v:false, v:true)
-        \| let b:commentary_format='<?php /* %s */ ?>'
-  autocmd FileType go
-        \  call s:set_indent(2, v:true, v:true)
-  autocmd FileType ruby
-        \  call s:set_indent(2, v:true, v:true)
-  autocmd FileType yaml,yaml.docker-compose
-        \  call s:set_indent(2, v:true, v:true)
+        \  setlocal kp=:PhpDoc
   autocmd FileType vim
-        \  call s:set_indent(2, v:false, v:true)
         \| let b:neoformat_basic_format_align = 1
-  autocmd FileType xml
-        \  call s:set_indent(4, v:false, v:true)
-  autocmd FileType sh
-        \  call s:set_indent(2, v:false, v:true)
-  autocmd FileType css
-        \  call s:set_indent(4, v:false, v:true)
-  autocmd FileType scss
-        \  call s:set_indent(4, v:false, v:true)
-  autocmd FileType blade
-        \  call s:set_indent(4, v:false, v:true)
-        \| let b:commentary_format='{{-- %s --}}'
-  autocmd FileType crontab\|nginx\|resolv
-        \  let b:commentary_format='# %s'
-  autocmd FileType markdown
-        \  setlocal spell spelllang=en_gb
   autocmd FileType qf
         \  nnoremap <buffer> o <cr>
         \| nnoremap <buffer> q :q
-  autocmd FileType fugitiveeee
-        \  execute("wincmd J")
-        \| if(winnr() != 1) | execute("resize 20") | endif
   " start mutt file edit on first empty line
   autocmd FileType mail
-        \  execute("normal /^$/\n")
+        \  call s:mail_init()
         \| setlocal spell spelllang=en_gb
         \| setlocal textwidth=72
   autocmd BufEnter .i3blocks.conf
@@ -92,8 +40,6 @@ augroup configgroup
   autocmd  FileType fzf
         \  set laststatus=0 noshowmode noruler
         \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
-  autocmd InsertLeave *
-        \ if &buftype == 'acwrite' | execute('WidenRegion') | endif
   autocmd BufWritePre *
         \  silent! Format auto
   autocmd BufWritePost *
@@ -183,7 +129,6 @@ augroup END
 silent! colorscheme solarized
 "
 source ~/.config/nvim/config/autopairs.vimrc
-" source ~/.config/nvim/config/composer.vimrc
 source ~/.config/nvim/config/terminal.vimrc
 
 " nicer vertical split
@@ -596,6 +541,11 @@ function! Phtml_scope()
   else
     return 'html'
   endif
+endfunction
+
+function! s:mail_init()
+  execute('normal gg')
+  call search('^$')
 endfunction
 
 " inoremap <silent> <expr> <CR> ncm2_ultisnips#expand_or("\<CR>", 'n')
