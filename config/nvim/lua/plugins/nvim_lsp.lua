@@ -2,43 +2,44 @@ local u = require'utils'
 local lspconfig = require('lspconfig')
 local cmd = vim.cmd
 
+local no_lsp_bind = '<cmd>lua print("No LSP attached")<CR>'
+local format_bind = '<cmd>Neoformat<CR>'
+
+local bindings = {
+  { 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', false },
+  { 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', false },
+  { 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', false },
+  { 'n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', no_lsp_bind },
+  { 'i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', no_lsp_bind },
+  { 'n', '<space>i', '<cmd>lua vim.lsp.buf.implementation()<CR>', no_lsp_bind },
+  { 'n', '<space>T', '<cmd>lua vim.lsp.buf.type_definition()<CR>', no_lsp_bind },
+  { 'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', no_lsp_bind },
+  { 'n', '<space>rr', '<cmd>lua vim.lsp.buf.references()<CR>', no_lsp_bind },
+  { 'n', '<space>d', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', no_lsp_bind },
+  { 'n', '<space>sd', '<cmd>lua vim.lsp.buf.document_symbol()<CR>', no_lsp_bind },
+  { 'n', '<space>sD', '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', no_lsp_bind },
+  { 'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', no_lsp_bind },
+  -- @todo fall back to migg=G`i and = if not available (how to detect?)
+  { 'n', '<space>af', '<cmd>lua vim.lsp.buf.formatting()<CR>', format_bind },
+  { 'v', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<CR>', format_bind },
+  { 'x', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<CR>', format_bind },
+}
+
 -- prevent stupid errors when using mapping with no lsp attached
-u.map('n', '<C-k>', '<cmd>lua print("No LSP attached")<CR>')
-u.map('i', '<C-k>', '<cmd>lua print("No LSP attached")<CR>')
-u.map('n', '<space>i', '<cmd>lua print("No LSP attached")<CR>')
-u.map('n', '<space>T', '<cmd>lua print("No LSP attached")<CR>')
-u.map('n', '<space>rn', '<cmd>lua print("No LSP attached")<CR>')
-u.map('n', '<space>rr', '<cmd>lua print("No LSP attached")<CR>')
-u.map('n', '<space>d', '<cmd>lua print("No LSP attached")<CR>')
-u.map('n', '<space>sd', '<cmd>lua print("No LSP attached")<CR>')
-u.map('n', '<space>sD', '<cmd>lua print("No LSP attached")<CR>')
-u.map('n', '<space>ca', '<cmd>lua print("No LSP attached")<CR>')
-u.map('n', '<space>af', '<cmd>lua print("No LSP attached")<CR>')
-u.map('v', '<space>af', '<cmd>lua print("No LSP attached")<CR>')
-u.map('x', '<space>af', '<cmd>lua print("No LSP attached")<CR>')
+for _, def in pairs(bindings) do
+  if def[4] then
+    u.map(def[1], def[2], def[4])
+  end
+end
 
 local on_attach = function(_, bufnr)
   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
   require'completion'.on_attach()
 
   -- Mappings.
-  u.buf_map(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>')
-  u.buf_map(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>')
-  u.buf_map(bufnr, 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>')
-  u.buf_map(bufnr, 'n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>')
-  u.buf_map(bufnr, 'i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>')
-  u.buf_map(bufnr, 'n', '<space>i', '<cmd>lua vim.lsp.buf.implementation()<CR>')
-  u.buf_map(bufnr, 'n', '<space>T', '<cmd>lua vim.lsp.buf.type_definition()<CR>')
-  u.buf_map(bufnr, 'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>')
-  u.buf_map(bufnr, 'n', '<space>rr', '<cmd>lua vim.lsp.buf.references()<CR>')
-  u.buf_map(bufnr, 'n', '<space>d', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>')
-  u.buf_map(bufnr, 'n', '<space>sd', '<cmd>lua vim.lsp.buf.document_symbol()<CR>')
-  u.buf_map(bufnr, 'n', '<space>sD', '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>')
-  u.buf_map(bufnr, 'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>')
-  -- @todo fall back to migg=G`i and = if not available (how to detect?)
-  u.buf_map(bufnr, 'n', '<space>af', '<cmd>lua vim.lsp.buf.formatting()<CR>')
-  u.buf_map(bufnr, 'v', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<CR>')
-  u.buf_map(bufnr, 'x', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<CR>')
+  for _, def in pairs(bindings) do
+    u.buf_map(bufnr, def[1], def[2], def[3])
+  end
 end
 
 vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
