@@ -1,17 +1,23 @@
-local U = {}
+local u = {}
 local cmd = vim.cmd
 local fn = vim.fn
 local b = vim.b
 local bo = vim.bo
+local api = vim.api
 
-Lua_augroups_callbacks = Lua_augroups_callbacks or {}
+local autocmd_callbacs = {}
+
+function u.call_autocmd(no)
+  autocmd_callbacs[no]()
+end
 
 -- definitions = {
---   VimEnter = {
+--   EventName = {
 --     {"*", function() print('test') end };
 --   }
 -- }
-function U.augroups(group_name, definitions)
+
+function u.augroup(group_name, definitions)
   cmd('augroup ' .. group_name)
   cmd('autocmd!')
   for event_type, definition in pairs(definitions) do
@@ -25,8 +31,8 @@ function U.augroups(group_name, definitions)
       table.insert(def, 2, event_type)
       local command = table.concat(def, ' ')
       if type(callback) == 'function' then
-        table.insert(Lua_augroups_callbacks, callback)
-        callback = 'lua Lua_augroups_callbacks[' .. #Lua_augroups_callbacks .. ']()'
+        table.insert(autocmd_callbacs, callback)
+        callback = 'lua require("utils").call_autocmd(' .. #autocmd_callbacs  .. ')'
       end
       command = command .. ' ' .. callback
       cmd(command)
@@ -39,7 +45,7 @@ end
 -- @param width Width in characters
 -- @param[opt=false] hardtab Use hard tab character
 -- @param[opt=false] force   Force indent even if already set
-function U.set_indent(width, hardtab, force)
+function u.set_indent(width, hardtab, force)
   -- Skip if already set
   if not force and b.Set_indent_initiated then
     return
@@ -58,4 +64,4 @@ function U.set_indent(width, hardtab, force)
   bo.expandtab = not hardtab
 end
 
-return U
+return u
