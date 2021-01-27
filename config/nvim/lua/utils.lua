@@ -64,4 +64,22 @@ function u.set_indent(width, hardtab, force)
   bo.expandtab = not hardtab
 end
 
+function u.map(mode, key, result, opts)
+  local opts = vim.tbl_extend('keep', opts or {}, {
+    noremap = true,
+    silent = mode ~= 'c',
+    expr = false
+  })
+  api.nvim_set_keymap(mode, key, result, opts)
+end
+
+function u.buf_map(buffer_nr, mode, key, result, opts)
+  local opts = vim.tbl_extend('keep', opts or {}, {
+    noremap = true,
+    silent = mode ~= 'c',
+    expr = false
+  })
+  api.nvim_buf_set_keymap(buffer_nr, mode, key, result, opts)
+end
+
 return u
