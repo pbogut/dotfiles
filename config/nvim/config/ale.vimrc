@@ -7,6 +7,8 @@ let g:ale_lint_on_enter = 0
 let g:ale_php_phpcs_executable = $HOME . '/.bin/phpcs'
 let g:ale_php_phpcs_use_global = 1
 
+let g:ale_disable_lsp = 1
+
 augroup pb_alegroup
   autocmd!
   autocmd InsertEnter php call s:ale_init_php()
