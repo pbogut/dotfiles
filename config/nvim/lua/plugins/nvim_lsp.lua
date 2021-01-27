@@ -19,10 +19,10 @@ local bindings = {
   { 'n', '<space>sd', '<cmd>lua vim.lsp.buf.document_symbol()<CR>', no_lsp_bind },
   { 'n', '<space>sD', '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', no_lsp_bind },
   { 'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', no_lsp_bind },
-  -- @todo fall back to migg=G`i and = if not available (how to detect?)
-  { 'n', '<space>af', '<cmd>lua vim.lsp.buf.formatting()<CR>', format_bind },
-  { 'v', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<CR>', format_bind },
-  { 'x', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<CR>', format_bind },
+  -- custom format functions with fall back to Neoformat cmd
+  { 'n', '<space>af', '<cmd>lua vim_lsp_buf_formatting()<CR>', format_bind },
+  { 'v', '<space>af', ':lua vim_lsp_buf_range_formatting()<CR>', format_bind },
+  { 'x', '<space>af', ':lua vim_lsp_buf_range_formatting()<CR>', format_bind },
 }
 
 -- prevent stupid errors when using mapping with no lsp attached
@@ -108,6 +108,18 @@ function attach_lsp_to_new_buffer()
         vim.lsp.buf_attach_client(bufnr, client_id)
       end
     end
+  end
+end
+
+function vim_lsp_buf_range_formatting()
+  if not pcall(vim.lsp.buf.range_formatting) then
+    cmd("'<,'>Neoformat")
+  end
+end
+
+function vim_lsp_buf_formatting()
+  if not pcall(vim.lsp.buf.formatting) then
+    cmd('Neoformat')
   end
 end
 
