@@ -31,10 +31,6 @@ augroup configgroup
         \| setlocal textwidth=72
   autocmd BufEnter .i3blocks.conf
         \ let b:whitespace_trim_disabled = 1
-  autocmd BufEnter *.keepass
-        \ nmap gp /^Password:<cr>:read !apg -m16 -n1 -MSNCL<cr>:%s/Password:.*\n/Password: /<cr><esc>
-  autocmd FileType tagbar
-        \  nmap <buffer> <space>n q
   autocmd  FileType fzf
         \  set laststatus=0 noshowmode noruler
         \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
@@ -129,16 +125,7 @@ hi VertSplit guibg=#073642 guifg=fg
 " dont mess with me!
 let g:no_plugin_maps = 1
 
-" macros
-nnoremap <space>em :tabnew ~/.vim/macros.vim<cr>
-nnoremap <space>sm :source ~/.vim/macros.vim<cr>
-" edit vimrc/zshrc and load vimrc bindings
-nnoremap <space>ev :tabnew $MYVIMRC<CR>
-nnoremap <space>ez :tabnew ~/.zshrc<CR>
-nnoremap <space>sv :source $MYVIMRC<CR>
-
-nnoremap <space>et :call local#fzf#mytemplates()<CR>
-nnoremap <space>es :call local#fzf#mysnippets()<CR>
+lua require('keymappings')
 
 " open list / quickfix
 nnoremap <silent> <space>l :call local#togglelist#locationlist()<cr>
@@ -150,7 +137,6 @@ nnoremap <silent> _ :Dirvish %:p:h<cr>
 nnoremap <silent> <space>w :W!<cr>
 nnoremap <silent> <space>a :Format<cr>
 nnoremap <silent> <space>z za
-nnoremap <silent> <esc> :set nohls<cr>
 nnoremap R ddO
 nnoremap n :set hls<cr>n
 nnoremap N :set hls<cr>N
@@ -194,89 +180,43 @@ for [key1, key2] in [['j', 'gj'], ['k', 'gk']]
   endfor
 endfor
 
-" nice to have
-inoremap <c-d> <del>
-cnoremap <c-d> <del>
 " vim make
 nmap <space>mf <space>w:call QuickTerm(substitute(b:my_make_cmd, '{file_name}', expand('%'), ''))<cr>
 nmap <space>ms <space>w:QuickTerm make<cr>
 nmap <space>mm <space>w:QuickTerm make<space>
 nmap <space>md <space>w:QuickTerm make deploy<cr>
-" regex helpers
-cnoremap \\* \(.*\)
-cnoremap \\- \(.\{-}\)
-" prevent pasting in visual from yank seletion
-snoremap p "_dP
-vnoremap p "_dP
-" case insensitive search by default
-nnoremap / :let @/=""<cr>:set hls<cr>/\c
-nnoremap ? :let @/=""<cr>:set hls<cr>?\c
-nnoremap * :set hls<cr>*
-nnoremap # :set hls<cr>#
-nnoremap <space><space> *``:set hls<cr>
-nnoremap <space><cr> "xy$:let @/=@x<cr>
-nnoremap <silent> <space>= migg=G`i
-inoremap <C-Space> <c-x><c-o>
-imap <C-@> <C-Space>
-
+" {{{ fzf
 nnoremap <silent> <space>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
 nnoremap <silent> <space>fa :call local#fzf#files()<cr>
 nnoremap <silent> <space>fp :FZFProject<cr>
 nnoremap <silent> <space>fc :call local#fzf#clip()<cr>
-nnoremap <silent> <space>fd :call local#fzf#buffer_dir_files()<cr>
+nnoremap <silent> <space>fd :call local#fzf#db()<cr>
+vnoremap <silent> <space>fd :call local#fzf#db_range()<cr>
+nnoremap <silent> <space>fD :call local#fzf#db_buf()<cr>
 nnoremap <silent> <space>ff :call local#fzf#all_files()<cr>
 nnoremap <silent> <space>fg :call local#fzf#git_ls()<cr>
 nnoremap <silent> <space>ft :FZFTags <cword><cr>
 nnoremap <silent> <space>] :FZFTags<cr>
 nnoremap <silent> <space>fb :FZFBuffers<cr>
-nnoremap <silent> <space>ec :call local#fzf#vim_config()<cr>
 nnoremap <silent> <space>gf :call local#fzf#file_under_coursor()<cr>
 ProjectType laravel nnoremap <silent> <space>gf :call local#laravel#file_under_coursor()<cr>
 nnoremap <silent> <space>gF :call local#fzf#file_under_coursor_all()<cr>
 nnoremap <silent> <space>gt :call local#fzf#tag_under_coursor()<cr>
 nnoremap <silent> <space>gw :Rg <cword><cr>
-nnoremap <silent> <space>ga :Ag<cr>
 nnoremap <silent> <space>gr :Rg<cr>
-vnoremap <silent> <space>ga "ay :Ag <c-r>a<cr>
 vnoremap <silent> <space>gr "ay :Rg <c-r>a<cr>
-
+" }}}
+"
 nnoremap <silent> <space>of :let g:pwd = expand('%:h') \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
 nnoremap <silent> <space>op :let g:pwd = projectroot#guess() \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
-nnoremap <silent> <space>ov :belowright 20split \| terminal vagrant ssh<cr>
 
 noremap <space>sc :execute(':rightbelow 10split \| te scspell %')<cr>
-
-" nvim now can map alt without terminal issues, new cool shortcuts commin
-tnoremap <silent> <c-q> <C-\><C-n>
-
-noremap <silent> <M-l> :vertical resize +1<cr>
-noremap <silent> <M-h> :vertical resize -1<cr>
-noremap <silent> <M-j> :resize +1<cr>
-noremap <silent> <M-k> :resize -1<cr>
-
-imap <M-o> <esc>O
-nmap <M-o> O
 
 " emmet quick shortcut
 imap <M-Tab> <c-y>,
 imap <M-CR> <cr><esc>O
 imap <M-n> <c-y>n
 imap <M-N> <c-y>N
-
-" diffmode
-nnoremap du :diffupdate<cr>
-
-cnoremap <A-k> <Up>
-cnoremap <A-j> <Down>
-
-for keys in ['w', 'iw', 'aw', 'e', 'W', 'iW', 'aW']
-  if keys == 'w' | let motion = 'e' | else | let motion = keys | endif
-  " quick change and search for naxt, change can be repeaded by . N and n will
-  " search for the same selection, gn gN will select same selection
-  exe('nnoremap cg' . keys . ' y' . motion . ':exe("let @/=@+")<bar><esc>cgn')
-  exe('nnoremap <space>s' . keys . ' y' . motion . ':s/<c-r>+//g<left><left>')
-  exe('nnoremap <space>%' . keys . ' y' . motion . ':%s/<c-r>+//g<left><left>')
-endfor
 
 nmap <silent> grr :Rg<cr>
 nmap <silent> grq :Rgg<cr>
