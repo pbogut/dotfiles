@@ -2,7 +2,6 @@ local cmd = vim.cmd
 local o = vim.o
 local wo = vim.wo
 local bo = vim.bo
-local fn = vim.fn
 
 cmd('syntax on')
 cmd("filetype plugin indent on")
@@ -11,6 +10,8 @@ cmd('set fillchars=fold:\\ ,vert:\\│')
 cmd('set shortmess+=c')
 cmd('set runtimepath+=~/.vim')
 
+o.signcolumn = 'yes'
+wo.signcolumn = 'yes'
 o.showmode = false
 o.ttimeoutlen = 0   -- eliminate esc timeout
 o.report = 0
