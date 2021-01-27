@@ -61,4 +61,4 @@ local config_group = {
   }
 }
 
-U.augroups('config_group', config_group)
+U.augroup('config_group', config_group)
