@@ -224,9 +224,11 @@ command! -bang -nargs=? -range=-1 -complete=file DBExport
       \ exe s:db_export(<q-args>, <bang>0)
 
 
-function! s:db_report(cmd, bang) abort
+function! s:db_report(cmd, bang, line1, line2) abort
+  let content = nvim_buf_get_lines(0, a:line1 - 1, a:line2, v:true)
+
   let sqlfile = trim(system('mktemp'))
-  let result = system('~/.scripts/db-output-conv/report-form.php ' . shellescape(expand('%')) . ' ' . shellescape(sqlfile))
+  let result = system('~/.scripts/db-output-conv/report-form.php ' . shellescape(sqlfile), l:content)
   if v:shell_error == 15
     echom "Report canceled by user"
   endif
@@ -239,9 +241,9 @@ function! s:db_report(cmd, bang) abort
   endif
 endfunction
 
-"Export result window
-command! -bang -nargs=? -complete=custom,s:db_command_complete DBReport
-      \ exe s:db_report(<q-args>, <bang>0)
+"Ask for placeholder data with yad
+command! -bang -nargs=? -range=% -complete=custom,s:db_command_complete DBReport
+      \ exe s:db_report(<q-args>, <bang>0, <line1>, <count>)
 
 
 " Example:
