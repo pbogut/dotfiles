@@ -1,4 +1,4 @@
-local U = require('utils')
+local u = require('utils')
 local b = vim.b
 local cmd = vim.cmd
 local fn = vim.fn
@@ -18,16 +18,23 @@ local config_group = {
     },
     { 'html,css,scss,xml,java,elixir,eelixir,c,php,php.phtml,sql,blade,elm',
       function()
-        U.set_indent(4)
+        u.set_indent(4)
       end
     },
     { 'sh,vue,javascript,vim,lua,yaml,yaml.docker-compose,ruby',
       function()
-        U.set_indent(2)
+        u.set_indent(2)
       end
     },
+    { 'mail', [[
+        setlocal spell spelllang=en_gb
+        setlocal textwidth=72
+        execute('normal gg')
+        call search('^$')
+      ]]
+    },
     { 'go', function()
-        U.set_indent(2, true)
+        u.set_indent(2, true)
       end
     },
     { 'sql', function()
@@ -54,11 +61,7 @@ local config_group = {
         cmd('setlocal spell spelllang=en_gb')
       end
     },
-    { 'help', function()
-        map('n', 'q', '<c-w>q', { noremap=true })
-      end
-    },
   }
 }
 
-U.augroup('config_group', config_group)
+u.augroup('x_autogroups', config_group)

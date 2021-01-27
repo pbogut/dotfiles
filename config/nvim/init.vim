@@ -25,10 +25,6 @@ augroup configgroup
         \  nnoremap <buffer> o <cr>
         \| nnoremap <buffer> q :q
   " start mutt file edit on first empty line
-  autocmd FileType mail
-        \  call s:mail_init()
-        \| setlocal spell spelllang=en_gb
-        \| setlocal textwidth=72
   autocmd BufEnter .i3blocks.conf
         \ let b:whitespace_trim_disabled = 1
   autocmd  FileType fzf
