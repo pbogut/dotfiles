@@ -12,7 +12,7 @@ end
 execute 'packadd packer.nvim'
 
 -- reload and recompile this file (plugins.lua) after change
-U.augroups('cfg_plugins_save', { BufWritePost = { 'plugins.lua', function()
+U.augroup('x_plugins_save', { BufWritePost = { 'plugins.lua', function()
   cmd('luafile ' .. os.getenv("HOME") .. '/.config/nvim/lua/plugins.lua')
   cmd('PackerCompile')
 end } } )
@@ -21,7 +21,7 @@ return require('packer').startup({
     function()
       -- Packer can manage itself as an optional plugin
       use { 'wbthomason/packer.nvim', opt = true }
-      use { 'editorconfig/editorconfig-vim' }
+      use { 'editorconfig/editorconfig-vim', setup = 'require "plugins.editorconfig"' }
       use { 'vim-ruby/vim-ruby', ft = { 'ruby' } }
       use { 'tpope/vim-scriptease' }
       use { 'tpope/vim-rsi' }
@@ -49,7 +49,7 @@ return require('packer').startup({
       use { 'mattn/emmet-vim' }
       use { 'sirver/ultisnips' }
       use { 'vim-vdebug/vdebug' }
-      use { 'sbdchd/neoformat' }
+      use { 'sbdchd/neoformat', config = 'require "plugins.neoformat"', cmd = 'Neoformat' }
       use { 'k-takata/matchit.vim' }
       use { 'captbaritone/better-indent-support-for-php-with-html', ft = { 'php' } }
       use { 'noahfrederick/vim-composer', ft = { 'php' } }
@@ -69,7 +69,7 @@ return require('packer').startup({
       use { 'Shougo/echodoc.vim' }
       use { 'andyl/vim-textobj-elixir' }
       use { 'kana/vim-textobj-user' }
-      use { 'justinmk/vim-dirvish' }
+      use { 'justinmk/vim-dirvish', config = 'require "plugins.vim_dirvish"' }
       use { 'kristijanhusak/vim-dirvish-git' }
       use { 'w0rp/ale' }
       use { 'chmp/mdnav' }
@@ -85,7 +85,6 @@ return require('packer').startup({
       use { 'ncm2/ncm2-bufword' }
       use { 'ncm2/ncm2-path' }
       use { 'ncm2/ncm2-tagprefix' }
-      use { 'ncm2/ncm2-jedi', ft = { 'python' } }
       use { 'ncm2/ncm2-cssomni', ft = { 'css', 'scss', 'less' } }
       use { 'ncm2/ncm2-tern', run = 'npm install' }
       use { 'ncm2/ncm2-go', ft = { 'go' } }
@@ -94,8 +93,8 @@ return require('packer').startup({
       use { 'pbogut/ncm2-alchemist' }
       use { 'rrethy/vim-illuminate' }
       use { 'junegunn/fzf' }
-      use { 'junegunn/fzf.vim' }
-      use { 'pbogut/fzf-mru.vim' }
+      use { 'junegunn/fzf.vim', after = 'fzf' }
+      use { 'pbogut/fzf-mru.vim', after = 'fzf.vim' }
       use { 'slashmili/alchemist.vim', ft = { 'elixir', 'eelixir' } }
       use { 'powerman/vim-plugin-AnsiEsc', ft = { 'elixir', 'eelixir' } }
       use { 'frankier/neovim-colors-solarized-truecolor-only' }
@@ -103,8 +102,10 @@ return require('packer').startup({
       use { 'sirtaj/vim-openscad' }
       use { '/home/pbogut/Projects/github.com/pbogut/simple-fold' }
       -- lsp
-      use { 'neovim/nvim-lsp', config = 'require "plugins.nvim_lsp"' }
+      use { 'neovim/nvim-lspconfig', config = 'require "plugins.nvim_lsp"' }
       use { 'nvim-lua/completion-nvim' }
+      -- maybe some day...
+      -- use { 'neoclide/coc.nvim', branch = 'release' }
 
       use { 'wakatime/vim-wakatime', cond = function()
         local f = os.getenv("HOME") .. '/.wakatime.cfg'

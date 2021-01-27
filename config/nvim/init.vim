@@ -21,8 +21,6 @@ augroup configgroup
         \  let b:my_make_cmd = "elm-make --warn --output /dev/null {file_name}"
   autocmd FileType php
         \  setlocal kp=:PhpDoc
-  autocmd FileType vim
-        \| let b:neoformat_basic_format_align = 1
   autocmd FileType qf
         \  nnoremap <buffer> o <cr>
         \| nnoremap <buffer> q :q
@@ -40,14 +38,10 @@ augroup configgroup
   autocmd  FileType fzf
         \  set laststatus=0 noshowmode noruler
         \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
-  autocmd BufWritePre *
-        \  silent! Format auto
   autocmd BufWritePost *
         \  silent! Whitespace
 augroup END
 
-" Plug 'editorconfig/editorconfig-vim'
-let g:EditorConfig_exclude_patterns = ['fugitive://.*', 'scp://.*']
 " Plug 'tpope/vim-dadbod'
 autocmd User after_vim_load source ~/.config/nvim/config/dadbod.vimrc
 " Plug 'tpope/vim-fugitive'
@@ -76,8 +70,6 @@ source ~/.config/nvim/config/signify.vim
 let g:strip_whitespace_on_save = 0 " Use Whitespace wrapper instead
 " Plug 'sirver/ultisnips'
 source ~/.config/nvim/config/ultisnips.vim
-" Plug 'sbdchd/neoformat'
-let g:neoformat_only_msg_on_error = 1
 " Plug 'janko-m/vim-test'
 source ~/.config/nvim/config/test.vim
 " Plug 'elmcast/elm-vim', { 'for': 'elm' }
@@ -470,35 +462,6 @@ function! s:set_indent(width, ...) " width:int, hardtab:bool, init:bool
 endfunction
 command! -bang -nargs=1 SetIndentWidth call s:set_indent(<args>, <bang>0)
 
-
-let g:neoformat_vimwiki_prettier = {
-      \ 'exe': 'prettier',
-      \ 'args': ['--stdin', '--stdin-filepath', '%:p'],
-      \ 'stdin': 1,
-      \ }
-
-let g:neoformat_disable_on_save = 1
-let g:neoformat_enabled_vimwiki = ['prettier']
-function! s:format(...)
-  let g:neoformat_run_all_formatters = get(b:, 'neoformat_run_all_formatters')
-  let g:neoformat_basic_format_align = get(b:, 'neoformat_basic_format_align')
-  let g:neoformat_basic_format_trim = get(b:, 'neoformat_basic_format_trim')
-  let l:disabled = !empty(get(b:, 'neoformat_disable_on_save'))
-        \ || !empty(get(g:, 'neoformat_disable_on_save'))
-
-  if a:0 && a:1 == "auto" && l:disabled
-    return
-  endif
-
-  if !empty(get(b:, 'neoformat_disabled'))
-    return
-  endif
-
-  silent! Neoformat
-endfunction
-command! -nargs=? Format call s:format(<q-args>)
-command! -bang FormatOnSaveDisable :exec 'let ' . (empty("<bang>") ? 'b' : 'g' ) . ':neoformat_disable_on_save = 1'
-command! -bang FormatOnSaveEnable :exec 'unlet ' . (empty("<bang>") ? 'b' : 'g' ) . ':neoformat_disable_on_save'
 
 " Simulate vim-dispatch
 command! -nargs=? -bang Start :!urxvt -e "<q-args>"

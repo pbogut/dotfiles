@@ -1,10 +1,7 @@
 local U = require('utils')
 local b = vim.b
-local bo = vim.bo
 local cmd = vim.cmd
 local fn = vim.fn
-local map = vim.api.nvim_set_keymap
-local buf_map = vim.api.nvim_buf_set_keymap
 
 local config_group = {
   ['BufRead,BufNewFile'] = {
