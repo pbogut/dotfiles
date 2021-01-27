@@ -82,4 +82,30 @@ function u.buf_map(buffer_nr, mode, key, result, opts)
   api.nvim_buf_set_keymap(buffer_nr, mode, key, result, opts)
 end
 
+function u.pp(var)
+  if type(var) == 'table' then
+    io.write('{ ')
+    for i, v in pairs(var) do
+      io.write(i .. ' = ')
+      io.write(u.pp(v))
+      io.write('; ')
+    end
+    io.write('}')
+  elseif type(var) == 'number' then
+    io.write(var)
+  elseif type(var) == 'string' then
+    io.write('[[' .. var .. ']]')
+  elseif type(var) == 'function' then
+    io.write('function()')
+  elseif type(var) == 'boolean' then
+    if var then
+      io.write('true')
+    else
+      io.write('false')
+    end
+  else
+    io.write(type(var))
+  end
+end
+
 return u
