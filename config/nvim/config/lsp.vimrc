@@ -12,6 +12,3 @@ autocmd User after_vim_load
       \| highlight LspDiagnosticsVirtualTextWarning guifg=#d33682
       \| highlight LspDiagnosticsVirtualTextInformation guifg=#a68f46
       \| highlight LspDiagnosticsVirtualTextHint guifg=#9eab7d
-
-autocmd BufNewFile * :lua attach_lsp_to_new_buffer()
-command! LspAttachBuffer :lua attach_lsp_to_new_buffer()<cr>
