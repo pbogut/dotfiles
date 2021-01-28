@@ -5,6 +5,7 @@ import subprocess
 import os
 
 inbox_only = os.getenv('OFFLINEIMAP_INBOX_ONLY') == "1"
+lock_file = os.getenv('HOME') + "/offlineimap.lock"
 
 """
 Reads config from local storage
@@ -16,3 +17,15 @@ def get_config(key):
     value = value.strip("\n")
 
     return value
+
+def is_locked():
+    try:
+        f = open(os.getenv('HOME') + "/offlineimap.lock")
+        return True
+    except IOError:
+        return False
+
+
+if (is_locked()):
+    print("Sync is locked with lockfile: " + lock_file)
+    exit(0)
