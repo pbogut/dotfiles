@@ -27,8 +27,8 @@ u.map('n', '<space><space>', '*``:set hls<cr>')
 -- format file indentation
 u.map('n', '<space>=', 'migg=G`i')
 -- trigger omnicompletion with c-space
-u.map('n', '<C-Space>', '<c-x><c-o>', { silent = false })
-u.map('i', '<C-@>', '<C-Space>', { silent = false, noremap = false })
+u.map('n', '<C-Space>', 'a<c-x><c-o>')
+u.map('i', '<C-Space>', '<c-x><c-o>')
 -- resize windows
 u.map('', '<M-l>', ':vertical resize +1<cr>')
 u.map('', '<M-h>', ':vertical resize -1<cr>')
