@@ -80,17 +80,6 @@ return require('packer').startup({
       use { 'MattesGroeger/vim-bookmarks' }
       use { 'prabirshrestha/async.vim' }
       use { 'roxma/nvim-yarp' }
-      use { 'ncm2/ncm2' }
-      use { 'ncm2/ncm2-ultisnips', config = 'require "plugins.ncm2_ultisnips"' }
-      use { 'ncm2/ncm2-bufword' }
-      use { 'ncm2/ncm2-path' }
-      use { 'ncm2/ncm2-tagprefix' }
-      use { 'ncm2/ncm2-cssomni', ft = { 'css', 'scss', 'less' } }
-      use { 'ncm2/ncm2-tern', run = 'npm install' }
-      use { 'ncm2/ncm2-go', ft = { 'go' } }
-      use { 'ncm2/ncm2-html-subscope' }
-      use { 'ncm2/ncm2-markdown-subscope' }
-      use { 'pbogut/ncm2-alchemist' }
       use { 'rrethy/vim-illuminate' }
       use { 'junegunn/fzf' }
       use { 'junegunn/fzf.vim', after = 'fzf' }

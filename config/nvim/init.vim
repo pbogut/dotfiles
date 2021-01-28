@@ -88,8 +88,6 @@ source ~/.config/nvim/config/vim-mergetool.vim
 source ~/.config/nvim/config/replacewithregister.vim
 " Plug 'MattesGroeger/vim-bookmarks'
 let g:bookmark_save_per_working_dir = 1
-" Plug 'ncm2/ncm2'
-autocmd User after_plug_end autocmd BufEnter * call ncm2#enable_for_buffer()
 " Plug 'pbogut/fzf-mru.vim'
 source ~/.config/nvim/config/fzf.vimrc
 " Plug 'sheerun/vim-polyglot'
