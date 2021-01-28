@@ -48,7 +48,8 @@ padding-right = 2
 module-margin-left = 1
 module-margin-right = 2
 
-font-0 = "Input Nerd Font:fontformat=truetype:size=8:antialias=true;1"
+font-0 = "InputMono Nerd Font:fontformat=truetype:size=8:antialias=true;1"
+; font-0 = "Input Nerd Font:fontformat=truetype:size=8:antialias=true;1"
 
 modules-left = close_switches
 modules-center =
@@ -85,7 +86,9 @@ padding-right = 2
 module-margin-left = 1
 module-margin-right = 2
 
-font-0 = "Input Nerd Font:fontformat=truetype:size=8:antialias=true;1"
+; font-0 = "Input Nerd Font:fontformat=truetype:size=8:antialias=true;1"
+; font-0 = "InputMono Nerd Font:fontformat=truetype:size=8:antialias=true;1"
+font-0 = "InputSansNarrow Nerd Font:fontformat=truetype:size=8:antialias=true;1"
 
 modules-left = i3
 modules-center = xwindow
@@ -121,7 +124,9 @@ padding-right = 2
 module-margin-left = 1
 module-margin-right = 2
 
-font-0 = "Input Nerd Font:fontformat=truetype:size=8:antialias=true;1"
+; font-0 = "Input Nerd Font:fontformat=truetype:size=8:antialias=true;1"
+; font-0 = "InputMono Nerd Font:fontformat=truetype:size=8:antialias=true;1"
+font-0 = "InputSansNarrow Nerd Font:fontformat=truetype:size=8:antialias=true;1"
 
 modules-left = i3
 modules-center = xwindow
