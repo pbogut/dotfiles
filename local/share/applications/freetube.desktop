@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=FreeTube
+Exec=/opt/FreeTube/freetube %U
+Terminal=false
+Type=Application
+Icon=freetube
+StartupWMClass=FreeTube
+Comment=A private YouTube client
+MimeType=x-scheme-handler/freetube;
+Categories=Network;

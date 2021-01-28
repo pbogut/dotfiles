@@ -70,6 +70,7 @@ read -d '' files <<"EOF"
     local/share/applications/ranger.desktop
     local/share/applications/browser.desktop
     local/share/applications/email.desktop
+    local/share/applications/freetube.desktop
     mutt/mailcap
     mutt/muttrc
     mutt/solarized-dark-16.muttrc
@@ -152,6 +153,10 @@ echo "done"
 
 echo -en "\tSet email script as default mailto handler (xdg-mime) ... "
 [[ -n $(command -v xdg-mime) ]] && xdg-mime default email.desktop 'x-scheme-handler/mailto'
+echo "done"
+
+echo -en "\tSet freetube as default youtube handler (xdg-mime) ... "
+[[ -n $(command -v xdg-mime) ]] && xdg-mime default freetube.desktop 'x-scheme-handler/freetube'
 echo "done"
 
 echo -en "\t"$(
