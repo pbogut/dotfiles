@@ -103,9 +103,8 @@ return require('packer').startup({
       use { '/home/pbogut/Projects/github.com/pbogut/simple-fold' }
       -- lsp
       use { 'neovim/nvim-lspconfig', config = 'require "plugins.nvim_lsp"' }
-      use { 'nvim-lua/completion-nvim' }
-      -- maybe some day...
-      -- use { 'neoclide/coc.nvim', branch = 'release' }
+      use { 'nvim-lua/completion-nvim', config = 'require "plugins.completion_nvim"' }
+      use { 'steelsojka/completion-buffers', after = 'completion-nvim' }
 
       use { 'wakatime/vim-wakatime', cond = function()
         local f = os.getenv("HOME") .. '/.wakatime.cfg'
