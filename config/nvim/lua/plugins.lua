@@ -38,8 +38,8 @@ return require('packer').startup({
       use { 'tpope/vim-abolish' }
       use { 'tpope/vim-projectionist', config = 'require "plugins.projectionist"' }
       use { 'rhysd/git-messenger.vim' }
-      use { 'vim-airline/vim-airline' }
-      use { 'vim-airline/vim-airline-themes' }
+      use { 'vim-airline/vim-airline', config = 'require "plugins.vim_airline"' }
+      use { 'vim-airline/vim-airline-themes', after = 'vim-airline' }
       use { 'mhinz/vim-signify' }
       use { 'MarcWeber/vim-addon-mw-utils' }
       use { 'ludovicchabant/vim-gutentags' }

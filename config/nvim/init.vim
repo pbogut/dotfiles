@@ -52,8 +52,6 @@ endfunction
 autocmd User after_vim_load source ~/.config/nvim/config/abolish.vimrc
 " Plug 'rhysd/git-messenger.vim'
 nmap <space>gm <Plug>(git-messenger)
-" Plug 'vim-airline/vim-airline'
-source ~/.config/nvim/config/airline.vimrc
 " Plug 'mhinz/vim-signify'
 source ~/.config/nvim/config/signify.vim
 " Plug 'ntpeters/vim-better-whitespace'
