@@ -44,7 +44,7 @@ return require('packer').startup({
       use { 'MarcWeber/vim-addon-mw-utils' }
       use { 'ludovicchabant/vim-gutentags' }
       use { 'gioele/vim-autoswap' }
-      use { 'ntpeters/vim-better-whitespace' }
+      use { 'ntpeters/vim-better-whitespace', config = 'vim.g.strip_whitespace_on_save = 0' }
       use { 'honza/vim-snippets' }
       use { 'mattn/emmet-vim' }
       use { 'sirver/ultisnips' }

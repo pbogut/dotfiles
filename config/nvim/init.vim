@@ -54,8 +54,6 @@ autocmd User after_vim_load source ~/.config/nvim/config/abolish.vimrc
 nmap <space>gm <Plug>(git-messenger)
 " Plug 'mhinz/vim-signify'
 source ~/.config/nvim/config/signify.vim
-" Plug 'ntpeters/vim-better-whitespace'
-let g:strip_whitespace_on_save = 0 " Use Whitespace wrapper instead
 " Plug 'sirver/ultisnips'
 source ~/.config/nvim/config/ultisnips.vim
 " Plug 'janko-m/vim-test'
