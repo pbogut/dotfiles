@@ -47,7 +47,7 @@ return require('packer').startup({
       use { 'ntpeters/vim-better-whitespace', config = 'vim.g.strip_whitespace_on_save = 0' }
       use { 'honza/vim-snippets' }
       use { 'mattn/emmet-vim' }
-      use { 'sirver/ultisnips' }
+      use { 'sirver/ultisnips', config = 'require "plugins.ultisnips"' }
       use { 'vim-vdebug/vdebug' }
       use { 'sbdchd/neoformat', config = 'require "plugins.neoformat"', cmd = 'Neoformat' }
       use { 'k-takata/matchit.vim' }
