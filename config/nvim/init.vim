@@ -440,22 +440,6 @@ function! Phtml_scope()
   endif
 endfunction
 
-function! s:mail_init()
-  execute('normal gg')
-  call search('^$')
-endfunction
-
-" inoremap <silent> <expr> <CR> ncm2_ultisnips#expand_or("\<CR>", 'n')
-
-silent! exec(":source ~/.vim/" . hostname() . ".vim")
-
-
-function! MagentoModel(path, model)
-  exec('e ' + a:model + '.php')
-  exec('e Resource/' + a:model + '.php')
-  exec('e Resource/' + a:model + '/Collection.php')
-endfunction
-
 function! InvertArgs(...)
   " Get the arguments of the current line (remove the spaces)
   let args=substitute(matchstr(getline('.'), '(\zs.*\ze)'), '\s', '', 'g')
