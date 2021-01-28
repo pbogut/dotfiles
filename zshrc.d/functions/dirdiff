@@ -8,6 +8,9 @@ dirdiff() {
   if [[ -z $2 ]]; then
     echo "Usage: dirdiff /path/to/dir/one /path/to/dir/two"
   else
-    echo ":bw! | DirDiff $1 $2" | $(which $EDITOR) $TMP/skip_session
+    # escape spaces in file name
+    file_a=$(echo "$1" | sed 's,\(\s\),\\\1,g')
+    file_b=$(echo "$2" | sed 's,\(\s\),\\\1,g')
+    nvim +"DirDiff $file_a $file_b"
   fi
 }
