@@ -1,12 +1,13 @@
 local u = require('utils')
 local b = vim.b
+local bo = vim.bo
 local cmd = vim.cmd
 local fn = vim.fn
 
 local config_group = {
   ['BufRead,BufNewFile'] = {
     '*.phtml', function()
-      cmd('setfiletype php.phtml')
+      b.commentary_format = '<?php /* %s */ ?>'
     end
   },
   FileType = {
@@ -42,6 +43,7 @@ local config_group = {
       end
     },
     { 'php', function()
+        bo.iskeyword = '@,48-57,_,192-255,$'
         b.commentary_format = '// %s'
       end
     },
@@ -51,10 +53,6 @@ local config_group = {
     },
     { 'crontab,nginx,resolv', function()
         b.commentary_format = '# %s'
-      end
-    },
-    { 'php.phtml', function()
-        b.commentary_format = '<?php /* %s */ ?>'
       end
     },
     { 'markdown', function()

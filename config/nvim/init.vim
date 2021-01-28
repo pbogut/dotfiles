@@ -415,7 +415,7 @@ vmap <C-_> :call Comment(v:true)<cr><down>
 vmap <C-/> :call Comment(v:true)<cr><down>
 
 function! Comment(...) range
-  if &ft == 'php.phtml'
+  if expand('%:e') == 'phtml'
     if Phtml_scope() == 'php'
       let b:commentary_format = '// %s'
     else
