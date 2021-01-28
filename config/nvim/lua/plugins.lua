@@ -59,7 +59,7 @@ return require('packer').startup({
       use { 'elixir-lang/vim-elixir', ft = { 'elixir', 'eelixir' } }
       use { 'kana/vim-operator-user' }
       use { 'moll/vim-bbye', cmd = { 'Bdelete' } }
-      use { 'will133/vim-dirdiff' }
+      use { 'will133/vim-dirdiff', config = 'require "plugins.vim_dirdiff"', cmd = 'DirDiff' }
       use { 'dbakker/vim-projectroot' }
       use { 'AndrewRadev/switch.vim' }
       use { 'AndrewRadev/splitjoin.vim' }
