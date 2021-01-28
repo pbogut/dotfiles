@@ -36,7 +36,7 @@ return require('packer').startup({
       use { 'tpope/vim-endwise' }
       use { 'tpope/vim-unimpaired' }
       use { 'tpope/vim-abolish' }
-      use { 'tpope/vim-projectionist' }
+      use { 'tpope/vim-projectionist', config = 'require "plugins.projectionist"' }
       use { 'rhysd/git-messenger.vim' }
       use { 'vim-airline/vim-airline' }
       use { 'vim-airline/vim-airline-themes' }

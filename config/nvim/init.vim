@@ -50,8 +50,6 @@ function! XGst()
 endfunction
 " Plug 'tpope/vim-abolish'
 autocmd User after_vim_load source ~/.config/nvim/config/abolish.vimrc
-" Plug 'tpope/vim-projectionist'
-source ~/.config/nvim/config/projectionist.vimrc
 " Plug 'rhysd/git-messenger.vim'
 nmap <space>gm <Plug>(git-messenger)
 " Plug 'vim-airline/vim-airline'
