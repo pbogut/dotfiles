@@ -76,7 +76,7 @@ u.augroup('x_keybindings', {
   },
   FileType = {
     { 'help', function()
-        u.map('n', 'q', '<c-w>q')
+        u.buf_map(0, 'n', 'q', '<c-w>q')
       end
     },
     { 'fugitive', function()
