@@ -64,6 +64,26 @@ function u.set_indent(width, hardtab, force)
   bo.expandtab = not hardtab
 end
 
+-- Set up highlight
+-- @param groups { HlGroup = { guibg = '#123456', guifg='#654321' } }
+function u.highlights(groups)
+  for group_name, definition in pairs(groups) do
+    local command = 'highlight ' .. group_name
+    for key, value in pairs(definition) do
+      command = command .. ' ' .. key .. '=' .. value
+    end
+    cmd(command)
+  end
+end
+
+-- Define signs
+-- @param groups { SignGroup = { text = 'X', texthl='#654321' } }
+function u.signs(groups)
+  for group_name, definition in pairs(groups) do
+    fn.sign_define(group_name, definition)
+  end
+end
+
 function u.map(mode, key, result, opts)
   local opts = vim.tbl_extend('keep', opts or {}, {
     noremap = true,

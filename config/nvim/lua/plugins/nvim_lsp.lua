@@ -1,6 +1,7 @@
 local u = require'utils'
 local lspconfig = require('lspconfig')
 local cmd = vim.cmd
+local fn = vim.fn
 
 local no_lsp_bind = '<cmd>lua print("No LSP attached")<CR>'
 local format_bind = '<cmd>Neoformat<CR>'
@@ -49,12 +50,30 @@ vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
     -- Enable virtual text, override spacing to 8
     virtual_text = {
       spacing = 8,
-      prefix = '■',
+      prefix = '■',
     },
     -- Disable a feature
     update_in_insert = false,
   }
 )
+
+u.signs({
+  LspDiagnosticsSignError = { text = "", texthl = "LspDiagnosticsSignError" },
+  LspDiagnosticsSignWarning = { text = "", texthl = "LspDiagnosticsSignWarning" },
+  LspDiagnosticsSignInformation = { text = "", texthl = "LspDiagnosticsSignInformation" },
+  LspDiagnosticsSignHint = { text = "", texthl = "LspDiagnosticsSignHint" },
+})
+
+u.highlights({
+  LspDiagnosticsSignError = { guibg = '#073642', guifg = '#dc322f' },
+  LspDiagnosticsSignWarning = { guibg = '#073642', guifg = '#d33682' },
+  LspDiagnosticsSignInformation = { guibg = '#073642', guifg = '#a68f46' },
+  LspDiagnosticsSignHint = { guibg = '#073642', guifg = '#9eab7d' },
+  LspDiagnosticsVirtualTextError = { guifg = '#dc322f' },
+  LspDiagnosticsVirtualTextWarning = { guifg = '#d33682' },
+  LspDiagnosticsVirtualTextInformation = { guifg = '#a68f46' },
+  LspDiagnosticsVirtualTextHint = { guifg = '#9eab7d' },
+})
 
 -- npm install -g vim-language-server
 lspconfig.vimls.setup { on_attach = on_attach }

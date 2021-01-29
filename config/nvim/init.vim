@@ -88,10 +88,6 @@ source ~/.config/nvim/config/fzf.vimrc
 
 lua require('plugins')
 
-" Plug 'neovim/nvim-lsp'
-" Plug 'nvim-lua/completion-nvim'
-autocmd User after_plug_end source ~/.config/nvim/config/lsp.vimrc
-
 doautocmd User after_plug_end
 autocmd! User after_plug_end " clear after_plug_end command list
 
