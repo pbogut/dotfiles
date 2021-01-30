@@ -29,7 +29,7 @@ return require('packer').startup({
       use { 'tpope/vim-fugitive' }
       use { 'tpope/vim-eunuch' }
       use { 'tpope/vim-git' }
-      use { 'tpope/vim-commentary' }
+      use { 'tpope/vim-commentary', config = 'require "plugins.vim_commentary"' }
       use { 'tpope/vim-surround' }
       use { 'tpope/vim-repeat' }
       use { 'tpope/vim-rails', ft = { 'ruby' } }

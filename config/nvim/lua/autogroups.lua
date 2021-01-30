@@ -5,11 +5,6 @@ local cmd = vim.cmd
 local fn = vim.fn
 
 local config_group = {
-  ['BufRead,BufNewFile'] = {
-    '*.phtml', function()
-      b.commentary_format = '<?php /* %s */ ?>'
-    end
-  },
   FileType = {
     { '*', function()
         fn.matchadd('Todo', '@todo\\>')
@@ -38,21 +33,8 @@ local config_group = {
         u.set_indent(2, true)
       end
     },
-    { 'sql', function()
-        b.commentary_format = '-- %s'
-      end
-    },
     { 'php', function()
         bo.iskeyword = '@,48-57,_,192-255,$'
-        b.commentary_format = '// %s'
-      end
-    },
-    { 'blade', function()
-        b.commentary_format = '{{-- %s --}}'
-      end
-    },
-    { 'crontab,nginx,resolv', function()
-        b.commentary_format = '# %s'
       end
     },
     { 'markdown', function()

@@ -397,37 +397,6 @@ function! s:whitespace()
 endfunction
 command! Whitespace call s:whitespace()
 
-nmap <C-_> :call Comment()<cr><down>
-nmap <C-/> :call Comment()<cr><down>
-vmap <C-_> :call Comment(v:true)<cr><down>
-vmap <C-/> :call Comment(v:true)<cr><down>
-
-function! Comment(...) range
-  if expand('%:e') == 'phtml'
-    if Phtml_scope() == 'php'
-      let b:commentary_format = '// %s'
-    else
-      let b:commentary_format = '<?php // %s ?>'
-    endif
-  endif
-  if empty(get(a:, 1))
-    normal gcc
-  else
-    normal gvgc
-  endif
-endfunction
-
-function! Phtml_scope()
-  let [l1, c1] = searchpos('?>', 'bnW')
-  let [l2, c2] = searchpos('<?php', 'bnW')
-
-  if l1 < l2 || l1 == l2 && c1 < c2
-    return 'php'
-  else
-    return 'html'
-  endif
-endfunction
-
 function! InvertArgs(...)
   " Get the arguments of the current line (remove the spaces)
   let args=substitute(matchstr(getline('.'), '(\zs.*\ze)'), '\s', '', 'g')
