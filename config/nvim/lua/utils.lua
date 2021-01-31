@@ -84,6 +84,46 @@ function u.signs(groups)
   end
 end
 
+function u.copy_table(tab)
+  return fn.copy(tab)
+end
+
+function u.extend_table(tab1, tab2)
+  return fn.extend(tab1, tab2)
+end
+
+function u.split_string(text, split)
+  if split then
+    return fn.split(text, split)
+  else
+    return fn.split(text)
+  end
+end
+
+function u.sub_string(text, start, stop)
+  start = start or 1
+  stop = stop or text:len()
+  return string.char(string.byte(text, start, stop))
+end
+
+function u.trim_string(text)
+  text, _ = text:gsub('^%s*(.-)%s*$', '%1')
+  return text
+end
+
+function u.string_under_coursor()
+  local pos1 = fn.searchpos([["\|'\|\s\|^.]], 'bn')
+  local pos2 = fn.searchpos([["\|'\|\s\|$]], 'n')
+  local line = ''
+  if pos1[1] == pos2[1] and pos1[2] < pos2[2] then
+    line = fn.getline(fn.line('.'))
+    line = u.sub_string(line, pos1[2], pos2[2])
+    line = line:gsub('^%s*(.*)', '%1')
+    line = line:gsub([[^['"](.*)['"]$]], '%1')
+  end
+  return line
+end
+
 function u.map(mode, key, result, opts)
   local opts = vim.tbl_extend('keep', opts or {}, {
     noremap = true,

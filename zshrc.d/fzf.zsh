@@ -10,11 +10,11 @@
 
 # fzf config
 export FZF_DEFAULT_OPTS="
-  --filepath-word --reverse
+  --reverse
+  --cycle
   --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
   --bind=ctrl-w:backward-kill-word
   --height 40%
-  --cycle
   "
 
 fe() {

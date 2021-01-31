@@ -24,14 +24,6 @@ export LESS="-RXe"
 export QT_QPA_PLATFORMTHEME=qt5ct
 export QT_STYLE_OVERRIDE=gtk2
 
-export FZF_DEFAULT_OPTS="
-  --filepath-word --reverse
-  --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
-  --bind=ctrl-w:backward-kill-word
-  --height 40%
-  --cycle
-  "
-
 # set up unique TMPDIR per user
 export TMPDIR="/tmp/$USER"
 mkdir $TMPDIR -p

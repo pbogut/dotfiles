@@ -81,7 +81,7 @@ return require('packer').startup({
       use { 'prabirshrestha/async.vim' }
       use { 'roxma/nvim-yarp' }
       use { 'rrethy/vim-illuminate' }
-      use { 'junegunn/fzf' }
+      use { 'junegunn/fzf' , config = 'require "plugins.fzf"' }
       use { 'junegunn/fzf.vim', after = 'fzf' }
       use { 'pbogut/fzf-mru.vim', after = 'fzf.vim' }
       use { 'slashmili/alchemist.vim', ft = { 'elixir', 'eelixir' } }
