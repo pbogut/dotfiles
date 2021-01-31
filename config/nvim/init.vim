@@ -8,12 +8,6 @@ lua require('autogroups')
 
 augroup configgroup_nvim
   autocmd!
-  " fix terminal display
-  autocmd TermOpen *
-        \  :exec('silent! normal! <c-\><c-n>a')
-        \| :startinsert
-  " \| setlocal nocursorline
-  " \| setlocal nocursorcolumn
 augroup END
 augroup configgroup
   autocmd!

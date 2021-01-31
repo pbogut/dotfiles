@@ -1,10 +1,20 @@
 local u = require('utils')
 local b = vim.b
 local bo = vim.bo
+local wo = vim.wo
 local cmd = vim.cmd
 local fn = vim.fn
 
 local config_group = {
+  -- fix terminal display
+  TermOpen = {
+    {'*', function()
+        wo.number = false
+        wo.relativenumber = false
+        wo.signcolumn = "no"
+      end
+    }
+  },
   FileType = {
     { '*', function()
         fn.matchadd('Todo', '@todo\\>')
