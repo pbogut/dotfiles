@@ -12,10 +12,6 @@ augroup configgroup_nvim
 augroup END
 augroup configgroup
   autocmd!
-  autocmd FileType qf
-        \  nnoremap <buffer> o <cr>
-        \| nnoremap <buffer> q :q
-  " start mutt file edit on first empty line
   autocmd BufEnter .i3blocks.conf
         \ let b:whitespace_trim_disabled = 1
   autocmd  FileType fzf

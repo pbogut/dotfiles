@@ -83,6 +83,11 @@ u.augroup('x_keybindings', {
     }
   },
   FileType = {
+    {'qf', function()
+        u.buf_map('n', 'o', '<cr>')
+        u.buf_map('n', 'q', ':q')
+      end
+    },
     {'help', function()
         u.buf_map(0, 'n', 'q', '<c-w>q')
       end
