@@ -22,7 +22,7 @@ function u.augroup(group_name, definitions)
   cmd('autocmd!')
   for event_type, definition in pairs(definitions) do
     if type(definition[1]) ~= 'table' then
-      definition = { definition }
+      definition = {definition}
     end
     for _, def in pairs(definition) do
       local callback = table.remove(def, #def)
@@ -65,7 +65,7 @@ function u.set_indent(width, hardtab, force)
 end
 
 -- Set up highlight
--- @param groups { HlGroup = { guibg = '#123456', guifg='#654321' } }
+-- @param groups {HlGroup = {guibg = '#123456', guifg='#654321'}}
 function u.highlights(groups)
   for group_name, definition in pairs(groups) do
     local command = 'highlight ' .. group_name
@@ -77,7 +77,7 @@ function u.highlights(groups)
 end
 
 -- Define signs
--- @param groups { SignGroup = { text = 'X', texthl='#654321' } }
+-- @param groups {SignGroup = {text = 'X', texthl='#654321'}}
 function u.signs(groups)
   for group_name, definition in pairs(groups) do
     fn.sign_define(group_name, definition)
@@ -125,7 +125,7 @@ function u.string_under_coursor()
 end
 
 function u.map(mode, key, result, opts)
-  local opts = vim.tbl_extend('keep', opts or {}, {
+  opts = vim.tbl_extend('keep', opts or {}, {
     noremap = true,
     silent = mode ~= 'c',
     expr = false
@@ -134,7 +134,7 @@ function u.map(mode, key, result, opts)
 end
 
 function u.buf_map(buffer_nr, mode, key, result, opts)
-  local opts = vim.tbl_extend('keep', opts or {}, {
+  opts = vim.tbl_extend('keep', opts or {}, {
     noremap = true,
     silent = mode ~= 'c',
     expr = false
@@ -143,29 +143,7 @@ function u.buf_map(buffer_nr, mode, key, result, opts)
 end
 
 function u.pp(var)
-  if type(var) == 'table' then
-    io.write('{ ')
-    for i, v in pairs(var) do
-      io.write(i .. ' = ')
-      io.write(u.pp(v))
-      io.write('; ')
-    end
-    io.write('}')
-  elseif type(var) == 'number' then
-    io.write(var)
-  elseif type(var) == 'string' then
-    io.write('[[' .. var .. ']]')
-  elseif type(var) == 'function' then
-    io.write('function()')
-  elseif type(var) == 'boolean' then
-    if var then
-      io.write('true')
-    else
-      io.write('false')
-    end
-  else
-    io.write(type(var))
-  end
+  print(vim.inspect(var))
 end
 
 return u

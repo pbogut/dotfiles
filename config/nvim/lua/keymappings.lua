@@ -6,13 +6,16 @@ u.map('n', '<space>sm', ':source ~/.vim/macros.vim<cr>')
 -- nice to have
 u.map('i', '<c-d>', '<del>')
 u.map('c', '<c-d>', '<del>')
+u.map('i', '<m-cr>', '<cr><esc>O')
+u.map('n', '<space><cr>', 'za')
+u.map('v', '<space><cr>', 'zf')
 u.map('n', '<space>tw', ':lua vim.wo.wrap = not vim.wo.wrap<cr>')
 -- regex helpers
 u.map('c', [[\\*]], [[\(.*\)]])
 u.map('c', [[\\-]], [[\(.\{-}\)]])
 -- command line navigation
-u.map('c', '<M-k>', '<Up>')
-u.map('c', '<M-j>', '<Down>')
+u.map('c', '<m-k>', '<Up>')
+u.map('c', '<m-j>', '<Down>')
 -- prevent pasting in visual from yanking seletion
 u.map('s', 'p', '"_dP')
 u.map('v', 'p', '"_dP')
@@ -21,8 +24,8 @@ u.map('n', '<esc>', ':set nohls<cr>')
 u.map('n', '*', ':set hls<cr>*')
 u.map('n', '#', ':set hls<cr>#')
 -- case insensitive search by default
-u.map('n', '/', ':let @/=""<cr>:set hls<cr>/\\c', { silent = false })
-u.map('n', '?', ':let @/=""<cr>:set hls<cr>?\\c', { silent = false })
+u.map('n', '/', ':let @/=""<cr>:set hls<cr>/\\c', {silent = false})
+u.map('n', '?', ':let @/=""<cr>:set hls<cr>?\\c', {silent = false})
 -- highlight/search curren word
 u.map('n', '<space><space>', '*``:set hls<cr>')
 -- format file indentation
@@ -31,10 +34,10 @@ u.map('n', '<space>=', 'migg=G`i')
 u.map('n', '<C-Space>', 'a<c-x><c-o>')
 u.map('i', '<C-Space>', '<c-x><c-o>')
 -- resize windows
-u.map('', '<M-l>', ':vertical resize +1<cr>')
-u.map('', '<M-h>', ':vertical resize -1<cr>')
-u.map('', '<M-j>', ':resize +1<cr>')
-u.map('', '<M-k>', ':resize -1<cr>')
+u.map('', '<m-l>', ':vertical resize +1<cr>')
+u.map('', '<m-h>', ':vertical resize -1<cr>')
+u.map('', '<m-j>', ':resize +1<cr>')
+u.map('', '<m-k>', ':resize -1<cr>')
 -- terminal - normal mode
 u.map('t', '<c-q>', [[<C-\><C-n>]])
 -- diffmode
@@ -46,20 +49,26 @@ u.map('n', 'dg', ':diffget<cr>')
 -- quick change and search for next occurrence, change can be repeated
 -- by . N and n will search for the same selection, gn gN will select same
 -- selection
-for _, keys in pairs({ 'w', 'iw', 'aw', 'e', 'W', 'iW', 'aW' }) do
+for _, keys in pairs({'w', 'iw', 'aw', 'e', 'W', 'iW', 'aW'}) do
   local motion = keys
   if keys == 'w' then
     motion = 'e'
   end
   u.map('n', 'cg' .. keys, motion  .. ':exe("let @/=@+")<bar><esc>cgn')
   u.map('n', 'cg' .. keys, 'y' .. motion .. ':exe("let @/=@+")<bar><esc>cgn')
-  u.map('n', '<space>s' .. keys, 'y' .. motion .. ':s/<c-r>+//g<left><left>', { silent = false })
-  u.map('n', '<space>%' .. keys, 'y' .. motion .. ':%s/<c-r>+//g<left><left>', { silent = false })
+  u.map('n', '<space>s' .. keys, 'y' .. motion .. ':s/<c-r>+//g<left><left>', {silent = false})
+  u.map('n', '<space>%' .. keys, 'y' .. motion .. ':%s/<c-r>+//g<left><left>', {silent = false})
+end
+
+-- swap line navigation (for wraplines to be navigated by j/k)
+for key1, key2 in pairs({['j'] = 'gj', ['k'] = 'gk'}) do
+  for _, maptype in pairs({'n', 'v', 'o'}) do
+    u.map(maptype, key1, key2)
+    u.map(maptype, key2, key1)
+  end
 end
 
 -- insert above
--- imap <M-o> <esc>O
--- nmap <M-o> O
 -- quick edit vimrc/zshrc and load vimrc bindings
 -- nnoremap <space>ev :tabnew $MYVIMRC<CR>
 -- nnoremap <space>ez :tabnew ~/.zshrc<CR>
@@ -68,18 +77,18 @@ end
 
 u.augroup('x_keybindings', {
   BufEnter = {
-    { '*.keepass', function()
+    {'*.keepass', function()
         u.map('n', 'gp', [[/^Password:<cr>:read !apg -m16 -n1 -MSNCL<cr>:%s/Password:.*\n/Password: /<cr><esc>]])
       end
     }
   },
   FileType = {
-    { 'help', function()
+    {'help', function()
         u.buf_map(0, 'n', 'q', '<c-w>q')
       end
     },
-    { 'fugitive', function()
-        u.buf_map(0, 'n', 'au', [[:exec(':Git update-index --assume-unchanged ' .  substitute(getline('.'), '^[AM?]\s', '', ''))<cr>]], { silent = false })
+    {'fugitive', function()
+        u.buf_map(0, 'n', 'au', [[:exec(':Git update-index --assume-unchanged ' .  substitute(getline('.'), '^[AM?]\s', '', ''))<cr>]], {silent = false})
       end
     },
   }

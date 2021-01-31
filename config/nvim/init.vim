@@ -74,9 +74,6 @@ source ~/.config/nvim/config/vim-mergetool.vim
 source ~/.config/nvim/config/replacewithregister.vim
 " Plug 'MattesGroeger/vim-bookmarks'
 let g:bookmark_save_per_working_dir = 1
-" Plug 'pbogut/fzf-mru.vim'
-source ~/.config/nvim/config/fzf.vimrc
-" Plug 'sheerun/vim-polyglot'
 
 lua require('plugins')
 
@@ -148,41 +145,17 @@ nmap yaf :let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>
 nmap yif :let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>
 nmap yrf :let @+=expand('%:.')<bar>echo 'Yanked: '.expand('%:.')<cr>
 
-" nicer wrapline navigation
-for [key1, key2] in [['j', 'gj'], ['k', 'gk']]
-  for maptype in ['noremap', 'vnoremap', 'onoremap']
-    execute(maptype . ' <silent> ' . key1 . ' ' . key2)
-    execute(maptype . ' <silent> ' . key2 . ' ' . key1)
-  endfor
-endfor
-
 " vim make
 nmap <space>mf <space>w:call QuickTerm(substitute(b:my_make_cmd, '{file_name}', expand('%'), ''))<cr>
 nmap <space>ms <space>w:QuickTerm make<cr>
 nmap <space>mm <space>w:QuickTerm make<space>
 nmap <space>md <space>w:QuickTerm make deploy<cr>
 " {{{ fzf
-nnoremap <silent> <space>fm :execute(':FZFFreshMru '. g:fzf_preview)<cr>
-nnoremap <silent> <space>fa :call local#fzf#files()<cr>
-nnoremap <silent> <space>fp :FZFProject<cr>
-nnoremap <silent> <space>fc :call local#fzf#clip()<cr>
-nnoremap <silent> <space>fd :call local#fzf#db()<cr>
-vnoremap <silent> <space>fd :call local#fzf#db_range()<cr>
-nnoremap <silent> <space>fD :call local#fzf#db_buf()<cr>
-nnoremap <silent> <space>ff :call local#fzf#all_files()<cr>
-nnoremap <silent> <space>fg :call local#fzf#git_ls()<cr>
-nnoremap <silent> <space>ft :FZFTags <cword><cr>
-nnoremap <silent> <space>] :FZFTags<cr>
-nnoremap <silent> <space>fb :FZFBuffers<cr>
-nnoremap <silent> <space>gf :call local#fzf#file_under_coursor()<cr>
-ProjectType laravel nnoremap <silent> <space>gf :call local#laravel#file_under_coursor()<cr>
-nnoremap <silent> <space>gF :call local#fzf#file_under_coursor_all()<cr>
-nnoremap <silent> <space>gt :call local#fzf#tag_under_coursor()<cr>
-nnoremap <silent> <space>gw :Rg <cword><cr>
-nnoremap <silent> <space>gr :Rg<cr>
-vnoremap <silent> <space>gr "ay :Rg <c-r>a<cr>
+lua require'plugins.fzf'
 " }}}
-"
+
+ProjectType laravel nnoremap <silent> <space>gf :call local#laravel#file_under_coursor()<cr>
+
 nnoremap <silent> <space>of :let g:pwd = expand('%:h') \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
 nnoremap <silent> <space>op :let g:pwd = projectroot#guess() \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
 
@@ -190,12 +163,9 @@ noremap <space>sc :execute(':rightbelow 10split \| te scspell %')<cr>
 
 " emmet quick shortcut
 imap <M-Tab> <c-y>,
-imap <M-CR> <cr><esc>O
 imap <M-n> <c-y>n
 imap <M-N> <c-y>N
-
-nmap <silent> grr :Rg<cr>
-nmap <silent> grq :Rgg<cr>
+" ripgrep
 nmap <silent> gr :set opfunc=<sid>ripgrep_from_motion<CR>g@
 function! s:ripgrep_from_motion(type, ...)
   let l:tmp = @a
@@ -211,15 +181,7 @@ function! s:ripgrep_from_motion(type, ...)
   exe("Rg " . @a)
   let @a = l:tmp
 endfunction
-
-" nmap <space><cr> za
-" vmap <space><cr> zf
-
-" quick set
-nnoremap <space>s  :set
-nnoremap <space>sf :FZFFileType<cr>
-nnoremap <space>sp :set paste!<cr>
-
+" toggle spell dictionaires
 nnoremap <space>ss :call SpellToggle()<cr>
 function! SpellToggle()
   let l:get_next = v:false
@@ -244,23 +206,6 @@ function! SpellToggle()
   echom "Set spell to en_gb"
   set spelllang=en_gb
   set spell
-endfunction
-
-nnoremap <space>S :call SpellCheckToggle()<cr>
-function! SpellCheckToggle()
-  let b:spell_check = get(b:, 'spell_check', 0)
-  if b:spell_check == 1
-    let b:spell_check = 0
-    execute(':set syntax=' . b:syntax)
-    hi SpellBad guifg=NONE
-    set nospell
-  else
-    let b:syntax = &syntax
-    let b:spell_check = 1
-    set syntax=
-    hi SpellBad guifg=lightred
-    set spell
-  endif
 endfunction
 
 " custom commands

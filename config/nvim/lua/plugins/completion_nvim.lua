@@ -28,6 +28,6 @@ g.completion_items_priority = {
     Buffers  = 0,
 }
 
-u.map('i', '<m-tab>', '<Plug>(completion_next_source)', { noremap = false })
-u.map('i', '<c-tab>', '<Plug>(completion_next_source)', { noremap = false })
-u.map('i', '<s-tab>', '<Plug>(completion_prev_source)', { noremap = false })
+-- u.map('i', '<m-tab>', '<Plug>(completion_next_source)', { noremap = false })
+-- u.map('i', '<c-tab>', '<Plug>(completion_next_source)', { noremap = false })
+-- u.map('i', '<s-tab>', '<Plug>(completion_prev_source)', { noremap = false })
