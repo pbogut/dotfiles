@@ -32,8 +32,7 @@ function! XGst()
         \| nmap <buffer> q <c-w>q
   execute(':Gst')
 endfunction
-" Plug 'rhysd/git-messenger.vim'
-nmap <space>gm <Plug>(git-messenger)
+
 " Plug 'mhinz/vim-signify'
 source ~/.config/nvim/config/signify.vim
 " Plug 'janko-m/vim-test'

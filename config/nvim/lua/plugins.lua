@@ -36,7 +36,7 @@ return require('packer').startup({
     use {'tpope/vim-rails', ft = {'ruby'}}
     use {'tpope/vim-unimpaired'}
     use {'tpope/vim-projectionist', config = 'require "plugins.projectionist"'}
-    use {'rhysd/git-messenger.vim'}
+    use {'rhysd/git-messenger.vim', config = 'require "plugins.git_messanger"'}
     use {'vim-airline/vim-airline', config = 'require "plugins.vim_airline"'}
     use {'vim-airline/vim-airline-themes', after = 'vim-airline'}
     use {'mhinz/vim-signify'}
