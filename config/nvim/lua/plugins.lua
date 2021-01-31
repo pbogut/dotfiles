@@ -43,7 +43,8 @@ return require('packer').startup({
     use {'ludovicchabant/vim-gutentags'}
     use {'ntpeters/vim-better-whitespace', config = 'vim.g.strip_whitespace_on_save = 0'}
     use {'honza/vim-snippets'}
-    use {'mattn/emmet-vim'}
+    use {'mattn/emmet-vim', ft = {'php', 'html', 'blade', 'vue'},
+                            config = 'require "plugins.emmet_vim"'}
     use {'sirver/ultisnips', config = 'require "plugins.ultisnips"'}
     use {'sbdchd/neoformat', config = 'require "plugins.neoformat"', cmd = 'Neoformat'}
     use {'k-takata/matchit.vim'}
