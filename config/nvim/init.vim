@@ -1,5 +1,6 @@
 " basic settings
 lua require('settings')
+lua require('indents')
 
 source ~/.config/nvim/config/perproject.vimrc
 

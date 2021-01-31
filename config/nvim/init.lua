@@ -1,4 +1,5 @@
 require('settings')
+require('indents')
 require('plugins')
 require('autogroups')
 require('keymappings')
