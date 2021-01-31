@@ -14,9 +14,6 @@ augroup configgroup
   autocmd!
   autocmd BufEnter .i3blocks.conf
         \ let b:whitespace_trim_disabled = 1
-  autocmd  FileType fzf
-        \  set laststatus=0 noshowmode noruler
-        \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
   autocmd BufWritePost *
         \  silent! Whitespace
 augroup END

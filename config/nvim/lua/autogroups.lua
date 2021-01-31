@@ -2,6 +2,7 @@ local u = require('utils')
 local b = vim.b
 local bo = vim.bo
 local wo = vim.wo
+local o = vim.o
 local cmd = vim.cmd
 local fn = vim.fn
 
@@ -12,6 +13,21 @@ local config_group = {
         wo.number = false
         wo.relativenumber = false
         wo.signcolumn = "no"
+        wo.cursorline = false
+        wo.cursorcolumn = false
+        o.laststatus = 0
+        o.showmode = false
+
+        u.augroup('x_termopen', {
+          BufLeave = {'<buffer>', function()
+            o.laststatus = 2
+            o.showmode = true
+          end},
+            BufEnter = {'<buffer>', function()
+            o.laststatus = 0
+            o.showmode = false
+          end},
+        })
         -- used to have display errors with terminal
         -- @remove below if not happening anymore
         -- " \  :exec('silent! normal! <c-\><c-n>a')
