@@ -12,16 +12,22 @@ local config_group = {
         wo.number = false
         wo.relativenumber = false
         wo.signcolumn = "no"
+        -- used to have display errors with terminal
+        -- @remove below if not happening anymore
+        -- " \  :exec('silent! normal! <c-\><c-n>a')
+        -- " \| :startinsert
       end
     }
   },
-  FileType = {
+  ['WinEnter,BufEnter'] = {
     { '*', function()
         fn.matchadd('Todo', '@todo\\>')
         fn.matchadd('Todo', '@fixme\\>')
         fn.matchadd('Error', '@debug\\>')
       end
     },
+  },
+  FileType = {
     { 'html,css,scss,xml,java,elixir,eelixir,c,php,php.phtml,sql,blade,elm',
       function()
         u.set_indent(4)
