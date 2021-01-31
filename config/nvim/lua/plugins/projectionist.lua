@@ -153,7 +153,13 @@ local magento2_module =
            },
            ['app/code/*/etc/adminhtml/routes.xml'] = {
              skeleton = "magento2_adminhtml_routes"
-           }
+           },
+           ['app/code/**/web/template/*.html'] = {
+             alternate = "app/code/{dirname}/web/js/view/{basename}.js"
+           },
+           ['app/code/**/web/js/view/*.js'] = {
+             alternate = "app/code/{dirname}/web/template/{basename}.html"
+           },
         }
 local laravel =
          {
