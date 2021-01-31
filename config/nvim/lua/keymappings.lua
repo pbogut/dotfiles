@@ -6,6 +6,7 @@ u.map('n', '<space>sm', ':source ~/.vim/macros.vim<cr>')
 -- nice to have
 u.map('i', '<c-d>', '<del>')
 u.map('c', '<c-d>', '<del>')
+u.map('n', '<space>tw', ':lua vim.wo.wrap = not vim.wo.wrap<cr>')
 -- regex helpers
 u.map('c', [[\\*]], [[\(.*\)]])
 u.map('c', [[\\-]], [[\(.\{-}\)]])
@@ -38,6 +39,8 @@ u.map('', '<M-k>', ':resize -1<cr>')
 u.map('t', '<c-q>', [[<C-\><C-n>]])
 -- diffmode
 u.map('n', 'du', ':diffupdate<cr>') -- @todo check if should be silent?
+u.map('n', 'dp', ':diffput<cr>')
+u.map('n', 'dg', ':diffget<cr>')
 
 
 -- quick change and search for next occurrence, change can be repeated
@@ -62,10 +65,6 @@ end
 -- nnoremap <space>ez :tabnew ~/.zshrc<CR>
 -- nnoremap <space>sv :source $MYVIMRC<CR>
 -- mapping for local functions that use fzf
-u.map('n', '<space>et', ':call local#fzf#mytemplates()<CR>')
-u.map('n', '<space>es', ':call local#fzf#mysnippets()<CR>')
-u.map('n', '<space>ec', ':call local#fzf#vim_config()<cr>')
-
 
 u.augroup('x_keybindings', {
   BufEnter = {
