@@ -12,8 +12,6 @@ augroup configgroup_nvim
 augroup END
 augroup configgroup
   autocmd!
-  autocmd FileType php
-        \  setlocal kp=:PhpDoc
   autocmd FileType qf
         \  nnoremap <buffer> o <cr>
         \| nnoremap <buffer> q :q
@@ -216,18 +214,6 @@ function! s:gap()
   startinsert
 endfunction
 command! Gap call s:gap()
-
-command! -nargs=1 PhpDoc split
-      \| silent! execute("e phpdoc://<args>")
-      \| silent! setlocal noswapfile
-      \| silent! setlocal ft=php
-      \| silent! setlocal syntax=man
-      \| silent! execute("read !psysh <<< 'doc <args>' | head -n -2 | tail -n +2")
-      \| silent! execute("normal! ggdd")
-      \| silent! setlocal buftype=nofile
-      \| silent! setlocal nomodifiable
-      \| silent! map <buffer> q :q<cr>
-
 
 let g:paranoic_backup_dir="~/.vim/backupfiles/"
 
