@@ -39,7 +39,7 @@ return require('packer').startup({
     use {'rhysd/git-messenger.vim', config = 'require "plugins.git_messanger"'}
     use {'vim-airline/vim-airline', config = 'require "plugins.vim_airline"'}
     use {'vim-airline/vim-airline-themes', after = 'vim-airline'}
-    use {'mhinz/vim-signify'}
+    use {'mhinz/vim-signify', config = 'require "plugins.vim_signify"'}
     use {'ludovicchabant/vim-gutentags'}
     use {'ntpeters/vim-better-whitespace', config = 'vim.g.strip_whitespace_on_save = 0'}
     use {'honza/vim-snippets'}

@@ -33,8 +33,6 @@ function! XGst()
   execute(':Gst')
 endfunction
 
-" Plug 'mhinz/vim-signify'
-source ~/.config/nvim/config/signify.vim
 " Plug 'janko-m/vim-test'
 source ~/.config/nvim/config/test.vim
 " Plug 'elmcast/elm-vim', { 'for': 'elm' }
