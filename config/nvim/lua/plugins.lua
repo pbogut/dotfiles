@@ -35,7 +35,6 @@ return require('packer').startup({
     use {'tpope/vim-repeat'}
     use {'tpope/vim-rails', ft = {'ruby'}}
     use {'tpope/vim-unimpaired'}
-    use {'tpope/vim-abolish'}
     use {'tpope/vim-projectionist', config = 'require "plugins.projectionist"'}
     use {'rhysd/git-messenger.vim'}
     use {'vim-airline/vim-airline', config = 'require "plugins.vim_airline"'}

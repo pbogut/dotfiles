@@ -42,8 +42,6 @@ function! XGst()
         \| nmap <buffer> q <c-w>q
   execute(':Gst')
 endfunction
-" Plug 'tpope/vim-abolish'
-autocmd User after_vim_load source ~/.config/nvim/config/abolish.vimrc
 " Plug 'rhysd/git-messenger.vim'
 nmap <space>gm <Plug>(git-messenger)
 " Plug 'mhinz/vim-signify'
