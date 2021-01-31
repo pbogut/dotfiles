@@ -20,18 +20,6 @@ augroup END
 
 " Plug 'tpope/vim-dadbod'
 autocmd User after_vim_load source ~/.config/nvim/config/dadbod.vimrc
-" Plug 'tpope/vim-fugitive'
-command! Gst 0Gstatus
-command! XGst call XGst()
-command! Gl 0Glog
-function! XGst()
-  autocmd FileType fugitive
-        \  map q <c-w>q
-        \| nmap q <c-w>q
-        \| map <buffer> q <c-w>q
-        \| nmap <buffer> q <c-w>q
-  execute(':Gst')
-endfunction
 
 " Plug 'janko-m/vim-test'
 source ~/.config/nvim/config/test.vim

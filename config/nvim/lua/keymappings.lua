@@ -84,16 +84,12 @@ u.augroup('x_keybindings', {
   },
   FileType = {
     {'qf', function()
-        u.buf_map('n', 'o', '<cr>')
-        u.buf_map('n', 'q', ':q')
+        u.buf_map(0, 'n', 'o', '<cr>')
+        u.buf_map(0, 'n', 'q', ':q')
       end
     },
     {'help', function()
         u.buf_map(0, 'n', 'q', '<c-w>q')
-      end
-    },
-    {'fugitive', function()
-        u.buf_map(0, 'n', 'au', [[:exec(':Git update-index --assume-unchanged ' .  substitute(getline('.'), '^[AM?]\s', '', ''))<cr>]], {silent = false})
       end
     },
   }
