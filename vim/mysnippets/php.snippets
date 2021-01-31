@@ -79,6 +79,16 @@ if snip.c == "":
  */$0
 endsnippet
 
+snippet var "Add variable type @var documentation" "re.match('.*\\$\\b[a-zA-Z0-9_]+\\b.*', snip.buffer[snip.line+1]) if len(snip.buffer) > snip.line+1 else False" e
+/** @var ${1:mixed} ${2:`!p
+if snip.c == "":
+	line = snip.buffer[vim.current.window.cursor[0]].strip()
+	var_name = re.sub(r".*?(\$[a-zA-Z0-9_]+)\b.*", "\\1", line).strip()
+	snip.rv = var_name
+`}$3 */$0
+endsnippet
+
+
 snippet cn "construct"
 ${3:`!p
 arguments = splitArguments(t[1])
@@ -677,4 +687,12 @@ endsnippet
 
 snippet suppressufp "Suppress PHPMD.UnusedFormalParameter"
 @SuppressWarnings(PHPMD.UnusedFormalParameter)
+endsnippet
+
+snippet phpcsignorestart "Start phpcs ignore standards"
+// @codingStandardsIgnoreStart
+endsnippet
+
+snippet phpcsignoreend "End phpcs ignore standards"
+// @codingStandardsIgnoreEnd
 endsnippet
