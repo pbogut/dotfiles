@@ -11,8 +11,6 @@ augroup configgroup_nvim
 augroup END
 augroup configgroup
   autocmd!
-  autocmd FileType elm
-        \  let b:my_make_cmd = "elm-make --warn --output /dev/null {file_name}"
   autocmd FileType php
         \  setlocal kp=:PhpDoc
   autocmd FileType qf
@@ -143,11 +141,6 @@ nmap yaf :let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>
 nmap yif :let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>
 nmap yrf :let @+=expand('%:.')<bar>echo 'Yanked: '.expand('%:.')<cr>
 
-" vim make
-nmap <space>mf <space>w:call QuickTerm(substitute(b:my_make_cmd, '{file_name}', expand('%'), ''))<cr>
-nmap <space>ms <space>w:QuickTerm make<cr>
-nmap <space>mm <space>w:QuickTerm make<space>
-nmap <space>md <space>w:QuickTerm make deploy<cr>
 " {{{ fzf
 lua require'plugins.fzf'
 " }}}
@@ -321,10 +314,6 @@ function! s:set_indent(width, ...) " width:int, hardtab:bool, init:bool
 endfunction
 command! -bang -nargs=1 SetIndentWidth call s:set_indent(<args>, <bang>0)
 
-
-" Simulate vim-dispatch
-command! -nargs=? -bang Start :!urxvt -e "<q-args>"
-
 function! s:whitespace()
   if !empty(get(b:, 'whitespace_trim_disabled'))
     return
@@ -333,26 +322,3 @@ function! s:whitespace()
   silent! StripWhitespace
 endfunction
 command! Whitespace call s:whitespace()
-
-function! InvertArgs(...)
-  " Get the arguments of the current line (remove the spaces)
-  let args=substitute(matchstr(getline('.'), '(\zs.*\ze)'), '\s', '', 'g')
-  if !empty(get(a:, 1))
-    let args=substitute(matchstr(getline('.'), '\s\+.*'), '\s', '', 'g')
-  endif
-  echom(args)
-
-  " Split the arguments as a list and reverse the list
-  let argsList=split(args, ',')
-  call reverse(argsList)
-
-  " Join the reversed list with a comma and a space separing the arguments
-  let invertedArgs=join(argsList, ', ')
-
-  " Remove the old arguments and put the new list
-  if !empty(get(a:, 1))
-    execute "normal! ^c$". invertedArgs
-  else
-    execute "normal! 0f(ci(" . invertedArgs
-  endif
-endfunction

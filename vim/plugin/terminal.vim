@@ -31,4 +31,9 @@ if has("nvim")
   endfunction
 
   command! -nargs=* -bang QuickTerm :call QuickTerm(<q-args>, <bang>0)
+
+  " vim make
+  nmap <space>ms :QuickTerm make<cr>
+  nmap <space>mm :QuickTerm make<space>
+  nmap <space>md :QuickTerm make deploy<cr>
 endif

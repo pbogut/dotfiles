@@ -64,10 +64,32 @@ if has("nvim")
     startinsert
   endfun
 
+  fun! s:run_terminal(path, split, command)
+    if (a:split)
+      belowright 20split
+      wincmd J
+      resize 20
+    endif
+    enew
+    if (a:split)
+      call termopen("cd ". a:path . "; " . a:command, {
+            \ 'on_exit' : function('s:close_term_split')
+            \ })
+    else
+      call termopen("cd ". a:path . "; " . a:command, {
+            \ 'on_exit' : function('s:close_term_window')
+            \ })
+    endif
+    startinsert
+  endfun
+
   nnoremap <silent> gof :call <sid>ranger(expand("%:p:h"), expand("%:t"))<cr>
   nnoremap <silent> goF :call <sid>ranger(getcwd(), expand("%:t"))<cr>
   nnoremap <silent> gOt :call <sid>open_terminal(expand("%:p:h"))<cr>
   nnoremap <silent> gOT :call <sid>open_terminal(getcwd())<cr>
   nnoremap <silent> got :call <sid>open_terminal(expand("%:p:h"), 1)<cr>
   nnoremap <silent> goT :call <sid>open_terminal(getcwd(), 1)<cr>
+
+  " emulate vim-dispatch Start command (for dadbod etc)
+  command! -nargs=? -bang Start :call <sid>run_terminal(getcwd(), <bang>1, <q-args>)
 endif
