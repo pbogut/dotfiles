@@ -36,4 +36,6 @@ elif [ "$hostname" == "darkbox" ]; then # pc at work
 else
   set_walpaper
 fi
+xset s off -dpms
+xset r rate 250 15
 source ~/.scripts/autostart.sh

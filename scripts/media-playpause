@@ -1,0 +1,77 @@
+#!/bin/php
+<?php
+
+$select = $_SERVER['TMPDIR'] . '/select-playpause';
+$file = $_SERVER['TMPDIR'] . '/last-playpause-use';
+$now = microtime(true);
+$last = @file_get_contents($file);
+$diff = $now - $last;
+file_put_contents($file, $now);
+
+if (isset($argv[1]) && $argv[1] == 'press') {
+    file_put_contents($file, $now);
+    return;
+}
+
+function sendAction($instance, $action = 'PlayPause') {
+    $object_path = "/org/mpris/MediaPlayer2";
+    $method = "org.mpris.MediaPlayer2.Player";
+
+    `gdbus call --session --dest $instance --object-path $object_path --method "$method.$action"`;
+}
+
+function getStatus($instance, $action = 'PlaybackStatus') {
+    $object_path = "/org/mpris/MediaPlayer2";
+    $method = "org.mpris.MediaPlayer2.Player";
+
+    $result = `qdbus $instance $object_path $method.$action`;
+    return $result;
+}
+
+$output = `mdbus2 | grep MediaPlayer2`;
+$instances = explode("\n", trim($output, "\n"));
+
+
+$selected = @file_get_contents($select);
+if (!in_array($selected, $instances)) {
+    foreach ($instances as $instance) {
+        $status = getStatus($instance, 'PlaybackStatus');
+        if ($status = 'Playing') {
+            $selected = $instance;
+            file_put_contents($select, $selected);
+            break;
+        }
+    }
+}
+
+if (!in_array($selected, $instances)) {
+    $selected = $instances[count($instances)-1];
+}
+
+if ($diff > 1) {
+    if (!$selected) {
+        $selected = $instances[count($instances)-1];
+    }
+
+    foreach ($instances as $idx => $instance) {
+        if ($instance == $selected) {
+            echo "match - $idx\n";
+            break;
+        }
+    }
+    $idx+=1;
+    if ($idx == count($instances)) {
+        $idx = 0;
+    }
+
+    $selected = $instances[$idx];
+
+    file_put_contents($select, $selected);
+
+    foreach ($instances as $instance) {
+        sendAction($instance, 'Pause');
+    }
+}
+
+sendAction($selected, 'PlayPause');
+`notify-send -i sound "PlayPause: $selected"`;

@@ -207,8 +207,7 @@ mode "$mode_resize" {
 bindsym $mod+r mode "$mode_resize"
 
 # screen lock with delay after, so suspend / hibernate with locked screen
-# set $Locker ~/.scripts/i3-lock.sh -i ~/Pictures/locktile.png -t && sleep 1
-set $Locker gllock
+set $Locker ~/.scripts/i3-lock.sh && sleep 1
 set $mode_system System (l) lock, (w) switch, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (p) suspend w/o lock, (Shift+s) shutdown, (Esc) cancel
 mode "$mode_system" {
 
@@ -244,6 +243,15 @@ bindsym $mod+q mode "$mode_system"
 # }
 exec_always --no-startup-id $HOME/.config/polybar/launch.sh
 
+# class                 border  backgr. text    indicator child_border
+client.focused          #4c7899 #285577 #ffffff #2e9ef4   #285577
+client.focused_inactive #333333 #5f676a #ffffff #484e50   #5f676a
+client.unfocused        #333333 #222222 #888888 #292d2e   #222222
+client.urgent           #2f343a #900000 #ffffff #900000   #900000
+client.placeholder      #000000 #0c0c0c #ffffff #000000   #0c0c0c
+
+client.background       #ffffff
+
 # new_window pixel 1
 new_window normal 1
 
@@ -254,7 +262,7 @@ workspace_layout stacked
 # assign apps to specific workspaces
 assign [title="^DBeaver" class="^SWT$"] $wsdb
 assign [title="^Dbeaver$"] $wsdb
-assign [title="^Ferdi$"] $wscomm
+assign [title="^Ferdi"] $wscomm
 assign [title="^toggl$"] $wsdash
 assign [title="^todoist$"] $wsdash
 assign [title="^jira$"] $wsdash
@@ -270,6 +278,7 @@ assign [title="^jira$"] $wsdash
 
 for_window [title="NVIM_FOR_QB"] floating enable
 for_window [title="FLOATING_WINDOW"] floating enable
+for_window [title="Friends List"] floating enable
 for_window [class="Toggl Desktop"] floating enable
 for_window [class="^Yad$"] floating enable
 # for_window [class="Skype"] floating enable
@@ -287,9 +296,11 @@ $exec "~/.scripts/i3-startup.sh"
 
 bindsym Mod1+Shift+Ctrl+space exec --no-startup-id ~/.scripts/i3-keyboard-layout-toggle.sh; $update_keylayout
 
+set $pressSound play ~/Media/test-44100Hz-le-1ch-4bytes.wav speed 2.0 vol 0.15
+set $releaseSound play ~/Media/test-44100Hz-le-1ch-4bytes.wav speed 3.0 vol 0.15
 
-bindsym Mod1+Shift+Ctrl+p $exec "~/.scripts/microphone.sh unmute"
-bindsym Mod1+Shift+Ctrl+r $exec "~/.scripts/microphone.sh mute"
+bindsym Mod1+Shift+Ctrl+p $exec "~/.scripts/media-playpause press && $pressSound"
+bindsym Mod1+Shift+Ctrl+r $exec "~/.scripts/media-playpause && $releaseSound"
 
 bindsym XF86MonBrightnessUp $exec "~/.scripts/i3-brightness.sh up"
 bindsym XF86MonBrightnessDown $exec "~/.scripts/i3-brightness.sh down"
@@ -306,7 +317,8 @@ bindsym XF86AudioPause $exec "xdotool key --clearmodifiers space"
 
 bindsym $mod+n $exec "~/.scripts/i3-switch-workspace.py --next --same-output"
 bindsym $mod+p $exec "~/.scripts/i3-switch-workspace.py --prev --same-output"
-bindsym $mod+Tab $exec "~/.scripts/i3-toggle-visible-workspace.py --next"
+# bindsym $mod+Tab $exec "~/.scripts/i3-toggle-visible-workspace.py --next"
+bindsym $mod+Tab workspace back_and_forth
 bindsym $mod+Shift+Tab $exec "~/.scripts/i3-toggle-visible-workspace.py --prev"
 bindsym $mod+Shift+N $exec "~/.scripts/i3-switch-workspace.py --next --same-output --with-container"
 bindsym $mod+Shift+P $exec "~/.scripts/i3-switch-workspace.py --prev --same-output --with-container"
@@ -321,10 +333,11 @@ bindsym $mod+Ctrl+w $exec "~/.scripts/i3-dmenu-workspaces.sh --send"
 bindsym --release $mod+v $sh 'xdotool keyup Super && xdotool type "$(xsel)"'
 bindsym $mod+Ctrl+i $sh '~/.scripts/vim-anywhere.sh --selection'
 bindsym $mod+i $sh '~/.scripts/vim-anywhere.sh'
+bindsym $mod+Ctrl+d $sh '~/.scripts/vim-anywhere.sh --draft'
 bindsym $mod+u $sh '~/.scripts/users.sh --switch'
 
 bindsym $mod+Ctrl+b $exec "~/.scripts/switch-or-launch.sh '\<qutebrowser$' 'browser'"
-bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '\<Ferdi$' 'ferdi'"
+bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '\<Ferdi -' 'ferdi'"
 bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
 bindsym $mod+Ctrl+g $exec "~/.scripts/switch-or-launch.sh '\<[Tt]oggl$' 'toggl'"
 bindsym $mod+Ctrl+j $exec "~/.scripts/switch-or-launch.sh '\<[Jj]ira$' 'jira'"
@@ -332,11 +345,10 @@ bindsym $mod+Ctrl+Shift+M $exec "~/.scripts/switch-or-launch.sh '\<Volume Contro
 
 bindsym $mod+Ctrl+c $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
 bindsym $mod+Ctrl+k $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
-# bindsym $mod+Ctrl+s $exec "urxvt -geometry 190x55 -T FLOATING_WINDOW -e spt"
-bindsym $mod+Ctrl+s $exec "~/.scripts/switch-or-launch.sh 'open.spotify.com.Google-chrome' 'google-chrome-stable --app=https://open.spotify.com'"
+bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh 'www.deezer.com__en.Google-chrome' 'google-chrome-stable --app=https://www.deezer.com/en/'"
 bindsym $mod+Ctrl+n $exec "~/.scripts/switch-or-launch.sh '\<Netflix$' 'google-chrome-stable --app=https://netflix.com'"
 bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
-bindsym $mod+Ctrl+m $exec "~/.scripts/audio-device-switch.sh"
+bindsym $mod+Ctrl+s $exec "~/.scripts/audio-device-switch.sh"
 # bindsym $mod+Ctrl+e $exec "urxvt -e neomutt && pkill -SIGRTMIN+13 i3blocks"
 bindsym $mod+Ctrl+e $exec "~/.scripts/switch-or-launch.sh '\<neomutt$' 'email'"
 # bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"

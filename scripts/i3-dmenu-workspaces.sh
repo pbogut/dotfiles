@@ -15,18 +15,6 @@ echo -e "$current\n$static" |
     rofi -dmenu -i -l 20 -p $label |
     while read ws; do
         if [[ -n $ws ]]; then
-            exists=$(echo "$current\n$static" | grep "$ws$")
-            if [[ -z "$exists" ]]; then
-                if [[ $ws =~ "code" ]]; then
-                    ws=$(echo $ws | sed 's,\(.*\), \1,')
-                fi
-                if [[ $ws =~ "browser" ]]; then
-                    ws=$(echo $ws | sed "s,0:,0: ,")
-                fi
-                if [[ $ws =~ "db" ]]; then
-                    ws=$(echo $ws | sed "s,0:,0: ,")
-                fi
-            fi
             echo $ws
         fi
     done |
