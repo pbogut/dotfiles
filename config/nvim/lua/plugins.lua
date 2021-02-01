@@ -27,7 +27,7 @@ return require('packer').startup({
     use {'vim-ruby/vim-ruby', ft = {'ruby'}}
     use {'tpope/vim-scriptease'}
     use {'tpope/vim-dadbod'}
-    use {'tpope/vim-fugitive'}
+    use {'tpope/vim-fugitive', config = 'require "plugins.vim_fugitive"'}
     use {'tpope/vim-eunuch'}
     use {'tpope/vim-git'}
     use {'tpope/vim-commentary', config = 'require "plugins.vim_commentary"'}
