@@ -53,6 +53,7 @@ yay -S \
     xrandr \
     xtitle \
     ruby \
+    noto-fonts-emoji \
     dunst
 
 pip install \
@@ -83,6 +84,18 @@ yarn global add \
     html-beautify \
     jshint \
     -y
+
+npm install -g \
+    readability-cli \
+    vls \
+    vim-language-server \
+    vscode-json-languageserver \
+    vscode-css-languageserver-bin \
+    vscode-html-languageserver-bin \
+    intelephense \
+    flow-bin \
+    bash-language-server \
+    pyright \
 
 # git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.3.0
 # source ~/.asdf/asdf.sh
