@@ -43,6 +43,9 @@ local on_attach = function(_, bufnr)
   end
 end
 
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+
 vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
   vim.lsp.diagnostic.on_publish_diagnostics, {
     -- Enable underline, use default values
@@ -76,29 +79,29 @@ u.highlights({
 })
 
 -- npm install -g vim-language-server
-lspconfig.vimls.setup { on_attach = on_attach }
+lspconfig.vimls.setup {on_attach = on_attach}
 -- npm install -g vls
-lspconfig.vuels.setup { on_attach = on_attach }
+lspconfig.vuels.setup {on_attach = on_attach}
 -- npm install -g bash-language-server
-lspconfig.bashls.setup { on_attach = on_attach }
+lspconfig.bashls.setup {on_attach = on_attach}
 -- GO111MODULE=on go get golang.org/x/tools/gopls@latest
-lspconfig.gopls.setup { on_attach = on_attach }
+lspconfig.gopls.setup {on_attach = on_attach}
 -- npm install -g typescript-language-server
-lspconfig.tsserver.setup { on_attach = on_attach }
+lspconfig.tsserver.setup {on_attach = on_attach}
+-- npm install -g vscode-css-languageserver-bin
+lspconfig.cssls.setup {on_attach = on_attach, capabilities = capabilities}
 -- npm install -g pyright
-lspconfig.pyright.setup { on_attach = on_attach }
+lspconfig.pyright.setup {on_attach = on_attach}
 -- see https://github.com/sumneko/lua-language-server/wiki/Build-and-Run-(Standalone)
 require 'plugins.lsp.sumneko_lua'.setup(on_attach)
 -- see ./lsp/pyls_ms.lua
 require 'plugins.lsp.pyls_ms'.setup(on_attach)
 -- npm install -g intelephense
-require 'plugins.lsp.intelephense'.setup(on_attach)
+require 'plugins.lsp.intelephense'.setup {on_attach = on_attach, capabilities = capabilities}
 -- npm install -g vscode-json-languageserver
 require 'plugins.lsp.jsonls'.setup(on_attach)
 -- npm install -g vscode-html-languageserver-bin
-require 'plugins.lsp.html'.setup(on_attach)
--- npm install -g vscode-css-languageserver-bin
-require 'plugins.lsp.cssls'.setup(on_attach)
+require 'plugins.lsp.html'.setup {on_attach = on_attach, capabilities = capabilities}
 
 local function get_active_client_map()
   local client_list = {}

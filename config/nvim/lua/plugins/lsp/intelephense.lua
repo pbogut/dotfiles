@@ -1,9 +1,8 @@
 local lspconfig = require('lspconfig')
 local me = {}
 
-function me.setup(on_attach)
-  lspconfig.intelephense.setup {
-    on_attach = on_attach,
+function me.setup(opts)
+  opts = vim.tbl_deep_extend('keep', opts, {
     filetypes = {"php", "blade"},
     settings = {
       intelephense = {
@@ -19,7 +18,8 @@ function me.setup(on_attach)
         }
       }
     }
-  }
+  })
+  lspconfig.intelephense.setup(opts)
 end
 
 return me
