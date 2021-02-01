@@ -1,26 +1,29 @@
 #!/bin/bash
 #=================================================
-# name:   archive
+# name:   notmuch-archive.sh
 # author: Pawel Bogut <https://pbogut.me>
 # date:   09/12/2020
 #=================================================
-hostname=$(hostname)
-if [[ $hostname != "redeye" ]]; then
-    # only archive on a main PC
-    exit 0
-fi
+#label:simplearchive  after:2006/8/8 before:2011/8/11  - 37 emails total
 daysago=1095
 todate=$(date --date="$daysago days ago" '+%Y-%m-%d')
 search="date:..$todate"
-account_filter=${1:-.}
-
+echo notmuch search --output files $search
+total=$(notmuch search --output files $search | grep -v '\.archive' | wc -l)
+echo "Archive emails before $todate."
+echo "> $total files. <"
 echo ""
-echo " > archive $search in $account_filter"
+echo "(prass enter to continue)"
+read
+echo "Start..."
 
-notmuch search --output files $search | grep $account_filter | grep -v '\.archive' |
+notmuch search --output files $search | grep -v '\.archive' |
     while read line; do
         origdir=$(dirname $line)
         archdir=$(echo $origdir | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/\2.archive/\3#')
+
+
+
         filename=$(basename $line)
 
         mkdir -p $archdir
@@ -40,10 +43,10 @@ notmuch search --output files $search | grep $account_filter | grep -v '\.archiv
         mv "$origdir/$filename" "$archdir/$filename" > /dev/null 2>&1
     done
 
-find $HOME/Maildir -iname '*.archive' -type d | while read source; do
-    dest=/storage/nextcloud/Maildir.archive${source##$HOME/Maildir}
-    destdir=$(dirname $dest)
-    mkdir -p $destdir
-    mv $source $dest
-    ln -s $dest $source
-done
+notmuch new
+
+gmaildaysago=$(expr $daysago + 3)
+gmailtodate=$(date --date="$gmaildaysago days ago" '+%Y/%m/%d')
+echo ""
+echo "To delete files from gmail use this query in web mail: "
+echo before:$gmailtodate
