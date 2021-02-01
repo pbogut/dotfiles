@@ -57,10 +57,10 @@ return require('packer').startup({
     use {'moll/vim-bbye', cmd = {'Bdelete'}}
     use {'will133/vim-dirdiff', config = 'require "plugins.vim_dirdiff"', cmd = 'DirDiff'}
     use {'dbakker/vim-projectroot'}
-    use {'AndrewRadev/switch.vim'}
+    use {'AndrewRadev/switch.vim', config = 'require "plugins.switch_vim"'}
     use {'AndrewRadev/splitjoin.vim'}
     use {'AndrewRadev/sideways.vim'}
-    use {'vim-scripts/cmdalias.vim'}
+    use {'vim-scripts/cmdalias.vim', config = 'require "plugins.cmdalias_vim"'}
     use {'Shougo/echodoc.vim'}
     use {'justinmk/vim-dirvish', config = 'require "plugins.vim_dirvish"'}
     use {'kristijanhusak/vim-dirvish-git', after = 'vim-dirvish'}
