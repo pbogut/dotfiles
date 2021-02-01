@@ -120,7 +120,7 @@ local function get_active_client_map()
   return client_list
 end
 
-function attach_lsp_to_new_buffer()
+local function attach_lsp_to_new_buffer()
   local clients = get_active_client_map()
   local bufnr = vim.api.nvim_get_current_buf()
   local file_type = vim.api.nvim_buf_get_option(bufnr, 'filetype')
@@ -135,19 +135,21 @@ function attach_lsp_to_new_buffer()
   end
 end
 
+-- global
 function vim_lsp_buf_range_formatting()
   if not pcall(vim.lsp.buf.range_formatting) then
     cmd("'<,'>Neoformat")
   end
 end
 
+-- global
 function vim_lsp_buf_formatting()
   if not pcall(vim.lsp.buf.formatting) then
     cmd('Neoformat')
   end
 end
 
-cmd('command! LspAttachBuffer :lua attach_lsp_to_new_buffer()<cr>')
+u.command('LspAttachBuffer', attach_lsp_to_new_buffer)
 u.augroup('x_nvim_lsp', {
     BufNewFile = {
       { "*", attach_lsp_to_new_buffer }

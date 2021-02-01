@@ -6,9 +6,14 @@ local bo = vim.bo
 local api = vim.api
 
 local autocmd_callbacs = {}
+local command_callbacs = {}
 
 function u.call_autocmd(no)
   autocmd_callbacs[no]()
+end
+
+function u.call_command(no)
+  command_callbacs[no]()
 end
 
 -- definitions = {
@@ -39,6 +44,25 @@ function u.augroup(group_name, definitions)
     end
   end
   cmd('augroup END')
+end
+
+-- its incomplete, dont have most things that one would want
+function u.command(command_name, action, opts)
+  opts = opts or {}
+  local command = 'command! '
+  if (opts.nargs) then
+    command = command .. '-nargs=' .. opts.nargs .. ' '
+  end
+  if (opts.bang) then
+    command = command .. '-bang '
+  end
+  command = command .. command_name .. ' '
+  if type(action) == 'function' then
+    table.insert(command_callbacs, action)
+    action = 'lua require("utils").call_command(' .. #command_callbacs  .. ')'
+  end
+  command = command .. action
+  cmd(command)
 end
 
 -- Set indent for current buffer
