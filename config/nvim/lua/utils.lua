@@ -169,7 +169,9 @@ function u.map(mode, key, result, opts)
     result = ':lua require("utils").call_mapping(' .. #mapping_callbacs  .. ')<cr>'
   end
   if opts.buffer then
-    api.nvim_buf_set_keymap(opts.buffer, mode, key, result, opts)
+    local buffer_nr = opts.buffer
+    opts.buffer = nil
+    api.nvim_buf_set_keymap(buffer_nr, mode, key, result, opts)
   else
     api.nvim_set_keymap(mode, key, result, opts)
   end
@@ -177,9 +179,7 @@ function u.map(mode, key, result, opts)
 end
 
 function u.buf_map(buffer_nr, mode, key, result, opts)
-  vim.tbl_extend('keep', opts or {}, {
-    buffer=buffer_nr
-  })
+  opts.buffer = buffer_nr or 0
   u.map(mode, key, result, opts)
 end
 
