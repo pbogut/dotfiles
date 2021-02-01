@@ -35,8 +35,6 @@ autocmd User after_plug_end source ~/.config/nvim/config/switch.vimrc
 source ~/.config/nvim/config/sideways.vim
 " Plug 'godlygeek/tabular'
 command! -nargs=* -range T Tabularize <args>
-" Plug 'vim-scripts/cmdalias.vim'
-autocmd User after_vim_load source ~/.config/nvim/config/cmdalias.vimrc
 " Plug 'kristijanhusak/vim-dirvish-git'
 source ~/.config/nvim/config/dirvish.vimrc
 " Plug 'w0rp/ale'
