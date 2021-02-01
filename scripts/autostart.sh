@@ -37,8 +37,7 @@ rerun insync "insync start"
 rerun copyq copyq
 rerun picom "picom -b --xrender-sync-fence --xrender-sync"
 # rerun TogglDesktop "toggldesktop -b"
-rerun megasync megasync
-
+demonize nextcloud nextcloud
 demonize geoclue /usr/lib/geoclue-2.0/demos/agent
 demonize redshift redshift-gtk
 demonize textaid "perl $scriptpath/edit-server.pl"
