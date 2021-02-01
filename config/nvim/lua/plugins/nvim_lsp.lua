@@ -7,23 +7,23 @@ local no_lsp_bind = '<cmd>lua print("No LSP attached")<CR>'
 local format_bind = '<cmd>Neoformat<CR>'
 
 local bindings = {
-  { 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', false },
-  { 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', false },
-  { 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', false },
-  { 'n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', no_lsp_bind },
-  { 'i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', no_lsp_bind },
-  { 'n', '<space>i', '<cmd>lua vim.lsp.buf.implementation()<CR>', no_lsp_bind },
-  { 'n', '<space>T', '<cmd>lua vim.lsp.buf.type_definition()<CR>', no_lsp_bind },
-  { 'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', no_lsp_bind },
-  { 'n', '<space>rr', '<cmd>lua vim.lsp.buf.references()<CR>', no_lsp_bind },
-  { 'n', '<space>d', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', no_lsp_bind },
-  { 'n', '<space>sd', '<cmd>lua vim.lsp.buf.document_symbol()<CR>', no_lsp_bind },
-  { 'n', '<space>sD', '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', no_lsp_bind },
-  { 'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', no_lsp_bind },
+  {'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', false},
+  {'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', false},
+  {'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', false},
+  {'n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', no_lsp_bind},
+  {'i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', no_lsp_bind},
+  {'n', '<space>i', '<cmd>lua vim.lsp.buf.implementation()<CR>', no_lsp_bind},
+  {'n', '<space>T', '<cmd>lua vim.lsp.buf.type_definition()<CR>', no_lsp_bind},
+  {'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', no_lsp_bind, {silent=false}},
+  {'n', '<space>rr', '<cmd>lua vim.lsp.buf.references()<CR>', no_lsp_bind},
+  {'n', '<space>d', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', no_lsp_bind},
+  {'n', '<space>sd', '<cmd>lua vim.lsp.buf.document_symbol()<CR>', no_lsp_bind},
+  {'n', '<space>sD', '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', no_lsp_bind},
+  {'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', no_lsp_bind},
   -- custom format functions with fall back to Neoformat cmd
-  { 'n', '<space>af', '<cmd>lua vim_lsp_buf_formatting()<CR>', format_bind },
-  { 'v', '<space>af', ':lua vim_lsp_buf_range_formatting()<CR>', format_bind },
-  { 'x', '<space>af', ':lua vim_lsp_buf_range_formatting()<CR>', format_bind },
+  {'n', '<space>af', '<cmd>lua vim_lsp_buf_formatting()<CR>', format_bind},
+  {'v', '<space>af', ':lua vim_lsp_buf_range_formatting()<CR>', format_bind},
+  {'x', '<space>af', ':lua vim_lsp_buf_range_formatting()<CR>', format_bind},
 }
 
 -- prevent stupid errors when using mapping with no lsp attached
@@ -39,7 +39,8 @@ local on_attach = function(_, bufnr)
 
   -- Mappings.
   for _, def in pairs(bindings) do
-    u.buf_map(bufnr, def[1], def[2], def[3])
+    local opts = def[5] or {}
+    u.buf_map(bufnr, def[1], def[2], def[3], opts)
   end
 end
 
@@ -86,8 +87,8 @@ lspconfig.vuels.setup {on_attach = on_attach}
 lspconfig.bashls.setup {on_attach = on_attach}
 -- GO111MODULE=on go get golang.org/x/tools/gopls@latest
 lspconfig.gopls.setup {on_attach = on_attach}
--- npm install -g typescript-language-server
-lspconfig.tsserver.setup {on_attach = on_attach}
+-- npm install -g flow-bin
+lspconfig.flow.setup{on_attach = on_attach}
 -- npm install -g vscode-css-languageserver-bin
 lspconfig.cssls.setup {on_attach = on_attach, capabilities = capabilities}
 -- npm install -g pyright
