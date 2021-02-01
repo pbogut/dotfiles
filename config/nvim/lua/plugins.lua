@@ -37,6 +37,7 @@ return require('packer').startup({
     use {'tpope/vim-rails', ft = {'ruby'}}
     use {'tpope/vim-unimpaired'}
     use {'tpope/vim-projectionist', config = 'require "plugins.projectionist"'}
+    use {'gioele/vim-autoswap'}
     use {'rhysd/git-messenger.vim', config = 'require "plugins.git_messanger"'}
     use {'vim-airline/vim-airline', config = 'require "plugins.vim_airline"'}
     use {'vim-airline/vim-airline-themes', after = 'vim-airline'}
@@ -88,7 +89,6 @@ return require('packer').startup({
     use {'godlygeek/tabular', cmd = {'T', 'Tabularize'}}
     use {'captbaritone/better-indent-support-for-php-with-html', ft = {'php'}}
     -- use {'MarcWeber/vim-addon-mw-utils'}
-    -- use {'gioele/vim-autoswap'}
     -- use {'joereynolds/gtags-scope'}
     -- use {'prabirshrestha/async.vim'} -- possibly used by vim-arilines ?
     -- use {'kana/vim-operator-user'}
