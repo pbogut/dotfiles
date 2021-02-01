@@ -13,7 +13,7 @@ function me.setup(opts)
         },
         environment = {
           includePaths = {
-            os.getenv('PROJECTS') .. '/github.com/deployphp/deployer',
+            (os.getenv('PROJECTS') or '') .. '/github.com/deployphp/deployer',
           }
         }
       }
