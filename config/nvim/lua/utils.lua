@@ -177,16 +177,10 @@ function u.map(mode, key, result, opts)
 end
 
 function u.buf_map(buffer_nr, mode, key, result, opts)
-  opts = vim.tbl_extend('keep', opts or {}, {
-    noremap = true,
-    silent = mode ~= 'c',
-    expr = false
+  vim.tbl_extend('keep', opts or {}, {
+    buffer=buffer_nr
   })
-  if type(result) == 'function' then
-    table.insert(mapping_callbacs, action)
-    result = ':lua require("utils").call_mapping(' .. #mapping_callbacs  .. ')<cr>'
-  end
-  api.nvim_buf_set_keymap(buffer_nr, mode, key, result, opts)
+  u.map(mode, key, result, opts)
 end
 
 function u.pp(var)
