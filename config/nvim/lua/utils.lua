@@ -75,18 +75,23 @@ end
 -- @param[opt=false] hardtab Use hard tab character
 -- @param[opt=false] force   Force indent even if already set
 function u.set_indent(width, hardtab, force)
+  force = force or false
   -- Skip if already set
-  if not force and b.Set_indent_initiated then
+  if not force and b.set_indent_initiated then
     return
   end
   -- Skip if .editorconfig is available (@todo implement project root search)
   if not force and fn.filereadable('.editorconfig') > 0 then
+    b.set_indent_skip_editorconfig = true
     return
   end
   -- optional params
   hardtab = hardtab or false
-  force = force or false
-  b.Set_indent_initiated = true
+
+  b.set_indent_initiated = true
+  b.set_indent_width = width
+  b.set_indent_hardtab = hardtab
+  b.set_indent_hardtab = hardtab
 
   bo.tabstop = width
   bo.shiftwidth = width
@@ -163,7 +168,12 @@ function u.map(mode, key, result, opts)
     table.insert(mapping_callbacs, result)
     result = ':lua require("utils").call_mapping(' .. #mapping_callbacs  .. ')<cr>'
   end
-  api.nvim_set_keymap(mode, key, result, opts)
+  if opts.buffer then
+    api.nvim_buf_set_keymap(opts.buffer, mode, key, result, opts)
+  else
+    api.nvim_set_keymap(mode, key, result, opts)
+  end
+
 end
 
 function u.buf_map(buffer_nr, mode, key, result, opts)
