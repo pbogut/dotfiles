@@ -1,7 +1,7 @@
 configuration {
 	modi: "run,drun,ssh,window";
 	width: 100;
-	font: "Droid Sans Mono 10";
+	font: "InputMono Nerd Font 9";
 	location: 1;
 	padding: 3;
 	terminal: "urxvt -e zsh -ic";
