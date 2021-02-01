@@ -5,6 +5,7 @@
 # date:   16/01/2017
 #=================================================
 echo "$@" >/tmp/last_url-$USER
+display=${DISPLAY:-:0}
 
 if [[ $1 =~ ^https://appear.in/ || $1 =~ url=https%3A%2F%2Fappear.in%2F ]] \
   ; then
@@ -12,5 +13,5 @@ if [[ $1 =~ ^https://appear.in/ || $1 =~ url=https%3A%2F%2Fappear.in%2F ]] \
 elif [[ $1 =~ ^http://chromecast.smplayer.info/ ]]; then
   google-chrome-stable --app="$1" "${@:2}"
 else
-  qutebrowser --target window --backend webengine --enable-webengine-inspector "$@"
+  DISPLAY=$display qutebrowser --target window --backend webengine --enable-webengine-inspector "$@"
 fi
