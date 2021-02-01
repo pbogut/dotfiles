@@ -30,6 +30,7 @@ return require('packer').startup({
     use {'tpope/vim-fugitive', config = 'require "plugins.vim_fugitive"'}
     use {'tpope/vim-eunuch'}
     use {'tpope/vim-git'}
+    use {'tpope/vim-rsi'}
     use {'tpope/vim-commentary', config = 'require "plugins.vim_commentary"'}
     use {'tpope/vim-surround'}
     use {'tpope/vim-repeat'}
@@ -86,7 +87,6 @@ return require('packer').startup({
     use {'vim-vdebug/vdebug', opt = true}
     use {'godlygeek/tabular', cmd = {'T', 'Tabularize'}}
     use {'captbaritone/better-indent-support-for-php-with-html', ft = {'php'}}
-    -- use {'tpope/vim-rsi'}
     -- use {'MarcWeber/vim-addon-mw-utils'}
     -- use {'gioele/vim-autoswap'}
     -- use {'joereynolds/gtags-scope'}
