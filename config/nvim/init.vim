@@ -29,10 +29,6 @@ let g:elm_format_autosave = 0
 " Plug 'dbakker/vim-projectroot'
 let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
       \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
-" Plug 'AndrewRadev/switch.vim'
-autocmd User after_plug_end source ~/.config/nvim/config/switch.vimrc
-" Plug 'AndrewRadev/sideways.vim'
-source ~/.config/nvim/config/sideways.vim
 " Plug 'godlygeek/tabular'
 command! -nargs=* -range T Tabularize <args>
 " Plug 'kristijanhusak/vim-dirvish-git'

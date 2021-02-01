@@ -59,7 +59,7 @@ return require('packer').startup({
     use {'dbakker/vim-projectroot'}
     use {'AndrewRadev/switch.vim', config = 'require "plugins.switch_vim"'}
     use {'AndrewRadev/splitjoin.vim'}
-    use {'AndrewRadev/sideways.vim'}
+    use {'AndrewRadev/sideways.vim', config = 'require "plugins.sideways_vim"'}
     use {'vim-scripts/cmdalias.vim', config = 'require "plugins.cmdalias_vim"'}
     use {'Shougo/echodoc.vim'}
     use {'justinmk/vim-dirvish', config = 'require "plugins.vim_dirvish"'}
