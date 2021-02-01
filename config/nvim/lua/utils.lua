@@ -179,6 +179,7 @@ function u.map(mode, key, result, opts)
 end
 
 function u.buf_map(buffer_nr, mode, key, result, opts)
+  opts = opts or {}
   opts.buffer = buffer_nr or 0
   u.map(mode, key, result, opts)
 end
