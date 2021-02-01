@@ -26,8 +26,23 @@ u.map('n', '#', ':set hls<cr>#')
 -- case insensitive search by default
 u.map('n', '/', ':let @/=""<cr>:set hls<cr>/\\c', {silent = false})
 u.map('n', '?', ':let @/=""<cr>:set hls<cr>?\\c', {silent = false})
--- highlight/search curren word
-u.map('n', '<space><space>', '*``:set hls<cr>')
+-- highlight/search current word
+-- (treat $word as word and word as $word to ease with PHP properties search)
+u.map('n', '<space><space>', function()
+  -- vim.fn.feedkeys('*``:set hls\n')
+  vim.fn.feedkeys('*``')
+  -- without defer it does not behave correctly
+  vim.defer_fn(function()
+    local term = vim.api.nvim_eval('@/')
+    term, _ = term:gsub([[%$\=\zs]], [[%$]])
+    term, _ = term:gsub('%$', [[%$\=\zs]])
+    if not term:match([[^\<%$]]) then
+      term, _ = term:gsub([[^\<]], [[\<%$\=\zs]])
+    end
+    vim.cmd('let @/="' .. vim.fn.escape(term, [["\]]) .. '"')
+    vim.cmd('set hls')
+  end, 1)
+end)
 -- format file indentation
 u.map('n', '<space>=', 'migg=G`i')
 -- trigger omnicompletion with c-space

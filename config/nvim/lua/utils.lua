@@ -7,6 +7,7 @@ local api = vim.api
 
 local autocmd_callbacs = {}
 local command_callbacs = {}
+local mapping_callbacs = {}
 
 function u.call_autocmd(no)
   autocmd_callbacs[no]()
@@ -14,6 +15,10 @@ end
 
 function u.call_command(no)
   command_callbacs[no]()
+end
+
+function u.call_mapping(no)
+  mapping_callbacs[no]()
 end
 
 -- definitions = {
@@ -154,6 +159,10 @@ function u.map(mode, key, result, opts)
     silent = mode ~= 'c',
     expr = false
   })
+  if type(result) == 'function' then
+    table.insert(mapping_callbacs, result)
+    result = ':lua require("utils").call_mapping(' .. #mapping_callbacs  .. ')<cr>'
+  end
   api.nvim_set_keymap(mode, key, result, opts)
 end
 
@@ -163,6 +172,10 @@ function u.buf_map(buffer_nr, mode, key, result, opts)
     silent = mode ~= 'c',
     expr = false
   })
+  if type(result) == 'function' then
+    table.insert(mapping_callbacs, action)
+    result = ':lua require("utils").call_mapping(' .. #mapping_callbacs  .. ')<cr>'
+  end
   api.nvim_buf_set_keymap(buffer_nr, mode, key, result, opts)
 end
 
