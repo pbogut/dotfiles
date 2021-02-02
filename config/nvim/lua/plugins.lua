@@ -83,6 +83,7 @@ return require('packer').startup({
     -- lsp
     use {'neovim/nvim-lspconfig', config = 'require "plugins.nvim_lsp"'}
     use {'nvim-lua/completion-nvim', config = 'require "plugins.completion_nvim"'}
+    use {'nvim-lua/lsp-status.nvim'}
     use {'steelsojka/completion-buffers', after = 'completion-nvim'}
     -- candidates to get removed
     use {'vim-vdebug/vdebug', opt = true}

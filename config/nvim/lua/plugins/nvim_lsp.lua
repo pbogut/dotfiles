@@ -1,8 +1,9 @@
 local u = require'utils'
 local lspconfig = require('lspconfig')
-local cmd = vim.cmd
-local fn = vim.fn
+local has_completion, completion = pcall(require, 'completion')
+local has_lspstatus, lspstatus = pcall(require, 'lsp-status')
 
+local cmd = vim.cmd
 local no_lsp_bind = '<cmd>lua print("No LSP attached")<CR>'
 local format_bind = '<cmd>Neoformat<CR>'
 
@@ -33,9 +34,14 @@ for _, def in pairs(bindings) do
   end
 end
 
-local on_attach = function(_, bufnr)
+local on_attach = function(client, bufnr)
   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
-  require'completion'.on_attach()
+  if has_completion then
+    completion.on_attach()
+  end
+  if has_lspstatus then
+    lspstatus.on_attach(client, bufnr)
+  end
 
   -- Mappings.
   for _, def in pairs(bindings) do
@@ -46,6 +52,10 @@ end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
+if has_lspstatus then
+  capabilities = vim.tbl_extend('keep', capabilities or {}, lspstatus.capabilities)
+  lspstatus.register_progress()
+end
 
 vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
   vim.lsp.diagnostic.on_publish_diagnostics, {
@@ -88,13 +98,13 @@ lspconfig.bashls.setup {on_attach = on_attach}
 -- GO111MODULE=on go get golang.org/x/tools/gopls@latest
 lspconfig.gopls.setup {on_attach = on_attach}
 -- npm install -g flow-bin
-lspconfig.flow.setup{on_attach = on_attach}
+lspconfig.flow.setup{on_attach = on_attach, capabilities = capabilities}
 -- npm install -g vscode-css-languageserver-bin
 lspconfig.cssls.setup {on_attach = on_attach, capabilities = capabilities}
 -- npm install -g pyright
 lspconfig.pyright.setup {on_attach = on_attach}
 -- see https://github.com/sumneko/lua-language-server/wiki/Build-and-Run-(Standalone)
-require 'plugins.lsp.sumneko_lua'.setup(on_attach)
+require 'plugins.lsp.sumneko_lua'.setup {on_attach = on_attach, capabilities = capabilities}
 -- see ./lsp/pyls_ms.lua
 require 'plugins.lsp.pyls_ms'.setup(on_attach)
 -- npm install -g intelephense

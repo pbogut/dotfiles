@@ -2,11 +2,11 @@ local lspconfig = require('lspconfig')
 local util = require 'lspconfig/util'
 local me = {}
 
-function me.setup(on_attach)
+function me.setup(opts)
   local sumneko_root_path = vim.fn.stdpath('cache')..'/lspconfig/sumneko_lua/lua-language-server'
   local sumneko_binary = sumneko_root_path.."/bin/Linux/lua-language-server"
-  lspconfig.sumneko_lua.setup {
-    on_attach = on_attach,
+
+  opts = vim.tbl_deep_extend('keep', opts, {
     cmd = {sumneko_binary, "-E", sumneko_root_path .. "/main.lua"},
     root_dir = function(fname)
       local cwd  = vim.loop.cwd();
@@ -32,7 +32,9 @@ function me.setup(on_attach)
         }
       }
     }
-  }
+  })
+
+  lspconfig.sumneko_lua.setup(opts)
 end
 
 return me
