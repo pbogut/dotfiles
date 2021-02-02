@@ -76,6 +76,7 @@ return require('packer').startup({
     use {'junegunn/fzf' , config = 'require "plugins.fzf"'}
     use {'junegunn/fzf.vim', after = 'fzf'}
     use {'pbogut/fzf-mru.vim', after = 'fzf.vim'}
+    use {'pbogut/vim-dadbod-ssh'}
     use {'frankier/neovim-colors-solarized-truecolor-only'}
     use {'sheerun/vim-polyglot', setup = 'require "plugins.polyglot"'}
     use {'sirtaj/vim-openscad', opt = false}
@@ -83,6 +84,7 @@ return require('packer').startup({
     -- lsp
     use {'neovim/nvim-lspconfig', config = 'require "plugins.nvim_lsp"'}
     use {'nvim-lua/completion-nvim', config = 'require "plugins.completion_nvim"'}
+    use {'kristijanhusak/vim-dadbod-completion'}
     use {'nvim-lua/lsp-status.nvim'}
     use {'steelsojka/completion-buffers', after = 'completion-nvim'}
     -- candidates to get removed

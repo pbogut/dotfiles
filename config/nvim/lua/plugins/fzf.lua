@@ -170,7 +170,7 @@ end
 
 function f.db_range(...)
   local options = {
-    source = fn.split(fn.GetDBs('g')),
+    source = fn['db#url_complete']('g:'),
     options = '--prompt "DB> " ' .. l.process_params({...}, true),
     sink = 'l.db_range',
   }
