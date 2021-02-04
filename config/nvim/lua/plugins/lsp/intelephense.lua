@@ -1,3 +1,4 @@
+local config = require('config')
 local lspconfig = require('lspconfig')
 local me = {}
 
@@ -9,16 +10,12 @@ function me.setup(opts)
         files = {
           associations = {
             "*.php", "*.phtml", "*.blade.php"
-          },
-        },
-        environment = {
-          includePaths = {
-            (os.getenv('PROJECTS') or '') .. '/github.com/deployphp/deployer',
           }
         }
       }
     }
   })
+  config.apply_to(opts.settings, 'intelephense', 'lsp.intelephense')
   lspconfig.intelephense.setup(opts)
 end
 
