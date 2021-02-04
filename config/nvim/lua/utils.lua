@@ -178,6 +178,45 @@ function u.map(mode, key, result, opts)
 
 end
 
+-- merges tables recursively, if both values
+-- are lists (see tbl_islist) then it merges
+-- data from both tables into one (not replacing one with other)
+-- for tables it is creating new ones (not passing refrence)
+-- so changes should not affect input values
+-- (although, functions will still go by reference, possibly
+-- other data types that are passed by reference as well)
+function u.merge_tables(val1, val2)
+  local fresh_one = nil
+  if type(val1) == 'table' and type(val2) == 'table'
+    and vim.tbl_islist(val1) and vim.tbl_islist(val2)
+  then
+    fresh_one = {}
+    for _, sub in ipairs(val1) do
+      table.insert(fresh_one, sub)
+    end
+    for _, sub in ipairs(val2) do
+      table.insert(fresh_one, sub)
+    end
+  elseif type(val1) == 'table' and type(val2) == 'table' then
+    fresh_one = {}
+    for key1, subval1 in pairs(val1) do
+      fresh_one[key1] = u.merge_tables(subval1, val2[key1])
+    end
+    for key2, subval2 in pairs(val2) do
+      fresh_one[key2] = u.merge_tables(subval2, val1[key2])
+    end
+  elseif val1 == nil and val2 == nil then
+    fresh_one = nil
+  elseif val1 == nil then
+    fresh_one = val2
+  elseif val2 == nil then
+    fresh_one = val1
+  else
+    fresh_one = val2 -- override with second
+  end
+  return fresh_one
+end
+
 function u.buf_map(buffer_nr, mode, key, result, opts)
   opts = opts or {}
   opts.buffer = buffer_nr or 0
