@@ -26,7 +26,6 @@ return require('packer').startup({
     use {'editorconfig/editorconfig-vim', setup = 'require "plugins.editorconfig"'}
     use {'vim-ruby/vim-ruby', ft = {'ruby'}}
     use {'tpope/vim-scriptease'}
-    use {'tpope/vim-dadbod'}
     use {'tpope/vim-fugitive', config = 'require "plugins.vim_fugitive"'}
     use {'tpope/vim-eunuch'}
     use {'tpope/vim-git'}
@@ -76,7 +75,8 @@ return require('packer').startup({
     use {'junegunn/fzf' , config = 'require "plugins.fzf"'}
     use {'junegunn/fzf.vim', after = 'fzf'}
     use {'pbogut/fzf-mru.vim', after = 'fzf.vim'}
-    use {'pbogut/vim-dadbod-ssh'}
+    use {'tpope/vim-dadbod', fn = 'db#url_complete', cmd = 'DB'}
+    use {'pbogut/vim-dadbod-ssh', after = 'vim-dadbod'}
     use {'frankier/neovim-colors-solarized-truecolor-only'}
     use {'sheerun/vim-polyglot', setup = 'require "plugins.polyglot"'}
     use {'sirtaj/vim-openscad', opt = false}
