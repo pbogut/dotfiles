@@ -1,1 +1,1 @@
-vim.g.polyglot_disabled = {'eelixir', 'elixir', 'sensible'}
+vim.g.polyglot_disabled = {'eelixir', 'elixir', 'sensible', 'autoindent'}
