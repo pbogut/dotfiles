@@ -71,6 +71,11 @@ l.switch_quotes = {
   ['"\\([^"]*\\)"'] = "'\\1'",
   ["'\\([^']*\\)'"] = '"\\1"',
 }
+l.switch_diffline = {
+  ['^+'] = '-',
+  ['^-'] = ' ',
+  ['^\\s'] = '+',
+}
 
 u.augroup('x_switch', {
     FileType = {
@@ -125,6 +130,11 @@ u.augroup('x_switch', {
       {'email', function()
           b.switch_custom_definitions = {
             l.switch_quotes,
+          }
+      end},
+      {'diff', function()
+          b.switch_custom_definitions = {
+            l.switch_diffline ,
           }
       end},
     }
