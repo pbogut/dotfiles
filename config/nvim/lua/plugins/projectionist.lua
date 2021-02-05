@@ -1,18 +1,14 @@
 local g = vim.g
 local u = require('utils')
 
--- transformations
--- for some reason defining it with lua is not working, it is what it is I guess
-vim.api.nvim_command([[
-let g:projectionist_transformations = get(g:, "projectionist_transformations", {})
-function! g:projectionist_transformations.mag_add_block(input, o) abort
-  return substitute(a:input, '\([^/]*/[^/]*\)', '\1/Block', '')
-endfunction
-function! g:projectionist_transformations.mag_rm_pool(input, o) abort
-  return substitute(a:input, '^\(core/\|community/\|local/\)', '', '')
-endfunction
-]])
-
+local transformations = {
+  mag_rm_pool = function(input)
+    return fn.substitute(input, [[^\(core/\|community/\|local/\)]], '', '')
+  end,
+  mag_add_block = function(input)
+    return input:gsub('^([^/]*/[^/]*)', '%1/Block')
+  end,
+}
 
 -- NOTES:
 -- Templates
@@ -315,3 +311,28 @@ g.projectionist_heuristics = {
     ["codeception.yml"] = codeception,
     [".polybar"] = polybar_scripts,
 }
+
+-- call proper lua transformation define in transformations table
+function p.transformation(transformation, input, options)
+  return transformations[transformation](input, options)
+end
+
+cmd([[
+let g:projectionist_transformations = get(g:, "projectionist_transformations", {})
+]])
+
+-- generate vim functions for transformations list end result looks like this:
+--
+-- function! g:projectionist_transformations.fn_name(i, o) abort
+-- return luaeval("require'plugins.projectionist'.transformation(_A[1], _A[2], _A[3])", ["fn_name", a:i, a:o])
+-- endfunction
+for t_name, _ in pairs(transformations) do
+  local def = 'function! g:projectionist_transformations.' .. t_name .. '(i, o) abort\n'
+    .. [[return luaeval("require'plugins.projectionist'.transformation]]
+    .. '(_A[1], _A[2], _A[3])", ["' .. t_name .. '", a:i, a:o])\n'
+    .. 'endfunction\n'
+
+  cmd(def)
+end
+
+return p
