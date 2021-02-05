@@ -1,11 +1,13 @@
+local cmd = vim.cmd
+local fn = vim.fn
 local g = vim.g
-local u = require('utils')
+local p = {}
 
 local transformations = {
-  mag_rm_pool = function(input)
+  mag_rm_pool = function(input, _)
     return fn.substitute(input, [[^\(core/\|community/\|local/\)]], '', '')
   end,
-  mag_add_block = function(input)
+  mag_add_block = function(input, _)
     return input:gsub('^([^/]*/[^/]*)', '%1/Block')
   end,
 }
@@ -17,8 +19,8 @@ local transformations = {
 -- prefix file pattern with r! and follow with vim regexp. =~# will be used to
 -- match pattern against relative file name
 
--- mapping
-u.map('n', '<space>ta', ':A<cr>', { silent = false })
+-- mapping - disabled in favour of alternate.lua
+-- u.map('n', '<space>ta', ':A<cr>', { silent = false })
 
 -- heuristics
 local magento_module = {
@@ -138,6 +140,12 @@ local magento2_module =
            ['app/code/*/etc/di.xml'] = {
              skeleton = "magento2_di"
            },
+           ['app/code/*/etc/frontend/di.xml'] = {
+             skeleton = "magento2_di"
+           },
+           ['app/code/*/etc/adminhtml/di.xml'] = {
+             skeleton = "magento2_di"
+           },
            ['app/code/*/etc/frontend/events.xml'] = {
              skeleton = "magento2_events"
            },
@@ -152,9 +160,6 @@ local magento2_module =
            },
            ['app/code/**/web/template/*.html'] = {
              alternate = "app/code/{dirname}/web/js/view/{basename}.js"
-           },
-           ['app/code/**/web/js/view/*.js'] = {
-             alternate = "app/code/{dirname}/web/template/{basename}.html"
            },
         }
 local laravel =
@@ -317,15 +322,12 @@ function p.transformation(transformation, input, options)
   return transformations[transformation](input, options)
 end
 
-cmd([[
-let g:projectionist_transformations = get(g:, "projectionist_transformations", {})
-]])
-
 -- generate vim functions for transformations list end result looks like this:
 --
 -- function! g:projectionist_transformations.fn_name(i, o) abort
 -- return luaeval("require'plugins.projectionist'.transformation(_A[1], _A[2], _A[3])", ["fn_name", a:i, a:o])
 -- endfunction
+cmd([[let g:projectionist_transformations = get(g:, "projectionist_transformations", {})]])
 for t_name, _ in pairs(transformations) do
   local def = 'function! g:projectionist_transformations.' .. t_name .. '(i, o) abort\n'
     .. [[return luaeval("require'plugins.projectionist'.transformation]]
