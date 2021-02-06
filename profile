@@ -8,7 +8,10 @@ export PROFILE_LOADED=true
 
 export GOPATH="$HOME/.gocode"
 
-export PATH="$HOME/.scripts:$PATH"
+export PROJECTS="$HOME/Projects"
+export DOTFILES="$PROJECTS/github.com/pbogut/dotfiles"
+export SCRIPTS="$HOME/.scripts"
+export PATH="$SCRIPTS:$PATH"
 export PATH="$HOME/.bin:$PATH"
 
 export PATH="$HOME/.local/bin:$PATH"
@@ -23,6 +26,9 @@ export LESS="-RXe"
 
 export QT_QPA_PLATFORMTHEME=qt5ct
 export QT_STYLE_OVERRIDE=gtk2
+
+# place for my common python scripts
+export PYTHONPATH="$SCRIPTS/_python"
 
 # set up unique TMPDIR per user
 export TMPDIR="/tmp/$USER"
