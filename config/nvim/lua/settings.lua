@@ -10,6 +10,7 @@ cmd('set fillchars=fold:\\ ,vert:\\│')
 cmd('set shortmess+=c')
 cmd('set runtimepath+=~/.vim')
 
+o.updatetime = 100
 o.signcolumn = 'yes'
 wo.signcolumn = 'yes'
 o.showmode = false
