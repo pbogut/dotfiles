@@ -1,3 +1,11 @@
+-- projector module -- its like... projectionist I guess
+--
+-- handles themplates and alternate files based on some patterns
+-- unlike projectionist it uses full patternmatching (lua one) so you have
+-- more freedom in configuration
+-- alternate file uses fzf if more then one candidate returned
+-- templates can be ultisnip snippets or files with placeholders
+
 local u = require('utils')
 local ph = require('template.placeholders')
 
@@ -32,30 +40,47 @@ local templates_path = os.getenv('HOME') .. '/.config/nvim/templates'
 local configuration = {
   -- magento2 project
   ["composer.json&bin/magento"] = {
-    ['.*/web/templates?/.*/[^/]*%.html$'] = {
-      alternate = function(relative, _)
-        local glob = relative:gsub('(.*)/web/templates?/.*/(.-)%.html', '%1/web/%*%*/%2.js')
-        return u.glob(glob)
-      end
-    },
-    ['.*/web/js/.*/[^/]*%.js$'] = {
-      alternate = function(relative, _)
-        local glob = relative:gsub('(.*)/web/js/.*/(.-)%.js', '%1/web/%*%*/%2.html')
-        return u.glob(glob)
-      end
-    },
-    ['app/code/*/etc/di.xml'] = {
-      template = "magento2_di"
-    },
+    order = 100,
+    patterns = {
+      ['.*/web/templates?/.*/[^/]*%.html$'] = {
+        alternate = function(relative, _)
+          local glob = relative:gsub('(.*)/web/templates?/.*/(.-)%.html', '%1/web/%*%*/%2.js')
+          return u.glob(glob)
+        end
+      },
+      ['.*/web/js/.*/[^/]*%.js$'] = {
+        alternate = function(relative, _)
+          local glob = relative:gsub('(.*)/web/js/.*/(.-)%.js', '%1/web/%*%*/%2.html')
+          return u.glob(glob)
+        end
+      },
+      ['app/code/.*/etc/.*/?di.xml'] = {
+        template = "_magento2_di",
+        order = 100,
+      },
+      ['app/code/.*/registration.php'] = {
+        template = "_magento2_registration",
+        order = 100,
+      },
+      ['.*%.php'] = {
+        template = "_magento2_class",
+        order = 1000,
+      },
+    }
   },
   -- match anything
   ["*"] = {
-    ['.*%.php'] = {
-      template = "file.php"
-    },
-    ['.*'] = {
-      template = "_skel"
-    },
+    order = 5000,
+    patterns = {
+      ['.*%.php'] = {
+        template = "file.php",
+        order = 5000,
+      },
+      ['.*'] = {
+        template = "_skel",
+        order = 5000,
+      },
+    }
   }
 }
 
@@ -69,6 +94,12 @@ function a.ultisnip_template(name)
   return g.ulti_expand_res and g.ulti_expand_res ~= 0
 end
 
+function a.file_template(name)
+    cmd('0r ' .. templates_path .. '/' .. name)
+    cmd('$delete') -- remove last line
+    a.process_placeholders()
+end
+
 -- create template
 function a.do_template()
   local cwd = fn.getcwd()
@@ -79,9 +110,7 @@ function a.do_template()
   if type(file_config.template) == 'string' and file_config.template:match('^%_') then
     a.ultisnip_template(file_config.template)
   elseif type(file_config.template) == 'string' then
-    cmd('0r ' .. templates_path .. '/' .. file_config.template)
-    cmd('$delete') -- remove last line
-    a.process_placeholders()
+    a.file_template(file_config.template)
   end
 end
 
@@ -174,10 +203,10 @@ end
 
 function l.get_project_config(cwd)
   local result = {}
-  for project_pattern, project_config in pairs(configuration) do
+  for project_pattern, project_config in u.spairs(configuration, l.sort) do
     if l.check_project(cwd, project_pattern) then
       -- first on the list has priority
-      result = u.merge_tables(project_config, result)
+      result = u.merge_tables(project_config.patterns, result)
     end
   end
 
@@ -187,7 +216,7 @@ end
 function l.get_file_config(cwd, relative)
   local project_config = l.get_project_config(cwd)
   local result = {}
-  for file_pattern, file_config in pairs(project_config) do
+  for file_pattern, file_config in u.spairs(project_config, l.sort) do
     -- let match many file patterns, or should we - first come first win even without alternate file?
     if l.check_file(relative, file_pattern) then
       -- first on the list has priority, we can fall down with something
@@ -272,6 +301,17 @@ function l.handle_project(project_patterns)
   end
 
   return false
+end
+
+-- ascending with nil's at the end
+function l.sort(tab, key1, key2)
+  if not tab[key1].order then
+    return false
+  end
+  if not tab[key2].order then
+    return true
+  end
+  return tab[key1].order < tab[key2].order
 end
 
 return a

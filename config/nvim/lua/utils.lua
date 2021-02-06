@@ -185,16 +185,26 @@ end
 -- so changes should not affect input values
 -- (although, functions will still go by reference, possibly
 -- other data types that are passed by reference as well)
-function u.merge_tables(val1, val2)
+-- @param append[false] - if true and two lists are merged, elements from second
+-- one will be appended to elements from the first one (by default its
+-- other way around)
+function u.merge_tables(val1, val2, append)
+  append = append or false
   local fresh_one = nil
   if type(val1) == 'table' and type(val2) == 'table'
     and vim.tbl_islist(val1) and vim.tbl_islist(val2)
   then
     fresh_one = {}
-    for _, sub in ipairs(val1) do
+    local t1 = val2
+    local t2 = val1
+    if append then
+      t1 = val1
+      t2 = val2
+    end
+    for _, sub in ipairs(t1) do
       table.insert(fresh_one, sub)
     end
-    for _, sub in ipairs(val2) do
+    for _, sub in ipairs(t2) do
       table.insert(fresh_one, sub)
     end
   elseif type(val1) == 'table' and type(val2) == 'table' then
@@ -203,7 +213,7 @@ function u.merge_tables(val1, val2)
       fresh_one[key1] = u.merge_tables(subval1, val2[key1])
     end
     for key2, subval2 in pairs(val2) do
-      fresh_one[key2] = u.merge_tables(subval2, val1[key2])
+      fresh_one[key2] = u.merge_tables(val1[key2], subval2)
     end
   elseif val1 == nil and val2 == nil then
     fresh_one = nil
@@ -217,10 +227,42 @@ function u.merge_tables(val1, val2)
   return fresh_one
 end
 
+function u.glob(pattern)
+  local result = fn.glob(pattern)
+  return u.split_string(result, '\n')
+end
+
 function u.buf_map(buffer_nr, mode, key, result, opts)
   opts = opts or {}
   opts.buffer = buffer_nr or 0
   u.map(mode, key, result, opts)
+end
+
+function u.termcodes(str)
+    return vim.api.nvim_replace_termcodes(str, true, true, true)
+end
+
+function u.spairs(t, order)
+    -- collect the keys
+    local keys = {}
+    for k in pairs(t) do keys[#keys+1] = k end
+
+    -- if order function given, sort by it by passing the table and keys a, b,
+    -- otherwise just sort the keys
+    if order then
+        table.sort(keys, function(a, b) return order(t, a, b) end)
+    else
+        table.sort(keys)
+    end
+
+    -- return the iterator function
+    local i = 0
+    return function()
+        i = i + 1
+        if keys[i] then
+            return keys[i], t[keys[i]]
+        end
+    end
 end
 
 function u.pp(var)
