@@ -1,7 +1,9 @@
 local u = require('utils')
 local g = vim.g
+local b = vim.b
 local fn = vim.fn
 local cmd = vim.cmd
+local api = vim.api
 local f = {}
 local l = {}
 
@@ -31,7 +33,8 @@ u.map('n', '<space>gf', ':lua require"plugins.fzf".file_under_coursor()<cr>')
 u.map('n', '<space>gF', ':lua require"plugins.fzf".file_under_coursor_all()<cr>')
 
 u.map('n', '<space>ft', ':lua require"plugins.fzf".ft()<cr>')
-u.map('v', '<space>fd', ':lua require"plugins.fzf".db_range()<cr>')
+u.map('v', '<space>fd', ':lua require"plugins.fzf".select_db()<cr>')
+u.map('n', '<space>fd', ':lua require"plugins.fzf".select_db()<cr>')
 
 u.map('n', '<space>gr', ':Rg<cr>')
 u.map('n', '<space>gw', ':Rg <cword><cr>')
@@ -168,24 +171,21 @@ function l.ft(line)
   vim.bo.ft = line
 end
 
-function f.db_range(...)
+function f.select_db(...)
   local options = {
     source = fn['db#url_complete']('g:'),
-    options = '--prompt "DB> " ' .. l.process_params({...}, true),
-    sink = 'l.db_range',
+    options = '--prompt "Select DB> " ' .. l.process_params({...}, true),
+    sink = 'l.select_db',
   }
   l.fzf_run(options)
 end
 
-function l.db_range(line)
-  -- giv fzf enough time to close
-  vim.defer_fn(function()
-    fn.feedkeys("gv")
-    -- giv vim enough time to actually highlight selection
-    vim.defer_fn(function()
-      fn.feedkeys(":DB! " .. line)
-    end, 50)
-  end, 50)
+function l.select_db(line)
+    b.db = api.nvim_eval(line)
+    b.db_selected = line
+    vim.schedule(function()
+      fn['db#adapter#ssh#create_tunnel'](b.db)
+    end)
 end
 
 -- FZFLuaSink is workaround to use lua functions as a sink, have no better idea
@@ -225,8 +225,6 @@ function l.process_params(params, preview)
 
     if preview == true then
         return (g.fzf_preview or '') .. ' ' .. params
-    -- elseif type(preview) == 'function' then
-    --     return preview(g.fzf_preview or '') .. ' ' .. params
     else
         return params
     end
