@@ -31,6 +31,7 @@
     au = "update-index --assume-unchanged" #  assume unchanged
     nau = "update-index --no-assume-unchanged" #  no assume unchanged
     sau = "!git ls-files -v | grep '^[a-z]' | cut -f2 -d' '" # show assumed unchanged
+    ignored = "!git ls-files -v | grep '^[a-z]'" # show assumed unchanged
     pushup = "!. ~/.githelpers && git_push_upstream"
     diff-export = "!. ~/.githelpers && git_diff_export"
     push-with-tags = "!git push && git push --tags"
