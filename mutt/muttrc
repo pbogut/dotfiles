@@ -134,9 +134,9 @@ virtual-mailboxes \
     "   ├ Locals"         "notmuch://?query=tag:newsletter and tag:locals"                                                 \
     "   └ Politics"       "notmuch://?query=tag:newsletter and tag:politics"                                               \
     "Everything"          "notmuch://?query=not tag:spam"                                                                  \
-    " ├  `date +'%Y'`"     "notmuch://?query=date:`date +'%Y'` and not tag:spam"                                          \
-    " ├  `expr $(date +'%Y') - 1`"   "notmuch://?query=date:`expr $(date +'%Y') - 1` and not tag:spam"                    \
-    " ├  `expr $(date +'%Y') - 2`.." "notmuch://?query=date:..`expr $(date +'%Y') - 2` and not tag:spam"                  \
+    " ├  Last 3 months"  "notmuch://?query=date:`date --date="3 months ago" '+%Y-%m-%d'`.. and not tag:spam"              \
+    " ├  Last 6 months"  "notmuch://?query=date:`date --date="6 months ago" '+%Y-%m-%d'`.. and not tag:spam"              \
+    " ├  Last year"      "notmuch://?query=date:`date --date="12 months ago" '+%Y-%m-%d'`.. and not tag:spam"             \
     " ├  Flagged"        "notmuch://?query=tag:flagged and not tag:spam"                                                  \
     " ├  trash"          "notmuch://?query=tag:trash and not tag:spam"                                                    \
     " └ ﯍ spam"           "notmuch://?query=tag:spam" \
@@ -146,7 +146,7 @@ virtual-mailboxes \
 # quick jump between boxes
 macro index gi "<change-vfolder>  Inbox<enter>" "Go to Inbox"
 macro index gu "<change-vfolder>  Unread<enter>" "Go to Unread"
-macro index ga "<change-vfolder>  ├  `date +'%Y'`<enter>" "Go to Archive"
+macro index ga "<change-vfolder>  ├  Last 3 months<enter>" "Go to Archive"
 macro index gs "<change-vfolder>  Sent<enter>" "Go to Sent Mail"
 macro index gS "<change-vfolder>  ↳ all sent<enter>" "Go to Sent Mail"
 macro index gd "<change-vfolder> Drafts<enter>" "Go to Drafts"
