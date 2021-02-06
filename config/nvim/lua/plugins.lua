@@ -75,7 +75,8 @@ return require('packer').startup({
     use {'junegunn/fzf' , config = 'require "plugins.fzf"'}
     use {'junegunn/fzf.vim', after = 'fzf'}
     use {'pbogut/fzf-mru.vim', after = 'fzf.vim'}
-    use {'tpope/vim-dadbod', fn = 'db#url_complete', cmd = 'DB'}
+    use {'tpope/vim-dadbod', fn = 'db#url_complete', cmd = 'DB',
+                             config = 'require "plugins.vim_dadbod"'}
     use {'pbogut/vim-dadbod-ssh', after = 'vim-dadbod'}
     use {'frankier/neovim-colors-solarized-truecolor-only'}
     use {'sheerun/vim-polyglot', setup = 'require "plugins.polyglot"'}

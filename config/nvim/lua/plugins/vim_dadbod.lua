@@ -66,6 +66,14 @@ end
 u.augroup('x_dadbod', {
   BufEnter = {
     {'*.dbout', function()
+        -- fix line breaks in result
+        cmd([[set modifiable]])
+        cmd([[silent! %s/^\n/ /]])          --empty lines
+        cmd([[silent! %s/[^\|\+]\zs\n/ /]]) --lines not ending with table
+        cmd([[w!]])
+        cmd([[set nomodifiable]])
+        cmd([[wincmd L]])
+        b.modifiable = false
         -- alternate file override for dbout && sql file
         u.buf_map(0, 'n', '<space>ta', function()
           local dbout = vim.fn.expand('%')
