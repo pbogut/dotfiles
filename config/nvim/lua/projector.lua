@@ -1,10 +1,10 @@
--- projector module -- its like... projectionist I guess
---
--- handles themplates and alternate files based on some patterns
--- unlike projectionist it uses full patternmatching (lua one) so you have
--- more freedom in configuration
--- alternate file uses fzf if more then one candidate returned
--- templates can be ultisnip snippets or files with placeholders
+--[[ projector module -- its like... projectionist I guess ]]
+
+--[[ handles themplates and alternate files based on some patterns
+     unlike projectionist it uses full patternmatching (lua one) so you have
+     more freedom in configuration
+     alternate file uses fzf if more then one candidate returned
+     templates can be ultisnip snippets or files with placeholders ]]
 
 local u = require('utils')
 local ph = require('template.placeholders')
@@ -18,79 +18,16 @@ local cmd = vim.cmd
 local a = {}
 local l = {}
 
-u.map('n', '<space>ta', ':lua require"alternate".go_alternate()<cr>', { silent = true })
-
-u.augroup('x_templates', {
-    BufNewFile = {
-      {'*', function()
-          -- initially ft is not available and ultisnip is not working correctly
-          -- so we deffer to next loop when ft is set properly
-          vim.schedule(function()
-            cmd('silent! lua require"alternate".do_template()')
-          end)
-      end},
-    },
-})
-
 -- how many lines from botton and top to search for alternate annotation
 local search_lines = 10
-local fallback = ':A'
 local templates_path = os.getenv('HOME') .. '/.config/nvim/templates'
-
-local configuration = {
-  -- magento2 project
-  ["composer.json&bin/magento"] = {
-    order = 100,
-    patterns = {
-      ['.*/web/templates?/.*/[^/]*%.html$'] = {
-        alternate = function(relative, _)
-          local glob = relative:gsub('(.*)/web/templates?/.*/(.-)%.html', '%1/web/%*%*/%2.js')
-          return u.glob(glob)
-        end
-      },
-      ['.*/web/js/.*/[^/]*%.js$'] = {
-        alternate = function(relative, _)
-          local glob = relative:gsub('(.*)/web/js/.*/(.-)%.js', '%1/web/%*%*/%2.html')
-          return u.glob(glob)
-        end
-      },
-      ['app/code/.*/etc/.*/?di.xml'] = {
-        template = "_magento2_di",
-        order = 100,
-      },
-      ['app/code/.*/registration.php'] = {
-        template = "_magento2_registration",
-        order = 100,
-      },
-      ['.*%.php'] = {
-        template = "_magento2_class",
-        order = 1000,
-      },
-    }
-  },
-  -- match anything
-  ["*"] = {
-    order = 5000,
-    patterns = {
-      ['.*%.php'] = {
-        template = "file.php",
-        order = 5000,
-      },
-      ['.*'] = {
-        template = "_skel",
-        order = 5000,
-      },
-    }
-  }
-}
+local configuration = require('plugins.projector')
 
 function a.ultisnip_template(name)
   cmd("normal! i_t" .. name .. t'<c-r>=UltiSnips#ExpandSnippet()<cr>')
-
   if not g.ulti_expand_res or g.ulti_expand_res == 0 then
     cmd("silent! undo")
   end
-
   return g.ulti_expand_res and g.ulti_expand_res ~= 0
 end
 
@@ -100,27 +37,54 @@ function a.file_template(name)
     a.process_placeholders()
 end
 
+function a.template_from_cmd(args)
+  args = u.split_string(args, ' ')
+  if args[1] then
+    cmd('set ft=' .. args[1])
+  end
+  local name = '_skel'
+  if args[2] then
+    name = args[2]
+  end
+
+  if name and name:match('^_') then
+    a.ultisnip_template(name)
+  elseif name then
+    a.file_template(name)
+  else
+    a.do_template()
+  end
+end
+
 -- create template
 function a.do_template()
+  -- Abort on non-empty buffer or extant file
+  if fn.line('$') ~= 1 or fn.getline('$') ~= '' then
+    print("You can use template only in empty file.")
+    return
+  end
+
   local cwd = fn.getcwd()
   local filename = fn.expand('%:p')
   local relative = filename:gsub('^' .. cwd .. '/', '')
-  local file_config = l.get_file_config(cwd, relative)
+  local file_configs = l.get_file_configs(cwd, relative)
 
-  if type(file_config.template) == 'string' and file_config.template:match('^%_') then
-    a.ultisnip_template(file_config.template)
-  elseif type(file_config.template) == 'string' then
-    a.file_template(file_config.template)
+  for _, config in u.spairs(file_configs, l.sort) do
+    if type(config.template) == 'string' and config.template:match('^%_') then
+      return a.ultisnip_template(config.template)
+    elseif type(config.template) == 'string' then
+      return a.file_template(config.template)
+    end
   end
 end
 
 function a.process_placeholders()
-  local placeholders = a.collect_placeholders()
+  local placeholders = l.collect_placeholders()
   local result = {}
   for name, config in pairs(placeholders) do
     result[name] = config.value()
   end
-  a.replace_placeholders(result)
+  l.replace_placeholders(result)
   if result['_'] then
     local pos = fn.searchpos('\\[\\[coursor_position\\]\\]', 'n')
     cmd([[silent! %s/\[\[coursor_position\]\]//g]])
@@ -130,65 +94,82 @@ function a.process_placeholders()
   end
 end
 
-function a.replace_placeholders(placeholders)
-  for placeholder, value in pairs(placeholders) do
-    print('%s/' .. placeholder .. '/' .. value .. '/g')
-    cmd([[silent! %s/\[\[]] .. placeholder .. [[\]\]/]] .. fn.escape(value, '/\\') .. '/g')
-  end
-end
-
-function a.load_placeholder(placeholder)
-  if  ph[placeholder] then
-    return ph[placeholder]
-  end
-
-  -- placeholder module
-  local is_module, ph_module = pcall(require, 'template.placeholder.' .. placeholder)
-  if is_module then
-    return ph_module
-  end
-
-    -- placeholder collection module
-  if placeholder:match('%.') then
-    local fun = placeholder:gsub('.*%.(.-)$', '%1')
-    local file = placeholder:gsub('(.*)%..-$', '%1')
-
-    is_module, ph_module = pcall(require, 'template.placeholder.' .. file)
-    if is_module and ph_module[fun] then
-      return ph_module[fun]
-    end
-  end
-end
-function a.collect_placeholders()
-  local result = {}
-  for _, line in ipairs(fn.getline(1, fn.line('$'))) do
-    for placeholder in line:gmatch('%[%[(.-)%]%]') do
-      if not result[placeholder] then
-        local ph_cfg = a.load_placeholder(placeholder)
-        if ph_cfg then
-          result[placeholder] = ph_cfg
-        end
-      end
-    end
-  end
-  return result
-end
-
 -- member functions
 function a.go_alternate()
   local cwd = fn.getcwd()
+  local filename = fn.expand('%:p')
+  local relative = filename:gsub('^' .. cwd .. '/', '')
+  local file_configs = l.get_file_configs(cwd, relative)
+  local result = {}
 
-  for project_pattern, project_config in pairs(configuration) do
-    if l.check_project(cwd, project_pattern) and l.handle_project(project_config)then
-      return true
+  for _, cfg in u.spairs(file_configs) do
+    if type(cfg.alternate) == 'string' then
+      local file, _ = relative:gsub(cfg.pattern, cfg.alternate)
+      result[#result+1] = file
+    elseif type(cfg.alternate) == 'table' then
+      for _, alternate_item in ipairs(cfg.alternate) do
+        local file, _ = relative:gsub(cfg.pattern, alternate_item)
+        result[#result+1] = file
+      end
+    elseif type(cfg.alternate) == 'function' then
+      result = u.merge_tables(result, cfg.alternate(relative, {file = filename, dir = cwd}))
     end
   end
 
-  local res, _ = pcall(cmd,fallback)
-  if not res then
-    cmd([[echo "No alternate file found."]])
+  -- only existing files if any --
+  local existing = {}
+  for _, file in ipairs(result) do
+    if fn.filereadable(file) > 0 then
+      existing[#existing+1] = file
+    end
   end
-  return res
+
+  if #existing > 0 then
+    l.select_alternate(existing)
+  else
+    l.select_alternate(result)
+  end
+end
+
+function l.select_alternate(files)
+  if #files == 1 then
+    cmd('e ' .. files[1])
+    return true
+  elseif #files > 1 then
+    l.ask(files)
+    return true
+  end
+end
+
+function a.find_alternate()
+  local start_line = 1
+  local end_line = fn.line('$')
+  local lines = math.max(end_line, search_lines)
+
+  local alternate_mark = '.- alternate: (.*)'
+
+  for i = start_line, lines, 1 do
+    local line = fn.getline(i)
+    if line:match(alternate_mark) then
+      local result, _ = line:gsub(alternate_mark, '%1')
+      return ">>>" .. result
+    end
+  end
+  for i = end_line, lines, -1 do
+    local line = fn.getline(i)
+    if line:match(alternate_mark) then
+      local result, _ = line:gsub(alternate_mark, '%1')
+      return ">>>" .. result
+    end
+  end
+
+  if b.db_input then
+    return b.db_input
+  end
+
+  if b.alternate_from then
+    return b.alternate_from
+  end
 end
 
 -- local functions
@@ -201,7 +182,20 @@ function l.ask(list)
   fn['fzf#run'](fn['fzf#wrap'](options))
 end
 
-function l.get_project_config(cwd)
+function l.get_project_type(cwd)
+  local result = {}
+  for project_pattern, project_config in u.spairs(configuration, l.sort) do
+    if l.check_project(cwd, project_pattern) then
+      if project_config.project_type then
+        result[#result] = project_config.project_type
+      end
+    end
+  end
+
+  return result
+end
+
+function l.get_project_patterns(cwd)
   local result = {}
   for project_pattern, project_config in u.spairs(configuration, l.sort) do
     if l.check_project(cwd, project_pattern) then
@@ -213,15 +207,16 @@ function l.get_project_config(cwd)
   return result
 end
 
-function l.get_file_config(cwd, relative)
-  local project_config = l.get_project_config(cwd)
+function l.get_file_configs(cwd, relative)
+  local project_config = l.get_project_patterns(cwd)
   local result = {}
   for file_pattern, file_config in u.spairs(project_config, l.sort) do
     -- let match many file patterns, or should we - first come first win even without alternate file?
     if l.check_file(relative, file_pattern) then
-      -- first on the list has priority, we can fall down with something
-      -- like *.js at the end
-      result = u.merge_tables(file_config, result)
+      -- assign pattern as we dont pass key otherwise
+      file_config.pattern = file_pattern
+      -- collect all matching ones into list
+      result[#result+1] = file_config
     end
   end
 
@@ -256,10 +251,14 @@ function l.check_project(path, pattern)
     return check
   end
 
+  local check_fn = fn.filereadable
+  if pattern:match('%/$') then
+    check_fn = fn.isdirectory
+  end
   if pattern:match('^%!') then
-    return fn.filereadable(path .. '/' .. pattern:gsub('^%!', '')) == 0
+    return check_fn(path .. '/' .. pattern:gsub('^%!', '')) == 0
   else
-    return fn.filereadable(path .. '/' .. pattern) > 0
+    return check_fn(path .. '/' .. pattern) > 0
   end
 end
 
@@ -267,51 +266,60 @@ function l.check_file(relative, pattern)
   return relative:match(pattern)
 end
 
-function l.handle_alternate(config)
-  local cwd = fn.getcwd()
-  local filename = fn.expand('%:p')
-  local relative = filename:gsub('^' .. cwd .. '/', '')
-  local result = config.alternate(relative, {file = filename, dir = cwd})
-
-  if not config.alternate then
-    result = {}
+function l.replace_placeholders(placeholders)
+  for placeholder, value in pairs(placeholders) do
+    print('%s/' .. placeholder .. '/' .. value .. '/g')
+    cmd([[silent! %s/\[\[]] .. placeholder .. [[\]\]/]] .. fn.escape(value, '/\\') .. '/g')
   end
-
-  if #result == 1 then
-    cmd('e ' .. result[1])
-    return true
-  elseif #result > 1 then
-    l.ask(result)
-    return true
-  end
-
-  return false
 end
 
-function l.handle_project(project_patterns)
-  local cwd = fn.getcwd()
-  local filename = fn.expand('%:p')
-  local relative = filename:gsub('^' .. cwd .. '/', '')
-
-  for file_pattern, file_config in pairs(project_patterns) do
-    -- let match many file patterns, or should we - first come first win even without alternate file?
-    if l.check_file(relative, file_pattern) and l.handle_alternate(file_config) then
-      return true
-    end
+function l.load_placeholder(placeholder)
+  if  ph[placeholder] then
+    return ph[placeholder]
   end
 
-  return false
+  -- placeholder module
+  local is_module, ph_module = pcall(require, 'template.placeholder.' .. placeholder)
+  if is_module then
+    return ph_module
+  end
+
+    -- placeholder collection module
+  if placeholder:match('%.') then
+    local fun = placeholder:gsub('.*%.(.-)$', '%1')
+    local file = placeholder:gsub('(.*)%..-$', '%1')
+
+    is_module, ph_module = pcall(require, 'template.placeholder.' .. file)
+    if is_module and ph_module[fun] then
+      return ph_module[fun]
+    end
+  end
+end
+
+function l.collect_placeholders()
+  local result = {}
+  for _, line in ipairs(fn.getline(1, fn.line('$'))) do
+    for placeholder in line:gmatch('%[%[(.-)%]%]') do
+      if not result[placeholder] then
+        local ph_cfg = l.load_placeholder(placeholder)
+        if ph_cfg then
+          result[placeholder] = ph_cfg
+        end
+      end
+    end
+  end
+  return result
 end
 
 -- ascending with nil's at the end
 function l.sort(tab, key1, key2)
-  if not tab[key1].order then
+  if not tab[key1].priority then
     return false
   end
-  if not tab[key2].order then
+  if not tab[key2].priority then
     return true
   end
-  return tab[key1].order < tab[key2].order
+  return tab[key1].priority < tab[key2].priority
 end
 
 return a

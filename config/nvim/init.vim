@@ -43,6 +43,9 @@ source ~/.config/nvim/config/replacewithregister.vim
 let g:bookmark_save_per_working_dir = 1
 
 lua require('plugins')
+" local plugins by me
+lua require('projector')
+
 
 doautocmd User after_plug_end
 autocmd! User after_plug_end " clear after_plug_end command list
@@ -277,7 +280,6 @@ function! s:whitespace()
   if !empty(get(b:, 'whitespace_trim_disabled'))
     return
   endif
-
   silent! StripWhitespace
 endfunction
 command! Whitespace call s:whitespace()
