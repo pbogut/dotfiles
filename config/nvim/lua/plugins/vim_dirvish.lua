@@ -1,4 +1,5 @@
 local u = require('utils')
+local t = u.termcodes
 local g = vim.g
 local fn = vim.fn
 local cmd = vim.cmd
@@ -66,7 +67,7 @@ end
 local function dirvish_copy()
   local from = fn.getline('.')
   local extension = fn.substitute(from, [[.*/[^\.]*\(.\{-}\)$]], [[\1]], '')
-  local move_cursor = fn.substitute(extension, '.', [[<left>]], 'g')
+  local move_cursor = fn.substitute(extension, '.', t'<left>', 'g')
   fn.inputsave()
   local to = fn.input('!cp -r ' .. from .. ' -> ', from .. move_cursor, 'file')
   fn.inputrestore()
@@ -82,7 +83,7 @@ end
 local function dirvish_move()
   local from = fn.getline('.')
   local extension = fn.substitute(from, [[.*/\(.\{-}\)$]], [[\1]], '')
-  local move_cursor = fn.substitute(extension, '.', '<left>', 'g')
+  local move_cursor = fn.substitute(extension, '.', t'<left>', 'g')
   fn.inputsave()
   local to = fn.input('!mv ' .. from .. ' -> ', from .. move_cursor, 'file')
   fn.inputrestore()
@@ -103,7 +104,7 @@ local function dirvish_rename()
   local dir_name = fn.substitute(from, [[\(.*/\).\{-}$]], [[\1]], '')
   local file_name = fn.substitute(from, [[.*/\(.\{-}\)$]], [[\1]], '')
   local extension = fn.substitute(from, [[.*/[^\.]*\(.\{-}\)$]], [[\1]], '')
-  local move_cursor = fn.substitute(extension, '.', '<left>', 'g')
+  local move_cursor = fn.substitute(extension, '.', t'<left>', 'g')
   fn.inputsave()
   local to = fn.input('!mv ' .. from .. ' -> ' .. dir_name, file_name .. move_cursor, 'file')
   fn.inputrestore()
