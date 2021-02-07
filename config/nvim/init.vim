@@ -10,13 +10,6 @@ lua require('autogroups')
 augroup configgroup_nvim
   autocmd!
 augroup END
-augroup configgroup
-  autocmd!
-  autocmd BufEnter .i3blocks.conf
-        \ let b:whitespace_trim_disabled = 1
-  autocmd BufWritePost *
-        \  silent! Whitespace
-augroup END
 
 " Plug 'tpope/vim-dadbod'
 autocmd User after_vim_load source ~/.config/nvim/config/dadbod.vimrc

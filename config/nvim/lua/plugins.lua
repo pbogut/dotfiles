@@ -42,7 +42,7 @@ return require('packer').startup({
     use {'vim-airline/vim-airline-themes', after = 'vim-airline'}
     use {'mhinz/vim-signify', config = 'require "plugins.vim_signify"'}
     use {'ludovicchabant/vim-gutentags'}
-    use {'ntpeters/vim-better-whitespace', config = 'vim.g.strip_whitespace_on_save = 0'}
+    use {'ntpeters/vim-better-whitespace', config = 'require "plugins.vim_better_whitespace"'}
     use {'honza/vim-snippets'}
     use {'mattn/emmet-vim', ft = {'php', 'html', 'blade', 'vue'},
                             config = 'require "plugins.emmet_vim"'}

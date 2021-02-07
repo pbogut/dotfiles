@@ -1,5 +1,4 @@
 local u = require('utils')
-local b = vim.b
 local bo = vim.bo
 local wo = vim.wo
 local o = vim.o
