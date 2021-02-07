@@ -97,7 +97,6 @@ return require('packer').startup({
     use {'captbaritone/better-indent-support-for-php-with-html', ft = {'php'}}
     -- use {'MarcWeber/vim-addon-mw-utils'}
     -- use {'joereynolds/gtags-scope'}
-    -- use {'prabirshrestha/async.vim'} -- possibly used by vim-arilines ?
     -- use {'kana/vim-operator-user'}
     -- use {'slashmili/alchemist.vim', ft = {'elixir', 'eelixir'}}
     -- use {'powerman/vim-plugin-AnsiEsc', ft = {'elixir', 'eelixir'}}

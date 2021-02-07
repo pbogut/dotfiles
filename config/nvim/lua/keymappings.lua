@@ -6,6 +6,7 @@ local cmd = vim.cmd
 u.map('n', '<space>em', ':tabnew ~/.vim/macros.vim<cr>')
 u.map('n', '<space>sm', ':source ~/.vim/macros.vim<cr>')
 -- nice to have
+u.map('n', 'R', '^Da')
 u.map('i', '<c-d>', '<del>')
 u.map('c', '<c-d>', '<del>')
 u.map('i', '<m-cr>', '<cr><esc>O')
@@ -18,13 +19,25 @@ u.map('c', [[\\-]], [[\(.\{-}\)]])
 -- command line navigation
 u.map('c', '<m-k>', '<Up>')
 u.map('c', '<m-j>', '<Down>')
+-- remap delete to c-d because on hardware level Im sending del when c-d (ergodox)
+u.map('n', '<del>', '<c-d>', {noremap = false})
 -- prevent pasting in visual from yanking seletion
+u.map('', 'Y', 'y$')
 u.map('s', 'p', '"_dP')
 u.map('v', 'p', '"_dP')
+u.map('n', '<space>', '"*')
+u.map('v', '<space>', '"*')
+-- more natural split (always right/below)
+u.map('n', '<c-w>v', ':rightbelow vsplit<cr>')
+u.map('n', '<c-w>s', ':rightbelow split<cr>')
+u.map('n', '<c-w>V', ':vsplit<cr>')
+u.map('n', '<c-w>S', ':split<cr>')
 -- search helpers
 u.map('n', '<esc>', ':set nohls<cr>')
 u.map('n', '*', ':set hls<cr>*')
 u.map('n', '#', ':set hls<cr>#')
+u.map('n', 'n', ':set hls<cr>n')
+u.map('n', 'N', ':set hls<cr>N')
 -- case insensitive search by default
 u.map('n', '/', ':let @/=""<cr>:set hls<cr>/\\c', {silent = false})
 u.map('n', '?', ':let @/=""<cr>:set hls<cr>?\\c', {silent = false})
@@ -66,7 +79,10 @@ u.map('n', '<space>w', function()
   fn.system('mkdir -p ' .. fn.expand('%:h'))
   cmd('w!')
 end)
-
+-- yank file name
+u.map('n', 'yaf', [[:let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>]])
+u.map('n', 'yif', [[:let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>]])
+u.map('n', 'yrf', [[:let @+=expand('%:.')<bar>echo 'Yanked: '.expand('%:.')<cr>]])
 
 -- quick change and search for next occurrence, change can be repeated
 -- by . N and n will search for the same selection, gn gN will select same

@@ -59,45 +59,8 @@ lua require('keymappings')
 nnoremap <silent> <space>l :call local#togglelist#locationlist()<cr>
 nnoremap <silent> <space>q :call local#togglelist#quickfixlist()<cr>
 
-nnoremap <silent> <space>z za
-nnoremap R ddO
-nnoremap n :set hls<cr>n
-nnoremap N :set hls<cr>N
-" selection mode (for easy snippets parts move)
-" removes selection as block
-smap <c-d> <esc>`<V`>x
-smap <c-c> <esc>`<V`>c
-" removes selection as it is
-smap <c-x> <esc>gvd
-smap <c-s> <esc>gvc
-" append to selection
-smap <c-a> <esc>a
-" nnoremap <silent> <space>z :call PHP__Fold()<cr>
-" vim is getting ^_ when pressing ^/, so I've mapped both
-nmap <C-_> gcc<down>^
-nmap <C-/> gcc<down>^
-vmap <C-_> gc
-vmap <C-/> gc
-" remap delete to c-d because on hardware level Im sending del when c-d (ergodox)
-nmap <silent> <del> <c-d>
 map <silent> <C-w>d :silent! Bdelete<cr>
 map <silent> <C-w>D :silent! Bdelete!<cr>
-" more natural split (always right/below)
-nmap <silent> <c-w>v :rightbelow vsplit<cr>
-nmap <silent> <c-w>s :rightbelow split<cr>
-" just in case I want old behaviour from time to time
-nmap <silent> <c-w>V :vsplit<cr>
-nmap <silent> <c-w>S :split<cr>
-map Y y$
-nnoremap <space> "*
-vnoremap <space> "*
-nmap yaf :let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>
-nmap yif :let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>
-nmap yrf :let @+=expand('%:.')<bar>echo 'Yanked: '.expand('%:.')<cr>
-
-" {{{ fzf
-lua require'plugins.fzf'
-" }}}
 
 ProjectType laravel nnoremap <silent> <space>gf :call local#laravel#file_under_coursor()<cr>
 

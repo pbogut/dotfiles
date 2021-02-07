@@ -1,3 +1,4 @@
+local u = require('utils')
 local g = vim.g
 
 g.neoformat_only_msg_on_error = 1
@@ -8,3 +9,5 @@ g.neoformat_vimwiki_prettier = {
 }
 g.neoformat_disable_on_save = 1
 g.neoformat_enabled_vimwiki = {'prettier'}
+
+u.map('n', '<space>a', ':Neoformat<cr>')
