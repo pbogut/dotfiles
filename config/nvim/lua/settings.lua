@@ -1,3 +1,6 @@
+require('settings.indents')
+require('settings.title')
+
 local cmd = vim.cmd
 local o = vim.o
 local wo = vim.wo
