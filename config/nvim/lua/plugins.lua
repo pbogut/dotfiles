@@ -59,7 +59,10 @@ return require('packer').startup({
     use {'elixir-lang/vim-elixir', ft = {'elixir', 'eelixir'}}
     use {'moll/vim-bbye', cmd = {'Bdelete'}}
     use {'will133/vim-dirdiff', config = 'require "plugins.vim_dirdiff"', cmd = 'DirDiff'}
-    use {'dbakker/vim-projectroot'}
+    use {'dbakker/vim-projectroot', config = [[
+      vim.g.rootmarkers = {'.projectroot', '.git', '.hg', '.svn', '.bzr',
+                           '_darcs', 'build.xml', 'composer.json', 'mix.exs'} ]]
+    }
     use {'AndrewRadev/switch.vim', config = 'require "plugins.switch_vim"'}
     use {'AndrewRadev/splitjoin.vim'}
     use {'AndrewRadev/sideways.vim', config = 'require "plugins.sideways_vim"'}
@@ -69,11 +72,10 @@ return require('packer').startup({
     use {'kristijanhusak/vim-dirvish-git', after = 'vim-dirvish'}
     use {'w0rp/ale'}
     use {'chmp/mdnav', ft = {'md'}}
-    use {'samoshkin/vim-mergetool'}
     use {'vim-scripts/ReplaceWithRegister', config = 'require "plugins.replacewithregister"'}
     use {'kana/vim-textobj-user'}
     use {'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user'}
-    use {'MattesGroeger/vim-bookmarks'}
+    use {'MattesGroeger/vim-bookmarks', config = 'vim.g.bookmark_save_per_working_dir = 1'}
     use {'rrethy/vim-illuminate'}
     use {'junegunn/fzf' , config = 'require "plugins.fzf"'}
     use {'junegunn/fzf.vim', after = 'fzf'}

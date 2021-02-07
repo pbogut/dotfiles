@@ -12,6 +12,7 @@ cmd('set invlist')
 cmd('set fillchars=fold:\\ ,vert:\\│')
 cmd('set shortmess+=c')
 cmd('set runtimepath+=~/.vim')
+cmd('silent! colorscheme solarized')
 
 o.updatetime = 100
 o.signcolumn = 'yes'

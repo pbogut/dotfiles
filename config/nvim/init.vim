@@ -6,29 +6,14 @@ source ~/.config/nvim/config/perproject.vimrc
 " autogroups
 lua require('autogroups')
 
-augroup configgroup_nvim
-  autocmd!
-augroup END
-
 " Plug 'tpope/vim-dadbod'
 autocmd User after_vim_load source ~/.config/nvim/config/dadbod.vimrc
-
-" Plug 'dbakker/vim-projectroot'
-let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
-      \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
-" Plug 'godlygeek/tabular'
-command! -nargs=* -range T Tabularize <args>
 " Plug 'w0rp/ale'
 autocmd User after_plug_end source ~/.config/nvim/config/ale.vimrc
-" Plug 'samoshkin/vim-mergetool'
-source ~/.config/nvim/config/vim-mergetool.vim
-" Plug 'MattesGroeger/vim-bookmarks'
-let g:bookmark_save_per_working_dir = 1
 
 lua require('plugins')
 " local plugins by me
 lua require('projector')
-
 
 doautocmd User after_plug_end
 autocmd! User after_plug_end " clear after_plug_end command list
@@ -40,16 +25,7 @@ augroup after_load
         \| autocmd! User after_vim_load " clear after_plug_end command list
 augroup END
 
-silent! colorscheme solarized
-"
-source ~/.config/nvim/config/autopairs.vimrc
 source ~/.config/nvim/config/terminal.vimrc
-
-" nicer vertical split
-hi VertSplit guibg=#073642 guifg=fg
-
-" dont mess with me!
-let g:no_plugin_maps = 1
 
 lua require('keymappings')
 
@@ -67,10 +43,6 @@ nnoremap <silent> <space>op :let g:pwd = projectroot#guess() \| belowright 20spl
 
 noremap <space>sc :execute(':rightbelow 10split \| te scspell %')<cr>
 
-" emmet quick shortcut
-imap <M-Tab> <c-y>,
-imap <M-n> <c-y>n
-imap <M-N> <c-y>N
 " ripgrep
 nmap <silent> gr :set opfunc=<sid>ripgrep_from_motion<CR>g@
 function! s:ripgrep_from_motion(type, ...)

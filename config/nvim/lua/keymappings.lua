@@ -1,6 +1,10 @@
 local u = require('utils')
+local g = vim.g
 local fn = vim.fn
 local cmd = vim.cmd
+
+-- dont mess with me!
+g.no_plugin_maps = 1
 
 -- macros helper (more like scratch pad)
 u.map('n', '<space>em', ':tabnew ~/.vim/macros.vim<cr>')
@@ -13,6 +17,10 @@ u.map('i', '<m-cr>', '<cr><esc>O')
 u.map('n', '<space><cr>', 'za')
 u.map('v', '<space><cr>', 'zf')
 u.map('n', '<space>tw', ':lua vim.wo.wrap = not vim.wo.wrap<cr>')
+-- vim replacement
+u.map('i', '(<cr>', '(<cr>)<esc>O')
+u.map('i', '{<cr>', '{<cr>}<esc>O')
+u.map('i', '[<cr>', '[<cr>]<esc>O')
 -- regex helpers
 u.map('c', [[\\*]], [[\(.*\)]])
 u.map('c', [[\\-]], [[\(.\{-}\)]])
