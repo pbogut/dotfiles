@@ -26,8 +26,6 @@ let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
       \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
 " Plug 'godlygeek/tabular'
 command! -nargs=* -range T Tabularize <args>
-" Plug 'kristijanhusak/vim-dirvish-git'
-source ~/.config/nvim/config/dirvish.vimrc
 " Plug 'w0rp/ale'
 autocmd User after_plug_end source ~/.config/nvim/config/ale.vimrc
 " Plug 'samoshkin/vim-mergetool'
@@ -69,11 +67,7 @@ lua require('keymappings')
 nnoremap <silent> <space>l :call local#togglelist#locationlist()<cr>
 nnoremap <silent> <space>q :call local#togglelist#quickfixlist()<cr>
 
-nnoremap <silent> \won <Plug>(dirvish_up)
-nnoremap <silent> <bs> :Dirvish %:p:h<cr>
-nnoremap <silent> _ :Dirvish %:p:h<cr>
 nnoremap <silent> <space>w :W!<cr>
-nnoremap <silent> <space>a :Format<cr>
 nnoremap <silent> <space>z za
 nnoremap R ddO
 nnoremap n :set hls<cr>n
