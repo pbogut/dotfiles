@@ -22,8 +22,6 @@ command! -nargs=* -range T Tabularize <args>
 autocmd User after_plug_end source ~/.config/nvim/config/ale.vimrc
 " Plug 'samoshkin/vim-mergetool'
 source ~/.config/nvim/config/vim-mergetool.vim
-" Plug 'vim-scripts/ReplaceWithRegister'
-source ~/.config/nvim/config/replacewithregister.vim
 " Plug 'MattesGroeger/vim-bookmarks'
 let g:bookmark_save_per_working_dir = 1
 

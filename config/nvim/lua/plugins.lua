@@ -70,7 +70,7 @@ return require('packer').startup({
     use {'w0rp/ale'}
     use {'chmp/mdnav', ft = {'md'}}
     use {'samoshkin/vim-mergetool'}
-    use {'vim-scripts/ReplaceWithRegister'}
+    use {'vim-scripts/ReplaceWithRegister', config = 'require "plugins.replacewithregister"'}
     use {'kana/vim-textobj-user'}
     use {'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user'}
     use {'MattesGroeger/vim-bookmarks'}
