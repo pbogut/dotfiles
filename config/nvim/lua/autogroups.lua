@@ -8,8 +8,21 @@ local fn = vim.fn
 
 local config_group = {
   -- fix terminal display
+  VimEnter = {
+    {
+      '*',
+      function()
+        -- highlights
+        u.highlights({
+          Folded = { term = 'NONE', cterm = 'NONE',  gui = 'NONE' }
+        })
+      end
+    },
+  },
   TermOpen = {
-    {'*', function()
+    {
+      '*',
+      function()
         wo.number = false
         wo.relativenumber = false
         wo.signcolumn = "no"
@@ -23,7 +36,7 @@ local config_group = {
             o.laststatus = 2
             o.showmode = true
           end},
-            BufEnter = {'<buffer>', function()
+          BufEnter = {'<buffer>', function()
             o.laststatus = 0
             o.showmode = false
           end},
@@ -33,45 +46,57 @@ local config_group = {
         -- " \  :exec('silent! normal! <c-\><c-n>a')
         -- " \| :startinsert
       end
-    }
+    },
   },
   ['WinEnter,BufEnter'] = {
-    {'*', function()
-       fn.matchadd('Todo', '@todo\\>')
-       fn.matchadd('Todo', '@fixme\\>')
-       fn.matchadd('Error', '@debug\\>')
-     end
+    {
+      '*',
+      function()
+        fn.matchadd('Todo', '@todo\\>')
+        fn.matchadd('Todo', '@fixme\\>')
+        fn.matchadd('Error', '@debug\\>')
+      end
     },
   },
   FileType = {
-    {'html,css,scss,xml,java,elixir,eelixir,c,php,php.phtml,sql,blade,elm',
-     function()
-       u.set_indent(4)
-     end
+    {
+      'html,css,scss,xml,java,elixir,eelixir,c,php,php.phtml,sql,blade,elm',
+      function()
+        u.set_indent(4)
+      end
     },
-    {'sh,vue,javascript,vim,lua,yaml,yaml.docker-compose,ruby',
-     function()
-       u.set_indent(2)
-     end
+    {
+      'sh,vue,javascript,vim,lua,yaml,yaml.docker-compose,ruby',
+      function()
+        u.set_indent(2)
+      end
     },
-    {'mail', [[
-       setlocal spell spelllang=en_gb
-       setlocal textwidth=72
-       execute('normal gg')
-       call search('^$')
-     ]]
+    {
+      'mail',
+      [[
+        setlocal spell spelllang=en_gb
+        setlocal textwidth=72
+        execute('normal gg')
+        call search('^$')
+      ]]
     },
-    {'go', function()
-       u.set_indent(2, true)
-     end
+    {
+      'go',
+      function()
+        u.set_indent(2, true)
+      end
     },
-    {'php', function()
-       bo.iskeyword = '@,48-57,_,192-255,$'
-     end
+    {
+      'php',
+      function()
+        bo.iskeyword = '@,48-57,_,192-255,$'
+      end
     },
-    {'markdown', function()
-       cmd('setlocal spell spelllang=en_gb')
-     end
+    {
+      'markdown',
+      function()
+        cmd('setlocal spell spelllang=en_gb')
+      end
     },
   }
 }

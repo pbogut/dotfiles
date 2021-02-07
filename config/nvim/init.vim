@@ -220,11 +220,6 @@ function! CreateFoldersAndWrite(bang)
 endfunction
 " disable double save (cousing file watchers issues)
 
-
-" fold adjust
-" remove underline
-hi Folded term=NONE cterm=NONE gui=NONE
-
 augroup set_title_group
   autocmd!
   autocmd BufEnter * call s:set_title_string()
@@ -242,39 +237,6 @@ function! s:set_title_string()
 endfunction
 let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, $TMPDIR . '/nvim\(.*\)\/0$', '\1', 'g') . ":" . substitute(getcwd(),$HOME,'~', 'g')
 set title
-
-function! s:set_indent(width, ...) " width:int, hardtab:bool, init:bool
-  if filereadable('.editorconfig')
-    return
-  endif
-  let l:rootmakers = g:rootmarkers
-  call add(g:rootmarkers, '.editorconfig')
-  let l:root = projectroot#guess()
-  let g:rootmarkers = l:rootmakers
-  if filereadable(l:root . '/.editorconfig')
-    return
-  endif
-  let l:hardtab = get(a:000, 0, v:false)
-  let l:init = get(a:000, 1, v:false)
-
-  if l:init && get(b:, 'Set_indent_inited', v:false) " init only once
-    return
-  elseif l:init
-    let b:Set_indent_inited = v:true
-  endif
-
-  " show existing tab with spaces
-  let &tabstop = a:width
-  " when indenting with '>', use 2 spaces width
-  let &shiftwidth = a:width
-  " On pressing tab, insert 2 spaces
-  if empty(l:hardtab)
-    set expandtab
-  else
-    set noexpandtab
-  end
-endfunction
-command! -bang -nargs=1 SetIndentWidth call s:set_indent(<args>, <bang>0)
 
 function! s:whitespace()
   if !empty(get(b:, 'whitespace_trim_disabled'))
