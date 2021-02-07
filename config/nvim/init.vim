@@ -67,7 +67,6 @@ lua require('keymappings')
 nnoremap <silent> <space>l :call local#togglelist#locationlist()<cr>
 nnoremap <silent> <space>q :call local#togglelist#quickfixlist()<cr>
 
-nnoremap <silent> <space>w :W!<cr>
 nnoremap <silent> <space>z za
 nnoremap R ddO
 nnoremap n :set hls<cr>n
@@ -180,57 +179,3 @@ endfunction
 command! Gap call s:gap()
 
 let g:paranoic_backup_dir="~/.vim/backupfiles/"
-
-command! -bang W :call CreateFoldersAndWrite(<bang>0)
-function! CreateFoldersAndWrite(bang)
-  let l:one = expand('%:p')
-  let l:two = substitute(l:one, '^[A-Za-z]*', '', '')
-  if l:one != l:two
-    echo "Sorry but buffer is not a real file"
-    return
-  endif
-  silent execute('!mkdir -p %:h')
-  try
-    if (a:bang)
-      execute(':w!')
-    else
-      execute(':w')
-    endif
-  catch "E166: Can't open linked file for writing"
-    redraw!
-    let sudo_write = confirm(
-          \ "Can't open linked file for writing, should I try SudoWrite?",
-          \ "&Yes\n&No", 2)
-    " call inputrestore()
-    if sudo_write == 1
-      SudoWrite
-    endif
-  endtry
-endfunction
-" disable double save (cousing file watchers issues)
-
-augroup set_title_group
-  autocmd!
-  autocmd BufEnter * call s:set_title_string()
-augroup END
-function! s:set_title_string()
-  let file = expand('%:~')
-  if file == ""
-    let file = substitute(getcwd(),$HOME,'~', 'g')
-  endif
-  if empty($SSH_CLIENT) && empty($SSH_TTY)
-    let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, $TMPDIR . '/nvim\(.*\)\/0$', '\1', 'g') . ":" . l:file
-  else
-    let &titlestring = $USER . '@' . hostname() . ":nvim:" . l:file
-  endif
-endfunction
-let &titlestring = $USER . '@' . hostname() . ":nvim:" . substitute($NVIM_LISTEN_ADDRESS, $TMPDIR . '/nvim\(.*\)\/0$', '\1', 'g') . ":" . substitute(getcwd(),$HOME,'~', 'g')
-set title
-
-function! s:whitespace()
-  if !empty(get(b:, 'whitespace_trim_disabled'))
-    return
-  endif
-  silent! StripWhitespace
-endfunction
-command! Whitespace call s:whitespace()

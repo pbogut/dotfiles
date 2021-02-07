@@ -1,4 +1,6 @@
 local u = require('utils')
+local fn = vim.fn
+local cmd = vim.cmd
 
 -- macros helper (more like scratch pad)
 u.map('n', '<space>em', ':tabnew ~/.vim/macros.vim<cr>')
@@ -59,6 +61,11 @@ u.map('t', '<c-q>', [[<C-\><C-n>]])
 u.map('n', 'du', ':diffupdate<cr>') -- @todo check if should be silent?
 u.map('n', 'dp', ':diffput<cr>')
 u.map('n', 'dg', ':diffget<cr>')
+-- create parent dir while saving file
+u.map('n', '<space>w', function()
+  fn.system('mkdir -p ' .. fn.expand('%:h'))
+  cmd('w!')
+end)
 
 
 -- quick change and search for next occurrence, change can be repeated
