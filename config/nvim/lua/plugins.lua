@@ -49,8 +49,11 @@ return require('packer').startup({
     use {'sirver/ultisnips', config = 'require "plugins.ultisnips"'}
     use {'sbdchd/neoformat', config = 'require "plugins.neoformat"', cmd = 'Neoformat'}
     use {'k-takata/matchit.vim'}
-    use {'vim-test/vim-test', cmd = {'TestNearest', 'TestFile', 'TestSuite',
-                                     'TestLast', 'TestLast', 'TestVisit'}}
+    use {'vim-test/vim-test',
+      config = 'require "plugins.vim_test".config()',
+      setup = 'require "plugins.vim_test".setup()',
+      cmd = {'TestNearest', 'TestFile', 'TestSuite', 'TestLast', 'TestLast', 'TestVisit'},
+    }
     use {'elmcast/elm-vim', ft = {'elm'}}
     use {'pbogut/vim-elmper', ft = {'elm'}}
     use {'elixir-lang/vim-elixir', ft = {'elixir', 'eelixir'}}

@@ -21,11 +21,6 @@ augroup END
 " Plug 'tpope/vim-dadbod'
 autocmd User after_vim_load source ~/.config/nvim/config/dadbod.vimrc
 
-" Plug 'janko-m/vim-test'
-source ~/.config/nvim/config/test.vim
-" Plug 'elmcast/elm-vim', { 'for': 'elm' }
-" Plug 'pbogut/vim-elmper', { 'for': 'elm' }
-let g:elm_format_autosave = 0
 " Plug 'dbakker/vim-projectroot'
 let g:rootmarkers = ['.projectroot', '.git', '.hg', '.svn', '.bzr',
       \ '_darcs', 'build.xml', 'composer.json', 'mix.exs']
