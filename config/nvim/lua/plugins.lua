@@ -1,4 +1,4 @@
-local U = require('utils')
+local u = require('utils')
 local execute = vim.api.nvim_command
 local fn = vim.fn
 local cmd = vim.cmd
@@ -12,7 +12,7 @@ end
 execute 'packadd packer.nvim'
 
 -- reload and recompile this file (plugins.lua) after change
-U.augroup('x_plugins_save', {BufWritePost = {'plugins.lua', function()
+u.augroup('x_plugins_save', {BufWritePost = {'plugins.lua', function()
   cmd('luafile ' .. os.getenv("HOME") .. '/.config/nvim/lua/plugins.lua')
   cmd('PackerClean')
   cmd('PackerInstall')
@@ -72,7 +72,7 @@ return require('packer').startup({
     use {'Shougo/echodoc.vim'}
     use {'justinmk/vim-dirvish', config = 'require "plugins.vim_dirvish"'}
     use {'kristijanhusak/vim-dirvish-git', after = 'vim-dirvish'}
-    use {'w0rp/ale'}
+    use {'w0rp/ale', config = 'require "plugins.ale"'}
     use {'chmp/mdnav', ft = {'markdown'}}
     use {'vim-scripts/ReplaceWithRegister', config = 'require "plugins.replacewithregister"'}
     use {'kana/vim-textobj-user'}

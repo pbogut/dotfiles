@@ -8,8 +8,6 @@ lua require('autogroups')
 
 " Plug 'tpope/vim-dadbod'
 autocmd User after_vim_load source ~/.config/nvim/config/dadbod.vimrc
-" Plug 'w0rp/ale'
-autocmd User after_plug_end source ~/.config/nvim/config/ale.vimrc
 
 lua require('plugins')
 " local plugins by me
