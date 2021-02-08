@@ -20,18 +20,6 @@ function! s:sink(cmd, winnr, c, lines, stream)
   endif
 endfunction
 
-function! local#laravel#file_under_coursor() abort
-  let file = local#fzf#get_file_under_coursor()
-  let vague_file = local#fzf#get_vague_file_under_coursor()
-  let template_file = "'resources/views/" . substitute(file, '\.', '/', 'g') . '.blade.php'
-
-  let search = template_file . ' | ' . vague_file
-  if (getline(line('.')) =~ 'view(.' . file)
-    let search = template_file
-  endif
-  call local#fzf#files(search)
-endfunction
-
 function! local#laravel#run(bang, command)
   let root = projectroot#guess()
   let artisan = get(b:, 'laravel_artisan_command', 'php {}/artisan')

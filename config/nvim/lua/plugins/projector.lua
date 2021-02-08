@@ -163,7 +163,17 @@ return {
   },
   -- laravel project
   ["artisan&composer.json"] = {
-    project_type = 'laravel',
+    project_init = function()
+      u.map('n', '<space>gf', function()
+        local file = u.string_under_coursor() or ''
+        local template = 'resources/views/' .. file:gsub('%.', '%/') .. '.blade.php'
+        if vim.fn.filereadable(template) > 0 then
+          cmd('e ' .. template)
+        else
+          require('plugins.fzf').file_under_coursor()
+        end
+      end)
+    end,
     priority = 100,
     patterns = {
       ['app/(.*)%.php'] = {

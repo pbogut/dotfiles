@@ -182,17 +182,15 @@ function l.ask(list)
   fn['fzf#run'](fn['fzf#wrap'](options))
 end
 
-function l.get_project_type(cwd)
-  local result = {}
+function l.init_project()
+  local cwd = fn.getcwd()
   for project_pattern, project_config in u.spairs(configuration, l.sort) do
     if l.check_project(cwd, project_pattern) then
-      if project_config.project_type then
-        result[#result] = project_config.project_type
+      if type(project_config.project_init) == 'function' then
+        return project_config.project_init()
       end
     end
   end
-
-  return result
 end
 
 function l.get_project_patterns(cwd)
@@ -321,5 +319,9 @@ function l.sort(tab, key1, key2)
   end
   return tab[key1].priority < tab[key2].priority
 end
+
+u.augroup('x_tttemplates', {
+  VimEnter = {'*', l.init_project},
+})
 
 return a
