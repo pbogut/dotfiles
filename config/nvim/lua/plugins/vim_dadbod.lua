@@ -1,4 +1,6 @@
+local config = require('config')
 local u = require('utils')
+local g = vim.g
 local b = vim.b
 local fn = vim.fn
 local cmd = vim.cmd
@@ -8,6 +10,11 @@ u.map('v', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
 u.map('v', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
 u.map('n', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
 u.map('n', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
+
+-- set up dadbod connections
+for name, url in pairs(config.get('dadbod.connections')) do
+  g[name] = url
+end
 
 function l.db_with_warning(bang)
   local db = b.db or ''
