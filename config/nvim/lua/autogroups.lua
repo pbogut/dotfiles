@@ -80,6 +80,12 @@ local config_group = {
       ]]
     },
     {
+      'make',
+      function()
+        u.set_indent(4, true)
+      end
+    },
+    {
       'go',
       function()
         u.set_indent(2, true)

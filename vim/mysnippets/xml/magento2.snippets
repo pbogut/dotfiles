@@ -49,3 +49,10 @@ snippet di_grid "Magento2 di for entity"
 </virtualType>
 <!-- $1 - END -->
 endsnippet
+
+snippet di_plugin "Magento2 di for plugin"
+<type name="${1:\Some\Class\To\Plug\Into}">
+	<plugin name="${2:`!p snip.rv = module_name(path).lower()`}_plugin_${3:for_some_class}"
+		type="${4:`!p snip.rv = module_ns(path)`}\Plugin\\${5:PluginClass}"/>
+</type>
+endsnippet

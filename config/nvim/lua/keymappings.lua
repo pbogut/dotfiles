@@ -1,5 +1,7 @@
 local u = require('utils')
 local g = vim.g
+local bo = vim.bo
+local wo = vim.wo
 local fn = vim.fn
 local cmd = vim.cmd
 
@@ -86,6 +88,44 @@ u.map('n', 'dg', ':diffget<cr>')
 u.map('n', '<space>w', function()
   fn.system('mkdir -p ' .. fn.expand('%:h'))
   cmd('w!')
+end)
+-- open terminal
+u.map('n', '<space>of', function()
+  cmd('belowright 20split')
+  cmd('enew')
+  fn.termopen('cd ' .. fn.expand('%:h') .. ' && zsh')
+  cmd('startinsert')
+end)
+u.map('n', '<space>op', function()
+  cmd('belowright 20split')
+  cmd('enew ')
+  fn.termopen('cd ' .. fn.getcwd() .. ' && zsh')
+  cmd('startinsert')
+end)
+-- toggle spell dictionaires
+u.map('n', '<space>ss', function()
+  local get_next = false
+  for _, spell_lang in pairs({{true, 'en_gb'}, {true, 'pl'}, {false, 'en_gb'}}) do
+    local spell = spell_lang[1]
+    local lang = spell_lang[2]
+    if get_next then
+      wo.spell = spell
+      bo.spelllang = lang
+      if not spell then
+        print('Disable spell checking')
+      else
+        print('Set spell to ' .. lang)
+      end
+      return
+    end
+    if spell == wo.spell and bo.spelllang == lang then
+      get_next = true
+    end
+  end
+  -- default if something is set up different
+  print("Set spell to en_gb")
+  bo.spelllang = 'en_gb'
+  wo.spell = true
 end)
 -- yank file name
 u.map('n', 'yaf', [[:let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>]])

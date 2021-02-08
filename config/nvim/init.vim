@@ -28,20 +28,9 @@ augroup END
 source ~/.config/nvim/config/terminal.vimrc
 
 lua require('keymappings')
-
-" open list / quickfix
-nnoremap <silent> <space>l :call local#togglelist#locationlist()<cr>
-nnoremap <silent> <space>q :call local#togglelist#quickfixlist()<cr>
-
-map <silent> <C-w>d :silent! Bdelete<cr>
-map <silent> <C-w>D :silent! Bdelete!<cr>
+lua require('commands')
 
 ProjectType laravel nnoremap <silent> <space>gf :call local#laravel#file_under_coursor()<cr>
-
-nnoremap <silent> <space>of :let g:pwd = expand('%:h') \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
-nnoremap <silent> <space>op :let g:pwd = projectroot#guess() \| belowright 20split \| enew \| call termopen('cd ' . g:pwd . ' && zsh') \| startinsert<cr>
-
-noremap <space>sc :execute(':rightbelow 10split \| te scspell %')<cr>
 
 " ripgrep
 nmap <silent> gr :set opfunc=<sid>ripgrep_from_motion<CR>g@
@@ -59,48 +48,5 @@ function! s:ripgrep_from_motion(type, ...)
   exe("Rg " . @a)
   let @a = l:tmp
 endfunction
-" toggle spell dictionaires
-nnoremap <space>ss :call SpellToggle()<cr>
-function! SpellToggle()
-  let l:get_next = v:false
-  for [l:spell, l:lang] in [[1, 'en_gb'], [1, 'pl'], [0, 'en_gb']]
-    if l:get_next
-      if l:spell == 0
-        set nospell
-        echom "Disable spell checking"
-      else
-        set spell
-        echom "Set spell to " . l:lang
-      endif
-      exec('set spelllang=' . l:lang)
-      return
-    endif
-    if &spell == l:spell && &spelllang == l:lang
-      let l:get_next = v:true
-      continue
-    endif
-  endfor
-  " default if something is set up different
-  echom "Set spell to en_gb"
-  set spelllang=en_gb
-  set spell
-endfunction
-
-" custom commands
-" close all buffers but current
-command! BCloseAll execute "%bd"
-command! BCloseOther execute "%bd | e#"
-command! BCloseOtherForce execute "%bd! | e#"
-
-"Git
-command! Gan execute "!git an %"
-function! s:gap()
-  let file = expand('%:p')
-  belowright 30split
-  enew
-  exec "te git ap " . file
-  startinsert
-endfunction
-command! Gap call s:gap()
 
 let g:paranoic_backup_dir="~/.vim/backupfiles/"

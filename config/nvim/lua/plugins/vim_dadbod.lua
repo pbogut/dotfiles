@@ -41,7 +41,7 @@ function l.db_with_warning(bang)
     }
     if not line:match("^%s*%-%-") then  -- skip if comment
       for _, pattern in ipairs(checks) do
-        if line:match(pattern) then
+        if line:lower():match(pattern) then
           has_change = true
         end
       end

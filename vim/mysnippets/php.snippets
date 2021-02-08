@@ -39,8 +39,14 @@ snippet fname "base file name"
 ${1:`!v expand('%:t:r')`}
 endsnippet
 
+snippet ( "expand braces" i
+(
+	$0
+)
+endsnippet
+
 snippet = "echo" i
-<?php echo ${VISUAL}$0 ?>
+<?= ${VISUAL}$0 ?>
 endsnippet
 
 snippet =if "template if" i
@@ -523,176 +529,4 @@ snippet {}); "Last param callback with colon" i
 {
 	$0
 });
-endsnippet
-
-snippet suppressma "Suppress PHPMD.MethodAware"
-@SuppressWarnings(PHPMD.MethodAware)
-endsnippet
-
-snippet suppressalv "Suppress PHPMD.AbstractLocalVariable"
-@SuppressWarnings(PHPMD.AbstractLocalVariable)
-endsnippet
-
-snippet suppresscc "Suppress PHPMD.CyclomaticComplexity"
-@SuppressWarnings(PHPMD.CyclomaticComplexity)
-endsnippet
-
-snippet suppressepc "Suppress PHPMD.ExcessivePublicCount"
-@SuppressWarnings(PHPMD.ExcessivePublicCount)
-endsnippet
-
-snippet suppressbgmn "Suppress PHPMD.BooleanGetMethodName"
-@SuppressWarnings(PHPMD.BooleanGetMethodName)
-endsnippet
-
-snippet suppresscnc "Suppress PHPMD.ConstantNamingConventions"
-@SuppressWarnings(PHPMD.ConstantNamingConventions)
-endsnippet
-
-snippet suppresslv "Suppress PHPMD.LongVariable"
-@SuppressWarnings(PHPMD.LongVariable)
-endsnippet
-
-snippet suppresscwnaec "Suppress PHPMD.ConstructorWithNameAsEnclosingClass"
-@SuppressWarnings(PHPMD.ConstructorWithNameAsEnclosingClass)
-endsnippet
-
-snippet suppresssmn "Suppress PHPMD.ShortMethodName"
-@SuppressWarnings(PHPMD.ShortMethodName)
-endsnippet
-
-snippet suppresssv "Suppress PHPMD.ShortVariable"
-@SuppressWarnings(PHPMD.ShortVariable)
-endsnippet
-
-snippet suppressfa "Suppress PHPMD.FunctionAware"
-@SuppressWarnings(PHPMD.FunctionAware)
-endsnippet
-
-snippet suppressulv "Suppress PHPMD.UnusedLocalVariable"
-@SuppressWarnings(PHPMD.UnusedLocalVariable)
-endsnippet
-
-snippet suppressupm "Suppress PHPMD.UnusedPrivateMethod"
-@SuppressWarnings(PHPMD.UnusedPrivateMethod)
-endsnippet
-
-snippet suppressia "Suppress PHPMD.InterfaceAware"
-@SuppressWarnings(PHPMD.InterfaceAware)
-endsnippet
-
-snippet suppressccvn "Suppress PHPMD.CamelCaseVariableName"
-@SuppressWarnings(PHPMD.CamelCaseVariableName)
-endsnippet
-
-snippet suppressccpn "Suppress PHPMD.CamelCasePropertyName"
-@SuppressWarnings(PHPMD.CamelCasePropertyName)
-endsnippet
-
-snippet suppresscccn "Suppress PHPMD.CamelCaseClassName"
-@SuppressWarnings(PHPMD.CamelCaseClassName)
-endsnippet
-
-snippet suppresssg "Suppress PHPMD.Superglobals"
-@SuppressWarnings(PHPMD.Superglobals)
-endsnippet
-
-snippet suppressccmn "Suppress PHPMD.CamelCaseMethodName"
-@SuppressWarnings(PHPMD.CamelCaseMethodName)
-endsnippet
-
-snippet suppressccpn "Suppress PHPMD.CamelCaseParameterName"
-@SuppressWarnings(PHPMD.CamelCaseParameterName)
-endsnippet
-
-snippet suppressca "Suppress PHPMD.ClassAware"
-@SuppressWarnings(PHPMD.ClassAware)
-endsnippet
-
-snippet suppressbaf "Suppress PHPMD.BooleanArgumentFlag"
-@SuppressWarnings(PHPMD.BooleanArgumentFlag)
-endsnippet
-
-snippet suppressee "Suppress PHPMD.ElseExpression"
-@SuppressWarnings(PHPMD.ElseExpression)
-endsnippet
-
-snippet suppresssa "Suppress PHPMD.StaticAccess"
-@SuppressWarnings(PHPMD.StaticAccess)
-endsnippet
-
-snippet suppressnoc "Suppress PHPMD.NumberOfChildren"
-@SuppressWarnings(PHPMD.NumberOfChildren)
-endsnippet
-
-snippet suppressgs "Suppress PHPMD.GotoStatement"
-@SuppressWarnings(PHPMD.GotoStatement)
-endsnippet
-
-snippet suppresslm "Suppress PHPMD.LongMethod"
-@SuppressWarnings(PHPMD.LongMethod)
-endsnippet
-
-snippet suppresswmc "Suppress PHPMD.WeightedMethodCount"
-@SuppressWarnings(PHPMD.WeightedMethodCount)
-endsnippet
-
-snippet suppressee "Suppress PHPMD.ExitExpression"
-@SuppressWarnings(PHPMD.ExitExpression)
-endsnippet
-
-snippet suppresstmpm "Suppress PHPMD.TooManyPublicMethods"
-@SuppressWarnings(PHPMD.TooManyPublicMethods)
-endsnippet
-
-snippet suppressee "Suppress PHPMD.EvalExpression"
-@SuppressWarnings(PHPMD.EvalExpression)
-endsnippet
-
-snippet suppressnc "Suppress PHPMD.NpathComplexity"
-@SuppressWarnings(PHPMD.NpathComplexity)
-endsnippet
-
-snippet suppresstmm "Suppress PHPMD.TooManyMethods"
-@SuppressWarnings(PHPMD.TooManyMethods)
-endsnippet
-
-snippet suppressdcf "Suppress PHPMD.DevelopmentCodeFragment"
-@SuppressWarnings(PHPMD.DevelopmentCodeFragment)
-endsnippet
-
-snippet suppressdoi "Suppress PHPMD.DepthOfInheritance"
-@SuppressWarnings(PHPMD.DepthOfInheritance)
-endsnippet
-
-snippet suppresslpl "Suppress PHPMD.LongParameterList"
-@SuppressWarnings(PHPMD.LongParameterList)
-endsnippet
-
-snippet suppresstmf "Suppress PHPMD.TooManyFields"
-@SuppressWarnings(PHPMD.TooManyFields)
-endsnippet
-
-snippet suppresslc "Suppress PHPMD.LongClass"
-@SuppressWarnings(PHPMD.LongClass)
-endsnippet
-
-snippet suppresscbo "Suppress PHPMD.CouplingBetweenObjects"
-@SuppressWarnings(PHPMD.CouplingBetweenObjects)
-endsnippet
-
-snippet suppressupf "Suppress PHPMD.UnusedPrivateField"
-@SuppressWarnings(PHPMD.UnusedPrivateField)
-endsnippet
-
-snippet suppressufp "Suppress PHPMD.UnusedFormalParameter"
-@SuppressWarnings(PHPMD.UnusedFormalParameter)
-endsnippet
-
-snippet phpcsignorestart "Start phpcs ignore standards"
-// @codingStandardsIgnoreStart
-endsnippet
-
-snippet phpcsignoreend "End phpcs ignore standards"
-// @codingStandardsIgnoreEnd
 endsnippet

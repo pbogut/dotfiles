@@ -44,8 +44,10 @@ return require('packer').startup({
     use {'ludovicchabant/vim-gutentags'}
     use {'ntpeters/vim-better-whitespace', config = 'require "plugins.vim_better_whitespace"'}
     use {'honza/vim-snippets'}
-    use {'mattn/emmet-vim', ft = {'php', 'html', 'blade', 'vue'},
-                            config = 'require "plugins.emmet_vim"'}
+    use {'mattn/emmet-vim',
+      config = 'require "plugins.emmet_vim"',
+      ft = {'php', 'html', 'blade', 'vue'},
+    }
     use {'sirver/ultisnips', config = 'require "plugins.ultisnips"'}
     use {'sbdchd/neoformat', config = 'require "plugins.neoformat"', cmd = 'Neoformat'}
     use {'k-takata/matchit.vim'}
@@ -57,7 +59,7 @@ return require('packer').startup({
     use {'elmcast/elm-vim', ft = {'elm'}}
     use {'pbogut/vim-elmper', ft = {'elm'}}
     use {'elixir-lang/vim-elixir', ft = {'elixir', 'eelixir'}}
-    use {'moll/vim-bbye', cmd = {'Bdelete'}}
+    use {'moll/vim-bbye', cmd = {'Bdelete', 'Bwipeout'}, setup = 'require "plugins.vim_bbye"'}
     use {'will133/vim-dirdiff', config = 'require "plugins.vim_dirdiff"', cmd = 'DirDiff'}
     use {'dbakker/vim-projectroot', config = [[
       vim.g.rootmarkers = {'.projectroot', '.git', '.hg', '.svn', '.bzr',
@@ -71,7 +73,7 @@ return require('packer').startup({
     use {'justinmk/vim-dirvish', config = 'require "plugins.vim_dirvish"'}
     use {'kristijanhusak/vim-dirvish-git', after = 'vim-dirvish'}
     use {'w0rp/ale'}
-    use {'chmp/mdnav', ft = {'md'}}
+    use {'chmp/mdnav', ft = {'markdown'}}
     use {'vim-scripts/ReplaceWithRegister', config = 'require "plugins.replacewithregister"'}
     use {'kana/vim-textobj-user'}
     use {'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user'}
