@@ -15,6 +15,14 @@ u.command('Gap', function()
   cmd('startinsert')
 end)
 
-cmd([[
-command! -nargs=? -bang Start :call <sid>run_terminal(getcwd(), <bang>1, <q-args>)
-]])
+-- vim-dispatch compatibility
+u.command('Start', function(bang, qargs)
+  if not bang then
+    cmd('belowright 20split')
+    cmd('enew')
+    fn.termopen(qargs)
+    cmd('startinsert')
+  else
+    fn.jobstart(qargs)
+  end
+end, {bang = true, nargs = '?', qargs = true})
