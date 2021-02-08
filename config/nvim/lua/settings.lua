@@ -1,5 +1,6 @@
 require('settings.indents')
 require('settings.title')
+require('settings.terminal')
 
 local cmd = vim.cmd
 local o = vim.o

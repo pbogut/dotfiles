@@ -14,3 +14,7 @@ u.command('Gap', function()
   fn.termopen('git ap ' .. file)
   cmd('startinsert')
 end)
+
+cmd([[
+command! -nargs=? -bang Start :call <sid>run_terminal(getcwd(), <bang>1, <q-args>)
+]])

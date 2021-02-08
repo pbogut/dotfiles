@@ -25,8 +25,6 @@ augroup after_load
         \| autocmd! User after_vim_load " clear after_plug_end command list
 augroup END
 
-source ~/.config/nvim/config/terminal.vimrc
-
 lua require('keymappings')
 lua require('commands')
 
