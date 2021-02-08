@@ -13,8 +13,8 @@ function u.call_autocmd(no)
   autocmd_callbacs[no]()
 end
 
-function u.call_command(no)
-  command_callbacs[no]()
+function u.call_command(no, ...)
+  command_callbacs[no](...)
 end
 
 function u.call_mapping(no)
@@ -54,19 +54,42 @@ end
 -- its incomplete, dont have most things that one would want
 function u.command(command_name, action, opts)
   opts = opts or {}
+  local args = {}
   local command = 'command! '
   if (opts.nargs) then
     command = command .. '-nargs=' .. opts.nargs .. ' '
   end
   if (opts.bang) then
+    args[#args+1] = '<bang>0?v:true:v:false'
     command = command .. '-bang '
+  end
+  if opts.qargs then
+    args[#args+1] = '<q-args>'
   end
   command = command .. command_name .. ' '
   if type(action) == 'function' then
     table.insert(command_callbacs, action)
-    action = 'lua require("utils").call_command(' .. #command_callbacs  .. ')'
+    local call = [[call luaeval('require("utils").call_command(]] .. #command_callbacs
+    for i, j in ipairs(args) do
+      call = call .. ',_A[' .. i .. ']'
+    end
+    call = call .. [[)']]
+    local opened = false
+    for _, arg in ipairs(args) do
+      if not opened then
+        call = call .. ',['
+        opened = true
+      end
+      call = call .. arg .. ','
+    end
+    if opened then
+      call =  call .. ']'
+    end
+    call = call .. [[)]]
+    command = command .. call
+  else
+    command = command .. action
   end
-  command = command .. action
   cmd(command)
 end
 
