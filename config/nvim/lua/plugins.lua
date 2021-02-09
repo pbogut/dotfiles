@@ -104,10 +104,8 @@ return require('packer').startup({
     -- use {'kana/vim-operator-user'}
     -- use {'slashmili/alchemist.vim', ft = {'elixir', 'eelixir'}}
     -- use {'powerman/vim-plugin-AnsiEsc', ft = {'elixir', 'eelixir'}}
-
-    use {'wakatime/vim-wakatime', cond = function()
-      local f = os.getenv("HOME") .. '/.wakatime.cfg'
-      return vim.fn.filereadable(f) > 0
-    end}
+    if vim.fn.filereadable((os.getenv("HOME") or '') .. '/.wakatime.cfg') > 0 then
+      use {'wakatime/vim-wakatime'}
+    end
   end
 })
