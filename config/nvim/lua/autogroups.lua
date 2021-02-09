@@ -27,23 +27,6 @@ local config_group = {
         wo.signcolumn = "no"
         wo.cursorline = false
         wo.cursorcolumn = false
-        o.laststatus = 0
-        o.showmode = false
-
-        u.augroup('x_termopen', {
-          BufLeave = {'<buffer>', function()
-            o.laststatus = 2
-            o.showmode = true
-          end},
-          BufEnter = {'<buffer>', function()
-            o.laststatus = 0
-            o.showmode = false
-          end},
-        })
-        -- used to have display errors with terminal
-        -- @remove below if not happening anymore
-        -- " \  :exec('silent! normal! <c-\><c-n>a')
-        -- " \| :startinsert
       end
     },
   },

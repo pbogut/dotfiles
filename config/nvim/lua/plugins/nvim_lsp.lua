@@ -4,10 +4,13 @@ local has_completion, completion = pcall(require, 'completion')
 local has_lspstatus, lspstatus = pcall(require, 'lsp-status')
 
 local cmd = vim.cmd
+local g = vim.g
 local no_lsp_bind = '<cmd>lua print("No LSP attached")<CR>'
 local format_bind = '<cmd>Neoformat<CR>'
 
 local bindings = {
+  {'n', ']d', ':lua vim.lsp.diagnostic.goto_next()<CR>', no_lsp_bind},
+  {'n', '[d', ':lua vim.lsp.diagnostic.goto_prev()<CR>', no_lsp_bind},
   {'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', false},
   {'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', false},
   {'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', false},
@@ -63,7 +66,7 @@ vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
     underline = true,
     -- Enable virtual text, override spacing to 8
     virtual_text = {
-      spacing = 8,
+      spacing = 4,
       prefix = '■',
     },
     -- Disable a feature
@@ -72,13 +75,17 @@ vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
 )
 
 u.signs({
-  LspDiagnosticsSignError = { text = "", texthl = "LspDiagnosticsSignError" },
-  LspDiagnosticsSignWarning = { text = "", texthl = "LspDiagnosticsSignWarning" },
-  LspDiagnosticsSignInformation = { text = "", texthl = "LspDiagnosticsSignInformation" },
-  LspDiagnosticsSignHint = { text = "", texthl = "LspDiagnosticsSignHint" },
+  LspDiagnosticsSignError = { text = g.icon.error, texthl = "LspDiagnosticsSignError" },
+  LspDiagnosticsSignWarning = { text = g.icon.warning, texthl = "LspDiagnosticsSignWarning" },
+  LspDiagnosticsSignInformation = { text = g.icon.info, texthl = "LspDiagnosticsSignInformation" },
+  LspDiagnosticsSignHint = { text = g.icon.hint, texthl = "LspDiagnosticsSignHint" },
 })
 
 u.highlights({
+  LspDiagnosticsFloatingInformation = { guibg = '#a68f46', guifg = '#073642' },
+  LspDiagnosticsFloatingHint = { guibg = '#9eab7d', guifg = '#073642' },
+  LspDiagnosticsFloatingError = { guibg = '#dc322f', guifg = '#073642' },
+  LspDiagnosticsFloatingWarning = { guibg = '#d33682', guifg = '#073642' },
   LspDiagnosticsSignError = { guibg = '#073642', guifg = '#dc322f' },
   LspDiagnosticsSignWarning = { guibg = '#073642', guifg = '#d33682' },
   LspDiagnosticsSignInformation = { guibg = '#073642', guifg = '#a68f46' },

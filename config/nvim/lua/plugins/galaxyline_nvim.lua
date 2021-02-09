@@ -6,8 +6,10 @@ local lspstatus = require('lsp-status')
 
 local gls = gl.section
 local fn = vim.fn
+local g = vim.g
 local api = vim.api
 local b = vim.b
+local i = g.icon
 -- gl.short_line_list = {'NvimTree','vista','dbui'}
 
 local colors = {
@@ -190,7 +192,7 @@ left[#left+1] = {
 left[#left+1] = {
   GitBranch = {
     provider = function()
-      local branch = vcs.get_git_branch()
+      local branch = vcs.get_git_branch() or ''
       return '  ' .. branch:gsub('%s*$', '') .. ' '
     end,
     condition = vcs.check_git_workspace,
@@ -311,13 +313,13 @@ right[#right+1] = {
       local diagnostics = lspstatus.diagnostics()
       local parts = {}
       if diagnostics.hints > 0 then
-        table.insert(parts, " " .. diagnostics.hints)
+        table.insert(parts, i.hint .. ' ' .. diagnostics.hints)
       end
       if diagnostics.info > 0 then
-        table.insert(parts, " " .. diagnostics.info)
+        table.insert(parts, i.info .. ' ' .. diagnostics.info)
       end
       if diagnostics.warnings > 0 then
-        table.insert(parts, " " .. diagnostics.warnings)
+        table.insert(parts, i.warning .. ' ' .. diagnostics.warnings)
       end
       local suffix = ''
       if #parts > 0 then
@@ -329,7 +331,7 @@ right[#right+1] = {
         result = result .. ''
       end
       if  diagnostics.errors > 0 then
-        result = result .. "  " .. diagnostics.errors .. ' '
+        result = result .. ' ' .. i.error .. ' ' .. diagnostics.errors .. ' '
       end
 
       local bg = colors.base01

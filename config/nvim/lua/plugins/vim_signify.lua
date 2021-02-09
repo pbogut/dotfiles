@@ -1,6 +1,7 @@
 local u = require('utils')
 local g = vim.g
 
+g.signify_priority = 1
 g.signify_vcs_list = { 'git' }
 g.signify_sign_add = '+'
 g.signify_sign_delete = '_'
