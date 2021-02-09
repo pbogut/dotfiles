@@ -16,11 +16,15 @@ for name, url in pairs(config.get('dadbod.connections')) do
   g[name] = url
 end
 
-function l.db_with_warning(bang)
+function l.db_with_warning(whole)
   local db = b.db or ''
   local db_selected = b.db_selected or ''
   local firstline = fn.line("'<")
   local lastline = fn.line("'>")
+  if whole then
+    firstline = 1
+    lastline = fn.line('$')
+  end
 
   if firstline == 0 then
     cmd([[echo "No query selected"]])
@@ -66,7 +70,7 @@ function l.db_with_warning(bang)
   end
 
   if not halt then
-    fn['db#execute_command']('', bang, firstline, lastline, '')
+    fn['db#execute_command']('', false, firstline, lastline, '')
   end
 end
 
