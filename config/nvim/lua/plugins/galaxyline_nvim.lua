@@ -1,6 +1,9 @@
 local u = require('utils')
-local lspstatus = require('lsp-status')
 local gl = require('galaxyline')
+local vcs = require('galaxyline.provider_vcs')
+local fileinfo = require('galaxyline.provider_fileinfo')
+local lspstatus = require('lsp-status')
+
 local gls = gl.section
 local fn = vim.fn
 local api = vim.api
@@ -29,6 +32,13 @@ local colors = {
 local left = {}
 local right = {}
 
+local width_gt_150 = function()
+  local width = vim.fn.winwidth(0)
+  if width > 150 then
+    return true
+  end
+  return false
+end
 
 local function get_selected_db()
   if not b.db then
@@ -132,7 +142,7 @@ left[#left+1] = {
       })
       return ' ' .. mode_text[vim.fn.mode()]
     end,
-    separator = ' ',
+    separator = '',
   },
 }
 
@@ -148,14 +158,13 @@ left[#left+1] = {
   ClearIfNoGit = {
     provider = function() return '' end,
     condition = function()
-      return  require('galaxyline.provider_vcs').check_git_workspace() == false
+      return vcs.check_git_workspace() == false
     end,
     separator_highlight = {colors.base01,colors.base02},
     highlight = {colors.base3, colors.base01, 'NONE'},
-    separator = ' ',
+    separator = '',
   }
 }
-
 
 left[#left+1] = {
   MyDiffStats = {
@@ -164,13 +173,15 @@ left[#left+1] = {
         local diff_add = vim.fn['sy#repo#get_stats']()[1]
         local diff_mod = vim.fn['sy#repo#get_stats']()[2]
         local diff_rem = vim.fn['sy#repo#get_stats']()[3]
-        if diff_add ~= -1 then 
-          return '+' .. diff_add .. ' ~' .. diff_mod .. ' -' .. diff_rem
+        if diff_add ~= -1 then
+          return ' +' .. diff_add .. ' ~' .. diff_mod .. ' -' .. diff_rem
         end
       end
     end,
-    condition = require('galaxyline.provider_vcs').check_git_workspace,
-    separator = '  ',
+    condition = function()
+      return vcs.check_git_workspace()
+        and width_gt_150()
+    end,
     highlight = {colors.base3,colors.base01},
     separator_highlight = {colors.base3,colors.base01},
   }
@@ -178,18 +189,24 @@ left[#left+1] = {
 
 left[#left+1] = {
   GitBranch = {
-    provider = 'GitBranch',
-    condition = require('galaxyline.provider_vcs').check_git_workspace,
+    provider = function()
+      local branch = vcs.get_git_branch()
+      return '  ' .. branch:gsub('%s*$', '') .. ' '
+    end,
+    condition = vcs.check_git_workspace,
     separator_highlight = {colors.base01,colors.base02},
     highlight = {colors.base3, colors.base01, 'NONE'},
-    separator = ' ',
+    separator = '',
   }
 }
 
 
 left[#left+1] = {
   FileName = {
-    provider = 'FileName',
+    provider = function()
+      local file = fileinfo.get_current_file_name()
+      return ' ' .. file
+    end,
     condition = buffer_not_empty,
     highlight = {colors.base3,colors.base02}
   }
@@ -248,11 +265,16 @@ right[#right+1] = {
       local encode = vim.bo.fenc ~= '' and vim.bo.fenc or vim.o.enc
       local format = vim.bo.fileformat
       local filetype = vim.bo.filetype or ''
-      local result = ' ' .. encode .. '[' .. format .. ']'
+      local result = ''
+      if width_gt_150() then
+        result = result .. encode .. '[' .. format .. ']'
+      end
       if filetype ~= '' then
         result = result .. '[' .. filetype .. ']'
       end
-      return result .. ' '
+      if result ~= '' then
+        return ' ' .. result .. ' '
+      end
     end,
     separator = '',
     highlight = {colors.base3, colors.base01, 'NONE'},
@@ -271,7 +293,11 @@ right[#right+1] = {
       if current_line ~= 1 then
         percent,_ = math.modf((current_line/total_line)*100)
       end
-      return ' '.. percent .. '% :' .. line .. '/' .. total_line .. ' :' .. column .. ' '
+      if width_gt_150() then
+        return ' '.. percent .. '% :' .. line .. '/' .. total_line .. ' :' .. column .. ' '
+      else
+        return ' ' .. line .. '/' .. total_line .. ' ' .. column .. ' '
+      end
     end,
     separator = '',
     separator_highlight = {colors.base1, colors.base01},
