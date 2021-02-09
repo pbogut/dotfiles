@@ -38,8 +38,7 @@ return require('packer').startup({
     use {'tpope/vim-projectionist', config = 'require "plugins.projectionist"'}
     use {'gioele/vim-autoswap'}
     use {'rhysd/git-messenger.vim', config = 'require "plugins.git_messanger"'}
-    use {'vim-airline/vim-airline', config = 'require "plugins.vim_airline"'}
-    use {'vim-airline/vim-airline-themes', after = 'vim-airline'}
+    use {'glepnir/galaxyline.nvim', branch = 'main', config = 'require "plugins.galaxyline_nvim"'}
     use {'mhinz/vim-signify', config = 'require "plugins.vim_signify"'}
     use {'ludovicchabant/vim-gutentags'}
     use {'ntpeters/vim-better-whitespace', config = 'require "plugins.vim_better_whitespace"'}
