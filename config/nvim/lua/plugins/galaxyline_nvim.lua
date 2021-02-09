@@ -164,7 +164,9 @@ left[#left+1] = {
         local diff_add = vim.fn['sy#repo#get_stats']()[1]
         local diff_mod = vim.fn['sy#repo#get_stats']()[2]
         local diff_rem = vim.fn['sy#repo#get_stats']()[3]
-        return '+' .. diff_add .. ' ~' .. diff_mod .. ' -' .. diff_rem
+        if diff_add ~= -1 then 
+          return '+' .. diff_add .. ' ~' .. diff_mod .. ' -' .. diff_rem
+        end
       end
     end,
     condition = require('galaxyline.provider_vcs').check_git_workspace,
