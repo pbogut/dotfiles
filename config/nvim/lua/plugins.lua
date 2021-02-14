@@ -87,7 +87,6 @@ return require('packer').startup({
     use {'frankier/neovim-colors-solarized-truecolor-only'}
     use {'sheerun/vim-polyglot', setup = 'require "plugins.polyglot"'}
     use {'sirtaj/vim-openscad', opt = false}
-    use {'/home/pbogut/Projects/github.com/pbogut/simple-fold'}
     -- lsp
     use {'neovim/nvim-lspconfig', config = 'require "plugins.nvim_lsp"'}
     use {'nvim-lua/completion-nvim', config = 'require "plugins.completion_nvim"'}
@@ -98,11 +97,6 @@ return require('packer').startup({
     use {'vim-vdebug/vdebug', opt = true}
     use {'godlygeek/tabular', cmd = {'T', 'Tabularize'}}
     use {'captbaritone/better-indent-support-for-php-with-html', ft = {'php'}}
-    -- use {'MarcWeber/vim-addon-mw-utils'}
-    -- use {'joereynolds/gtags-scope'}
-    -- use {'kana/vim-operator-user'}
-    -- use {'slashmili/alchemist.vim', ft = {'elixir', 'eelixir'}}
-    -- use {'powerman/vim-plugin-AnsiEsc', ft = {'elixir', 'eelixir'}}
     if vim.fn.filereadable((os.getenv("HOME") or '') .. '/.wakatime.cfg') > 0 then
       use {'wakatime/vim-wakatime'}
     end
