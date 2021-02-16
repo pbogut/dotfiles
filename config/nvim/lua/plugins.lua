@@ -69,6 +69,7 @@ return require('packer').startup({
     use {'vim-scripts/cmdalias.vim', config = 'require "plugins.cmdalias_vim"'}
     use {'Shougo/echodoc.vim'}
     use {'justinmk/vim-dirvish', config = 'require "plugins.vim_dirvish"'}
+    use {'justinmk/vim-sneak', config = 'require "plugins.vim_sneak"'}
     use {'kristijanhusak/vim-dirvish-git', after = 'vim-dirvish'}
     use {'w0rp/ale', config = 'require "plugins.ale"'}
     use {'chmp/mdnav', ft = {'markdown'}}
