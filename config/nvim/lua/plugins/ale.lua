@@ -1,6 +1,7 @@
 local u = require('utils')
-local g = vim.g
+local cmd = vim.cmd
 local fn = vim.fn
+local g = vim.g
 
 g.ale_lint_on_text_changed = 'never'
 g.ale_lint_on_enter = 0
@@ -13,6 +14,7 @@ g.ale_disable_lsp = 1
 g.ale_lint_on_save = 1
 -- to disable autocommand set up by ale
 g.ale_lint_on_text_changed = 'never'
+g.ale_lint_on_insert_leave = false
 g.ale_command_wrapper = 'nice -n15'
 
 g.ale_sign_error = g.icon.error
@@ -33,6 +35,12 @@ if fn.filereadable('phpmd.xml') > 0 then
 end
 
 u.augroup('x_ale', {
+  InsertEnter = {
+    '*',
+    function()
+      cmd('ALEReset')
+    end
+  },
   VimEnter = {
     {
       '*',
@@ -40,7 +48,7 @@ u.augroup('x_ale', {
         -- highlights
         u.highlights({
           ALEVirtualTextInfo = {gui='none'},
-          ALEErrorSign = {guibg = '#073642', guifg = '#dc322f', gui = 'none'},
+          ALEErrorSign = {guibg = '#073642', guifg = '#268bd2', gui = 'none'},
           ALEWarningSign = {guibg = '#073642', guifg = '#268bd2', gui = 'none'},
           ALEVirtualTextError = {guibg = '#073642', guifg = '#268bd2', gui = 'none'},
           ALEVirtualTextWarning = {guibg = '#073642', guifg = '#268bd2', gui = 'none'},
