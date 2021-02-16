@@ -25,9 +25,9 @@ local bindings = {
   {'n', '<space>sD', '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', no_lsp_bind},
   {'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', no_lsp_bind},
   -- custom format functions with fall back to Neoformat cmd
-  {'n', '<space>af', '<cmd>lua vim_lsp_buf_formatting()<CR>', format_bind},
-  {'v', '<space>af', ':lua vim_lsp_buf_range_formatting()<CR>', format_bind},
-  {'x', '<space>af', ':lua vim_lsp_buf_range_formatting()<CR>', format_bind},
+  {'n', '<space>af', '<cmd>lua vim.lsp.buf.x_formatting()<CR>', format_bind},
+  {'v', '<space>af', ':lua vim.lsp.buf.x_range_formatting()<CR>', format_bind},
+  {'x', '<space>af', ':lua vim.lsp.buf.x_range_formatting()<CR>', format_bind},
 }
 
 -- prevent stupid errors when using mapping with no lsp attached
@@ -154,14 +154,14 @@ local function attach_lsp_to_new_buffer()
 end
 
 -- global
-function vim_lsp_buf_range_formatting()
+function vim.lsp.buf.x_range_formatting()
   if not pcall(vim.lsp.buf.range_formatting) then
     cmd("'<,'>Neoformat")
   end
 end
 
 -- global
-function vim_lsp_buf_formatting()
+function vim.lsp.buf.x_formatting()
   if not pcall(vim.lsp.buf.formatting) then
     cmd('Neoformat')
   end
