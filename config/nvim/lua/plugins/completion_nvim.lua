@@ -4,34 +4,89 @@ local u = require('utils')
 local g = vim.g
 
 g.completion_matching_strategy_list = {'exact', 'substring'}
+g.completion_menu_length = 20
+g.completion_abbr_length = 20
+
+u.map('i', '<c-space>', '<plug>(completion_trigger)', {noremap = false})
+u.map('i', '<c-j>', '<plug>(completion_next_source)', {noremap = false})
 
 -- g.completion_auto_change_source = 1
 g.completion_enable_snippet = 'UltiSnips'
 g.completion_chain_complete_list = {
-  {complete_items = {'lsp', 'snippet','buffers', 'vim-dadbod-completion'}},
-  -- {complete_items = {'buffers'}},
-  {mode = '<c-p>'},
-  {mode = '<c-n>'},
+  default = {
+    {complete_items = {'lsp', 'snippet', 'ts', 'buffers', 'vim-dadbod-completion'}},
+    {mode = 'file'},
+    {mode = 'spell'},
+  },
+  markdown = {
+    {mode = 'spell'},
+    {mode = 'file'},
+  },
+  mail = {
+    {mode = 'spell'},
+    {mode = 'file'},
+  }
+  -- {mode = '<c-n>'},
 }
 
-g.completion_items_priority = {
-  Method = 10,
-  Field = 9,
-  Property = 9,
-  Variables = 7,
-  Function = 7,
-  Interfaces = 6,
-  Constant = 6,
-  Class = 6,
-  Struct = 6,
-  DB  = 6,
-  Keyword = 5,
-  Value = 5,
-  Treesitter = 4,
-  File  = 2,
-  TabNine  = 1,
-  Buffers  = 0,
+g.completion_source_priority = {
+  lsp = 10,
+  ['vim-dadbod-completion'] = 9,
+  snippet = 5,
+  ts = 7,
+  buffers = 1,
 }
+
+g.completion_customize_lsp_label = {
+  Treesitter = 'ts',
+  Buffers  = '',
+  Function = '',
+  f = '',
+  Method = '',
+  Constructor = '',
+  Variables = 's',
+  Variable = '',
+  v = '',
+  Value = '',
+  Property = '',
+  Field = '',
+  Constant = '',
+  UltiSnips = '烈',
+  Keyword = '',
+  Module = '',
+  Class = '',
+  Struct = '',
+  DB = '',
+  Reference = '',
+  Folder = '',
+  File = '',
+  Snippet = '',
+  Operator = '',
+  Text = '',
+  Interfaces = 's',
+  Interface = '',
+  [' '] = '?',
+  [' '] = '!',
+}
+-- g.completion_items_priority = {
+--   Method = 10,
+--   Field = 9,
+--   Property = 9,
+--   Variables = 7,
+--   v = 7,
+--   Function = 7,
+--   Interfaces = 6,
+--   Constant = 6,
+--   Class = 6,
+--   Struct = 6,
+--   DB  = 6,
+--   Keyword = 5,
+--   Value = 5,
+--   Treesitter = 4,
+--   File  = 2,
+--   TabNine  = 1,
+--   Buffers  = 0,
+-- }
 
 if has_dadbod then
   u.augroup("x_competion_nvim", {
