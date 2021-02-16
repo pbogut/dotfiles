@@ -1,5 +1,7 @@
 local u = require('utils')
 local cmd = vim.cmd
+local bo = vim.bo
+local o = vim.o
 local l = {}
 
 u.command('Skel', 'lua require"projector".template_from_cmd(<q-args>)', {
@@ -201,15 +203,14 @@ return {
   -- laravel project
   ["artisan&composer.json"] = {
     project_init = function()
-      u.map('n', '<space>gf', function()
-        local file = u.string_under_coursor() or ''
-        local template = 'resources/views/' .. file:gsub('%.', '%/') .. '.blade.php'
-        if vim.fn.filereadable(template) > 0 then
-          cmd('e ' .. template)
-        else
-          require('plugins.fzf').file_under_coursor()
-        end
-      end)
+      u.augroup('x_laravel', {
+        FileType = {'php', function()
+          -- copied from polyglot/blade so it works in controllers as well
+          bo.suffixesadd = '.blade.php,.php'
+          bo.includeexpr = [[substitute(v:fname,'\.','/','g')]]
+          bo.path = o.path .. [[,resources/views;]]
+        end}
+      })
     end,
     priority = 100,
     patterns = {
