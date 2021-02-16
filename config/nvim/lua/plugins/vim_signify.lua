@@ -3,11 +3,11 @@ local g = vim.g
 
 g.signify_priority = 1
 g.signify_vcs_list = { 'git' }
-g.signify_sign_add = '+'
-g.signify_sign_delete = '_'
+g.signify_sign_add = g.icon.added
+g.signify_sign_delete = g.icon.deleted
 g.signify_sign_delete_first_line = '‾'
-g.signify_sign_change = '~'
-g.signify_sign_changedelete = '~'
+g.signify_sign_change = g.icon.changed
+g.signify_sign_changedelete = g.icon.changed
 g.signify_sign_show_count = 0
 
 u.map('n', '<space>hh', ':SignifyToggleHighlight<cr>')

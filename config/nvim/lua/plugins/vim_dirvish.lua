@@ -7,6 +7,16 @@ local cmd = vim.cmd
 g.dirvish_mode = [[:sort r /[^\/]$/]]
 g.echodoc_enable_at_startup = 1
 
+g.dirvish_git_indicators = {
+  Modified  = g.icon.changed,
+  Staged    = g.icon.added,
+  Untracked = '☒',
+  Renamed   = g.icon.renamed,
+  Unmerged  = '═',
+  Ignored   = g.icon.ignored,
+  Unknown   = '?'
+}
+
 u.map('n', '\\won', '<Plug>(dirvish_up)', {noremap = false})
 u.map('n', '<bs>', ':Dirvish %:p:h<cr>')
 
