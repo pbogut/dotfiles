@@ -87,7 +87,10 @@ u.map('n', 'dg', ':diffget<cr>')
 -- create parent dir while saving file
 u.map('n', '<space>w', function()
   fn.system('mkdir -p ' .. fn.expand('%:h'))
-  cmd('w!')
+  local success, err = pcall(cmd,'w!')
+  if not success then
+    cmd('SudoWrite')
+  end
 end)
 -- open terminal
 u.map('n', 'got', function()
