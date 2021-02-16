@@ -1,5 +1,6 @@
 local u = require('utils')
 local cmd = vim.cmd
+local l = {}
 
 u.command('Skel', 'lua require"projector".template_from_cmd(<q-args>)', {
   nargs = '?'
@@ -17,6 +18,33 @@ u.augroup('x_templates', {
     },
 })
 
+function l.snakecase(text)
+  return text:gsub('([a-z])([A-Z])', '%1_%2'):lower()
+end
+
+function l.camelcase(text)
+  return text:gsub('_(%l)', function(match)
+    return match:upper()
+  end)
+end
+
+function l.capitalize(text)
+  text = text:gsub('([^%l%u])(%l)', function(sign, letter)
+    return sign .. letter:upper()
+  end)
+  return text:gsub('^(%l)', function(letter)
+    return letter:upper()
+  end)
+end
+
+function l.mag_rm_pool(text)
+  return text:gsub('^[a-z]*/(.*)', '%1') -- drop first part which is code pool
+end
+
+function l.mag_add_block(text)
+  return text:gsub('^(.*)/(.*)/(.*)$', '%1/%2/Block/%3')
+end
+
 -- config for projector module
 return {
   --magento project
@@ -25,7 +53,12 @@ return {
     patterns = {
       ['app/code/(.*)/Block/(.*)%.php'] = {
         template = "_magento_block",
-        -- alternate = "app/design/frontend/base/default/template/{mag_rm_pool|snakecase}.phtml"
+        alternate = function(_, opt)
+          local path = l.snakecase(l.mag_rm_pool(opt.match[1]))
+          local file = l.snakecase(opt.match[2])
+          return {'app/design/frontend/base/default/template/'
+                  .. path .. '/' .. file .. '.phtml'}
+        end
       },
       ['app/code/**/Helper/*.php'] = {
         template = "_magento_helper",
@@ -39,13 +72,17 @@ return {
       ['app/code/**/Model/*.php'] = {
         template = "_magento_model",
       },
-      -- ['app/design/frontend/base/default/template/*.phtml'] = {
-      --   alternate = {
-      --     "app/code/core/{camelcase|capitalize|mag_add_block}.php",
-      --     "app/code/community/{camelcase|capitalize|mag_add_block}.php",
-      --     "app/code/local/{camelcase|capitalize|mag_add_block}.php"
-      --   }
-      -- }
+      ['app/design/frontend/base/default/template/(.*)%.phtml'] = {
+        alternate = function(_, opt)
+          local filename =
+            l.mag_add_block(l.capitalize(l.camelcase(opt.match[1])))
+          return {
+            'app/code/core/' .. filename .. '.php',
+            'app/code/community/' .. filename .. '.php',
+            'app/code/local/' .. filename .. '.php',
+          }
+        end
+      }
     }
   },
   -- magento2 project

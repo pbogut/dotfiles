@@ -112,7 +112,10 @@ function a.go_alternate()
         result[#result+1] = file
       end
     elseif type(cfg.alternate) == 'function' then
-      result = u.merge_tables(result, cfg.alternate(relative, {file = filename, dir = cwd}))
+      local match = {relative:match(cfg.pattern)}
+      result = u.merge_tables(result, cfg.alternate(relative, {
+        match = match, file = filename, dir = cwd
+      }))
     end
   end
 

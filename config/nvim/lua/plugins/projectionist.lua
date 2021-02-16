@@ -20,16 +20,6 @@ local magento_module = {
     ['*'] = {
         ['project_root'] = 1,
     },
-    ['app/code/**/Block/*.php'] = {
-        alternate = "app/design/frontend/base/default/template/{mag_rm_pool|snakecase}.phtml"
-    },
-    ['app/design/frontend/base/default/template/*.phtml'] = {
-        alternate = {
-            "app/code/core/{camelcase|capitalize|mag_add_block}.php",
-            "app/code/community/{camelcase|capitalize|mag_add_block}.php",
-            "app/code/local/{camelcase|capitalize|mag_add_block}.php"
-        }
-    }
 }
 local magento2_module =
          {
