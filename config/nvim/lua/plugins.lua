@@ -30,6 +30,7 @@ return require('packer').startup({
     use {'tpope/vim-eunuch'}
     use {'tpope/vim-git'}
     use {'tpope/vim-rsi'}
+    use {'tpope/vim-abolish'} -- coercion thingis
     use {'tpope/vim-commentary', config = 'require "plugins.vim_commentary"'}
     use {'tpope/vim-surround'}
     use {'tpope/vim-repeat'}
@@ -87,6 +88,9 @@ return require('packer').startup({
     use {'frankier/neovim-colors-solarized-truecolor-only'}
     use {'sheerun/vim-polyglot', setup = 'require "plugins.polyglot"'}
     use {'sirtaj/vim-openscad', opt = false}
+    use {'nvim-treesitter/nvim-treesitter', run = 'vim.cmd("TSUpdate")',
+         config = 'require "plugins.nvim_treesitter"'}
+    use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'completion-nvim'}}
     -- lsp
     use {'neovim/nvim-lspconfig', config = 'require "plugins.nvim_lsp"'}
     use {'nvim-lua/completion-nvim', config = 'require "plugins.completion_nvim"'}
