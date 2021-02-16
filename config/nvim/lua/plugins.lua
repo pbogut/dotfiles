@@ -35,7 +35,6 @@ return require('packer').startup({
     use {'tpope/vim-repeat'}
     use {'tpope/vim-rails', ft = {'ruby'}}
     use {'tpope/vim-unimpaired'}
-    use {'tpope/vim-projectionist', config = 'require "plugins.projectionist"'}
     use {'gioele/vim-autoswap'}
     use {'rhysd/git-messenger.vim', config = 'require "plugins.git_messanger"'}
     use {'glepnir/galaxyline.nvim', branch = 'main', config = 'require "plugins.galaxyline_nvim"'}
