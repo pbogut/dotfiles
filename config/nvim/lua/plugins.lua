@@ -91,6 +91,7 @@ return require('packer').startup({
     use {'nvim-treesitter/nvim-treesitter', run = 'vim.cmd("TSUpdate")',
          config = 'require "plugins.nvim_treesitter"'}
     use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'completion-nvim'}}
+    use {'aca/completion-tabnine', run = './install.sh', after = 'completion-nvim'}
     -- lsp
     use {'neovim/nvim-lspconfig', config = 'require "plugins.nvim_lsp"'}
     use {'nvim-lua/completion-nvim', config = 'require "plugins.completion_nvim"'}
