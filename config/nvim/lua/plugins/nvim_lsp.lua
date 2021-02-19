@@ -191,6 +191,10 @@ local function attach_lsp_to_new_buffer()
       end
     end
   end
+  -- write to not lose any changes
+  cmd(':w')
+  -- then reload so lsp is attached when reloaded from actuall file
+  cmd(':edit')
 end
 
 -- global
@@ -207,9 +211,8 @@ function vim.lsp.buf.x_formatting()
   end
 end
 
+u.command('LspReload', function()
+     vim.lsp.stop_client(vim.lsp.get_active_clients())
+     cmd('edit')
+end)
 u.command('LspAttachBuffer', attach_lsp_to_new_buffer)
-u.augroup('x_nvim_lsp', {
-    BufNewFile = {
-      { "*", attach_lsp_to_new_buffer }
-    }
-})
