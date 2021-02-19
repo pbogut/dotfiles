@@ -18,6 +18,18 @@ u.augroup('x_templates', {
           end)
       end},
     },
+    BufNew = {
+      {'*', function()
+          -- initially ft is not available and ultisnip is not working correctly
+          -- so we deffer to next loop when ft is set properly
+          vim.schedule(function()
+            -- check if fiel is empty, if so then populate from template
+            if vim.fn.line('$') == 1 and vim.fn.getline('$') == '' then
+              require('projector').do_template()
+            end
+          end)
+      end},
+    },
 })
 
 function l.snakecase(text)
@@ -54,6 +66,7 @@ return {
     priority = 100,
     patterns = {
       ['app/code/(.*)/Block/(.*)%.php'] = {
+        priority = 100,
         template = "_magento_block",
         alternate = function(_, opt)
           local path = l.snakecase(l.mag_rm_pool(opt.match[1]))
@@ -63,18 +76,23 @@ return {
         end
       },
       ['app/code/**/Helper/*.php'] = {
+        priority = 100,
         template = "_magento_helper",
       },
       ['app/code/**/Model/Resource/*/Collection.php'] = {
+        priority = 100,
         template = "_magento_collection",
       },
       ['app/code/**/Model/Resource/*.php'] = {
+        priority = 100,
         template = "_magento_resource",
       },
       ['app/code/**/Model/*.php'] = {
+        priority = 100,
         template = "_magento_model",
       },
       ['app/design/frontend/base/default/template/(.*)%.phtml'] = {
+        priority = 100,
         alternate = function(_, opt)
           local filename =
             l.mag_add_block(l.capitalize(l.camelcase(opt.match[1])))
