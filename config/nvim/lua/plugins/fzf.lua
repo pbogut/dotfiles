@@ -17,12 +17,18 @@ g.fzf_action = {
   ['ctrl-x'] = 'rightbelow split',
   ['ctrl-v'] = 'rightbelow vsplit'
 }
-g.fzf_preview = "-1 --preview 'sh ~/.scripts/fzf-preview.sh {-1}'"
+g.fzf_preview = "-1 --preview 'sh ~/.scripts/fzf-preview.sh {}'"
 
 u.map('n', '<space>et', ':lua require"plugins.fzf".templates()<CR>')
 u.map('n', '<space>es', ':lua require"plugins.fzf".snippets()<CR>')
 u.map('n', '<space>ec', ':lua require"plugins.fzf".nvim_config()<cr>')
 u.map('n', '<space>ed', ':lua require"plugins.fzf".dotfiles()<cr>')
+
+u.map('n', '<space>fq', ':silent! cclose | lua require"plugins.fzf".quickfix()<cr>')
+u.map('n', '<space>fl', ':silent! lclose | lua require"plugins.fzf".loclist()<cr>')
+
+u.map('n', '<space>q', ':silent! cclose | lua require"plugins.fzf".quickfix()<cr>')
+u.map('n', '<space>l', ':silent! lclose | lua require"plugins.fzf".loclist()<cr>')
 
 u.map('n', '<space>fa', ':lua require"plugins.fzf".files()<cr>')
 u.map('n', '<space>ff', ':lua require"plugins.fzf".all_files()<cr>')
@@ -49,7 +55,11 @@ cmd([[command! -nargs=* -bang -complete=dir Rgg lua require'plugins.fzf'.grep('<
 function f.rg(raw, params)
   params = l.fzf_rg_params(raw, params)
   print(":rg -i " .. params)
-  fn['fzf#vim#grep']('rg --vimgrep --color=always -i ' .. params, 1)
+  local options = { source = 'rg --vimgrep --color=always -i '  .. params,
+    sink = 'l.from_grep_format',
+    options = '--ansi --prompt "Rg> " ' .. l.process_params({}, true),
+  }
+  l.fzf_run(options)
 end
 
 function f.grep(raw, params)
@@ -70,6 +80,62 @@ end
 function l.git_ls(line)
     local file, _ = string.gsub(' ' .. line, '^......(.*)', '%1')
     cmd('e ' .. file)
+end
+
+function f.loclist()
+    local options = {
+        source = l.get_loclist(),
+        sink = 'l.from_grep_format',
+        options = '--ansi --prompt "LocList> " ' .. l.process_params({}, true),
+    }
+    l.fzf_run(options)
+end
+
+function l.get_loclist()
+  local result = {}
+  local list = fn.getloclist(0)
+  for _, row in ipairs(list) do
+    local file = fn.bufname(row.bufnr)
+    local line = file .. ':' .. row.lnum .. ':' .. row.col .. ':' .. row.text
+    result[#result+1] = line
+  end
+  return result
+end
+
+function f.quickfix(word)
+    local options = {
+        source = l.get_quickfix(word),
+        sink = 'l.from_grep_format',
+        options = '--ansi --prompt "QuickFix> " ' .. l.process_params({}, true),
+    }
+    l.fzf_run(options)
+end
+
+function l.get_quickfix(word)
+  local result = {}
+  local list = fn.getqflist()
+  for _, row in ipairs(list) do
+    local file = fn.bufname(row.bufnr)
+    local c = {
+      purple = '\27[35m',
+      gray = '\27[38m',
+      green = '\27[32m',
+    }
+    local text = row.text
+    if word then
+      text = u.highlight_word(row.text, word)
+    end
+    local line = c.purple .. file .. c.gray .. ':' .. c.green .. row.lnum
+      .. c.gray .. ':' .. row.col .. ':' .. c.gray .. text
+    result[#result+1] = line
+  end
+  return result
+end
+
+function l.from_grep_format(line)
+  local match = {line:match('(.-):(.-):(.-):.*')}
+  cmd('e ' .. match[1])
+  fn.cursor(match[2], match[3])
 end
 
 function f.files(...)
