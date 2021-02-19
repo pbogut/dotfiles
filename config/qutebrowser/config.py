@@ -22,7 +22,7 @@ c.url.start_pages = ["http://localhost:46637"]
 c.url.default_page = 'http://localhost:46637'
 # c.url.start_pages = ["https://duckduckgo.com/"]
 # c.url.default_page = 'https://duckduckgo.com/'
-c.downloads.open_dispatcher = '/bin/bash -c "QB_DOWNLOAD_FILE=1 ~/.scripts/i3-open \'{}\'"'
+c.downloads.open_dispatcher = '/bin/bash -c "QB_DOWNLOAD_FILE=1 download-sort-and-open.sh \'{}\'"'
 c.editor.command = ["urxvt", "--geometry", "120x32",
                     "--title", "NVIM_FOR_QB", "-e", "nvim", "{}"]
 c.downloads.position = "bottom"
@@ -172,6 +172,7 @@ config.bind('sjd', 'set content.javascript.enabled false')
 config.bind('es',  'spawn --userscript ~/.scripts/qb-switch-enviroment.php')
 
 config.bind(',rm', 'spawn --userscript ~/.scripts/qb-url-to-remarkable.sh')
+config.bind(',pdf', 'spawn --userscript ~/.scripts/qb-url-to-clean-pdf.sh')
 config.bind(',tp', 'spawn --userscript ~/.scripts/qb-send-to-phone.sh')
 
 bind_js(',jpp', 'pixel_perfect')
@@ -180,7 +181,6 @@ bind_js(',dd', 'developer_mode')
 
 bind_js(',pp', 'pocket')
 bind_js(',pt', 'pocket_tag')
-
 
 dir_path = os.path.dirname(__file__)
 if os.path.exists(dir_path + '/secure_config.py'):

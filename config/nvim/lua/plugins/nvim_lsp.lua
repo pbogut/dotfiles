@@ -60,6 +60,46 @@ if has_lspstatus then
   lspstatus.register_progress()
 end
 
+local function location_handler(_, method, result)
+  vim.g.lsp_last_word = vim.fn.expand('<cword>')
+  if result == nil or vim.tbl_isempty(result) then
+    print(method, 'No location found')
+    return nil
+  end
+  local util = require('vim.lsp.util')
+  if vim.tbl_islist(result) then
+    if #result == 1 then
+      util.jump_to_location(result[1])
+    elseif #result > 1 then
+      util.set_qflist(util.locations_to_items(result))
+      require('plugins.fzf').quickfix(vim.fn.expand('<cword>'));
+      -- api.nvim_command("copen")
+      -- api.nvim_command("wincmd p")
+    end
+  else
+    util.jump_to_location(result)
+  end
+end
+
+vim.lsp.handlers['textDocument/declaration'] = location_handler
+vim.lsp.handlers['textDocument/definition'] = location_handler
+vim.lsp.handlers['textDocument/typeDefinition'] = location_handler
+vim.lsp.handlers['textDocument/implementation'] = location_handler
+vim.lsp.handlers['textDocument/references'] = function(_, _, result)
+  vim.g.lsp_last_word = vim.fn.expand('<cword>')
+  if not result then return end
+  if #result == 0 then
+    cmd('echo "Getting references..."')
+    return
+  end
+  cmd('echo ""')
+  local util = require('vim.lsp.util')
+  util.set_qflist(util.locations_to_items(result))
+  require('plugins.fzf').quickfix(vim.fn.expand('<cword>'));
+  -- api.nvim_command("copen")
+  -- api.nvim_command("wincmd p")
+end
+
 vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
   vim.lsp.diagnostic.on_publish_diagnostics, {
     -- Enable underline, use default values
