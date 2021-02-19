@@ -123,7 +123,7 @@ function l.get_quickfix(word)
     }
     local text = row.text
     if word then
-      text = u.highlight_word(row.text, word)
+      text = text:gsub(word, '\27%[3;31m%1\27%[0m')
     end
     local line = c.purple .. file .. c.gray .. ':' .. c.green .. row.lnum
       .. c.gray .. ':' .. row.col .. ':' .. c.gray .. text
