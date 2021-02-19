@@ -71,6 +71,8 @@ local function dirvish_create()
     dir = fn.substitute(to, [[\(.*\)/[^/]\+]], [[\1]], '')
   end
   fn.system('mkdir -p ' .. dir)
+  -- create empty file first
+  fn.system('touch ' .. to)
   cmd('e ' .. to)
 end
 
