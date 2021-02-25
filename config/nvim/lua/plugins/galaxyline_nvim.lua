@@ -11,6 +11,12 @@ local api = vim.api
 local b = vim.b
 local i = g.icon
 -- gl.short_line_list = {'NvimTree','vista','dbui'}
+i.separator = {
+  left = '',
+  right = '',
+  mid_right = '',
+  mid_left = '',
+}
 
 local colors = {
     base03 = '#002b36',
@@ -33,6 +39,8 @@ local colors = {
 
 local left = {}
 local right = {}
+local short_left = {}
+local short_right = {}
 
 local width_gt_150 = function()
   local width = vim.fn.winwidth(0)
@@ -80,34 +88,34 @@ left[#left+1] = {
     provider = function()
       -- auto change color according the vim mode
       local mode_colors = {
-        n = {colors.base3, colors.base1},
-        i = {colors.base3, colors.yellow},
+        n = {colors.base3, colors.blue},
+        i = {colors.base3, colors.green},
         v = {colors.base3, colors.magenta},
         s = {colors.base3, colors.magenta},
         r = {colors.base3, colors.red},
         c = {colors.base3, colors.violet},
       }
       local mode_text = {
-        n      = 'NORMAL ',
-        i      = 'INSERT ',
-        v      = 'VISUAL ',
-        [''] = 'V-BLOCK',
-        V      = 'V-LINE ',
-        c      = 'COMMAND',
-        t      = ' TERM  ',
-        no     = 'NO',
-        s      = 'SELECT ',
-        S      = 'S',
-        [''] = '^S',
-        ic     = 'ic',
-        R      = 'R',
-        Rv     = 'Rv',
-        cv     = 'cv',
-        ce     = 'ce',
-        r      = 'r',
-        rm     = 'rm',
-        ['r?'] = 'r?',
-        ['!']  = '!',
+        n      = 'NRM',
+        i      = 'INS',
+        v      = 'VIS',
+        [''] = 'V-B',
+        V      = 'V-L',
+        c      = 'CMD',
+        t      = 'TRM',
+        no     = 'NO ',
+        s      = 'SEL',
+        S      = ' S ',
+        [''] = '^S ',
+        ic     = 'ic ',
+        R      = ' R ',
+        Rv     = 'Rv ',
+        cv     = 'cv ',
+        ce     = 'ce ',
+        r      = ' r ',
+        rm     = 'rm ',
+        ['r?'] = 'r? ',
+        ['!']  = ' ! ',
       }
       local mode_color = {
         n = mode_colors.n,
@@ -142,9 +150,9 @@ left[#left+1] = {
           guibg = colors.base01
         },
       })
-      return ' ' .. mode_text[vim.fn.mode()]
+      return ' ' .. mode_text[vim.fn.mode()] .. ' '
     end,
-    separator = '',
+    separator = i.separator.left,
   },
 }
 
@@ -164,9 +172,10 @@ left[#left+1] = {
     end,
     separator_highlight = {colors.base01,colors.base02},
     highlight = {colors.base3, colors.base01, 'NONE'},
-    separator = '',
+    separator = i.separator.left,
   }
 }
+short_left[#short_left+1] = left[#left]
 
 left[#left+1] = {
   MyDiffStats = {
@@ -176,7 +185,8 @@ left[#left+1] = {
         local diff_mod = vim.fn['sy#repo#get_stats']()[2]
         local diff_rem = vim.fn['sy#repo#get_stats']()[3]
         if diff_add ~= -1 then
-          return ' +' .. diff_add .. ' ~' .. diff_mod .. ' -' .. diff_rem
+          local s = i.separator.mid_left
+          return '+' .. diff_add .. s .. '~' .. diff_mod .. s .. '-' .. diff_rem .. s
         end
       end
     end,
@@ -198,9 +208,10 @@ left[#left+1] = {
     condition = vcs.check_git_workspace,
     separator_highlight = {colors.base01,colors.base02},
     highlight = {colors.base3, colors.base01, 'NONE'},
-    separator = '',
+    separator = i.separator.left,
   }
 }
+short_left[#short_left+1] = left[#left]
 
 
 left[#left+1] = {
@@ -213,6 +224,7 @@ left[#left+1] = {
     highlight = {colors.base3,colors.base02}
   }
 }
+short_left[#short_left+1] = left[#left]
 
 right[#right+1] = {
   LspSymbol = {
@@ -260,6 +272,7 @@ right[#right+1] = {
     separator_highlight = {colors.base01,colors.base02}
   }
 }
+short_right[#short_right+1] = right[#right]
 
 right[#right+1] = {
   Fenc = {
@@ -278,11 +291,12 @@ right[#right+1] = {
         return ' ' .. result .. ' '
       end
     end,
-    separator = '',
+    separator = i.separator.right,
     highlight = {colors.base3, colors.base01, 'NONE'},
     separator_highlight = {colors.base01, colors.base02},
   }
 }
+short_right[#short_right+1] = right[#right]
 
 right[#right+1] = {
   LineInformation = {
@@ -293,7 +307,7 @@ right[#right+1] = {
       local column = fn.col('.')
       local percent = 0
       if current_line ~= 1 then
-        percent,_ = math.modf((current_line/total_line)*100)
+        percent, _ = math.modf((current_line/total_line)*100)
       end
       if width_gt_150() then
         return ' '.. percent .. '% :' .. line .. '/' .. total_line .. ' :' .. column .. ' '
@@ -301,16 +315,34 @@ right[#right+1] = {
         return ' ' .. line .. '/' .. total_line .. ' ' .. column .. ' '
       end
     end,
-    separator = '',
+    separator = i.separator.right,
     separator_highlight = {colors.base1, colors.base01},
     highlight = {colors.base3, colors.base1}
   }
 }
+short_right[#short_right+1] = right[#right]
 
 right[#right+1] = {
-  LspDiag = {
+  Diagnostics = { -- @todo @fixme @debug
     provider = function()
+      -- local matches = fn.getmatches()
+
+      local ale = fn['ale#statusline#Count'](fn.bufnr('')) or {total = 0}
       local diagnostics = lspstatus.diagnostics()
+
+      -- if no lsp fallback to ale
+      if #vim.lsp.buf_get_clients() == 0 then
+        -- get level down because ale reports warnings as errors sometimes
+        -- and I dont trust it
+        diagnostics = {
+          hints = ale.info,
+          info = ale.warning + ale.style_warning,
+          warnings = ale.error + ale.style_error,
+          errors = 0,
+        }
+        ale = {total = 0}
+      end
+
       local parts = {}
       if diagnostics.hints > 0 then
         table.insert(parts, i.hint .. ' ' .. diagnostics.hints)
@@ -326,9 +358,9 @@ right[#right+1] = {
         suffix = ' '
       end
 
-      local result = suffix .. fn.join(parts, ' ') .. suffix
+      local result = suffix .. fn.join(parts, ' ' .. i.separator.mid_right .. ' ') .. suffix
       if #parts > 0 and diagnostics.errors > 0 then
-        result = result .. ''
+        result = result .. i.separator.mid_right
       end
       if  diagnostics.errors > 0 then
         result = result .. ' ' .. i.error .. ' ' .. diagnostics.errors .. ' '
@@ -341,18 +373,21 @@ right[#right+1] = {
         bg = colors.orange
       elseif #parts > 0 then
         bg = colors.yellow
+      elseif ale.total > 0 then
+        bg = colors.blue
+        result = ' ' .. i.hint .. ' ' .. ale.total .. ' ' .. i.separator.mid_right .. '  '
       else
         bg = colors.green
         result = '  '
       end
 
       u.highlights({
-          GalaxyLspDiag = {
+          GalaxyDiagnostics = {
             guifg = colors.base3,
             guibg = bg,
             gui = 'none'
           },
-          LspDiagSeparator = {
+          DiagnosticsSeparator = {
             guifg = bg,
             guibg = colors.base1
           },
@@ -360,7 +395,7 @@ right[#right+1] = {
 
       return result
     end,
-    separator = '',
+    separator = i.separator.right,
     -- condition = has_warnings,
     highlight = {colors.base3,colors.orange},
     separator_highlight = {colors.orange, colors.base01}
@@ -369,3 +404,5 @@ right[#right+1] = {
 
 gls.left = left
 gls.right = right
+gls.short_line_left = short_left
+gls.short_line_right = short_right

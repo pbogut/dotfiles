@@ -17,18 +17,21 @@ g.ale_lint_on_text_changed = 'never'
 g.ale_lint_on_insert_leave = false
 g.ale_command_wrapper = 'nice -n15'
 
-g.ale_sign_error = g.icon.error
-g.ale_sign_warning = g.icon.warning
-g.ale_sign_info = g.icon.info
+-- get one level down, as ale is over reacting often
+g.ale_sign_error = g.icon.warning
+g.ale_sign_warning = g.icon.info
+g.ale_sign_info = g.icon.hint
 
 g.ale_virtualtext_cursor = 1
 
 g.ale_virtualtext_prefix = '    ■ '
 g.ale_sign_column_always = 1
 
-g.ale_echo_msg_error_str = 'E'
-g.ale_echo_msg_warning_str = 'W'
-g.ale_echo_msg_format = '[%severity%][%linter%] %s'
+-- get one level down, as ale is over reacting often
+g.ale_echo_msg_error_str = g.icon.warning
+g.ale_echo_msg_warning_str = g.icon.info
+g.ale_echo_msg_info_str = g.icon.hint
+g.ale_echo_msg_format = '[ %severity% ][%linter%] %s'
 
 if fn.filereadable('phpmd.xml') > 0 then
   g.ale_php_phpmd_ruleset = 'phpmd.xml'
