@@ -3,11 +3,8 @@ local util = require 'lspconfig/util'
 local me = {}
 
 function me.setup(opts)
-  local sumneko_root_path = vim.fn.stdpath('cache')..'/lspconfig/sumneko_lua/lua-language-server'
-  local sumneko_binary = sumneko_root_path.."/bin/Linux/lua-language-server"
-
   opts = vim.tbl_deep_extend('keep', opts, {
-    cmd = {sumneko_binary, "-E", sumneko_root_path .. "/main.lua"},
+    cmd = {'lua-language-server'},
     root_dir = function(fname)
       local cwd  = vim.loop.cwd();
       local root = util.root_pattern(".git", "init.lua")(fname);
