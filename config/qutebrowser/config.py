@@ -13,7 +13,7 @@ def bind_js(binding, js_name):
     file.close()
     config.bind(binding, ("jseval " + js_content))
 
-# load widevine
+c.backend = 'webengine'
 c.qt.args = [('ppapi-widevine-path='
               '/usr/lib/qt/plugins/ppapi/libwidevinecdmadapter.so')]
 # /usr/share/qutebrowser/scripts/dictcli.py install pl-PL en-GB
@@ -37,12 +37,7 @@ c.tabs.position = "right"
 c.tabs.width = 200
 c.tabs.padding = {"top": 2, "bottom": 2, "left": 5, "right": 5}
 c.downloads.location.directory = "~/Downloads"
-#c.content.headers.user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"
-c.content.headers.user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
 c.content.plugins = True
-c.content.host_blocking.whitelist = [
-    "piwik.org", "analytics.google.com", "apis.google.com", "thepiratebay.org",
-    "googleadservices.com", "cache.addthiscdn.com"]
 c.content.pdfjs = False
 c.hints.border = "1px solid #E3BE23"
 c.hints.chars = "arstdhneifuwy"

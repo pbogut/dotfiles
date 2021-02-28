@@ -4,12 +4,12 @@ import os
 import json
 import time
 import cachemere
+from mylib.config import config
 from sys import argv
 from subprocess import call
-from subprocess import check_output
 
-octopi_url = check_output(['config', 'octopi/url']).decode().strip()
-api_key = check_output(['config', 'octopi/key']).decode().strip()
+octopi_url = config.get('octopi/url')
+api_key = config.get('octopi/key')
 
 session = cachemere.start('octopi-status', autosave=True)
 

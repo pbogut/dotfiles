@@ -9,24 +9,19 @@ g.completion_abbr_length = 20
 
 u.map('i', '<c-space>', '<plug>(completion_trigger)', {noremap = false})
 u.map('i', '<c-j>', '<plug>(completion_next_source)', {noremap = false})
-
 -- g.completion_auto_change_source = 1
 g.completion_enable_snippet = 'UltiSnips'
 g.completion_chain_complete_list = {
-  default = {
-    {complete_items = {'lsp', 'snippet', 'ts', 'buffers', 'vim-dadbod-completion'}},
-    {mode = 'file'},
+    {complete_items = {
+        'lsp',
+        'snippet',
+        'path',
+        'buffers',
+        'ts',
+        'tabnine',
+        'vim-dadbod-completion',
+    }},
     {mode = 'spell'},
-  },
-  markdown = {
-    {mode = 'spell'},
-    {mode = 'file'},
-  },
-  mail = {
-    {mode = 'spell'},
-    {mode = 'file'},
-  }
-  -- {mode = '<c-n>'},
 }
 
 g.completion_source_priority = {
@@ -34,10 +29,13 @@ g.completion_source_priority = {
   ['vim-dadbod-completion'] = 9,
   snippet = 5,
   ts = 7,
+  tabnine = 8,
+  path = 3,
   buffers = 1,
 }
 
 g.completion_customize_lsp_label = {
+  Path = '',
   Treesitter = 'ts',
   Buffers  = '',
   Function = '',

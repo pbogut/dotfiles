@@ -1,5 +1,9 @@
 priority -50
 
+snippet =ne "echo" i
+<?= /* @noEscape */ ${VISUAL}$0 ?>
+endsnippet
+
 snippet customersession "use CustomerSession"
 use Magento\Customer\Model\Session as CustomerSession;
 endsnippet

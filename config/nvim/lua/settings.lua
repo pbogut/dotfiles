@@ -2,6 +2,7 @@ require('settings.indents')
 require('settings.title')
 require('settings.terminal')
 require('settings.icons')
+require('settings.highlights')
 
 local cmd = vim.cmd
 local o = vim.o
@@ -10,12 +11,13 @@ local bo = vim.bo
 
 cmd('syntax on')
 cmd("filetype plugin indent on")
-cmd('set invlist')
 cmd('set fillchars=fold:\\ ,vert:\\│')
 cmd('set shortmess+=c')
 cmd('set runtimepath+=~/.vim')
 cmd('silent! colorscheme solarized')
 
+o.list = true
+wo.list = true
 o.updatetime = 100
 o.signcolumn = 'yes'
 wo.signcolumn = 'yes'

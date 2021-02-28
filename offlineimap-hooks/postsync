@@ -78,7 +78,7 @@ fi
 #notmuch tag +archive -- date:..`date --date='6 month ago' +%Y-%m-%d`
 
 # Thread view - Add sent and archive items to inbox if part of the thread is in inbox
-notmuch tag +inbox -archive -- tag:inbox $(echo $(notmuch search --output=threads tag:inbox | awk '{print "or " $1}'))
+notmuch tag +inbox -archive -- "(tag:inbox $(echo $(notmuch search --output=threads tag:inbox and tag:new and not:gitlab and not:github | awk '{print "or " $1}')))"
 
 end_hook="$HOME/.offlineimap-hooks-post-postsync-$hostname.sh"
 [[ -f $end_hook ]] && $end_hook

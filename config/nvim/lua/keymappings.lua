@@ -89,7 +89,7 @@ u.map('n', '<space>w', function()
   fn.system('mkdir -p ' .. fn.expand('%:h'))
   local success, err = pcall(cmd,'w!')
   if not success then
-    cmd('SudoWrite')
+    cmd('SudaWrite')
   end
 end)
 -- open terminal

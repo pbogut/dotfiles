@@ -82,7 +82,6 @@ entries.each do |entry|
   end
 end
 
-search_parts = []
 # get only top part of domain
 site_parts = []
 url = ENV['QUTE_URL'] || ''
@@ -217,11 +216,18 @@ if action == '--type-pass'
   end
 end
 if action == '--type-user-and-pass' or action.empty?
-  File.open(ENV['QUTE_FIFO'], 'w') do |file|
-    file.write("fake-key #{user}\n")
-    file.write("fake-key <tab>\n")
-    file.write("fake-key #{pass}\n")
-    # file.write("fake-key -g <esc>i\n")
+  if ENV['QUTE_FIFO']
+    File.open(ENV['QUTE_FIFO'], 'w') do |file|
+      file.write("fake-key #{user}\n")
+      file.write("fake-key <tab>\n")
+      file.write("fake-key #{pass}\n")
+      # file.write("fake-key -g <esc>i\n")
+    end
+  else
+    Open3.capture3('sleep', '0.5s')
+    Open3.capture3('xdotool', 'type', '--clearmodifiers', user)
+    Open3.capture3('xdotool', 'type', '--clearmodifiers', "\t")
+    Open3.capture3('xdotool', 'type', '--clearmodifiers', pass)
   end
 end
 if action == '--type-otpauth'

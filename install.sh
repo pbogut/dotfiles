@@ -50,9 +50,10 @@ read -d '' files <<"EOF"
     config/i3/workspaces
     config/ncmpcpp/config
     config/ncmpcpp/bindings
-    config/nvim/init.vim
+    config/nvim/init.lua
     config/nvim/ginit.vim
     config/nvim/config
+    config/nvim/templates
     config/pip/pip.conf
     config/polybar
     config/qutebrowser/config.py

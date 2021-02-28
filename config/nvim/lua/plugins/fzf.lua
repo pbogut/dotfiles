@@ -10,7 +10,7 @@ local l = {}
 g.fzf_layout = { down = '~35%' }
 g.fzf_command_prefix = "FZF"
 -- g.fzf_mru_relative = 1
-g.fzf_mru_max = 100
+g.fzf_mru_max = 10000
 g.fzf_mru_per_session = 1
 g.fzf_action = {
   ['ctrl-t'] = 'tab split',
@@ -46,7 +46,9 @@ u.map('n', '<space>gr', ':Rg<cr>')
 u.map('n', '<space>gw', ':Rg <cword><cr>')
 u.map('v', '<space>gw', '"ay :Rg <c-r>a<cr>')
 
-u.map('n', '<space>fm', ':execute(":FZFFreshMru " . g:fzf_preview)<cr>')
+u.map('n', '<space>fn', ':execute(":FZFFreshMru " . g:fzf_preview)<cr>')
+u.map('n', '<space>fm', [[:lua require('fzf_mru.mru').display({branch = true})<cr>]])
+u.map('n', '<space>fM', [[:lua require('fzf_mru.mru').display()<cr>]])
 u.map('n', '<space>fb', ':FZFBuffers<cr>')
 
 cmd([[command! -nargs=* -bang -complete=dir Rg lua require'plugins.fzf'.rg('<bang>' == '!',<q-args>)]])

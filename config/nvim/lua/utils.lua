@@ -125,11 +125,15 @@ end
 -- @param groups {HlGroup = {guibg = '#123456', guifg='#654321'}}
 function u.highlights(groups)
   for group_name, definition in pairs(groups) do
-    local command = 'highlight ' .. group_name
-    for key, value in pairs(definition) do
-      command = command .. ' ' .. key .. '=' .. value
+    if definition.link then
+      cmd('highlight link ' .. group_name .. ' ' .. definition.link)
+    else
+      local command = 'highlight ' .. group_name
+      for key, value in pairs(definition) do
+        command = command .. ' ' .. key .. '=' .. value
+      end
+      cmd(command)
     end
-    cmd(command)
   end
 end
 

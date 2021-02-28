@@ -1,23 +1,13 @@
 local u = require('utils')
 local bo = vim.bo
+local b = vim.b
 local wo = vim.wo
-local o = vim.o
+local w = vim.w
 local cmd = vim.cmd
 local fn = vim.fn
 
 local config_group = {
   -- fix terminal display
-  VimEnter = {
-    {
-      '*',
-      function()
-        -- highlights
-        u.highlights({
-          Folded = { term = 'NONE', cterm = 'NONE',  gui = 'NONE' }
-        })
-      end
-    },
-  },
   TermOpen = {
     {
       '*',
@@ -30,13 +20,22 @@ local config_group = {
       end
     },
   },
-  ['WinEnter,BufEnter'] = {
+  BufEnter = {
+    {'env.*', function()
+        bo.filetype = 'sh'
+      end
+    },
+  },
+  ['BufEnter,WinNew'] = {
     {
       '*',
       function()
-        fn.matchadd('Todo', '@todo\\>')
-        fn.matchadd('Todo', '@fixme\\>')
-        fn.matchadd('Error', '@debug\\>')
+        if w.match_mytodo then fn.matchdelete(w.match_mytodo) end
+        if w.match_myfixme then fn.matchdelete(w.match_myfixme) end
+        if w.match_mydebug then fn.matchdelete(w.match_mydebug) end
+        w.match_mytodo = fn.matchadd('MyTodo', '@todo\\>')
+        w.match_myfixme = fn.matchadd('MyFixme', '@fixme\\>')
+        w.match_mydebug = fn.matchadd('MyDebug', '@debug\\>')
       end
     },
   },
@@ -75,9 +74,15 @@ local config_group = {
       end
     },
     {
+      'javascript',
+      function()
+        bo.iskeyword = '@,48-57,_,192-255' -- remove $ from keyword list, whiy tist there in js anyway?
+      end
+    },
+    {
       'php',
       function()
-        bo.iskeyword = '@,48-57,_,192-255,$'
+        -- bo.iskeyword = '@,48-57,_,192-255,$'
       end
     },
     {

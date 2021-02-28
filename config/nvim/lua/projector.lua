@@ -24,7 +24,7 @@ local templates_path = os.getenv('HOME') .. '/.config/nvim/templates'
 local configuration = require('plugins.projector')
 
 function a.ultisnip_template(name)
-  cmd("normal! i_t" .. name .. t'<c-r>=UltiSnips#ExpandSnippet()<cr>')
+  cmd("silent! normal! i_t" .. name .. t'<c-r>=UltiSnips#ExpandSnippet()<cr>')
   if not g.ulti_expand_res or g.ulti_expand_res == 0 then
     cmd("silent! undo")
   end
@@ -71,7 +71,9 @@ function a.do_template()
 
   for _, config in u.spairs(file_configs, l.sort) do
     if type(config.template) == 'string' and config.template:match('^%_') then
-      return a.ultisnip_template(config.template)
+      if a.ultisnip_template(config.template) then -- try till it lands
+        return true
+      end
     elseif type(config.template) == 'string' then
       return a.file_template(config.template)
     end

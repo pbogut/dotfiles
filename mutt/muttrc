@@ -134,12 +134,12 @@ virtual-mailboxes \
     "   ├ Locals"         "notmuch://?query=tag:newsletter and tag:locals"                                                 \
     "   └ Politics"       "notmuch://?query=tag:newsletter and tag:politics"                                               \
     "Everything"          "notmuch://?query=not tag:spam"                                                                  \
-    " ├  Last 3 months"  "notmuch://?query=date:`date --date="3 months ago" '+%Y-%m-%d'`.. and not tag:spam"              \
-    " ├  Last 6 months"  "notmuch://?query=date:`date --date="6 months ago" '+%Y-%m-%d'`.. and not tag:spam"              \
-    " ├  Last year"      "notmuch://?query=date:`date --date="12 months ago" '+%Y-%m-%d'`.. and not tag:spam"             \
-    " ├  Flagged"        "notmuch://?query=tag:flagged and not tag:spam"                                                  \
-    " ├  trash"          "notmuch://?query=tag:trash and not tag:spam"                                                    \
-    " └ ﯍ spam"           "notmuch://?query=tag:spam" \
+    " ├  Last 3 months"  "notmuch://?query=date:`date --date="3 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
+    " ├  Last 6 months"  "notmuch://?query=date:`date --date="6 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
+    " ├  Last year"      "notmuch://?query=date:`date --date="12 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"             \
+    " ├  Flagged"        "notmuch://?query=tag:flagged and not tag:spam and not tag:sendmail"                                                  \
+    " ├  trash"          "notmuch://?query=tag:trash and not tag:spam and not tag:sendmail"                                                    \
+    " └ ﯍ spam"           "notmuch://?query=tag:spam and not tag:sendmail" \
     "Sendmail"            "notmuch://?query=tag:sendmail and NOT tag:archive" \
     " └ all"              "notmuch://?query=tag:sendmail"
 
