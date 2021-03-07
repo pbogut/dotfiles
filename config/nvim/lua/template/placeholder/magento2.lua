@@ -21,9 +21,14 @@ p.module_name = {
     return 'Vendor_ModuleName'
   end
 }
+p.module_name_str = {
+  value = function()
+    return p.module_name.value():gsub('_', ' '):gsub('([a-z0-9A-Z])([A-Z])', '%1 %2')
+  end
+}
 p.module_key = {
   value = function()
-    return p.module_name.value:lower()
+    return p.module_name.value():lower()
   end
 }
 p.namespace = {

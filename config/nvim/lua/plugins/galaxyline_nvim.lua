@@ -168,7 +168,7 @@ left[#left+1] = {
   ClearIfNoGit = {
     provider = function() return '' end,
     condition = function()
-      return vcs.check_git_workspace() == false
+      return vcs.get_git_branch() == false
     end,
     separator_highlight = {colors.base01,colors.base02},
     highlight = {colors.base3, colors.base01, 'NONE'},
@@ -191,7 +191,7 @@ left[#left+1] = {
       end
     end,
     condition = function()
-      return vcs.check_git_workspace()
+      return vcs.get_git_branch()
         and width_gt_150()
     end,
     highlight = {colors.base3,colors.base01},
@@ -205,7 +205,7 @@ left[#left+1] = {
       local branch = vcs.get_git_branch() or ''
       return '  ' .. branch:gsub('%s*$', '') .. ' '
     end,
-    condition = vcs.check_git_workspace,
+    condition = vcs.get_git_branch,
     separator_highlight = {colors.base01,colors.base02},
     highlight = {colors.base3, colors.base01, 'NONE'},
     separator = i.separator.left,

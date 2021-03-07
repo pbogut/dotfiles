@@ -33,25 +33,6 @@ u.augroup('x_templates', {
     },
 })
 
-function l.snakecase(text)
-  return text:gsub('([a-z])([A-Z])', '%1_%2'):lower()
-end
-
-function l.camelcase(text)
-  return text:gsub('_(%l)', function(match)
-    return match:upper()
-  end)
-end
-
-function l.capitalize(text)
-  text = text:gsub('([^%l%u])(%l)', function(sign, letter)
-    return sign .. letter:upper()
-  end)
-  return text:gsub('^(%l)', function(letter)
-    return letter:upper()
-  end)
-end
-
 function l.mag_rm_pool(text)
   return text:gsub('^[a-z]*/(.*)', '%1') -- drop first part which is code pool
 end
@@ -70,8 +51,8 @@ return {
         priority = 100,
         template = "_magento_block",
         alternate = function(_, opt)
-          local path = l.snakecase(l.mag_rm_pool(opt.match[1]))
-          local file = l.snakecase(opt.match[2])
+          local path = h.snakecase(l.mag_rm_pool(opt.match[1]))
+          local file = h.snakecase(opt.match[2])
           return {'app/design/frontend/base/default/template/'
                   .. path .. '/' .. file .. '.phtml'}
         end
@@ -96,7 +77,7 @@ return {
         priority = 100,
         alternate = function(_, opt)
           local filename =
-            l.mag_add_block(l.capitalize(l.camelcase(opt.match[1])))
+            l.mag_add_block(h.capitalize(h.camelcase(opt.match[1])))
           return {
             'app/code/core/' .. filename .. '.php',
             'app/code/community/' .. filename .. '.php',
@@ -108,8 +89,40 @@ return {
   },
   -- magento2 project
   ["composer.json&bin/magento"] = {
+    generators = {
+      module = {
+        variables = {
+          Vendor = '',
+          ModuleName = '',
+        },
+        {
+          'app/code/{Vendor}/{ModuleName}/registration.php',
+          'app/code/{Vendor}/{ModuleName}/etc/module.xml',
+        }
+      }
+    },
     priority = 100,
     patterns = {
+      ['app/code/(.*)/Block/(.*)%.php'] = {
+        priority = 100,
+        template = "magento2/block.php",
+        alternate = function(_, opt)
+          return {
+            'app/code/' .. opt.match[1] .. '/view/frontend/templates/'
+              .. h.snakecase(opt.match[2]) .. '.phtml',
+          }
+        end,
+      },
+      ['app/code/(.*)/view/frontend/templates/(.*)%.phtml'] = {
+        priority = 100,
+        template = "magento2/block.phtml",
+        alternate = function(_, opt)
+          return {
+            'app/code/' .. opt.match[1] .. '/Block/'
+              ..  h.capitalize(h.camelcase(opt.match[2])) .. '.php',
+          }
+        end,
+      },
       ['app/code/.*/Model/ResourceModel/.*/Collection%.php'] = {
         template = "_magento2_resource_model_collection",
         priority = 100
@@ -147,6 +160,9 @@ return {
       ['app/code/.*/view/adminhtml/layout/.*_edit.xml'] = {
         template = "_magento2_layout_entity_edit"
       },
+      ['app/code/.*/etc/email_templates.xml'] = {
+        template = "magento2/etc/email_templates.xml"
+      },
       ['app/code/.*/view/adminhtml/ui_component/.*_listing.xml'] = {
         template = "_magento2_layout_ui_component_listing"
       },
@@ -181,17 +197,25 @@ return {
         template = "_magento2_observer",
         priority = 100
       },
+      ['app/code/.*/etc/widget.xml'] = {
+        template = "/magento2/etc/widget.xml",
+        priority = 100,
+      },
       ['app/code/.*/etc/module.xml'] = {
-        template = "_magento2_module"
+        template = "_magento2_module",
+        priority = 100,
       },
       ['app/code/.*/etc/.*/?events.xml'] = {
-        template = "_magento2_events"
+        template = "_magento2_events",
+        priority = 100,
       },
       ['app/code/.*/etc/frontend/routes.xml'] = {
-        template = "_magento2_frontend_routes"
+        template = "_magento2_frontend_routes",
+        priority = 100,
       },
       ['app/code/.*/etc/adminhtml/routes.xml'] = {
-        template = "_magento2_adminhtml_routes"
+        template = "_magento2_adminhtml_routes",
+        priority = 100,
       },
       ['app/code/.*/etc/.*/?di.xml'] = {
         template = "_magento2_di",

@@ -1,10 +1,10 @@
 require'nvim-treesitter.configs'.setup {
   ensure_installed = "maintained", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
   highlight = {
-    enable = false -- its buggy, will try in some time
+    enable = true, 
   },
   indent = {
-    enable = false -- like it better in php/html so far, but its shit in pure php
+    enable = true, 
   }
 }
 
