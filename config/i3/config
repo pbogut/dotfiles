@@ -277,6 +277,10 @@ assign [title="^jira$"] $wsdash
 # for_window [class="^qutebrowser$" workspace="$wscode"] focus
 
 for_window [title="NVIM_FOR_QB"] floating enable
+for_window [title="QB_FILE_SELECTION"] floating enable
+for_window [title="QB_FILE_SELECTION"] move absolute position 360px 140px
+for_window [title="QB_FILE_SELECTION"] resize set width 1200px
+for_window [title="QB_FILE_SELECTION"] resize set height 800px
 for_window [title="FLOATING_WINDOW"] floating enable
 for_window [title="Friends List"] floating enable
 for_window [class="Toggl Desktop"] floating enable

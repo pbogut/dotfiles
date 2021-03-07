@@ -22,6 +22,11 @@ c.url.start_pages = ["http://localhost:46637"]
 c.url.default_page = 'http://localhost:46637'
 # c.url.start_pages = ["https://duckduckgo.com/"]
 # c.url.default_page = 'https://duckduckgo.com/'
+
+c.fileselect.handler = "external"
+c.fileselect.single_file.command = ["urxvt", "-T", "QB_FILE_SELECTION", "-e", "ranger", "--choosefile={}"]
+c.fileselect.multiple_files.command = ["urxvt", "-T", "QB_FILE_SELECTION", "-e", "ranger", "--choosefiles={}"]
+
 c.downloads.open_dispatcher = '/bin/bash -c "QB_DOWNLOAD_FILE=1 download-sort-and-open.sh \'{}\'"'
 c.editor.command = ["urxvt", "--geometry", "120x32",
                     "--title", "NVIM_FOR_QB", "-e", "nvim", "{}"]
