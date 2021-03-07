@@ -435,14 +435,6 @@ if m:
 `}
 endsnippet
 
-snippet [ "Close array" i
-[]$0
-endsnippet
-
-snippet { "Close block" i
-{}$0
-endsnippet
-
 snippet [] "Expand array" i
 [
 	$0
@@ -477,6 +469,12 @@ snippet []) "Expand last param array" i
 ])
 endsnippet
 
+snippet array( "Expand last param old array" i
+array(
+	$0
+)
+endsnippet
+
 snippet array()) "Expand last param old array" i
 array(
 	$0
@@ -505,6 +503,18 @@ snippet []); "Expand last param array with colon" i
 [
 	$0
 ]);
+endsnippet
+
+snippet [ "Expand to list" i
+[
+	$0
+]
+endsnippet
+
+snippet { "Expand to block" i
+{
+	$0
+}
 endsnippet
 
 snippet {} "Expand block" i
