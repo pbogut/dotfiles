@@ -27,6 +27,12 @@ local config_group = {
     },
   },
   ['BufEnter,WinNew'] = {
+    { '*.php,*.phtml',
+      function()
+        -- if w.match_php_annotation then fn.matchdelete(w.match_php_annotation) end
+        -- w.match_php_annotation = fn.matchadd('TSAnnotation', [[\* \zs@[a-z]*\>]])
+      end
+    },
     {
       '*',
       function()
@@ -82,7 +88,8 @@ local config_group = {
     {
       'php',
       function()
-        -- bo.iskeyword = '@,48-57,_,192-255,$'
+        -- if w.match_php_annotation then fn.matchdelete(w.match_php_annotation) end
+        -- w.match_php_annotation = fn.matchadd('TSAnnotation', [[\* \zs@[a-z]*\>]])
       end
     },
     {

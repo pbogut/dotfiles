@@ -56,6 +56,18 @@ function a.template_from_cmd(args)
   end
 end
 
+
+-- create template
+function a.generate(generator_name)
+  local generators = l.get_project_generators()
+  if not generators[generator_name] then
+    print('Generator ' .. generator_name .. ' not found');
+  end
+
+  -- generators[generator_name].variables
+
+end
+
 -- create template
 function a.do_template()
   -- Abort on non-empty buffer or extant file
@@ -68,13 +80,16 @@ function a.do_template()
   local filename = fn.expand('%:p')
   local relative = filename:gsub('^' .. cwd .. '/', '')
   local file_configs = l.get_file_configs(cwd, relative)
+  -- print(vim.inspect(file_configs))
 
   for _, config in u.spairs(file_configs, l.sort) do
     if type(config.template) == 'string' and config.template:match('^%_') then
+      -- print('ulti', config.template);
       if a.ultisnip_template(config.template) then -- try till it lands
         return true
       end
     elseif type(config.template) == 'string' then
+      -- print('file', config.template);
       return a.file_template(config.template)
     end
   end
@@ -204,6 +219,18 @@ function l.get_project_patterns(cwd)
     if l.check_project(cwd, project_pattern) then
       -- first on the list has priority
       result = u.merge_tables(project_config.patterns, result)
+    end
+  end
+
+  return result
+end
+
+function l.get_project_generators(cwd)
+  local result = {}
+  for project_pattern, project_config in u.spairs(configuration, l.sort) do
+    if l.check_project(cwd, project_pattern) then
+      -- first on the list has priority
+      result = u.merge_tables(project_config.generators, result)
     end
   end
 

@@ -216,3 +216,8 @@ u.command('LspReload', function()
      cmd('edit')
 end)
 u.command('LspAttachBuffer', attach_lsp_to_new_buffer)
+-- u.augroup('x_nvim_lsp', {
+--     BufNewFile = {
+--       { "*", attach_lsp_to_new_buffer }
+--     }
+-- })

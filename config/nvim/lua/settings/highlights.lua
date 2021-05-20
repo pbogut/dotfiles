@@ -14,6 +14,8 @@ local function highlights()
     MyFixme = {gui = 'bold', guifg = '#d33682'},
     MyDebug = {gui = 'bold', guifg = '#dc322f'},
 
+    IndentBlanklineChar = {gui = 'none', guifg = g.colors.base02},
+
     TSPunctBracket      = { guifg = c.red },
     TSPunctDelimiter  = { guifg = c.alt_base0 },
     TSPunctSpecial     = { guifg = c.alt_base0 },

@@ -59,6 +59,9 @@ function u.command(command_name, action, opts)
   if (opts.nargs) then
     command = command .. '-nargs=' .. opts.nargs .. ' '
   end
+  if (opts.complete) then
+    command = command .. '-complete=' .. opts.complete .. ' '
+  end
   if (opts.bang) then
     args[#args+1] = '<bang>0?v:true:v:false'
     command = command .. '-bang '
@@ -87,6 +90,7 @@ function u.command(command_name, action, opts)
     end
     call = call .. [[)]]
     command = command .. call
+    -- print(command)
   else
     command = command .. action
   end
@@ -290,6 +294,38 @@ function u.spairs(t, order)
             return keys[i], t[keys[i]]
         end
     end
+end
+
+function u.dedup(tab, keymaker)
+  local key_index = {}
+  local del_index = {}
+  for index, element in ipairs(tab) do
+    local key = element
+    if keymaker then
+      key = keymaker(element)
+    end
+    if key_index[key] then
+      table.insert(del_index, 1, index)
+    end
+    key_index[key] = true
+  end
+
+  for _, index in ipairs(del_index) do
+    table.remove(tab, index)
+  end
+
+  return tab
+end
+
+function u.profile_start()
+  cmd([[profile start profile.log]])
+  cmd([[profile func *]])
+  cmd([[profile file *]])
+end
+
+function u.profile_stop()
+  cmd([[profile pause]])
+  cmd([[noautocmd qall!]])
 end
 
 function u.pp(var)

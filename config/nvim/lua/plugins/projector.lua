@@ -15,7 +15,8 @@ u.augroup('x_templates', {
           -- initially ft is not available and ultisnip is not working correctly
           -- so we deffer to next loop when ft is set properly
           vim.schedule(function()
-            cmd('unsilent lua require"projector".do_template()')
+            -- cmd('unsilent lua require"projector".do_template()')
+            cmd('lua require"projector".do_template()')
           end)
       end},
     },
@@ -196,6 +197,10 @@ return {
       ['app/code/.*/Observer/.*%.php'] = {
         template = "_magento2_observer",
         priority = 100
+      },
+      ['app/code/.*/Source/.*%.php'] = {
+        template = "/magento2/Source/Source.php",
+        priority = 100,
       },
       ['app/code/.*/etc/widget.xml'] = {
         template = "/magento2/etc/widget.xml",

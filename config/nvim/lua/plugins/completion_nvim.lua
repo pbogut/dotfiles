@@ -4,8 +4,8 @@ local u = require('utils')
 local g = vim.g
 
 g.completion_matching_strategy_list = {'exact', 'substring'}
-g.completion_menu_length = 20
-g.completion_abbr_length = 20
+-- g.completion_menu_length = 20
+-- g.completion_abbr_length = 20
 
 u.map('i', '<c-space>', '<plug>(completion_trigger)', {noremap = false})
 u.map('i', '<c-j>', '<plug>(completion_next_source)', {noremap = false})

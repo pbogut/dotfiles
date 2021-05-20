@@ -11,7 +11,13 @@ local api = vim.api
 local b = vim.b
 local i = g.icon
 -- gl.short_line_list = {'NvimTree','vista','dbui'}
+-- 
 i.separator = {
+  -- left = '',
+  -- right = '',
+  -- mid_right = '',
+  -- left = '',
+  -- right = '',
   left = '',
   right = '',
   mid_right = '',
@@ -27,13 +33,29 @@ local colors = {
     base1   = '#93a1a1',
     base2   = '#eee8d5',
     base3   = '#fdf6e3',
+    -- yellow  = '#b58900',
     orange  = '#cb4b16',
     red     = '#dc322f',
     magenta = '#d33682',
     violet  = '#6c71c4',
     blue = '#268bd2',
     cyan    = '#2aa198',
+    -- green   = '#859900',
+    -- base03  ='#1c1c1c',
+    -- base02  ='#262626',
+    -- base01  ='#4e4e4e',
+    -- base00  ='#585858',
+    -- base0   ='#808080',
+    -- base1   ='#8a8a8a',
+    -- base2   ='#d7d7af',
+    -- base3   ='#ffffd7',
     yellow  = '#af8700',
+    -- orange  ='#d75f00',
+    -- red     ='#d70000',
+    -- magenta ='#af005f',
+    -- violet  ='#5f5faf',
+    -- blue    ='#0087ff',
+    -- cyan    ='#00afaf',
     green   = '#5f8700',
 }
 
@@ -88,6 +110,8 @@ left[#left+1] = {
     provider = function()
       -- auto change color according the vim mode
       local mode_colors = {
+        -- n = {colors.base3, colors.base1},
+        -- i = {colors.base3, colors.yellow},
         n = {colors.base3, colors.blue},
         i = {colors.base3, colors.green},
         v = {colors.base3, colors.magenta},
@@ -237,6 +261,7 @@ right[#right+1] = {
 
       return result
     end,
+    -- condition = function() return (b.lsp_current_function or '') ~= '' end,
     highlight = {colors.base3,colors.base02},
     separator_highlight = {colors.base01,colors.base02}
   }

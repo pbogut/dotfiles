@@ -5,3 +5,4 @@ require('keymappings')
 require('commands')
 -- local plugins --
 require('projector')
+require('remotesync')
