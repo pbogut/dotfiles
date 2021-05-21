@@ -176,7 +176,7 @@ git_sync_upstream() {
 git_checkout_or_create_branch() {
   branch=$1
   if [[ "$branch" == "" ]]; then
-    branch=$(git branch | rofi -dmenu)
+    branch=$(git branch | rofi -dmenu -i)
   fi
 
   output=$(git checkout $branch 2>&1 >/dev/null)
