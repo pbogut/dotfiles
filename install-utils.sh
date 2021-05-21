@@ -17,7 +17,9 @@ sudo pacman -S wget which
 install_yay
 echo "Installing neovim..."
 yay -S \
-    abook \
+    base-devel \
+    cmake \
+    atool \
     inetutils \
     picom \
     dmenu \
