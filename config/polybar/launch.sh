@@ -12,11 +12,15 @@ killall -q polybar
 # polybar-msg cmd quit
 
 
+hostname=$(hostname)
 
 screens=$(polybar -m | wc -l)
 primary=$(polybar -m | grep '(primary)' | awk '{gsub(/:$/, "", $1); print $1}')
 
-if [[ $screens -eq 2 ]]; then
+if [[ $hostname == "silverspoon" ]]; then
+  echo "---" | tee -a /tmp/polybar1.log
+  MONITOR=$primary    polybar silverspoon  2>&1 | tee -a /tmp/polybar1.log & disown
+elif [[ $screens -eq 2 ]]; then
   echo "---" | tee -a /tmp/polybar1.log /tmp/polybar2.log
   secondary=$(polybar -m | grep -v '(primary)' | awk '{gsub(/:$/, "", $1); print $1}' | head -n1)
 

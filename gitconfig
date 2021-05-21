@@ -27,6 +27,8 @@
     rmc = rm --cached
     cob = checkout -b
     cl = "!. ~/.githelpers && git_clone_to_projects"
+    gh = "!. ~/.githelpers && git_clone_to_projects"
+    gl = "!. ~/.githelpers && git_clone_to_projects_gl"
     ccstaging = "!. ~/.githelpers && create_clean_staging"
     au = "update-index --assume-unchanged" #  assume unchanged
     nau = "update-index --no-assume-unchanged" #  no assume unchanged

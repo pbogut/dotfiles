@@ -5,7 +5,6 @@ URxvt.depth:                32
 URxvt*buffered:             false
 ! URxvt.geometry:             90x30
 URxvt.transparent:          false
-URxvt.fading:               0
 URxvt.urgentOnBell:         false
 URxvt.visualBell:           false
 URxvt.loginShell:           true
