@@ -51,6 +51,7 @@ read -d '' files <<"EOF"
     config/ncmpcpp/config
     config/ncmpcpp/bindings
     config/nvim/init.lua
+    config/nvim/lua
     config/nvim/ginit.vim
     config/nvim/config
     config/nvim/templates

@@ -73,19 +73,47 @@ pretty_git_log() {
     fi
 }
 
+git_clone_to_projects_gl() {
+  repo=$1
+  if [[ ! "$1" =~ (@) ]] && [[ ! "$1" =~ ^http ]]; then
+    # use github by default
+    repo="git@gitlab.com:$repo.git"
+  fi
+
+  if [[ "$2" == "" ]]; then
+    dest="$HOME/Projects/$(echo "$repo" |
+      sed 's#[^@]*@##' |
+      sed 's#^\(https\|http\)://##g' |
+      sed 's#:#/#g' |
+      sed 's#\.git$##g' |
+      awk '{print tolower($0)}')"
+  else
+    dest="$2"
+  fi
+  if [[ -n $repo ]]; then
+    git clone $repo $dest
+  else
+    echo "You must specify a repository to clone."
+    echo
+    echo "usage: git cl <repo> [<dir>]"
+    echo
+    echo "If no dir provided then ~/Projects/<git-host>/<repo-owner>/<repo-name> is used."
+    echo
+  fi
+}
 git_clone_to_projects() {
   repo=$1
-  if [[ ! "$1" =~ (@) ]]; then
+  if [[ ! "$1" =~ (@) ]] && [[ ! "$1" =~ ^http ]]; then
     # use github by default
     repo="git@github.com:$repo.git"
   fi
 
   if [[ "$2" == "" ]]; then
-    dest="$HOME/Projects/$(echo "$repo" | 
-      sed 's#[^@]*@##' | 
-      sed 's#^\(https\|http\)://##g' | 
-      sed 's#:#/#g' | 
-      sed 's#\.git$##g' | 
+    dest="$HOME/Projects/$(echo "$repo" |
+      sed 's#[^@]*@##' |
+      sed 's#^\(https\|http\)://##g' |
+      sed 's#:#/#g' |
+      sed 's#\.git$##g' |
       awk '{print tolower($0)}')"
   else
     dest="$2"
