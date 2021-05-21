@@ -31,7 +31,7 @@ notmuch tag +drafts -- folder:/drafts/ tag:new
 notmuch tag +sent -- folder:/sent/ tag:new
 notmuch tag +trash -- folder:/trash/ tag:new
 notmuch tag +spam -- folder:/spam/ tag:new
-notmuch tag +sendmail -- folder:sendmail tag:new
+notmuch tag +sendmail -unread -inbox -- folder:sendmail tag:new
 
 # add image tag
 notmuch tag +image -- tag:new and mimetype:image

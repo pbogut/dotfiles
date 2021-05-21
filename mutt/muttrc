@@ -93,7 +93,8 @@ bind compose Y send-message
 bind compose y noop
 macro compose H ':set sendmail="msmtp.sh --preview"<enter><send-message>:set sendmail="msmtp.sh"<enter>'
 
-macro index,pager \cr '<shell-escape>echo -n "Checking for new emails... " && OFFLINEIMAP_INBOX_ONLY=1 offlineimap > /dev/null 2>&1 <enter>'
+# macro index,pager \cr '<shell-escape>echo -n "Checking for new emails... " && OFFLINEIMAP_INBOX_ONLY=1 offlineimap > /dev/null 2>&1 <enter>'
+macro index,pager \cr '<shell-escape>echo -n "Checking for new emails... " && offlineimap-reload.sh <enter>'
 
 # open attachments with rifle
 macro attach \CO '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>i3-open /tmp/.mutt-tmp/* <enter>'
@@ -207,4 +208,5 @@ set implicit_autoview
 
 # theme
 source ~/.mutt/solarized-dark-16.muttrc
+source ~/.mutt/hooks
 #folder-hook ! archive "color index red default \"~Y '\W?archive\W?'\""

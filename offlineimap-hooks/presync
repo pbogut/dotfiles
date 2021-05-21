@@ -33,7 +33,10 @@ notmuch search --output=files tag:sent | grep "$_account_filter" |grep '/INBOX/'
 
 notmuch tag +archive -- not date:`date +%Y` and not date:`expr $(date +%Y) - 1` and not tag:archive and tag:sent
 
-$HOME/.offlineimap-hooks/archive $_account_filter
+# archive only on redeye
+if [[ $(hostname) == "redeye" ]]; then
+    $HOME/.offlineimap-hooks/archive $_account_filter
+fi
 
 # detect moved files and update database
 notmuch new
