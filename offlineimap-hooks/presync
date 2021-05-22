@@ -5,11 +5,12 @@
 # fi
 
 account="$1"
-
 if [[ $account == "" ]]; then
   _account_filter="."
+  folder_filter=".*"
 else
   _account_filter="/Maildir/$account/"
+  folder_filter="/^$account"
 fi
 
 # if something is archive, then it should not be inbox
@@ -19,9 +20,10 @@ notmuch tag -unread -inbox -- tag:archive
 # but only if they are in inbox or sent, other are in archive
 # already (at least on gmail, but that one actually make sense).
 
-notmuch search --output=files tag:archive | grep "$_account_filter" | grep '/INBOX/\|/sent/' |while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null  2>&1;done;
+notmuch search --output=files tag:archive and "folder:$folder_filter/sent/" | while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null 2>&1;done;
+notmuch search --output=files tag:archive and "folder:$folder_filter/INBOX/" | while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null 2>&1;done;
 
-notmuch search --output=files "not tag:inbox and not tag:sent" | grep "$_account_filter" | grep INBOX | while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null 2>&1 ;done;
+notmuch search --output=files "not tag:inbox and not tag:sent and folder:$folder_filter/INBOX/" | while read line; do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null 2>&1 ;done;
 
 # move sent emails out of inbox folder
 notmuch search --output=files tag:sent | grep "$_account_filter" |grep '/INBOX/' |while read line; do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/sent/\3#'`"  > /dev/null 2>&1 ;done;
@@ -35,7 +37,7 @@ notmuch tag +archive -- not date:`date +%Y` and not date:`expr $(date +%Y) - 1` 
 
 # archive only on redeye
 if [[ $(hostname) == "redeye" ]]; then
-    $HOME/.offlineimap-hooks/archive $_account_filter
+    $HOME/.offlineimap-hooks/archive $account
 fi
 
 # detect moved files and update database
