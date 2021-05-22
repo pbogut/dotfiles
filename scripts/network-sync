@@ -104,13 +104,16 @@ print_status() {
 if [[ $action == "enable" ]]; then
   run touch ~/.netsync-enabled > /dev/null 2>&1
   print_status
+  exit
 fi
 if [[ $action == "disable" ]]; then
   rm -fr touch ~/.netsync-enabled > /dev/null 2>&1
   print_status
+  exit
 fi
 if [[ $action == "status" ]]; then
   print_status
+  exit
 fi
 
 # check status
@@ -126,12 +129,14 @@ fi
 if [[ $action == "inbox" ]]; then
   [[ $quiet == "yes" ]] && quiet="-u quiet"
   run "OFFLINEIMAP_INBOX_ONLY=1 $trickle offlineimap $quiet"
+  exit
 fi
 
 # sync full email
 if [[ $action == "inbox" ]] || [[ $action == "all" ]]; then
   [[ $quiet == "yes" ]] && quiet="-u quiet"
   run "$trickle offlineimap $quiet"
+  exit
 fi
 
 # sync calendars
@@ -141,4 +146,5 @@ if [[ $action == "calendar" ]] || [[ $action == "all" ]]; then
   else
     run "$trickle vdirsyncer sync 2>&1"
   fi
+  exit
 fi
