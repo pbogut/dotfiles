@@ -28,8 +28,9 @@ ls -1d --color=never ~/Maildir/$sort_filter/archive | sed "s#$HOME/Maildir/#fold
 notmuch tag -sort_directories -- tag:sort_directories
 
 # hook up after directories are sorted, so we dont mess with them anymore
-begin_hook="$HOME/.offlineimap-hooks-pre-postsync-$hostname.sh"
-[[ -f $begin_hook ]] && $begin_hook
+if [[ -f ~/.offlineimap-hooks/mails-to-myself ]]; then
+    ~/.offlineimap-hooks/mails-to-myself
+fi
 
 notmuch tag +spam -inbox -- 'tag:new and subject:^[SPAM]'
 
@@ -86,7 +87,8 @@ fi
 # Thread view - Add sent and archive items to inbox if part of the thread is in inbox
 notmuch tag +inbox -archive -- "(tag:inbox $(echo $(notmuch search --output=threads tag:inbox and tag:new and not:gitlab and not:github | awk '{print "or " $1}')))"
 
-end_hook="$HOME/.offlineimap-hooks-post-postsync-$hostname.sh"
-[[ -f $end_hook ]] && $end_hook
+if [[ -f ~/.offlineimap-hooks/special-tags ]]; then
+    ~/.offlineimap-hooks/special-tags
+fi
 
 notmuch tag -new -- tag:new #clear new tag
