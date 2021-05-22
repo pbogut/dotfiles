@@ -1,6 +1,6 @@
 #!/bin/bash
 #=================================================
-# name:   network-sync.sh
+# name:   network-sync
 # author: Pawel Bogut <https://pbogut.me>
 # date:   22/05/2021
 #=================================================
