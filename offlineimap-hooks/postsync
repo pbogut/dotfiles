@@ -12,12 +12,12 @@ notmuch new
 # before archive, which in gmails contain all mails by default (fy Google)
 notmuch tag +sort_directories -- tag:new
 ls -1d --color=never ~/Maildir/*/INBOX | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +inbox -- tag:sort_directories and
-ls -1d --color=never ~/Maildir/*/drafts | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +drafts +draft -- tag:sort_directories and
-ls -1d --color=never ~/Maildir/*/sent | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +sent -- tag:sort_directories and
-ls -1d --color=never ~/Maildir/*/trash | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +trash -- tag:sort_directories and
-ls -1d --color=never ~/Maildir/*/spam | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +spam -- tag:sort_directories and
+ls -1d --color=never ~/Maildir/*/drafts | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +drafts +draft -inbox -- tag:sort_directories and
+ls -1d --color=never ~/Maildir/*/sent | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +sent -inbox -- tag:sort_directories and
+ls -1d --color=never ~/Maildir/*/trash | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +trash -inbox -- tag:sort_directories and
+ls -1d --color=never ~/Maildir/*/spam | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +spam -inbox -- tag:sort_directories and
 # in gmail everything is in archive, so we do this at the end
-ls -1d --color=never ~/Maildir/*/archive | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +archive -- tag:sort_directories and
+ls -1d --color=never ~/Maildir/*/archive | sed "s#$HOME/Maildir/#folder:#g" | xargs notmuch tag -sort_directories +archive -inbox -- tag:sort_directories and
 # sorted, get rid of remaining (if any?)
 notmuch tag -sort_directories -- tag:sort_directories
 

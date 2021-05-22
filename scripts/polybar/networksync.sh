@@ -1,8 +1,8 @@
 #!/bin/env bash
 #=================================================
-# name:   keyboard-layout.sh
+# name:   networksync.sh
 # author: Pawel Bogut <https://pbogut.me>
-# date:   21/05/2021
+# date:   22/05/2021
 #=================================================
 cycle=0    #init cycle
 slp=0.2    #sleep for tick (tick / 1000)
@@ -10,30 +10,32 @@ tick=200   #tick every n miliseconds
 refresh=5  #refresh every n seconds
 refresh=$((refresh * 1000)) #convert to mili seconds
 
-variant=""
-eval $(setxkbmap -query | sed 's#\<\([^\>]*\):.*\<\(.*\)\>#\1="\2"#' | grep -v options)
+state="off"
+if [[ "$(network-sync status)" =~ Enabled ]]; then
+  state="on"
+fi
 
 toggle() {
-  if [[ $variant == "colemak" ]]; then
-    setxkbmap pl
-    variant=""
+  if [[ "$state" == "on" ]]; then
+    network-sync disable
+    state="off"
   else
-    setxkbmap pl -variant colemak
-    variant="colemak"
+    network-sync enable
+    state="on"
   fi
   # update_state
   show_state
 }
 
 update_state() {
-  eval $(setxkbmap -query | sed 's#\<\([^\>]*\):.*\<\(.*\)\>#\1="\2"#' | grep -v options)
+  echo $state
 }
 
 show_state() {
-  if [[ $variant == "colemak" ]]; then
-    echo "cmk"
-  else
-    echo "pol"
+  if [[ $state == "on" ]]; then
+		echo 
+	else
+		echo 
   fi
 }
 
