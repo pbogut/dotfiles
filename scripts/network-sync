@@ -56,6 +56,25 @@ while test $# -gt 0; do
       action="status"
       shift
       ;;
+    --help|*)
+      echo "Usage:"
+      echo "  network-sync action [--options]"
+      echo "  "
+      echo "Actions:"
+      echo "  enable"
+      echo "  disable"
+      echo "  status"
+      echo "  inbox"
+      echo "  mail"
+      echo "  calendar"
+      echo "  "
+      echo "Options:"
+      echo "  --help"
+      echo "  --trickle"
+      echo "  --quiet"
+      echo "  --force"
+      echo "  --debug"
+      exit
   esac
 done
 
