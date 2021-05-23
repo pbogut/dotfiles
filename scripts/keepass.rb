@@ -34,7 +34,7 @@ end
 action, = ARGV
 
 if !action
-  cmd = "rofi -dmenu -p 'select mode:'"
+  cmd = "rofi -dmenu -i -p 'select mode:'"
   selection, _, _ = Open3.capture3(cmd, stdin_data: [
     "--copy-user-and-pass",
     "--copy-user",
@@ -154,8 +154,9 @@ if !action
   action = "--copy-user-and-pass"
 end
 
-cmd = "rofi -filter '#{search_urls} ' -dmenu -p '#{prompt}:'"
+cmd = "rofi -filter '#{search_urls} ' -dmenu -i -p '#{prompt}:'"
 selection, _, _ = Open3.capture3(cmd, stdin_data: formated_list)
+selection = selection.force_encoding('utf-8').encode
 
 index = selection.gsub(/(\d+).*/, '\1').to_i
 
