@@ -89,7 +89,6 @@ return require('packer').startup({
     use {'tpope/vim-dadbod', fn = 'db#url_complete', cmd = 'DB',
                              config = 'require "plugins.vim_dadbod"'}
     use {'pbogut/vim-dadbod-ssh', after = 'vim-dadbod'}
-    use {'kristijanhusak/vim-dadbod-completion', after = {'nvim-compe', 'vim-dadbod'}}
     use {'frankier/neovim-colors-solarized-truecolor-only'}
 
     use {'mhartington/oceanic-next'}
@@ -98,17 +97,23 @@ return require('packer').startup({
     use {'sirtaj/vim-openscad', opt = false}
     use {'nvim-treesitter/nvim-treesitter', run = 'vim.cmd("TSUpdate")',
          config = 'require "plugins.nvim_treesitter"'}
-    -- use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'completion-nvim'}}
-    use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'nvim-compe'}}
-    -- use {'aca/completion-tabnine', run = './install.sh', after = 'completion-nvim'}
-    use {'tzachar/compe-tabnine', run = './install.sh', after = 'nvim-compe'}
+
+    -- use my patched version for is-keyward hack and sources sorting
+    use {'pbogut/completion-nvim', config = 'require "plugins.completion_nvim"'}
+    use {'kristijanhusak/vim-dadbod-completion', after = {'completion-nvim', 'vim-dadbod'}}
+    use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'completion-nvim'}}
+    use {'aca/completion-tabnine', run = './install.sh', after = 'completion-nvim'}
+    use {'steelsojka/completion-buffers', after = 'completion-nvim'}
+
+    -- nvim-compe - it has some performance issues with my setup, mostly with sql
+    -- use {'hrsh7th/nvim-compe', config = 'require "plugins.nvim_compe"'}
+    -- use {'kristijanhusak/vim-dadbod-completion', after = {'nvim-compe', 'vim-dadbod'}}
+    -- use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'nvim-compe'}}
+    -- use {'tzachar/compe-tabnine', run = './install.sh', after = 'nvim-compe'}
     -- lsp
     use {'neovim/nvim-lspconfig', config = 'require "plugins.nvim_lsp"'}
-    -- use {'/home/pbogut/Projects/github.com/nvim-lua/completion-nvim', config = 'require "plugins.completion_nvim"'}
-    use {'hrsh7th/nvim-compe', config = 'require "plugins.nvim_compe"'}
     use {'hrsh7th/vim-vsnip'}
     use {'nvim-lua/lsp-status.nvim'}
-    -- use {'steelsojka/completion-buffers', after = 'completion-nvim'}
     -- candidates to get removed
     use {'vim-vdebug/vdebug', opt = true}
     use {'godlygeek/tabular', cmd = {'T', 'Tabularize'}}
