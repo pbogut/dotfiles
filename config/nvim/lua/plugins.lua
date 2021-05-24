@@ -84,8 +84,7 @@ return require('packer').startup({
                     config = 'require "plugins.indent_blankline"'}
     use {'junegunn/fzf' , config = 'require "plugins.fzf"'}
     use {'junegunn/fzf.vim', after = 'fzf'}
-    -- use {'pbogut/fzf-mru.vim', after = 'fzf.vim'}
-    use {'/home/pbogut/Projects/github.com/pbogut/fzf-mru.vim', after = 'fzf.vim'}
+    use {'pbogut/fzf-mru.vim', after = 'fzf.vim', branch = 'lua'}
     use {'tpope/vim-dadbod', fn = 'db#url_complete', cmd = 'DB',
                              config = 'require "plugins.vim_dadbod"'}
     use {'pbogut/vim-dadbod-ssh', after = 'vim-dadbod'}
