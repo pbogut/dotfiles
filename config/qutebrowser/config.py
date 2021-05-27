@@ -42,7 +42,12 @@ c.tabs.position = "right"
 c.tabs.width = 200
 c.tabs.padding = {"top": 2, "bottom": 2, "left": 5, "right": 5}
 c.downloads.location.directory = "~/Downloads"
+# c.content.headers.user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
 c.content.plugins = True
+c.content.blocking.method = "both"
+c.content.blocking.whitelist = [
+    "piwik.org", "analytics.google.com", "apis.google.com", "thepiratebay.org",
+    "googleadservices.com", "cache.addthiscdn.com"]
 c.content.pdfjs = False
 c.hints.border = "1px solid #E3BE23"
 c.hints.chars = "arstdhneifuwy"
@@ -188,6 +193,10 @@ if os.path.exists(dir_path + '/secure_config.py'):
     import secure_config
     secure_config.init(config)
 
+# hackish way to change audio / mute icon
+from qutebrowser.mainwindow import tabwidget
+tabwidget.TabWidget.MUTE_STRING = " "
+tabwidget.TabWidget.AUDIBLE_STRING = " "
 
 # load yaml config
 config.load_autoconfig()
