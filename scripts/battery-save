@@ -1,0 +1,7 @@
+#!/bin/bash
+#=================================================
+# name:   battery-save
+# author: Pawel Bogut <https://pbogut.me>
+# date:   25/05/2021
+#=================================================
+network-sync disable

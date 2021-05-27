@@ -14,3 +14,8 @@ find $HOME/Maildir -iname '*.archive' -type d | while read source; do
     echo ln -s $dest $source
     ln -s $dest $source
 done
+
+find $HOME/Nextcloud/Maildir.archive/* -iname '*.archive' -type d | while read source; do
+    dest=$HOME/Maildir${source##$HOME/Nextcloud/Maildir.archive}
+    ln -sf $source $dest
+done

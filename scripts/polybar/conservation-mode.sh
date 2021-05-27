@@ -1,8 +1,8 @@
-#!/bin/env bash
+#!/bin/bash
 #=================================================
-# name:   networksync.sh
+# name:   conservation-mode.sh
 # author: Pawel Bogut <https://pbogut.me>
-# date:   22/05/2021
+# date:   27/05/2021
 #=================================================
 cycle=0    #init cycle
 slp=0.2    #sleep for tick (tick / 1000)
@@ -14,10 +14,10 @@ state=""
 
 toggle() {
   if [[ "$state" == "on" ]]; then
-    network-sync disable
+    sudo ideapad-cm disable
     state="off"
   else
-    network-sync enable
+    sudo ideapad-cm enable
     state="on"
   fi
   # update_state
@@ -25,7 +25,7 @@ toggle() {
 }
 
 update_state() {
-  if [[ "$(network-sync status)" =~ Enabled ]]; then
+  if [[ "$(ideapad-cm status)" =~ enabled ]]; then
     state="on"
   else
     state="off"

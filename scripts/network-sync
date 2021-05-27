@@ -5,7 +5,7 @@
 # date:   22/05/2021
 #=================================================
 trickle=""
-action=""
+action="help"
 quiet=""
 force=""
 debug=""
@@ -57,6 +57,13 @@ while test $# -gt 0; do
       shift
       ;;
     --help|*)
+      action="help"
+      break
+      ;;
+  esac
+done
+
+if [[ $action == "help" ]]; then
       echo "Usage:"
       echo "  network-sync action [--options]"
       echo "  "
@@ -75,8 +82,7 @@ while test $# -gt 0; do
       echo "  --force"
       echo "  --debug"
       exit
-  esac
-done
+fi
 
 
 if [[ $debug == "yes" ]]; then

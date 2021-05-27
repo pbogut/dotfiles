@@ -26,10 +26,10 @@ foreground-alt = #777
 icon = #2e9ef4
 charging = #2e9ef4
 discharging = #2e9ef4
-
 primary = #ffb52a
 secondary = #e60053
 alert = #bd2c40
+warning = #bdbd40
 
 [bar/switches]
 monitor = ${env:MONITOR:HDMI-0}
@@ -57,8 +57,45 @@ modules-left = close_switches
 modules-center =
 modules-right = arctis barrier screensaver light_1 light_2
 
-tray-position = right
-tray-padding = 2
+tray-position = none
+
+cursor-click = pointer
+cursor-scroll = ns-resize
+
+override-redirect = true
+offset-y = ${bar/primary.height}
+; radius = 6.0
+;
+border-size = 1
+border-color = #00000000
+
+[bar/silverspoon_switches]
+monitor = ${env:MONITOR:HDMI-0}
+width = 23%
+offset-x = 77%
+height = 20
+fixed-center = false
+
+background = ${colors.background}
+foreground = ${colors.foreground}
+
+line-size = 2
+line-color = #ff0
+
+padding-left = 0
+padding-right = 2
+
+module-margin-left = 1
+module-margin-right = 2
+
+font-0 = "InputMono Nerd Font:fontformat=truetype:size=8:antialias=true;1"
+; font-0 = "Input Nerd Font:fontformat=truetype:size=8:antialias=true;1"
+
+modules-left = close_silverspoon_switches
+modules-center =
+modules-right = arctis barrier screensaver light_1 light_2 conservation xcape netsync
+
+tray-position = none
 
 cursor-click = pointer
 cursor-scroll = ns-resize
@@ -93,7 +130,7 @@ font-0 = "InputSansNarrow Nerd Font:fontformat=truetype:size=8:antialias=true;1"
 
 modules-left = i3
 modules-center = xwindow
-modules-right = memory_left cpu pulse backlight weather date time battery keylayout xcape email netsync powermenu toggle_switches
+modules-right = memory_left cpu pulse backlight weather date time battery keylayout email powermenu toggle_silverspoon_switches
 
 tray-position = right
 tray-padding = 2
@@ -166,7 +203,6 @@ modules-center = xwindow
 modules-right = octopi_redfactory octopi_patchwork memory_left cpu filesystem pulse weather date time email toggle_switches
 
 tray-position = none
-tray-padding = 2
 ;tray-transparent = true
 ;tray-background = #0063ff
 
@@ -235,12 +271,26 @@ exec = "echo "
 interval = 999
 label = %output%
 format-foreground = ${colors.secondary}
-; format-prefix = "x "
-; format-prefix-foreground = ${colors.icon}
+
+[module/toggle_silverspoon_switches]
+type = custom/script
+click-left = ~/.scripts/polybar/toggle-bar.sh silverspoon_switches
+exec = "echo "
+interval = 999
+label = %output%
+format-foreground = ${colors.secondary}
 
 [module/close_switches]
 type = custom/script
 click-left = ~/.scripts/polybar/toggle-bar.sh switches
+exec = "echo ' '"
+interval = 999
+label = %output%
+format-foreground = ${colors.secondary}
+
+[module/close_silverspoon_switches]
+type = custom/script
+click-left = ~/.scripts/polybar/toggle-bar.sh silverspoon_switches
 exec = "echo ' '"
 interval = 999
 label = %output%
@@ -286,6 +336,15 @@ exec = ~/.scripts/polybar/networksync.sh
 tail = true
 label = %output%
 format-prefix = " "
+format-prefix-foreground = ${colors.icon}
+click-left = /usr/bin/kill -SIGRTMIN+1 %pid%
+
+[module/conservation]
+type = custom/script
+exec = ~/.scripts/polybar/conservation-mode.sh
+tail = true
+label = %output%
+format-prefix = " "
 format-prefix-foreground = ${colors.icon}
 click-left = /usr/bin/kill -SIGRTMIN+1 %pid%
 
@@ -660,39 +719,53 @@ battery = BAT1
 adapter = ADP1
 full-at = 98
 
+; format-charging = <ramp-capacity> <label-charging>
+; format-discharging = <ramp-capacity> <label-discharging>
 ; format-charging = <animation-charging> <label-charging>
 ; format-charging-underline = #ffb52a
+;
+format-charging = <ramp-capacity> <label-charging>
+format-discharging = <ramp-capacity> <label-discharging>
+format-full = <ramp-capacity> <label-full>
 
 ; format-discharging = <animation-discharging> <label-discharging>
 ; format-discharging-underline = ${self.format-charging-underline}
 
-format-charging-prefix = " "
-format-discharging-prefix = " "
-format-full-prefix = " "
+format-charging-prefix = ""
+format-discharging-prefix = ""
+format-full-prefix = ""
 ; format-full-underline = ${self.format-charging-underline}
 
 
 format-full-prefix-foreground = ${colors.icon}
-format-charging-prefix-foreground = ${colors.charging}
-format-discharging-prefix-foreground = ${colors.discharging}
+format-charging-prefix-foreground = ${colors.icon}
+format-discharging-prefix-foreground = ${colors.icon}
 
-ramp-capacity-0 = 
-ramp-capacity-1 = 
-ramp-capacity-2 = 
+ramp-capacity-0-foreground = ${colors.warning}
+ramp-capacity-1-foreground = ${colors.warning}
+ramp-capacity-2-foreground = ${colors.icon}
+ramp-capacity-3-foreground = ${colors.icon}
+ramp-capacity-4-foreground = ${colors.icon}
+
+ramp-capacity-0 = 
+ramp-capacity-1 = 
+ramp-capacity-2 = 
+ramp-capacity-3 = 
+ramp-capacity-4 = 
+
 format-prefix-foreground = ${colors.charging}
-; ramp-capacity-foreground = ${colors.foreground-alt}
 
-animation-charging-0 = 
-animation-charging-1 = 
-animation-charging-2 = 
-; animation-charging-foreground = ${colors.foreground-alt}
-animation-charging-framerate = 2000
+; animation-charging-0 = 
+; animation-charging-1 = 
+; animation-charging-2 = 
+; ; animation-charging-foreground = ${colors.foreground-alt}
+; animation-charging-framerate = 2000
 
-animation-discharging-0 = 
-animation-discharging-1 = 
-animation-discharging-2 = 
-; animation-discharging-foreground = ${colors.foreground-alt}
-animation-discharging-framerate = 2000
+; animation-discharging-0 = 
+; animation-discharging-1 = 
+; animation-discharging-2 = 
+; ; animation-discharging-foreground = ${colors.foreground-alt}
+; animation-discharging-framerate = 2000
 
 [module/temperature]
 type = internal/temperature

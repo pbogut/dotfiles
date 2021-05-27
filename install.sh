@@ -45,6 +45,7 @@ read -d '' files <<"EOF"
     config/dunst/dunstrc
     config/feh/keys
     config/fish
+    config/gtk-3.0/settings.ini
     config/i3/config
     config/i3/i3status.conf
     config/i3/workspaces
@@ -68,6 +69,7 @@ read -d '' files <<"EOF"
     config/rofi/config.rasi
     config/roxterm.sourceforge.net
     config/Franz/Plugins/todoist
+    gtk-2.0
     i3blocks.conf
     local/share/applications/ranger.desktop
     local/share/applications/browser.desktop
