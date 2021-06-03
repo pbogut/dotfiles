@@ -1,4 +1,23 @@
 #!/bin/bash
+
+
+sleep=0
+while test $# -gt 0; do
+  case "$1" in
+    --sleep)
+      sleep=$2
+      shift
+      shift
+      ;;
+    *)
+      shift
+      ;;
+
+  esac
+done
+
+
+
 try_to_run() {
   type $1 > /dev/null 2>&1
   if [[ $? == 0 ]]; then
@@ -18,6 +37,9 @@ lock_screen() {
 
 lay=`setxkbmap -print | grep 'pc+' | sed 's/.*pc+\([^+]*\)+.*/\1/' | sed 's/[()]/ /g' | sed 's/ / -variant /'`
 setxkbmap pl
+dunstctl set-paused true
 (lock_screen &&
 setxkbmap $lay &&
-pkill -SIGRTMIN+12 i3blocks) &
+dunstctl set-paused false
+) &
+sleep ${sleep}s;
