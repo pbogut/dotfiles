@@ -18,7 +18,7 @@ c.qt.args = [('ppapi-widevine-path='
               '/usr/lib/qt/plugins/ppapi/libwidevinecdmadapter.so')]
 # /usr/share/qutebrowser/scripts/dictcli.py install pl-PL en-GB
 c.spellcheck.languages = ['pl-PL', 'en-GB']
-c.url.start_pages = ["http://localhost:46637"]
+c.url.start_pages = ['http://localhost:46637']
 c.url.default_page = 'http://localhost:46637'
 # c.url.start_pages = ["https://duckduckgo.com/"]
 # c.url.default_page = 'https://duckduckgo.com/'
@@ -112,6 +112,8 @@ config.bind('gp', 'set-cmd-text :open -p {url:pretty}')
 config.bind('gO', 'set-cmd-text :open -t {url:pretty}')
 config.bind('xO', 'set-cmd-text :open -b {url:pretty}')
 config.bind('<Ctrl-q>', 'tab-close')
+config.bind('<Ctrl-j>', 'tab-next')
+config.bind('<Ctrl-k>', 'tab-prev')
 config.bind('<Ctrl-n>', 'tab-next')
 config.bind('<Ctrl-p>', 'tab-prev')
 config.bind('<Ctrl-h>', 'fake-key <backspace>', mode='insert')
@@ -141,6 +143,8 @@ config.bind(
     'spawn --userscript ~/.scripts/keepass.rb --type-otpauth', mode='insert')
 
 
+config.bind('<ctrl-j>', 'fake-key <down>', mode='insert')
+config.bind('<ctrl-k>', 'fake-key <up>', mode='insert')
 config.bind('<ctrl-n>', 'fake-key <down>', mode='insert')
 config.bind('<ctrl-p>', 'fake-key <up>', mode='insert')
 config.bind(
@@ -148,6 +152,8 @@ config.bind(
     'fake-key <shift-ctrl-left> ;; fake-key <backspace>', mode='insert')
 
 
+config.bind('<Ctrl-j>', 'completion-item-focus next', mode='command')
+config.bind('<Ctrl-k>', 'completion-item-focus prev', mode='command')
 config.bind('<Ctrl-n>', 'completion-item-focus next', mode='command')
 config.bind('<Ctrl-p>', 'completion-item-focus prev', mode='command')
 config.bind(
