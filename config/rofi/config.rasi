@@ -1,17 +1,21 @@
 configuration {
-	modi: "run,drun,ssh,window";
-	width: 100;
-	font: "InputMono Nerd Font 9";
-	location: 1;
-	padding: 3;
-	terminal: "urxvt -e zsh -ic";
-	case-sensitive: false;
-	separator-style: "solid";
-	hide-scrollbar: true;
-	color-normal: "#222222, #cccccc, #222222, #285577, #dddddd";
-	color-urgent: "#222222, #da4281, #222222, #285577, #da4281";
-	color-active: "#222222, #008ed4, #222222, #285577, #008ed4";
-	color-window: "#222222, #222222, #285577";
-	kb-clear-line: "Control+Alt+h";
-	kb-remove-word-back: "Control+w";
+  modi: "run,drun,ssh,window";
+  width: 100;
+  font: "InputMono Nerd Font 9";
+  location: 1;
+  padding: 3;
+  terminal: "urxvt -e zsh -ic";
+  case-sensitive: false;
+  separator-style: "solid";
+  hide-scrollbar: true;
+  color-normal: "#222222, #cccccc, #222222, #285577, #dddddd";
+  color-urgent: "#222222, #da4281, #222222, #285577, #da4281";
+  color-active: "#222222, #008ed4, #222222, #285577, #008ed4";
+  color-window: "#222222, #222222, #285577";
+  kb-clear-line: "Control+Alt+h";
+  kb-remove-word-back: "Control+w";
+  kb-row-up: "Control+k";
+  kb-row-down: "Control+j";
+  kb-remove-to-eol: "";
+  kb-accept-entry: "Control+m,Return,KP_Enter";
 }
