@@ -13,27 +13,108 @@ else
   folder_filter="/^$account"
 fi
 
+read -d '' directories <<"EOF"
+  sent
+  drafts
+  trash
+  spam
+EOF
+
+for directory in $directories; do
+  echo notmuch tag -archive -- tag:archive tag:$directory folder:"$folder_filter/"
+  notmuch tag -archive -- tag:archive tag:$directory folder:"$folder_filter/"
+done
+
 # if something is archive, then it should not be inbox
 notmuch tag -unread -inbox -- tag:archive
+notmuch tag -inbox -- tag:inbox and folder:/\\.archive/
+notmuch tag -inbox -- tag:inbox and folder:/archive/
 
 # move mails with archive tag to archvie imap catalog
 # but only if they are in inbox or sent, other are in archive
 # already (at least on gmail, but that one actually make sense).
 
-notmuch search --output=files tag:archive and "folder:$folder_filter/sent/" | while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null 2>&1;done;
-notmuch search --output=files tag:archive and "folder:$folder_filter/INBOX/" | while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null 2>&1;done;
+# notmuch search --output=files tag:archive and "folder:$folder_filter/sent/" | while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null 2>&1;done;
+# notmuch search --output=files tag:archive and "folder:$folder_filter/INBOX/" | while read line;do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null 2>&1;done;
 
-notmuch search --output=files "not tag:inbox and not tag:sent and folder:$folder_filter/INBOX/" | while read line; do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null 2>&1 ;done;
+# notmuch search --output=files "not tag:inbox and not tag:sent and folder:$folder_filter/INBOX/" | while read line; do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/archive/\3#'`" > /dev/null 2>&1 ;done;
 
 # move sent emails out of inbox folder
-notmuch search --output=files tag:sent | grep "$_account_filter" |grep '/INBOX/' |while read line; do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/sent/\3#'`"  > /dev/null 2>&1 ;done;
+# notmuch search --output=files tag:sent | grep "$_account_filter" |grep '/INBOX/' |while read line; do mv "$line" "`echo $line | sed 's#Maildir/\(.*\)/\(.*\)/\(cur\|new\)#Maildir/\1/sent/\3#'`"  > /dev/null 2>&1 ;done;
 
-# remove spam emails
-# notmuch search --output=files tag:spam | while read line; do
-#   mv "$line" ~/Temp/spam/ 2>&1 > /dev/null
+read -d '' directories <<"EOF"
+  sent
+  drafts
+  trash
+  spam
+  archive
+EOF
+
+# for directory in $directories; do
+#   echo notmuch search --output=files tag:$directory folder:"$folder_filter/" not folder:"/^$directory/"
+#   notmuch search --output=files tag:$directory folder:"$folder_filter/" not folder:"/^$directory/" |
+#     while read line; do
+#       dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/$directory\3\/\4#")"
+#       if [[ $line != $dest ]]; then
+#         echo mv "$line" "$dest"
+#         # mv "$line" "$dest" > /dev/null 2>&1
+#         mv "$line" "$dest"
+#       fi
+#     done
 # done
-
-notmuch tag +archive -- not date:`date +%Y` and not date:`expr $(date +%Y) - 1` and not tag:archive and tag:sent
+echo 1
+notmuch search --output=files tag:sent folder:"$folder_filter/" not folder:"/sent/" \
+  not tag:drafts not tag:trash |
+  while read line; do
+    echo $line
+    dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/sent\3\/\4#")"
+    if [[ $line != $dest ]]; then
+      echo mv "$line" "$dest"
+      # mv "$line" "$dest" > /dev/null 2>&1
+      mv "$line" "$dest"
+    fi
+  done
+echo 2
+notmuch search --output=files tag:drafts folder:"$folder_filter/" not folder:"/drafts/" \
+  not tag:trash |
+  while read line; do
+    dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/drafts\3\/\4#")"
+    if [[ $line != $dest ]]; then
+      echo mv "$line" "$dest"
+      # mv "$line" "$dest" > /dev/null 2>&1
+      mv "$line" "$dest"
+    fi
+  done
+echo 3
+notmuch search --output=files tag:trash folder:"$folder_filter/" not folder:"/trash/" |
+  while read line; do
+    dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/trash\3\/\4#")"
+    if [[ $line != $dest ]]; then
+      echo mv "$line" "$dest"
+      # mv "$line" "$dest" > /dev/null 2>&1
+      mv "$line" "$dest"
+    fi
+  done
+echo 4
+notmuch search --output=files tag:spam folder:"$folder_filter/" not folder:"/spam/" |
+  while read line; do
+    dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/spam\3\/\4#")"
+    if [[ $line != $dest ]]; then
+      echo mv "$line" "$dest"
+      # mv "$line" "$dest" > /dev/null 2>&1
+      mv "$line" "$dest"
+    fi
+  done
+echo 5
+notmuch search --output=files tag:archive folder:"$folder_filter/" not folder:"/archive/" |
+  while read line; do
+    dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/archive\3\/\4#")"
+    if [[ $line != $dest ]]; then
+      echo mv "$line" "$dest"
+      # mv "$line" "$dest" > /dev/null 2>&1
+      mv "$line" "$dest"
+    fi
+  done
 
 # archive only on redeye
 if [[ $(hostname) == "redeye" ]]; then
