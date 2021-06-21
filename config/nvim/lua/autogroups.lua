@@ -60,12 +60,14 @@ local config_group = {
     },
     {
       'mail',
-      [[
-        setlocal spell spelllang=en_gb
-        setlocal textwidth=72
-        execute('normal gg')
-        call search('^$')
-      ]]
+      function()
+        cmd([[
+          setlocal spell spelllang=en_gb
+          setlocal textwidth=72
+          execute('normal gg')
+          call search('^$')
+        ]])
+      end
     },
     {
       'make',
