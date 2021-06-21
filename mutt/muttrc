@@ -116,7 +116,7 @@ set nm_default_uri="notmuch://`echo $HOME`/Maildir" # path to the maildir
 set virtual_spoolfile=yes                           # enable virtual folders
 virtual-mailboxes \
     " Inbox"             "notmuch://?query=tag:inbox and NOT tag:archive and NOT tag:sendmail"                            \
-    " Unread"            "notmuch://?query=tag:unread"                                                                    \
+    " Unread"            "notmuch://?query=tag:unread and NOT tag:spam"                                                   \
     " Sent"              "notmuch://?query=tag:sent and date:`date --date="90 days ago" '+%Y-%m-%d'`.."                   \
     "   └ all"            "notmuch://?query=tag:sent"                                                                      \
     " Projects / Issues" "notmuch://?query=(tag:github or tag:gitlab) and date:`date --date="90 days ago" '+%Y-%m-%d'`.." \
