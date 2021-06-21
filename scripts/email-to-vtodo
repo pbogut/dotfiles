@@ -50,3 +50,5 @@ if [[ "$CAL_LIST" == "" ]]; then
 fi
 
 echo $description | todo new -r -l $CAL_LIST "$subject @$CATEGORY"
+task_id=$(todo list | sort -h | tail -n1 | awk '{print $1}')
+urxvt -geometry 130x35 -T FLOATING_WINDOW -e zsh -ic "todo edit $task_id" &
