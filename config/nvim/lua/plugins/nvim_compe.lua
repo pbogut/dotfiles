@@ -25,6 +25,7 @@ compe.setup {
     -- treesitter = true;
     vim_dadbod_completion = true;
     vsnip = true;
+    ultisnips = true;
   };
 }
 
