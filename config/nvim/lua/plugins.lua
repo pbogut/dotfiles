@@ -98,17 +98,18 @@ return require('packer').startup({
          config = 'require "plugins.nvim_treesitter"'}
 
     -- use my patched version for is-keyward hack and sources sorting
-    use {'pbogut/completion-nvim', config = 'require "plugins.completion_nvim"'}
-    use {'kristijanhusak/vim-dadbod-completion', after = {'completion-nvim', 'vim-dadbod'}}
-    use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'completion-nvim'}}
-    use {'aca/completion-tabnine', run = './install.sh', after = 'completion-nvim'}
-    use {'steelsojka/completion-buffers', after = 'completion-nvim'}
+    -- use {'pbogut/completion-nvim', config = 'require "plugins.completion_nvim"'}
+    -- use {'kristijanhusak/vim-dadbod-completion', after = {'completion-nvim', 'vim-dadbod'}}
+    -- use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'completion-nvim'}}
+    -- use {'aca/completion-tabnine', run = './install.sh', after = 'completion-nvim'}
+    -- use {'steelsojka/completion-buffers', after = 'completion-nvim'}
 
     -- nvim-compe - it has some performance issues with my setup, mostly with sql
-    -- use {'hrsh7th/nvim-compe', config = 'require "plugins.nvim_compe"'}
-    -- use {'kristijanhusak/vim-dadbod-completion', after = {'nvim-compe', 'vim-dadbod'}}
-    -- use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'nvim-compe'}}
-    -- use {'tzachar/compe-tabnine', run = './install.sh', after = 'nvim-compe'}
+    use {'hrsh7th/nvim-compe', config = 'require "plugins.nvim_compe"'}
+    use {'kristijanhusak/vim-dadbod-completion', after = {'nvim-compe', 'vim-dadbod'}}
+    use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'nvim-compe'}}
+    use {'tzachar/compe-tabnine', run = './install.sh', after = 'nvim-compe'}
+
     -- lsp
     use {'neovim/nvim-lspconfig', config = 'require "plugins.nvim_lsp"'}
     use {'hrsh7th/vim-vsnip'}
