@@ -13,6 +13,7 @@ export FZF_DEFAULT_OPTS="
   --reverse
   --cycle
   --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
+  --bind=alt-j:preview-down,alt-k:preview-up
   --bind=ctrl-w:backward-kill-word
   --height 40%
   "
