@@ -193,7 +193,7 @@ macro pager A "<modify-labels-then-hide>+archive -inbox -unread\nq" # tag as Arc
 macro attach A "qA"                                                 # tag as Archived
 macro index R "<modify-labels>-unread\n"  # mark as read
 
-macro index I "<modify-labels>-inbox\n"                             # remove from inbox
+# macro index I "<modify-labels>-inbox\n"                             # remove from inbox
 macro index B "<modify-labels>+inbox -archive\n"                    # remove from inbox
 
 macro index P "<modify-labels-then-hide>-inbox +project/"           # tag as project

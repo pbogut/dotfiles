@@ -63,7 +63,7 @@ notmuch search --output=files from:gitlab@mg.gitlab.com and tag:new | while read
     notmuch tag +gitlab/$tag +gitlab -- id:$id
 done
 
-notmuch tag -inbox -- "(tag:work and tag:inbox) and not tag:unread"
+# notmuch tag -inbox -- "(tag:work and tag:inbox) and not tag:unread"
 
 # emails from myself
 notmuch tag -inbox -unread +sent -- from:"Pawel Bogut" and tag:new

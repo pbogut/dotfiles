@@ -48,3 +48,11 @@ find $HOME/Maildir -iname '*.archive' -type d | while read source; do
     mv $source $dest
     ln -s $dest $source
 done
+
+if [[ $account == "gmail" ]]; then
+  gmaildaysago=$(expr $daysago + 3)
+  gmailtodate=$(date --date="$gmaildaysago days ago" '+%Y/%m/%d')
+  echo ""
+  echo "To delete files from gmail use this query in web mail: "
+  echo before:$gmailtodate
+fi

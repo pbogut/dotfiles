@@ -12,7 +12,12 @@ else
   _account_filter="/Maildir/$account/"
   folder_filter="/^$account"
 fi
-notmuch search folder:"/INBOX/" not tag:inbox
+notmuch tag +archive -- folder:"/INBOX/" not tag:inbox
+
+if [[ -f ~/.offlineimap-hooks/spam-filter ]]; then
+    ~/.offlineimap-hooks/spam-filter
+fi
+
 read -d '' directories <<"EOF"
   sent
   drafts
@@ -30,26 +35,8 @@ notmuch tag -unread -inbox -- tag:archive
 notmuch tag -inbox -- tag:inbox and folder:/\\.archive/
 notmuch tag -inbox -- tag:inbox and folder:/archive/
 
-# read -d '' directories <<"EOF"
-#   sent
-#   drafts
-#   trash
-#   spam
-#   archive
-# EOF
-
-# for directory in $directories; do
-#   echo notmuch search --output=files tag:$directory folder:"$folder_filter/" not folder:"/^$directory/"
-#   notmuch search --output=files tag:$directory folder:"$folder_filter/" not folder:"/^$directory/" |
-#     while read line; do
-#       dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/$directory\3\/\4#")"
-#       if [[ $line != $dest ]]; then
-#         echo mv "$line" "$dest"
-#         # mv "$line" "$dest" > /dev/null 2>&1
-#         mv "$line" "$dest"
-#       fi
-#     done
-# done
+echo notmuch search --output=files tag:sent folder:"$folder_filter/" not folder:"/sent/" not tag:drafts not tag:trash
+# notmuch search --output=files tag:sent folder:"$folder_filter/" not folder:"/sent/" not tag:drafts not tag:trash
 notmuch search --output=files tag:sent folder:"$folder_filter/" not folder:"/sent/" \
   not tag:drafts not tag:trash |
   while read line; do
@@ -61,6 +48,8 @@ notmuch search --output=files tag:sent folder:"$folder_filter/" not folder:"/sen
       mv "$line" "$dest"
     fi
   done
+echo notmuch search --output=files tag:drafts folder:"$folder_filter/" not folder:"/drafts/" not tag:trash
+# notmuch search --output=files tag:drafts folder:"$folder_filter/" not folder:"/drafts/" not tag:trash
 notmuch search --output=files tag:drafts folder:"$folder_filter/" not folder:"/drafts/" \
   not tag:trash |
   while read line; do
@@ -71,6 +60,8 @@ notmuch search --output=files tag:drafts folder:"$folder_filter/" not folder:"/d
       mv "$line" "$dest"
     fi
   done
+echo notmuch search --output=files tag:trash folder:"$folder_filter/" not folder:"/trash/"
+# notmuch search --output=files tag:trash folder:"$folder_filter/" not folder:"/trash/"
 notmuch search --output=files tag:trash folder:"$folder_filter/" not folder:"/trash/" |
   while read line; do
     dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/trash\3\/\4#")"
@@ -80,6 +71,8 @@ notmuch search --output=files tag:trash folder:"$folder_filter/" not folder:"/tr
       mv "$line" "$dest"
     fi
   done
+echo notmuch search --output=files tag:spam folder:"$folder_filter/" not folder:"/spam/"
+# notmuch search --output=files tag:spam folder:"$folder_filter/" not folder:"/spam/"
 notmuch search --output=files tag:spam folder:"$folder_filter/" not folder:"/spam/" |
   while read line; do
     dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/spam\3\/\4#")"
@@ -89,7 +82,9 @@ notmuch search --output=files tag:spam folder:"$folder_filter/" not folder:"/spa
       mv "$line" "$dest"
     fi
   done
-notmuch search --output=files tag:archive folder:"$folder_filter/" not folder:"/archive/" |
+echo notmuch search --output=files tag:archive folder:"$folder_filter/" folder:"/INBOX/"
+# notmuch search --output=files tag:archive folder:"$folder_filter/" folder:"/INBOX/"
+notmuch search --output=files tag:archive folder:"$folder_filter/" folder:"/INBOX/" |
   while read line; do
     dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/archive\3\/\4#")"
     if [[ $line != $dest ]]; then
