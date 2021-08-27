@@ -4,6 +4,17 @@ local config = require('config')
 
 local remotes = config.get('sync.remotes')
 
+local function sync(remote)
+  if remote and remotes and remotes[remote] then
+    local cmd = {'scp', fn.expand('%:.'), remotes[remote] .. '/' .. fn.expand('%:.')}
+    fn.jobstart(cmd, {
+      on_exit = function()
+        print('File synced to ' .. remote .. ' (' .. fn.expand('%:.') .. ')')
+      end
+    })
+  end
+end
+
 local config_group = {
   BufWritePost = {
     {
@@ -13,15 +24,7 @@ local config_group = {
         if remote == "" then
           remote = vim.g.sync_remote or ""
         end
-
-        if remote and remotes and remotes[remote] then
-          local cmd = {'scp', fn.expand('%:.'), remotes[remote] .. '/' .. fn.expand('%:.')}
-          fn.jobstart(cmd, {
-            on_exit = function()
-              print('File synced to ' .. remote .. ' (' .. fn.expand('%:.') .. ')')
-            end
-          })
-        end
+        sync(remote)
       end
     },
   },
@@ -41,5 +44,21 @@ u.command('RemoteSync', function(bang, name)
     vim.b.sync_remote = name
   end
 end, {complete = 'customlist,v:lua.remotesync_complete', nargs = '?', bang = true, qargs = true})
+
+u.command('RemotePush', function(name)
+  local halt = false
+  if name:match('prod') then
+    halt = 1 ~= fn.confirm('You are about to do some changes, are you sure you know what you are doing?', "Yes\nNo", 'No')
+  end
+  if not halt then
+    vim.defer_fn(function()
+      print('Syncing...')
+      sync(name)
+    end, 1)
+  else
+    vim.defer_fn(function() print('File push aborted!') end, 1)
+    vim.defer_fn(function() print(' ') end, 1000)
+  end
+end, {complete = 'customlist,v:lua.remotesync_complete', nargs = '?', bang = false, qargs = true})
 
 -- -complete=custom
