@@ -80,8 +80,7 @@ return require('packer').startup({
     use {'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user'}
     use {'MattesGroeger/vim-bookmarks', config = 'vim.g.bookmark_save_per_working_dir = 1'}
     use {'rrethy/vim-illuminate'}
-    use {'lukas-reineke/indent-blankline.nvim', branch = 'lua',
-                    config = 'require "plugins.indent_blankline"'}
+    use {'lukas-reineke/indent-blankline.nvim', config = 'require "plugins.indent_blankline"'}
     use {'junegunn/fzf' , config = 'require "plugins.fzf"'}
     use {'junegunn/fzf.vim', after = 'fzf'}
     use {'pbogut/fzf-mru.vim', after = 'fzf.vim', branch = 'lua'}
@@ -92,6 +91,7 @@ return require('packer').startup({
 
     use {'mhartington/oceanic-next'}
 
+    use {'kevinoid/vim-jsonc'}
     use {'sheerun/vim-polyglot', setup = 'require "plugins.polyglot"'}
     use {'sirtaj/vim-openscad', opt = false}
     use {'nvim-treesitter/nvim-treesitter', run = 'vim.cmd("TSUpdate")',
