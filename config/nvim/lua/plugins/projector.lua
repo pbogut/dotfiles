@@ -227,7 +227,7 @@ return {
         priority = 100,
       },
       ['app/code/.*/registration.php'] = {
-        template = "_magento2_registration",
+        template = "magento2/registration.php",
         priority = 100,
       },
       ['.*%.php'] = {
