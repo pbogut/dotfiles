@@ -14,7 +14,7 @@ u.command('Gst', function()
     cmd('wincmd H')
   end
 
-  cmd('0Gstatus')
+  cmd('0Git')
 end)
 u.command('Gl', '0Glog')
 
