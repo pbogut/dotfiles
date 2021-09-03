@@ -152,8 +152,6 @@ lspconfig.cssls.setup {on_attach = on_attach, capabilities = capabilities}
 lspconfig.pyright.setup {on_attach = on_attach}
 -- see https://github.com/sumneko/lua-language-server/wiki/Build-and-Run-(Standalone)
 require 'plugins.lsp.sumneko_lua'.setup {on_attach = on_attach, capabilities = capabilities}
--- see ./lsp/pyls_ms.lua
-require 'plugins.lsp.pyls_ms'.setup(on_attach)
 -- npm install -g intelephense
 require 'plugins.lsp.intelephense'.setup {on_attach = on_attach, capabilities = capabilities}
 -- npm install -g vscode-json-languageserver
