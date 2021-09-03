@@ -78,14 +78,13 @@ u.augroup('x_dadbod', {
   BufEnter = {
     {'*.dbout', function()
         -- fix line breaks in result
-        if b.db and (type(b.db) == 'string' and b.db:match('^mysql')) 
+        cmd([[set modifiable]])
+        if b.db and (type(b.db) == 'string' and b.db:match('^mysql'))
           or (type(b.db) == 'table' and type(b.db.db_url) == 'string'  and b.db.db_url:match('^mysql'))
         then
-          cmd([[set modifiable]])
           cmd([[silent! %s/^\n/ /]])          --empty lines
           cmd([[silent! %s/[^\|\+]\zs\n/ /]]) --lines not ending with table
           cmd([[w!]])
-          cmd([[set nomodifiable]])
         end
         cmd([[wincmd L]])
         b.modifiable = false
