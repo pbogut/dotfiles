@@ -20,6 +20,17 @@ yay -S \
     base-devel \
     cmake \
     atool \
+    zenity \
+    xdotool \
+    ripgrep \
+    bluez-hcitool \
+    jq \
+    apg
+    w3m \
+    wmctrl \
+    xcwd-git \
+    copyq \
+    paru \
     inetutils \
     picom \
     dmenu \
