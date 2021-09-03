@@ -8,4 +8,10 @@ for arg in "$@"; do
     esac
 done
 
-urxvt -cd "$cwd"
+cd "$cwd"
+
+if which urxvt; then
+  urxvt
+else
+  xterm
+fi
