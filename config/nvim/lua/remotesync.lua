@@ -2,7 +2,7 @@ local u = require('utils')
 local fn = vim.fn
 local config = require('config')
 
-local remotes = config.get('sync.remotes')
+local remotes = config.get('sync.remotes') or {}
 
 local function sync(remote)
   if remote and remotes and remotes[remote] then
