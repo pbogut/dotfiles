@@ -422,6 +422,10 @@ return {
         template = "file.php",
         priority = 5000,
       },
+      ['docker%-compose%.yml'] = {
+        template = "docker-compose.yml",
+        priority = 5000,
+      },
       ['.*'] = {
         template = "_skel",
         priority = 5000,
