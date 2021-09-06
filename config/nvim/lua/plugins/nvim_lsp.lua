@@ -60,10 +60,10 @@ if has_lspstatus then
   lspstatus.register_progress()
 end
 
-local function location_handler(_, method, result)
+local function location_handler(_, result, ctx)
   vim.g.lsp_last_word = vim.fn.expand('<cword>')
   if result == nil or vim.tbl_isempty(result) then
-    print(method, 'No location found')
+    print(ctx.method, 'No location found')
     return nil
   end
   local util = require('vim.lsp.util')
@@ -85,7 +85,7 @@ vim.lsp.handlers['textDocument/declaration'] = location_handler
 vim.lsp.handlers['textDocument/definition'] = location_handler
 vim.lsp.handlers['textDocument/typeDefinition'] = location_handler
 vim.lsp.handlers['textDocument/implementation'] = location_handler
-vim.lsp.handlers['textDocument/references'] = function(_, _, result)
+vim.lsp.handlers['textDocument/references'] = function(_, result)
   vim.g.lsp_last_word = vim.fn.expand('<cword>')
   if not result then return end
   if #result == 0 then
