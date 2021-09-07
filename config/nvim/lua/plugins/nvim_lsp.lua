@@ -1,6 +1,5 @@
 local u = require'utils'
 local lspconfig = require('lspconfig')
-local has_completion, completion = pcall(require, 'completion')
 local has_lspstatus, lspstatus = pcall(require, 'lsp-status')
 
 local cmd = vim.cmd
@@ -39,9 +38,6 @@ end
 
 local on_attach = function(client, bufnr)
   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
-  if has_completion then
-    completion.on_attach()
-  end
   if has_lspstatus then
     lspstatus.on_attach(client, bufnr)
   end
@@ -151,7 +147,7 @@ lspconfig.cssls.setup {on_attach = on_attach, capabilities = capabilities}
 -- npm install -g pyright
 lspconfig.pyright.setup {on_attach = on_attach}
 -- npm install -g @tailwindcss/language-server
-lspconfig.tailwindcss.setup {on_attach = on_attach, capabilities = capabilities}
+require 'plugins.lsp.tailwindcss'.setup {on_attach = on_attach, capabilities = capabilities}
 -- see https://github.com/sumneko/lua-language-server/wiki/Build-and-Run-(Standalone)
 require 'plugins.lsp.sumneko_lua'.setup {on_attach = on_attach, capabilities = capabilities}
 -- npm install -g intelephense
