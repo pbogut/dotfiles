@@ -7,6 +7,7 @@
      templates can be ultisnip snippets or files with placeholders ]]
 
 local u = require('utils')
+local s = require('snippy')
 local ph = require('template.placeholders')
 
 local t = u.termcodes
@@ -23,6 +24,8 @@ local search_lines = 10
 local templates_path = os.getenv('HOME') .. '/.config/nvim/templates'
 local configuration = require('plugins.projector')
 
+_G.projector = {}
+
 function a.ultisnip_template(name)
   cmd("silent! normal! i_t" .. name .. t'<c-r>=UltiSnips#ExpandSnippet()<cr>')
   if not g.ulti_expand_res or g.ulti_expand_res == 0 then
@@ -32,9 +35,15 @@ function a.ultisnip_template(name)
 end
 
 function a.file_template(name)
-    cmd('0r ' .. templates_path .. '/' .. name)
-    cmd('$delete') -- remove last line
-    a.process_placeholders()
+    local template = io.open(templates_path .. '/' .. name .. '.snippet', 'r')
+    local lines = vim.split(template:read('*a'), '\n')
+    if lines[#lines] == '' then
+        table.remove(lines)
+    end
+    s.expand_snippet({
+      body = lines,
+      kind = 'snipmate'
+    })
 end
 
 function a.template_from_cmd(args)
@@ -92,6 +101,15 @@ function a.do_template()
       -- print('file', config.template);
       return a.file_template(config.template)
     end
+  end
+end
+
+function _G.projector.f(placeholder)
+  local ph_cfg = l.load_placeholder(placeholder)
+  if ph_cfg then
+    return ph_cfg.value()
+  else
+    return placeholder
   end
 end
 

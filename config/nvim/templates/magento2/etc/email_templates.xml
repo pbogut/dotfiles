@@ -1,4 +1,0 @@
-<?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:Magento:module:Magento_Email:etc/email_templates.xsd">
-    <template id="[[magento2.module_key]]_email_template" label="Email label" file="email_template.html" type="html" module="[[magento2.module_name]]" area="frontend"/>
-</config>
