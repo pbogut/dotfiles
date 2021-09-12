@@ -48,7 +48,6 @@ return require('packer').startup({
       config = 'require "plugins.emmet_vim"',
       ft = {'php', 'html', 'blade', 'vue'},
     }
-    use {'sirver/ultisnips', config = 'require "plugins.ultisnips"'}
     use {'sbdchd/neoformat', config = 'require "plugins.neoformat"', cmd = 'Neoformat'}
     use {'k-takata/matchit.vim'}
     use {'vim-test/vim-test',
@@ -97,22 +96,28 @@ return require('packer').startup({
     use {'nvim-treesitter/nvim-treesitter', run = 'vim.cmd("TSUpdate")',
          config = 'require "plugins.nvim_treesitter"'}
 
-    -- use my patched version for is-keyward hack and sources sorting
-    -- use {'pbogut/completion-nvim', config = 'require "plugins.completion_nvim"'}
-    -- use {'kristijanhusak/vim-dadbod-completion', after = {'completion-nvim', 'vim-dadbod'}}
-    -- use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'completion-nvim'}}
-    -- use {'aca/completion-tabnine', run = './install.sh', after = 'completion-nvim'}
-    -- use {'steelsojka/completion-buffers', after = 'completion-nvim'}
+    use {'dcampos/nvim-snippy', config = 'require "plugins.nvim_snippy"'}
+    use {'hrsh7th/nvim-cmp', config = 'require "plugins.nvim_cmp"', requires = {
+        'hrsh7th/cmp-buffer',
+        'hrsh7th/cmp-path',
+        'hrsh7th/cmp-nvim-lsp',
+        'hrsh7th/cmp-nvim-lua',
+        'hrsh7th/cmp-emoji',
+        'quangnguyen30192/cmp-nvim-tags',
+        'tzachar/cmp-tabnine',
+        'ray-x/cmp-treesitter',
+        'f3fora/cmp-spell',
+        'onsails/lspkind-nvim',
+        'dcampos/cmp-snippy',
+      }
+    }
 
-    -- nvim-compe - it has some performance issues with my setup, mostly with sql
-    use {'hrsh7th/nvim-compe', config = 'require "plugins.nvim_compe"'}
-    use {'kristijanhusak/vim-dadbod-completion', after = {'nvim-compe', 'vim-dadbod'}}
-    use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'nvim-compe'}}
-    use {'tzachar/compe-tabnine', run = './install.sh', after = 'nvim-compe'}
+    use {'kristijanhusak/vim-dadbod-completion', after = {'nvim-cmp', 'vim-dadbod'}}
+    use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'nvim-cmp'}}
+    use {'tzachar/cmp-tabnine', run = './install.sh', after = 'nvim-cmp'}
 
     -- lsp
     use {'neovim/nvim-lspconfig', config = 'require "plugins.nvim_lsp"'}
-    use {'hrsh7th/vim-vsnip'}
     use {'nvim-lua/lsp-status.nvim'}
     -- candidates to get removed
     use {'vim-vdebug/vdebug', opt = true}
