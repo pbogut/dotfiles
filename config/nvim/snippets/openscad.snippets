@@ -1,0 +1,53 @@
+snippet cube "cube"
+	cube([${1:5}, ${2:5}, ${3:5}]);
+	$0
+snippet translate "translate"
+	translate([${1:0}, ${2:0}, ${3:0}]) ${VISUAL}$0
+snippet scale "scale"
+	scale([${1:1}, ${2:1}, ${3:1}]) ${VISUAL}$0
+snippet sphere "sphere"
+	sphere(${1:5});
+snippet cylinder "cylinder"
+	cylinder(h=${1:5}, r=${2:5});
+snippet union "union"
+	union() {
+		${VISUAL}$0
+	}
+snippet hull "hull"
+	hull() {
+		${VISUAL}$0
+	}
+snippet rotate "rotate"
+	rotate(${1:90}, [${2:0}, ${3:0}, ${4:0}]) ${VISUAL}$0
+snippet module "module"
+	module ${1:name}() {
+		${VISUAL}$0
+	}
+snippet inter "intersection"
+	intersection() {
+		${VISUAL}$0
+	}
+snippet intersection "intersection"
+	intersection() {
+		${VISUAL}$0
+	}
+snippet diff "difference"
+	difference() {
+		${VISUAL}$0
+	}
+snippet for "for"
+	for (${1:i} = [${2:1}:${3:1}:${4:10}]) {
+		${VISUAL}$0
+	}
+snippet difference "difference"
+	difference() {
+		${VISUAL}$0
+	}
+snippet vec "vector" i
+	[${1:0}, ${2:0}, ${3:0}]
+snippet [] "vector" i
+	[${1:0}, ${2:0}, ${3:0}]
+snippet {} "block" i
+	{
+		${VISUAL}$0
+	}
