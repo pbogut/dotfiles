@@ -5,8 +5,9 @@ local bo = vim.bo
 local o = vim.o
 local l = {}
 
-u.command('Skel', 'lua require"projector".template_from_cmd(<q-args>)', {
-  nargs = '?'
+u.command('Skel', 'lua require"projector".file_template(<q-args>)', {
+  nargs = '?',
+  complete = 'custom,v:lua.projector.temp_completion'
 })
 u.map('n', '<space>ta', ':lua require"projector".go_alternate()<cr>', { silent = true })
 u.augroup('x_templates', {
@@ -125,15 +126,15 @@ return {
         end,
       },
       ['app/code/.*/Model/ResourceModel/.*/Collection%.php'] = {
-        template = "_magento2_resource_model_collection",
+        template = "magento2/Model/ResourceModel/Collection.php",
         priority = 100
       },
       ['app/code/.*/Model/ResourceModel/.*/CollectionFactory%.php'] = {
-        template = "_magento2_resource_model_collection_factory",
+        template = "magento2/Model/ResourceModel/CollectionFactory.php",
         priority = 100
       },
       ['app/code/.*/Model/ResourceModel/.*/DataProvider%.php'] = {
-        template = "_magento2_resource_model_data_provider",
+        template = "magento2/Model/ResourceModel/DataProvider.php",
         priority = 100
       },
       ['app/code/.*/Model/ResourceModel/.*%.php'] = {
@@ -422,8 +423,24 @@ return {
         template = "file.php",
         priority = 5000,
       },
+      ['.*%.sh'] = {
+        template = "file.sh",
+        priority = 5000,
+      },
+      ['.*%.zsh'] = {
+        template = "file.zsh",
+        priority = 5000,
+      },
       ['docker%-compose%.yml'] = {
         template = "docker-compose.yml",
+        priority = 5000,
+      },
+      ['phpmd%.xml'] = {
+        template = "phpmd.xml",
+        priority = 5000,
+      },
+      ['phpcs%.xml'] = {
+        template = "phpcs.xml",
         priority = 5000,
       },
       ['.*'] = {

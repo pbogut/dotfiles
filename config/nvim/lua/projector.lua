@@ -24,8 +24,6 @@ local search_lines = 10
 local templates_path = os.getenv('HOME') .. '/.config/nvim/templates'
 local configuration = require('plugins.projector')
 
-_G.projector = {}
-
 function a.ultisnip_template(name)
   cmd("silent! normal! i_t" .. name .. t'<c-r>=UltiSnips#ExpandSnippet()<cr>')
   if not g.ulti_expand_res or g.ulti_expand_res == 0 then
@@ -41,30 +39,37 @@ function a.file_template(name)
         table.remove(lines)
     end
     s.expand_snippet({
-      body = lines,
+      body = a.process_placeholders(lines),
       kind = 'snipmate'
     })
 end
 
-function a.template_from_cmd(args)
-  args = u.split_string(args, ' ')
-  if args[1] then
-    cmd('set ft=' .. args[1])
-  end
-  local name = '_skel'
-  if args[2] then
-    name = args[2]
+function a.process_placeholders(lines)
+  local placeholders = l.collect_placeholders(lines)
+  local result = {}
+  for name, config in pairs(placeholders) do
+    local value = config.value()
+    if value and value:len() > 0 then
+      result[name] = value
+    else
+      result[name] = name
+    end
   end
 
-  if name and name:match('^_') then
-    a.ultisnip_template(name)
-  elseif name then
-    a.file_template(name)
-  else
-    a.do_template()
-  end
+  return l.replace_placeholders(lines, result)
 end
 
+function a.template_list()
+  local result = {}
+  local file_list = u.glob(templates_path .. "**/*.snippet")
+  for _, file in ipairs(file_list) do
+    file = file:gsub('^' .. templates_path .. '/', '')
+    file = file:gsub('%.snippet$', '')
+    table.insert(result, file)
+  end
+
+  return table.concat(result, '\n')
+end
 
 -- create template
 function a.generate(generator_name)
@@ -101,31 +106,6 @@ function a.do_template()
       -- print('file', config.template);
       return a.file_template(config.template)
     end
-  end
-end
-
-function _G.projector.f(placeholder)
-  local ph_cfg = l.load_placeholder(placeholder)
-  if ph_cfg then
-    return ph_cfg.value()
-  else
-    return placeholder
-  end
-end
-
-function a.process_placeholders()
-  local placeholders = l.collect_placeholders()
-  local result = {}
-  for name, config in pairs(placeholders) do
-    result[name] = config.value()
-  end
-  l.replace_placeholders(result)
-  if result['_'] then
-    local pos = fn.searchpos('\\[\\[coursor_position\\]\\]', 'n')
-    cmd([[silent! %s/\[\[coursor_position\]\]//g]])
-    fn.cursor(pos[1], pos[2])
-  else
-    fn.cursor(fn.line('$'),1)
   end
 end
 
@@ -314,11 +294,17 @@ function l.check_file(relative, pattern)
   return relative:match(pattern)
 end
 
-function l.replace_placeholders(placeholders)
-  for placeholder, value in pairs(placeholders) do
-    print('%s/' .. placeholder .. '/' .. value .. '/g')
-    cmd([[silent! %s/\[\[]] .. placeholder .. [[\]\]/]] .. fn.escape(value, '/\\') .. '/g')
+function l.replace_placeholders(lines, placeholders)
+  local result = {}
+  for _, line in ipairs(lines) do
+    for placeholder, value in pairs(placeholders) do
+      line = line:gsub('%[%[' .. placeholder .. '%]%]', value)
+      -- print('%s/' .. placeholder .. '/' .. value .. '/g')
+    end
+    table.insert(result, line)
   end
+
+  return result
 end
 
 function l.load_placeholder(placeholder)
@@ -344,9 +330,9 @@ function l.load_placeholder(placeholder)
   end
 end
 
-function l.collect_placeholders()
+function l.collect_placeholders(lines)
   local result = {}
-  for _, line in ipairs(fn.getline(1, fn.line('$'))) do
+  for _, line in ipairs(lines) do
     for placeholder in line:gmatch('%[%[(.-)%]%]') do
       if not result[placeholder] then
         local ph_cfg = l.load_placeholder(placeholder)
@@ -373,5 +359,8 @@ end
 u.augroup('x_tttemplates', {
   VimEnter = {'*', l.init_project},
 })
+
+_G.projector = _G.projector or {}
+_G.projector.temp_completion = a.template_list
 
 return a

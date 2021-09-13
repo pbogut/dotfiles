@@ -404,111 +404,14 @@ class `!p snip.rv = snip.basename` extends \Magento\Framework\Model\ResourceMode
 endsnippet
 
 snippet _t_magento2_resource_model_collection_factory "Magento2 Resource Model Collection Factory" b
-<?php
-
-namespace `!p snip.rv = namespace(path)`;
+namespace ${1:`v:lua.projector.f('magento2.namespace')`};
 
 use Magento\Framework\ObjectManagerInterface;
 
-class `!p snip.rv = snip.basename`
-{
-	/** @var ObjectManagerInterface **/
-	protected $_objectManager = null;
-	/** @var Collection **/
-	protected $_instanceName = null;
-
-	public function __construct(ObjectManagerInterface $objectManager, $instanceName = Collection::class)
-	{
-		$this->_objectManager = $objectManager;
-		$this->_instanceName = $instanceName;
-	}
-
-	public function create(array $data = [])
-	{
-		return $this->_objectManager->create($this->_instanceName, $data);
-	}
-}
-endsnippet
-
-snippet _t_magento2_resource_model_data_provider "Magento2 Resource Model Data Provider" b
-<?php
-
-namespace `!p snip.rv = namespace(path)`;
-
-use Magento\Ui\DataProvider\AbstractDataProvider;
-
-class `!p snip.rv = snip.basename` extends AbstractDataProvider
-{
-	protected $_loadedData;
-
-	/**
-	 * @param string $name
-	 * @param string $primaryFieldName
-	 * @param string $requestFieldName
-	 * @param CollectionFactory $collectionFactory
-	 * @param array $meta
-	 * @param array $data
-	 */
-	public function __construct(
-		$name,
-		$primaryFieldName,
-		$requestFieldName,
-		CollectionFactory $collectionFactory,
-		array $meta = [],
-		array $data = []
-	) {
-		$this->collection = $collectionFactory->create();
-		parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
-	}
-
-	/**
-	 * Get data
-	 *
-	 * @return array
-	 */
-	public function getData()
-	{
-		if (isset($this->_loadedData)) {
-			return $this->_loadedData;
-		}
-		$items = $this->collection->getItems();
-		foreach ($items as $item) {
-			$this->_loadedData[$item->getId()] = $item->getData();
-		}
-		return $this->_loadedData;
-	}
-}
-endsnippet
-
-snippet _t_magento2_resource_model_source "Magento2 Source Model" b
-<?php
-
-namespace `!p snip.rv = namespace(path)`;
-
-use Magento\Framework\Data\OptionSourceInterface;
-
 /**
- * Class Status
+ * Class ${2:`v:lua.projector.f('php.class')`}
+ *
+ * @author ${3:`v:lua.projector.f('author')`} <${4:`v:lua.projector.f('author_contact')`}>
  */
-class `!p snip.rv = snip.basename` implements OptionSourceInterface
-{
-	protected $options = [];
-
-	/**
-	 * Get options
-	 *
-	 * @return array
-	 */
-	public function toOptionArray()
-	{
-		$options = [];
-		foreach ($this->options as $key => $value) {
-			$options[] = [
-				'label' => $value,
-				'value' => $key,
-			];
-		}
-		return $options;$0
-	}
-}
+class $2
 endsnippet
