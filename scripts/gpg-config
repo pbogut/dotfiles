@@ -22,6 +22,10 @@ elif [[ $action == "set" ]]; then
     $0 get $key
     echo ""
 
+elif [[ $action == "init" ]]; then
+    gpg --full-gen-key
+    echo default-recipient-self >> "$HOME/.gnupg/gpg.conf"
+
 else
     echo "Usage: ${0##*/} [list|get|set] [key]"
     echo ""
