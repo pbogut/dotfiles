@@ -53,6 +53,12 @@ trap "volume_mute" SIGRTMIN+3
 update_state
 show_state
 
+#watch changes in real time
+pactl subscribe | grep --line-buffered "sink" | while read x; do
+  update_state
+  show_state
+done
+
 while true; do
   if [[ $cycle -ge $((refresh / tick)) ]]; then
     update_state
