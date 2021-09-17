@@ -1,0 +1,54 @@
+snippet {} "block"
+	{
+		${VISUAL}$1
+	}$0
+snippet {}; "block colon"
+	{
+		${VISUAL}$1
+	};$0
+snippet { "inline block"
+	{${VISUAL}$1}$0
+snippet {; "inline block colon"
+	{${VISUAL}$1};$0
+snippet {}) "callback or something"
+	{
+		${VISUAL}$0
+	})
+snippet [] "square block"
+	[
+		${VISUAL}$1
+	]$0
+snippet []; "square block colon"
+	[
+		${VISUAL}$1
+	];$0
+snippet [ "inline square block"
+	[${VISUAL}$1]$0
+snippet [; "inline square block colon"
+	[${VISUAL}$1];$0
+snippet () "round block"
+	(
+		${VISUAL}$1
+	)$0
+snippet (); "round block colon"
+	(
+		${VISUAL}$1
+	);$0
+snippet ( "inline round block"
+	(${VISUAL}$1)$0
+snippet (; "inline round block colon"
+	(${VISUAL}$1);$0
+snippet ([]) "squere round block"
+	([
+		${VISUAL}$1
+	])$0
+snippet ([]); "squere round block colon"
+	([
+		${VISUAL}$1
+	]);$0
+snippet ([ "inline squere round block"
+	([${VISUAL}$1])$0
+snippet ([; "inline squere round block colon"
+	([${VISUAL}$1]);$0
+snippet bn
+	${1:`v:lua.projector.f('base_name')`}$0
