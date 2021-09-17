@@ -51,6 +51,7 @@ yay -S \
     notmuch-runtime notmuch \
     numlockx \
     pandoc \
+    playerctl \
     pulsemixer \
     python python-pip python2 python2-pip \
     qutebrowser \

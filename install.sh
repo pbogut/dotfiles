@@ -56,6 +56,7 @@ read -d '' files <<"EOF"
     config/nvim/ginit.vim
     config/nvim/config
     config/nvim/templates
+    config/nvim/snippets
     config/pip/pip.conf
     config/polybar
     config/qutebrowser/config.py
