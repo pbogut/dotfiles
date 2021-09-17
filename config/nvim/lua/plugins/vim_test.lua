@@ -29,4 +29,11 @@ function c.config()
   })
 end
 
+vim.g['test#strategy'] = {
+  nearest = 'neovim',
+  file = 'neovim',
+  suite = 'neovim',
+}
+vim.g['test#elixir#exunit#options'] = '--trace'
+
 return c
