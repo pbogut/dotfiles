@@ -46,7 +46,7 @@ return require('packer').startup({
     use {'honza/vim-snippets'}
     use {'mattn/emmet-vim',
       config = 'require "plugins.emmet_vim"',
-      ft = {'php', 'html', 'blade', 'vue'},
+      ft = {'php', 'html', 'blade', 'vue', 'eelixir'},
     }
     use {'sbdchd/neoformat', config = 'require "plugins.neoformat"', cmd = 'Neoformat'}
     use {'k-takata/matchit.vim'}

@@ -19,16 +19,12 @@ u.map('i', '<m-cr>', '<cr><esc>O')
 u.map('n', '<space><cr>', 'za')
 u.map('v', '<space><cr>', 'zf')
 u.map('n', '<space>tw', ':lua vim.wo.wrap = not vim.wo.wrap<cr>')
--- vim replacement
-u.map('i', '(<cr>', '(<cr>)<esc>O')
-u.map('i', '{<cr>', '{<cr>}<esc>O')
-u.map('i', '[<cr>', '[<cr>]<esc>O')
 -- regex helpers
 u.map('c', [[\\*]], [[\(.*\)]])
 u.map('c', [[\\-]], [[\(.\{-}\)]])
 -- command line navigation
-u.map('c', '<m-k>', '<Up>')
-u.map('c', '<m-j>', '<Down>')
+u.map('c', '<c-k>', '<Up>')
+u.map('c', '<c-j>', '<Down>')
 -- remap delete to c-d because on hardware level Im sending del when c-d (ergodox)
 u.map('n', '<del>', '<c-d>', {noremap = false})
 -- prevent pasting in visual from yanking seletion
@@ -70,9 +66,6 @@ u.map('n', '<space><space>', function()
 end)
 -- format file indentation
 u.map('n', '<space>=', 'migg=G`i')
--- trigger omnicompletion with c-space
--- u.map('n', '<C-Space>', 'a<c-x><c-o>')
--- u.map('i', '<C-Space>', '<c-x><c-o>')
 -- resize windows
 u.map('', '<m-l>', ':vertical resize +1<cr>')
 u.map('', '<m-h>', ':vertical resize -1<cr>')
