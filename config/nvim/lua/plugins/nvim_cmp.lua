@@ -1,20 +1,41 @@
 local cmp = require('cmp')
-local u = require('utils')
+
+local has_words_before = function()
+  if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then
+    return false
+  end
+  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+  return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+end
+
+local feedkey = function(key, mode)
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), mode, true)
+end
 
 cmp.setup {
   snippet = {
     expand = function(args)
-      -- vim.fn["vsnip#anonymous"](args.body)
       require 'snippy'.expand_snippet(args.body)
     end,
   },
   mapping = {
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<cr>'] = cmp.mapping.confirm({
+    ['<c-space>'] = cmp.mapping.complete(),
+    ['<c-y>S'] = cmp.mapping.confirm({
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     }),
-    ['<C-e>'] = cmp.mapping.close(),
+    ['<tab>'] = cmp.mapping(function(fallback)
+
+      if vim.fn.pumvisible() == 1 and vim.v.completed_item.word then
+        feedkey("<C-y>S", "i")
+      elseif require'snippy'.can_expand_or_advance() then
+        require'snippy'.expand_or_advance()
+      elseif has_words_before() then
+        feedkey("<C-y>,", "i")
+      else
+        fallback()
+      end
+    end, { "i", "s" }),
   },
   sources = {
     {name = 'nvim_lsp'},
@@ -22,10 +43,9 @@ cmp.setup {
     {name = 'treesitter'},
     {name = 'vim-dadbod-completion'},
     {name = 'cmp_tabnine'},
-    {name = 'snippy'},
-    {name = 'ultisnips'},
+    {name = 'snippy', keyword_length = 2},
     {name = 'path'},
-    {name = 'tags'},
+    {name = 'tags', max_item_count = 15},
     {name = 'buffer'},
     {name = 'emoji'},
     {name = 'spell'},
