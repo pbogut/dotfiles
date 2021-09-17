@@ -22,12 +22,17 @@ if [[ "$1" =~ ^mailto: ]]; then
     cc=$(echo "$mail_data" | /bin/sed -s 's/.*?[Cc][Cc]=//' |
         /bin/sed -s 's/?.*//')
 
-    urxvt -e neomutt "$recipient" -b "$bcc" -c "$cc" -s "$subject" \
+    # urxvt -T "EMAIL_MUTT" -e zsh -ic neomutt "$recipient" -b "$bcc" -c "$cc" -s "$subject" \
+    cmd='neomutt -a "'"$1"'" -b "'"$bcc"'" -c "'"$cc"'" -s "'"$subject"'"'
+    # urxvt -T "EMAIL_MUTT" -e zsh -ic "$cmd" \
+    urxvt -e zsh -ic "$cmd" \
         && pkill -SIGRTMIN+13 i3blocks
 elif [[ -f "$1" ]]; then
-    urxvt -e neomutt -a "$1" \
+    # urxvt -T "EMAIL_MUTT" -e zsh -ic neomutt -a "$1" \
+    cmd='neomutt -a "'"$1"'"'
+    urxvt -e zsh -ic "$cmd" \
         && pkill -SIGRTMIN+13 i3blocks
 else
-    urxvt -e neomutt \
+    urxvt -T "EMAIL_MUTT" -e zsh -ic neomutt \
         && pkill -SIGRTMIN+13 i3blocks
 fi
