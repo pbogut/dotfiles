@@ -1,4 +1,5 @@
 local u = require('utils')
+local h = require('projector.helper')
 local fn = vim.fn
 
 local function get_file_parts()
@@ -30,6 +31,11 @@ local p = {
       end
 
       return result
+    end
+  },
+  snake_name = {
+    value = function()
+      return h.snakecase(fn.expand('%:t:r'))
     end
   },
   class = {

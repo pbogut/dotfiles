@@ -1,24 +1,42 @@
 local h = require('projector.helper')
-local u = require('utils')
 local fn = vim.fn
-
-local function get_file_parts()
-  local cwd = fn.getcwd()
-  local filename = fn.expand('%:p')
-  local relative = filename:gsub('^' .. cwd .. '/', '')
-  local noext = relative:gsub('(.*)%..-$', '%1')
-  return u.split_string(noext, '/')
-end
 
 local p = {}
 
 p.module_name = {
   value = function()
-    local list = get_file_parts()
+    local list = h.get_file_parts()
     if #list > 4 then
       return list[3] .. '_' .. list[4]
     end
     return 'Vendor_ModuleName'
+  end
+}
+p.module_namespace = {
+  value = function()
+    local list = h.get_file_parts()
+    if #list > 4 then
+      return list[3] .. [[\]] .. list[4]
+    end
+    return [[Vendor\ModuleName]]
+  end
+}
+p.resource_name = {
+  value = function()
+    local list = h.get_file_parts()
+    if #list > 4 then
+      return list[#list-1]
+    end
+    return 'ResourceName'
+  end
+}
+p.resource_key = {
+  value = function()
+    local list = h.get_file_parts()
+    if #list > 4 then
+      return list[#list-1]:lower()
+    end
+    return 'resourcename'
   end
 }
 p.module_name_str = {
@@ -33,7 +51,7 @@ p.module_key = {
 }
 p.namespace = {
   value = function()
-    local list = get_file_parts()
+    local list = h.get_file_parts()
     table.remove(list, #list)
     local result = ''
 

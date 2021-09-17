@@ -44,6 +44,15 @@ function a.file_template(name)
     })
 end
 
+function a.process_placeholder(placeholder)
+  local ph_cfg = l.load_placeholder(placeholder)
+  if ph_cfg then
+    return ph_cfg.value()
+  else
+    return placeholder
+  end
+end
+
 function a.process_placeholders(lines)
   local placeholders = l.collect_placeholders(lines)
   local result = {}
@@ -134,13 +143,17 @@ function a.go_alternate()
     end
   end
 
+  result = u.unique(result)
+
   -- only existing files if any --
   local existing = {}
   for _, file in ipairs(result) do
-    if fn.filereadable(file) > 0 then
+    if fn.filereadable(fn.getcwd() .. '/' .. file) > 0 then
       existing[#existing+1] = file
     end
   end
+
+  existing = u.unique(existing)
 
   if #existing > 0 then
     l.select_alternate(existing)
@@ -362,5 +375,6 @@ u.augroup('x_tttemplates', {
 
 _G.projector = _G.projector or {}
 _G.projector.temp_completion = a.template_list
+_G.projector.f = a.process_placeholder
 
 return a

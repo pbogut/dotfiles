@@ -285,6 +285,10 @@ return {
         template = "_laravel_test",
         priority = 100,
       },
+      ['app/Models/.*%.php'] = {
+        template = "laravel/model.php",
+        priority = 100,
+      },
       ['app/Console/Commands/.*%.php'] = {
         template = "_laravel_command",
         priority = 100,

@@ -258,6 +258,18 @@ function u.merge_tables(val1, val2, append)
   return fresh_one
 end
 
+function u.unique(tab)
+  local result = {}
+  local temp = {}
+  for _, v in ipairs(tab) do
+    temp[v] = true
+  end
+  for v, _ in pairs(temp) do
+    result[#result+1] = v
+  end
+  return result
+end
+
 function u.glob(pattern)
   local result = fn.glob(pattern)
   return u.split_string(result, '\n')

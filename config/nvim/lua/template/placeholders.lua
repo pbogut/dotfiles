@@ -1,6 +1,11 @@
 local p = {
   base_name = {
     value = function()
+      return vim.fn.expand('%:t:r')
+    end
+  },
+  file_name = {
+    value = function()
       return vim.fn.expand('%:t')
     end
   },
