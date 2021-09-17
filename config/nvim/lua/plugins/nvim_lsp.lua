@@ -8,8 +8,8 @@ local no_lsp_bind = '<cmd>lua print("No LSP attached")<CR>'
 local format_bind = '<cmd>Neoformat<CR>'
 
 local bindings = {
-  {'n', ']d', ':lua vim.lsp.diagnostic.goto_next()<CR>', no_lsp_bind},
-  {'n', '[d', ':lua vim.lsp.diagnostic.goto_prev()<CR>', no_lsp_bind},
+  {'n', ']d', ':lua vim.diagnostic.goto_next()<CR>', no_lsp_bind},
+  {'n', '[d', ':lua vim.diagnostic.goto_prev()<CR>', no_lsp_bind},
   {'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', false},
   {'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', false},
   {'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', false},
@@ -19,7 +19,7 @@ local bindings = {
   {'n', '<space>T', '<cmd>lua vim.lsp.buf.type_definition()<CR>', no_lsp_bind},
   {'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', no_lsp_bind, {silent=false}},
   {'n', '<space>rr', '<cmd>lua vim.lsp.buf.references()<CR>', no_lsp_bind},
-  {'n', '<space>ee', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', no_lsp_bind},
+  {'n', '<space>ee', '<cmd>lua vim.diagnostic.show_line_diagnostics()<CR>', no_lsp_bind},
   {'n', '<space>sd', '<cmd>lua vim.lsp.buf.document_symbol()<CR>', no_lsp_bind},
   {'n', '<space>sD', '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', no_lsp_bind},
   {'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', no_lsp_bind},
@@ -67,7 +67,7 @@ local function location_handler(_, result, ctx)
     if #result == 1 then
       util.jump_to_location(result[1])
     elseif #result > 1 then
-      util.set_qflist(util.locations_to_items(result))
+      vim.fn.setqflist(util.locations_to_items(result))
       require('plugins.fzf').quickfix(vim.fn.expand('<cword>'));
       -- api.nvim_command("copen")
       -- api.nvim_command("wincmd p")
@@ -90,7 +90,7 @@ vim.lsp.handlers['textDocument/references'] = function(_, result)
   end
   cmd('echo ""')
   local util = require('vim.lsp.util')
-  util.set_qflist(util.locations_to_items(result))
+  vim.fn.setqflist(util.locations_to_items(result))
   require('plugins.fzf').quickfix(vim.fn.expand('<cword>'));
   -- api.nvim_command("copen")
   -- api.nvim_command("wincmd p")
@@ -110,26 +110,26 @@ vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
   }
 )
 
-u.signs({
-  LspDiagnosticsSignError = { text = g.icon.error, texthl = "LspDiagnosticsSignError" },
-  LspDiagnosticsSignWarning = { text = g.icon.warning, texthl = "LspDiagnosticsSignWarning" },
-  LspDiagnosticsSignInformation = { text = g.icon.info, texthl = "LspDiagnosticsSignInformation" },
-  LspDiagnosticsSignHint = { text = g.icon.hint, texthl = "LspDiagnosticsSignHint" },
+u.highlights({
+  DiagnosticFloatingInformation = { guibg = '#a68f46', guifg = '#073642' },
+  DiagnosticFloatingHint = { guibg = '#9eab7d', guifg = '#073642' },
+  DiagnosticFloatingError = { guibg = '#dc322f', guifg = '#073642' },
+  DiagnosticFloatingWarning = { guibg = '#d33682', guifg = '#073642' },
+  DiagnosticSignError = { guibg = '#073642', guifg = '#dc322f' },
+  DiagnosticSignWarn = { guibg = '#073642', guifg = '#d33682' },
+  DiagnosticSignInfo = { guibg = '#073642', guifg = '#a68f46' },
+  DiagnosticSignHint = { guibg = '#073642', guifg = '#9eab7d' },
+  DiagnosticVirtualTextError = { guifg = '#dc322f' },
+  DiagnosticVirtualTextWarning = { guifg = '#d33682' },
+  DiagnosticVirtualTextInformation = { guifg = '#a68f46' },
+  DiagnosticVirtualTextHint = { guifg = '#9eab7d' },
 })
 
-u.highlights({
-  LspDiagnosticsFloatingInformation = { guibg = '#a68f46', guifg = '#073642' },
-  LspDiagnosticsFloatingHint = { guibg = '#9eab7d', guifg = '#073642' },
-  LspDiagnosticsFloatingError = { guibg = '#dc322f', guifg = '#073642' },
-  LspDiagnosticsFloatingWarning = { guibg = '#d33682', guifg = '#073642' },
-  LspDiagnosticsSignError = { guibg = '#073642', guifg = '#dc322f' },
-  LspDiagnosticsSignWarning = { guibg = '#073642', guifg = '#d33682' },
-  LspDiagnosticsSignInformation = { guibg = '#073642', guifg = '#a68f46' },
-  LspDiagnosticsSignHint = { guibg = '#073642', guifg = '#9eab7d' },
-  LspDiagnosticsVirtualTextError = { guifg = '#dc322f' },
-  LspDiagnosticsVirtualTextWarning = { guifg = '#d33682' },
-  LspDiagnosticsVirtualTextInformation = { guifg = '#a68f46' },
-  LspDiagnosticsVirtualTextHint = { guifg = '#9eab7d' },
+u.signs({
+  DiagnosticSignError = { text = g.icon.error, texthl = "DiagnosticSignError" },
+  DiagnosticSignWarn = { text = g.icon.warning, texthl = "DiagnosticSignWarning" },
+  DiagnosticSignInfo = { text = g.icon.info, texthl = "DiagnosticSignInformation" },
+  DiagnosticSignHint = { text = g.icon.hint, texthl = "DiagnosticSignHint" },
 })
 
 -- npm install -g vim-language-server
@@ -200,6 +200,8 @@ end
 function vim.lsp.buf.x_range_formatting()
   if not pcall(vim.lsp.buf.range_formatting) then
     cmd("'<,'>Neoformat")
+  else
+    print('Range formated with LSP')
   end
 end
 
@@ -207,6 +209,8 @@ end
 function vim.lsp.buf.x_formatting()
   if not pcall(vim.lsp.buf.formatting) then
     cmd('Neoformat')
+  else
+    print('File formated with LSP')
   end
 end
 
