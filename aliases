@@ -28,5 +28,5 @@ alias ctags_php="ctags -h \".php\" -R --exclude=\".git\" --exclude=\"tests\" --e
 # built in zsh kill suck ballz
 alias kill=/usr/bin/kill
 
-alias yay="yay --color=always"
 alias lg="lazygit"
+alias fly=flyctl
