@@ -161,6 +161,7 @@ set $wsdash 0: dash
 set $wsterm 0: term
 set $wsbrow 0: browser
 set $wscomm 0:/ comm
+set $wsmedia 0: media
 
 
 bindsym $hype+c workspace $wscode
@@ -269,10 +270,13 @@ assign [title="^Ferdi"] $wscomm
 assign [class="^discord$"] $wscomm
 assign [title="Friends List"] $wscomm
 assign [title="^EMAIL_MUTT$"] $wscomm
+assign [title="^www.deezer.com"] $wsmedia
+assign [title="Freezer"] $wsmedia
 
 for_window [class="^discord$"] workspace --no-auto-back-and-forth $wscomm
 for_window [title="^Ferdi"] workspace --no-auto-back-and-forth $wscomm
 for_window [title="Friends List"] workspace --no-auto-back-and-forth $wscomm
+for_window [title="^www.deezer.com"] workspace --no-auto-back-and-forth $wsmedia
 
 # assign [title="^urxvt$"] $wsterm
 # for_window [title="^urxvt$"] workspace --no-auto-back-and-forth $wsterm
@@ -285,9 +289,9 @@ for_window [title="Friends List"] workspace --no-auto-back-and-forth $wscomm
 
 for_window [title="NVIM_FOR_QB"] floating enable
 for_window [title="QB_FILE_SELECTION"] floating enable
-for_window [title="QB_FILE_SELECTION"] move absolute position 360px 140px
 for_window [title="QB_FILE_SELECTION"] resize set width 1200px
 for_window [title="QB_FILE_SELECTION"] resize set height 800px
+for_window [title="QB_FILE_SELECTION"] move position center
 for_window [title="FLOATING_WINDOW"] floating enable
 for_window [class="Toggl Desktop"] floating enable
 for_window [class="^Yad$"] floating enable
@@ -309,21 +313,18 @@ bindsym Mod1+Shift+Ctrl+space exec --no-startup-id ~/.scripts/i3-keyboard-layout
 set $pressSound play ~/Media/test-44100Hz-le-1ch-4bytes.wav speed 2.0 vol 0.15
 set $releaseSound play ~/Media/test-44100Hz-le-1ch-4bytes.wav speed 3.0 vol 0.15
 
-bindsym Mod1+Shift+Ctrl+p $exec "~/.scripts/media-playpause press && $pressSound"
-bindsym Mod1+Shift+Ctrl+r $exec "~/.scripts/media-playpause && $releaseSound"
-
+# Media Keys
 bindsym XF86MonBrightnessUp $exec "~/.scripts/i3-brightness.sh up"
 bindsym XF86MonBrightnessDown $exec "~/.scripts/i3-brightness.sh down"
-bindsym XF86AudioRaiseVolume $exec "pulsemixer --change-volume +1" ; $update_volume
-bindsym XF86AudioLowerVolume $exec "pulsemixer --change-volume -1" ; $update_volume
-# bindsym XF86AudioStop $exec "mpc pause"
-# bindsym XF86AudioPlay $exec "mpc play"
-# bindsym XF86AudioNext $exec "mpc next"
-# bindsym XF86AudioPrev $exec "mpc prev"
-#bindsym XF86AudioPause $exec "notify-send -i printer-error 'Presssed'"
-bindsym XF86AudioPlay $exec "xdotool key --clearmodifiers space"
-bindsym XF86AudioPause $exec "xdotool key --clearmodifiers space"
+bindsym XF86AudioRaiseVolume $exec "~/.scripts/volume.sh up"
+bindsym XF86AudioLowerVolume $exec "~/.scripts/volume.sh down"
+bindsym XF86AudioPause $exec "~/.scripts/playerctl.sh play-pause"
+bindsym XF86AudioPlay $exec "~/.scripts/playerctl.sh play-pause"
+bindsym XF86AudioNext $exec "~/.scripts/playerctl.sh next"
+bindsym XF86AudioPrev $exec "~/.scripts/playerctl.sh previous"
 
+bindsym $mod+XF86AudioRaiseVolume $exec "~/.scripts/playerctl.sh next-player"
+bindsym $mod+XF86AudioLowerVolume $exec "~/.scripts/playerctl.sh prev-player"
 
 bindsym $mod+n $exec "~/.scripts/i3-switch-workspace.py --next --same-output"
 bindsym $mod+p $exec "~/.scripts/i3-switch-workspace.py --prev --same-output"
@@ -356,6 +357,7 @@ bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '\<Ferdi -' 'ferdi'"
 bindsym $mod+Ctrl+Shift+M $exec "~/.scripts/switch-or-launch.sh '\<Volume Control$' 'pavucontrol'"
 bindsym $mod+Ctrl+k $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
 bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh 'www.deezer.com__en.Google-chrome' 'google-chrome-stable --app=https://www.deezer.com/en/'"
+# bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh 'Freezer' 'freezer'"
 bindsym $mod+Ctrl+d $exec "~/.scripts/switch-or-launch.sh 'discord' 'discord'"
 bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
 bindsym $mod+Ctrl+s $exec "~/.scripts/audio-device-out-switch.sh"
@@ -377,8 +379,6 @@ bindsym $mod+slash $exec "~/.scripts/quickbrowser.sh"
 # screen shots
 # full screen (image magick required)
 bindsym Print $exec "import -window root ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
-# focused window (image magick required)
-bindsym $mod+Print $exec "import -window $(xprop -root | awk '/_NET_ACTIVE_WINDOW\(WINDOW\)/{print $NF}') ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
 # area (maim and slop required)
 bindsym Shift+Print $exec "maim -s ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
 bindsym Shift+Ctrl+Print $exec "~/.scripts/record.sh ~/Videos/Capture_from_$(date +%Y-%m-%d_%H-%M-%S).mp4"
