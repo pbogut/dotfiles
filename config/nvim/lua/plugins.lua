@@ -19,93 +19,118 @@ u.augroup('x_plugins_save', {BufWritePost = {'plugins.lua', function()
   cmd('PackerCompile')
 end}})
 
+local function config(plugin)
+  return [[
+    local xcfg = require("plugins.]] .. plugin .. [[")
+    if type(xcfg) == 'table' and xcfg['config'] then
+      xcfg.config()
+    end]]
+end
+
+local function setup(plugin)
+  return [[
+    local xcfg = require("plugins.]] .. plugin .. [[")
+    if type(xcfg) == 'table' and xcfg['setup'] then
+      xcfg.setup()
+    end]]
+end
+
 return require('packer').startup({
   function()
     -- Packer can manage itself as an optional plugin
     use {'wbthomason/packer.nvim', opt = true}
-    use {'editorconfig/editorconfig-vim', setup = 'require "plugins.editorconfig"'}
-    use {'vim-ruby/vim-ruby', ft = {'ruby'}}
+    use {'editorconfig/editorconfig-vim', setup = setup('editorconfig')}
     use {'tpope/vim-scriptease'}
     use {'tpope/vim-eunuch'}
     use {'tpope/vim-rsi'}
     use {'tpope/vim-abolish'} -- coercion thingis
-    use {'tpope/vim-commentary', config = 'require "plugins.vim_commentary"'}
+    use {'tpope/vim-commentary', config = config('vim_commentary')}
     use {'tpope/vim-surround'}
     use {'tpope/vim-repeat'}
     use {'tpope/vim-rails', ft = {'ruby'}}
+    use {'vim-ruby/vim-ruby', ft = {'ruby'}}
     use {'tpope/vim-unimpaired'}
     use {'lambdalisue/suda.vim'}
     use {'gioele/vim-autoswap'}
-    use {'glepnir/galaxyline.nvim', branch = 'main', config = 'require "plugins.galaxyline_nvim"'}
-    use {'mhinz/vim-signify', config = 'require "plugins.vim_signify"'}
+    use {'glepnir/galaxyline.nvim', config = config('galaxyline_nvim')}
+    use {'mhinz/vim-signify', config = config('vim_signify')}
     use {'ludovicchabant/vim-gutentags'}
-    use {'ntpeters/vim-better-whitespace', config = 'require "plugins.vim_better_whitespace"'}
+    use {'ntpeters/vim-better-whitespace', config = config('vim_better_whitespace')}
     use {'honza/vim-snippets'}
     use {'mattn/emmet-vim',
-      config = 'require "plugins.emmet_vim"',
+      config = config('emmet_vim'),
       ft = {'php', 'html', 'blade', 'vue', 'eelixir'},
     }
-    use {'sbdchd/neoformat', config = 'require "plugins.neoformat"', cmd = 'Neoformat'}
+    use {'sbdchd/neoformat', config = config('neoformat'), cmd = 'Neoformat'}
     use {'k-takata/matchit.vim'}
     use {'vim-test/vim-test',
-      config = 'require "plugins.vim_test".config()',
-      setup = 'require "plugins.vim_test".setup()',
-      cmd = {'TestNearest', 'TestFile', 'TestSuite', 'TestLast', 'TestLast', 'TestVisit'},
+      cmd = {'TestNearest', 'TestFile', 'TestSuite',
+             'TestLast', 'TestLast', 'TestVisit'},
+      config = config('vim_test'),
+      setup = setup('vim_test'),
     }
     use {'elmcast/elm-vim', ft = {'elm'}}
     use {'pbogut/vim-elmper', ft = {'elm'}}
     use {'elixir-lang/vim-elixir', ft = {'elixir', 'eelixir'}}
-    use {'moll/vim-bbye', cmd = {'Bdelete', 'Bwipeout'}, setup = 'require "plugins.vim_bbye"'}
-    use {'will133/vim-dirdiff', config = 'require "plugins.vim_dirdiff"', cmd = 'DirDiff'}
-    use {'dbakker/vim-projectroot', config = [[
-      vim.g.rootmarkers = {'.projectroot', '.git', '.hg', '.svn', '.bzr',
-                           '_darcs', 'build.xml', 'composer.json', 'mix.exs'} ]]
+    use {'moll/vim-bbye', cmd = {'Bdelete', 'Bwipeout'}, setup = setup('vim_bbye')}
+    use {'will133/vim-dirdiff', cmd = 'DirDiff', config = config('vim_dirdiff')}
+    use {'dbakker/vim-projectroot',
+      config = [[
+        vim.g.rootmarkers = {'.projectroot', '.git', '.hg', '.svn', '.bzr',
+                             '_darcs', 'build.xml', 'composer.json', 'mix.exs'}
+      ]]
     }
-    use {'AndrewRadev/switch.vim', config = 'require "plugins.switch_vim"'}
+    use {'AndrewRadev/switch.vim', config = config('switch_vim')}
     use {'AndrewRadev/splitjoin.vim'}
-    use {'AndrewRadev/sideways.vim', config = 'require "plugins.sideways_vim"'}
-    use {'vim-scripts/cmdalias.vim', config = 'require "plugins.cmdalias_vim"'}
+    use {'AndrewRadev/sideways.vim', config = config('sideways_vim')}
+    use {'vim-scripts/cmdalias.vim', config = config('cmdalias_vim')}
     use {'Shougo/echodoc.vim'}
-    use {'justinmk/vim-dirvish', config = 'require "plugins.vim_dirvish"'}
-    use {'justinmk/vim-sneak', config = 'require "plugins.vim_sneak"'}
+    use {'justinmk/vim-dirvish', config = config('vim_dirvish')}
+    use {'justinmk/vim-sneak', config = config('vim_sneak')}
     use {'kristijanhusak/vim-dirvish-git', after = 'vim-dirvish'}
-    use {'w0rp/ale', config = 'require "plugins.ale"'}
+    use {'w0rp/ale', config = config('ale')}
     use {'chmp/mdnav', ft = {'markdown'}}
-    use {'vim-scripts/ReplaceWithRegister', config = 'require "plugins.replacewithregister"'}
+    use {'vim-scripts/ReplaceWithRegister', config = config('replacewithregister')}
     use {'kana/vim-textobj-user'}
     use {'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user'}
-    use {'MattesGroeger/vim-bookmarks', config = 'vim.g.bookmark_save_per_working_dir = 1'}
+    use {'MattesGroeger/vim-bookmarks',
+      config = 'vim.g.bookmark_save_per_working_dir = 1'
+    }
     use {'rrethy/vim-illuminate'}
-    use {'lukas-reineke/indent-blankline.nvim', config = 'require "plugins.indent_blankline"'}
-    use {'junegunn/fzf' , config = 'require "plugins.fzf"'}
+    use {'lukas-reineke/indent-blankline.nvim', config = config('indent_blankline')}
+    use {'junegunn/fzf', config = config('fzf')}
     use {'junegunn/fzf.vim', after = 'fzf'}
     use {'pbogut/fzf-mru.vim', after = 'fzf.vim', branch = 'lua'}
-    use {'tpope/vim-dadbod', fn = 'db#url_complete', cmd = 'DB',
-                             config = 'require "plugins.vim_dadbod"'}
+    use {'tpope/vim-dadbod',
+      cmd = 'DB',
+      config = config('vim_dadbod'),
+      fn = 'db#url_complete',
+    }
     use {'pbogut/vim-dadbod-ssh', after = 'vim-dadbod'}
     use {'frankier/neovim-colors-solarized-truecolor-only'}
-
-    use {'mhartington/oceanic-next'}
-
     use {'kevinoid/vim-jsonc'}
-    use {'sheerun/vim-polyglot', setup = 'require "plugins.polyglot"'}
+    use {'sheerun/vim-polyglot', setup = setup('polyglot')}
     use {'sirtaj/vim-openscad', opt = false}
-    use {'nvim-treesitter/nvim-treesitter', run = 'vim.cmd("TSUpdate")',
-         config = 'require "plugins.nvim_treesitter"'}
+    use {'nvim-treesitter/nvim-treesitter',
+      run = 'vim.cmd("TSUpdate")',
+      config = config('nvim_treesitter')
+    }
 
     -- git
     use {'timuntersberger/neogit',
-      config = 'require "plugins.neogit".config()',
-      setup = 'require "plugins.neogit".setup()',
+      config = config('neogit'),
+      setup = setup('neogit'),
       cmd = {'Neogit', 'Gst'},
       requires = {'nvim-lua/plenary.nvim'},
     }
-    use {'rhysd/git-messenger.vim', config = 'require "plugins.git_messanger"'}
+    use {'rhysd/git-messenger.vim', config = config('git_messanger')}
     -- use {'nvim-lua/plenary.nvim'}
 
     -- completion
-    use {'dcampos/nvim-snippy', config = 'require "plugins.nvim_snippy"'}
-    use {'hrsh7th/nvim-cmp', config = 'require "plugins.nvim_cmp"', requires = {
+    use {'dcampos/nvim-snippy', config = config('nvim_snippy')}
+    use {'hrsh7th/nvim-cmp',
+      config = config('nvim_cmp'),
+      requires = {
         'hrsh7th/cmp-buffer',
         'hrsh7th/cmp-path',
         'hrsh7th/cmp-nvim-lsp',
@@ -119,14 +144,13 @@ return require('packer').startup({
         'dcampos/cmp-snippy',
       }
     }
-
     use {'kristijanhusak/vim-dadbod-completion', after = {'nvim-cmp', 'vim-dadbod'}}
-    use {'nvim-treesitter/completion-treesitter', after = {'nvim-treesitter', 'nvim-cmp'}}
     use {'tzachar/cmp-tabnine', run = './install.sh', after = 'nvim-cmp'}
 
     -- lsp
-    use {'neovim/nvim-lspconfig', config = 'require "plugins.nvim_lsp"'}
+    use {'neovim/nvim-lspconfig', config = config('nvim_lsp')}
     use {'nvim-lua/lsp-status.nvim'}
+
     -- candidates to get removed
     use {'vim-vdebug/vdebug', opt = true}
     use {'godlygeek/tabular', cmd = {'T', 'Tabularize'}}
