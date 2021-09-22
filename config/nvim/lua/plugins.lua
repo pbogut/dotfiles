@@ -26,9 +26,7 @@ return require('packer').startup({
     use {'editorconfig/editorconfig-vim', setup = 'require "plugins.editorconfig"'}
     use {'vim-ruby/vim-ruby', ft = {'ruby'}}
     use {'tpope/vim-scriptease'}
-    use {'tpope/vim-fugitive', config = 'require "plugins.vim_fugitive"'}
     use {'tpope/vim-eunuch'}
-    use {'tpope/vim-git'}
     use {'tpope/vim-rsi'}
     use {'tpope/vim-abolish'} -- coercion thingis
     use {'tpope/vim-commentary', config = 'require "plugins.vim_commentary"'}
@@ -38,7 +36,6 @@ return require('packer').startup({
     use {'tpope/vim-unimpaired'}
     use {'lambdalisue/suda.vim'}
     use {'gioele/vim-autoswap'}
-    use {'rhysd/git-messenger.vim', config = 'require "plugins.git_messanger"'}
     use {'glepnir/galaxyline.nvim', branch = 'main', config = 'require "plugins.galaxyline_nvim"'}
     use {'mhinz/vim-signify', config = 'require "plugins.vim_signify"'}
     use {'ludovicchabant/vim-gutentags'}
@@ -96,6 +93,17 @@ return require('packer').startup({
     use {'nvim-treesitter/nvim-treesitter', run = 'vim.cmd("TSUpdate")',
          config = 'require "plugins.nvim_treesitter"'}
 
+    -- git
+    use {'timuntersberger/neogit',
+      config = 'require "plugins.neogit".config()',
+      setup = 'require "plugins.neogit".setup()',
+      cmd = {'Neogit', 'Gst'},
+      requires = {'nvim-lua/plenary.nvim'},
+    }
+    use {'rhysd/git-messenger.vim', config = 'require "plugins.git_messanger"'}
+    -- use {'nvim-lua/plenary.nvim'}
+
+    -- completion
     use {'dcampos/nvim-snippy', config = 'require "plugins.nvim_snippy"'}
     use {'hrsh7th/nvim-cmp', config = 'require "plugins.nvim_cmp"', requires = {
         'hrsh7th/cmp-buffer',
