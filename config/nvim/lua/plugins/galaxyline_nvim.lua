@@ -2,7 +2,6 @@ local u = require('utils')
 local gl = require('galaxyline')
 local vcs = require('galaxyline.provider_vcs')
 local fileinfo = require('galaxyline.provider_fileinfo')
-local lspstatus = require('lsp-status')
 
 local gls = gl.section
 local fn = vim.fn
@@ -353,7 +352,7 @@ right[#right+1] = {
       -- local matches = fn.getmatches()
 
       local ale = fn['ale#statusline#Count'](fn.bufnr('')) or {total = 0}
-      local diagnostics = lspstatus.diagnostics()
+      local diagnostics = {}
 
       -- if no lsp fallback to ale
       if #vim.lsp.buf_get_clients() == 0 then
@@ -366,6 +365,13 @@ right[#right+1] = {
           errors = 0,
         }
         ale = {total = 0}
+      else
+        diagnostics = {
+          hints = vim.lsp.diagnostic.get_count(0, 'Hint'),
+          info = vim.lsp.diagnostic.get_count(0, 'Information'),
+          warnings = vim.lsp.diagnostic.get_count(0, 'Warning'),
+          errors = vim.lsp.diagnostic.get_count(0, 'Error'),
+        }
       end
 
       local parts = {}
