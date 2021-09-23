@@ -5,3 +5,7 @@ snippet postgres "PostgerSQL service"
 		restart: always
 		environment:
 			POSTGRES_PASSWORD: postgres
+snippet mail "Mailhog service"
+	${2:mailhog}:
+		image: mailhog/mailhog:latest
+		hostname: ${1:app_name}.mailhog.local

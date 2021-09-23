@@ -32,17 +32,6 @@ def module_key(text, depth=0):
 	return company + '_' + parts[-(3+depth)].lower()
 endglobal
 
-snippet _t_magento2_module "Magento module file" b
-<?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
-	<module name="${1:`!p snip.rv = module_name(path) `}">
-		<!-- <sequence>
-			<module name="Module_Name"/>
-		</sequence> -->
-	</module>
-</config>
-endsnippet
-
 snippet _t_magento2_frontend_routes "Magento frontend routes file" b
 <?xml version="1.0" ?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
@@ -62,16 +51,6 @@ snippet _t_magento2_adminhtml_routes "Magento frontend routes file" b
 			<module name="${2:`!p snip.rv = module_name(path) `}" before="Magento_Backend"/>
 		</route>
 	</router>
-</config>
-endsnippet
-
-snippet _t_magento2_events "Magento events" b
-<?xml version="1.0" encoding="UTF-8"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-	<event name="${1:event_name}">
-		<observer name="`!p snip.rv = module_name(path).lower() `_$1"
-		      instance="${2:Observer\Class}" />
-	</event>
 </config>
 endsnippet
 

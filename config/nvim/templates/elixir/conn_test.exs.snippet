@@ -1,0 +1,9 @@
+defmodule ${1:[[elixir.module_name]]} do
+	use ${2:[[elixir.base_module]]}.ConnCase, async: true
+
+	describe "${3:function_name/0}" do
+		test "${4:test description}", %{conn: conn} do
+			${0:assert false == true}
+		end
+	end
+end
