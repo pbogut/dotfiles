@@ -23,9 +23,6 @@ local function config()
   })
 
   u.augroup('x_neogit', {
-    BufEnter = {'NeogitStatus', function()
-      neogit.dispatch_refresh()
-    end},
     FileType = {'NeogitStatus', function()
       my.neogit_syntax()
       my.neogit_mappings()
@@ -96,7 +93,11 @@ local function config()
       local name = file_name() -- get file name before tab open
       cmd('tabnew')
       cmd('silent !git add -N ' .. name)
-      fn.termopen('git add -p ' .. name)
+      fn.termopen('git add -p ' .. name, {
+        on_exit = function()
+          neogit.dispatch_refresh()
+        end
+      })
       cmd('startinsert')
     end)
   end
