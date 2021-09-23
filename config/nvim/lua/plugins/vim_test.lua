@@ -1,9 +1,7 @@
 local u = require('utils')
 local g = vim.g
 
-local c = {}
-
-function c.setup()
+local function setup()
   u.map('n', '<space>tn', ':TestNearest<CR>')
   u.map('n', '<space>tf', ':TestFile<CR>')
   u.map('n', '<space>ts', ':TestSuite<CR>')
@@ -12,7 +10,7 @@ function c.setup()
   u.map('n', '<space>tv', ':TestVisit<CR>')
 end
 
-function c.config()
+local function config()
   u.augroup('x_test', {
     FileType = {
       {
@@ -27,13 +25,16 @@ function c.config()
       }
     }
   })
+
+  vim.g['test#strategy'] = {
+    nearest = 'neovim',
+    file = 'neovim',
+    suite = 'neovim',
+  }
+  vim.g['test#elixir#exunit#options'] = '--trace'
 end
 
-vim.g['test#strategy'] = {
-  nearest = 'neovim',
-  file = 'neovim',
-  suite = 'neovim',
+return {
+  config = config,
+  setup = setup,
 }
-vim.g['test#elixir#exunit#options'] = '--trace'
-
-return c
