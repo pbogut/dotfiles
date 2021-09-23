@@ -13,7 +13,7 @@ state="off"
 switch_state() {
   update_state
   if [[ $state == "on" ]]; then
-    sudo killall barriers -9
+    killall barriers -9
     state="off"
   else
     barriers

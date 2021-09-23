@@ -395,7 +395,8 @@ tail = true
 label = %output%
 ; format-prefix = " "
 ; format-prefix-foreground = ${colors.icon}
-click-left = browser https://pogoda.interia.pl
+; click-left = browser https://pogoda.interia.pl
+click-left = browser https://www.accuweather.com/en/pl/opole/274945/hourly-weather-forecast/274945
 click-right = kill -USR1 %pid%
 ; format-background = #999
 ; format-foreground = #000
@@ -410,8 +411,8 @@ format-prefix = " "
 format-prefix-foreground = ${colors.icon}
 click-left = /usr/bin/kill -SIGRTMIN+3 %pid%
 click-right = echo "DISPLAY=:0.0 pavucontrol -t 1" | at now
-scroll-up = /usr/bin/kill -SIGRTMIN+1 %pid%
-scroll-down = /usr/bin/kill -SIGRTMIN+2 %pid%
+scroll-up = ~/.scripts/volume.sh up
+scroll-down = ~/.scripts/volume.sh down
 
 [module/keylayout]
 type = custom/script

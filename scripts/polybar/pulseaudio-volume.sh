@@ -4,9 +4,6 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   22/12/2020
 #=================================================
-cycle=0    #init cycle
-slp=0.2    #sleep for tick (tick / 1000)
-tick=200   #tick every n miliseconds
 refresh=5  #refresh every n seconds
 refresh=$((refresh * 1000)) #convert to mili seconds
 
@@ -57,15 +54,4 @@ show_state
 pactl subscribe | grep --line-buffered "sink" | while read x; do
   update_state
   show_state
-done
-
-while true; do
-  if [[ $cycle -ge $((refresh / tick)) ]]; then
-    update_state
-    show_state
-    cycle=0
-  fi
-  cycle=$((cycle + 1))
-  sleep ${slp}s
-  wait
 done
