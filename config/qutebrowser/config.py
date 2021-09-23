@@ -48,6 +48,11 @@ c.content.blocking.method = "both"
 c.content.blocking.whitelist = [
     "piwik.org", "analytics.google.com", "apis.google.com", "thepiratebay.org",
     "googleadservices.com", "cache.addthiscdn.com"]
+c.content.blocking.hosts.lists = [
+    "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts",
+    "https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt",
+    "https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt",
+    "http://storage.pbogut.me/cda.txt"]
 c.content.pdfjs = False
 c.hints.border = "1px solid #E3BE23"
 c.hints.chars = "arstdhneifuwy"
@@ -127,7 +132,7 @@ config.bind('gc', 'spawn google-chrome-stable {url:pretty}')
 
 config.bind('<Ctrl-i>', 'open-editor', mode='insert')
 config.bind(
-    '<ctrl-k>',
+    '<ctrl-i>',
     'spawn --userscript ~/.scripts/keepass.rb --add', mode='insert')
 config.bind(
     '<ctrl-l>',
