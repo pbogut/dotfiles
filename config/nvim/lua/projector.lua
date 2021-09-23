@@ -80,6 +80,15 @@ function a.template_list()
   return table.concat(result, '\n')
 end
 
+function a.template_from_cmd(args)
+  print(args)
+  if args and args:len() > 0 then
+    a.file_template(args)
+  else
+    a.do_template();
+  end
+end
+
 -- create template
 function a.generate(generator_name)
   local generators = l.get_project_generators()

@@ -5,7 +5,7 @@ local bo = vim.bo
 local o = vim.o
 local l = {}
 
-u.command('Skel', 'lua require"projector".file_template(<q-args>)', {
+u.command('Skel', 'lua require"projector".template_from_cmd(<q-args>)', {
   nargs = '?',
   complete = 'custom,v:lua.projector.temp_completion'
 })
@@ -208,11 +208,11 @@ return {
         priority = 100,
       },
       ['app/code/.*/etc/module.xml'] = {
-        template = "_magento2_module",
+        template = "magento2/etc/module.xml",
         priority = 100,
       },
       ['app/code/.*/etc/.*/?events.xml'] = {
-        template = "_magento2_events",
+        template = "magento2/etc/events.xml",
         priority = 100,
       },
       ['app/code/.*/etc/frontend/routes.xml'] = {
@@ -370,6 +370,11 @@ return {
         template = "_phoenix_test_controller",
         priority = 100,
       },
+      ['^test/(.*)/features/(.*)_test%.exs'] = {
+        -- alternate = "web/controllers/%1.ex",
+        template = "elixir/wallaby/feature_test.exs",
+        priority = 100,
+      },
       ['^test/views/(.*)_test%.exs'] = {
         alternate = "web/views/%1.ex",
         template = "_phoenix_test_view",
@@ -378,6 +383,10 @@ return {
       ['^test/models/(.*)_test%.exs'] = {
         alternate = "web/models/%1.ex",
         template = "_phoenix_test_model",
+        priority = 100,
+      },
+      ['tailwind%.config%.js'] = {
+        template = "elixir/tailwind.config.js",
         priority = 100,
       },
     }
@@ -447,10 +456,18 @@ return {
         template = "phpcs.xml",
         priority = 5000,
       },
-      ['.*'] = {
-        template = "_skel",
+      ['tailwind%.config%.js'] = {
+        template = "js/tailwind.config.js",
         priority = 5000,
       },
+      ['postcss%.config%.js'] = {
+        template = "js/postcss.config.js",
+        priority = 5000,
+      },
+      -- ['.*'] = {
+      --   template = "_skel",
+      --   priority = 5000,
+      -- },
     }
   }
 }
