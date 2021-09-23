@@ -1,6 +1,5 @@
 local h = require('projector.helper')
 local fn = vim.fn
-
 local p = {}
 
 p.module_name = {
@@ -16,9 +15,9 @@ p.module_namespace = {
   value = function()
     local list = h.get_file_parts()
     if #list > 4 then
-      return list[3] .. [[\]] .. list[4]
+      return list[3] .. [[\\]] .. list[4]
     end
-    return [[Vendor\ModuleName]]
+    return [[Vendor\\ModuleName]]
   end
 }
 p.resource_name = {
@@ -58,7 +57,7 @@ p.namespace = {
     for _, el in ipairs(list) do
       local sep = ''
       if result ~= '' then
-        sep = [[\]]
+        sep = [[\\]]
       end
       if not el:match('^%l') then
         result = result .. sep .. el
@@ -70,7 +69,7 @@ p.namespace = {
 }
 p.block_namespace = {
   value = function()
-    return p.namespace.value() .. [[\Block]]
+    return p.namespace.value() .. [[\\Block]]
   end
 }
 p.block_class = {

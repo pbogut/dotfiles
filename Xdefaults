@@ -95,25 +95,4 @@ URxvt.iso14755:             false
 *color7:                    #eee8d5
 *color15:                   #fdf6e3
 
-
-! ------------------------------------------------------------------------------
-! ROFI Config
-! ------------------------------------------------------------------------------
-rofi.color-enabled: true
-rofi.color-window: #222222, #222222, #285577
-rofi.color-normal: #222222, #cccccc, #222222, #285577, #dddddd
-rofi.color-active: #222222, #008ed4, #222222, #285577, #008ed4
-rofi.color-urgent: #222222, #da4281, #222222, #285577, #da4281
-rofi.modi: run,drun,ssh,window
-rofi.separator-style: solid
-rofi.location: 1
-rofi.width: 100
-rofi.font: Droid Sans Mono 10
-rofi.padding: 3
-rofi.hide-scrollbar: true
-rofi.terminal: urxvt -e zsh -ic
-rofi.kb-remove-word-back: Control+w
-rofi.kb-clear-line: Control+Alt+h
-rofi.case-sensitive: false
-
 #include ".Xresources.local"

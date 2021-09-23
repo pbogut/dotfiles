@@ -20,7 +20,7 @@ local p = {
       for _, el in ipairs(list) do
         local sep = ''
         if result ~= '' then
-          sep = [[\]]
+          sep = [[\\]]
         end
         if not el:match('^%l') then
           result = result .. sep .. el

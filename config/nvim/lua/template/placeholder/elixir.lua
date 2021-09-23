@@ -1,5 +1,4 @@
 local h = require('projector.helper')
-
 local p = {}
 
 p.module_name_parts = {
@@ -34,18 +33,20 @@ p.module_name_parts = {
     return h.map(h.map(list, h.camelcase), h.upper_first)
   end
 }
-
 p.module_name = {
   value = function()
     return table.concat(p.module_name_parts.value(), '.')
   end
 }
-
+p.tested_module_name = {
+  value = function()
+    return table.concat(p.module_name_parts.value(), '.'):gsub('Test$', '')
+  end
+}
 p.base_module = {
   value = function()
     return p.module_name_parts.value()[1]
   end
 }
 
-print(vim.inspect(p.base_module.value()))
 return p
