@@ -27,8 +27,8 @@ u.map('n', '<space>ed', ':lua require"plugins.fzf".dotfiles()<cr>')
 u.map('n', '<space>fq', ':silent! cclose | lua require"plugins.fzf".quickfix()<cr>')
 u.map('n', '<space>fl', ':silent! lclose | lua require"plugins.fzf".loclist()<cr>')
 
-u.map('n', '<space>q', ':silent! cclose | lua require"plugins.fzf".quickfix()<cr>')
-u.map('n', '<space>l', ':silent! lclose | lua require"plugins.fzf".loclist()<cr>')
+u.map('n', '<space>lq', ':silent! cclose | lua require"plugins.fzf".quickfix()<cr>')
+u.map('n', '<space>ll', ':silent! lclose | lua require"plugins.fzf".loclist()<cr>')
 
 u.map('n', '<space>fa', ':lua require"plugins.fzf".files()<cr>')
 u.map('n', '<space>ff', ':lua require"plugins.fzf".all_files()<cr>')
@@ -175,7 +175,13 @@ end
 
 function f.templates(...)
     local options = {
-        dir = os.getenv('DOTFILES') .. '/vim/mytemplates',
+        source = [[
+            rg --files \
+            config/nvim/templates && \
+            rg --files \
+            vim/mytemplates
+        ]],
+        dir = os.getenv('DOTFILES'),
         options = '--prompt "Templates> " ' .. l.process_params({...}, true),
         sink = 'e'
     }
@@ -185,7 +191,13 @@ end
 
 function f.snippets(...)
     local options = {
-        dir = os.getenv('DOTFILES') .. '/vim/mysnippets',
+        source = [[
+            rg --files \
+            config/nvim/snippets && \
+            rg --files \
+            vim/mysnippets
+        ]],
+        dir = os.getenv('DOTFILES'),
         options = '--prompt "Snippets> " ' .. l.process_params({...}, true),
         sink = 'e'
     }
