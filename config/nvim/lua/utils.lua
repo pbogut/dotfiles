@@ -209,6 +209,22 @@ function u.map(mode, key, result, opts)
 
 end
 
+function u.table_map(list, fun)
+  local result = {}
+  for k, v in pairs(list) do
+    result[k] = fun(v, k)
+  end
+  return result
+end
+
+function u.table_keys(list)
+  local result = {}
+  u.table_map(list, function(_, k)
+    result[#result+1] = k
+  end)
+  return result
+end
+
 -- merges tables recursively, if both values
 -- are lists (see tbl_islist) then it merges
 -- data from both tables into one (not replacing one with other)
@@ -342,6 +358,33 @@ end
 
 function u.pp(var)
   print(vim.inspect(var))
+end
+
+function u.debounce_trailing(fun, ms, first)
+  local timer = vim.loop.new_timer()
+  local wrapped_fn
+
+  if not first then
+    function wrapped_fn(...)
+      local argv = {...}
+      local argc = select('#', ...)
+
+      timer:start(ms, 0, function()
+        pcall(vim.schedule_wrap(fun), unpack(argv, 1, argc))
+      end)
+    end
+  else
+    local argv, argc
+    function wrapped_fn(...)
+      argv = argv or {...}
+      argc = argc or select('#', ...)
+
+      timer:start(ms, 0, function()
+        pcall(vim.schedule_wrap(fun), unpack(argv, 1, argc))
+      end)
+    end
+  end
+  return wrapped_fn, timer
 end
 
 return u
