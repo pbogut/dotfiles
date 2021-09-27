@@ -9,7 +9,9 @@ require "csv"
 require "open3"
 require "nokogiri"
 require "clipboard"
-
+require "rotp"
+require "uri"
+require 'cgi'
 
 def has_otp(notes)
   notes.split("\n").each do |line|
@@ -21,14 +23,22 @@ def has_otp(notes)
 end
 
 def get_otp(notes)
-  result = ""
+  uri = nil
   notes.split("\n").each do |line|
     if line.match(/^otpauth:\/\//)
-      result, _, _ = Open3.capture3('authy.py', line)
+      uri = URI.parse(line.gsub(" ", "%20"))
       break
     end
   end
-  return result.delete "\n"
+
+
+  secret = CGI::parse(uri.query)['secret']
+  if uri.host == 'totp'
+    totp = ROTP::TOTP.new(secret[0])
+    return totp.now()
+  else
+    raise "#{uri.host} not implemented"
+  end
 end
 
 action, = ARGV
