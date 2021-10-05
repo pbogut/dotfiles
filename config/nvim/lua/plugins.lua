@@ -61,7 +61,11 @@ return require('packer').startup({
       config = config('emmet_vim'),
       ft = {'php', 'html', 'blade', 'vue', 'eelixir'},
     }
-    use {'sbdchd/neoformat', config = config('neoformat'), cmd = 'Neoformat'}
+    use {'sbdchd/neoformat',
+      cmd = 'Neoformat',
+      config = config('neoformat'),
+      setup = setup('neoformat'),
+    }
     use {'k-takata/matchit.vim'}
     use {'vim-test/vim-test',
       cmd = {'TestNearest', 'TestFile', 'TestSuite',
