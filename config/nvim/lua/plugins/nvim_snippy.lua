@@ -4,4 +4,5 @@ vim.cmd([[
   imap <expr> <C-k> snippy#can_jump(-1) ? '<Plug>(snippy-previous)' : '<c-k>'
   smap <expr> <C-j> snippy#can_jump(1) ? '<Plug>(snippy-next)' : '<c-j>'
   smap <expr> <C-k> snippy#can_jump(-1) ? '<Plug>(snippy-previous)' : '<c-k>'
+  xmap <tab> <plug>(snippy-cut-text)
 ]])
