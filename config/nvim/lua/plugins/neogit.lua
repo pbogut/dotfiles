@@ -96,7 +96,7 @@ local function config()
       fn.termopen('git add -p ' .. name, {
         on_exit = function()
           cmd('wincmd q')
-          vim.defer_fn(neogit.dispatch_refresh, 150)
+          vim.defer_fn(neogit.dispatch_refresh, 250)
         end
       })
       cmd('startinsert')
