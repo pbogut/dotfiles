@@ -1,3 +1,4 @@
+local config = require('config')
 local u = require('utils')
 local bo = vim.bo
 local b = vim.b
@@ -104,3 +105,14 @@ local config_group = {
 }
 
 u.augroup('x_autogroups', config_group)
+
+-- Auto format on save
+if (config.get('autoformat_on_save')) then
+  u.augroup('x_autoformat', {
+    BufWritePre  = {
+      {
+        '* lua vim.lsp.buf.x_formatting()'
+      }
+    }
+  })
+end
