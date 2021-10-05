@@ -18,6 +18,12 @@ handle_qb() {
     fi
 }
 
+#back up if exists
+if [[ -f "$destination/$filename" ]]; then
+    date=$(date +'%Y-%m-%d_%H:%M:%S.%N')
+    mv "$destination/$filename" "$destination/$filename.$date"
+fi
+
 if [[ $should_move == "move" ]]; then
     mv "$file" "$destination/$filename"
     handle_qb
