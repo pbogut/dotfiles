@@ -12,8 +12,7 @@ Location: {location}
 
 {description}"
 
-# khal printics -f "$format" $1 | tail -n+2
-khal printics -f "$format" $1
+khal printics -f "$format" $1 | tail -n+3
 
 if [[ $2 == "int" ]]; then
     echo -en "\n\n>> Do you want to import this event to your calendar? (y/[n]): "
