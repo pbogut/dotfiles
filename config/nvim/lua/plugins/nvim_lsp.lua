@@ -140,8 +140,6 @@ lspconfig.vuels.setup {on_attach = on_attach}
 lspconfig.bashls.setup {on_attach = on_attach}
 -- GO111MODULE=on go get golang.org/x/tools/gopls@latest
 lspconfig.gopls.setup {on_attach = on_attach}
--- npm install -g flow-bin
-lspconfig.flow.setup{on_attach = on_attach, capabilities = capabilities}
 -- npm install -g vscode-css-languageserver-bin
 lspconfig.cssls.setup {on_attach = on_attach, capabilities = capabilities}
 -- npm install -g pyright
