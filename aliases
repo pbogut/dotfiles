@@ -30,3 +30,5 @@ alias kill=/usr/bin/kill
 
 alias lg="lazygit"
 alias fly=flyctl
+
+alias genpass="apg -m16 -n1 -MSNCL"
