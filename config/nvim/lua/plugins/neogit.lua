@@ -50,9 +50,9 @@ local function config()
     }
 
     for id, section in pairs(sections) do
-      vim.cmd('syn match ' .. id .. ' /' .. section.pattern .. '/ contained')
-      vim.cmd('syn region ' .. id .. 'Region start=/' .. section.pattern .. [[\ze.*/ end=/$/ contains=]] .. id)
-      vim.cmd('hi def link ' .. id .. ' ' .. section.color)
+      cmd('syn match ' .. id .. ' /' .. section.pattern .. '/ contained')
+      cmd('syn region ' .. id .. 'Region start=/' .. section.pattern .. [[\ze.*/ end=/$/ contains=]] .. id)
+      cmd('hi def link ' .. id .. ' ' .. section.color)
     end
 
     local section_names = table.concat(u.table_keys(sections), ',')
@@ -63,10 +63,10 @@ local function config()
     }
 
     for id, region in pairs(regions) do
-      vim.cmd('syn match ' .. id .. ' /' .. region.pattern .. '/ contained')
-      vim.cmd('syn region ' .. id .. 'Region start=/' .. region.pattern .. [[\ze.*/ end=/\n\n/ contains=]] .. id .. ',' .. section_names)
-      vim.cmd('hi def link ' .. id .. ' ' .. region.title_color)
-      vim.cmd('hi def link ' .. id .. 'Region ' .. region.color)
+      cmd('syn match ' .. id .. ' /' .. region.pattern .. '/ contained')
+      cmd('syn region ' .. id .. 'Region start=/' .. region.pattern .. [[\ze.*/ end=/\n\n/ contains=]] .. id .. ',' .. section_names)
+      cmd('hi def link ' .. id .. ' ' .. region.title_color)
+      cmd('hi def link ' .. id .. 'Region ' .. region.color)
     end
   end
 
@@ -95,7 +95,8 @@ local function config()
       cmd('silent !git add -N ' .. name)
       fn.termopen('git add -p ' .. name, {
         on_exit = function()
-          neogit.dispatch_refresh()
+          cmd('wincmd q')
+          vim.defer_fn(neogit.dispatch_refresh, 150)
         end
       })
       cmd('startinsert')
