@@ -6,3 +6,5 @@ snippet do
 	do
 		$0
 	done
+snippet dir "get script dir"
+	dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

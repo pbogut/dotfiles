@@ -39,22 +39,6 @@ snippet fname "base file name"
 ${1:`!v expand('%:t:r')`}
 endsnippet
 
-snippet ( "expand braces" i
-(
-	$0
-)
-endsnippet
-
-snippet = "echo" i
-<?= ${VISUAL}$0 ?>
-endsnippet
-
-snippet =if "template if" i
-<?php if(${1:true}): ?>
-	${VISUAL}$0
-<?php endif ?>
-endsnippet
-
 snippet doc "Add class documentation" "re.match('.*\\bclass\\b.*', snip.buffer[snip.line+1]) if len(snip.buffer) > snip.line+1 else False" e
 /**
  * ${1:`!p
@@ -239,12 +223,6 @@ public function set$2($${4:$3})
 }$0
 endsnippet
 
-snippet bn "base name"
-${1:`!p
-snip.rv = snip.basename
-`}
-endsnippet
-
 snippet ans "namespace declaration" b
 namespace ${1:`!p
 relpath = os.path.relpath(path)
@@ -379,35 +357,6 @@ snippet rpsy "Psy sh break point (with require)"
 require_once('psysh'); eval(\Psy\sh()); #make sure psysh is in your include path
 endsnippet
 
-snippet zd "Zend_Debug dump"
-Zend_Debug::dump
-endsnippet
-snippet zd( "Zend_Debug dump"
-Zend_Debug::dump(${VISUAL})
-endsnippet
-snippet zd(); "Zend_Debug dump"
-Zend_Debug::dump(${VISUAL});
-endsnippet
-snippet zd; "Zend_Debug dump"
-Zend_Debug::dump(${VISUAL});
-endsnippet
-
-snippet schcr "Laravel Schema::create"
-Schema::create('${1:table_name}', function (Blueprint $table) {
-	${2:$table->${3:increments}('${4:id}')};$0
-});
-endsnippet
-
-snippet schdr "Laravel Schema::drop"
-Schema::drop('${1:table_name}');$0
-endsnippet
-
-snippet schtab "Laravel Schema::table"
-Schema::table('${1:table_name}', function (Blueprint $table) {
-	${2:$table->${3:increments}('${4:id}')};$0
-});
-endsnippet
-
 snippet cl "PSR-1 Class"
 <?php
 
@@ -433,110 +382,4 @@ m = re.search(r'[A-Z].+(?=/)', relpath)
 if m:
 	snip.rv = m.group().replace('/', '_')  + '_' + snip.basename
 `}
-endsnippet
-
-snippet [] "Expand array" i
-[
-	$0
-]
-endsnippet
-
-snippet array "Expand old array without parents" i
-array($1)$0
-endsnippet
-
-snippet array() "Expand old array" i
-array(
-	$0
-)
-endsnippet
-
-snippet []; "Expand array with colon" i
-[
-	$0
-];
-endsnippet
-
-snippet [], "Expand array with coma" i
-[
-	$0
-],
-endsnippet
-
-snippet []) "Expand last param array" i
-[
-	$0
-])
-endsnippet
-
-snippet array( "Expand last param old array" i
-array(
-	$0
-)
-endsnippet
-
-snippet array()) "Expand last param old array" i
-array(
-	$0
-))
-endsnippet
-
-snippet array()); "Expand last param old array with colon" i
-array(
-	$0
-));
-endsnippet
-
-snippet array(); "Expand array with colon" i
-array(
-	$0
-);
-endsnippet
-
-snippet array(), "Expand array with coma" i
-array(
-	$0
-),
-endsnippet
-
-snippet []); "Expand last param array with colon" i
-[
-	$0
-]);
-endsnippet
-
-snippet [ "Expand to list" i
-[
-	$0
-]
-endsnippet
-
-snippet { "Expand to block" i
-{
-	$0
-}
-endsnippet
-
-snippet {} "Expand block" i
-{
-	$0
-}
-endsnippet
-
-snippet {}; "Expand block with colon" i
-{
-	$0
-};
-endsnippet
-
-snippet {}) "Last param callback" i
-{
-	$0
-})
-endsnippet
-
-snippet {}); "Last param callback with colon" i
-{
-	$0
-});
 endsnippet

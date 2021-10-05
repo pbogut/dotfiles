@@ -1,0 +1,10 @@
+snippet schcr "Laravel Schema::create"
+	Schema::create('${1:table_name}', function (Blueprint $table) {
+		${2:$table->${3:increments}('${4:id}')};$0
+	});
+snippet schdr "Laravel Schema::drop"
+	Schema::drop('${1:table_name}');$0
+snippet schtab "Laravel Schema::table"
+	Schema::table('${1:table_name}', function (Blueprint $table) {
+		${2:$table->${3:increments}('${4:id}')};$0
+	});

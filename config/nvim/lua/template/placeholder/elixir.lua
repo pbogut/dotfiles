@@ -1,4 +1,5 @@
 local h = require('projector.helper')
+local c = require('config')
 local p = {}
 
 p.module_name_parts = {
@@ -28,6 +29,21 @@ p.module_name_parts = {
       if drop then
         table.remove(list, 2)
       end
+    end
+
+    local main_module = nil
+    local has_file, content = pcall(vim.fn.readfile, 'lib/' .. list[1] .. '.ex')
+    if has_file then
+      for _, line in pairs(content) do
+        if line:match('defmodule ') then
+          main_module = line:gsub('.*defmodule (%w+).*$', '%1')
+          break
+        end
+      end
+    end
+
+    if main_module then
+      list[1] = h.snakecase(main_module)
     end
 
     return h.map(h.map(list, h.camelcase), h.upper_first)

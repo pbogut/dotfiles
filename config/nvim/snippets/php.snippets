@@ -3,7 +3,9 @@ snippet ['
 snippet [';
 	['$1'];$0
 snippet fn
-	${1|public,protected,private|} function ${2:FnName}(${3:$args}) 
+	${1|public,protected,private|} function ${2:FnName}(${3:$args})
 	{
 		$4
 	}$0
+snippet cl "clas name (file name)"
+	class ${1:`v:lua.projector.f('base_name')`}$0
