@@ -154,12 +154,6 @@ return require('packer').startup({
     -- lsp
     use {'neovim/nvim-lspconfig', config = config('nvim_lsp')}
     use {'nvim-lua/lsp-status.nvim'}
-
-    -- candidates to get removed
-    use {'vim-vdebug/vdebug', opt = true}
-    use {'godlygeek/tabular', cmd = {'T', 'Tabularize'}}
-    use {'captbaritone/better-indent-support-for-php-with-html', ft = {'php'}}
-    -- use {'nvim-treesitter/completion-treesitter'}
     if vim.fn.filereadable((os.getenv("HOME") or '') .. '/.wakatime.cfg') > 0 then
       use {'wakatime/vim-wakatime'}
     end
