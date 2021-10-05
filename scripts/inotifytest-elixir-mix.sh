@@ -10,6 +10,15 @@
 #
 # Written in 2014 by Suraj N. Kurapati <https://github.com/sunaku>
 
+notification_id=0
+
+notify() {
+  if [[ $notification_id -eq 0 ]]; then
+    notification_id=$(dunstify -p -I "$1" "$2" "$(date +'%H:%M:%S.%N')")
+  else
+    dunstify -r $notification_id -I "$1" "$2" "$(date +'%H:%M:%S.%N')"
+  fi
+}
 map_file_to_test() { file=$1
   case "$file" in
     (lib/*.ex|lib/*.exs) test=test${file#lib}
@@ -22,6 +31,7 @@ map_file_to_test() { file=$1
 }
 
 test_exit_status=0
+
 inotifywait -rqme close_write --format '%w%f' lib/ test/ |
 while read -r changed_file; do {
 
@@ -45,8 +55,8 @@ while read -r changed_file; do {
 
   mix test "$@" $changed_file_test $compiled_file_tests
   test_exit_status=$?
-  # test $test_exit_status -eq 0 && notify-send -i /usr/share/icons/gnome/48x48/emblems/emblem-default.png "Tests passed"
-  # test $test_exit_status -eq 0 || notify-send -i /usr/share/icons/gnome/48x48/emblems/emblem-important.png "Tests failed"
+  test $test_exit_status -eq 0 && notify /usr/share/icons/gnome/48x48/emblems/emblem-default.png "Tests passed"
+  test $test_exit_status -eq 0 || notify /usr/share/icons/gnome/48x48/emblems/emblem-important.png "Tests failed"
 
 } </dev/null
 done
