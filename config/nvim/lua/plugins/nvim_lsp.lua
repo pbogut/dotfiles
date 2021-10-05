@@ -200,8 +200,10 @@ end
 
 -- global
 function vim.lsp.buf.x_range_formatting()
-  if not pcall(vim.lsp.buf.range_formatting) then
+  local _, formatted = pcall(vim.lsp.buf.range_formatting)
+  if not formatted then
     cmd("'<,'>Neoformat")
+    print('File formated with Neoformat')
   else
     print('Range formated with LSP')
   end
@@ -209,8 +211,10 @@ end
 
 -- global
 function vim.lsp.buf.x_formatting()
-  if not pcall(vim.lsp.buf.formatting) then
+  local _, formatted = pcall(vim.lsp.buf.formatting)
+  if not formatted then
     cmd('Neoformat')
+    print('File formated with Neoformat')
   else
     print('File formated with LSP')
   end
