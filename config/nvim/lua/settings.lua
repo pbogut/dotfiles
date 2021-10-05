@@ -36,6 +36,7 @@ o.relativenumber = true
 o.lazyredraw = true
 o.wildmenu = true
 o.showcmd = true
+o.dir = os.getenv("HOME") .. "/.vim/swapfiles//"
 o.undodir = os.getenv("HOME") .. '/.vim/undofiles//'
 o.undofile = true
 o.listchars = 'tab:▸,eol:¬,trail:⋅,extends:❯,precedes:❮,nbsp:%'
