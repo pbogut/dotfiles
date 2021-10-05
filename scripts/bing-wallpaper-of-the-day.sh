@@ -62,7 +62,7 @@ else
 fi
 
 # set as wallpaper using feh
-feh --bg-fill $saveDir$picName
+DISPLAY=${DISPLAY-:0} feh --bg-fill $saveDir$picName
 
 # Remove pictures older than 30 days
 #find $saveDir -atime 30 -delete
