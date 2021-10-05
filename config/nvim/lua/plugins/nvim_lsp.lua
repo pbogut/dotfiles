@@ -146,6 +146,8 @@ lspconfig.flow.setup{on_attach = on_attach, capabilities = capabilities}
 lspconfig.cssls.setup {on_attach = on_attach, capabilities = capabilities}
 -- npm install -g pyright
 lspconfig.pyright.setup {on_attach = on_attach}
+-- pacman -S deno
+lspconfig.denols.setup {on_attach = on_attach}
 -- npm install -g @tailwindcss/language-server
 require 'plugins.lsp.tailwindcss'.setup {on_attach = on_attach, capabilities = capabilities}
 -- see https://github.com/sumneko/lua-language-server/wiki/Build-and-Run-(Standalone)
