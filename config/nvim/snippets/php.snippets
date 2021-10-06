@@ -12,4 +12,10 @@ snippet cl "clAs name (file name)"
 snippet cl1 "class psr-1"
 	class ${1:`v:lua.projector.f('php.class1')`}$0
 snippet ns "namespace"
-	class ${1:`v:lua.projector.f('php.namespace')`}$0
+	namespace ${1:`v:lua.projector.f('php.namespace')`};$0
+snippet doccl "class doc"
+	/**
+	 * Class ${1:`v:lua.projector.f('base_name')`}
+	 * $4
+	 * @author ${2:`v:lua.projector.f('author')`} <${3:`v:lua.projector.f('author_contact')`}>
+	 */$0

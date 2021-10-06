@@ -25,6 +25,11 @@ local p = {
         if not el:match('^%l') then
           result = result .. sep .. el
         end
+        -- if app folowed by other lowercase folders, remove it
+        if result == 'App' and el:match('^%l') then
+          result = ''
+        end
+        -- if class preceeded with App
         if result == '' and el == 'app' then
           result = 'App'
         end
@@ -56,6 +61,11 @@ local p = {
         if not el:match('^%l') then
           result = result .. sep .. el
         end
+        -- if app folowed by other lowercase folders, remove it
+        if result == 'App' and el:match('^%l') then
+          result = ''
+        end
+        -- if class preceeded with App
         if result == '' and el == 'app' then
           result = 'App'
         end

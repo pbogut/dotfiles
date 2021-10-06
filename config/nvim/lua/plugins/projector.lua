@@ -86,7 +86,11 @@ return {
             'app/code/local/' .. filename .. '.php',
           }
         end
-      }
+      },
+      ['.*%.php'] = {
+        template = "magento/Class",
+        priority = 4500,
+      },
     }
   },
   -- magento2 project
@@ -232,8 +236,8 @@ return {
         priority = 100,
       },
       ['.*%.php'] = {
-        template = "_magento2_class",
-        priority = 1000,
+        template = "php/Class",
+        priority = 4500,
       },
       ['.*/web/templates?/.*/[^/]*%.html$'] = {
         alternate = function(relative, _)
@@ -268,8 +272,8 @@ return {
           "tests/Unit/%1Test.php",
           "tests/Feature/%1Test.php"
         },
-        template = "_laravel_class",
-        priority = 1000,
+        template = "php/Class",
+        priority = 4500,
       },
       ['app/Http/Controllers/.*Controller%.php'] = {
         template = "_laravel_controller",
@@ -286,7 +290,7 @@ return {
         priority = 100,
       },
       ['app/Models/.*%.php'] = {
-        template = "laravel/model.php",
+        template = "laravel/Model",
         priority = 100,
       },
       ['app/Console/Commands/.*%.php'] = {
