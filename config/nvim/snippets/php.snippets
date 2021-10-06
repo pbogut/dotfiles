@@ -7,5 +7,9 @@ snippet fn
 	{
 		$4
 	}$0
-snippet cl "clas name (file name)"
+snippet cl "clAs name (file name)"
 	class ${1:`v:lua.projector.f('base_name')`}$0
+snippet cl1 "class psr-1"
+	class ${1:`v:lua.projector.f('php.class1')`}$0
+snippet ns "namespace"
+	class ${1:`v:lua.projector.f('php.namespace')`}$0

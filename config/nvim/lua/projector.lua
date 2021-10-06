@@ -59,7 +59,8 @@ function a.process_placeholders(lines)
   for name, config in pairs(placeholders) do
     local value = config.value()
     if value and value:len() > 0 then
-      result[name] = value
+      -- escape backslashes to unify behavior between templates and snippets
+      result[name] = value:gsub([[\]], [[\\]])
     else
       result[name] = name
     end

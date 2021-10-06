@@ -15,9 +15,9 @@ p.module_namespace = {
   value = function()
     local list = h.get_file_parts()
     if #list > 5 then
-      return list[4] .. [[\\]] .. list[5]
+      return list[4] .. [[\]] .. list[5]
     end
-    return [[Vendor\\ModuleName]]
+    return [[Vendor\ModuleName]]
   end
 }
 p.module_name_str = {
