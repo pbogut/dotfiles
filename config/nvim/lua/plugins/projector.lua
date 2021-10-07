@@ -428,7 +428,7 @@ return {
     priority = 100,
     patterns = {
       ['*.zsh'] = {
-        skeleton = "polybar_script"
+        skeleton = "polybar/script"
       },
     }
   },
