@@ -1,0 +1,46 @@
+snippet mod "mod"
+	module ${1:Module.Name} exposing (${2:..})$0
+snippet im "import"
+	import ${1:Module}$0
+snippet ima "import as"
+	import ${1:Module} as ${2:Alias}$0
+snippet ime "import exposing"
+	import ${1:Module} exposing (${2:..})$0
+snippet imae "import as exposing"
+	import ${1:Module} as ${2:Alias} exposing (${3:..})$0
+snippet case "case"
+	case ${1:variable} of
+		${2:condition} ->
+			${3:result}$0
+snippet ! "model ! []"
+	${1:model} ! [$2]$0
+snippet set "setter"
+	{ ${1:model} | ${2:property} = ${3:value} }$0
+snippet let "let in"
+	let
+		$1
+	in
+		$0
+snippet t "tag"
+	${1:Html.${2:div}} [$3] [$4]$0
+snippet { "record"
+	{ $0
+	}
+snippet [ "list"
+	[ $0
+	]
+snippet ( "tuplet"
+	( $0
+	)
+snippet S "String"
+	String
+snippet L "List"
+	List
+snippet B "Bool"
+	Bool
+snippet F "Float"
+	Float
+snippet I "Int"
+	Int
+snippet M "Model"
+	Model

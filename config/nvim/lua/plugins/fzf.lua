@@ -191,12 +191,7 @@ end
 
 function f.snippets(...)
     local options = {
-        source = [[
-            rg --files \
-            config/nvim/snippets && \
-            rg --files \
-            vim/mysnippets
-        ]],
+        source = 'rg --files config/nvim/snippets',
         dir = os.getenv('DOTFILES'),
         options = '--prompt "Snippets> " ' .. l.process_params({...}, true),
         sink = 'e'
