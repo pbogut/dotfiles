@@ -276,17 +276,17 @@ return {
         priority = 4500,
       },
       ['app/Http/Controllers/.*Controller%.php'] = {
-        template = "_laravel_controller",
+        template = "laravel/Controller",
         priority = 100,
       },
       ['tests/Unit/(.*)Test%.php'] = {
         alternate = "app/%1.php",
-        template = "_laravel_test",
+        template = "laravel/Test",
         priority = 100,
       },
       ['tests/Feature/(.*)Test.php'] = {
         alternate = "app/%1.php",
-        template = "_laravel_test",
+        template = "laravel/Test",
         priority = 100,
       },
       ['app/Models/.*%.php'] = {
@@ -294,7 +294,7 @@ return {
         priority = 100,
       },
       ['app/Console/Commands/.*%.php'] = {
-        template = "_laravel_command",
+        template = "laravel/Command",
         priority = 100,
       },
     }
