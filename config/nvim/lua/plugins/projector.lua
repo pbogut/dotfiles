@@ -111,7 +111,7 @@ return {
     patterns = {
       ['app/code/(.*)/Block/(.*)%.php'] = {
         priority = 100,
-        template = "magento2/block.php",
+        template = "magento2/Block",
         alternate = function(_, opt)
           return {
             'app/code/' .. opt.match[1] .. '/view/frontend/templates/'
@@ -142,70 +142,70 @@ return {
         priority = 100
       },
       ['app/code/.*/Model/ResourceModel/.*%.php'] = {
-        template = "_magento2_resource_model_entity",
+        template = "magento2/ResourceModel",
         priority = 200
       },
-      ['app/code/.*/Model/Source/.*%.php'] = {
-        template = "_magento2_resource_model_source",
-        priority = 100
-      },
       ['app/code/.*/Helper/.*%.php'] = {
-        template = "_magento2_helper",
+        template = "magento2/Helper",
         priority = 100
       },
       ['app/code/.*/Model/.*%.php'] = {
-        template = "_magento2_model_entity",
+        template = "magento2/Model",
         priority = 300
       },
       ['app/code/.*/view/adminhtml/layout/.*_index.xml'] = {
-        template = "_magento2_layout_entity_index"
+        template = "magento2/view/adminhtml/layout/layout_entity_index.xml"
       },
       ['app/code/.*/view/adminhtml/layout/.*_new.xml'] = {
-        template = "_magento2_layout_entity_new"
+        template = "magento2/view/adminhtml/layout/layout_entity_new.xml"
       },
       ['app/code/.*/view/adminhtml/layout/.*_edit.xml'] = {
-        template = "_magento2_layout_entity_edit"
+        template = "magento2/view/adminhtml/layout/layout_entity_edit.xml"
       },
       ['app/code/.*/etc/email_templates.xml'] = {
         template = "magento2/etc/email_templates.xml"
       },
       ['app/code/.*/view/adminhtml/ui_component/.*_listing.xml'] = {
-        template = "_magento2_layout_ui_component_listing"
+        template = "magento2/view/adminhtml/ui_component/entity_listing.xml"
       },
       ['app/code/.*/view/adminhtml/ui_component/.*_form.xml'] = {
-        template = "_magento2_layout_ui_component_form"
+        template = "magento2/view/adminhtml/ui_component/entity_form.xml"
       },
       ['app/code/.*/Controller/Adminhtml/.*/Index%.php'] = {
-        template = "_magento2_adminhtml_controller_index",
+        template = "magento2/Controller/Adminhtml/Index",
         priority = 100
       },
       ['app/code/.*/Controller/Adminhtml/.*/Edit%.php'] = {
-        template = "_magento2_adminhtml_controller_edit",
+        template = "magento2/Controller/Adminhtml/Edit",
         priority = 100
       },
       ['app/code/.*/Controller/Adminhtml/.*/NewAction%.php'] = {
-        template = "_magento2_adminhtml_controller_new",
+        template = "magento2/Controller/Adminhtml/NewAction",
         priority = 100
       },
       ['app/code/.*/Controller/Adminhtml/.*/Save%.php'] = {
-        template = "_magento2_adminhtml_controller_save",
+        template = "magento2/Controller/Adminhtml/Save",
         priority = 100
       },
       ['app/code/.*/Controller/Adminhtml/.*%.php'] = {
-        template = "_magento2_adminhtml_controller",
+        template = "magento2/Controller/Adminhtml/Action",
         priority = 500
       },
       ['app/code/.*/Controller/.*%.php'] = {
-        template = "_magento2_controller",
+        template = "magento2/Controller/Action",
         priority = 200
       },
       ['app/code/.*/Observer/.*%.php'] = {
-        template = "_magento2_observer",
+        template = "magento2/Observer",
         priority = 100
       },
       ['app/code/.*/Source/.*%.php'] = {
-        template = "/magento2/Source/Source.php",
+        template = "/magento2/Source",
         priority = 100,
+      },
+      ['app/code/.*/Model/Source/.*%.php'] = {
+        template = "magento2/Source",
+        priority = 100
       },
       ['app/code/.*/etc/widget.xml'] = {
         template = "/magento2/etc/widget.xml",
@@ -219,16 +219,12 @@ return {
         template = "magento2/etc/events.xml",
         priority = 100,
       },
-      ['app/code/.*/etc/frontend/routes.xml'] = {
-        template = "_magento2_frontend_routes",
-        priority = 100,
-      },
-      ['app/code/.*/etc/adminhtml/routes.xml'] = {
-        template = "_magento2_adminhtml_routes",
+      ['app/code/.*/etc/.*/routes.xml'] = {
+        template = "magento2/etc/routes.xml",
         priority = 100,
       },
       ['app/code/.*/etc/.*/?di.xml'] = {
-        template = "_magento2_di",
+        template = "magento2/etc/di.xml",
         priority = 100,
       },
       ['app/code/.*/registration.php'] = {

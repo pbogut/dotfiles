@@ -78,5 +78,20 @@ p.block_class = {
     return h.capitalize(h.camelcase(path))
   end
 }
+p.snake_base_name = {
+  value = function()
+    return h.snakecase(vim.fn.expand('%:t:r'))
+  end
+}
+p.drop_suffix_index = {
+  value = function()
+    return vim.fn.expand('%:t:r'):gsub('_index$', '')
+  end
+}
+p.drop_suffix_edit = {
+  value = function()
+    return vim.fn.expand('%:t:r'):gsub('_edit$', '')
+  end
+}
 
 return p

@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * Class [[php.class1]]
+ *
+ * @author ${1:[[author]]} <${2:[[author_contact]]}>
+ */
+class $1 extends Mage_Core_Block_Template
+{
+	protected $_template = '${3:`!p
+relpath = os.path.relpath(path)
+m = re.search(r'[A-Z].+(?=/)', relpath)
+if m:
+	parts = snake(m.group() + '/' + snip.basename).split('/block/')
+	snip.rv = parts[0] + '/' + parts[1] + '.phtml'
+`}';$0
+}
+endsnippet
