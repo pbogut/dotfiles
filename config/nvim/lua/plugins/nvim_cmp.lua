@@ -1,6 +1,7 @@
 local cmp = require('cmp')
 local emmet = require('plugins.emmet_vim')
 local snippy = require('snippy')
+local projector = require('projector')
 
 local feedkey = function(key, mode)
   vim.api.nvim_feedkeys(
@@ -26,7 +27,7 @@ cmp.setup {
       if vim.fn.pumvisible() == 1 and vim.v.completed_item.word then
         feedkey("<C-y>S", "i")
       elseif snippy.can_expand_or_advance() then
-        snippy.expand_or_advance()
+        projector.expand_snippet()
       elseif emmet.can_expand() then
         emmet.expand()
       else

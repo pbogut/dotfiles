@@ -47,4 +47,11 @@ function M.get_file_parts()
   return u.split_string(noext, '/')
 end
 
+function M.get_relative_line(num)
+  num = num or 0
+  local cur_line = fn.line('.')
+
+  return fn.getline(cur_line + num)
+end
+
 return M

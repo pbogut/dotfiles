@@ -382,36 +382,3 @@ class `!p snip.rv = snip.basename` extends AbstractDb
 	}
 }
 endsnippet
-
-snippet _t_magento2_resource_model_collection "Magento2 Resource Model Collection" b
-<?php
-namespace `!p snip.rv = namespace(path)`;
-
-use `!p snip.rv = module_ns(path)`\Model\\${1:`!p snip.rv = resource_name(path).title()`};
-use `!p snip.rv = module_ns(path)`\Model\ResourceModel\\${2:`!p snip.rv = resource_name(path).title()`} as ${3:$2Resource};
-
-class `!p snip.rv = snip.basename` extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
-{
-	protected $_idFieldName = '${4:`!p snip.rv = resource_name(path)`_id}';
-	protected $_eventPrefix = '${5:`!p snip.rv = module_name(path).lower()`}_${6:`!p snip.rv = resource_name(path)`}_collection';
-	protected $_eventObject = '`!p snip.rv = resource_name(path)`_collection';
-
-	protected function _construct()
-	{
-		$this->_init($1::class, $3::class);
-	}
-}
-endsnippet
-
-snippet _t_magento2_resource_model_collection_factory "Magento2 Resource Model Collection Factory" b
-namespace ${1:`v:lua.projector.f('magento2.namespace')`};
-
-use Magento\Framework\ObjectManagerInterface;
-
-/**
- * Class ${2:`v:lua.projector.f('php.class')`}
- *
- * @author ${3:`v:lua.projector.f('author')`} <${4:`v:lua.projector.f('author_contact')`}>
- */
-class $2
-endsnippet

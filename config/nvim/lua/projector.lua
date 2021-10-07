@@ -8,6 +8,7 @@
 
 local u = require('utils')
 local s = require('snippy')
+local shared = require('snippy.shared')
 local ph = require('template.placeholders')
 
 local t = u.termcodes
@@ -30,6 +31,16 @@ function a.ultisnip_template(name)
     cmd("silent! undo")
   end
   return g.ulti_expand_res and g.ulti_expand_res ~= 0
+end
+
+function a.expand_snippet()
+  for _, snippets in pairs(shared.cache) do
+    for _, snippet in pairs(snippets) do
+      snippet.body = l.placeholders_to_eval(snippet.body)
+    end
+  end
+
+  s.expand_or_advance()
 end
 
 function a.file_template(name)
@@ -170,6 +181,14 @@ function a.go_alternate()
   else
     l.select_alternate(result)
   end
+end
+
+function l.placeholders_to_eval(lines)
+  local result = {}
+  for _, line in ipairs(lines) do
+      result[#result+1] = line:gsub('%[%[(.-)%]%]', [[`v:lua.projector.placeholder('%1')`]])
+  end
+  return result
 end
 
 function l.select_alternate(files)
@@ -385,6 +404,6 @@ u.augroup('x_tttemplates', {
 
 _G.projector = _G.projector or {}
 _G.projector.temp_completion = a.template_list
-_G.projector.f = a.process_placeholder
+_G.projector.placeholder = a.process_placeholder
 
 return a

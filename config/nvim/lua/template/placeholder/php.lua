@@ -74,6 +74,52 @@ local p = {
       return result
     end
   },
+  doc = {
+    value = function()
+      local next_line = h.get_relative_line(1)
+      print(next_line)
+      if (next_line:match('class')) then
+        return 'doc_class'
+      end
+      if (next_line:match('function')) then
+        return 'doc_function'
+      end
+      if (next_line:match('protected %$%l')
+        or next_line:match('public %$%l')
+        or next_line:match('private %$%l'))
+      then
+        return 'doc_property'
+      end
+      if (next_line:match('%s+%$%l')) then
+        return 'doc_variable'
+      end
+      return 'doc'
+    end
+  },
+  get_class_name = {
+    value = function()
+      local next_line = h.get_relative_line(1)
+      return next_line:gsub('class (%w+).*$', '%1')
+    end
+  },
+  get_visibility = {
+    value = function()
+      local next_line = h.get_relative_line(1)
+      return h.upper_first(next_line:gsub('%s+(%w+) .*$', '%1'))
+    end
+  },
+  get_variable_name = {
+    value = function()
+      local next_line = h.get_relative_line(1)
+      return next_line:gsub('.*%$(%w+).*$', '%1')
+    end
+  },
+  get_function_name = {
+    value = function()
+      local next_line = h.get_relative_line(1)
+      return next_line:gsub('%s+%w+ function (%w+)%(.*$', '%1')
+    end
+  },
   _ = {
     value = function()
       return '[[coursor_position]]'
