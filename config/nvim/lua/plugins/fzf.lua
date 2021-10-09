@@ -175,12 +175,7 @@ end
 
 function f.templates(...)
     local options = {
-        source = [[
-            rg --files \
-            config/nvim/templates && \
-            rg --files \
-            vim/mytemplates
-        ]],
+        source = 'rg --files config/nvim/templates',
         dir = os.getenv('DOTFILES'),
         options = '--prompt "Templates> " ' .. l.process_params({...}, true),
         sink = 'e'

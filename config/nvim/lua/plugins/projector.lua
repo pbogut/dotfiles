@@ -51,7 +51,7 @@ return {
     patterns = {
       ['app/code/(.*)/Block/(.*)%.php'] = {
         priority = 100,
-        template = "_magento_block",
+        template = "magento/Block",
         alternate = function(_, opt)
           local path = h.snakecase(l.mag_rm_pool(opt.match[1]))
           local file = h.snakecase(opt.match[2])
@@ -61,19 +61,19 @@ return {
       },
       ['app/code/**/Helper/*.php'] = {
         priority = 100,
-        template = "_magento_helper",
+        template = "magento/Helper",
       },
       ['app/code/**/Model/Resource/*/Collection.php'] = {
         priority = 100,
-        template = "_magento_collection",
+        template = "magento/Collection",
       },
       ['app/code/**/Model/Resource/*.php'] = {
         priority = 100,
-        template = "_magento_resource",
+        template = "magento/Resource",
       },
       ['app/code/**/Model/*.php'] = {
         priority = 100,
-        template = "_magento_model",
+        template = "magento/Model",
       },
       ['app/design/frontend/base/default/template/(.*)%.phtml'] = {
         priority = 100,
@@ -130,15 +130,15 @@ return {
         end,
       },
       ['app/code/.*/Model/ResourceModel/.*/Collection%.php'] = {
-        template = "magento2/Model/ResourceModel/Collection.php",
+        template = "magento2/Collection",
         priority = 100
       },
       ['app/code/.*/Model/ResourceModel/.*/CollectionFactory%.php'] = {
-        template = "magento2/Model/ResourceModel/CollectionFactory.php",
+        template = "magento2/CollectionFactory",
         priority = 100
       },
       ['app/code/.*/Model/ResourceModel/.*/DataProvider%.php'] = {
-        template = "magento2/Model/ResourceModel/DataProvider.php",
+        template = "magento2/DataProvider",
         priority = 100
       },
       ['app/code/.*/Model/ResourceModel/.*%.php'] = {
@@ -342,15 +342,15 @@ return {
     priority = 100,
     patterns = {
       ['(.*)%.exs'] = {
-        template = "_phoenix_skel",
+        template = "elixir/module",
         priority = 300,
       },
       ['(.*)%.ex'] = {
-        template = "_phoenix_skel",
+        template = "elixir/module",
         priority = 300,
       },
       ['(.*)_view%.ex'] = {
-        template = "_phoenix_view",
+        template = "elixir/view",
         priority = 100,
       },
       ['^lib/(.*)%.ex'] = {
@@ -362,27 +362,27 @@ return {
         priority = 200,
       },
       ['^test/(.*)_test%.exs'] = {
-        alternate = "web/%1.ex",
+        alternate = {"lib/%1.ex", "web/%1.ex"},
+        template = "elixir/data_test",
         priority = 200,
       },
       ['^test/controllers/(.*)_test%.exs'] = {
         alternate = "web/controllers/%1.ex",
-        template = "_phoenix_test_controller",
+        template = "elixir/controller_test",
         priority = 100,
       },
-      ['^test/(.*)/features/(.*)_test%.exs'] = {
-        -- alternate = "web/controllers/%1.ex",
-        template = "elixir/wallaby/feature_test.exs",
+      ['^test/channels/(.*)_test%.exs'] = {
+        alternate = "web/channels/%1.ex",
+        template = "elixir/channel_test",
         priority = 100,
       },
       ['^test/views/(.*)_test%.exs'] = {
         alternate = "web/views/%1.ex",
-        template = "_phoenix_test_view",
+        template = "elixir/view_test",
         priority = 100,
       },
-      ['^test/models/(.*)_test%.exs'] = {
-        alternate = "web/models/%1.ex",
-        template = "_phoenix_test_model",
+      ['^test/(.*)/features/(.*)_test%.exs'] = {
+        template = "elixir/wallaby/feature_test",
         priority = 100,
       },
       ['tailwind%.config%.js'] = {
@@ -397,24 +397,27 @@ return {
     patterns = {
       ['lib/(.*)%.ex'] = {
         alternate = "test/%1_test.exs",
+        template = "elixir/module",
         priority = 300,
       },
       ['test/(.*)_test%.exs'] = {
         alternate = "lib/%1.ex",
-        template = "_test",
+        template = "elixir/unit",
         priority = 300,
       },
       ['(.*)%.exs'] = {
         alternate = "%1_test.exs",
+        template = "elixir/module",
         priority = 500,
       },
       ['(.*]%.ex'] = {
         alternate = "%1_test.exs",
+        template = "elixir/module",
         priority = 500,
       },
       ['(.*)_test%.exs'] = {
         alternate = {"%1.exs", "%1.ex"},
-        template = "_test",
+        template = "elixir/unit",
         priority = 400,
       },
     }

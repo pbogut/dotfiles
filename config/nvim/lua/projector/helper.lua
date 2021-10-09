@@ -31,6 +31,13 @@ function M.upper_first(text)
   return text
 end
 
+function M.lower_first(text)
+  text = text:gsub('^(%u)', function(letter)
+    return letter:lower()
+  end)
+  return text
+end
+
 function M.map(list, fun)
   local result = {}
   for k, v in pairs(list) do
