@@ -1,7 +1,7 @@
 local cmp = require('cmp')
 local emmet = require('plugins.emmet_vim')
 local snippy = require('snippy')
-local projector = require('projector')
+local projector = require('plugins.projector')
 
 local feedkey = function(key, mode)
   vim.api.nvim_feedkeys(
@@ -14,7 +14,7 @@ end
 cmp.setup {
   snippet = {
     expand = function(args)
-      require 'snippy'.expand_snippet(args.body)
+      snippy.expand_snippet(args.body)
     end,
   },
   mapping = {

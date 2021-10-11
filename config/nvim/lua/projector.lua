@@ -7,8 +7,6 @@
      templates can be ultisnip snippets or files with placeholders ]]
 
 local u = require('utils')
-local s = require('snippy')
-local shared = require('snippy.shared')
 local ph = require('template.placeholders')
 
 local t = u.termcodes
@@ -23,7 +21,18 @@ local l = {}
 -- how many lines from botton and top to search for alternate annotation
 local search_lines = 10
 local templates_path = os.getenv('HOME') .. '/.config/nvim/templates'
-local configuration = require('plugins.projector')
+local projections = {}
+local engine = 'raw'
+
+function a.setup(opts)
+  projections = opts.projections or {}
+  if opts.templates and opts.templates.path then
+    templates_path = opts.templates.path
+  end
+  if opts.templates and opts.templates.engine then
+    engine = opts.templates.engine
+  end
+end
 
 function a.ultisnip_template(name)
   cmd("silent! normal! i_t" .. name .. t'<c-r>=UltiSnips#ExpandSnippet()<cr>')
@@ -33,26 +42,22 @@ function a.ultisnip_template(name)
   return g.ulti_expand_res and g.ulti_expand_res ~= 0
 end
 
-function a.expand_snippet()
-  for _, snippets in pairs(shared.cache) do
-    for _, snippet in pairs(snippets) do
-      snippet.body = l.placeholders_to_eval(snippet.body)
-    end
-  end
-
-  s.expand_or_advance()
-end
-
 function a.file_template(name)
     local template = io.open(templates_path .. '/' .. name .. '.snippet', 'r')
     local lines = vim.split(template:read('*a'), '\n')
     if lines[#lines] == '' then
         table.remove(lines)
     end
-    s.expand_snippet({
-      body = a.process_placeholders(lines),
-      kind = 'snipmate'
-    })
+    if engine == 'raw' then
+      local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+      vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col, lines)
+    elseif engine == 'snippy' then
+      local snippy = require('snippy')
+      snippy.expand_snippet({
+        body = a.process_placeholders(lines),
+        kind = 'snipmate'
+      })
+    end
 end
 
 function a.process_placeholder(placeholder)
@@ -244,7 +249,7 @@ end
 
 function l.init_project()
   local cwd = fn.getcwd()
-  for project_pattern, project_config in u.spairs(configuration, l.sort) do
+  for project_pattern, project_config in u.spairs(projections, l.sort) do
     if l.check_project(cwd, project_pattern) then
       if type(project_config.project_init) == 'function' then
         return project_config.project_init()
@@ -255,7 +260,7 @@ end
 
 function l.get_project_patterns(cwd)
   local result = {}
-  for project_pattern, project_config in u.spairs(configuration, l.sort) do
+  for project_pattern, project_config in u.spairs(projections, l.sort) do
     if l.check_project(cwd, project_pattern) then
       -- first on the list has priority
       result = u.merge_tables(project_config.patterns, result)
@@ -267,7 +272,7 @@ end
 
 function l.get_project_generators(cwd)
   local result = {}
-  for project_pattern, project_config in u.spairs(configuration, l.sort) do
+  for project_pattern, project_config in u.spairs(projections, l.sort) do
     if l.check_project(cwd, project_pattern) then
       -- first on the list has priority
       result = u.merge_tables(project_config.generators, result)
