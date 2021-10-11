@@ -33,8 +33,8 @@ warning = #bdbd40
 
 [bar/switches]
 monitor = ${env:MONITOR:HDMI-0}
-width = 15%
-offset-x = 85%
+width = 17%
+offset-x = 83%
 height = 20
 fixed-center = false
 
@@ -55,7 +55,7 @@ font-0 = "InputMono Nerd Font:fontformat=truetype:size=8:antialias=true;1"
 
 modules-left = close_switches
 modules-center =
-modules-right = arctis barrier screensaver light_1 light_2
+modules-right = arctis barrier screensaver light_1 light_2 onboard
 
 tray-position = none
 
@@ -329,6 +329,13 @@ label = %output%
 format-prefix = " "
 format-prefix-foreground = ${colors.icon}
 click-left = /usr/bin/kill -SIGRTMIN+1 %pid%
+
+[module/onboard]
+type = custom/text
+content = ""
+format-prefix-foreground = ${colors.icon}
+click-right = /usr/bin/kill onboard
+click-left = onboard
 
 [module/netsync]
 type = custom/script
