@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+#=================================================
+# name:   mutt
+# author: Pawel Bogut <https://pbogut.me>
+# date:   08/10/2021
+#=================================================
+mutt() {
+  dest="$HOME"
+  if [[ -n $1 ]]; then
+    dest="$1"
+  fi
+  cd $dest && neomutt && cd -
+  # && pkill -SIGRTMIN+13 i3blocks
+}

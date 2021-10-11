@@ -39,9 +39,7 @@ fi
 # cdr already exists in zsh apparently, so override right away
 source $HOME/.zshrc.d/functions/cdr
 
-#vim mode
-setopt transientrprompt
-bindkey -v
+bindkey -e
 
 # bash word style (c-w on /some/path| will results in /some/|)
 autoload -U select-word-style && select-word-style bash
@@ -115,17 +113,6 @@ abbrev-alias --init
 abbrev-alias -g G='|rg'
 abbrev-alias -g dc='docker-compose'
 
-mutt() {
-  dest="$HOME"
-  if [[ -n $1 ]]; then
-    dest="$1"
-  fi
-  cd $dest && neomutt && cd - && pkill -SIGRTMIN+13 i3blocks
-}
-cht() {
-  curl "cht.sh/$1" 2>/dev/null | less
-}
-
 # shortcuts
 source ~/.aliases
 
@@ -140,7 +127,6 @@ if [[ -f ~/.zshrc.d/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
 fi
 
 setopt prompt_subst
-[[ -f /usr/lib/libstderred.so ]] && export LD_PRELOAD="/usr/lib/libstderred.so${LD_PRELOAD:+:$LD_PRELOAD}"
 
 # host specific config
 if [ -f $HOME/.$hostname.zsh ]; then
