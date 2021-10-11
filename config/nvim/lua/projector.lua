@@ -188,14 +188,6 @@ function a.go_alternate()
   end
 end
 
-function l.placeholders_to_eval(lines)
-  local result = {}
-  for _, line in ipairs(lines) do
-      result[#result+1] = line:gsub('%[%[(.-)%]%]', [[`v:lua.projector.placeholder('%1')`]])
-  end
-  return result
-end
-
 function l.select_alternate(files)
   if #files == 1 then
     cmd('e ' .. files[1])

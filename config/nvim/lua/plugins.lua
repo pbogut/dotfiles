@@ -143,7 +143,6 @@ return require('packer').startup({
         'quangnguyen30192/cmp-nvim-tags',
         'tzachar/cmp-tabnine',
         'ray-x/cmp-treesitter',
-        'f3fora/cmp-spell',
         'onsails/lspkind-nvim',
         'dcampos/cmp-snippy',
       }

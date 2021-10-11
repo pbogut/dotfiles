@@ -82,8 +82,6 @@ read -d '' files <<"EOF"
     scspell/dictionary.txt
     vim/autoload/plug.vim
     vim/ftplugin
-    vim/mysnippets
-    vim/mytemplates
     vim/plugin
     weechat/alias.conf
     weechat/cron.txt

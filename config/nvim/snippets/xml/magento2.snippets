@@ -1,8 +1,13 @@
 snippet m2plugin
-	<type name="${1:\\Magento\\Cms\\Controller\\Page\\View}">
+	<type name="${1:Class\\To\\Plug\\In\\To}">
 		<plugin name="${2:[[magento2.module_key]]}_${3:plugin_name}"
-		        type="${4:[[magento2.module_namespace]]\\Plugin\\}${5:PluginNameClass}"/>
+		        type="${4:[[magento2.module_namespace]]}\\Plugin\\${5:PluginClass}"/>
 	</type>$0
+snippet m2event
+	<event name="${1:event_name}">
+		<observer name="${2:[[magento2.module_key]]}_${1:event_name}"
+		          instance="${3:[[magento2.module_namespace]]}\\Observer\\${4:ObserverClass}"/>
+	</event>
 snippet m2grid
 	<!-- ${1:Entity} - START -->
 	<type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
