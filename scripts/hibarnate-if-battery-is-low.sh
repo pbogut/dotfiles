@@ -5,7 +5,7 @@
 # date:   12/10/2021
 #=================================================
 icon="/usr/share/icons/gnome/32x32/devices/battery.png"
-limit="3"
+limit="4"
 notify="5"
 
 battery="$(acpi | sed -E 's,^.*? ([0-9]+)%.*?$,\1,')"
@@ -21,14 +21,15 @@ if [[ $limit -gt $battery ]] || [[ $limit -eq $battery ]]; then
     --text "Battery level: $battery%\n\nSystem is going to be hibernated.\n\nClick cancel to prevent it. " \
     --image $icon \
     --question \
-    --timeout=5 \
+    --timeout=30 \
     --timeout-indicator=bottom
 
   result=$?
 
-  if [[ $result -eq 1 ]]; then
+  # if cancel clicked or esc hit
+  if [[ $result -eq 1 ]] || [[ $result -eq 252 ]]; then
     exit 1
   else
-    systemctl hibernate
+    sudo systemctl hibernate
   fi
 fi
