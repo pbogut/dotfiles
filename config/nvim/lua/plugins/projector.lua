@@ -49,7 +49,7 @@ end
 function l.placeholders_to_eval(lines)
   local result = {}
   for _, line in ipairs(lines) do
-      result[#result+1] = line:gsub('%[%[(.-)%]%]', [[`v:lua.projector.placeholder('%1')`]])
+      result[#result+1] = line:gsub('%[%[((%w%_%-%.]-)%]%]', [[`v:lua.projector.placeholder('%1')`]])
   end
   return result
 end

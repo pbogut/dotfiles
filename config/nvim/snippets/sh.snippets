@@ -8,3 +8,53 @@ snippet do
 	done
 snippet dir "get script dir"
 	dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+snippet args
+	usage() {
+		echo "Ussage: \${0##*/} [OPTIONS]"
+		echo ""
+		echo "Options:"
+		echo "  -h, --help     display this help and exit"
+	}
+
+	while test \$# -gt 0; do
+		case "\$1" in$0
+			--help|-h)
+				usage
+				exit 0
+				;;
+			*)
+				usage
+				exit 1
+				;;
+		esac
+	done
+snippet argflag
+	--${1:flag}${3:|-${2:f}})$4
+		shift
+		;;$0
+snippet argopt
+	--${1:option}|--${1:option}=*${3:|-${2:o}})
+		if [[ \$1 =~ --[a-z]+= ]]; then
+			_val="\${1//--${1:option}=/}"
+			shift
+		else
+			_val="\$2"
+			shift; shift
+		fi
+		${4:${1:option}}="$_val"
+		;;
+snippet argopt-
+	--${1:option}${3:|-${2:o}})
+		${1:option}="\$2"$4
+		shift; shift
+		;;$0
+snippet argopt=
+	--${1:option}=*)
+		${1:option}="\${1//--${1:option}=/}"$2
+		shift
+		;;$0
+snippet argopt==
+	--${1:option}=*})
+		${1:option}="$(sed 's,--[a-z]\+=\(.*\)$,\1,' <<< "\$1")"$2
+		shift
+		;;$0

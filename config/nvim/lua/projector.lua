@@ -372,7 +372,7 @@ end
 function l.collect_placeholders(lines)
   local result = {}
   for _, line in ipairs(lines) do
-    for placeholder in line:gmatch('%[%[(.-)%]%]') do
+    for placeholder in line:gmatch('%[%[([%w%_%-%.]-)%]%]') do
       if not result[placeholder] then
         local ph_cfg = l.load_placeholder(placeholder)
         if ph_cfg then
