@@ -9,3 +9,4 @@ gem install nokogiri
 gem install clipboard
 gem install mail
 gem install redcarpet
+gem install rotp
