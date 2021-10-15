@@ -93,7 +93,7 @@ bindsym $mod+Shift+Right move right
 # bindsym $mod+v split v
 
 # split in vertical orientation - who the fuck made it other way around?
-bindsym $mod+s split h
+# bindsym $mod+s split h
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
@@ -347,23 +347,23 @@ bindsym $mod+i $sh '~/.scripts/vim-anywhere.sh'
 # bindsym $mod+Ctrl+d $sh '~/.scripts/vim-anywhere.sh --draft'
 bindsym $mod+u $sh '~/.scripts/users.sh --switch'
 
-bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '\<Ferdi -' 'ferdi'"
+bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '^Ferdi -' 'ferdi'"
 # bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
 # bindsym $mod+Ctrl+b $exec "~/.scripts/switch-or-launch.sh '\<qutebrowser$' 'browser'"
 # bindsym $mod+Ctrl+g $exec "~/.scripts/switch-or-launch.sh '\<[Tt]oggl$' 'toggl'"
 
 # bindsym $mod+Ctrl+c $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
 # bindsym $mod+Ctrl+n $exec "~/.scripts/switch-or-launch.sh '\<Netflix$' 'google-chrome-stable --app=https://netflix.com'"
-bindsym $mod+Ctrl+Shift+M $exec "~/.scripts/switch-or-launch.sh '\<Volume Control$' 'pavucontrol'"
+bindsym $mod+Ctrl+s $exec "~/.scripts/switch-or-launch.sh --scratchpad '^Volume Control$' 'pavucontrol'"
 bindsym $mod+Ctrl+k $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
-bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh 'www.deezer.com__en.Google-chrome' 'google-chrome-stable --app=https://www.deezer.com/en/'"
+bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh '^www.deezer.com__en.Google-chrome$' 'google-chrome-stable --app=https://www.deezer.com/en/'"
 # bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh 'Freezer' 'freezer'"
-bindsym $mod+Ctrl+d $exec "~/.scripts/switch-or-launch.sh 'discord' 'discord'"
+bindsym $mod+Ctrl+d $exec "~/.scripts/switch-or-launch.sh '^Discord$' 'discord'"
 bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
-bindsym $mod+Ctrl+s $exec "~/.scripts/audio-device-out-switch.sh"
-bindsym $mod+Ctrl+r $exec "~/.scripts/audio-device-in-switch.sh"
+# bindsym $mod+Ctrl+s $exec "~/.scripts/audio-device-out-switch.sh"
+# bindsym $mod+Ctrl+r $exec "~/.scripts/audio-device-in-switch.sh"
 # bindsym $mod+Ctrl+e $exec "urxvt -e neomutt && pkill -SIGRTMIN+13 i3blocks"
-bindsym $mod+Ctrl+e $exec "~/.scripts/switch-or-launch.sh '\<EMAIL_MUTT$' 'email'"
+bindsym $mod+Ctrl+e $exec "~/.scripts/switch-or-launch.sh '^EMAIL_MUTT$' 'email'"
 # bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
 bindsym $mod+Ctrl+l $exec "urxvt -e ~/.scripts/dev-log"
 

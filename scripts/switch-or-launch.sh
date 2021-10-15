@@ -6,6 +6,72 @@
 #=================================================
 last_id_file="/tmp/$USER/_switch-or-launch.last_id"
 workspc_file="/tmp/$USER/_switch-or-launch.workspc"
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS] <pattern> <command>"
+  echo ""
+  echo "Arguments:"
+  echo "  <pattern>            window class/title pattern"
+  echo "  <command>            command to run pattern not found"
+  echo ""
+  echo "Options:"
+  echo "  -s, --scratchpad     floating/scratchpad window"
+  echo "  -h, --help           display this help and exit"
+}
+
+get_windows() {
+  wmctrl -lx | awk '{id=$1; $1=$2=$3=$4=""; print id $0}' | while read -r id title; do
+    echo "$id" "$title"
+  done
+}
+
+get_window_id() {
+  wmctrl -lx | awk '{id=$1; cls=$3; $1=$2=$3=$4=""; print id "\t" cls $0}' |
+    while read -r id cls title; do
+      if [[ $(echo "$title" | grep -E "$1") ]]; then
+        echo $(( id ))
+        return 0
+      fi
+      if [[ $(echo "$cls" | grep -E "$1") ]]; then
+        echo $(( id ))
+        return 0
+      fi
+    done
+}
+
+scratchpad=0
+pattern=""
+command=""
+
+while test $# -gt 0; do
+  case "$1" in
+    --scratchpad|-s)
+      scratchpad=1
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *) #positional
+      if [[ -z $pattern ]]; then
+        pattern=$1
+      elif [[ -z $command ]]; then
+        command=$1
+      else
+        usage
+        exit 1
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [[ -z $pattern ]] || [[ -z $command ]]; then
+  usage
+  exit 1
+fi
+
 mkdir -p $(dirname $last_id_file)
 touch $last_id_file
 touch $workspc_file
@@ -13,31 +79,49 @@ touch $workspc_file
 last_id=$(cat $last_id_file)
 id=$(xdotool getwindowfocus)
 
-echo $id > $last_id_file
+if [[ $scratchpad -eq 0 ]]; then
+  echo "$id" > "$last_id_file"
+fi
 
-win=$(( $(wmctrl -lx | grep "$1" | awk '{print $1}' | head -n1) ))
+win=$(get_window_id "$pattern")
 
+# app currently focused
 if [[ -n $id && "$win" == "$id" ]]; then
-  cat $workspc_file | while read workspc_id; do
-    i3-msg -t command  workspace $workspc_id
-  done
-  sleep 0.15s;
-  wmctrl -ia $last_id
-else
-  i3-msg -t get_workspaces | jq '.[] | select(.visible==true).name' | cut -d"\"" -f2  $workspc_file
-
-  win=$(wmctrl -lx | grep "$1" | awk '{print $1}' | head -n1)
-  if [[ -n $win ]]; then
-    wmctrl -ia $win
+  if [[ $scratchpad -eq 1 ]]; then
+    i3-msg move scratchpad
   else
-    $2 &
-    # wait for app to be open
-    for i in {1..20}; do
-      sleep 0.1s
-      if [[ -n $(wmctrl -l | grep "$1" | awk '{print $1}') ]]; then
-        break
-      fi
+    cat $workspc_file | while read workspc_id; do
+      i3-msg -t command  workspace $workspc_id
     done
-    wmctrl -ia $(wmctrl -l | grep "$1" | awk '{print $1}')
+    sleep 0.15s;
+    wmctrl -ia "$last_id"
+  fi
+else
+  if [[ $scratchpad -eq 1 ]]; then
+    win=$(get_window_id "$pattern")
+    if [[ -n $win ]]; then # command already ran
+      i3-msg '[title="'"$pattern"'"]' scratchpad show
+    else # command needs to be started
+      $command &
+    fi
+  else
+    i3-msg -t get_workspaces | jq '.[] | select(.visible==true).name' | cut -d"\"" -f2 "$workspc_file"
+
+    win=$(get_window_id "$pattern")
+    if [[ -n $win ]]; then # command already ran
+      wmctrl -ia "$win" # focus app window
+    else # command needs to be started
+      $command &
+      # wait for app to be open
+      for _ in {1..30}; do
+        sleep 0.1s
+        win=$(get_window_id "$pattern")
+        if [[ -n $win ]]; then
+          break
+        fi
+      done
+      # focus app window
+      wmctrl -ia "$win"
+    fi
   fi
 fi
