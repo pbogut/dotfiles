@@ -2,14 +2,8 @@ local cmp = require('cmp')
 local emmet = require('plugins.emmet_vim')
 local snippy = require('snippy')
 local projector = require('plugins.projector')
-
-local feedkey = function(key, mode)
-  vim.api.nvim_feedkeys(
-    vim.api.nvim_replace_termcodes(key, true, true, true),
-    mode,
-    true
-  )
-end
+local u = require('utils')
+local c = vim.g.colors
 
 cmp.setup {
   snippet = {
@@ -87,3 +81,12 @@ cmp.setup {
     end,
   },
 }
+
+u.highlights({
+  CmpItemAbbr =           {gui = 'none', guibg = c.base03, guifg = c.base0},
+  CmpItemKind =           {gui = 'italic', guibg = c.base02, guifg = c.base0},
+  CmpItemMenu =           {gui = 'none', guibg = c.base02, guifg = c.base0},
+  CmpItemAbbrMatch =      {gui = 'bold', guibg = c.base03, guifg = c.base0},
+  CmpItemAbbrMatchFuzzy = {gui = 'italic', guibg = c.base03, guifg = c.base0},
+  CmpItemAbbrDeprecated = {gui = 'none', guibg = c.base01, guifg = c.base0},
+})
