@@ -24,8 +24,21 @@ cmp.setup {
       select = true,
     }),
     ['<tab>'] = cmp.mapping(function(fallback)
-      if vim.fn.pumvisible() == 1 and vim.v.completed_item.word then
-        feedkey("<C-y>S", "i")
+      local entry = cmp.core.view:get_selected_entry()
+      if cmp.visible() and entry then
+        local item = entry:get_completion_item()
+        if item.data
+          and type(item.data) == "table"
+          and item.data.snippet
+          and item.data.snippet.kind == "snipmate"
+        then
+          projector.expand_snippet()
+        else
+          cmp.confirm({
+            behavior = cmp.ConfirmBehavior.Replace,
+            select = true,
+          })
+        end
       elseif snippy.can_expand_or_advance() then
         projector.expand_snippet()
       elseif emmet.can_expand() then
