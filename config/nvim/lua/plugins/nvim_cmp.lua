@@ -5,6 +5,19 @@ local projector = require('plugins.projector')
 local u = require('utils')
 local c = vim.g.colors
 
+local src = {
+  lsp = {name = 'nvim_lsp'},
+  lua = {name = 'nvim_lua'},
+  ts = {name = 'treesitter'},
+  db = {name = 'vim-dadbod-completion'},
+  tn = {name = 'cmp_tabnine'},
+  snip = {name = 'snippy', keyword_length = 2},
+  path = {name = 'path'},
+  tag = {name = 'tags', max_item_count = 15},
+  buf = {name = 'buffer'},
+  emo = {name = 'emoji'},
+}
+
 cmp.setup {
   snippet = {
     expand = function(args)
@@ -43,17 +56,14 @@ cmp.setup {
     end, { "i", "s" }),
   },
   sources = {
-    {name = 'nvim_lsp'},
-    {name = 'nvim_lua'},
-    {name = 'treesitter'},
-    {name = 'vim-dadbod-completion'},
-    {name = 'cmp_tabnine'},
-    {name = 'snippy', keyword_length = 2},
-    {name = 'path'},
-    {name = 'tags', max_item_count = 15},
-    {name = 'buffer'},
-    {name = 'emoji'},
-    {name = 'spell'},
+    src.lsp,
+    src.ts,
+    src.tn,
+    src.snip,
+    src.path,
+    src.tag,
+    src.buf,
+    src.emo,
   },
   sorting = {
     priority_weight = 2,
@@ -81,6 +91,42 @@ cmp.setup {
     end,
   },
 }
+
+u.augroup('x_cmp', {
+  FileType = {
+    { 'sql,mysql,plsql',
+      function()
+        cmp.setup.buffer({
+          sources = {
+            src.db,
+            src.lsp,
+            src.ts,
+            src.tn,
+            src.snip,
+            src.path,
+            src.buf,
+            src.emo,
+          }
+        })
+      end
+    },
+    { 'lua',
+      function()
+        cmp.setup.buffer({
+          sources = { src.lua,
+            src.lsp,
+            src.ts,
+            src.tn,
+            src.snip,
+            src.path,
+            src.buf,
+            src.emo,
+          }
+        })
+      end
+    },
+  }
+})
 
 u.highlights({
   CmpItemAbbr =           {gui = 'none', guibg = c.base03, guifg = c.base0},
