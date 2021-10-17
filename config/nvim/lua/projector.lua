@@ -63,7 +63,7 @@ end
 function a.process_placeholder(placeholder)
   local ph_cfg = l.load_placeholder(placeholder)
   if ph_cfg then
-    return ph_cfg.value()
+    return ph_cfg()
   else
     return placeholder
   end
@@ -73,7 +73,7 @@ function a.process_placeholders(lines)
   local placeholders = l.collect_placeholders(lines)
   local result = {}
   for name, config in pairs(placeholders) do
-    local value = config.value()
+    local value = config()
     if value and value:len() > 0 then
       -- escape backslashes to unify behavior between templates and snippets
       result[name] = value:gsub([[\]], [[\\]])
