@@ -53,6 +53,13 @@ return require('packer').startup({
     use {'lambdalisue/suda.vim'}
     use {'gioele/vim-autoswap'}
     use {'glepnir/galaxyline.nvim', config = config('galaxyline_nvim')}
+    use {'kyazdani42/nvim-web-devicons',
+      config = config('nvim_web_devicons'),
+    }
+    use {'seblj/nvim-tabline',
+      config = config('nvim_tabline'),
+      requires = {'kyazdani42/nvim-web-devicons'},
+    }
     use {'mhinz/vim-signify', config = config('vim_signify')}
     use {'ludovicchabant/vim-gutentags'}
     use {'ntpeters/vim-better-whitespace', config = config('vim_better_whitespace')}
