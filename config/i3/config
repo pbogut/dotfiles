@@ -269,7 +269,6 @@ assign [title="^jira$"] $wsdash
 assign [title="^Ferdi"] $wscomm
 assign [class="^discord$"] $wscomm
 assign [title="Friends List"] $wscomm
-assign [title="^EMAIL_MUTT$"] $wscomm
 assign [title="^www.deezer.com"] $wsmedia
 assign [title="Freezer"] $wsmedia
 
@@ -278,6 +277,9 @@ for_window [title="^Ferdi"] workspace --no-auto-back-and-forth $wscomm
 for_window [title="Friends List"] workspace --no-auto-back-and-forth $wscomm
 for_window [title="^www.deezer.com"] workspace --no-auto-back-and-forth $wsmedia
 
+for_window [title="^.*$"] $exec sort-workspace.sh
+
+# assign [title="^EMAIL_MUTT$"] $wscomm
 # assign [title="^urxvt$"] $wsterm
 # for_window [title="^urxvt$"] workspace --no-auto-back-and-forth $wsterm
 # for_window [title="^urxvt$"] focus
@@ -287,11 +289,11 @@ for_window [title="^www.deezer.com"] workspace --no-auto-back-and-forth $wsmedia
 # for_window [class="^qutebrowser$" workspace="$wscode"] workspace --no-auto-back-and-forth $wsterm
 # for_window [class="^qutebrowser$" workspace="$wscode"] focus
 
-for_window [title="NVIM_FOR_QB"] floating enable
-for_window [title="QB_FILE_SELECTION"] floating enable
-for_window [title="QB_FILE_SELECTION"] resize set width 1200px
-for_window [title="QB_FILE_SELECTION"] resize set height 800px
-for_window [title="QB_FILE_SELECTION"] move position center
+# for_window [title="NVIM_FOR_QB"] floating enable
+# for_window [title="QB_FILE_SELECTION"] floating enable
+# for_window [title="QB_FILE_SELECTION"] resize set width 1200px
+# for_window [title="QB_FILE_SELECTION"] resize set height 800px
+# for_window [title="QB_FILE_SELECTION"] move position center
 for_window [title="FLOATING_WINDOW"] floating enable
 for_window [class="Toggl Desktop"] floating enable
 for_window [class="^Yad$"] floating enable
@@ -349,7 +351,7 @@ bindsym $mod+u $sh '~/.scripts/users.sh --switch'
 
 bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '^Ferdi -' 'ferdi'"
 # bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
-# bindsym $mod+Ctrl+b $exec "~/.scripts/switch-or-launch.sh '\<qutebrowser$' 'browser'"
+bindsym $mod+Ctrl+b $exec "~/.scripts/switch-or-launch.sh --scratchpad '^Bluetooth Devices$' 'blueman-manager'"
 # bindsym $mod+Ctrl+g $exec "~/.scripts/switch-or-launch.sh '\<[Tt]oggl$' 'toggl'"
 
 # bindsym $mod+Ctrl+c $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
@@ -358,7 +360,7 @@ bindsym $mod+Ctrl+s $exec "~/.scripts/switch-or-launch.sh --scratchpad '^Volume 
 bindsym $mod+Ctrl+k $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
 bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh '^www.deezer.com__en.Google-chrome$' 'google-chrome-stable --app=https://www.deezer.com/en/'"
 # bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh 'Freezer' 'freezer'"
-bindsym $mod+Ctrl+d $exec "~/.scripts/switch-or-launch.sh '^Discord$' 'discord'"
+bindsym $mod+Ctrl+d $exec "~/.scripts/switch-or-launch.sh '^discord.discord$' 'discord'"
 bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
 # bindsym $mod+Ctrl+s $exec "~/.scripts/audio-device-out-switch.sh"
 # bindsym $mod+Ctrl+r $exec "~/.scripts/audio-device-in-switch.sh"
