@@ -39,6 +39,7 @@ read -d '' files <<"EOF"
     bashrc
     bash_profile
     Xdefaults
+    Xresources
     composer/composer.json
     config/autostart/autostart.desktop
     config/dircolors-solarized
@@ -72,6 +73,7 @@ read -d '' files <<"EOF"
     config/Franz/Plugins/todoist
     gtk-2.0
     i3blocks.conf
+    icons/polar
     local/share/applications/ranger.desktop
     local/share/applications/browser.desktop
     local/share/applications/email.desktop

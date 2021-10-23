@@ -1,0 +1,24 @@
+#!/bin/bash
+
+
+# Hue shift by x percent.
+HUE=100
+
+mogrify modulate 0,0,HUE Spinner0.png
+mogrify modulate 0,0,HUE Spinner1.png
+mogrify modulate 0,0,HUE Spinner2.png
+mogrify modulate 0,0,HUE Spinner3.png
+mogrify modulate 0,0,HUE Spinner4.png
+mogrify modulate 0,0,HUE Spinner5.png
+mogrify modulate 0,0,HUE Spinner6.png
+mogrify modulate 0,0,HUE Spinner7.png
+mogrify modulate 0,0,HUE Spinner8.png
+mogrify modulate 0,0,HUE Spinner9.png
+mogrify modulate 0,0,HUE Spinner10.png
+mogrify modulate 0,0,HUE Spinner11.png
+mogrify modulate 0,0,HUE Spinner12.png
+mogrify modulate 0,0,HUE Spinner13.png
+mogrify modulate 0,0,HUE Spinner14.png
+mogrify modulate 0,0,HUE Spinner15.png
+mogrify modulate 0,0,HUE Spinner16.png
+mogrify modulate 0,0,HUE Spinner17.png
