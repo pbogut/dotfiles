@@ -21,18 +21,26 @@ usage() {
 
 get_windows() {
   wmctrl -lx | awk '{id=$1; $1=$2=$3=$4=""; print id $0}' | while read -r id title; do
-    echo "$id" "$title"
+    echo "$id" $(print "$title")
   done
+}
+
+print() {
+  if [[ $ignore_case -eq 1 ]]; then
+    echo "$@" | awk '{print tolower($0)}'
+  else
+    echo "$@"
+  fi
 }
 
 get_window_id() {
   wmctrl -lx | awk '{id=$1; cls=$3; $1=$2=$3=$4=""; print id "\t" cls $0}' |
     while read -r id cls title; do
-      if [[ $(echo "$title" | grep -E "$1") ]]; then
+      if [[ $(print "$title" | grep -E "$1") ]]; then
         echo $(( id ))
         return 0
       fi
-      if [[ $(echo "$cls" | grep -E "$1") ]]; then
+      if [[ $(print "$cls" | grep -E "$1") ]]; then
         echo $(( id ))
         return 0
       fi
@@ -42,9 +50,14 @@ get_window_id() {
 scratchpad=0
 pattern=""
 command=""
+ignore_case=0
 
 while test $# -gt 0; do
   case "$1" in
+    --ignore-case|-i)
+      ignore_case=1
+      shift
+      ;;
     --scratchpad|-s)
       scratchpad=1
       shift

@@ -303,6 +303,7 @@ interval = 10
 label = %output%
 format-prefix = "R "
 format-prefix-foreground = ${colors.icon}
+click-left = ~/.scripts/polybar/octopi-open.sh redfactory
 
 [module/octopi_patchwork]
 type = custom/script
@@ -311,6 +312,7 @@ interval = 10
 label = %output%
 format-prefix = "P "
 format-prefix-foreground = ${colors.icon}
+click-left = ~/.scripts/polybar/octopi-open.sh patchwork
 
 [module/arctis]
 type = custom/script
@@ -448,7 +450,7 @@ tail = true
 label = %output%
 format-prefix = " "
 format-prefix-foreground = ${colors.icon}
-click-left = urxvt -e zsh -ic neomutt
+click-left = email
 ; click-right = echo "DISPLAY=:0.0 pavucontrol -t 1" | at now
 ; scroll-up = /usr/bin/kill -SIGRTMIN+1 %pid%
 ; scroll-down = /usr/bin/kill -SIGRTMIN+2 %pid%
