@@ -60,6 +60,11 @@ return require('packer').startup({
       config = config('nvim_tabline'),
       requires = {'kyazdani42/nvim-web-devicons'},
     }
+    use {'mfussenegger/nvim-dap',
+      config = config('nvim_dap'),
+      requires = {'xdebug/vscode-php-debug'}
+    }
+    use {'xdebug/vscode-php-debug', run = 'npm install && npm run build'}
     use {'mhinz/vim-signify', config = config('vim_signify')}
     use {'ludovicchabant/vim-gutentags'}
     use {'ntpeters/vim-better-whitespace', config = config('vim_better_whitespace')}
