@@ -1,42 +1,103 @@
 local cfg = require('config')
 local u = require('utils')
 local i = vim.g.icon
-local c = vim.g.colors
+local colors = vim.g.colors
 
-local function config()
-  local dap = require('dap')
-  local phpDebugJs = vim.fn.stdpath('data') ..
-        '/site/pack/packer/start/vscode-php-debug/out/phpDebug.js'
-
-  dap.configurations.php = {}
-  dap.adapters.php = {
+local adapters = {
+  php = {
     type = 'executable',
     command = 'node',
-    args = { phpDebugJs }
+    args = {
+      vim.fn.stdpath('data') .. '/site/pack/packer/start/vscode-php-debug/out/phpDebug.js'
+    }
+  },
+  mix_task = {
+    type = 'executable',
+    command = 'bash',
+    args = {
+      os.getenv('HOME') .. '/.elixir_ls/elixir-ls/debugger.sh'
+    }
   }
+}
 
-  local local_config = cfg.get('dap', {})
-  local defaults = { php = {} }
-  defaults.php = {
+local defaults = {
+  php = {
     log = true,
     type = 'php',
     request = 'launch',
     name = 'Xdebug',
     port = 9003
+  },
+  elixir = {
+    type = "mix_task",
+    name = "mix test",
+    request = "launch",
+    projectDir = "${workspaceFolder}",
+    requireFiles = {
+      "test/**/test_helper.exs",
+      "test/**/*_test.exs"
+    }
   }
+}
 
-  for lang, configs in pairs(local_config) do
-    for _, c in pairs(configs) do
-      dap.configurations[lang] = dap.configurations[lang] or {}
-      table.insert(
-        dap.configurations[lang],
-        vim.tbl_extend('keep', c or {}, defaults[lang])
-      )
+local configs = {
+  elixir = {
+    {
+      task = "test",
+      name = "test",
+      taskArgs = {"--trace"},
+    },
+    {
+      task = "test",
+      name = "test (phx)",
+      taskArgs = {"--trace"},
+      startApps = true,
+    },
+    {
+      name = "phx.server",
+      task = "phx.server",
+      startApps = true,
+    }
+  }
+}
+
+local function config()
+  local dap = require('dap')
+  local local_config = cfg.get('dap', {})
+
+  dap.adapters = adapters
+
+  local function load_config(lang, conf)
+    dap.configurations[lang] = dap.configurations[lang] or {}
+    table.insert(
+      dap.configurations[lang],
+      vim.tbl_extend('keep', conf or {}, defaults[lang])
+    )
+  end
+
+  -- get config from .nvim-config.json
+  for lang, _ in pairs(local_config) do
+    for _, c in pairs(local_config[lang]) do
+      load_config(lang, c)
     end
   end
 
+  -- if no config for lang get it from local configs
+  for lang, _ in pairs(configs) do
+    if not dap.configurations[lang]
+      or #dap.configurations[lang] == 0
+    then
+      for _, conf in pairs(configs[lang]) do
+        load_config(lang, conf)
+      end
+    end
+  end
+
+  -- if still no config for lang get it from local defaults
   for lang, _ in pairs(defaults) do
-    if #dap.configurations[lang] == 0 then
+    if not dap.configurations[lang]
+      or #dap.configurations[lang] == 0
+    then
       dap.configurations[lang] = { defaults[lang] }
     end
   end
@@ -64,9 +125,9 @@ local function config()
   u.highlights({
     DapBreakpoint = { link = 'DiagnosticSignError' },
     DapBreakpointCondition = { link = 'DiagnosticSignWarn' },
-    DapBreakpointRejected = { guifg = c.orange, guibg = c.base02 },
+    DapBreakpointRejected = { guifg = colors.orange, guibg = colors.base02 },
     DapLogPoint = { link = 'DiagnosticSignInfo' },
-    DapStopped = { guifg = '#719e07', guibg = c.base02 },
+    DapStopped = { guifg = '#719e07', guibg = colors.base02 },
   })
 
   u.signs({
