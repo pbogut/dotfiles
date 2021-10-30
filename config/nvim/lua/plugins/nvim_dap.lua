@@ -8,15 +8,13 @@ local adapters = {
     type = 'executable',
     command = 'node',
     args = {
-      vim.fn.stdpath('data') .. '/site/pack/packer/start/vscode-php-debug/out/phpDebug.js'
+      plugin_path('vscode-php-debug/out/phpDebug.js')
     }
   },
   mix_task = {
     type = 'executable',
-    command = 'bash',
-    args = {
-      os.getenv('HOME') .. '/.elixir_ls/elixir-ls/debugger.sh'
-    }
+    command = plugin_path('elixir-ls/out/debugger.sh'),
+    args = {}
   }
 }
 
@@ -31,11 +29,15 @@ local defaults = {
   elixir = {
     type = "mix_task",
     name = "mix test",
+    task = "test",
     request = "launch",
     projectDir = "${workspaceFolder}",
     requireFiles = {
       "test/**/test_helper.exs",
       "test/**/*_test.exs"
+    },
+    excludeModules = {
+      "Bcrypt"
     }
   }
 }

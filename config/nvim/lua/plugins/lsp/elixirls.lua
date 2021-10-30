@@ -3,7 +3,9 @@ local me = {}
 
 function me.setup(opts)
   opts = vim.tbl_deep_extend('keep', opts, {
-    cmd = { os.getenv('HOME') .. "/.elixir_ls/elixir-ls/language_server.sh" };
+    cmd = {
+      plugin_path('elixir-ls/out/language_server.sh')
+    }
     -- settings = {
     --   elixirLS = {
     --     dialyzerEnabled = false;

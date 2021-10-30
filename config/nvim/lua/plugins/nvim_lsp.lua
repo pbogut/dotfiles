@@ -127,8 +127,8 @@ u.highlights({
 
 u.signs({
   DiagnosticSignError = { text = g.icon.error, texthl = "DiagnosticSignError" },
-  DiagnosticSignWarn = { text = g.icon.warning, texthl = "DiagnosticSignWarning" },
-  DiagnosticSignInfo = { text = g.icon.info, texthl = "DiagnosticSignInformation" },
+  DiagnosticSignWarn = { text = g.icon.warning, texthl = "DiagnosticSignWarn" },
+  DiagnosticSignInfo = { text = g.icon.info, texthl = "DiagnosticSignInfo" },
   DiagnosticSignHint = { text = g.icon.hint, texthl = "DiagnosticSignHint" },
 })
 
@@ -156,8 +156,7 @@ require 'plugins.lsp.intelephense'.setup {on_attach = on_attach, capabilities = 
 require 'plugins.lsp.jsonls'.setup(on_attach)
 -- npm install -g vscode-html-languageserver-bin
 require 'plugins.lsp.html'.setup {on_attach = on_attach, capabilities = capabilities}
--- curl -fLO https://github.com/elixir-lsp/elixir-ls/releases/latest/download/elixir-ls.zip
--- unzip elixir-ls.zip -d $HOME/.elixir_ls/elixir-ls
+-- via packer (@see plugins.lua)
 require 'plugins.lsp.elixirls'.setup {on_attach = on_attach, capabilities = capabilities}
 
 local function get_active_client_map()
