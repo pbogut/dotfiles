@@ -152,6 +152,10 @@ projector.setup({
           template = "magento2/Collection",
           priority = 100
         },
+        ['app/code/.*/Console/.*%.php'] = {
+          template = "magento2/Console",
+          priority = 100
+        },
         ['app/code/.*/Model/ResourceModel/.*/CollectionFactory%.php'] = {
           template = "magento2/CollectionFactory",
           priority = 100
