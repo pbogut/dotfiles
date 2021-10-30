@@ -72,7 +72,29 @@ ws_browser="0: browser"
 ws_db="0: db"
 ws_dash="0: dash"
 
-handled=1
+if [[ $extended -eq 1 ]]; then
+  case  "$wm_class" in
+    "qutebrowser qutebrowser")
+      move_and_swich "$ws_browser"
+      ;;
+    "urxvt URxvt")
+      case "$wm_title" in
+        *~/Projects/*|*$HOME/Projects/*)
+          project_name=${wm_title##*/}
+          move_and_swich "$ws_code $project_name"
+          ;;
+        *)
+          move_and_swich "$ws_term"
+          exit 0
+          ;;
+      esac
+      ;;
+    *)
+      exit 0
+      ;;
+  esac
+fi
+
 case  "$wm_class" in
   "pavucontrol Pavucontrol")
     set_floating 800px 800px
@@ -91,30 +113,6 @@ case  "$wm_class" in
     ;;
   EMAIL_MUTT)
     move_and_swich "$ws_comm"
-    ;;
-  *)
-    handled=0
-    ;;
-esac
-
-# if no extended or handled already end here
-[[ $extended -eq 1 ]] && [[ $handled -eq 0 ]] && exit 0
-
-case  "$wm_class" in
-  "qutebrowser qutebrowser")
-    move_and_swich "$ws_browser"
-    ;;
-  "urxvt URxvt")
-    case "$wm_title" in
-      *~/Projects/*|*$HOME/Projects/*)
-        project_name=${wm_title##*/}
-        move_and_swich "$ws_code $project_name"
-        ;;
-      *)
-        move_and_swich "$ws_term"
-        exit 0
-        ;;
-    esac
     ;;
   *)
     exit 0
