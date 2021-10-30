@@ -5,9 +5,6 @@
 # date:   13/10/2021
 #=================================================
 current_ws=$(i3-msg -t get_workspaces | jq '.[] | select(.focused==true) | .name' -r)
-
-sleep 0.1s; # give urxvt chance to update title
-
 xprop=$(xprop -id $(xdpyinfo | grep -Eo 'window 0x[^,]+' | cut -d" " -f2))
 wm_title=$(echo "$xprop" | grep '^WM_NAME' | sed 's,.* = "\(.*\)"$,\1,')
 wm_class=$(echo "$xprop" | grep '^WM_CLASS' | sed 's,.* = "\(.*\)"$,\1,' | sed 's/", "/ /')
@@ -43,6 +40,10 @@ set_floating() {
 
 while test $# -gt 0; do
   case "$1" in
+    --extended|-e)
+      extended=1
+      shift
+      ;;
     --title|--title=*|-t)
       if [[ $1 =~ --[a-z]+= ]]; then
         _val="${1//--title=/}"
@@ -71,6 +72,7 @@ ws_browser="0: browser"
 ws_db="0: db"
 ws_dash="0: dash"
 
+handled=1
 case  "$wm_class" in
   "pavucontrol Pavucontrol")
     set_floating 800px 800px
@@ -78,23 +80,32 @@ case  "$wm_class" in
   "smplayer smplayer")
     move_and_swich "$ws_media"
     ;;
-  "qutebrowser qutebrowser")
-    move_and_swich "$ws_browser"
-    ;;
   "blueman-manager Blueman-manager")
     set_floating 800px 800px
     ;;
+  QB_FILE_SELECTION)
+    set_floating 1200px 800px
+    ;;
+  NVIM_FOR_QB)
+    set_floating
+    ;;
+  EMAIL_MUTT)
+    move_and_swich "$ws_comm"
+    ;;
+  *)
+    handled=0
+    ;;
+esac
+
+# if no extended or handled already end here
+[[ $extended -eq 1 ]] && [[ $handled -eq 0 ]] && exit 0
+
+case  "$wm_class" in
+  "qutebrowser qutebrowser")
+    move_and_swich "$ws_browser"
+    ;;
   "urxvt URxvt")
     case "$wm_title" in
-      QB_FILE_SELECTION)
-        set_floating 1200px 800px
-        ;;
-      NVIM_FOR_QB)
-        set_floating
-        ;;
-      EMAIL_MUTT)
-        move_and_swich "$ws_comm"
-        ;;
       *~/Projects/*|*$HOME/Projects/*)
         project_name=${wm_title##*/}
         move_and_swich "$ws_code $project_name"

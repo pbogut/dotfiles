@@ -341,7 +341,8 @@ bindsym $mod+Shift+C $exec "~/.scripts/i3-create-empty-workspace.py --move"
 bindsym $mod+Shift+X $exec "~/.scripts/i3-create-empty-workspace.py --send"
 bindsym $mod+w $exec "~/.scripts/i3-dmenu-workspaces.sh"
 bindsym $mod+Shift+W $exec "~/.scripts/i3-dmenu-workspaces.sh --move"
-bindsym $mod+Ctrl+w $exec "~/.scripts/i3-dmenu-workspaces.sh --send"
+# bindsym $mod+Ctrl+w $exec "~/.scripts/i3-dmenu-workspaces.sh --send"
+bindsym $mod+Ctrl+w $exec "~/.scripts/sort-workspace.sh --extended"
 
 bindsym --release $mod+v $sh 'xdotool keyup Super && xdotool type "$(xsel)"'
 bindsym $mod+Ctrl+i $sh '~/.scripts/vim-anywhere.sh --selection'
