@@ -23,8 +23,9 @@ if [[ "$1" =~ ^mailto: ]]; then
         /bin/sed -s 's/?.*//')
 
     # urxvt -T "EMAIL_MUTT" -e zsh -ic neomutt "$recipient" -b "$bcc" -c "$cc" -s "$subject" \
-    cmd='neomutt -a "'"$1"'" -b "'"$bcc"'" -c "'"$cc"'" -s "'"$subject"'"'
+    cmd='neomutt "'"$recipient"'" -b "'"$bcc"'" -c "'"$cc"'" -s "'"$subject"'"'
     # urxvt -T "EMAIL_MUTT" -e zsh -ic "$cmd" \
+    # echo $cmd
     urxvt -e zsh -ic "$cmd" \
         && pkill -SIGRTMIN+13 i3blocks
 elif [[ -f "$1" ]]; then
