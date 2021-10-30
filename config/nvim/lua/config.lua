@@ -33,7 +33,16 @@ local function load_config()
     path_config = read_file(path_file)
   end
 
-  return u.merge_tables(user_config, path_config)
+  local config = u.merge_tables(user_config, path_config)
+
+  for _, to_import in pairs(config.import or {}) do
+    if fn.filereadable(to_import) > 0 then
+      local import_config = read_file(to_import)
+      config = u.merge_tables(import_config, config)
+    end
+  end
+
+  return config
 end
 
 local config = load_config()
