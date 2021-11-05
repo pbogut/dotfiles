@@ -111,7 +111,13 @@ if (config.get('autoformat_on_save')) then
   u.augroup('x_autoformat', {
     BufWritePre  = {
       {
-        '* lua vim.lsp.buf.x_formatting()'
+        '*', function()
+          local file = vim.fn.expand('%:p')
+          local cwd = vim.fn.getcwd()
+          if file:match('^' .. cwd) then
+          vim.lsp.buf.x_formatting()
+          end
+        end
       }
     }
   })
