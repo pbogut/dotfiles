@@ -69,10 +69,6 @@ return require('packer').startup({
     use {'ludovicchabant/vim-gutentags'}
     use {'ntpeters/vim-better-whitespace', config = config('vim_better_whitespace')}
     use {'honza/vim-snippets'}
-    use {'mattn/emmet-vim',
-      config = config('emmet_vim'),
-      ft = {'php', 'html', 'blade', 'vue', 'eelixir'},
-    }
     use {'sbdchd/neoformat',
       cmd = 'Neoformat',
       config = config('neoformat'),

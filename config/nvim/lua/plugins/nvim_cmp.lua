@@ -1,5 +1,4 @@
 local cmp = require('cmp')
-local emmet = require('plugins.emmet_vim')
 local snippy = require('snippy')
 local projector = require('plugins.projector')
 local u = require('utils')
@@ -48,8 +47,6 @@ cmp.setup {
         end
       elseif snippy.can_expand_or_advance() then
         projector.expand_snippet()
-      elseif emmet.can_expand() then
-        emmet.expand()
       else
         fallback()
       end

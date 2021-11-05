@@ -147,6 +147,7 @@ lspconfig.pyright.setup {on_attach = on_attach}
 -- pacman -S deno
 lspconfig.denols.setup {on_attach = on_attach}
 -- npm install -g @tailwindcss/language-server
+require 'plugins.lsp.emmet_ls'.setup {on_attach = on_attach, capabilities = capabilities}
 require 'plugins.lsp.tailwindcss'.setup {on_attach = on_attach, capabilities = capabilities}
 -- see https://github.com/sumneko/lua-language-server/wiki/Build-and-Run-(Standalone)
 require 'plugins.lsp.sumneko_lua'.setup {on_attach = on_attach, capabilities = capabilities}
