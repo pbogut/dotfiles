@@ -274,6 +274,10 @@ function u.merge_tables(val1, val2, append)
   return fresh_one
 end
 
+function u.clone_table(val1)
+  return u.merge_tables({}, val1)
+end
+
 function u.unique(tab)
   local result = {}
   local temp = {}
