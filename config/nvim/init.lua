@@ -1,9 +1,9 @@
+require('helper')
 require('settings')
 require('plugins')
 require('autogroups')
 require('keymappings')
 require('commands')
-require('helper')
 -- local plugins --
 require('projector')
 require('plugins.projector')
