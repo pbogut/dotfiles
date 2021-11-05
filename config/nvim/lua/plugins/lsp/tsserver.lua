@@ -3,9 +3,13 @@ local me = {}
 
 function me.setup(opts)
   opts = vim.tbl_deep_extend('keep', opts, {
-    filetypes = { "html", "php", "blade" }
+    filetypes = {
+      'typescript',
+      'typescriptreact',
+      'typescript.tsx',
+    },
   })
-  lspconfig.html.setup(opts)
+  lspconfig.tsserver.setup(opts)
 end
 
 return me

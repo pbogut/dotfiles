@@ -3,10 +3,10 @@ local util = require 'lspconfig/util'
 local me = {}
 
 function me.setup(opts)
-  local path = os.getenv('PROJECTS') .. '/github.com/sumneko/lua-language-server'
   opts = vim.tbl_deep_extend('keep', opts, {
-    -- see https://github.com/sumneko/lua-language-server/wiki/Build-and-Run-(Standalone)
-    cmd = { path .. '/bin/Linux/lua-language-server', path .. '/main.lua' },
+    cmd = {
+      plugin_path('lua-language-server/bin/Linux/lua-language-server')
+    },
     root_dir = function(fname)
       local cwd  = vim.loop.cwd();
       local root = util.root_pattern(".git", "init.lua")(fname);
