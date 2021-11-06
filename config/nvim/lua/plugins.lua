@@ -124,7 +124,7 @@ return require('packer').startup({
     use {'sheerun/vim-polyglot', setup = setup('polyglot')}
     use {'sirtaj/vim-openscad', opt = false}
     use {'nvim-treesitter/nvim-treesitter',
-      run = 'vim.cmd("TSUpdate")',
+      run = ':TSUpdate',
       config = config('nvim_treesitter')
     }
 
