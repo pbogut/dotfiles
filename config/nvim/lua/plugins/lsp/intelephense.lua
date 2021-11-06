@@ -3,7 +3,11 @@ local lspconfig = require('lspconfig')
 local me = {}
 
 function me.setup(opts)
+  -- keep licenceKey in ~/.config/intelephense/licence.txt
+  local fake_home = os.getenv('HOME') .. '/.config'
+
   opts = vim.tbl_deep_extend('keep', opts, {
+    cmd = { 'sh', '-c', 'HOME=' .. fake_home.. ' intelephense --stdio' },
     filetypes = {"php", "blade"},
     settings = {
       intelephense = {
