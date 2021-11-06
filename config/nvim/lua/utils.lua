@@ -391,4 +391,54 @@ function u.debounce_trailing(fun, ms, first)
   return wrapped_fn, timer
 end
 
+function u.process_shell_commands(commands, messages, callback)
+  local to_process = u.clone_table(commands)
+  local errors = 0
+  local success = 0
+  local function process_next()
+    if #to_process == 0 then
+      local msg = messages.prefix .. '[' .. success .. '/' .. #commands .. '] '
+        .. (messages.done or 'Commands finished.')
+      if errors > 0 then
+        msg = msg .. ' (' .. errors .. ' '
+            .. (errors > 1 and 'errors' or 'error') .. ')'
+      end
+      vim.cmd('echo "' .. msg .. '"')
+
+      if type(callback) == "function" then
+        callback()
+      end
+      return
+    end
+    local command = table.remove(to_process, 1)
+    local progress = '[' .. #commands - #to_process .. '/' .. #commands .. '] '
+
+    vim.cmd('echo "' .. (messages.prefix or '[Running]') ..
+      progress .. command .. '"')
+    vim.fn.jobstart(command, {
+      on_stdout = function(_, lines)
+        for _, line in pairs(lines) do
+          if line:len() > 1 then
+            vim.cmd('echo "' .. (messages.prefix or '[Running]')
+            .. progress .. command .. " | " .. line .. '"')
+          end
+        end
+      end,
+      on_exit = function(_, exit_code)
+        if exit_code == 0 then
+          success = success + 1
+        else
+          errors = errors + 1
+          vim.cmd('echohl ErrorMsg')
+          vim.cmd('echom "[Error:' .. exit_code .. '] ' .. command .. '"')
+          vim.cmd('echohl NONE')
+        end
+        process_next()
+      end,
+    })
+  end
+
+  process_next()
+end
+
 return u

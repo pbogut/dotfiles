@@ -5,10 +5,11 @@ local cmd = vim.cmd
 
 local install_path = fn.stdpath('data')..'/site/pack/packer/opt/packer.nvim'
 
+local first_install = false
+
 if fn.empty(fn.glob(install_path)) > 0 then
   execute('!git clone https://github.com/wbthomason/packer.nvim '..install_path)
-  require('packages')
-  cmd('InstallExternalPackages')
+  first_install = true
 end
 
 execute 'packadd packer.nvim'
@@ -39,7 +40,7 @@ local function setup(plugin)
     end]]
 end
 
-return require('packer').startup({
+require('packer').startup({
   function()
     -- Packer can manage itself as an optional plugin
     use {'wbthomason/packer.nvim', opt = true}
@@ -168,3 +169,10 @@ return require('packer').startup({
     require('packages').startup(use)
   end
 })
+
+if first_install then
+  require('packages')
+  cmd('InstallExternalPackages')
+  cmd('PackerInstall')
+  cmd('PackerCompile')
+end

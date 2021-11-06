@@ -60,55 +60,17 @@ local update_cmds = {
 }
 
 u.command('UpdateExternalPackages', function()
-  local to_update = u.clone_table(update_cmds)
-
-  vim.cmd('echo "Updating packages..."')
-  local function update_next()
-    for idx, command in pairs(to_update) do
-      to_update[idx] = nil
-      vim.fn.jobstart(command, {
-        on_exit = function(_, exit_code)
-          if exit_code == 0 then
-            vim.cmd('echo "[Updated] ' .. command .. '"')
-          else
-            vim.cmd('echohl ErrorMsg')
-            vim.cmd('echom "[Error:' .. exit_code .. '] ' .. command .. '"')
-            vim.cmd('echohl NONE')
-          end
-          update_next()
-        end,
-      })
-      break
-    end
-  end
-
-  update_next()
+  u.process_shell_commands(update_cmds, {
+    done = 'done',
+    prefix = '[Update]',
+  })
 end)
 
 u.command('InstallExternalPackages', function()
-  local to_install = u.clone_table(install_cmds)
-
-  vim.cmd('echo "Installing packages..."')
-  local function install_next()
-    for idx, command in pairs(to_install) do
-      to_install[idx] = nil
-      vim.fn.jobstart(command, {
-        on_exit = function(_, exit_code)
-          if exit_code == 0 then
-            vim.cmd('echo "[Installed] ' .. command .. '"')
-          else
-            vim.cmd('echohl ErrorMsg')
-            vim.cmd('echom "[Error:' .. exit_code .. '] ' .. command .. '"')
-            vim.cmd('echohl NONE')
-          end
-          install_next()
-        end,
-      })
-      break
-    end
-  end
-
-  install_next()
+  u.process_shell_commands(install_cmds, {
+    done = 'done',
+    prefix = '[Install]',
+  })
 end)
 
 return {
