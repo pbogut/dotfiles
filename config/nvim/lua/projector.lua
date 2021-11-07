@@ -4,7 +4,7 @@
      unlike projectionist it uses full patternmatching (lua one) so you have
      more freedom in configuration
      alternate file uses fzf if more then one candidate returned
-     templates can be ultisnip snippets or files with placeholders ]]
+     templates can be snippy snippets or files with placeholders ]]
 
 local u = require('utils')
 local ph = require('template.placeholders')
@@ -30,7 +30,16 @@ function a.setup(opts)
     templates_path = opts.templates.path
   end
   if opts.templates and opts.templates.engine then
-    engine = opts.templates.engine
+
+  engine = opts.templates.engine
+
+  if engine == 'snippy' then
+    local has_snippy, _ = pcall(require, 'snippy')
+      if not has_snippy then
+        engine = 'raw'
+        print('You dont have snippy installed, falling back to raw engine')
+      end
+    end
   end
 end
 
