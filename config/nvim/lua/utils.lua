@@ -241,6 +241,7 @@ function u.merge_tables(val1, val2, append)
   if type(val1) == 'table' and type(val2) == 'table'
     and vim.tbl_islist(val1) and vim.tbl_islist(val2)
   then
+    local uniqueness = {}
     fresh_one = {}
     local t1 = val2
     local t2 = val1
@@ -249,10 +250,13 @@ function u.merge_tables(val1, val2, append)
       t2 = val2
     end
     for _, sub in ipairs(t1) do
+      uniqueness[sub] = true
       table.insert(fresh_one, sub)
     end
     for _, sub in ipairs(t2) do
-      table.insert(fresh_one, sub)
+      if not uniqueness[sub] then
+        table.insert(fresh_one, sub)
+      end
     end
   elseif type(val1) == 'table' and type(val2) == 'table' then
     fresh_one = {}

@@ -146,8 +146,12 @@ require('packer').startup({
     -- use {'nvim-lua/plenary.nvim'}
 
     -- completion
-    use {'dcampos/nvim-snippy', config = config('nvim_snippy')}
+    use {'dcampos/nvim-snippy',
+      after = 'projector',
+      config = config('nvim_snippy'),
+    }
     use {'hrsh7th/nvim-cmp',
+      after = {'nvim-snippy', 'projector'},
       config = config('nvim_cmp'),
       requires = {
         'hrsh7th/cmp-buffer',
