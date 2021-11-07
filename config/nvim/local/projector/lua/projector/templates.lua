@@ -76,21 +76,27 @@ local function process_placeholders(lines)
 end
 
 local function file_template(name)
-    local template = io.open(templates_path .. '/' .. name .. '.snippet', 'r')
-    local lines = vim.split(template:read('*a'), '\n')
-    if lines[#lines] == '' then
-        table.remove(lines)
-    end
-    if engine == 'raw' then
-      local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-      vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col, lines)
-    elseif engine == 'snippy' then
-      local snippy = require('snippy')
+  local template = io.open(templates_path .. '/' .. name .. '.snippet', 'r')
+  local lines = vim.split(template:read('*a'), '\n')
+  if lines[#lines] == '' then
+      table.remove(lines)
+  end
+  if engine == 'snippy' then
+    local has_snippy, snippy = pcall(require, 'snippy')
+    if has_snippy then
       snippy.expand_snippet({
         body = process_placeholders(lines),
         kind = 'snipmate'
       })
+    else
+      engine = 'raw'
+      print('You dont have snippy installed, falling back to raw engine')
     end
+  end
+  if engine == 'raw' then
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col, lines)
+  end
 end
 
 function M.setup(opts)
@@ -99,14 +105,6 @@ function M.setup(opts)
   end
   if opts.templates and opts.templates.engine then
     engine = opts.templates.engine
-
-    if engine == 'snippy' then
-      local has_snippy, _ = pcall(require, 'snippy')
-      if not has_snippy then
-        engine = 'raw'
-        print('You dont have snippy installed, falling back to raw engine')
-      end
-    end
   end
 end
 

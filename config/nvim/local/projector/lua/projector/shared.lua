@@ -82,6 +82,7 @@ local function check_file(relative, pattern)
 end
 
 function M.setup(opts)
+  config_cache = {}
   projector_setup = opts
   projections = opts.projections or {}
 end

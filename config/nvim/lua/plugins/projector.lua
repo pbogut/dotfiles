@@ -1,35 +1,21 @@
 local projector = require('projector')
-local snippy = require('snippy')
-local shared = require('snippy.shared')
 local h = require('projector.helper')
 local u = require('utils')
-local cmd = vim.cmd
 local bo = vim.bo
 local o = vim.o
 local l = {}
 
-u.command('Skel', 'lua require"projector".template_from_cmd(<q-args>)', {
+u.command('Skel', 'lua require"projector".template_command(<q-args>)', {
   nargs = '?',
-  complete = 'custom,v:lua.projector.temp_completion'
+  complete = 'customlist,v:lua.projector.temp_completion'
 })
 u.map('n', '<space>ta', ':lua require"projector".go_alternate()<cr>', { silent = true })
 u.augroup('x_templates', {
-    BufNewFile = {
+    ['BufNewFile,BufNew'] = {
       {'*', function()
           -- initially ft is not available and ultisnip is not working correctly
           -- so we deffer to next loop when ft is set properly
           vim.schedule(function()
-            -- cmd('unsilent lua require"projector".do_template()')
-            cmd('lua require"projector".do_template()')
-          end)
-      end},
-    },
-    BufNew = {
-      {'*', function()
-          -- initially ft is not available and ultisnip is not working correctly
-          -- so we deffer to next loop when ft is set properly
-          vim.schedule(function()
-            -- check if fiel is empty, if so then populate from template
             if vim.fn.line('$') == 1 and vim.fn.getline('$') == '' then
               require('projector').do_template()
             end
@@ -67,6 +53,12 @@ projector.setup({
     --magento project
     ["composer.json&app/Mage.php"] = {
       priority = 100,
+      snippy = {
+        scopes = {
+          php = {'magento/php'},
+          xml = {'magento/xml'},
+        }
+      },
       patterns = {
         ['app/code/(.*)/Block/(.*)%.php'] = {
           priority = 100,
@@ -114,19 +106,32 @@ projector.setup({
     },
     -- magento2 project
     ["composer.json&bin/magento"] = {
+      priority = 100,
+      snippy = {
+        scopes = {
+          php = {'magento2/php'},
+          xml = {'magento2/xml'},
+          html = {'knockout/html'},
+        }
+      },
       generators = {
         module = {
           variables = {
-            Vendor = '',
-            ModuleName = '',
+            { name = "Vendor", prompt = "Vendor name" },
+            { name = "ModuleName", prompt = "Module name" },
           },
-          {
-            'app/code/{Vendor}/{ModuleName}/registration.php',
-            'app/code/{Vendor}/{ModuleName}/etc/module.xml',
-          }
+          new = {
+            {
+              file = 'app/code/{Vendor}/{ModuleName}/registration.php',
+              template = 'magento2/registration.php',
+            },
+            {
+              file = 'app/code/{Vendor}/{ModuleName}/etc/module.xml',
+              template = 'magento2/etc/module.xml',
+            },
+          },
         }
       },
-      priority = 100,
       patterns = {
         ['app/code/(.*)/Block/(.*)%.php'] = {
           priority = 100,
@@ -274,6 +279,7 @@ projector.setup({
     },
     -- laravel project
     ["artisan&composer.json"] = {
+      priority = 100,
       project_init = function()
         u.augroup('x_laravel', {
           FileType = {'php', function()
@@ -284,7 +290,11 @@ projector.setup({
           end}
         })
       end,
-      priority = 100,
+      snippy = {
+        scopes = {
+          php = {'laravel/php'},
+        }
+      },
       patterns = {
         ['app/(.*)%.php'] = {
           alternate = {
@@ -454,9 +464,23 @@ projector.setup({
         },
       }
     },
+    -- phpcs
+    ['phpcs.xml'] = {
+      priority = 1000,
+      snippy = {
+        scopes = {
+          php = {'phpcs/php'}
+        }
+      }
+    },
     -- match anything
     ['*'] = {
       priority = 5000,
+      snippy = {
+        scopes = {
+          zsh = {'sh'},
+        }
+      },
       patterns = {
         ['.*%.php'] = {
           template = "file.php",

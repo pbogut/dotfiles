@@ -1,4 +1,4 @@
-snippet =ne "echo" i
+snippet =ne "echo"
 	<?= /* @noEscape */ ${VISUAL}$0 ?>
 snippet customersession "use CustomerSession"
 	use Magento\Customer\Model\Session as CustomerSession;
@@ -17,7 +17,7 @@ snippet resultredirect "$resultRedirect"
 	/** @var Magento\Framework\Controller\Result\Redirect $resultRedirect **/
 	$resultRedirect = $this->_resultFactory->create(ResultFactory::TYPE_REDIRECT);
 snippet objectmanager "$objectManager"
-	/** @var \Magento\Framework\App\ObjectManager */
+	/** @var \Magento\Framework\ObjectManagerInterface */
 	$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 snippet log "log"
 	\Magento\Framework\App\ObjectManager::getInstance()
