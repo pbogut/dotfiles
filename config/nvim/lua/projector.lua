@@ -126,10 +126,7 @@ function a.do_template()
     return
   end
 
-  local cwd = fn.getcwd()
-  local filename = fn.expand('%:p')
-  local relative = filename:gsub('^' .. cwd .. '/', '')
-  local file_configs = l.get_file_configs(cwd, relative)
+  local file_configs = l.get_file_configs()
   -- print(vim.inspect(file_configs))
 
   for _, config in u.spairs(file_configs, l.sort) do
@@ -150,7 +147,7 @@ function a.go_alternate()
   local cwd = fn.getcwd()
   local filename = fn.expand('%:p')
   local relative = filename:gsub('^' .. cwd .. '/', '')
-  local file_configs = l.get_file_configs(cwd, relative)
+  local file_configs = l.get_file_configs()
   local result = {}
 
   for _, cfg in u.spairs(file_configs) do
@@ -279,7 +276,10 @@ function a.get_config(keys, default)
   return result == nil and default or result
 end
 
-function l.get_file_configs(cwd, relative)
+function l.get_file_configs()
+  local cwd = fn.getcwd()
+  local filename = fn.expand('%:p')
+  local relative = filename:gsub('^' .. cwd .. '/', '')
   local patterns = a.get_config('patterns', {})
   local result = {}
   for file_pattern, file_config in u.spairs(patterns, l.sort) do
