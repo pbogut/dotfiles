@@ -25,10 +25,13 @@ local function get_value(tbl, keys, default)
   if type(keys) == 'string' then
     keys = fn.split(keys, '\\.')
   end
-
   if type(keys) == 'table' then
     for _, key in ipairs(keys) do
-      tbl = tbl[key]
+      if type(tbl) == 'table' then
+        tbl = tbl[key]
+      else
+        tbl = nil
+      end
     end
   end
 
@@ -102,7 +105,6 @@ function M.get_config(keys, default)
     end
     config_cache[cwd] = result
   end
-
   return get_value(result, keys, default)
 end
 

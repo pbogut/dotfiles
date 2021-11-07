@@ -6,6 +6,7 @@
      alternate file uses fzf if more then one candidate returned
      templates can be snippy snippets or files with placeholders ]]
 
+local generators = require('projector.generators')
 local alternates = require('projector.alternates')
 local templates = require('projector.templates')
 local shared = require('projector.shared')
@@ -55,5 +56,8 @@ a.template_command = templates.template_command
 _G.projector = _G.projector or {}
 _G.projector.temp_completion = templates.template_list
 _G.projector.placeholder = templates.process_placeholder
+_G.projector.get_config = shared.get_config
+
+_G.projector.gen_completion = generators.generator_list
 
 return a

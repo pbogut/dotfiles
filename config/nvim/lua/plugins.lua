@@ -44,6 +44,12 @@ require('packer').startup({
   function()
     -- Packer can manage itself as an optional plugin
     use {'wbthomason/packer.nvim', opt = true}
+
+    -- My local plugins
+    use {fn.stdpath('config') .. '/local/projector', config = config('projector') }
+    use {fn.stdpath('config') .. '/local/remotesync'}
+
+    -- Github plugins
     use {'editorconfig/editorconfig-vim', setup = setup('editorconfig')}
     use {'tpope/vim-scriptease'}
     use {'tpope/vim-eunuch'}
