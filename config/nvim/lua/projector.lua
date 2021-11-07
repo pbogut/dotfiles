@@ -14,6 +14,7 @@ local g = vim.g
 local b = vim.b
 local fn = vim.fn
 local cmd = vim.cmd
+local config_cache = {}
 
 local a = {}
 local l = {}
@@ -25,6 +26,7 @@ local projections = {}
 local engine = 'raw'
 
 function a.setup(opts)
+  config_cache = {}
   projections = opts.projections or {}
   if opts.templates and opts.templates.path then
     templates_path = opts.templates.path
@@ -113,16 +115,6 @@ function a.template_from_cmd(args)
   else
     a.do_template();
   end
-end
-
--- create template
-function a.generate(generator_name)
-  local generators = l.get_project_generators()
-  if not generators[generator_name] then
-    print('Generator ' .. generator_name .. ' not found');
-  end
-
-  -- generators[generator_name].variables
 
 end
 
@@ -259,34 +251,38 @@ function l.init_project()
   end
 end
 
-function l.get_project_patterns(cwd)
+function a.get_config(keys, default)
+  keys = keys or nil
+  local cwd = fn.getcwd()
   local result = {}
-  for project_pattern, project_config in u.spairs(projections, l.sort) do
-    if l.check_project(cwd, project_pattern) then
-      -- first on the list has priority
-      result = u.merge_tables(project_config.patterns, result)
+  if config_cache[cwd] then
+    result = config_cache[cwd]
+  else
+    for project_pattern, project_config in u.spairs(projections, l.sort) do
+      if l.check_project(cwd, project_pattern) then
+        -- first on the list has priority
+        result = u.merge_tables(project_config, result)
+      end
     end
   end
 
-  return result
-end
+  if type(keys) == 'string' then
+    keys = fn.split(keys, '\\.')
+  end
 
-function l.get_project_generators(cwd)
-  local result = {}
-  for project_pattern, project_config in u.spairs(projections, l.sort) do
-    if l.check_project(cwd, project_pattern) then
-      -- first on the list has priority
-      result = u.merge_tables(project_config.generators, result)
+  if type(keys) == 'table' then
+    for _, key in ipairs(keys) do
+      result = result[key]
     end
   end
 
-  return result
+  return result == nil and default or result
 end
 
 function l.get_file_configs(cwd, relative)
-  local project_config = l.get_project_patterns(cwd)
+  local patterns = a.get_config('patterns', {})
   local result = {}
-  for file_pattern, file_config in u.spairs(project_config, l.sort) do
+  for file_pattern, file_config in u.spairs(patterns, l.sort) do
     -- let match many file patterns, or should we - first come first win even without alternate file?
     if l.check_file(relative, file_pattern) then
       -- assign pattern as we dont pass key otherwise
