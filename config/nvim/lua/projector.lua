@@ -6,6 +6,7 @@
      alternate file uses fzf if more then one candidate returned
      templates can be snippy snippets or files with placeholders ]]
 
+local shared = require('projector.shared')
 local u = require('utils')
 local ph = require('template.placeholders')
 
@@ -14,7 +15,6 @@ local g = vim.g
 local b = vim.b
 local fn = vim.fn
 local cmd = vim.cmd
-local config_cache = {}
 
 local a = {}
 local l = {}
@@ -22,12 +22,11 @@ local l = {}
 -- how many lines from botton and top to search for alternate annotation
 local search_lines = 10
 local templates_path = os.getenv('HOME') .. '/.config/nvim/templates'
-local projections = {}
 local engine = 'raw'
 
 function a.setup(opts)
-  config_cache = {}
-  projections = opts.projections or {}
+  shared.setup(opts)
+
   if opts.templates and opts.templates.path then
     templates_path = opts.templates.path
   end
@@ -115,7 +114,6 @@ function a.template_from_cmd(args)
   else
     a.do_template();
   end
-
 end
 
 -- create template
@@ -126,19 +124,10 @@ function a.do_template()
     return
   end
 
-  local file_configs = l.get_file_configs()
-  -- print(vim.inspect(file_configs))
+  local file_config = shared.get_file_config()
 
-  for _, config in u.spairs(file_configs, l.sort) do
-    if type(config.template) == 'string' and config.template:match('^%_') then
-      -- print('ulti', config.template);
-      if a.ultisnip_template(config.template) then -- try till it lands
-        return true
-      end
-    elseif type(config.template) == 'string' then
-      -- print('file', config.template);
-      return a.file_template(config.template)
-    end
+  if type(file_config.template) == 'string' then
+    return a.file_template(file_config.template)
   end
 end
 
@@ -147,7 +136,7 @@ function a.go_alternate()
   local cwd = fn.getcwd()
   local filename = fn.expand('%:p')
   local relative = filename:gsub('^' .. cwd .. '/', '')
-  local file_configs = l.get_file_configs()
+  local file_configs = shared.get_file_config(true)
   local result = {}
 
   for _, cfg in u.spairs(file_configs) do
@@ -238,99 +227,9 @@ function l.ask(list)
 end
 
 function l.init_project()
-  local cwd = fn.getcwd()
-  for project_pattern, project_config in u.spairs(projections, l.sort) do
-    if l.check_project(cwd, project_pattern) then
-      if type(project_config.project_init) == 'function' then
-        return project_config.project_init()
-      end
-    end
-  end
-end
-
-function a.get_config(keys, default)
-  keys = keys or nil
-  local cwd = fn.getcwd()
-  local result = {}
-  if config_cache[cwd] then
-    result = config_cache[cwd]
-  else
-    for project_pattern, project_config in u.spairs(projections, l.sort) do
-      if l.check_project(cwd, project_pattern) then
-        -- first on the list has priority
-        result = u.merge_tables(project_config, result)
-      end
-    end
-  end
-
-  if type(keys) == 'string' then
-    keys = fn.split(keys, '\\.')
-  end
-
-  if type(keys) == 'table' then
-    for _, key in ipairs(keys) do
-      result = result[key]
-    end
-  end
-
-  return result == nil and default or result
-end
-
-function l.get_file_configs()
-  local cwd = fn.getcwd()
-  local filename = fn.expand('%:p')
-  local relative = filename:gsub('^' .. cwd .. '/', '')
-  local patterns = a.get_config('patterns', {})
-  local result = {}
-  for file_pattern, file_config in u.spairs(patterns, l.sort) do
-    -- let match many file patterns, or should we - first come first win even without alternate file?
-    if l.check_file(relative, file_pattern) then
-      -- assign pattern as we dont pass key otherwise
-      file_config.pattern = file_pattern
-      -- collect all matching ones into list
-      result[#result+1] = file_config
-    end
-  end
-
-  return result
-end
-
-function l.check_project(path, pattern)
-  if pattern == "*" then
-    return true
-  end
-  if pattern:match('%|') then
-    local or_checks = u.split_string(pattern, '|')
-    local check = nil
-    for _, or_check in ipairs(or_checks) do
-      if check == nil then
-        check = l.check_project(path, or_check)
-      else
-        check = check or l.check_project(path, or_check)
-      end
-    end
-    return check
-  elseif pattern:match('%&') then
-    local and_checks = u.split_string(pattern, '&')
-    local check = true
-    for _, and_check in ipairs(and_checks) do
-      if check == nil then
-        check = l.check_project(path, and_check)
-      else
-        check = check and l.check_project(path, and_check)
-      end
-    end
-    return check
-  end
-
-  local check_fn = fn.filereadable
-  if pattern:match('%/$') then
-    check_fn = fn.isdirectory
-  end
-  if pattern:match('^%!') then
-    return check_fn(path .. '/' .. pattern:gsub('^%!', '')) == 0
-  else
-    return check_fn(path .. '/' .. pattern) > 0
+  local init = shared.get_config('project_init')
+  if type(init) == 'function' then
+    return init()
   end
 end
 
@@ -404,6 +303,7 @@ u.augroup('x_tttemplates', {
   VimEnter = {'*', l.init_project},
 })
 
+a.get_config = shared.get_config
 _G.projector = _G.projector or {}
 _G.projector.temp_completion = a.template_list
 _G.projector.placeholder = a.process_placeholder
