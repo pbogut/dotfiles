@@ -139,6 +139,12 @@ local function config()
     DapLogPoint = { text = i.breakpoint_info, texthl = "DapLogPoint" },
     DapStopped = { text = i.breakpoint_current, texthl = "DapStopped" },
   })
+
+  u.augroup('x_nvim_dap', {
+    FileType = {'elixir,eelixir', function()
+      require('plugins.dap.elixir').setup({defaults = defaults.elixir})
+    end}
+  })
 end
 
 return {
