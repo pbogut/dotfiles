@@ -55,7 +55,7 @@ require('packer').startup({
     use {'wbthomason/packer.nvim', opt = true}
 
     -- My local plugins
-    use {fn.stdpath('config') .. '/local/projector', config = config('projector') }
+    use {fn.stdpath('config') .. '/local/projector', config = config('projector')}
     use {fn.stdpath('config') .. '/local/remotesync'}
 
     -- Github plugins
