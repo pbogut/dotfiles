@@ -108,6 +108,7 @@ bindsym $mod+e layout toggle split
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
+bindsym $mod+Ctrl+space sticky toggle
 
 # change focus between tiling / floating windows
 bindsym $mod+space focus mode_toggle
@@ -351,9 +352,8 @@ bindsym $mod+i $sh '~/.scripts/vim-anywhere.sh'
 bindsym $mod+u $sh '~/.scripts/users.sh --switch'
 
 bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '^Ferdi -' 'ferdi'"
-# bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
 bindsym $mod+Ctrl+b $exec "~/.scripts/switch-or-launch.sh --scratchpad '^Bluetooth Devices$' 'blueman-manager'"
-# bindsym $mod+Ctrl+g $exec "~/.scripts/switch-or-launch.sh '\<[Tt]oggl$' 'toggl'"
+bindsym $mod+Ctrl+r $exec "~/.scripts/switch-or-launch.sh '^rssguard.RSS$' 'rssguard'"
 
 # bindsym $mod+Ctrl+c $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
 # bindsym $mod+Ctrl+n $exec "~/.scripts/switch-or-launch.sh '\<Netflix$' 'google-chrome-stable --app=https://netflix.com'"

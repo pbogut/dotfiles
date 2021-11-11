@@ -10,7 +10,13 @@ function! local#paranoicbackup#init()
 endfunction
 
 function! local#paranoicbackup#write()
-  let dir = get(g:, 'paranoic_backup_dir' , '~/.vim/paranoic_backup')
+  let dir = get(g:, 'paranoic_backup_dir' , $HOME . '/.vim/paranoic_backup')
+  if isdirectory(l:dir) != 1
+    silent execute "!mkdir -p " . fnameescape(l:dir)
+  endif
+  if isdirectory(l:dir . '/.git') != 1
+     silent execute '!sh -c "cd ' . fnameescape(l:dir) . ' && git init "'
+  endif
   let filedir = l:dir . '/' . expand('%:p:h')
   let filename = expand('%:t')
   let timestamp = strftime("%Y-%m-%d %H:%M:%S")

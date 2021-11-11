@@ -65,6 +65,7 @@ read -d '' files <<"EOF"
     config/qutebrowser/keys.conf
     config/qutebrowser/qutebrowser.conf
     config/qutebrowser/js
+    config/ranger/commands.py
     config/ranger/devicons.py
     config/ranger/plugins/devicons_linemode.py
     config/ranger/rc.conf

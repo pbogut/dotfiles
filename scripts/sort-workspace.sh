@@ -20,6 +20,20 @@ usage() {
   echo "  -h, --help     display this help and exit"
 }
 
+move_top() {
+  i3-msg move down 50ppt > /dev/null
+  i3-msg move down 5ppt > /dev/null
+  i3-msg move down 5ppt > /dev/null
+  i3-msg move down 5ppt > /dev/null
+  i3-msg move down 5ppt > /dev/null
+  i3-msg move down 5ppt > /dev/null
+  i3-msg move up 95ppt > /dev/null
+}
+
+focus_toggle() {
+  i3-msg focus mode_toggle
+}
+
 move_and_swich() {
   new_ws="$1"
   if [[ "$current_ws" != "$new_ws" ]]; then
@@ -71,8 +85,10 @@ ws_media="0: media"
 ws_browser="0: browser"
 ws_db="0: db"
 ws_dash="0: dash"
+ws_rss="0: rss"
 
 if [[ $extended -eq 1 ]]; then
+  found=1
   case  "$wm_class" in
     "qutebrowser qutebrowser")
       move_and_swich "$ws_browser"
@@ -85,17 +101,20 @@ if [[ $extended -eq 1 ]]; then
           ;;
         *)
           move_and_swich "$ws_term"
-          exit 0
           ;;
       esac
       ;;
     *)
-      exit 0
+      found=0
       ;;
   esac
+  [[ $found -eq 1 ]] && exit 0
 fi
 
 case  "$wm_class" in
+  "rssguard RSS Guard")
+    move_and_swich "$ws_rss"
+    ;;
   "pavucontrol Pavucontrol")
     set_floating 800px 800px
     ;;
@@ -105,14 +124,32 @@ case  "$wm_class" in
   "blueman-manager Blueman-manager")
     set_floating 800px 800px
     ;;
-  QB_FILE_SELECTION)
-    set_floating 1200px 800px
+  "yad Yad")
+    case "$wm_title" in
+      "keepass show")
+         move_top
+         focus_toggle
+        ;;
+      *)
+        exit 0
+        ;;
+    esac
     ;;
-  NVIM_FOR_QB)
-    set_floating
-    ;;
-  EMAIL_MUTT)
-    move_and_swich "$ws_comm"
+  "urxvt URxvt")
+    case "$wm_title" in
+      QB_FILE_SELECTION)
+        set_floating 1200px 800px
+        ;;
+      NVIM_FOR_QB)
+        set_floating
+        ;;
+      EMAIL_MUTT)
+        move_and_swich "$ws_comm"
+        ;;
+      *)
+        exit 0
+        ;;
+    esac
     ;;
   *)
     exit 0

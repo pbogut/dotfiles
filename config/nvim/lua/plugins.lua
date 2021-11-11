@@ -15,14 +15,23 @@ end
 execute 'packadd packer.nvim'
 
 -- reload and recompile this file (plugins.lua) after change
-u.augroup('x_plugins_save', {BufWritePost = {'plugins.lua,packages.lua', function()
-  package.loaded['packages'] = nil
-  cmd('luafile ' .. os.getenv("HOME") .. '/.config/nvim/lua/plugins.lua')
-  cmd('luafile ' .. os.getenv("HOME") .. '/.config/nvim/lua/packages.lua')
-  cmd('PackerClean')
-  cmd('PackerInstall')
-  cmd('PackerCompile')
-end}})
+u.augroup('x_plugins_save', {
+  BufWritePost = {
+    'plugins.lua,packages.lua', function()
+      package.loaded['packages'] = nil
+      cmd('luafile ' .. os.getenv("HOME") .. '/.config/nvim/lua/plugins.lua')
+      cmd('luafile ' .. os.getenv("HOME") .. '/.config/nvim/lua/packages.lua')
+      cmd('PackerClean')
+      cmd('PackerInstall')
+      cmd('PackerCompile')
+    end
+  },
+  BufEnter = {
+    'plugins.lua,packages.lua', function()
+      vim.bo.path = fn.stdpath('config') .. '/lua/plugins/'
+    end
+  }
+})
 
 local function config(plugin)
   return [[
@@ -46,7 +55,7 @@ require('packer').startup({
     use {'wbthomason/packer.nvim', opt = true}
 
     -- My local plugins
-    use {fn.stdpath('config') .. '/local/projector', config = config('projector') }
+    use {fn.stdpath('config') .. '/local/projector', config = config('projector')}
     use {fn.stdpath('config') .. '/local/remotesync'}
 
     -- Github plugins
@@ -108,7 +117,10 @@ require('packer').startup({
     use {'justinmk/vim-sneak', config = config('vim_sneak')}
     use {'kristijanhusak/vim-dirvish-git', after = 'vim-dirvish'}
     use {'w0rp/ale', config = config('ale')}
-    use {'chmp/mdnav', ft = {'markdown'}}
+    use {'jakewvincent/mkdnflow.nvim',
+      ft = {'markdown'},
+      config = config('mkdnflow'),
+    }
     use {'vim-scripts/ReplaceWithRegister', config = config('replacewithregister')}
     use {'kana/vim-textobj-user'}
     use {'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user'}
