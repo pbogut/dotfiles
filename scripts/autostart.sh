@@ -26,7 +26,6 @@ numlockx on
 killall xcape -9 >/dev/null 2>&1
 # only if run with xcape option (its not playing nicely with my ergodox)
 if [[ $1 == "--xcape" ]]; then
-  xcape -e 'Caps_Lock=Escape'
   xcape -e 'Control_L=Escape'
   xcape -e 'Shift_L=parenleft'
   xcape -e 'Shift_R=parenright'
