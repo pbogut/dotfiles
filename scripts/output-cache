@@ -1,0 +1,102 @@
+#!/usr/bin/env zsh
+#=================================================
+# name:   output-cache
+# author: Pawel Bogut <https://pbogut.me>
+# date:   11/11/2021
+#=================================================
+
+
+usage() {
+  echo "Ussage: ${0##*/} [--set|--get] [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -s, --set           set cache value"
+  echo "  -g, --get           get cache lifetime"
+  echo "  -l, --lifetime      cache lifetime"
+  echo "  -k, --key           cache key"
+  echo "  -h, --help          display this help and exit"
+}
+
+while test $# -gt 0; do
+  case "$1" in
+    --get|-g)
+      action="get"
+      shift
+      ;;
+    --set|-s)
+      action="set"
+      shift
+      ;;
+    --lifetime|--lifetime=*|-l)
+      if [[ $1 =~ --[a-z]+= ]]; then
+        _val="${1//--lifetime=/}"
+        shift
+      else
+        _val="$2"
+        shift; shift
+      fi
+      lifetime="$_val"
+      ;;
+    --key|--key=*|-k)
+      if [[ $1 =~ --[a-z]+= ]]; then
+        _val="${1//--key=/}"
+        shift
+      else
+        _val="$2"
+        shift; shift
+      fi
+      key="$_val"
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 11
+      ;;
+  esac
+done
+
+
+if [[ $action != "get" ]] && [[ $action != "set" ]]; then
+  echo "--get or --set is required"
+  exit 1
+fi
+
+if [[ $key == "" ]]; then
+  echo "--key is required"
+  exit 1
+fi
+
+if [[ $action == "get" ]] && [[ ! $lifetime -gt 0 ]]; then
+  echo "--liftime is required with --get"
+  usage
+  exit 1
+fi
+
+cache_file="/tmp/__out_cache/$(md5sum <<< $key | awk '{print $1}')"
+mkdir -p "$(dirname $cache_file)" >/dev/null 2>&1
+
+
+if [[ $action == "set" ]]; then
+  cat /dev/stdin | tee $cache_file
+fi
+
+if [[ $action == "get" ]]; then
+  if [[ ! -f $cache_file ]]; then
+    exit 1
+  fi
+
+  last_mod=$(stat -c %Y $cache_file)
+  last_val=$(expr "$(date '+%s') - $lifetime")
+
+  if [[ $last_val -lt $last_mod ]]; then
+    touch $cache_file
+    cat $cache_file
+  else
+    exit 1
+  fi
+fi
+
+exit 0
