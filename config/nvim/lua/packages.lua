@@ -38,36 +38,63 @@ local function startup(use)
     }
 end
 
-local install_cmds = {
-  'yarn global add @tailwindcss/language-server',
-  'yarn global add vim-language-server',
-  'yarn global add vls',
-  'yarn global add bash-language-server',
-  'yarn global add pyright',
-  'yarn global add dockerfile-language-server-nodejs',
-  'yarn global add typescript-language-server',
-  'yarn global add @tailwindcss/language-server',
-  'yarn global add intelephense',
-  'yarn global add vscode-langservers-extracted',
-  'go install golang.org/x/tools/gopls@latest',
-  -- 'paru -S deno',
+local packages = {
+  yarn = {
+    '@tailwindcss/language-server',
+    'vim-language-server',
+    'vls',
+    'bash-language-server',
+    'pyright',
+    'dockerfile-language-server-nodejs',
+    'typescript-language-server',
+    '@tailwindcss/language-server',
+    'intelephense',
+    'vscode-langservers-extracted',
+  },
+  gem = {
+    'solargraph',
+  },
+  go = {
+    'golang.org/x/tools/gopls@latest'
+  }
 }
 
-local update_cmds = {
-  'yarn global upgrade',
-  'go install golang.org/x/tools/gopls@latest',
-  -- 'paru -Syu deno',
+local managers = {
+  yarn = {
+    install = 'yarn global add {}',
+    update = 'yarn global upgrade {}'
+  },
+  gem = {
+    install = 'gem install {}',
+    update = 'gem update {}'
+  },
+  go = {
+    install = 'go install {}',
+    update = 'go install {}'
+  },
 }
 
 u.command('UpdateExternalPackages', function()
-  u.process_shell_commands(update_cmds, {
+  local cmds = {}
+  for manager, package_list in pairs(packages) do
+    for _, package in pairs(package_list) do
+      cmds[#cmds+1] = managers[manager].update:gsub('%{%}', package)
+    end
+  end
+  u.process_shell_commands(cmds, {
     done = 'done',
     prefix = '[Update]',
   })
 end)
 
 u.command('InstallExternalPackages', function()
-  u.process_shell_commands(install_cmds, {
+  local cmds = {}
+  for manager, package_list in pairs(packages) do
+    for _, package in pairs(package_list) do
+      cmds[#cmds+1] = managers[manager].install:gsub('%{%}', package)
+    end
+  end
+  u.process_shell_commands(cmds, {
     done = 'done',
     prefix = '[Install]',
   })
