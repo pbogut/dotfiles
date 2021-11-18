@@ -10,7 +10,11 @@ done
 
 cd "$cwd"
 
-if which urxvt; then
+if which "$TERMINAL"; then
+  $TERMINAL
+elif which alacritty; then
+  alacritty
+elif which urxvt; then
   urxvt
 else
   xterm
