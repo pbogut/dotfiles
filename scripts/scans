@@ -35,7 +35,8 @@ end
 def do_delete()
   result, _, _ = Open3.capture3('find', @data_dir, '-iname', '*.jpg', '-type', 'f')
   selected_file = ""
-  Open3.popen2('fzf', '--height=100%', '--preview', 'scans-display-image.sh {-1}') do |stdin, stdout, wait_thr|
+  # Open3.popen2('fzf', '--height=100%', '--preview', 'scans-display-image.sh {-1}') do |stdin, stdout, wait_thr|
+  Open3.popen2('fzfimg.sh', '--height=100%') do |stdin, stdout, wait_thr|
     stdin << "\n"
     stdin << result
     selected_file = stdout.read
@@ -51,7 +52,7 @@ end
 def do_search(query)
   result, _, _ = Open3.capture3('rg', '-liuu', query, @data_dir)
   selected_file = ""
-  Open3.popen2('fzf', '--height=100%', '--preview', 'scans-display-image.sh {-1}') do |stdin, stdout, wait_thr|
+  Open3.popen2('fzfimg.sh', '--height=100%') do |stdin, stdout, wait_thr|
     stdin << "\n"
     result.split("\n").each do |file|
       stdin << file.gsub(/\/\.(.*).txt$/, "/\\1\n")
