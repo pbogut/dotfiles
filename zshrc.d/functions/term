@@ -1,0 +1,12 @@
+#!/bin/zsh
+term() {
+  echo "Install term info: (copied to the clipboard already)"
+  echo ""
+  alacritty_tic=$(
+    echo "curl 'https://raw.githubusercontent.com/alacritty/alacritty/master/extra/alacritty.info' -o /tmp/alacritty.info;"
+    echo "tic -xe alacritty,alacritty-direct /tmp/alacritty.info;"
+    echo "rm /tmp/alacritty.info;"
+  )
+  echo "$alacritty_tic"
+  echo -n $alacritty_tic | xclip -selection "clipboard"
+}
