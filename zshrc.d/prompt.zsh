@@ -15,8 +15,10 @@ vim_cmd_color="014"
 vim_vis_color="005"
 
 HOST_COLOR="%F{012}"
+USER_SIGN="λ"
 if [ -n "$SSH_CLIENT"  ] || [ -n "$SSH_TTY"  ]; then
   HOST_COLOR="%F{003}"
+  USER_SIGN="$"
 fi
 
 vim_ps1() {
@@ -30,7 +32,7 @@ vim_ps1() {
   fi
   TIME="${ERROR_COLOR}[$(date +'%H:%M:%S %Y-%m-%d')]${ERROR_CODE}"
   PS1="$USERHOST %B%F{001}(%b%F{012}%~%B%F{001}) %b%F{004}${GIT_BRANCH}%f${TIME}
-${VIMODE_LETTER}%B%F{${VIMODE_COLOR}}%(!.#.λ) %b%f%k"
+${VIMODE_LETTER}%B%F{${VIMODE_COLOR}}%(!.#.${USER_SIGN}) %b%f%k"
 }
 precmd() {
   LAST_EXIT_CODE=$?
