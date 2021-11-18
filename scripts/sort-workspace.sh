@@ -93,7 +93,7 @@ if [[ $extended -eq 1 ]]; then
     "qutebrowser qutebrowser")
       move_and_swich "$ws_browser"
       ;;
-    "urxvt URxvt")
+    "urxvt URxvt"|"Alacritty Alacritty")
       case "$wm_title" in
         *~/Projects/*|*$HOME/Projects/*)
           project_name=${wm_title##*/}
@@ -135,7 +135,7 @@ case  "$wm_class" in
         ;;
     esac
     ;;
-  "urxvt URxvt")
+  "urxvt URxvt"|"Alacritty Alacritty")
     case "$wm_title" in
       QB_FILE_SELECTION)
         set_floating 1200px 800px
