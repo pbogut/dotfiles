@@ -175,6 +175,10 @@ config.bind('<Alt-k>', 'command-history-prev', mode='command')
 config.bind('K', 'tab-move -')
 config.bind('J', 'tab-move +')
 
+config.bind('M', 'spawn --userscript nextcloud --add-bookmark')
+config.bind('b', 'spawn --userscript nextcloud --open-bookmark')
+config.bind('B', 'spawn --userscript nextcloud --open-bookmark --new-tab')
+
 config.bind('yh', 'spawn --userscript ~/.scripts/qb-copy-html.sh -b')
 config.bind('ys', 'spawn --userscript ~/.scripts/qb-copy-text.sh -b')
 config.bind('yH', 'spawn --userscript ~/.scripts/qb-copy-html.sh -p')
