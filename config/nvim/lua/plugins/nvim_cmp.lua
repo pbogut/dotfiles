@@ -48,7 +48,8 @@ cmp.setup {
       elseif snippy.can_expand_or_advance() then
         projector.expand_snippet()
       else
-        fallback()
+        -- fallback() -- this is broken for some reason
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes([[	]], true, true, true), "n", true)
       end
     end, { "i", "s" }),
   },
