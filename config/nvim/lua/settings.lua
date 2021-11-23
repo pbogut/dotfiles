@@ -6,11 +6,9 @@ require('settings.highlights')
 
 local cmd = vim.cmd
 local o = vim.opt
-local wo = vim.wo
-local bo = vim.bo
 
 cmd('syntax on')
-cmd("filetype plugin indent on")
+cmd('filetype plugin indent on')
 cmd('set fillchars=fold:\\ ,vert:\\│')
 cmd('set shortmess+=c')
 cmd('set runtimepath+=~/.vim')
@@ -20,7 +18,7 @@ o.list = true
 o.updatetime = 100
 o.signcolumn = 'yes'
 o.showmode = false
-o.ttimeoutlen = 0   -- eliminate esc timeout
+o.ttimeoutlen = 0 -- eliminate esc timeout
 o.report = 0
 o.hlsearch = false
 o.cursorline = true
@@ -36,8 +34,8 @@ o.relativenumber = true
 o.lazyredraw = true
 o.wildmenu = true
 o.showcmd = true
-o.dir = os.getenv("HOME") .. "/.vim/swapfiles//"
-o.undodir = os.getenv("HOME") .. '/.vim/undofiles//'
+o.dir = os.getenv('HOME') .. '/.vim/swapfiles//'
+o.undodir = os.getenv('HOME') .. '/.vim/undofiles//'
 o.undofile = true
 o.listchars = 'tab:▸,eol:¬,trail:⋅,extends:❯,precedes:❮,nbsp:%'
 o.showbreak = '↪'
@@ -54,8 +52,9 @@ o.foldlevelstart = 99
 
 o.termguicolors = true
 o.background = 'dark'
-o.guicursor = 'n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor'
-o.shell='/bin/bash'
+o.guicursor =
+  'n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor'
+o.shell = '/bin/bash'
 
 o.inccommand = 'split'
 -- rip grep as default grep program

@@ -8,6 +8,11 @@ local cmd = vim.cmd
 local fn = vim.fn
 
 local config_group = {
+  -- fix alacritty startup resize bug
+  VimEnter = {
+    '*',
+    ':silent exec "!kill -s SIGWINCH $PPID"',
+  },
   -- fix terminal display
   TermOpen = {
     {
@@ -15,35 +20,37 @@ local config_group = {
       function()
         wo.number = false
         wo.relativenumber = false
-        wo.signcolumn = "no"
+        wo.signcolumn = 'no'
         wo.cursorline = false
         wo.cursorcolumn = false
-      end
+      end,
     },
   },
   BufEnter = {
-    {'env.*', function()
+    {
+      'env.*',
+      function()
         bo.filetype = 'sh'
-      end
+      end,
     },
   },
   ['BufEnter,WinNew'] = {
-    { '*.php,*.phtml',
-      function()
-        -- if w.match_php_annotation then fn.matchdelete(w.match_php_annotation) end
-        -- w.match_php_annotation = fn.matchadd('TSAnnotation', [[\* \zs@[a-z]*\>]])
-      end
-    },
     {
       '*',
       function()
-        if w.match_mytodo then fn.matchdelete(w.match_mytodo) end
-        if w.match_myfixme then fn.matchdelete(w.match_myfixme) end
-        if w.match_mydebug then fn.matchdelete(w.match_mydebug) end
+        if w.match_mytodo then
+          fn.matchdelete(w.match_mytodo)
+        end
+        if w.match_myfixme then
+          fn.matchdelete(w.match_myfixme)
+        end
+        if w.match_mydebug then
+          fn.matchdelete(w.match_mydebug)
+        end
         w.match_mytodo = fn.matchadd('MyTodo', '@todo\\>')
         w.match_myfixme = fn.matchadd('MyFixme', '@fixme\\>')
         w.match_mydebug = fn.matchadd('MyDebug', '@debug\\>')
-      end
+      end,
     },
   },
   FileType = {
@@ -51,13 +58,13 @@ local config_group = {
       'html,css,scss,xml,java,elixir,eelixir,c,php,php.phtml,sql,blade,elm',
       function()
         u.set_indent(4)
-      end
+      end,
     },
     {
       'sh,vue,javascript,vim,lua,yaml,yaml.docker-compose,ruby',
       function()
         u.set_indent(2)
-      end
+      end,
     },
     {
       'mail',
@@ -68,57 +75,51 @@ local config_group = {
           execute('normal gg')
           call search('^$')
         ]])
-      end
+      end,
     },
     {
       'make',
       function()
         u.set_indent(4, true)
-      end
+      end,
     },
     {
       'go',
       function()
         u.set_indent(2, true)
-      end
+      end,
     },
     {
       'javascript',
       function()
         bo.iskeyword = '@,48-57,_,192-255' -- remove $ from keyword list, whiy tist there in js anyway?
-      end
-    },
-    {
-      'php',
-      function()
-        -- if w.match_php_annotation then fn.matchdelete(w.match_php_annotation) end
-        -- w.match_php_annotation = fn.matchadd('TSAnnotation', [[\* \zs@[a-z]*\>]])
-      end
+      end,
     },
     {
       'markdown',
       function()
         cmd('setlocal spell spelllang=en_gb')
-      end
+      end,
     },
-  }
+  },
 }
 
 u.augroup('x_autogroups', config_group)
 
 -- Auto format on save
-if (config.get('autoformat_on_save')) then
+if config.get('autoformat_on_save.enabled') then
   u.augroup('x_autoformat', {
-    BufWritePre  = {
+    BufWritePre = {
       {
-        '*', function()
+        '*',
+        function()
           local file = vim.fn.expand('%:p')
           local cwd = vim.fn.getcwd()
           if file:match('^' .. cwd) then
-          vim.lsp.buf.formatting()
+            vim.lsp.buf.formatting()
           end
-        end
-      }
-    }
+        end,
+      },
+    },
   })
 end
