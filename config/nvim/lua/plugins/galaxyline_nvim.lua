@@ -190,13 +190,12 @@ end
 
 left[#left+1] = {
   ClearIfNoGit = {
-    provider = function() return '' end,
+    provider = function() return ' ' end,
     condition = function()
-      return vcs.get_git_branch() == false
+      return vcs.get_git_branch() == nil
     end,
     separator_highlight = {colors.base01,colors.base02},
-    highlight = {colors.base3, colors.base01, 'NONE'},
-    separator = i.separator.left,
+    highlight = {colors.base01, colors.base02, 'NONE'},
   }
 }
 short_left[#short_left+1] = left[#left]
@@ -245,7 +244,6 @@ left[#left+1] = {
       end
     end,
     highlight = {colors.orange, colors.base02},
-    -- condition = function() return dap.status():len() > 0 end,
   },
   Dap = {
     provider = function()
@@ -256,7 +254,6 @@ left[#left+1] = {
         return ""
       end
     end,
-    -- condition = function() return (b.lsp_current_function or '') ~= '' end,
     highlight = {colors.base2,colors.orange},
     separator_highlight = {colors.orange,colors.base02},
   },
@@ -382,23 +379,16 @@ short_right[#short_right+1] = right[#right]
 right[#right+1] = {
   Diagnostics = { -- @todo @fixme @debug
     provider = function()
-      -- local matches = fn.getmatches()
+      local no_lsp = true
+      local diagnostics = {
+        hints = 0,
+        info = 0,
+        warnings = 0,
+        errors = 0,
+      }
 
-      local ale = fn['ale#statusline#Count'](fn.bufnr('')) or {total = 0}
-      local diagnostics = {}
-
-      -- if no lsp fallback to ale
-      if #vim.lsp.buf_get_clients() == 0 then
-        -- get level down because ale reports warnings as errors sometimes
-        -- and I dont trust it
-        diagnostics = {
-          hints = ale.info,
-          info = ale.warning + ale.style_warning,
-          warnings = ale.error + ale.style_error,
-          errors = 0,
-        }
-        ale = {total = 0}
-      else
+      if #vim.lsp.buf_get_clients() > 0 then
+        no_lsp = false
         diagnostics = {
           hints = vim.lsp.diagnostic.get_count(0, 'Hint'),
           info = vim.lsp.diagnostic.get_count(0, 'Information'),
@@ -437,9 +427,9 @@ right[#right+1] = {
         bg = colors.orange
       elseif #parts > 0 then
         bg = colors.yellow
-      elseif ale.total > 0 then
+      elseif no_lsp  then
         bg = colors.blue
-        result = ' ' .. i.hint .. ' ' .. ale.total .. ' ' .. i.separator.mid_right .. '  '
+        result = '  '
       else
         bg = colors.green
         result = '  '
@@ -460,7 +450,6 @@ right[#right+1] = {
       return result
     end,
     separator = i.separator.right,
-    -- condition = has_warnings,
     highlight = {colors.base3,colors.orange},
     separator_highlight = {colors.orange, colors.base01}
   }
