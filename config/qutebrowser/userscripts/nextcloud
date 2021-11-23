@@ -121,7 +121,9 @@ class NextcloudApi():
         })
 
     def get_bookmarks(self):
-        return self.get("index.php/apps/bookmarks/public/rest/v2/bookmark", {})
+        return self.get("index.php/apps/bookmarks/public/rest/v2/bookmark", {
+            "page": -1
+        })
 
     def add_bookmark(self, url: str, title: str, tags: list[str] = []):
         status_code, _ = self.post("index.php/apps/bookmarks/public/rest/v2/bookmark", {

@@ -1,8 +1,8 @@
 import os
 
 # pylint: disable=C0111
-c = c  # noqa: F821 pylint: disable=E0602,C0103
-config = config  # noqa: F821 pylint: disable=E0602,C0103
+c = c  # type: ignore # noqa: F821 pylint: disable=E0602,C0103
+config = config  # type: ignore # noqa: F821 pylint: disable=E0602,C0103
 
 term = os.getenv("TERMINAL")
 
@@ -198,6 +198,9 @@ config.bind(',rm', 'spawn --userscript ~/.scripts/qb-url-to-remarkable.sh')
 config.bind(',pdf', 'spawn --userscript ~/.scripts/qb-url-to-clean-pdf.sh')
 config.bind(',tp', 'spawn --userscript ~/.scripts/qb-send-to-phone.sh')
 
+config.bind(',xe', "jseval document.cookie = 'XDEBUG_SESSION=nvim-xdebug;'")
+config.bind(',xd', "jseval document.cookie = `XDEBUG_SESSION=DISABLE; path=/; max-age=0;`;")
+
 bind_js(',jpp', 'pixel_perfect')
 bind_js(',jve', 'visual_event')
 bind_js(',dd', 'developer_mode')
@@ -207,13 +210,13 @@ bind_js(',pt', 'pocket_tag')
 
 dir_path = os.path.dirname(__file__)
 if os.path.exists(dir_path + '/secure_config.py'):
-    import secure_config
+    import secure_config # type: ignore
     secure_config.init(config)
 
 # hackish way to change audio / mute icon
 from qutebrowser.mainwindow import tabwidget
-tabwidget.TabWidget.MUTE_STRING = " "
-tabwidget.TabWidget.AUDIBLE_STRING = " "
+tabwidget.TabWidget.MUTE_STRING = " " # type: ignore
+tabwidget.TabWidget.AUDIBLE_STRING = " " # type: ignore
 
 # load yaml config
 config.load_autoconfig()
