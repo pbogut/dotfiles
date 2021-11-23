@@ -56,7 +56,7 @@ require('packer').startup({
 
     -- My local plugins
     use {fn.stdpath('config') .. '/local/projector', config = config('projector')}
-    use {fn.stdpath('config') .. '/local/remotesync'}
+    use {fn.stdpath('config') .. '/local/remotesync', config = "require'remotesync'"}
 
     -- Github plugins
     use {'editorconfig/editorconfig-vim', setup = setup('editorconfig')}
@@ -187,6 +187,7 @@ require('packer').startup({
     if vim.fn.filereadable((os.getenv("HOME") or '') .. '/.wakatime.cfg') > 0 then
       use {'wakatime/vim-wakatime'}
     end
+    use {'activitywatch/aw-watcher-vim'}
 
     require('packages').startup(use)
   end
