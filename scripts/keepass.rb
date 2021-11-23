@@ -284,5 +284,5 @@ if action == "--show"
     end
   end
   width = 100 + (i * 20)
-  out, _, _ = Open3.capture3("zenity --info --width=#{width} --text=\"#{lines.join("\n")}\"")
+  out, _, _ = Open3.capture3("yad --title=\"keepass show\" --info --width=#{width} --text=\"#{lines.join("\n")}\"")
 end
