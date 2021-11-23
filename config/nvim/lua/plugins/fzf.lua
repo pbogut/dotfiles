@@ -196,6 +196,24 @@ function f.snippets(...)
     l.fzf_run(options)
 end
 
+function f.packer_plugins(...)
+    local packer_dir = vim.fn.stdpath('data') .. '/site/pack/packer/'
+    local options = {
+        source = u.table_map(u.glob(packer_dir .. '*/*'), function(path)
+          return path:sub(packer_dir:len()+1)
+        end),
+        dir = os.getenv('DOTFILES'),
+        options = '--prompt "Nvim files> " ' .. l.process_params({...}, true),
+        sink = 'l.packer_plugins'
+    }
+
+    l.fzf_run(options)
+end
+function l.packer_plugins(line)
+  local packer_dir = vim.fn.stdpath('data') .. '/site/pack/packer/'
+  cmd('e ' .. packer_dir .. '/' .. line)
+end
+
 function f.nvim_config(...)
     local options = {
         source = [[
@@ -203,6 +221,7 @@ function f.nvim_config(...)
             config/nvim/init.vim \
             config/nvim/init.lua \
             config/nvim/config   \
+            config/nvim/local    \
             vim/plugin/          \
             config/nvim/lua/
         ]],
