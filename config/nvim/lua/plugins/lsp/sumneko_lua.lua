@@ -1,3 +1,4 @@
+local config = require('config')
 local lspconfig = require('lspconfig')
 local util = require 'lspconfig/util'
 local me = {}
@@ -26,12 +27,11 @@ function me.setup(opts)
         },
         diagnostics = {
           globals = {'hs', 'vim', 'it', 'describe', 'before_each', 'after_each', 'use'},
-          -- disable = {'lowercase-global'}
         }
       }
     }
   })
-
+  config.apply_to(opts.settings, 'Lua', 'lsp.sumneko_lua')
   lspconfig.sumneko_lua.setup(opts)
 end
 
