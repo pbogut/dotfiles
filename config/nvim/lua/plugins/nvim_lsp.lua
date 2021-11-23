@@ -14,6 +14,7 @@ else
   signature_action = '<cmd>lua vim.lsp.buf.signature_help()<CR>'
 end
 local bindings = {
+  {'n', '<space>er', ':TroubleToggle lsp_references<CR>', no_lsp_bind},
   {'n', ']d', ':lua vim.diagnostic.goto_next()<CR>', no_lsp_bind},
   {'n', '[d', ':lua vim.diagnostic.goto_prev()<CR>', no_lsp_bind},
   {'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', false},

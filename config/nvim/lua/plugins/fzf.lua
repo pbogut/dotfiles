@@ -21,8 +21,9 @@ g.fzf_preview = "-1 --preview 'sh ~/.scripts/fzf-preview.sh {}'"
 
 u.map('n', '<space>et', ':lua require"plugins.fzf".templates()<CR>')
 u.map('n', '<space>es', ':lua require"plugins.fzf".snippets()<CR>')
-u.map('n', '<space>ec', ':lua require"plugins.fzf".nvim_config()<cr>')
-u.map('n', '<space>ed', ':lua require"plugins.fzf".dotfiles()<cr>')
+u.map('n', '<space>en', ':lua require"plugins.fzf".nvim_config()<cr>')
+u.map('n', '<space>ec', ':lua require"plugins.fzf".dotfiles()<cr>')
+u.map('n', '<space>ep', ':lua require"plugins.fzf".packer_plugins()<cr>')
 
 u.map('n', '<space>fq', ':silent! cclose | lua require"plugins.fzf".quickfix()<cr>')
 u.map('n', '<space>fl', ':silent! lclose | lua require"plugins.fzf".loclist()<cr>')
