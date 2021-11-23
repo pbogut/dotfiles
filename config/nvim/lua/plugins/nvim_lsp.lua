@@ -1,19 +1,26 @@
 local u = require'utils'
 local lspconfig = require('lspconfig')
 local has_lspstatus, lspstatus = pcall(require, 'lsp-status')
+local has_lsp_signature, lsp_signature = pcall(require, 'lsp_signature')
 
 local cmd = vim.cmd
 local g = vim.g
 local no_lsp_bind = '<cmd>lua print("No LSP attached")<CR>'
 
+local signature_action = ''
+if has_lsp_signature then
+  signature_action = '<cmd>lua require"lsp_signature".toggle_float_win()<CR>'
+else
+  signature_action = '<cmd>lua vim.lsp.buf.signature_help()<CR>'
+end
 local bindings = {
   {'n', ']d', ':lua vim.diagnostic.goto_next()<CR>', no_lsp_bind},
   {'n', '[d', ':lua vim.diagnostic.goto_prev()<CR>', no_lsp_bind},
   {'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', false},
   {'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', false},
   {'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', false},
-  {'n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', no_lsp_bind},
-  {'i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', no_lsp_bind},
+  {'n', '<C-k>', signature_action, no_lsp_bind},
+  {'i', '<C-k>', signature_action, no_lsp_bind},
   {'n', '<space>i', '<cmd>lua vim.lsp.buf.implementation()<CR>', no_lsp_bind},
   {'n', '<space>T', '<cmd>lua vim.lsp.buf.type_definition()<CR>', no_lsp_bind},
   {'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', no_lsp_bind, {silent=false}},
@@ -36,6 +43,18 @@ for _, def in pairs(bindings) do
 end
 
 local on_attach = function(client, bufnr)
+  if has_lsp_signature then
+    lsp_signature.on_attach({
+      bind = true,
+      doc_lines = 10,
+      floating_window = true,
+      floating_window_above_cur_line = true,
+      hint_enable = false,
+      handler_opts = { border = "none" },
+      toggle_key = '<c-k>'
+    })
+  end
+
   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
   if has_lspstatus then
     lspstatus.on_attach(client, bufnr)
@@ -122,6 +141,7 @@ u.highlights({
   DiagnosticVirtualTextWarning = { guifg = '#d33682' },
   DiagnosticVirtualTextInformation = { guifg = '#a68f46' },
   DiagnosticVirtualTextHint = { guifg = '#9eab7d' },
+  LspSignatureActiveParameter = { link = 'Search' },
 })
 
 u.signs({

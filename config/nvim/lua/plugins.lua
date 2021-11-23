@@ -176,6 +176,7 @@ require('packer').startup({
     use {'tzachar/cmp-tabnine', run = './install.sh', after = 'nvim-cmp'}
 
     -- lsp
+    use {'ray-x/lsp_signature.nvim'}
     use {'jose-elias-alvarez/null-ls.nvim',
       config = config('null_ls_nvim'),
       requires = {'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig'},
