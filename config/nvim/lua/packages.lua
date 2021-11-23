@@ -56,7 +56,10 @@ local packages = {
   },
   go = {
     'golang.org/x/tools/gopls@latest'
-  }
+  },
+  cargo = {
+    'stylua'
+  },
 }
 
 local managers = {
@@ -71,6 +74,14 @@ local managers = {
   go = {
     install = 'go install {}',
     update = 'go install {}'
+  },
+  cargo = {
+    install = 'cargo install {}',
+    update = 'cargo install {}'
+  },
+  aur = {
+    install = 'paru -S {}',
+    update = 'paru -Sy {}'
   },
 }
 
