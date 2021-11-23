@@ -26,13 +26,12 @@ end
 --     {"*", function() print('test') end };
 --   }
 -- }
-
 function u.augroup(group_name, definitions)
   cmd('augroup ' .. group_name)
   cmd('autocmd!')
   for event_type, definition in pairs(definitions) do
     if type(definition[1]) ~= 'table' then
-      definition = {definition}
+      definition = { definition }
     end
     for _, def in pairs(definition) do
       local callback = table.remove(def, #def)
@@ -42,7 +41,9 @@ function u.augroup(group_name, definitions)
       local command = table.concat(def, ' ')
       if type(callback) == 'function' then
         table.insert(autocmd_callbacs, callback)
-        callback = 'lua require("utils").call_autocmd(' .. #autocmd_callbacs  .. ')'
+        callback = 'lua require("utils").call_autocmd('
+          .. #autocmd_callbacs
+          .. ')'
       end
       command = command .. ' ' .. callback
       cmd(command)
@@ -56,23 +57,24 @@ function u.command(command_name, action, opts)
   opts = opts or {}
   local args = {}
   local command = 'command! '
-  if (opts.nargs) then
+  if opts.nargs then
     command = command .. '-nargs=' .. opts.nargs .. ' '
   end
-  if (opts.complete) then
+  if opts.complete then
     command = command .. '-complete=' .. opts.complete .. ' '
   end
-  if (opts.bang) then
-    args[#args+1] = '<bang>0?v:true:v:false'
+  if opts.bang then
+    args[#args + 1] = '<bang>0?v:true:v:false'
     command = command .. '-bang '
   end
   if opts.qargs then
-    args[#args+1] = '<q-args>'
+    args[#args + 1] = '<q-args>'
   end
   command = command .. command_name .. ' '
   if type(action) == 'function' then
     table.insert(command_callbacs, action)
-    local call = [[call luaeval('require("utils").call_command(]] .. #command_callbacs
+    local call = [[call luaeval('require("utils").call_command(]]
+      .. #command_callbacs
     for i, j in ipairs(args) do
       call = call .. ',_A[' .. i .. ']'
     end
@@ -86,7 +88,7 @@ function u.command(command_name, action, opts)
       call = call .. arg .. ','
     end
     if opened then
-      call =  call .. ']'
+      call = call .. ']'
     end
     call = call .. [[)]]
     command = command .. call
@@ -193,11 +195,13 @@ function u.map(mode, key, result, opts)
   opts = vim.tbl_extend('keep', opts or {}, {
     noremap = true,
     silent = mode ~= 'c',
-    expr = false
+    expr = false,
   })
   if type(result) == 'function' then
     table.insert(mapping_callbacs, result)
-    result = ':lua require("utils").call_mapping(' .. #mapping_callbacs  .. ')<cr>'
+    result = ':lua require("utils").call_mapping('
+      .. #mapping_callbacs
+      .. ')<cr>'
   end
   if opts.buffer then
     local buffer_nr = opts.buffer
@@ -206,7 +210,6 @@ function u.map(mode, key, result, opts)
   else
     api.nvim_set_keymap(mode, key, result, opts)
   end
-
 end
 
 function u.table_map(list, fun)
@@ -220,7 +223,7 @@ end
 function u.table_keys(list)
   local result = {}
   u.table_map(list, function(_, k)
-    result[#result+1] = k
+    result[#result + 1] = k
   end)
   return result
 end
@@ -238,8 +241,11 @@ end
 function u.merge_tables(val1, val2, append)
   append = append or false
   local fresh_one = nil
-  if type(val1) == 'table' and type(val2) == 'table'
-    and vim.tbl_islist(val1) and vim.tbl_islist(val2)
+  if
+    type(val1) == 'table'
+    and type(val2) == 'table'
+    and vim.tbl_islist(val1)
+    and vim.tbl_islist(val2)
   then
     local uniqueness = {}
     fresh_one = {}
@@ -289,7 +295,7 @@ function u.unique(tab)
     temp[v] = true
   end
   for v, _ in pairs(temp) do
-    result[#result+1] = v
+    result[#result + 1] = v
   end
   return result
 end
@@ -306,30 +312,34 @@ function u.buf_map(buffer_nr, mode, key, result, opts)
 end
 
 function u.termcodes(str)
-    return vim.api.nvim_replace_termcodes(str, true, true, true)
+  return vim.api.nvim_replace_termcodes(str, true, true, true)
 end
 
 function u.spairs(t, order)
-    -- collect the keys
-    local keys = {}
-    for k in pairs(t) do keys[#keys+1] = k end
+  -- collect the keys
+  local keys = {}
+  for k in pairs(t) do
+    keys[#keys + 1] = k
+  end
 
-    -- if order function given, sort by it by passing the table and keys a, b,
-    -- otherwise just sort the keys
-    if order then
-        table.sort(keys, function(a, b) return order(t, a, b) end)
-    else
-        table.sort(keys)
-    end
+  -- if order function given, sort by it by passing the table and keys a, b,
+  -- otherwise just sort the keys
+  if order then
+    table.sort(keys, function(a, b)
+      return order(t, a, b)
+    end)
+  else
+    table.sort(keys)
+  end
 
-    -- return the iterator function
-    local i = 0
-    return function()
-        i = i + 1
-        if keys[i] then
-            return keys[i], t[keys[i]]
-        end
+  -- return the iterator function
+  local i = 0
+  return function()
+    i = i + 1
+    if keys[i] then
+      return keys[i], t[keys[i]]
     end
+  end
 end
 
 function u.dedup(tab, keymaker)
@@ -374,7 +384,7 @@ function u.debounce_trailing(fun, ms, first)
 
   if not first then
     function wrapped_fn(...)
-      local argv = {...}
+      local argv = { ... }
       local argc = select('#', ...)
 
       timer:start(ms, 0, function()
@@ -384,7 +394,7 @@ function u.debounce_trailing(fun, ms, first)
   else
     local argv, argc
     function wrapped_fn(...)
-      argv = argv or {...}
+      argv = argv or { ... }
       argc = argc or select('#', ...)
 
       timer:start(ms, 0, function()
@@ -401,15 +411,24 @@ function u.process_shell_commands(commands, messages, callback)
   local success = 0
   local function process_next()
     if #to_process == 0 then
-      local msg = messages.prefix .. '[' .. success .. '/' .. #commands .. '] '
+      local msg = messages.prefix
+        .. '['
+        .. success
+        .. '/'
+        .. #commands
+        .. '] '
         .. (messages.done or 'Commands finished.')
       if errors > 0 then
-        msg = msg .. ' (' .. errors .. ' '
-            .. (errors > 1 and 'errors' or 'error') .. ')'
+        msg = msg
+          .. ' ('
+          .. errors
+          .. ' '
+          .. (errors > 1 and 'errors' or 'error')
+          .. ')'
       end
-      vim.cmd('echo "' .. msg .. '"')
+      vim.notify(msg)
 
-      if type(callback) == "function" then
+      if type(callback) == 'function' then
         callback()
       end
       return
@@ -417,14 +436,18 @@ function u.process_shell_commands(commands, messages, callback)
     local command = table.remove(to_process, 1)
     local progress = '[' .. #commands - #to_process .. '/' .. #commands .. '] '
 
-    vim.cmd('echo "' .. (messages.prefix or '[Running]') ..
-      progress .. command .. '"')
+    vim.notify((messages.prefix or '[Running]') .. progress .. command)
     vim.fn.jobstart(command, {
       on_stdout = function(_, lines)
         for _, line in pairs(lines) do
           if line:len() > 1 then
-            vim.cmd('echo "' .. (messages.prefix or '[Running]')
-            .. progress .. command .. " | " .. line .. '"')
+            vim.notify(
+              (messages.prefix or '[Running]')
+                .. progress
+                .. command
+                .. ' | '
+                .. line
+            )
           end
         end
       end,
