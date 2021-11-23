@@ -34,9 +34,10 @@ fi
 # daemons
 rerun insync "insync start"
 rerun copyq copyq
-rerun picom "picom -b --xrender-sync-fence --xrender-sync"
+rerun picom "picom -b --xrender-sync-fence"
 # rerun TogglDesktop "toggldesktop -b"
 demonize nextcloud nextcloud
+demonize conky conky
 demonize geoclue /usr/lib/geoclue-2.0/demos/agent
 demonize redshift redshift-gtk
 demonize textaid "perl $scriptpath/edit-server.pl"
@@ -47,7 +48,6 @@ demonize mopidy "mopidy"
 demonize pomodoro "i3-gnome-pomodoro daemon"
 demonize memwatch ~/.scripts/memwatch.sh
 demonize mailsgoweb ~/.scripts/mailsgoweb.sh
-demonize TogglDesktop TogglDesktop
 demonize kdeconnect kdeconnect-indicator
 
 # sepcific for the computer
