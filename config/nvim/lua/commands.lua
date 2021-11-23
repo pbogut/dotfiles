@@ -27,6 +27,27 @@ u.command('Start', function(bang, qargs)
   end
 end, {bang = true, nargs = '?', qargs = true})
 
+u.command('LazyGit', function(qargs)
+  cmd('tabnew')
+  fn.termopen('lazygit', {
+    on_exit = function()
+      cmd('wincmd q')
+    end
+  })
+  cmd('startinsert')
+
+  local bufnr = fn.bufnr()
+
+  u.augroup('x_lazygit' .. bufnr, {
+    BufEnter = {
+      {
+        '<buffer=' .. bufnr .. '>',
+        'startinsert'
+      }
+    }
+  })
+end, {nargs = '?', qargs = true})
+
 u.command('Dispatch', function(bang, qargs)
   if not bang then
     cmd('belowright split')
