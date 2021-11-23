@@ -7,6 +7,9 @@ function me.setup(opts)
       'typescript',
       'typescriptreact',
       'typescript.tsx',
+      'javascript',
+      'javascriptreact',
+      'javascript.jsx',
     },
   })
   lspconfig.tsserver.setup(opts)

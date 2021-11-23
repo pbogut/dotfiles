@@ -26,7 +26,7 @@ local bindings = {
   {'n', '<space>T', '<cmd>lua vim.lsp.buf.type_definition()<CR>', no_lsp_bind},
   {'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', no_lsp_bind, {silent=false}},
   {'n', '<space>rr', '<cmd>lua vim.lsp.buf.references()<CR>', no_lsp_bind},
-  {'n', '<space>ee', '<cmd>lua vim.diagnostic.show_line_diagnostics()<CR>', no_lsp_bind},
+  {'n', '<space>ee', '<cmd>lua vim.diagnostic.open_float(0, {scope = "line"})<CR>', no_lsp_bind},
   {'n', '<space>sd', '<cmd>lua vim.lsp.buf.document_symbol()<CR>', no_lsp_bind},
   {'n', '<space>sD', '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', no_lsp_bind},
   {'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', no_lsp_bind},
@@ -160,7 +160,7 @@ lspconfig.gopls.setup {on_attach = on_attach}
 lspconfig.cssls.setup {on_attach = on_attach, capabilities = capabilities}
 lspconfig.pyright.setup {on_attach = on_attach}
 lspconfig.dockerls.setup {on_attach = on_attach}
-require 'plugins.lsp.denols'.setup {on_attach = on_attach}
+-- require 'plugins.lsp.denols'.setup {on_attach = on_attach}
 require 'plugins.lsp.tsserver'.setup{on_attach = on_attach}
 require 'plugins.lsp.emmet_ls'.setup {on_attach = on_attach, capabilities = capabilities}
 require 'plugins.lsp.tailwindcss'.setup {on_attach = on_attach, capabilities = capabilities}
