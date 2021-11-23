@@ -12,8 +12,10 @@ u.map('n', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
 u.map('n', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
 
 -- set up dadbod connections
-for name, url in pairs(config.get('dadbod.connections')) do
-  g[name] = url
+for _, connection in pairs(config.get('dadbod.connections')) do
+  local name = connection.name
+  local uri = connection.uri
+  g[name] = uri
 end
 
 function l.db_with_warning(whole)
