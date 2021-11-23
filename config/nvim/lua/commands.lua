@@ -26,3 +26,20 @@ u.command('Start', function(bang, qargs)
     fn.jobstart(qargs)
   end
 end, {bang = true, nargs = '?', qargs = true})
+
+u.command('Dispatch', function(bang, qargs)
+  if not bang then
+    cmd('belowright split')
+    cmd('enew')
+    fn.termopen(qargs)
+    cmd('norm G')
+    cmd('wincmd J')
+    cmd('resize 4')
+    cmd('setlocal laststatus=0')
+    cmd([[autocmd BufEnter <buffer> resize 20]])
+    cmd([[autocmd BufLeave <buffer> resize 4]])
+    cmd('wincmd k')
+  else
+    fn.jobstart(qargs)
+  end
+end, {bang = true, nargs = '?', qargs = true})
