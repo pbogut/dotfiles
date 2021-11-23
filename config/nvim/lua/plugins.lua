@@ -182,6 +182,10 @@ require('packer').startup({
     use {'tzachar/cmp-tabnine', run = './install.sh', after = 'nvim-cmp'}
 
     -- lsp
+    use {'jose-elias-alvarez/null-ls.nvim',
+      config = config('null_ls_nvim'),
+      requires = {'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig'},
+    }
     use {'neovim/nvim-lspconfig', config = config('nvim_lsp')}
     use {'nvim-lua/lsp-status.nvim'}
     if vim.fn.filereadable((os.getenv("HOME") or '') .. '/.wakatime.cfg') > 0 then
