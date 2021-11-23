@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "JSON schema for .nvim-config.json files",
+  "type": "object",
+  "properties": {
+    "import": {
+      "description": "List of nvim-config.json files to import configuration from. Configuration will be merged with current file config.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "lsp": {
+      "type": "object",
+      "description": "Language Server Protocol configuration. Usually contains key for language server name and it's specific configuration. For example `inteliphense: {files: {exlude: '*.*'}}`."
+    },
+    "autoformat_on_save": {
+      "description": "Autoformat files on save configuration",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Enable / Disable autoformat on save",
+          "type": "boolean"
+        }
+      }
+    },
+    "templates": {
+      "description": "Templates/snippets configuration",
+      "type": ["object"],
+      "properties": {
+        "author": {
+          "type": "string",
+          "description": "Author name"
+        },
+        "author_contact": {
+          "type": "string",
+          "description": "Author contact, could be url or email"
+        }
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "sync": {
+      "description": "Synchronization options",
+      "properties": {
+        "remotes": {
+          "type": "array",
+          "description": "List of remote destinations.",
+          "items": {
+            "type": "object",
+            "required": ["name", "uri"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the destination."
+              },
+              "uri": {
+                "type": "string",
+                "description": "Destination SSH uri (user@server:/path/to/files)"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "dadbod": {
+      "description": "Configuration for `tpope/vim-dadbod` plugin.",
+      "properties": {
+        "connections": {
+          "type": "array",
+          "description": "List of connections to DB servers.",
+          "items": {
+            "type": "object",
+            "required": ["name", "uri"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the connection"
+              },
+              "uri": {
+                "type": "string",
+                "description": "DB Connection Uri"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  }
+}

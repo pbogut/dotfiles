@@ -165,7 +165,7 @@ require 'plugins.lsp.emmet_ls'.setup {on_attach = on_attach, capabilities = capa
 require 'plugins.lsp.tailwindcss'.setup {on_attach = on_attach, capabilities = capabilities}
 require 'plugins.lsp.sumneko_lua'.setup {on_attach = on_attach, capabilities = capabilities}
 require 'plugins.lsp.intelephense'.setup {on_attach = on_attach, capabilities = capabilities}
-require 'plugins.lsp.jsonls'.setup(on_attach)
+require 'plugins.lsp.jsonls'.setup {on_attach = on_attach, capabilities = capabilities}
 require 'plugins.lsp.html'.setup {on_attach = on_attach, capabilities = capabilities}
 require 'plugins.lsp.elixirls'.setup {on_attach = on_attach, capabilities = capabilities}
 
