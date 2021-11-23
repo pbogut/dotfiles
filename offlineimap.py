@@ -14,13 +14,13 @@ Used mostly for sensitive data like passwords or email address
 def get_config(key):
     value = subprocess.Popen("~/.scripts/gpg-config get %s" % key,
                      shell=True, stdout=subprocess.PIPE).stdout.read()
-    value = value.strip("\n")
+    value = value.strip("\n".encode())
 
     return value
 
 def is_locked():
     try:
-        f = open(os.getenv('HOME') + "/offlineimap.lock")
+        open(os.getenv('HOME', '') + "/offlineimap.lock")
         return True
     except IOError:
         return False
