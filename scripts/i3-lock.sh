@@ -35,11 +35,17 @@ lock_screen() {
   try_to_run i3lock --nofork
 }
 
-lay=`setxkbmap -print | grep 'pc+' | sed 's/.*pc+\([^+]*\)+.*/\1/' | sed 's/[()]/ /g' | sed 's/ / -variant /'`
-setxkbmap pl
+fix_postsuspend() {
+  # fix laptop touchpad issues
+  sudo -n modprobe -r hid_multitouch
+  sudo -n modprobe hid_multitouch
+}
+
+# lay=`setxkbmap -print | grep 'pc+' | sed 's/.*pc+\([^+]*\)+.*/\1/' | sed 's/[()]/ /g' | sed 's/ / -variant /'`
+# setxkbmap pl
 dunstctl set-paused true
 (lock_screen &&
-setxkbmap $lay &&
-dunstctl set-paused false
+dunstctl set-paused false &&
+fix_postsuspend()
 ) &
-sleep ${sleep}s;
+sleep "${sleep}s";
