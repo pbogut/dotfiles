@@ -14,7 +14,9 @@ cd $dir
 timestamp=$(date '+%s')
 mkdir -p ".backup/$timestamp"
 
-ls * | grep -v "$file" | grep -v "$ext"'$\|nfo$\|jpg$\|png$' | while read tobackup; do
+# ls * | grep -v "$file" | grep -v "$ext"'$\|nfo$\|jpg$\|png$' | while read tobackup; do
+# done
+ls "$filename"* | grep -v "$ext"'$\|nfo$\|jpg$\|png$' | while read tobackup; do
     mv "$tobackup" ".backup/$timestamp/$tobackup"
 done
 
