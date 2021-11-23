@@ -5,8 +5,12 @@
 ############################
 
 ########## Variables
-
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # dotfiles directory
+
+# fix scripts executable attribute
+chmod +x $(find -iname '*.sh')
+chmod +x $(find -iname '*.zsh')
+
 echo -n "Updating submodules ..."
 git submodule sync && git submodule update --init
 echo "done"
@@ -41,8 +45,10 @@ read -d '' files <<"EOF"
     Xdefaults
     Xresources
     composer/composer.json
+    config/alacritty
     config/autostart/autostart.desktop
     config/dircolors-solarized
+    config/dircolors.256dark
     config/dunst/dunstrc
     config/feh/keys
     config/fish
@@ -53,6 +59,7 @@ read -d '' files <<"EOF"
     config/mpv/input.conf
     config/mpv/mpv.conf
     config/mpv/script-settings/mpvDLNA.conf
+    config/mpv/scripts/minidlna-subs.lua
     config/ncmpcpp/config
     config/ncmpcpp/bindings
     config/nvim/init.lua
@@ -62,12 +69,14 @@ read -d '' files <<"EOF"
     config/nvim/templates
     config/nvim/snippets
     config/nvim/local
+    config/nvim/nvim-config.json
     config/pip/pip.conf
     config/polybar
     config/qutebrowser/config.py
     config/qutebrowser/keys.conf
     config/qutebrowser/qutebrowser.conf
     config/qutebrowser/js
+    config/qutebrowser/userscripts
     config/ranger/commands.py
     config/ranger/devicons.py
     config/ranger/plugins/devicons_linemode.py

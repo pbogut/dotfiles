@@ -4,23 +4,25 @@ sudo pacman -Sy
 # $ curl https://nixos.org/nix/install | sh
 #
 
-install_yay() {
+instal_paru() {
     if [[ "$(which yay)" == "yay not found" ]]; then
-        wget https://storage.pbogut.me/yay-9.4.2-1-x86_64.pkg.tar.xz
-        sudo pacman -U yay-9.4.2-1-x86_64.pkg.tar.xz
-        rm -fr yay-9.4.2-1-x86_64.pkg.tar.xz
+        wget http://storage.pbogut.me/paru-1.9.0-1-x86_64.pkg.tar.zst
+        sudo pacman -U paru-1.9.0-1-x86_64.pkg.tar.zst
+        rm -fr paru-1.9.0-1-x86_64.pkg.tar.zst
     fi
 }
 
-echo "Installing yay..."
+echo "Installing paru..."
 sudo pacman -S wget which
-install_yay
-echo "Installing neovim..."
-yay -S \
+instal_paru
+echo "Installing packages..."
+paru -S \
     base-devel \
     cmake \
     atool \
+    enca \
     zenity \
+    rust \
     xdotool \
     ripgrep \
     bluez-hcitool \
@@ -84,12 +86,21 @@ pip2 install \
     pynvim \
     --upgrade
 
-gem install redcarpet
-gem pristine --all
+gem install \
+  redcarpet \
+  nokogiri \
+  clipboard \
+  mail \
+  rotp \
+  solargraph
+#gem pristine --all
 
-go get github.com/nsf/gocode
-go get github.com/pbogut/mails-go-web
-go get github.com/pbogut/exail
+go install github.com/nsf/gocode@latest
+go install github.com/pbogut/mails-go-web@latest
+go install github.com/pbogut/exail@latest
+go install golang.org/x/tools/gopls@latest
+
+cargo install stylua
 
 [[ $(command -v yarn) ]] || npm install -g yarn
 yarn global add \
@@ -97,19 +108,19 @@ yarn global add \
     eslint \
     html-beautify \
     jshint \
-    -y
-
-npm install -g \
-    readability-cli \
-    vls \
+    @tailwindcss/language-server \
     vim-language-server \
-    vscode-json-languageserver \
-    vscode-css-languageserver-bin \
-    vscode-html-languageserver-bin \
-    intelephense \
-    flow-bin \
+    vls \
     bash-language-server \
     pyright \
+    dockerfile-language-server-nodejs \
+    typescript-language-server \
+    @tailwindcss/language-server \
+    intelephense \
+    vscode-langservers-extracted \
+    readability-cli \
+    -y
+
 
 # git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.3.0
 # source ~/.asdf/asdf.sh
