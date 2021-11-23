@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   khal-import
+# author: Pawel Bogut <https://pbogut.me>
+# date:   11/11/2021
+#=================================================
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ical=$1
+
+$dir/icalfix.rb $ical
+khal import $ical
