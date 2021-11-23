@@ -4,4 +4,10 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   25/05/2021
 #=================================================
-network-sync disable
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ $1 == "on" ]]; then
+  $dir/network-sync disable
+fi
+if [[ $1 == "off" ]]; then
+  $dir/network-sync enable
+fi
