@@ -28,6 +28,10 @@ snippet args
 				;;
 		esac
 	done
+snippet argpos
+	if [[ -z \$${1:posarg} ]]; then
+		${1:posarg}="\$1"
+	fi
 snippet argflag
 	--${1:flag}${3:|-${2:f}})$4
 		shift
