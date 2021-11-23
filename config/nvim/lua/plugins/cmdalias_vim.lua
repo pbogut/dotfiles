@@ -22,5 +22,6 @@ u.augroup('x_alias', {
     alias('repl', 'Repl')
     alias('skel', 'Skel')
     alias('db', 'DB')
+    alias('lg', 'LazyGit')
   end}
 })
