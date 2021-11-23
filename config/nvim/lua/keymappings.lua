@@ -8,6 +8,8 @@ local cmd = vim.cmd
 -- dont mess with me!
 g.no_plugin_maps = 1
 
+u.map('n', '<bs>', ':Explore<cr>')
+u.map('n', '<c-s>', [[:echo synIDattr(synID(line('.'), col('.'), 1), "name")<cr>]])
 -- macros helper (more like scratch pad)
 u.map('n', '<space>em', ':tabnew ~/.vim/macros.vim<cr>')
 u.map('n', '<space>sm', ':source ~/.vim/macros.vim<cr>')
@@ -145,7 +147,7 @@ end
 
 -- swap line navigation (for wraplines to be navigated by j/k)
 for key1, key2 in pairs({['j'] = 'gj', ['k'] = 'gk'}) do
-  for _, maptype in pairs({'n', 'v', 'o'}) do
+  for _, maptype in pairs({'n', 'x', 'o'}) do
     u.map(maptype, key1, key2)
     u.map(maptype, key2, key1)
   end
@@ -166,6 +168,11 @@ u.augroup('x_keybindings', {
     }
   },
   FileType = {
+    {'netrw', function()
+        u.buf_map(0, 'n', '<bs>', '-', {noremap = false})
+        u.buf_map(0, 'n', 'q', ':bdelete!<cr>')
+      end
+    },
     {'qf', function()
         u.buf_map(0, 'n', 'o', '<cr>')
         u.buf_map(0, 'n', 'q', ':q')
