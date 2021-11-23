@@ -115,7 +115,7 @@ if (config.get('autoformat_on_save')) then
           local file = vim.fn.expand('%:p')
           local cwd = vim.fn.getcwd()
           if file:match('^' .. cwd) then
-          vim.lsp.buf.x_formatting()
+          vim.lsp.buf.formatting()
           end
         end
       }

@@ -85,11 +85,6 @@ require('packer').startup({
     use {'ludovicchabant/vim-gutentags'}
     use {'ntpeters/vim-better-whitespace', config = config('vim_better_whitespace')}
     use {'honza/vim-snippets'}
-    use {'sbdchd/neoformat',
-      cmd = 'Neoformat',
-      config = config('neoformat'),
-      setup = setup('neoformat'),
-    }
     use {'k-takata/matchit.vim'}
     use {'vim-test/vim-test',
       cmd = {'TestNearest', 'TestFile', 'TestSuite',
@@ -116,7 +111,6 @@ require('packer').startup({
     use {'justinmk/vim-dirvish', config = config('vim_dirvish')}
     use {'justinmk/vim-sneak', config = config('vim_sneak')}
     use {'kristijanhusak/vim-dirvish-git', after = 'vim-dirvish'}
-    use {'w0rp/ale', config = config('ale')}
     use {'jakewvincent/mkdnflow.nvim',
       ft = {'markdown'},
       config = config('mkdnflow'),

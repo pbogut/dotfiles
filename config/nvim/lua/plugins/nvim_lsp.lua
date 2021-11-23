@@ -5,7 +5,6 @@ local has_lspstatus, lspstatus = pcall(require, 'lsp-status')
 local cmd = vim.cmd
 local g = vim.g
 local no_lsp_bind = '<cmd>lua print("No LSP attached")<CR>'
-local format_bind = '<cmd>Neoformat<CR>'
 
 local bindings = {
   {'n', ']d', ':lua vim.diagnostic.goto_next()<CR>', no_lsp_bind},
@@ -24,9 +23,9 @@ local bindings = {
   {'n', '<space>sD', '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', no_lsp_bind},
   {'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', no_lsp_bind},
   -- custom format functions with fall back to Neoformat cmd
-  {'n', '<space>af', '<cmd>lua vim.lsp.buf.x_formatting()<CR>', format_bind},
-  {'v', '<space>af', ':lua vim.lsp.buf.x_range_formatting()<CR>', format_bind},
-  {'x', '<space>af', ':lua vim.lsp.buf.x_range_formatting()<CR>', format_bind},
+  {'n', '<space>af', '<cmd>lua vim.lsp.buf.formatting()<CR>', no_lsp_bind},
+  {'v', '<space>af', ':lua vim.lsp.buf.range_formatting()<CR>', no_lsp_bind},
+  {'x', '<space>af', ':lua vim.lsp.buf.range_formatting()<CR>', no_lsp_bind},
 }
 
 -- prevent stupid errors when using mapping with no lsp attached
@@ -185,35 +184,12 @@ local function attach_lsp_to_new_buffer()
   cmd(':edit')
 end
 
--- global
-function vim.lsp.buf.x_range_formatting()
-  local _, formatted = pcall(vim.lsp.buf.range_formatting)
-  if not formatted then
-    cmd("'<,'>Neoformat")
-    print('File formated with Neoformat')
-  else
-    print('Range formated with LSP')
-  end
-end
-
--- global
-function vim.lsp.buf.x_formatting()
-  local _, formatted = pcall(vim.lsp.buf.formatting)
-  if not formatted then
-    cmd('Neoformat')
-    print('File formated with Neoformat')
-  else
-    print('File formated with LSP')
-  end
-end
-
 u.command('LspReload', function()
      vim.lsp.stop_client(vim.lsp.get_active_clients())
      cmd('edit')
 end)
 u.command('LspAttachBuffer', attach_lsp_to_new_buffer)
--- u.augroup('x_nvim_lsp', {
---     BufNewFile = {
---       { "*", attach_lsp_to_new_buffer }
---     }
--- })
+
+return {
+  on_attach = on_attach
+}
