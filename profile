@@ -12,14 +12,17 @@ export PROJECTS="$HOME/Projects"
 export DOTFILES="$PROJECTS/github.com/pbogut/dotfiles"
 export SCRIPTS="$HOME/.scripts"
 export PATH="$SCRIPTS:$PATH"
-export PATH="$HOME/.bin:$PATH"
 
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.npm/bin:$PATH"
+export PATH="$HOME/.yarn/bin:$PATH"
 export PATH="$HOME/.gocode/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
+export PATH="$HOME/.gem/ruby/3.0.0/bin:$PATH"
+export PATH="$HOME/.bin:$PATH"
 
-export TERM=xterm-256color
-export TERMINAL="urxvt"
+# export TERM=xterm-256color
+export TERMINAL="alacritty"
 export EDITOR="nvim"
 export PAGER="less"
 export LESS="-RXe"
