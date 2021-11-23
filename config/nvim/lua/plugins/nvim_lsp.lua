@@ -130,7 +130,8 @@ vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
 )
 
 u.highlights({
-  DiagnosticFloatingInformation = { guibg = '#a68f46', guifg = '#073642' },
+  FloatBorder = { guibg = g.colors.base0, guifg = vim.g.colors.base03 },
+  DiagnosticFloatingInfo = { guibg = '#a68f46', guifg = '#073642' },
   DiagnosticFloatingHint = { guibg = '#9eab7d', guifg = '#073642' },
   DiagnosticFloatingError = { guibg = '#dc322f', guifg = '#073642' },
   DiagnosticFloatingWarning = { guibg = '#d33682', guifg = '#073642' },
@@ -140,7 +141,7 @@ u.highlights({
   DiagnosticSignHint = { guibg = '#073642', guifg = '#9eab7d' },
   DiagnosticVirtualTextError = { guifg = '#dc322f' },
   DiagnosticVirtualTextWarning = { guifg = '#d33682' },
-  DiagnosticVirtualTextInformation = { guifg = '#a68f46' },
+  DiagnosticVirtualTextInfo = { guifg = '#a68f46' },
   DiagnosticVirtualTextHint = { guifg = '#9eab7d' },
   LspSignatureActiveParameter = { link = 'Search' },
 })

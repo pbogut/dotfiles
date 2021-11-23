@@ -21,10 +21,10 @@ local function highlights()
     TSPunctSpecial     = { guifg = c.alt_base0 },
     TSTagDelimiter    = { guifg = c.alt_base0 },
 
-    TSConstBuiltin  = { guifg = g.colors.cyan }, -- true/false/null
-    TSFuncBuiltin        = { guifg = g.colors.alt_magenta },
+    TSConstBuiltin  = { guifg = g.colors.yellow }, -- true/false/null
+    TSFuncBuiltin        = { guifg = g.colors.base1, gui = 'none' },
     TSVariableBuiltin    = { guifg = g.colors.magenta }, -- $this/parent/static
-    TSConstructor        = { guifg = g.colors.base1 }, -- class name, namespace, const name
+    TSConstructor        = { guifg = g.colors.base1, gui = 'italic' }, -- class name, namespace, const name
 
     TSVariable    = { guifg = g.colors.blue }, -- $variable, function $param
     -- TSConstant           = { guifg = c.orange },
@@ -34,9 +34,9 @@ local function highlights()
     -- TSLiteral            = { guifg = c.orange },
     -- TSStringEscape       = { guifg = c.orange },
     -- TSCharacter          = { guifg = c.orange },
-    -- TSNumber             = { guifg = c.orange },
-    -- TSFloat              = { guifg = c.orange },
-    -- TSBoolean            = { guifg = c.orange },
+    TSNumber             = { guifg = c.yellow },
+    TSFloat              = { guifg = c.yellow },
+    TSBoolean            = { guifg = c.yellow },
 
     TSFunction            = { guifg = c.base1 },
     TSMethod             = { guifg = c.base1 },
