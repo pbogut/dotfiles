@@ -205,9 +205,6 @@ bind_js(',jpp', 'pixel_perfect')
 bind_js(',jve', 'visual_event')
 bind_js(',dd', 'developer_mode')
 
-bind_js(',pp', 'pocket')
-bind_js(',pt', 'pocket_tag')
-
 dir_path = os.path.dirname(__file__)
 if os.path.exists(dir_path + '/secure_config.py'):
     import secure_config # type: ignore
