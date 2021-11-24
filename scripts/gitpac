@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 #=================================================
 # name:   gitpac
 # author: Pawel Bogut <https://pbogut.me>
@@ -56,7 +56,7 @@ install_package() {
     print -Pn "%F{006}"
     echo "❣️ $cmd"
     print -Pn "%f"
-    echo $cmd | xargs zsh -c
+    echo $cmd | xargs bash -c
   done <<< $(jq -c '.run[]' <<< $json)
 }
 
