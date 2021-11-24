@@ -1,0 +1,34 @@
+{
+  "packages": [
+    {
+      "repo": "xdebug/vscode-php-debug",
+      "run": [
+        "npm install",
+        "npm run build"
+      ]
+    },
+    {
+      "repo": "elixir-lsp/elixir-ls",
+      "run": [
+        "mix deps.get",
+        "mix compile",
+        "mix elixir_ls.release -o ./out"
+      ]
+    },
+    {
+      "repo": "pbogut/emmet-ls",
+      "run": [
+        "npm install",
+        "npm run build"
+      ]
+    },
+    {
+      "repo": "sumneko/lua-language-server",
+      "run": [
+        "git submodule update --init --recursive",
+        "cd 3rd/luamake && ./compile/install.sh",
+        "./3rd/luamake/luamake rebuild"
+      ]
+    }
+  ]
+}

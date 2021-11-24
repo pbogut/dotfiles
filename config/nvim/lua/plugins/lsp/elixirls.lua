@@ -4,7 +4,7 @@ local me = {}
 function me.setup(opts)
   opts = vim.tbl_deep_extend('keep', opts, {
     cmd = {
-      plugin_path('elixir-ls/out/language_server.sh')
+      gitpac_path('elixir-lsp/elixir-ls/out/language_server.sh')
     }
     -- settings = {
     --   elixirLS = {

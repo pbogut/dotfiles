@@ -3,7 +3,7 @@ local me = {}
 
 function me.setup(opts)
   opts = vim.tbl_deep_extend('keep', opts, {
-    cmd = {'node', plugin_path('emmet-ls/out/server.js'), '--stdio'},
+    cmd = {'node', gitpac_path('pbogut/emmet-ls/out/server.js'), '--stdio'},
     filetypes = {'xml', 'php', 'html', 'blade', 'vue', 'eelixir', 'css'},
     settings = {
       html_filetypes = {'xml', 'html', 'php'},

@@ -22,3 +22,7 @@ function _G.plugin_path(path)
 
   return result
 end
+
+function _G.gitpac_path(path)
+  return os.getenv('HOME') .. '/.gitpac/' .. path
+end

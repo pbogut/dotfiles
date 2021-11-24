@@ -8,12 +8,12 @@ local adapters = {
     type = 'executable',
     command = 'node',
     args = {
-      plugin_path('vscode-php-debug/out/phpDebug.js')
+      gitpac_path('xdebug/vscode-php-debug/out/phpDebug.js')
     }
   },
   mix_task = {
     type = 'executable',
-    command = plugin_path('elixir-ls/out/debugger.sh'),
+    command = gitpac_path('elixir-lsp/elixir-ls/out/debugger.sh'),
     args = {}
   }
 }

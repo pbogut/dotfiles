@@ -1,43 +1,12 @@
 local u = require('utils')
 
-local function startup(use)
-    -- NON PLUGINS --
-    -- Things that are installed by packer but are not really plugins, just
-    -- standalone dependencies that I like to have managed by vim as vim is
-    -- one using them, they are installed as opt so hopefully should not
-    -- affect vim load times
-    use {'xdebug/vscode-php-debug',
-      opt = true,
-      run = {
-        'npm install',
-        'npm run build'
-      }
-    }
-    use {'pbogut/emmet-ls',
-      opt = true,
-      run = {
-        'npm install',
-        'npm run build'
-      },
-    }
-    use {'elixir-lsp/elixir-ls',
-      opt = true,
-      run = {
-        'mix deps.get',
-        'mix compile',
-        'mix elixir_ls.release -o ./out'
-      }
-    }
-    use {'sumneko/lua-language-server',
-      opt = true,
-      run = {
-        'git submodule update --init --recursive',
-        'cd 3rd/luamake && ./compile/install.sh',
-        './3rd/luamake/luamake rebuild'
-      },
-    }
-end
-
+-- NON PLUGINS --
+-- Things that are used by neovim but are not plugins (language servers,
+-- linters, etc)
+-- This script uses external tools to install and update them
+-- usage:
+-- :exec('luafile ' . expand('%')) | UpdateExternalPackages
+--
 local packages = {
   yarn = {
     '@tailwindcss/language-server',
@@ -59,6 +28,12 @@ local packages = {
   },
   cargo = {
     'stylua'
+  },
+  gitpac = {
+    'sumneko/lua-language-server',
+    'pbogut/emmet-ls',
+    'elixir-lsp/elixir-ls',
+    'xdebug/vscode-php-debug',
   },
 }
 
@@ -83,6 +58,10 @@ local managers = {
     install = 'paru -S {}',
     update = 'paru -Sy {}'
   },
+  gitpac = {
+    install = 'gitpac {}',
+    update = 'gitpac {}'
+  }
 }
 
 u.command('UpdateExternalPackages', function()
@@ -110,7 +89,3 @@ u.command('InstallExternalPackages', function()
     prefix = '[Install]',
   })
 end)
-
-return {
-  startup = startup
-}

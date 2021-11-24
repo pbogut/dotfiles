@@ -6,7 +6,7 @@ local me = {}
 function me.setup(opts)
   opts = vim.tbl_deep_extend('keep', opts, {
     cmd = {
-      plugin_path('lua-language-server/bin/Linux/lua-language-server')
+      gitpac_path('sumneko/lua-language-server/bin/Linux/lua-language-server')
     },
     root_dir = function(fname)
       local cwd  = vim.loop.cwd();
