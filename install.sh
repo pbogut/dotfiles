@@ -24,6 +24,7 @@ read -d '' files <<"EOF"
     gitconfig
     githelpers
     gitignore
+    gitpac.json
     inputrc
     jshintrc
     npmrc

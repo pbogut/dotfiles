@@ -68,6 +68,7 @@ paru -S \
     xcape \
     xrandr \
     xtitle \
+    yarn \
     ruby \
     noto-fonts-emoji \
     dunst
@@ -102,7 +103,6 @@ go install golang.org/x/tools/gopls@latest
 
 cargo install stylua
 
-[[ $(command -v yarn) ]] || npm install -g yarn
 yarn global add \
     elm \
     eslint \
@@ -120,6 +120,8 @@ yarn global add \
     vscode-langservers-extracted \
     readability-cli \
     -y
+
+gitpac all
 
 
 # git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.3.0
