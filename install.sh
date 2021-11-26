@@ -16,6 +16,8 @@ git submodule sync && git submodule update --init
 echo "done"
 olddir=~/.dotfiles_backup/$(date +%s%N) # old dotfiles backup directory
 read -d '' files <<"EOF"
+    redeye.autostart.sh
+    silverspoon.autostart.sh
     ackrc
     aliases
     bin
