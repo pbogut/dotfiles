@@ -6,7 +6,16 @@ require'nvim-treesitter.configs'.setup {
   },
   indent = {
     enable = true, -- like it better in php/html so far, but its shit in pure php
-  }
+  },
+  incremental_selection = {
+    enable = true,
+    keymaps = {
+      init_selection = '<cr>',
+      scope_incremental = '<c-cr>',
+      node_incremental = '<cr>',
+      node_decremental = '<bs>',
+    },
+  },
 }
 
 -- vim.cmd([[set foldmethod=expr]])
