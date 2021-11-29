@@ -36,10 +36,6 @@ u.augroup('x_dirvish', {
         u.buf_map(0, 'n', '/', [[/\ze[^\/]*[\/]\=$<Home>\c]], {silent = false})
         u.buf_map(0, 'n', '?', [[?\ze[^\/]*[\/]\=$<Home>\c]], {silent = false})
         u.buf_map(0, 'n', 'A', ':echo "Use K"<cr>')
-
-        u.highlights({
-          SpecialKey = {guibg = 'none'}
-        })
       end
     }
   }

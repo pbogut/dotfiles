@@ -10,6 +10,9 @@ local function highlights()
     Folded = { term = 'NONE', cterm = 'NONE',  gui = 'NONE' },
     VertSplit = {guibg = '#073642', guifg = 'fg'},
     NonText = {gui = 'none', guifg = '#586e75'},
+    SpecialKey = {gui = 'none', guifg = '#586e75'},
+    Whitespace = {gui = 'none', guifg = '#586e75'},
+
     MyTodo = {gui = 'bold', guifg = '#d33682'},
     MyFixme = {gui = 'bold', guifg = '#d33682'},
     MyDebug = {gui = 'bold', guifg = '#dc322f'},

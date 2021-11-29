@@ -16,6 +16,10 @@ require'nvim-treesitter.configs'.setup {
       node_decremental = '<bs>',
     },
   },
+  context_commentstring = {
+    enable_autocmd = false, -- we will use nvim-ts-context-commentstring
+    enable = true
+  },
 }
 
 -- vim.cmd([[set foldmethod=expr]])

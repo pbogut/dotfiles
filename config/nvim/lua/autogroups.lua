@@ -34,25 +34,6 @@ local config_group = {
       end,
     },
   },
-  ['BufEnter,WinNew'] = {
-    {
-      '*',
-      function()
-        if w.match_mytodo then
-          fn.matchdelete(w.match_mytodo)
-        end
-        if w.match_myfixme then
-          fn.matchdelete(w.match_myfixme)
-        end
-        if w.match_mydebug then
-          fn.matchdelete(w.match_mydebug)
-        end
-        w.match_mytodo = fn.matchadd('MyTodo', '@todo\\>')
-        w.match_myfixme = fn.matchadd('MyFixme', '@fixme\\>')
-        w.match_mydebug = fn.matchadd('MyDebug', '@debug\\>')
-      end,
-    },
-  },
   FileType = {
     {
       'html,css,scss,xml,java,elixir,eelixir,c,php,php.phtml,sql,blade,elm',

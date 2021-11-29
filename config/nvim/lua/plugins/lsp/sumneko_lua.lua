@@ -17,11 +17,7 @@ function me.setup(opts)
     settings = {
       Lua = {
         workspace = {
-          library = {
-            [vim.fn.expand('$VIMRUNTIME/lua')] = true,
-            [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
-            [vim.fn.stdpath('data') .. '/share/nvim/site/pack/packer/opt/packer.nvim/lua'] = true,
-          },
+          -- library = {},
           maxPreload = 2000,
           preloadFileSize = 1000,
         },

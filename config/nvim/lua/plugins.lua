@@ -17,17 +17,15 @@ execute 'packadd packer.nvim'
 -- reload and recompile this file (plugins.lua) after change
 u.augroup('x_plugins_save', {
   BufWritePost = {
-    'plugins.lua,packages.lua', function()
-      package.loaded['packages'] = nil
+    'plugins.lua', function()
       cmd('luafile ' .. os.getenv("HOME") .. '/.config/nvim/lua/plugins.lua')
-      cmd('luafile ' .. os.getenv("HOME") .. '/.config/nvim/lua/packages.lua')
       cmd('PackerClean')
       cmd('PackerInstall')
       cmd('PackerCompile')
     end
   },
   BufEnter = {
-    'plugins.lua,packages.lua', function()
+    'plugins.lua', function()
       vim.bo.path = fn.stdpath('config') .. '/lua/plugins/'
     end
   }
@@ -188,8 +186,6 @@ require('packer').startup({
       use {'wakatime/vim-wakatime'}
     end
     use {'activitywatch/aw-watcher-vim'}
-
-    require('packages').startup(use)
   end
 })
 
