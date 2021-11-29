@@ -13,5 +13,8 @@ if [[ $1 =~ ^https://appear.in/ || $1 =~ url=https%3A%2F%2Fappear.in%2F ]] \
 elif [[ $1 =~ ^http://chromecast.smplayer.info/ ]]; then
   google-chrome-stable --app="$1" "${@:2}"
 else
-  DISPLAY=$display qutebrowser --target window "$@"
+  NODE_PATH="$(npm root -g)" \
+  QTWEBENGINE_REMOTE_DEBUGGING=9222 \
+  DISPLAY=$display \
+  qutebrowser --target window "$@"
 fi
