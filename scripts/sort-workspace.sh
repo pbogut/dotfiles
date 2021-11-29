@@ -90,8 +90,18 @@ ws_rss="0: rss"
 if [[ $extended -eq 1 ]]; then
   found=1
   case  "$wm_class" in
+    "gl mpv")
+      move_and_swich "$ws_media"
+      ;;
     "qutebrowser qutebrowser")
-      move_and_swich "$ws_browser"
+      case "$wm_title" in
+        "*Invidious*")
+          move_and_swich "$ws_media"
+          ;;
+        *)
+          move_and_swich "$ws_browser"
+          ;;
+      esac
       ;;
     "urxvt URxvt"|"Alacritty Alacritty")
       case "$wm_title" in
