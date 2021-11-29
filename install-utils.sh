@@ -56,6 +56,10 @@ paru -S \
     playerctl \
     pulsemixer \
     python python-pip python2 python2-pip \
+    python-black \
+    python-isort \
+    jedi-language-server \
+    flake8 \
     qutebrowser \
     ranger \
     redshift \
@@ -74,9 +78,9 @@ paru -S \
     dunst
 
 pip install \
+    upnpclient \
     i3-py \
     i3ipc \
-    flake8 \
     pynvim \
     neovim-remote \
     vim-vint \
@@ -120,6 +124,12 @@ yarn global add \
     vscode-langservers-extracted \
     readability-cli \
     -y
+
+npm install \
+  jsdom \
+  qutejs \
+  @mozilla/readability \
+  -g
 
 gitpac all
 

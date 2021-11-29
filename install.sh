@@ -63,8 +63,10 @@ read -d '' files <<"EOF"
     config/mpv/mpv.conf
     config/mpv/script-settings/mpvDLNA.conf
     config/mpv/scripts/minidlna-subs.lua
+    config/mpv/scripts/trakt
     config/ncmpcpp/config
     config/ncmpcpp/bindings
+    config/nvim/after
     config/nvim/init.lua
     config/nvim/lua
     config/nvim/ginit.vim
