@@ -1,0 +1,131 @@
+defmodule Mix.Tasks.StaticAssets do
+  require Logger
+
+  @src "./assets/static"
+  @dst "./priv/static"
+
+  def run(args) do
+    if not File.dir?(@src) do
+      info("Initialize #{@src}")
+      first_run()
+    end
+
+    if args |> Enum.any?(&(&1 == "--purge")) do
+      static_files =
+        @dst
+        |> File.ls!()
+        |> Enum.filter(fn file ->
+          # assets are managed by esbuild so dont touch it
+          not Enum.any?(["assets"], &(&1 == file))
+        end)
+
+      for file <- static_files do
+        File.rm_rf!(@dst <> file)
+      end
+    end
+
+    once()
+
+    if args |> Enum.any?(&(&1 == "--watch")) do
+      watch()
+    end
+  end
+
+  # On firs run get current priv/static content and move it to
+  # assets/static folder
+  defp first_run() do
+    File.mkdir_p!(@src)
+
+    static_files =
+      @dst
+      |> File.ls!()
+      |> Enum.filter(fn file ->
+        # ignore assets if already generated
+        not Enum.any?(["assets"], &(&1 == file))
+      end)
+
+    for file <- static_files do
+      (@src <> file) |> base_dir |> File.mkdir_p()
+      File.cp_r(@dst <> "/" <> file, @src <> "/" <> file)
+    end
+  end
+
+  defp once() do
+    @src
+    |> File.ls!()
+    |> Enum.each(&copy_file("/" <> &1))
+  end
+
+  defp watch do
+    info("Watching #{@src} for changes...")
+
+    port =
+      Port.open({:spawn_executable, "./lib/mix/tasks/run_command.sh"}, [
+        :stderr_to_stdout,
+        :binary,
+        :exit_status,
+        args: ~w"inotifywait --format %:e;%w%f -rqme modify,create,delete,move #{@src}"
+      ])
+
+    stream_output(port)
+  end
+
+  defp stream_output(port) do
+    receive do
+      {^port, {:data, data}} ->
+        data
+        |> String.trim()
+        |> String.split("\n")
+        |> Enum.map(&process_line(&1))
+
+        stream_output(port)
+
+      {^port, {:exit_status, 0}} ->
+        IO.inspect("Command success")
+
+      {^port, {:exit_status, status}} ->
+        IO.inspect("Command error, status #{status}")
+    end
+  end
+
+  defp process_line(line) do
+    file = Regex.replace(~r/^.*?;/, line, "")
+    @src <> relative = file
+
+    action =
+      case line do
+        "DELETE" <> _ -> :remove
+        "MOVED_FROM" <> _ -> :remove
+        "CREATE" <> _ -> :copy
+        "MOVED_TO" <> _ -> :copy
+        _ -> true
+      end
+
+    case action do
+      :copy -> copy_file(relative)
+      :remove -> remove_file(relative)
+      _ -> true
+    end
+  end
+
+  defp base_dir(file) do
+    Regex.replace(~r/(.*)\/.*?$/, file, "\\1")
+  end
+
+  defp copy_file(file) do
+    (@dst <> file) |> base_dir |> File.mkdir_p()
+    File.cp_r(@src <> file, @dst <> file)
+
+    info("cp: " <> @src <> file <> " -> " <> @dst <> file)
+  end
+
+  defp remove_file(file) do
+    (@dst <> file) |> File.rm_rf()
+
+    info("rm: " <> @dst <> file)
+  end
+
+  defp info(message) do
+    Logger.info("[static_assets] " <> message)
+  end
+end
