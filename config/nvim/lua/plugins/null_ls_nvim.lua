@@ -7,11 +7,10 @@ local os = {}
 local cfg = { sources = {} }
 
 local sources = {
+  -- lua
+  { builtin = null_ls.builtins.diagnostics.luacheck, enabled = false },
   { builtin = null_ls.builtins.formatting.stylua },
-  {
-    builtin = null_ls.builtins.formatting.prettier,
-    filetypes = { 'markdown' },
-  },
+  -- php
   {
     builtin = null_ls.builtins.diagnostics.phpcs,
     lower_servity = 2,
@@ -19,9 +18,17 @@ local sources = {
       return vim.fn.filereadable(vim.fn.getcwd() .. '/phpcs.xml') == 1
     end,
   },
-  { builtin = null_ls.builtins.diagnostics.luacheck, enabled = false },
-  { builtin = null_ls.builtins.completion.spell, enabled = false },
   { builtin = null_ls.builtins.formatting.phpcbf, enabled = false },
+  -- python
+  { builtin = null_ls.builtins.diagnostics.flake8, enabled = true },
+  { builtin = null_ls.builtins.formatting.isort, enabled = true },
+  { builtin = null_ls.builtins.formatting.yapf, enabled = true },
+  -- other
+  { builtin = null_ls.builtins.completion.spell, enabled = false },
+  {
+    builtin = null_ls.builtins.formatting.prettier,
+    filetypes = { 'markdown' },
+  },
 }
 
 -- store original servity

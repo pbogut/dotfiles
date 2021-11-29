@@ -158,7 +158,8 @@ lspconfig.vuels.setup {on_attach = on_attach}
 lspconfig.bashls.setup {on_attach = on_attach}
 lspconfig.gopls.setup {on_attach = on_attach}
 lspconfig.cssls.setup {on_attach = on_attach, capabilities = capabilities}
-lspconfig.pyright.setup {on_attach = on_attach}
+-- lspconfig.pyright.setup {on_attach = on_attach}
+lspconfig.jedi_language_server.setup {on_attach = on_attach}
 lspconfig.dockerls.setup {on_attach = on_attach}
 lspconfig.solargraph.setup {on_attach = on_attach}
 -- require 'plugins.lsp.denols'.setup {on_attach = on_attach}
