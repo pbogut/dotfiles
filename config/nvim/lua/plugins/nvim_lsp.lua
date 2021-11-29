@@ -171,6 +171,7 @@ require 'plugins.lsp.intelephense'.setup {on_attach = on_attach, capabilities = 
 require 'plugins.lsp.jsonls'.setup {on_attach = on_attach, capabilities = capabilities}
 require 'plugins.lsp.html'.setup {on_attach = on_attach, capabilities = capabilities}
 require 'plugins.lsp.elixirls'.setup {on_attach = on_attach, capabilities = capabilities}
+require 'plugins.lsp.prosemd'.setup {on_attach = on_attach}
 
 local function get_active_client_map()
   local client_list = {}

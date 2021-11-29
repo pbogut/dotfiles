@@ -27,7 +27,8 @@ local packages = {
     'golang.org/x/tools/gopls@latest'
   },
   cargo = {
-    'stylua'
+    'stylua',
+    'prosemd'
   },
   gitpac = {
     'sumneko/lua-language-server',
