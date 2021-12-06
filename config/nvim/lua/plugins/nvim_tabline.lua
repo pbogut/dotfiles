@@ -52,7 +52,7 @@ local function config()
             local bufnr = vim.fn.tabpagebuflist(index)[winnr]
             local bufname = vim.fn.bufname(bufnr)
             local bufmodified = vim.fn.getbufvar(bufnr, '&mod')
-            local filename = utils.find_filename(bufname)
+            local tabname = utils.get_tabname(bufname, index)
             local extension = vim.fn.fnamemodify(bufname, ':e')
             s = s .. '%' .. index .. 'T'
 
@@ -67,8 +67,8 @@ local function config()
             end
             -- tl[#tl+1] = icons.get_left_separator(active, bufmodified)                   -- Left separator
             tl[#tl+1] = utils.get_item('TabLinePadding', ' ', active)               -- Padding
-            tl[#tl+1] = icons.get_devicon(active, filename, extension)                  -- DevIcon
-            tl[#tl+1] = utils.get_item('TabLine', filename, active, true)               -- Filename
+            tl[#tl+1] = icons.get_devicon(active, bufname, extension)                  -- DevIcon
+            tl[#tl+1] = utils.get_item('TabLine', tabname, active, true)               -- Filename
             tl[#tl+1] = utils.get_item('TabLinePadding', '', active)               -- Padding
             tl[#tl+1] = icons.get_modified_icon('TabLineModified', active, bufmodified) -- Modified icon
             tl[#tl+1] = icons.get_close_icon('TabLineClose', index, bufmodified)        -- Closing icon
