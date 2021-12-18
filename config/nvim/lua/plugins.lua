@@ -139,7 +139,6 @@ require('packer').startup({
     use {'pbogut/vim-dadbod-ssh', after = 'vim-dadbod'}
     use {'frankier/neovim-colors-solarized-truecolor-only'}
     use {'kevinoid/vim-jsonc'}
-    use {'sheerun/vim-polyglot', setup = setup('polyglot')}
     use {'sirtaj/vim-openscad', opt = false}
     use {'nvim-treesitter/nvim-treesitter',
       run = ':TSUpdate',
