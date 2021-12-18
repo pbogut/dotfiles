@@ -1,15 +1,27 @@
 local mp = require('mp')
 local options = require('mp.options')
 
+local auth_file = ''
+
+if os.getenv('TRAKT_AUTH_FILE') then
+  auth_file = os.getenv('TRAKT_AUTH_FILE')
+elseif os.getenv('HOME') then
+  auth_file = os.getenv('HOME') .. '/.config/mpv_trakt.json'
+end
+
 local opts = {
   client_id = os.getenv('TRAKT_CLIENT_ID') or '',
   client_secret = os.getenv('TRAKT_CLIENT_SECRET') or '',
   disable_output = false,
   auto_stop = true,
-  auto_stop_threshold = 95,
+  auto_stop_threshold = 99,
   stop_on_pause = true,
-  stop_on_pause_threshold = 90,
+  stop_on_pause_threshold = 95,
+  auth_file_location = auth_file,
+  icon_ok = '/usr/share/icons/gnome/48x48/emblems/emblem-default.png',
+  icon_err = '/usr/share/icons/gnome/48x48/emblems/emblem-important.png',
 }
+
 options.read_options(opts, 'trakt')
 
 local function log(message)
@@ -26,6 +38,8 @@ local function trakt_cmd(opt)
     opts.client_id,
     '--client-secret',
     opts.client_secret,
+    '--auth-file',
+    opts.auth_file_location,
   }
 
   for key, val in pairs(opt) do
@@ -35,24 +49,45 @@ local function trakt_cmd(opt)
     end
   end
 
-  return mp.command_native_async({
+  local result = mp.command_native({
     name = 'subprocess',
     playback_only = false,
     capture_stdout = true,
     capture_stderr = true,
     args = args,
-  }, function(_, result)
-    if result then
-      log(result.stdout)
-    else
-      log('There was an error when trying to execute trakt_cmd.py')
+  })
+  if result then
+    log(result.stdout)
+    if result.stderr then
+      log(result.stderr)
     end
-  end)
+    return result.stdout
+  else
+    log('There was an error when trying to execute trakt_cmd.py')
+    return ''
+  end
 end
 
 mp.add_key_binding(nil, 'trakt_reauth', function()
   trakt_cmd({ reauth = true })
 end)
+
+mp.add_key_binding(nil, 'trakt_history', function()
+  local result = trakt_cmd({ history = true })
+  mp.osd_message('Trakt history: \n' .. result)
+  mp.osd_message(result, 5)
+end)
+
+local function red(text)
+  local ass_start = mp.get_property_osd('osd-ass-cc/0')
+  local ass_stop = mp.get_property_osd('osd-ass-cc/1')
+  return ass_start .. '{\\1c&H0000FF&}' .. text .. ass_stop
+end
+local function green(text)
+  local ass_start = mp.get_property_osd('osd-ass-cc/0')
+  local ass_stop = mp.get_property_osd('osd-ass-cc/1')
+  return ass_start .. '{\\1c&H00FF00&}' .. text .. ass_stop
+end
 
 local function trakt(action, title, progress)
   if title == nil or progress == nil then
@@ -67,9 +102,19 @@ local function trakt(action, title, progress)
     action = 'stop'
   end
 
-  trakt_cmd({ name = title, progress = progress, action = action })
+  local result = trakt_cmd({
+    name = title,
+    progress = progress,
+    action = action,
+  })
 
-  return true
+  if result:match('^None') or result == "" then
+    mp.osd_message(red('Trakt: ' .. action .. ' FAILED\n') .. title, 2)
+    return false
+  else
+    mp.osd_message(green('Trakt: ' .. action .. ' ' .. 'SUCCEED\n') .. title, 2)
+    return true
+  end
 end
 
 local last_title = nil
@@ -78,7 +123,25 @@ local stopped = false
 
 mp.register_event('shutdown', function()
   if last_title then
-    trakt('stop', last_title, last_progress)
+    local success = trakt('stop', last_title, last_progress)
+    local icon = ''
+    local msg = ''
+
+    if success then
+      icon = opts.icon_ok
+      msg = 'Trakt stop succeed'
+    else
+      icon = opts.icon_err
+      msg = 'Trakt stop FAILED'
+    end
+
+    mp.command_native({
+      name = 'subprocess',
+      playback_only = false,
+      capture_stdout = true,
+      capture_stderr = true,
+      args = {'notify-send', '-i', icon, msg}
+    })
   end
 end)
 

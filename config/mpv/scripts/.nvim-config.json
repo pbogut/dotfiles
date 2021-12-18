@@ -1,0 +1,11 @@
+{
+  "lsp": {
+    "sumneko_lua": {
+      "workspace": {
+        "library": {
+          "/home/pbogut/Projects/github.com/disco0/mpv-types-lua": true
+        }
+      }
+    }
+  }
+}

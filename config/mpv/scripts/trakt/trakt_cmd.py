@@ -6,7 +6,7 @@ import subprocess
 
 import guessit
 import six
-from trakt import Trakt
+from trakt import Trakt, objects
 
 parser = argparse.ArgumentParser(
     description="Toggle between visible workspaces.")
@@ -17,6 +17,14 @@ parser.add_argument(
     dest="progress",
     help="watch progress percentage",
     default="100",
+)
+parser.add_argument(
+    "--history",
+    dest="history",
+    action='store_const',
+    help="show history",
+    const=True,
+    default=None,
 )
 parser.add_argument(
     "--action",
@@ -118,6 +126,36 @@ if args.reauth:
         authenticate()
         exit(0)
 
+# Authenticate
+Trakt.on('oauth.refresh', on_token_refreshed)
+Trakt.configuration.defaults.oauth.from_response(authenticate(), refresh=True)
+
+if Trakt['sync/collection'].movies() is None:
+    print("Error, can't connect to trakt api")
+    exit(2)
+
+if args.history:
+    count_items = 20
+    list = {}
+    for item in Trakt['sync/history'].get(pagination=True, per_page=25):
+        # print()
+        if isinstance(item, objects.episode.Episode):
+            if item.show.title not in list:
+                count_items = count_items - 1
+                print("%s %s" % (item.show.title, ("S%02dE%02d" % item.pk)))
+            list[item.show.title] = True
+
+        if isinstance(item, objects.movie.Movie):
+            if item.title not in list:
+                count_items = count_items - 1
+                print("%s (%s)" % (item.title, item.year))
+            list[item.title] = True
+
+        if count_items <= 0:
+            exit(2)
+
+    exit(1)
+
 if action not in ["start", "pause", "stop"]:
     print("Action can be one of: start,pause,stop")
     exit(1)
@@ -131,14 +169,6 @@ result = guessit.guessit(args.name)
 if "type" not in result:
     print("Can't figure out what you are watching")
     exit(1)
-
-# Authenticate
-Trakt.on('oauth.refresh', on_token_refreshed)
-Trakt.configuration.defaults.oauth.from_response(authenticate(), refresh=True)
-
-if Trakt['sync/collection'].movies() is None:
-    print("Error, can't connect to trakt api")
-    exit(2)
 
 if result["type"] == "episode":
     show = {}
