@@ -24,11 +24,11 @@ local packages = {
     'solargraph',
   },
   go = {
-    'golang.org/x/tools/gopls@latest'
+    'golang.org/x/tools/gopls@latest',
   },
   cargo = {
     'stylua',
-    'prosemd'
+    'prosemd',
   },
   gitpac = {
     'sumneko/lua-language-server',
@@ -41,35 +41,35 @@ local packages = {
 local managers = {
   yarn = {
     install = 'yarn global add {}',
-    update = 'yarn global upgrade {}'
+    update = 'yarn global remove {} && yarn global add {}',
   },
   gem = {
     install = 'gem install {}',
-    update = 'gem update {}'
+    update = 'gem update {}',
   },
   go = {
     install = 'go install {}',
-    update = 'go install {}'
+    update = 'go install {}',
   },
   cargo = {
     install = 'cargo install {}',
-    update = 'cargo install {}'
+    update = 'cargo install {}',
   },
   aur = {
     install = 'paru -S {}',
-    update = 'paru -Sy {}'
+    update = 'paru -Sy {}',
   },
   gitpac = {
     install = 'gitpac {}',
-    update = 'gitpac {}'
-  }
+    update = 'gitpac {}',
+  },
 }
 
 u.command('UpdateExternalPackages', function()
   local cmds = {}
   for manager, package_list in pairs(packages) do
     for _, package in pairs(package_list) do
-      cmds[#cmds+1] = managers[manager].update:gsub('%{%}', package)
+      cmds[#cmds + 1] = managers[manager].update:gsub('%{%}', package)
     end
   end
   u.process_shell_commands(cmds, {
@@ -82,7 +82,7 @@ u.command('InstallExternalPackages', function()
   local cmds = {}
   for manager, package_list in pairs(packages) do
     for _, package in pairs(package_list) do
-      cmds[#cmds+1] = managers[manager].install:gsub('%{%}', package)
+      cmds[#cmds + 1] = managers[manager].install:gsub('%{%}', package)
     end
   end
   u.process_shell_commands(cmds, {
