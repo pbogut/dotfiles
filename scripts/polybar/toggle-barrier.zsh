@@ -16,7 +16,7 @@ switch_state() {
     killall barriers -9
     state="off"
   else
-    barriers
+    barriers --disable-crypto
     state="on"
   fi
   show_state
