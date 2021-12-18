@@ -116,7 +116,11 @@ require('packer').startup({
     use {'kana/vim-textobj-user'}
     use {'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user'}
     use {'MattesGroeger/vim-bookmarks',
-      config = 'vim.g.bookmark_save_per_working_dir = 1'
+      config = {
+        'vim.g.bookmark_save_per_working_dir = 1',
+        [[vim.g.bookmark_sign =  '📌']],
+        [[vim.g.bookmark_annotation_sign = '📔']],
+      }
     }
     use {'rrethy/vim-illuminate'}
     use {'lukas-reineke/indent-blankline.nvim', config = config('indent_blankline')}
