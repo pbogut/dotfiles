@@ -130,7 +130,7 @@ font-0 = "InputSansNarrow Nerd Font:fontformat=truetype:size=8:antialias=true;1"
 
 modules-left = i3
 modules-center = xwindow
-modules-right = memory_left cpu pulse backlight weather date time battery keylayout email powermenu toggle_silverspoon_switches
+modules-right = memory_left cpu pulse backlight weather date time battery keylayout email update powermenu toggle_silverspoon_switches
 
 tray-position = right
 tray-padding = 2
@@ -162,7 +162,7 @@ font-0 = "InputSansNarrow Nerd Font:fontformat=truetype:size=8:antialias=true;1"
 
 modules-left = i3
 modules-center = xwindow
-modules-right = memory_left cpu pulse weather date time time_uk email powermenu toggle_switches
+modules-right = memory_left cpu pulse weather date time time_uk email update powermenu toggle_switches
 
 tray-position = right
 tray-padding = 2
@@ -442,6 +442,15 @@ format-prefix-foreground = ${colors.icon}
 click-left = /usr/bin/kill -SIGRTMIN+3 %pid%
 scroll-up = /usr/bin/kill -SIGRTMIN+1 %pid%
 scroll-down = /usr/bin/kill -SIGRTMIN+2 %pid%
+
+[module/update]
+type = custom/script
+exec = ~/.scripts/polybar/check-updates.sh
+label = %output%
+tail = true
+format-prefix = " "
+format-prefix-foreground = ${colors.icon}
+click-left = kill -USR1 %pid%
 
 [module/email]
 type = custom/script
