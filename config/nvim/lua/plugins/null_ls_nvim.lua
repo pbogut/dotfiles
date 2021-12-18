@@ -4,7 +4,7 @@ local on_attach = require('plugins.nvim_lsp').on_attach
 local s = h.diagnostics.severities
 local os = {}
 
-local cfg = { sources = {} }
+local cfg = { sources = {}, on_attach = on_attach }
 
 local sources = {
   -- lua
@@ -85,5 +85,4 @@ for _, source in ipairs(sources) do
   end
 end
 
-require('null-ls').config(cfg)
-require('lspconfig')['null-ls'].setup({ on_attach = on_attach })
+null_ls.setup(cfg)
