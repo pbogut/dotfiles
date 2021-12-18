@@ -75,6 +75,7 @@ read -d '' files <<"EOF"
     config/nvim/snippets
     config/nvim/local
     config/nvim/nvim-config.json
+    config/picom/picom.conf
     config/pip/pip.conf
     config/polybar
     config/qutebrowser/config.py
