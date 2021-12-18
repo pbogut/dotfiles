@@ -62,7 +62,6 @@ require('packer').startup({
     use {'tpope/vim-eunuch'}
     use {'tpope/vim-rsi'}
     use {'tpope/vim-abolish'} -- coercion thingis
-    use {'tpope/vim-commentary', config = config('vim_commentary')}
     use {'tpope/vim-surround'}
     use {'tpope/vim-repeat'}
     use {'tpope/vim-rails', ft = {'ruby'}}
@@ -129,6 +128,7 @@ require('packer').startup({
       config = config('vim_dadbod'),
       fn = 'db#url_complete',
     }
+    use {'numtostr/comment.nvim', config = config('comment_nvim')}
     use {'pbogut/vim-dadbod-ssh', after = 'vim-dadbod'}
     use {'frankier/neovim-colors-solarized-truecolor-only'}
     use {'kevinoid/vim-jsonc'}
