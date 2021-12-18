@@ -130,6 +130,7 @@ require('packer').startup({
       config = config('vim_dadbod'),
       fn = 'db#url_complete',
     }
+    use {'joosepalviste/nvim-ts-context-commentstring'}
     use {'numtostr/comment.nvim', config = config('comment_nvim')}
     use {'pbogut/vim-dadbod-ssh', after = 'vim-dadbod'}
     use {'frankier/neovim-colors-solarized-truecolor-only'}
