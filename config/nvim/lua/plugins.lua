@@ -120,9 +120,11 @@ require('packer').startup({
     }
     use {'rrethy/vim-illuminate'}
     use {'lukas-reineke/indent-blankline.nvim', config = config('indent_blankline')}
-    use {'junegunn/fzf', config = config('fzf')}
-    use {'junegunn/fzf.vim', after = 'fzf'}
-    use {'pbogut/fzf-mru.vim', after = 'fzf.vim', branch = 'lua'}
+    use {'nvim-telescope/telescope.nvim',
+      config = config('telescope_nvim'),
+      requires = {'nvim-lua/plenary.nvim'},
+    }
+    use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
     use {'tpope/vim-dadbod',
       cmd = 'DB',
       config = config('vim_dadbod'),
