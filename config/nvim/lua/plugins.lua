@@ -161,9 +161,11 @@ require('packer').startup({
       after = 'projector',
       config = config('nvim_snippy'),
     }
+    use {'tzachar/cmp-tabnine', run = './install.sh', after = 'nvim-cmp'}
     use {'hrsh7th/nvim-cmp',
       after = {'nvim-snippy', 'projector'},
       config = config('nvim_cmp'),
+      setup = setup('nvim_cmp'),
       requires = {
         'hrsh7th/cmp-buffer',
         'hrsh7th/cmp-path',
@@ -178,7 +180,6 @@ require('packer').startup({
       }
     }
     use {'kristijanhusak/vim-dadbod-completion', after = {'nvim-cmp', 'vim-dadbod'}}
-    use {'tzachar/cmp-tabnine', run = './install.sh', after = 'nvim-cmp'}
 
     -- lsp
     use {'ray-x/lsp_signature.nvim'}
