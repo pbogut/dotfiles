@@ -95,7 +95,7 @@ if [[ $extended -eq 1 ]]; then
       ;;
     "qutebrowser qutebrowser")
       case "$wm_title" in
-        "*Invidious*")
+        *" - Invidious - "*)
           move_and_swich "$ws_media"
           ;;
         *)
