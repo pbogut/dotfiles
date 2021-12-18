@@ -121,7 +121,11 @@ local function config()
   u.map('n', '<space>do', dap.step_out)
   u.map('n', '<space>df', function()
     dap.list_breakpoints()
-    require('plugins.fzf').quickfix()
+    if vim.fn.exists(':Trouble') > 0 then
+      vim.cmd('Trouble quickfix')
+    else
+      vim.cmd('copen')
+    end
   end)
 
   u.highlights({
