@@ -123,3 +123,5 @@
     trustExitCode = true
 [hub]
     protocol = ssh
+[init]
+    defaultBranch = master
