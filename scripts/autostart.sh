@@ -1,6 +1,5 @@
 #!/bin/bash
 #super awesome capslock key
-setxkbmap -option 'caps:ctrl_modifier'
 host_name=$(hostname -s)
 script=$(readlink -f "$0")
 scriptpath=$(dirname "$script")
@@ -25,6 +24,7 @@ numlockx on
 # make use of the useless capslock
 killall xcape -9 >/dev/null 2>&1
 # only if run with xcape option (its not playing nicely with my ergodox)
+setxkbmap -option 'caps:ctrl_modifier'
 if [[ $1 == "--xcape" ]]; then
   xcape -e 'Control_L=Escape'
   xcape -e 'Shift_L=parenleft'
@@ -34,8 +34,6 @@ fi
 # daemons
 rerun insync "insync start"
 rerun copyq copyq
-rerun picom "picom -b --xrender-sync-fence"
-# rerun TogglDesktop "toggldesktop -b"
 demonize nextcloud nextcloud
 demonize conky conky
 demonize geoclue /usr/lib/geoclue-2.0/demos/agent

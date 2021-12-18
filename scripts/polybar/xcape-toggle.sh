@@ -4,10 +4,10 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   22/05/2021
 #=================================================
-cycle=0    #init cycle
-slp=0.2    #sleep for tick (tick / 1000)
-tick=200   #tick every n miliseconds
-refresh=5  #refresh every n seconds
+cycle=0                     #init cycle
+slp=0.2                     #sleep for tick (tick / 1000)
+tick=200                    #tick every n miliseconds
+refresh=5                   #refresh every n seconds
 refresh=$((refresh * 1000)) #convert to mili seconds
 
 state="off"
@@ -24,7 +24,7 @@ toggle() {
     killall xcape -9
   else
     state="on"
-    xcape -e 'Caps_Lock=Escape'
+    setxkbmap -option 'caps:ctrl_modifier'
     xcape -e 'Control_L=Escape'
     xcape -e 'Shift_L=parenleft'
     xcape -e 'Shift_R=parenright'
@@ -44,9 +44,9 @@ update_state() {
 
 show_state() {
   if [[ $state == "on" ]]; then
-		echo 
-	else
-		echo 
+    echo 
+  else
+    echo 
   fi
 }
 
