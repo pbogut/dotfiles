@@ -9,7 +9,7 @@
     email = pbogut@pbogut.me
 [core]
     autocrlf = input
-    excludesfile = ~/.gitignore
+    excludesFile = ~/.gitignore
 [push]
     default = simple
 [pull]
