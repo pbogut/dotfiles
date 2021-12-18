@@ -51,7 +51,16 @@ create_clean_staging() {
 }
 
 pretty_git_log() {
-  git log --color=always --graph --pretty="tformat:${FORMAT}" $* |
+  width=$(stty size | awk '{print $2}')
+  width=$(expr $width - 12)
+
+  ( echo    " ╭─────────╮"
+    echo    " │ Git Log │"
+    echo -n "─╯         ╰"
+    x=0; while test $x -lt $width; do echo -n '─'; x=$(expr $x + 1); done;
+    echo ""
+    git log --color=always --graph --pretty="tformat:${FORMAT}" $*
+    ) |
     # Replace (2 years ago) with (2 years)
     sed -Ee 's/(^[^<]*) ago\)/\1)/' |
     # Replace (2 years, 5 months) with (2 years)
@@ -75,8 +84,7 @@ pretty_git_log() {
 
 git_clone_to_projects_gl() {
   repo=$1
-  if [[ ! "$1" =~ (@) ]] && [[ ! "$1" =~ ^http ]]; then
-    # use github by default
+  if [[ ! "$1" =~ @ ]] && [[ ! "$1" =~ ^http ]]; then
     repo="git@gitlab.com:$repo.git"
   fi
 
@@ -103,7 +111,7 @@ git_clone_to_projects_gl() {
 }
 git_clone_to_projects() {
   repo=$1
-  if [[ ! "$1" =~ (@) ]] && [[ ! "$1" =~ ^http ]]; then
+  if [[ ! "$1" =~ @ ]] && [[ ! "$1" =~ ^http ]]; then
     # use github by default
     repo="git@github.com:$repo.git"
   fi
