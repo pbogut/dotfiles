@@ -116,7 +116,7 @@ set virtual_spoolfile=yes                           # enable virtual folders
 virtual-mailboxes \
     " Inbox"             "notmuch://?query=tag:inbox and NOT tag:archive and NOT tag:sendmail"                            \
     " Unread"            "notmuch://?query=tag:unread and NOT tag:spam"                                                   \
-    " Sent"              "notmuch://?query=tag:sent and date:`date --date="90 days ago" '+%Y-%m-%d'`.."                   \
+    " Sent"              "notmuch://?query=tag:sent and date:`date --date="90 days ago" '+%Y-%m-%d'`.. and NOT tag:spam"  \
     "   └ all"            "notmuch://?query=tag:sent"                                                                      \
     " Projects / Issues" "notmuch://?query=(tag:github or tag:gitlab) and date:`date --date="90 days ago" '+%Y-%m-%d'`.." \
     "   └ all"            "notmuch://?query=(tag:github or tag:gitlab)"                                                    \
@@ -206,6 +206,7 @@ alternative_order text/calendar text/plain text/enriched text/html  # save html 
 set implicit_autoview
 
 # theme
-source ~/.mutt/solarized-dark-16.muttrc
+# source ~/.mutt/solarized-dark-16.muttrc
+source ~/.mutt/solarized-dark-256.muttrc
 source ~/.mutt/hooks
 #folder-hook ! archive "color index red default \"~Y '\W?archive\W?'\""
