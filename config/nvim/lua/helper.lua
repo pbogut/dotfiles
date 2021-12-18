@@ -26,3 +26,45 @@ end
 function _G.gitpac_path(path)
   return os.getenv('HOME') .. '/.gitpac/' .. path
 end
+
+function _G.prequire(module_name)
+  local success, module = pcall(require, module_name)
+  local result = {}
+  if success then
+    result['done'] = function(callback)
+      callback(module)
+      return result
+    end
+    result['fail'] = function(_)
+      return result
+    end
+  else
+    result['done'] = function(_)
+      return result
+    end
+    result['fail'] = function(callback)
+      callback(module)
+      return result
+    end
+  end
+
+  return result
+end
+
+
+function _G.crequire(module_name, callback)
+  callback = callback or {}
+  local success, module = pcall(require, module_name)
+  local result = {}
+  if success then
+    if type(callback.done) == "function" then
+      return callback.done(module)
+    end
+  else
+    if type(callback.fail) == "function" then
+      return callback.fail(module)
+    end
+  end
+
+  return result
+end
