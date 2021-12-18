@@ -27,6 +27,9 @@ u.map('v', '<space><cr>', 'zf')
 u.map('n', '<space>tw', ':lua vim.wo.wrap = not vim.wo.wrap<cr>')
 u.map('n', '<space>lq', ':copen<CR>')
 u.map('n', '<space>ll', ':lopen<CR>')
+-- Shift + J/K moves selected lines down/up in visual mode
+u.map('v', 'J', [[:m '>+1<CR>gv=gv]])
+u.map('v', 'K', [[:m '<-2<CR>gv=gv]])
 -- regex helpers
 u.map('c', [[\\*]], [[\(.*\)]])
 u.map('c', [[\\-]], [[\(.\{-}\)]])
