@@ -55,7 +55,7 @@ paru -S \
     pandoc \
     playerctl \
     pulsemixer \
-    python python-pip python2 python2-pip \
+    python python-pip \
     python-black \
     python-isort \
     jedi-language-server \
@@ -85,6 +85,8 @@ pip install \
     neovim-remote \
     vim-vint \
     visidata \
+    guessit \
+    trakt.py \
     --upgrade
 
 pip2 install \
