@@ -25,6 +25,8 @@ u.map('i', '<m-cr>', '<cr><esc>O')
 u.map('n', '<space><cr>', 'za')
 u.map('v', '<space><cr>', 'zf')
 u.map('n', '<space>tw', ':lua vim.wo.wrap = not vim.wo.wrap<cr>')
+u.map('n', '<space>lq', ':copen<CR>')
+u.map('n', '<space>ll', ':lopen<CR>')
 -- regex helpers
 u.map('c', [[\\*]], [[\(.*\)]])
 u.map('c', [[\\-]], [[\(.\{-}\)]])
