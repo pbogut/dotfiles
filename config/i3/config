@@ -15,6 +15,7 @@ set $hype Mod4+Mod1+Ctrl+Shift
 set $fish exec --no-startup-id fish -ic
 set $sh exec --no-startup-id sh -c
 set $exec exec
+set $term exec $TERMINAL
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
 font pango:monospace 8
@@ -182,11 +183,6 @@ bindsym $mod+Shift+E exec "i3-nagbar -t warning -m 'You pressed the exit shortcu
 # resize window (you can also use the mouse for that)
 set $mode_resize Resize (h) shrink width, (l) grow width, (j) shrink height, (k) grow height, (Esc) done
 mode "$mode_resize" {
-        # Pressing left will shrink the window’s width.
-        # Pressing right will grow the window’s width.
-        # Pressing up will shrink the window’s height.
-        # Pressing down will grow the window’s height.
-
         bindsym Mod1+h resize shrink width 1 px
         bindsym Mod1+k resize grow height 1 px
         bindsym Mod1+j resize shrink height 1 px
@@ -229,20 +225,6 @@ mode "$mode_system" {
 }
 bindsym $mod+q mode "$mode_system"
 
-# Start i3bar to display a workspace bar (plus the system information i3status
-# finds out, if available)
-# bar {
-#         # use font awesome [http://fontawesome.io/cheatsheet/] [aur/ttf-font-awesome]
-#         font pango:DejaVu Sans Mono, Awesome 8
-#         # font pango:Input Nerd Font 8
-#         # status_command i3status --config ~/.config/i3/i3status.conf
-#         # status_command i3status --config ~/.config/i3/i3status.conf
-#         # status_command bash ~/.scripts/i3-status.sh
-#         status_command i3blocks
-#         position top
-#         tray_output primary
-#         strip_workspace_numbers yes
-# }
 exec_always --no-startup-id $HOME/.config/polybar/launch.sh
 
 # class                 border  backgr. text    indicator child_border
@@ -280,21 +262,6 @@ for_window [title="^www.deezer.com"] workspace --no-auto-back-and-forth $wsmedia
 
 for_window [title="^.*$"] $exec sort-workspace.sh
 
-# assign [title="^EMAIL_MUTT$"] $wscomm
-# assign [title="^urxvt$"] $wsterm
-# for_window [title="^urxvt$"] workspace --no-auto-back-and-forth $wsterm
-# for_window [title="^urxvt$"] focus
-#
-# assign [class="^qutebrowser$" workspace="$wscode"] $wsbrow
-# assign [class="^qutebrowser$" workspace="1"] $wsbrow
-# for_window [class="^qutebrowser$" workspace="$wscode"] workspace --no-auto-back-and-forth $wsterm
-# for_window [class="^qutebrowser$" workspace="$wscode"] focus
-
-# for_window [title="NVIM_FOR_QB"] floating enable
-# for_window [title="QB_FILE_SELECTION"] floating enable
-# for_window [title="QB_FILE_SELECTION"] resize set width 1200px
-# for_window [title="QB_FILE_SELECTION"] resize set height 800px
-# for_window [title="QB_FILE_SELECTION"] move position center
 for_window [title="FLOATING_WINDOW"] floating enable
 for_window [class="Toggl Desktop"] floating enable
 for_window [class="^Yad$"] floating enable
@@ -302,10 +269,6 @@ for_window [class="^Yad$"] floating enable
 for_window [class="explorer.exe"] floating enable
 for_window [class="krusader"] floating disable
 for_window [class="^feh$"] fullscreen enable
-
-#for_window [title="^fzf-dmenu$"] floating enable
-#for_window [title="^fzf-dmenu$"] move absolute position 0px -16px
-#for_window [title="^fzf-dmenu$"] resize set width 1920px
 
 # fake-outputs 3288x1080+0+0
 $exec "setxkbmap pl"
@@ -331,9 +294,7 @@ bindsym $mod+XF86AudioLowerVolume $exec "~/.scripts/playerctl.sh prev-player"
 
 bindsym $mod+n $exec "~/.scripts/i3-switch-workspace.py --next --same-output"
 bindsym $mod+p $exec "~/.scripts/i3-switch-workspace.py --prev --same-output"
-# bindsym $mod+Tab $exec "~/.scripts/i3-toggle-visible-workspace.py --next"
 bindsym $mod+Tab workspace back_and_forth
-bindsym $mod+Shift+Tab $exec "~/.scripts/i3-toggle-visible-workspace.py --prev"
 bindsym $mod+Shift+N $exec "~/.scripts/i3-switch-workspace.py --next --same-output --with-container"
 bindsym $mod+Shift+P $exec "~/.scripts/i3-switch-workspace.py --prev --same-output --with-container"
 
@@ -355,27 +316,17 @@ bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '^Ferdi -' 'ferdi'"
 bindsym $mod+Ctrl+b $exec "~/.scripts/switch-or-launch.sh --scratchpad '^Bluetooth Devices$' 'blueman-manager'"
 bindsym $mod+Ctrl+r $exec "~/.scripts/switch-or-launch.sh '^rssguard.RSS$' 'rssguard'"
 
-# bindsym $mod+Ctrl+c $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
-# bindsym $mod+Ctrl+n $exec "~/.scripts/switch-or-launch.sh '\<Netflix$' 'google-chrome-stable --app=https://netflix.com'"
 bindsym $mod+Ctrl+s $exec "~/.scripts/switch-or-launch.sh --scratchpad '^Volume Control$' 'pavucontrol'"
-bindsym $mod+Ctrl+k $exec "urxvt -geometry 90x35 -T FLOATING_WINDOW -e khal interactive"
+bindsym $mod+Ctrl+k $term -t FLOATING_WINDOW -e khal interactive
 bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh '^www.deezer.com__en.Google-chrome$' 'google-chrome-stable --app=https://www.deezer.com/en/'"
-# bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh 'Freezer' 'freezer'"
 bindsym $mod+Ctrl+d $exec "~/.scripts/switch-or-launch.sh '^discord.discord$' 'discord'"
 bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
-# bindsym $mod+Ctrl+s $exec "~/.scripts/audio-device-out-switch.sh"
-# bindsym $mod+Ctrl+r $exec "~/.scripts/audio-device-in-switch.sh"
-# bindsym $mod+Ctrl+e $exec "urxvt -e neomutt && pkill -SIGRTMIN+13 i3blocks"
 bindsym $mod+Ctrl+e $exec "~/.scripts/switch-or-launch.sh '^EMAIL_MUTT$' 'email'"
-# bindsym $mod+Ctrl+r $sh "~/.scripts/switch-or-launch.sh '\<ranger$' 'urxvt -e ranger $(xcwd)'"
-bindsym $mod+Ctrl+l $exec "urxvt -e ~/.scripts/dev-log"
+bindsym $mod+Ctrl+l $term -e ~/.scripts/dev-log
 
 # move workspace to another monitor
 bindsym $mod+m move workspace to output right
 bindsym $mod+Shift+M move workspace to output left
-# swap workspaces between two monitors
-# bindsym $mod+Shift+M $exec "~/.scripts/i3-swap-workspaces.py"
-# anamnesis clip board
 bindsym $mod+apostrophe $exec "~/.scripts/i3-dmenu-copyq.sh"
 # browser shortcut
 bindsym $mod+slash $exec "~/.scripts/quickbrowser.sh"
