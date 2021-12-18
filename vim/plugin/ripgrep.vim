@@ -11,6 +11,6 @@ function! s:ripgrep_from_motion(type, ...)
   else
     silent exe "normal! `[v`]\"ay"
   endif
-  exe("Rg " . @a)
+  exe("Rg " . trim(@a))
   let @a = l:tmp
 endfunction
