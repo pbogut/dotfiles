@@ -13,15 +13,6 @@ require "rotp"
 require "uri"
 require 'cgi'
 
-def has_otp(notes)
-  notes.split("\n").each do |line|
-    if line.match(/^otpauth:\/\//)
-      return true
-    end
-  end
-  return false
-end
-
 def get_otp(notes)
   uri = nil
   notes.split("\n").each do |line|
@@ -82,11 +73,11 @@ entries.each do |entry|
   name = entry.xpath('./String/Key[text()="Title"]/../Value').text
   url = entry.xpath('./String/Key[text()="URL"]/../Value').text
   user = entry.xpath('./String/Key[text()="UserName"]/../Value').text
-  notes = entry.xpath('./String/Key[text()="Notes"]/../Value').text
-  otp = " 2FA" if has_otp(notes)
+  otpauth = entry.xpath('./String/Key[text()="otpauth"]/../Value').text
+  otp = ' 2FA' if otpauth.length.positive?
   cat = "#{cat}/" if cat
 
-  indexes[no] = name
+  indexes[no] = entry
   if name
     formated_list <<  ('%3.3s| %-50.50s %-50.50s %-8.8s %s' % [no, "#{cat}#{name}" , user, otp, url]) + "\n"
   end
@@ -172,25 +163,13 @@ index = selection.gsub(/(\d+).*/, '\1').to_i
 
 exit unless index > 0
 
-name = indexes[index]
-result, _, _ = Open3.capture3("keepass-cli", "show", "-s", name)
-# Open3.capture3('copyq', 'disable') # disable copyq from storing password
-# Open3.capture3('keepass-cli', 'clip', name)
-# Open3.capture3('copyq', 'enable') # allow copyq keep working after password was coppied
-# pass = Clipboard.paste
-pass = ''
-user = ''
-otpauth = ''
-result.gsub(/^UserName: (.*)$/) do |match|
-  user = match.gsub(/^UserName: (.*)$/, '\1')
-end
-result.gsub(/^Password: (.*)$/) do |match|
-  pass = match.gsub(/^Password: (.*)$/, '\1')
-end
-result.gsub(/^(Notes: )?otpauth:\/\/(.*)$/) do |match|
-  otpurl = match.gsub(/^(Notes: )?(otpauth:\/\/.*)$/, '\2')
-  otpauth = get_otp(otpurl)
-end
+entry = indexes[index]
+
+name = entry.xpath('./String/Key[text()="Title"]/../Value').text
+user = entry.xpath('./String/Key[text()="UserName"]/../Value').text
+pass = entry.xpath('./String/Key[text()="Password"]/../Value').text
+otpurl = entry.xpath('./String/Key[text()="otpauth"]/../Value').text
+otpauth = get_otp(otpurl) if otpurl
 
 sleep 0.2
 
