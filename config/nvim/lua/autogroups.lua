@@ -48,6 +48,14 @@ local config_group = {
       end,
     },
     {
+      'NeogitCommitMessage',
+      function()
+        cmd([[
+          setlocal spell spelllang=en_gb
+        ]])
+      end,
+    },
+    {
       'mail',
       function()
         cmd([[
