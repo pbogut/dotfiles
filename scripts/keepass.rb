@@ -22,6 +22,7 @@ def get_otp(notes)
     end
   end
 
+  return nil if uri.nil?
 
   secret = CGI::parse(uri.query)['secret']
   if uri.host == 'totp'

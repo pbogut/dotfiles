@@ -388,10 +388,10 @@ right[#right + 1] = {
       if #vim.lsp.buf_get_clients() > 0 then
         no_lsp = false
         diagnostics = {
-          hints = vim.lsp.diagnostic.get_count(0, 'Hint'),
-          info = vim.lsp.diagnostic.get_count(0, 'Information'),
-          warnings = vim.lsp.diagnostic.get_count(0, 'Warning'),
-          errors = vim.lsp.diagnostic.get_count(0, 'Error'),
+          hints = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.HINT}),
+          info = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.INFO}),
+          warnings = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.WARN}),
+          errors = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR}),
         }
       end
 
