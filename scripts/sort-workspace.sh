@@ -86,6 +86,7 @@ ws_browser="0: browser"
 ws_db="0: db"
 ws_dash="0: dash"
 ws_rss="0: rss"
+ws_lol="0: LoL"
 
 if [[ $extended -eq 1 ]]; then
   found=1
@@ -122,6 +123,15 @@ if [[ $extended -eq 1 ]]; then
 fi
 
 case  "$wm_class" in
+  "leagueclient.exe leagueclient.exe")
+    move_and_swich "$ws_lol"
+    ;;
+  "leagueclientux.exe leagueclientux.exe")
+    move_and_swich "$ws_lol"
+    ;;
+  "league of legends.exe league of legends.exe")
+    move_and_swich "$ws_lol"
+    ;;
   "rssguard RSS Guard")
     move_and_swich "$ws_rss"
     ;;
