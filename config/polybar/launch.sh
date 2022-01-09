@@ -11,24 +11,19 @@ killall -q polybar
 # If all your bars have ipc enabled, you can also use
 # polybar-msg cmd quit
 
-
 hostname=$(hostname)
-
-screens=$(polybar -m | wc -l)
-primary=$(polybar -m | grep '(primary)' | awk '{gsub(/:$/, "", $1); print $1}')
 
 if [[ $hostname == "silverspoon" ]]; then
   echo "---" | tee -a /tmp/polybar1.log
-  MONITOR=$primary    polybar silverspoon  2>&1 | tee -a /tmp/polybar1.log & disown
-elif [[ $screens -eq 2 ]]; then
+  MONITOR=eDP1     polybar silverspoon 2>&1 | tee -a /tmp/polybar1.log & disown
+elif [[ $hostname = "redeye" ]]; then
   echo "---" | tee -a /tmp/polybar1.log /tmp/polybar2.log
-  secondary=$(polybar -m | grep -v '(primary)' | awk '{gsub(/:$/, "", $1); print $1}' | head -n1)
-
-  MONITOR=$primary    polybar primary     2>&1 | tee -a /tmp/polybar1.log & disown
-  MONITOR=$secondary  polybar secondary   2>&1 | tee -a /tmp/polybar2.log & disown
+  MONITOR=HDMI-0   polybar primary     2>&1 | tee -a /tmp/polybar1.log & disown
+  MONITOR=DVI-D-0  polybar secondary   2>&1 | tee -a /tmp/polybar2.log & disown
 else
   echo "---" | tee -a /tmp/polybar1.log
-  MONITOR=$primary    polybar primary     2>&1 | tee -a /tmp/polybar1.log & disown
+  primary=$(polybar -m | grep '(primary)' | awk '{gsub(/:$/, "", $1); print $1}')
+  MONITOR=$primary polybar primary     2>&1 | tee -a /tmp/polybar1.log & disown
 fi
 
 echo "Bars launched..."
