@@ -54,7 +54,7 @@ local sources = {
   },
   {
     builtin = null_ls.builtins.formatting.prettier,
-    filetypes = { 'markdown' },
+    filetypes = { 'markdown', 'css' },
     enabled = true,
   },
 }
