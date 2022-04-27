@@ -35,7 +35,7 @@ u.augroup('x_plugins_save', {
 
 local function config(plugin)
   return [[
-    local xcfg = require("plugins.]] .. plugin .. [[")
+    local _, xcfg = pcall(require, "plugins.]] .. plugin .. [[")
     if type(xcfg) == 'table' and xcfg['config'] then
       xcfg.config()
     end]]
@@ -43,7 +43,7 @@ end
 
 local function setup(plugin)
   return [[
-    local xcfg = require("plugins.]] .. plugin .. [[")
+    local _, xcfg = pcall(require, "plugins.]] .. plugin .. [[")
     if type(xcfg) == 'table' and xcfg['setup'] then
       xcfg.setup()
     end]]
@@ -55,7 +55,7 @@ require('packer').startup({
     use({ 'wbthomason/packer.nvim', opt = true })
 
     -- My local plugins
-    use({ fn.stdpath('config') .. '/local/projector', config = config('projector') })
+    pcall(use,{ fn.stdpath('config') .. '/local/projector', config = config('projector') })
     use({ fn.stdpath('config') .. '/local/remotesync', config = "require'remotesync'" })
 
     -- Github plugins
@@ -80,10 +80,9 @@ require('packer').startup({
     })
     use({ 'mfussenegger/nvim-dap', config = config('nvim_dap') })
     use({ 'mhinz/vim-signify', config = config('vim_signify') })
-    use({ 'ludovicchabant/vim-gutentags' })
     use({ 'ntpeters/vim-better-whitespace', config = config('vim_better_whitespace') })
     use({ 'honza/vim-snippets' })
-    use({ 'k-takata/matchit.vim' })
+    use({ 'andymass/vim-matchup' })
     use({
       'vim-test/vim-test',
       cmd = { 'TestNearest', 'TestFile', 'TestSuite', 'TestLast', 'TestLast', 'TestVisit' },
@@ -164,15 +163,20 @@ require('packer').startup({
         'hrsh7th/cmp-nvim-lsp',
         'hrsh7th/cmp-nvim-lua',
         'hrsh7th/cmp-emoji',
-        'quangnguyen30192/cmp-nvim-tags',
         'tzachar/cmp-tabnine',
         'ray-x/cmp-treesitter',
         'onsails/lspkind-nvim',
         'dcampos/cmp-snippy',
+        -- 'quangnguyen30192/cmp-nvim-tags', # dont even try, its slow trash
       },
     })
     use({ 'kristijanhusak/vim-dadbod-completion', after = { 'nvim-cmp', 'vim-dadbod' } })
 
+    use({ 'emmanueltouzery/agitator.nvim' })
+
+    use({ 'f-person/git-blame.nvim', config = config('git_blame') })
+    -- copilot after rsi due to binding conflict (<c-f>)
+    use({ 'github/copilot.vim', config = config('copilot'), after = 'vim-rsi'})
     -- lsp
     use({ 'ray-x/lsp_signature.nvim' })
     use({

@@ -228,6 +228,13 @@ function u.table_keys(list)
   return result
 end
 
+function u.table_remove(list, start, length)
+  for _=1,length do
+    table.remove(list, start)
+  end
+  return list
+end
+
 -- merges tables recursively, if both values
 -- are lists (see tbl_islist) then it merges
 -- data from both tables into one (not replacing one with other)

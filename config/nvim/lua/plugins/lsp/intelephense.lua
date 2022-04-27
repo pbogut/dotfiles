@@ -8,7 +8,7 @@ function me.setup(opts)
 
   opts = vim.tbl_deep_extend('keep', opts, {
     cmd = { 'sh', '-c', 'HOME=' .. fake_home.. ' intelephense --stdio' },
-    filetypes = {"php", "blade"},
+    filetypes = {"php", "blade", "html"},
     settings = {
       intelephense = {
         files = {

@@ -7,7 +7,6 @@ for _, remote in pairs(config.get('sync.remotes', {})) do
   remotes[remote.name] = remote.uri
 end
 
-
 local function sync(remote)
   if remote and remotes and remotes[remote] then
     local cmd = {'scp', fn.expand('%:.'), remotes[remote] .. '/' .. fn.expand('%:.')}
@@ -17,6 +16,18 @@ local function sync(remote)
       end
     })
   end
+end
+
+if config.get('sync.autosync.enabled', false) then
+  local remote = config.get('sync.autosync.remote', '')
+  local filters = config.get('sync.autosync.filters', {})
+
+  vim.api.nvim_create_autocmd('BufEnter',{
+    pattern = filters,
+    callback = function()
+      vim.cmd('RemoteSync ' .. remote)
+    end,
+  })
 end
 
 local config_group = {

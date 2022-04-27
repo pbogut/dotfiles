@@ -30,6 +30,11 @@ local function config()
         behavior = cmp.ConfirmBehavior.Replace,
         select = true,
       }),
+      ['<c-o>'] = cmp.mapping(function(fallback)
+        if cmp.visible() then
+          cmp.close()
+        end
+      end),
       ['<tab>'] = cmp.mapping(function(fallback)
         local entry = cmp.core.view:get_selected_entry()
         if cmp.visible() and entry then

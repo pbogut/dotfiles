@@ -33,6 +33,19 @@ local config_group = {
         bo.filetype = 'sh'
       end,
     },
+    {
+      'crontab.*',
+      function ()
+        bo.commentstring = '# %s'
+      end,
+    },
+    {
+      '*.phtml',
+      function()
+        bo.filetype = 'html'
+        bo.syntax = 'php'
+      end,
+    },
   },
   FileType = {
     {

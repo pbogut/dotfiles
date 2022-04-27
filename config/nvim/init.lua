@@ -1,8 +1,8 @@
 -- common helper
 require('helper')
 -- config
-require('settings')
-require('plugins')
-require('autogroups')
-require('keymappings')
-require('commands')
+prequire('settings')
+prequire('plugins')
+prequire('autogroups')
+prequire('keymappings')
+prequire('commands')

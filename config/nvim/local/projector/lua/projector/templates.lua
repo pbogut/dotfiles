@@ -75,7 +75,7 @@ local function process_placeholders(lines)
   return replace_placeholders(lines, result)
 end
 
-local function file_template(name)
+function M.file_template(name)
   local template = io.open(templates_path .. '/' .. name .. '.snippet', 'r')
   local lines = vim.split(template:read('*a'), '\n')
   if lines[#lines] == '' then
@@ -128,7 +128,7 @@ end
 
 function M.template_command(args)
   if args and args:len() > 0 then
-    file_template(args)
+    M.file_template(args)
   else
     M.do_template();
   end
@@ -145,7 +145,7 @@ function M.do_template()
   local file_config = shared.get_file_config()
 
   if type(file_config.template) == 'string' then
-    return file_template(file_config.template)
+    return M.file_template(file_config.template)
   end
 end
 

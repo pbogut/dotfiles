@@ -44,6 +44,7 @@ o.undolevels = 1000
 o.wildignore = '*.swp,*.bak,*.pyc,*.class'
 o.hidden = true
 o.clipboard = 'unnamedplus'
+o.laststatus = 3
 
 o.colorcolumn = '81' -- line 80 limit 81 is colored
 o.foldmethod = 'manual'

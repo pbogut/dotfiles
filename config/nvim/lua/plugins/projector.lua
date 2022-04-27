@@ -9,6 +9,12 @@ u.command('Skel', 'lua require"projector".template_command(<q-args>)', {
   nargs = '?',
   complete = 'customlist,v:lua.projector.temp_completion'
 })
+
+u.command('Gen', 'lua require"projector".generate(<q-args>)', {
+  nargs = '?',
+  complete = 'customlist,v:lua.projector.gen_completion'
+})
+
 u.map('n', '<space>ta', ':lua require"projector".go_alternate()<cr>', { silent = true })
 u.augroup('x_templates', {
     ['BufNewFile,BufNew'] = {
@@ -114,6 +120,71 @@ projector.setup({
           html = {'knockout/html'},
         }
       },
+      project_init = function()
+        u.augroup('x_magento', {
+          BufWritePost = {'*.html,*.css,*.js', function()
+            -- when template save remove generated one
+            --
+            -- app/design/frontend/menspharmacy/default/web/css/checkout.css
+            -- pub/static/frontend/menspharmacy/default/en_GB/css/checkout.css
+            --
+            --                        app/code/Pharmacy/Checkout/view/frontend/web/js/mixin/server-method.js
+            -- pub/static/frontend/assuredpharmacy/default/en_GB/Pharmacy_Checkout/js/mixin/server-method.js
+            --
+            -- pub/static/frontend/Magento/blank/en_GB/Ebizmarts_SagePaySuite/js/view/payment/method-renderer/server-method.js
+            -- pub/static/frontend/Magento/blank/en_GB/Pharmacy_Checkout/js/mixin/server-method.js
+            -- pub/static/frontend/Magento/luma/en_GB/Ebizmarts_SagePaySuite/js/view/payment/method-renderer/server-method.js
+            -- pub/static/frontend/Magento/luma/en_GB/Pharmacy_Checkout/js/mixin/server-method.js
+            -- pub/static/frontend/assuredpharmacy/default/en_GB/Ebizmarts_SagePaySuite/js/view/payment/method-renderer/server-method.js
+            -- pub/static/frontend/assuredpharmacy/default/en_GB/Pharmacy_Checkout/js/mixin/server-method.js
+            local parts = h.get_file_parts()
+            local ext = vim.fn.expand('%:e')
+            local toremove = false
+
+            if parts[7] == "web" then
+              toremove = true
+              local vendor = parts[3]
+              local module = parts[4]
+              u.table_remove(parts, 1, 7)
+              table.insert(parts, 1, vendor .. "_" .. module)
+              table.insert(parts, 1, '*')
+              table.insert(parts, 1, 'static')
+              table.insert(parts, 1, 'pub')
+
+              dump(parts)
+            end
+
+            if parts[2] == "design" then
+              toremove = true
+              parts[1] = "pub" -- change to pub static dir
+              parts[2] = "static"
+              if parts[6] == "web" then
+                -- web folder directly in design
+                parts[6] = "*"
+              else
+                -- web folder in module subfolder
+                table.remove(parts, 7) -- remove web
+                table.insert(parts, 6, '*') -- insert * for language en_US, en_GB etc
+              end
+            end
+
+
+            if toremove then
+              local glob = table.concat(parts, "/") .. '.' .. ext
+              dump(glob)
+              local files = u.glob(glob)
+              -- dump(files)
+              for _, file in pairs(files) do
+                local success = os.remove(file)
+                if not success then
+                  vim.notify("Cant remove: " .. file)
+                end
+              end
+            end
+
+          end}
+        })
+      end,
       generators = {
         module = {
           variables = {
@@ -373,6 +444,126 @@ projector.setup({
     -- elixir phoenix
     ["mix.exs&deps/phoenix/"] = {
       priority = 100,
+      generators = {
+        tailwind = {
+          cmd = {
+            'cd assets',
+            'npm install autoprefixer postcss postcss-import tailwindcss --save-dev',
+            'cd ..',
+          },
+          new = {
+            {
+              file = 'assets/postcss.config.js',
+              template = 'js/postcss.config.js',
+            },
+            {
+              file = 'assets/tailwind.config.js',
+              template = 'elixir/tailwind.config.js',
+            },
+          },
+          update = {
+            {
+              file = 'config/dev.exs',
+              after = 'watchers: %[',
+              insert = {
+                  '    npx: [',
+                  '      "tailwindcss",',
+                  '      "--input=css/app.css",',
+                  '      "--output=../priv/static/assets/app.css",',
+                  '      "--postcss",',
+                  '      "--watch",',
+                  '      cd: Path.expand("../assets", __DIR__)',
+                  '    ],',
+              },
+            },
+            {
+              file = 'assets/css/app.css',
+              prepend = {
+                '@import "tailwindcss/base";',
+                '@import "tailwindcss/components";',
+                '@import "tailwindcss/utilities";',
+                '/*',
+                '@layer components {',
+                '  // custom components',
+                '}',
+                '*/',
+                '',
+              },
+            },
+            {
+              file = 'assets/js/app.js',
+              replace = '^import "%.%./css/app.css"',
+              with = '// import "../css/app.css"',
+            },
+          }
+        },
+        alpinejs = {
+          cmd = {
+            'cd assets',
+            'npm install alpinejs',
+            'cd ..',
+          },
+          update = {
+            {
+              file = 'assets/js/app.js',
+              replace = 'let liveSocket %= new LiveSocket%("%/live", Socket, %{(params:.-)%}%)$',
+              with = {
+                'let liveSocket %= new LiveSocket%("%/live", Socket, %{',
+                '  %1',
+                '%}%)',
+              },
+            },
+            {
+              file = 'assets/js/app.js',
+              prepend = {
+                'import Alpine from "alpinejs";',
+                '',
+                'window.Alpine = Alpine;',
+                'Alpine.start();',
+              },
+              after = 'let liveSocket %= new LiveSocket%("%/live", Socket, %{',
+              insert = {
+                '  dom: {',
+                '    onBeforeElUpdated(from, to) {',
+                '      if (from._x_dataStack) {',
+                '        window.Alpine.clone(from, to);',
+                '      }',
+                '    },',
+                '  },',
+              }
+            },
+          }
+        },
+        static_assets = {
+          cmd = {
+            'chmod +x lib/mix/tasks/run_command.sh'
+          },
+          new = {
+            {
+              file = 'lib/mix/tasks/static_assets.ex',
+              template = 'elixir/static_assets/static_assets.ex',
+            },
+            {
+              file = 'lib/mix/tasks/run_command.sh',
+              template = 'elixir/static_assets/run_command.sh',
+            },
+          },
+          update = {
+            {
+              file = 'config/dev.exs',
+              after = 'watchers: %[',
+              insert = {
+                '    static: {Mix.Tasks.StaticAssets, :run, [~w(--watch --purge)]},',
+              },
+            },
+            {
+              file = 'mix.exs',
+              replace = '"assets.deploy": %[(.-)%]',
+              with = '"assets.deploy": %["static_assets --purge", %1%]',
+            }
+          }
+        }
+      },
       patterns = {
         ['(.*)%.exs'] = {
           template = "elixir/module",

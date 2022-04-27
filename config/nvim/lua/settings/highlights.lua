@@ -9,6 +9,7 @@ local function highlights()
   u.highlights({
     Folded = { term = 'NONE', cterm = 'NONE',  gui = 'NONE' },
     VertSplit = {guibg = '#073642', guifg = 'fg'},
+    WinSeparator = {guibg = 'none', guifg = 'fg'},
     NonText = {gui = 'none', guifg = '#586e75'},
     SpecialKey = {gui = 'none', guifg = '#586e75'},
     Whitespace = {gui = 'none', guifg = '#586e75'},
@@ -63,6 +64,9 @@ local function highlights()
 
     TSKeyword           = { guifg = g.colors.alt_green }, -- public, function, class, extends, $, as
     TSKeywordFunction   = { guifg = g.colors.orange },
+
+    -- MatchParen ctermbg=blue guibg=lightblue cterm=italic gui=italic
+    MatchParen = { guifg = g.colors.orange, guibg = g.colors.base02 }
   })
 end
 

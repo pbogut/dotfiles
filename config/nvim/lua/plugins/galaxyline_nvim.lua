@@ -226,30 +226,13 @@ short_left[#short_left + 1] = left[#left]
 
 prequire('dap').done(function(dap)
   left[#left + 1] = {
-    DapStart = {
-      provider = function()
-        if dap.status():len() > 0 then
-          return i.separator.right
-        end
-      end,
-      highlight = { colors.orange, colors.base02 },
-    },
     Dap = {
       provider = function()
         local status = dap.status()
         if status:len() > 0 then
-          return '  (' .. status .. ')'
+          return '  (' .. status .. ') ' .. i.separator.mid_right .. ' '
         else
           return ''
-        end
-      end,
-      highlight = { colors.base2, colors.orange },
-      separator_highlight = { colors.orange, colors.base02 },
-    },
-    DapStop = {
-      provider = function()
-        if dap.status():len() > 0 then
-          return i.separator.left .. ' '
         end
       end,
       highlight = { colors.orange, colors.base02 },
