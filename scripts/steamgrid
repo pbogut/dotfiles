@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   steamgrid
+# author: Pawel Bogut <https://pbogut.me>
+# date:   13/03/2022
+#=================================================
+steamdir=""
+
+PARAMS=""
+
+while test $# -gt 0; do
+  case "$1" in
+    -flatpak|--flatpak)
+      PARAMS="$PARAMS --steamdir $HOME/.var/app/com.valvesoftware.Steam/data/Steam"
+      shift
+      ;;
+    *)
+      PARAMS="$PARAMS $1"
+      shift
+      ;;
+  esac
+done
+
+/usr/bin/steamgrid --steamgriddb $(config steam/steamgriddb/api_key) $PARAMS
