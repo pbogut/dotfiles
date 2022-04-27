@@ -141,6 +141,9 @@ end, { nargs = '?', qargs = true, bang = true, complete = 'dir' })
 
 telescope.setup({
   defaults = {
+    path_display = {
+      shorten = { len = 3, exclude = {1, 2, -1, -2, -3} }
+    },
     -- sorting_strategy = "ascending",
     -- layout_strategy = 'vertical',
     vimgrep_arguments = {
