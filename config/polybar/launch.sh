@@ -19,7 +19,9 @@ if [[ $hostname == "silverspoon" ]]; then
 elif [[ $hostname = "redeye" ]]; then
   echo "---" | tee -a /tmp/polybar1.log /tmp/polybar2.log
   MONITOR=HDMI-0   polybar primary     2>&1 | tee -a /tmp/polybar1.log & disown
-  MONITOR=DVI-D-0  polybar secondary   2>&1 | tee -a /tmp/polybar2.log & disown
+  # MONITOR=DVI-D-0  polybar secondary   2>&1 | tee -a /tmp/polybar2.log & disown
+  MONITOR=DP-2  polybar secondary   2>&1 | tee -a /tmp/polybar2.log & disown
+  MONITOR=DP-1  polybar secondary   2>&1 | tee -a /tmp/polybar2.log & disown
 else
   echo "---" | tee -a /tmp/polybar1.log
   primary=$(polybar -m | grep '(primary)' | awk '{gsub(/:$/, "", $1); print $1}')
