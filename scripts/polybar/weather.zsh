@@ -53,11 +53,12 @@ show_weather() {
               $values[0] eq "Partly Sunny w/ T-Storms" ||
               $values[0] eq "Rain"
           ) {
-            $icon = "";
+            # $icon = "";
+            $icon = "";
           }
 
           if($values[0] eq "Windy") {
-            $icon = "";
+            $icon = "";
           }
 
           if($values[0] eq "Flurries" ||
@@ -94,10 +95,10 @@ show_weather() {
             print $icon;
             print "%\{F-\}";
             $icon  = "";
-            print $2
+            #print replace("C", "X", $2);
           }
           # print $icon; $icon  = "";
-          print $values[1];
+          print $values[1] =~ s/C/糖/r;
         }'
   echo '' # new line for new i3blocks compatibility
 }
