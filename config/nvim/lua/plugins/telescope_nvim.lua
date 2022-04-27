@@ -107,7 +107,6 @@ u.map('n', '<space>gr', ':Rg<cr>')
 
 local last_query = ''
 u.command('Rg', function(bang, query)
-  dump(query)
   if query == '' then
     query = last_query
   else
@@ -126,6 +125,17 @@ u.command('Rg', function(bang, query)
     dirs = { dir }
     query = query:gsub('(.-) ([^%s]+%/)$', '%1')
   end
+  local message = '"' .. query .. '"'
+  local short_dirs = {}
+  for _, dir in pairs(dirs) do
+    if dir ~= vim.fn.getcwd() then
+      short_dirs[#short_dirs + 1] = dir:gsub('^.*%.%/', '')
+    end
+  end
+  if #short_dirs > 0 then
+    message = message .. ' in ' .. table.concat(short_dirs, ', ')
+  end
+  print(message)
   builtin.grep_string({ search = query, use_regex = bang, search_dirs = dirs })
 end, { nargs = '?', qargs = true, bang = true, complete = 'dir' })
 
