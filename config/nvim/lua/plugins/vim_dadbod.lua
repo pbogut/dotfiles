@@ -86,7 +86,6 @@ u.augroup('x_dadbod', {
         then
           cmd([[silent! %s/^\n/ /]])          --empty lines
           cmd([[silent! %s/[^\|\+]\zs\n/ /]]) --lines not ending with table
-          cmd([[w!]])
         end
         cmd([[wincmd L]])
         b.modifiable = false
