@@ -21,17 +21,25 @@ usage() {
 }
 
 move_top() {
-  i3-msg move down 50ppt > /dev/null
-  i3-msg move down 5ppt > /dev/null
-  i3-msg move down 5ppt > /dev/null
-  i3-msg move down 5ppt > /dev/null
-  i3-msg move down 5ppt > /dev/null
-  i3-msg move down 5ppt > /dev/null
-  i3-msg move up 95ppt > /dev/null
+  i3move --inside-distance 2 up
 }
 
 focus_toggle() {
   i3-msg focus mode_toggle
+}
+
+move() {
+  new_ws="$1"
+  if [[ "$current_ws" != "$new_ws" ]]; then
+    i3-msg move window to workspace "$new_ws" > /dev/null
+  fi
+}
+
+swich() {
+  new_ws="$1"
+  if [[ "$current_ws" != "$new_ws" ]]; then
+    i3-msg workspace "$new_ws" > /dev/null
+  fi
 }
 
 move_and_swich() {
@@ -86,7 +94,11 @@ ws_browser="0: browser"
 ws_db="0: db"
 ws_dash="0: dash"
 ws_rss="0: rss"
+ws_vm="0: VM"
 ws_lol="0: LoL"
+ws_steam="0: steam"
+ws_game="0: gaming"
+
 
 if [[ $extended -eq 1 ]]; then
   found=1
@@ -123,6 +135,18 @@ if [[ $extended -eq 1 ]]; then
 fi
 
 case  "$wm_class" in
+  "Steam Steam"|"steam steam"|"heroic heroic")
+    move_and_swich "$ws_game"
+    ;;
+  "obs obs")
+    move_and_swich "$ws_game"
+    ;;
+  "csgo_linux64 csgo_linux64"|steam_app*|steam_proton*)
+    move_and_swich "$ws_game"
+    ;;
+  "chiaki Chiaki")
+    move_and_swich "$ws_game"
+    ;;
   "leagueclient.exe leagueclient.exe")
     move_and_swich "$ws_lol"
     ;;
@@ -131,6 +155,12 @@ case  "$wm_class" in
     ;;
   "league of legends.exe league of legends.exe")
     move_and_swich "$ws_lol"
+    ;;
+  "VBoxSDL VBoxSDL"|\
+  "VirtualBox Manager VirtualBox Manager"|\
+  "VirtualBox Machine VirtualBox Machine"|\
+  "VirtualBox Machine VirtualBox Machine")
+    move_and_swich "$ws_vm"
     ;;
   "rssguard RSS Guard")
     move_and_swich "$ws_rss"

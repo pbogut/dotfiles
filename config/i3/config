@@ -237,11 +237,13 @@ client.placeholder      #000000 #0c0c0c #ffffff #000000   #0c0c0c
 client.background       #ffffff
 
 # new_window pixel 1
-new_window normal 1
+# new_window normal 1
+default_border normal 1
+
 
 # stacked by default
 # workspace_layout tabbed
-workspace_layout stacked
+workspace_layout stacking
 
 # assign apps to specific workspaces
 assign [title="^DBeaver" class="^SWT$"] $wsdb
@@ -269,6 +271,10 @@ for_window [class="^Yad$"] floating enable
 for_window [class="explorer.exe"] floating enable
 for_window [class="krusader"] floating disable
 for_window [class="^feh$"] fullscreen enable
+for_window [title="SPLASH_SCREEN"] floating enable
+for_window [title="SPLASH_SCREEN"] fullscreen disable
+for_window [title="SPLASH_SCREEN"] title_format "<span alpha='1'>%title</span>"
+for_window [title="SPLASH_SCREEN"] border pixel 1
 
 # fake-outputs 3288x1080+0+0
 $exec "setxkbmap pl"
@@ -282,13 +288,16 @@ set $releaseSound play ~/Media/test-44100Hz-le-1ch-4bytes.wav speed 3.0 vol 0.15
 # Media Keys
 bindsym XF86MonBrightnessUp $exec "~/.scripts/i3-brightness.sh up"
 bindsym XF86MonBrightnessDown $exec "~/.scripts/i3-brightness.sh down"
-bindsym XF86AudioRaiseVolume $exec "~/.scripts/volume.sh up"
-bindsym XF86AudioLowerVolume $exec "~/.scripts/volume.sh down"
+bindsym Shift+XF86AudioRaiseVolume $exec "~/.scripts/volume.sh up 'Arctis Pro'"
+bindsym Shift+XF86AudioLowerVolume $exec "~/.scripts/volume.sh down 'Arctis Pro'"
+bindsym XF86AudioRaiseVolume $exec "~/.scripts/volume.sh up 'Family 17h'"
+bindsym XF86AudioLowerVolume $exec "~/.scripts/volume.sh down 'Family 17h'"
 bindsym XF86AudioPause $exec "~/.scripts/playerctl.sh play-pause"
 bindsym XF86AudioPlay $exec "~/.scripts/playerctl.sh play-pause"
 bindsym XF86AudioNext $exec "~/.scripts/playerctl.sh next"
 bindsym XF86AudioPrev $exec "~/.scripts/playerctl.sh previous"
 
+bindsym $hype+n $exec "~/.scripts/playerctl.sh next-player"
 bindsym $mod+XF86AudioRaiseVolume $exec "~/.scripts/playerctl.sh next-player"
 bindsym $mod+XF86AudioLowerVolume $exec "~/.scripts/playerctl.sh prev-player"
 
@@ -312,32 +321,50 @@ bindsym $mod+i $sh '~/.scripts/vim-anywhere.sh'
 # bindsym $mod+Ctrl+d $sh '~/.scripts/vim-anywhere.sh --draft'
 bindsym $mod+u $sh '~/.scripts/users.sh --switch'
 
-bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '^Ferdi -' 'ferdi'"
+bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '^Ferdi -' 'com.getferdi.Ferdi'"
 bindsym $mod+Ctrl+b $exec "~/.scripts/switch-or-launch.sh --scratchpad '^Bluetooth Devices$' 'blueman-manager'"
 bindsym $mod+Ctrl+r $exec "~/.scripts/switch-or-launch.sh '^rssguard.RSS$' 'rssguard'"
 
 bindsym $mod+Ctrl+s $exec "~/.scripts/switch-or-launch.sh --scratchpad '^Volume Control$' 'pavucontrol'"
 bindsym $mod+Ctrl+k $term -t FLOATING_WINDOW -e khal interactive
 bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh '^www.deezer.com__en.Google-chrome$' 'google-chrome-stable --app=https://www.deezer.com/en/'"
-bindsym $mod+Ctrl+d $exec "~/.scripts/switch-or-launch.sh '^discord.discord$' 'discord'"
+bindsym $mod+Ctrl+d $exec "~/.scripts/switch-or-launch.sh '^discord.discord$' 'discord.sh'"
 bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
 bindsym $mod+Ctrl+e $exec "~/.scripts/switch-or-launch.sh '^EMAIL_MUTT$' 'email'"
 bindsym $mod+Ctrl+l $term -e ~/.scripts/dev-log
 
+bindsym $mod+b $exec "~/.scripts/mangohud-mode-switch.sh"
+
 # move workspace to another monitor
-bindsym $mod+m move workspace to output right
-bindsym $mod+Shift+M move workspace to output left
+bindsym $mod+m $exec "~/.scripts/i3-screen-ring.sh --move --next"
+bindsym $mod+comma move workspace to output up
 bindsym $mod+apostrophe $exec "~/.scripts/i3-dmenu-copyq.sh"
 # browser shortcut
 bindsym $mod+slash $exec "~/.scripts/quickbrowser.sh"
 # screen shots
 # full screen (image magick required)
-bindsym Print $exec "import -window root ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
+bindsym Print $exec "import -window $(xdotool getwindowfocus -f) ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
+bindsym $mod+Print $exec "import -window root ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
 # area (maim and slop required)
 bindsym Shift+Print $exec "maim -s ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
-bindsym Shift+Ctrl+Print $exec "~/.scripts/record.sh ~/Videos/Capture_from_$(date +%Y-%m-%d_%H-%M-%S).mp4"
-bindsym Ctrl+Print $exec "killall ffmpeg; notify-send 'Recording has been stoped'"
+#bindsym Shift+Ctrl+Print $exec "~/.scripts/record.sh ~/Videos/Capture_from_$(date +%Y-%m-%d_%H-%M-%S).mp4"
+#bindsym Ctrl+Print $exec "killall ffmpeg; notify-send 'Recording has been stoped'"
+
+
+bindsym Ctrl+Print $exec "shadowplay.sh --screen-shot"
+bindsym Shift+Ctrl+Print $exec "shadowplay.sh --save"
 
 for_window [class="^looking.*"] move scratchpad
 bindsym $mod+g scratchpad show
 bindsym $mod+Shift+G move scratchpad
+
+
+# bindsym --whole-window buttor4 focus output up
+# bindsym --whole-window buttor5 focus output right
+# bindsym --whole-window $mod+button4 focus output up
+# bindsym --whole-window $mod+button5 focus output right
+bindsym --whole-window $mod+button4 $exec "i3-screen-ring.sh --focus --next"
+bindsym --whole-window $mod+button5 $exec "i3-screen-ring.sh --focus --prev"
+# move out of game window
+# bindsym --whole-window $mod+ctrl+p $exec "xdotool mousemove 2880 1620"
+bindsym $mod+Ctrl+P $exec "xdotool mousemove 2880 1620"

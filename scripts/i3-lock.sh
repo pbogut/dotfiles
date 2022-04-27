@@ -46,6 +46,6 @@ fix_postsuspend() {
 dunstctl set-paused true
 (lock_screen &&
 dunstctl set-paused false &&
-fix_postsuspend()
+fix_postsuspend
 ) &
 sleep "${sleep}s";

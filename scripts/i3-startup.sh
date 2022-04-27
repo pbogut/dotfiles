@@ -4,12 +4,11 @@ set_walpaper() {
   feh --randomize --bg-fill ~/Pictures/wallpaper
 }
 if [ "$hostname" == "redeye" ]; then # pc
-  hdmi0=$(xrandr | grep HDMI-0)
-  stnr="0"
-  if [[ $hdmi0 == "" ]]; then
-    stnr="1"
-  fi
-  xrandr --output VGA-$stnr --off --output DVI-D-$stnr --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-$stnr --primary --mode 1920x1080 --pos 1920x0 --rotate normal
+  xrandr \
+    --output HDMI-0 --mode 1920x1080 --pos 1920x1080 --rotate normal \
+    --output DP-2 --primary --mode 1920x1080 --refresh 144 --pos 0x1080 --rotate normal \
+    --output DP-1 --mode 1920x1080 --pos 1920x0 --rotate normal \
+    --output DP-0 --off --output DP-3 --off --output DP-4 --off --output DP-5 --off
 
   set_walpaper
 else
