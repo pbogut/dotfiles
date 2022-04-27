@@ -13,21 +13,23 @@ require "rotp"
 require "uri"
 require 'cgi'
 
-def get_otp(notes)
-  uri = nil
-  notes.split("\n").each do |line|
-    if line.match(/^otpauth:\/\//)
-      uri = URI.parse(line.gsub(" ", "%20"))
-      break
-    end
-  end
-
+def get_otp(url)
+  uri = URI.parse(url.gsub(' ', '%20'))
   return nil if uri.nil?
 
-  secret = CGI::parse(uri.query)['secret']
+  params = CGI::parse(uri.query)
+  secret = params['secret'][0]
+  digits = params['digits'][0]
+  digits = digits ? digits.to_i : 6
+
   if uri.host == 'totp'
-    totp = ROTP::TOTP.new(secret[0])
-    return totp.now()
+    totp = ROTP::TOTP.new(secret, digits: digits)
+    return totp.now
+  elsif uri.host == 'steam'
+    # print(uri.host)
+    steam_user = uri.path.gsub(/^.*:/, '')
+    code, = Open3.capture3("steamctl authenticator code #{steam_user}")
+    return code.strip
   else
     raise "#{uri.host} not implemented"
   end
@@ -157,12 +159,12 @@ if !action
 end
 
 cmd = "rofi -filter '#{search_urls} ' -dmenu -i -p '#{prompt}:'"
-selection, _, _ = Open3.capture3(cmd, stdin_data: formated_list)
+selection, = Open3.capture3(cmd, stdin_data: formated_list)
 selection = selection.force_encoding('utf-8').encode
 
 index = selection.gsub(/(\d+).*/, '\1').to_i
 
-exit unless index > 0
+exit unless index.positive?
 
 entry = indexes[index]
 
@@ -170,19 +172,15 @@ name = entry.xpath('./String/Key[text()="Title"]/../Value').text
 user = entry.xpath('./String/Key[text()="UserName"]/../Value').text
 pass = entry.xpath('./String/Key[text()="Password"]/../Value').text
 otpurl = entry.xpath('./String/Key[text()="otpauth"]/../Value').text
-otpauth = get_otp(otpurl) if otpurl
+otpauth = get_otp(otpurl) if !otpurl.empty?
 
 sleep 0.2
 
-if action == '--copy-user'
-  _, _, _ = Open3.capture3('xsel -b -i', stdin_data: user)
-end
-if action == '--copy-pass'
-  _, _, _ = Open3.capture3('xsel -p -i', stdin_data: pass)
-end
+Open3.capture3('xsel -b -i', stdin_data: user) if action == '--copy-user'
+Open3.capture3('xsel -p -i', stdin_data: pass) if action == '--copy-pass'
 if action == '--copy-user-and-pass'
-  _, _, _ = Open3.capture3('xsel -b -i', stdin_data: user)
-  _, _, _ = Open3.capture3('xsel -p -i', stdin_data: pass)
+  Open3.capture3('xsel -b -i', stdin_data: user)
+  Open3.capture3('xsel -p -i', stdin_data: pass)
 end
 if action == '--type-user'
   if ENV['QUTE_FIFO']
@@ -206,13 +204,12 @@ if action == '--type-pass'
     Open3.capture3('xdotool', 'type', '--clearmodifiers', pass)
   end
 end
-if action == '--type-user-and-pass' or action.empty?
+if action == '--type-user-and-pass' || action.empty?
   if ENV['QUTE_FIFO']
     File.open(ENV['QUTE_FIFO'], 'w') do |file|
       file.write("fake-key #{user}\n")
       file.write("fake-key <tab>\n")
       file.write("fake-key #{pass}\n")
-      # file.write("fake-key -g <esc>i\n")
     end
   else
     Open3.capture3('sleep', '0.5s')
