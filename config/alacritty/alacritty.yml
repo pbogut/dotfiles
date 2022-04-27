@@ -55,7 +55,7 @@ hints:
 
   enabled:
   # urls
-  - regex: "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)//[a-zA-Z0-9\\.\\-_/\\?=&%]+"
+  - regex: "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)//[a-zA-Z0-9\\.\\-_/\\?=&%:]+"
     command: xdg-open
     post_processing: true
     mouse:
