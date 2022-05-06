@@ -16,7 +16,7 @@ u.augroup('x_title', {
         if os.getenv('SSH_CLIENT') or os.getenv('SSH_TTY') then
           o.titlestring = user .. '@' ..  host .. ":nvim:" .. cwd
         else
-          local nvim_addr = os.getenv('NVIM_LISTEN_ADDRESS') or ''
+          local nvim_addr = vim.v.servername or ''
           local tmp_dir = os.getenv('TMPDIR') or '/tmp'
           local addr = fn.substitute(nvim_addr, tmp_dir .. [[/nvim\(.*\)\/0$]], [[\1]], 'g')
           o.titlestring = user .. '@' ..  host .. ':nvim:' ..  addr .. ':' .. cwd
