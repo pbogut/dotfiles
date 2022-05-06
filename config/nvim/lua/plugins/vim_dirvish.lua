@@ -1,4 +1,5 @@
 local u = require('utils')
+local k = vim.keymap
 local t = u.termcodes
 local g = vim.g
 local fn = vim.fn
@@ -17,25 +18,25 @@ g.dirvish_git_indicators = {
   Unknown   = '?'
 }
 
-u.map('n', '\\won', '<Plug>(dirvish_up)', {noremap = false})
-u.map('n', '<bs>', ':Dirvish %:p:h<cr>')
+k.set('n', '\\won', '<Plug>(dirvish_up)', { remap = true })
+k.set('n', '<bs>', ':Dirvish %:p:h<cr>')
 
 u.augroup('x_dirvish', {
   FileType = {
     {
       'dirvish',
       function()
-        u.buf_map(0, 'n', 'q', '<c-w>q')
-        u.buf_map(0, 'n', '<bs>', '<Plug>(dirvish_up)', {noremap = false})
-        u.buf_map(0, 'n', 'H', '<Plug>(dirvish_up)', {noremap = false})
-        u.buf_map(0, 'n', 'cc', ':DirvishCopy<cr>')
-        u.buf_map(0, 'n', 'rr', ':DirvishRename<cr>')
-        u.buf_map(0, 'n', 'mm', ':DirvishMove<cr>')
-        u.buf_map(0, 'n', 'dd', ':DirvishDelete<cr>')
-        u.buf_map(0, 'n', 'K', ':DirvishCreate<cr>')
-        u.buf_map(0, 'n', '/', [[/\ze[^\/]*[\/]\=$<Home>\c]], {silent = false})
-        u.buf_map(0, 'n', '?', [[?\ze[^\/]*[\/]\=$<Home>\c]], {silent = false})
-        u.buf_map(0, 'n', 'A', ':echo "Use K"<cr>')
+        k.set('n', 'q', '<c-w>q')
+        k.set('n', '<bs>', '<Plug>(dirvish_up)', { remap = false, buffer = true })
+        k.set('n', 'H', '<Plug>(dirvish_up)', { remap = false, buffer = true })
+        k.set('n', 'cc', ':DirvishCopy<cr>', { buffer = true })
+        k.set('n', 'rr', ':DirvishRename<cr>', { buffer = true })
+        k.set('n', 'mm', ':DirvishMove<cr>', { buffer = true })
+        k.set('n', 'dd', ':DirvishDelete<cr>', { buffer = true })
+        k.set('n', 'K', ':DirvishCreate<cr>', { buffer = true })
+        k.set('n', '/', [[/\ze[^\/]*[\/]\=$<Home>\c]], { silent = false, buffer = true })
+        k.set('n', '?', [[?\ze[^\/]*[\/]\=$<Home>\c]], { silent = false, buffer = true })
+        k.set('n', 'A', ':echo "Use K"<cr>', { buffer = true })
       end
     }
   }

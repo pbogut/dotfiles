@@ -1,5 +1,6 @@
 local mkdnflow = require('mkdnflow')
 local u = require('utils')
+local k = vim.keymap
 
 mkdnflow.setup({
   default_mappings = false,
@@ -8,14 +9,9 @@ mkdnflow.setup({
 
 u.augroup('x_mkdnflow', {
   FileType = {'markdown', function()
-    u.buf_map(0, 'n', '<bs>', function()
-      if not mkdnflow.files.goBack() then
-        vim.cmd('Dirvish %:p')
-      end
-    end)
-    u.buf_map(0, 'n', '<Tab>', [[<cmd>:MkdnNextLink<CR>]])
-    u.buf_map(0, 'n', '<S-Tab>', [[<cmd>:MkdnPrevLink<CR>]])
-    u.buf_map(0, 'n', '<CR>', [[<cmd>:MkdnFollowPath<CR>]])
-    u.buf_map(0, 'v', '<CR>', [[<cmd>:MkdnFollowPath<CR>]])
+    k.set('n', '<Tab>', [[<cmd>:MkdnNextLink<CR>]], { buffer = true })
+    k.set('n', '<S-Tab>', [[<cmd>:MkdnPrevLink<CR>]], { buffer = true })
+    k.set('n', '<CR>', [[<cmd>:MkdnFollowPath<CR>]], { buffer = true })
+    k.set('v', '<CR>', [[<cmd>:MkdnFollowPath<CR>]], { buffer = true })
   end}
 })

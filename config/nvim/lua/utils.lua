@@ -191,27 +191,6 @@ function u.string_under_coursor()
   return line
 end
 
-function u.map(mode, key, result, opts)
-  opts = vim.tbl_extend('keep', opts or {}, {
-    noremap = true,
-    silent = mode ~= 'c',
-    expr = false,
-  })
-  if type(result) == 'function' then
-    table.insert(mapping_callbacs, result)
-    result = ':lua require("utils").call_mapping('
-      .. #mapping_callbacs
-      .. ')<cr>'
-  end
-  if opts.buffer then
-    local buffer_nr = opts.buffer
-    opts.buffer = nil
-    api.nvim_buf_set_keymap(buffer_nr, mode, key, result, opts)
-  else
-    api.nvim_set_keymap(mode, key, result, opts)
-  end
-end
-
 function u.table_map(list, fun)
   local result = {}
   for k, v in pairs(list) do
@@ -310,12 +289,6 @@ end
 function u.glob(pattern)
   local result = fn.glob(pattern)
   return u.split_string(result, '\n')
-end
-
-function u.buf_map(buffer_nr, mode, key, result, opts)
-  opts = opts or {}
-  opts.buffer = buffer_nr or 0
-  u.map(mode, key, result, opts)
 end
 
 function u.termcodes(str)

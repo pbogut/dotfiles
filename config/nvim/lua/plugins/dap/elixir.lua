@@ -1,4 +1,5 @@
 local u = require("utils")
+local k = vim.keymap
 local dap = require("dap")
 local defaults = {}
 
@@ -20,7 +21,7 @@ end
 
 local function setup(opts)
   defaults = opts.defaults
-  u.buf_map(0, 'n', '<space>dt', debug_test)
+  k.set('n', '<space>dt', debug_test, { buffer = true })
 end
 
 return {

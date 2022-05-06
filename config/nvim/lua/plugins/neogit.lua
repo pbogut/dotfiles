@@ -1,7 +1,8 @@
 local u = require('utils')
+local k = vim.keymap
 
 local function setup()
-  u.map('n', '<space>lg', ':Neogit<cr>')
+  k.set('n', '<space>lg', ':Neogit<cr>')
 end
 
 local function config()
@@ -78,18 +79,18 @@ local function config()
       name = name:gsub('^Deleted ', '')
       return fn.shellescape(name)
     end
-    u.buf_map(0, 'n', 'R', function()
+    k.set('n', 'R', function()
       cmd('silent !git reset ' .. file_name())
       neogit.dispatch_refresh()
-    end)
-    u.buf_map(0, 'n', 'au', function()
+    end, { buffer = true })
+    k.set('n', 'au', function()
       cmd('silent !git update-index --assume-unchanged ' .. file_name())
-    end)
-    u.buf_map(0, 'n', 'an', function()
+    end, { buffer = true })
+    k.set('n', 'an', function()
       cmd('silent !git add -N ' .. file_name())
       neogit.dispatch_refresh()
-    end)
-    u.buf_map(0, 'n', 'ap', function()
+    end, { buffer = true })
+    k.set('n', 'ap', function()
       local name = file_name() -- get file name before tab open
       cmd('tabnew')
       cmd('silent !git add -N ' .. name)
@@ -100,7 +101,7 @@ local function config()
         end
       })
       cmd('startinsert')
-    end)
+    end, { buffer = true })
   end
 end
 

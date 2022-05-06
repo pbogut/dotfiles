@@ -1,6 +1,7 @@
 local projector = require('projector')
 local h = require('projector.helper')
 local u = require('utils')
+local k = vim.keymap
 local bo = vim.bo
 local o = vim.o
 local l = {}
@@ -15,7 +16,7 @@ u.command('Gen', 'lua require"projector".generate(<q-args>)', {
   complete = 'customlist,v:lua.projector.gen_completion'
 })
 
-u.map('n', '<space>ta', ':lua require"projector".go_alternate()<cr>', { silent = true })
+k.set('n', '<space>ta', ':lua require"projector".go_alternate()<cr>', { silent = true })
 u.augroup('x_templates', {
     ['BufNewFile,BufNew'] = {
       {'*', function()

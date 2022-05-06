@@ -1,10 +1,10 @@
-local u = require('utils')
+local k = vim.keymap
 
 local function config()
-  u.map('n', '<c-_>', 'gcc<down>', { noremap = false })
-  u.map('n', '<c-/>', 'gcc<down>', { noremap = false })
-  u.map('v', '<c-_>', 'gc<down>', { noremap = false })
-  u.map('v', '<c-/>', 'gc<down>', { noremap = false })
+  k.set('n', '<c-_>', 'gcc<down>', { remap = true })
+  k.set('n', '<c-/>', 'gcc<down>', { remap = true })
+  k.set('v', '<c-_>', 'gc<down>', { remap = true })
+  k.set('v', '<c-/>', 'gc<down>', { remap = true })
 
   require('Comment').setup({
     ignore = '^$',

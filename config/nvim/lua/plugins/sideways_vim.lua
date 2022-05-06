@@ -1,8 +1,8 @@
-local u = require('utils')
+local k = vim.keymap
 
-u.map('n', 'ga<', ':SidewaysLeft<cr>')
-u.map('n', 'ga>', ':SidewaysRight<cr>')
-u.map('o', 'aa', '<plug>SidewaysArgumentTextobjA', {noremap = false})
-u.map('x', 'aa', '<plug>SidewaysArgumentTextobjA', {noremap = false})
-u.map('o', 'ia', '<plug>SidewaysArgumentTextobjI', {noremap = false})
-u.map('x', 'ia', '<plug>SidewaysArgumentTextobjI', {noremap = false})
+k.set('n', 'ga<', ':SidewaysLeft<cr>')
+k.set('n', 'ga>', ':SidewaysRight<cr>')
+k.set('o', 'aa', '<plug>SidewaysArgumentTextobjA', { remap = true })
+k.set('x', 'aa', '<plug>SidewaysArgumentTextobjA', { remap = true })
+k.set('o', 'ia', '<plug>SidewaysArgumentTextobjI', { remap = true })
+k.set('x', 'ia', '<plug>SidewaysArgumentTextobjI', { remap = true })

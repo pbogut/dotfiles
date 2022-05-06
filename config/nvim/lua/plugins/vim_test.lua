@@ -1,13 +1,14 @@
 local u = require('utils')
+local k = vim.keymap
 local g = vim.g
 
 local function setup()
-  u.map('n', '<space>tn', ':TestNearest<CR>')
-  u.map('n', '<space>tf', ':TestFile<CR>')
-  u.map('n', '<space>ts', ':TestSuite<CR>')
-  u.map('n', '<space>tl', ':TestLast<CR>')
-  u.map('n', '<space>tt', ':TestLast<CR>')
-  u.map('n', '<space>tv', ':TestVisit<CR>')
+  k.set('n', '<space>tn', ':TestNearest<CR>')
+  k.set('n', '<space>tf', ':TestFile<CR>')
+  k.set('n', '<space>ts', ':TestSuite<CR>')
+  k.set('n', '<space>tl', ':TestLast<CR>')
+  k.set('n', '<space>tt', ':TestLast<CR>')
+  k.set('n', '<space>tv', ':TestVisit<CR>')
 end
 
 local function config()

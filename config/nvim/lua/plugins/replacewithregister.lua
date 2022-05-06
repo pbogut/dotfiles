@@ -1,7 +1,7 @@
-local u = require('utils')
+local k = vim.keymap
 
-u.map('n', 'cp', '<Plug>ReplaceWithRegisterOperator', {noremap = false})
-u.map('n', 'cP', 'cp$', {noremap = false})
-u.map('n', 'cp=', 'cpp==', {noremap = false})
-u.map('n', 'cpp', '<Plug>ReplaceWithRegisterLine', {noremap = false})
-u.map('x', 'cp', '<Plug>ReplaceWithRegisterVisual', {noremap = false})
+k.set('n', 'cp', '<Plug>ReplaceWithRegisterOperator', { remap = true })
+k.set('n', 'cP', 'cp$', { remap = true })
+k.set('n', 'cp=', 'cpp==', { remap = true })
+k.set('n', 'cpp', '<Plug>ReplaceWithRegisterLine', { remap = true })
+k.set('x', 'cp', '<Plug>ReplaceWithRegisterVisual', { remap = true })

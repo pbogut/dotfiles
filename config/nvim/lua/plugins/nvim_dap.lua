@@ -1,5 +1,6 @@
 local cfg = require('config')
 local u = require('utils')
+local k = vim.keymap
 local i = vim.g.icon
 local colors = vim.g.colors
 
@@ -104,22 +105,22 @@ local function config()
     end
   end
 
-  u.map('n', '<space>dbc', function()
+  k.set('n', '<space>dbc', function()
     dap.set_breakpoint(vim.fn.input('Breakpoint condition: '))
   end)
-  u.map('n', '<space>dbl', function()
+  k.set('n', '<space>dbl', function()
     dap.set_breakpoint(nil, nil, vim.fn.input('Log point message: '))
   end)
-  u.map('n', '<space>dd', dap.toggle_breakpoint)
-  u.map('n', '<space>dc', dap.continue)
-  u.map('n', '<space>ds', dap.close)
-  u.map('n', '<space>dl', function() dap.run_last() end)
-  u.map('n', '<space>dr', dap.repl.toggle)
-  u.map('n', '<space>dtc', dap.run_to_cursor)
-  u.map('n', '<space>di', dap.step_into)
-  u.map('n', '<space>dn', dap.step_over)
-  u.map('n', '<space>do', dap.step_out)
-  u.map('n', '<space>df', function()
+  k.set('n', '<space>dd', dap.toggle_breakpoint)
+  k.set('n', '<space>dc', dap.continue)
+  k.set('n', '<space>ds', dap.close)
+  k.set('n', '<space>dl', function() dap.run_last() end)
+  k.set('n', '<space>dr', dap.repl.toggle)
+  k.set('n', '<space>dtc', dap.run_to_cursor)
+  k.set('n', '<space>di', dap.step_into)
+  k.set('n', '<space>dn', dap.step_over)
+  k.set('n', '<space>do', dap.step_out)
+  k.set('n', '<space>df', function()
     dap.list_breakpoints()
     if vim.fn.exists(':Trouble') > 0 then
       vim.cmd('Trouble quickfix')

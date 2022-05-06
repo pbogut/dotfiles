@@ -1,15 +1,16 @@
 local config = require('config')
 local u = require('utils')
+local k = vim.keymap
 local g = vim.g
 local b = vim.b
 local fn = vim.fn
 local cmd = vim.cmd
 local l = {}
 
-u.map('v', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
-u.map('v', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
-u.map('n', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
-u.map('n', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
+k.set('v', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
+k.set('v', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
+k.set('n', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
+k.set('n', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
 
 -- set up dadbod connections
 for _, connection in pairs(config.get('dadbod.connections')) do
@@ -90,18 +91,18 @@ u.augroup('x_dadbod', {
         cmd([[wincmd L]])
         b.modifiable = false
         -- alternate file override for dbout && sql file
-        u.buf_map(0, 'n', '<space>ta', function()
+        k.set('n', '<space>ta', function()
           local dbout = vim.fn.expand('%')
           local db = vim.b.db
           vim.cmd('e ' .. vim.b.db_input)
           vim.defer_fn(function()
-            u.buf_map(0, 'n', '<space>ta', function()
+            k.set('n', '<space>ta', function()
               vim.cmd('e ' .. dbout)
-            end)
-            u.buf_map(0, 'n', 'q', '<c-w>q')
+            end, { buffer = true })
+            k.set('n', 'q', '<c-w>q', { buffer = true })
             vim.b.db = db
           end, 100)
-        end)
+        end, { buffer = true })
       end
     }
   }

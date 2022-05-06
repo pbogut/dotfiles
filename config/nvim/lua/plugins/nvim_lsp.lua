@@ -1,4 +1,5 @@
 local u = require('utils')
+local k = vim.keymap
 local lspconfig = require('lspconfig')
 local has_lspstatus, lspstatus = pcall(require, 'lsp-status')
 local has_lsp_signature, lsp_signature = pcall(require, 'lsp_signature')
@@ -73,7 +74,7 @@ local bindings = {
 -- prevent stupid errors when using mapping with no lsp attached
 for _, def in pairs(bindings) do
   if def[4] then
-    u.map(def[1], def[2], def[4])
+    k.set(def[1], def[2], def[4])
   end
 end
 
@@ -98,7 +99,8 @@ local on_attach = function(client, bufnr)
   -- Mappings.
   for _, def in pairs(bindings) do
     local opts = def[5] or {}
-    u.buf_map(bufnr, def[1], def[2], def[3], opts)
+    opts.buffer = bufnr
+    k.set(def[1], def[2], def[3], opts)
   end
 end
 

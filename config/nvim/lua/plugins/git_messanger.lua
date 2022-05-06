@@ -1,3 +1,3 @@
-local u = require('utils')
+local k = vim.keymap
 
-u.map('n', '<space>gm', '<plug>(git-messenger)', {noremap = false})
+k.set('n', '<space>gm', '<plug>(git-messenger)', { remap = true })

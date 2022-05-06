@@ -1,4 +1,4 @@
-local u = require('utils')
+local k = vim.keymap
 
-u.map('', '<c-w>d', ':silent! Bdelete<cr>')
-u.map('', '<c-w>D', ':silent! Bdelete!<cr>')
+k.set('', '<c-w>d', ':silent! Bdelete<cr>')
+k.set('', '<c-w>D', ':silent! Bdelete!<cr>')
