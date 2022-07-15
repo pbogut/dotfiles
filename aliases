@@ -1,4 +1,5 @@
 alias vim=nvim
+alias tmux="TERM=xterm-256color /usr/bin/tmux"
 
 alias irb="irb -r 'irb/completion'"
 alias sc="bash -c \"\`cat ~/.commands | fzf | sed 's,[^;]*;;; ,,'\`\""
