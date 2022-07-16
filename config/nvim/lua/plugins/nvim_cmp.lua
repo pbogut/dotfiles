@@ -24,7 +24,7 @@ local function config()
         snippy.expand_snippet(args.body)
       end,
     },
-    mapping = {
+    mapping = cmp.mapping.preset.insert({
       ['<c-space>'] = cmp.mapping.complete(),
       ['<c-y>S'] = cmp.mapping.confirm({
         behavior = cmp.ConfirmBehavior.Replace,
@@ -63,7 +63,7 @@ local function config()
           )
         end
       end, { 'i', 's' }),
-    },
+    }),
     sources = {
       src.lsp,
       src.ts,
