@@ -50,12 +50,12 @@ local function setup(plugin)
 end
 
 require('packer').startup({
-  function()
+  function(use)
     -- Packer can manage itself as an optional plugin
     use({ 'wbthomason/packer.nvim', opt = true })
 
     -- My local plugins
-    pcall(use,{ fn.stdpath('config') .. '/local/projector', config = config('projector') })
+    pcall(use, { fn.stdpath('config') .. '/local/projector', config = config('projector') })
     use({ fn.stdpath('config') .. '/local/remotesync', config = "require'remotesync'" })
 
     -- Github plugins
@@ -71,13 +71,8 @@ require('packer').startup({
     use({ 'tpope/vim-unimpaired' })
     use({ 'lambdalisue/suda.vim' })
     use({ 'gioele/vim-autoswap' })
-    use({ 'glepnir/galaxyline.nvim', config = config('galaxyline_nvim') })
+    use({ 'nvim-lualine/lualine.nvim', config = config('lualine_nvim') })
     use({ 'kyazdani42/nvim-web-devicons', config = config('nvim_web_devicons') })
-    use({
-      'seblj/nvim-tabline',
-      config = config('nvim_tabline'),
-      requires = { 'kyazdani42/nvim-web-devicons' },
-    })
     use({ 'mfussenegger/nvim-dap', config = config('nvim_dap') })
     use({ 'mhinz/vim-signify', config = config('vim_signify') })
     use({ 'ntpeters/vim-better-whitespace', config = config('vim_better_whitespace') })
@@ -186,7 +181,7 @@ require('packer').startup({
     })
     use({ 'folke/trouble.nvim', config = config('trouble_nvim') })
     use({ 'neovim/nvim-lspconfig', config = config('nvim_lsp') })
-    use({ 'nvim-lua/lsp-status.nvim' })
+    use({ 'smiteshp/nvim-gps', config = config('nvim_gps') })
     if vim.fn.filereadable((os.getenv('HOME') or '') .. '/.wakatime.cfg') > 0 then
       use({ 'wakatime/vim-wakatime' })
     end
