@@ -17,8 +17,7 @@ u.augroup('x_title', {
           o.titlestring = user .. '@' ..  host .. ":nvim:" .. cwd
         else
           local nvim_addr = vim.v.servername or ''
-          local tmp_dir = os.getenv('TMPDIR') or '/tmp'
-          local addr = fn.substitute(nvim_addr, tmp_dir .. [[/nvim\(.*\)\/0$]], [[\1]], 'g')
+          local addr = fn.substitute(nvim_addr, [[/run/user/[0-9]\+/nvim\.\(.*\)\.0]], [[\1]], 'g')
           o.titlestring = user .. '@' ..  host .. ':nvim:' ..  addr .. ':' .. cwd
         end
       end
