@@ -24,6 +24,7 @@ local vanilla = {
   references = 'lua vim.lsp.buf.references()',
   document_symbol = 'lua vim.lsp.buf.document_symbol()',
   workspace_symbol = 'lua vim.lsp.buf.workspace_symbol()',
+  diagnostics = 'lua vim.diagnostic.open_float({scope = "buffer"})',
 }
 
 local telescope = {
@@ -33,6 +34,7 @@ local telescope = {
   references = 'Telescope lsp_references',
   document_symbol = 'Telescope lsp_document_symbols',
   workspace_symbol = 'Telescope lsp_workspace_symbols',
+  diagnostics = [[lua require('telescope.builtin').diagnostics({bufnr = 0})]],
 }
 
 local function maybe_telescope(name)
@@ -80,7 +82,8 @@ local bindings = {
   { 'v', '<space>ca', vim.lsp.buf.range_code_action, no_lsp_bind },
 
   { 'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', no_lsp_bind, { silent = false } },
-  { 'n', '<space>ee', '<cmd>lua vim.diagnostic.open_float(0, {scope = "line"})<CR>', no_lsp_bind },
+  { 'n', '<space>el', '<cmd>lua vim.diagnostic.open_float(0, {scope = "line"})<CR>', no_lsp_bind },
+  { 'n', '<space>ee', maybe_telescope('diagnostics'), no_lsp_bind },
   { 'n', '<space>af', lsp_formatting, no_lsp_bind },
   { 'v', '<space>af', ':lua vim.lsp.buf.range_formatting()<CR>', no_lsp_bind },
   { 'x', '<space>af', ':lua vim.lsp.buf.range_formatting()<CR>', no_lsp_bind },
