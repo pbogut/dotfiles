@@ -1,6 +1,7 @@
 local u = require('utils')
 local k = vim.keymap
 local actions = require('telescope.actions')
+local make_entry = require('telescope.make_entry')
 local actions_layout = require('telescope.actions.layout')
 local builtin = require('telescope.builtin')
 local telescope = require('telescope')
@@ -37,38 +38,72 @@ k.set('n', '<space>fF', function()
   })
 end)
 k.set('n', '<space>fd', function()
-  pickers.new({
-    prompt_title = 'Database',
-    finder = finders.new_table({
-      results = vim.fn['db#url_complete']('g:'),
-      -- entry_maker = ''
-    }),
-    sorter = conf.generic_sorter({}),
-    attach_mappings = function(prompt_bufnr)
-      actions.select_default:replace(function()
-        local selection = action_state.get_selected_entry()
-        if selection == nil then
-          print('[telescope] Nothing currently selected')
-          return
-        end
-        actions.close(prompt_bufnr)
-        vim.b.db = vim.api.nvim_eval(selection[1])
-        vim.b.db_selected = selection[1]
-        vim.schedule(function()
-          vim.fn['db#adapter#ssh#create_tunnel'](vim.b.db)
+  pickers
+    .new({
+      prompt_title = 'Database',
+      finder = finders.new_table({
+        results = vim.fn['db#url_complete']('g:'),
+        -- entry_maker = ''
+      }),
+      sorter = conf.file_sorter({}),
+      attach_mappings = function(prompt_bufnr)
+        actions.select_default:replace(function()
+          local selection = action_state.get_selected_entry()
+          if selection == nil then
+            print('[telescope] Nothing currently selected')
+            return
+          end
+          actions.close(prompt_bufnr)
+          vim.b.db = vim.api.nvim_eval(selection[1])
+          vim.b.db_selected = selection[1]
+          vim.schedule(function()
+            vim.fn['db#adapter#ssh#create_tunnel'](vim.b.db)
+          end)
         end)
-      end)
-      return true
-    end,
-  }):find()
+        return true
+      end,
+    })
+    :find()
+end)
+k.set('n', '<space>fm', function()
+  local result = {}
+  local files = vim.fn['bm#all_files']()
+  for _, file in ipairs(files) do
+    local line_nrs = vim.fn['bm#all_lines'](file)
+    for _, line_nr in ipairs(line_nrs) do
+      local bookmark = vim.fn['bm#get_bookmark_by_line'](file, line_nr)
+      local content = ''
+      if bookmark.annotation:len() > 0 then
+        content = 'Annotation: ' .. bookmark.annotation
+      elseif bookmark.content:len() > 0 then
+        content = bookmark.content
+      else
+        content = 'empty line'
+      end
+      result[#result+1] = file .. ":" .. line_nr .. ":0:" .. content
+    end
+  end
+
+  pickers
+    .new({
+      prompt_title = 'BookMarks',
+
+      finder = finders.new_table({
+        results = result,
+        entry_maker = make_entry.gen_from_vimgrep({}),
+      }),
+      previewer = conf.grep_previewer({}),
+      sorter = conf.generic_sorter({}),
+    })
+    :find()
 end)
 k.set('n', '<space>fb', function()
   builtin.buffers()
 end)
-k.set('n', '<space>fm', function()
+k.set('n', '<space>fo', function()
   builtin.oldfiles({ only_cwd = true })
 end)
-k.set('n', '<space>fM', function()
+k.set('n', '<space>fO', function()
   builtin.oldfiles()
 end)
 k.set('n', '<space>et', function()
@@ -143,7 +178,7 @@ end, { nargs = '?', qargs = true, bang = true, complete = 'dir' })
 telescope.setup({
   defaults = {
     path_display = {
-      shorten = { len = 3, exclude = {1, 2, -1, -2, -3} }
+      shorten = { len = 3, exclude = { 1, 2, -1, -2, -3 } },
     },
     -- sorting_strategy = "ascending",
     -- layout_strategy = 'vertical',
@@ -199,6 +234,12 @@ telescope.setup({
       case_mode = 'smart_case', -- or "ignore_case" or "respect_case"
       -- the default case_mode is "smart_case"
     },
+    ['ui-select'] = {
+      require('telescope.themes').get_dropdown({
+        -- even more opts
+      }),
+    },
   },
 })
 require('telescope').load_extension('fzf')
+require('telescope').load_extension('ui-select')

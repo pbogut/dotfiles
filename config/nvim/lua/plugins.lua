@@ -124,6 +124,7 @@ require('packer').startup({
       config = config('telescope_nvim'),
       requires = { 'nvim-lua/plenary.nvim' },
     })
+    use({ 'nvim-telescope/telescope-ui-select.nvim' })
     use({ 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' })
     use({ 'tpope/vim-dadbod', cmd = 'DB', config = config('vim_dadbod'), fn = 'db#url_complete' })
     use({ 'joosepalviste/nvim-ts-context-commentstring' })
