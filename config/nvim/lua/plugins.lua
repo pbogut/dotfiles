@@ -72,6 +72,7 @@ require('packer').startup({
     use({ 'lambdalisue/suda.vim' })
     use({ 'gioele/vim-autoswap' })
     use({ 'nvim-lualine/lualine.nvim', config = config('lualine_nvim') })
+    use({ 'b0o/incline.nvim', config = config('incline_nvim') })
     use({ 'kyazdani42/nvim-web-devicons', config = config('nvim_web_devicons') })
     use({ 'mfussenegger/nvim-dap', config = config('nvim_dap') })
     use({ 'mhinz/vim-signify', config = config('vim_signify') })

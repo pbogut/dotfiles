@@ -1,6 +1,5 @@
 local lualine = require('lualine')
-local g = vim.g
-local c = g.colors
+local c = vim.g.colors
 
 -- custom sections
 local s = {
