@@ -1,8 +1,8 @@
 local k = vim.keymap
 local trouble = require('trouble')
 
-k.set('n', '<space>ed', ':TroubleToggle lsp_document_diagnostics<CR>')
-k.set('n', '<space>ew', ':TroubleToggle lsp_workspace_diagnostics<CR>')
+k.set('n', '<space>ed', ':TroubleToggle document_diagnostics<CR>')
+k.set('n', '<space>ew', ':TroubleToggle workspace_diagnostics<CR>')
 k.set('n', '<space>lq', ':TroubleToggle quickfix<CR>')
 k.set('n', '<space>ll', ':TroubleToggle loclist<CR>')
 
