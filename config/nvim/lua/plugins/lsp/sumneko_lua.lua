@@ -6,7 +6,7 @@ local me = {}
 function me.setup(opts)
   opts = vim.tbl_deep_extend('keep', opts, {
     cmd = {
-      gitpac_path('sumneko/lua-language-server/bin/Linux/lua-language-server')
+      gitpac_path('sumneko/lua-language-server/bin/lua-language-server')
     },
     root_dir = function(fname)
       local cwd  = vim.loop.cwd();
@@ -17,12 +17,11 @@ function me.setup(opts)
     settings = {
       Lua = {
         workspace = {
-          -- library = {},
           maxPreload = 2000,
           preloadFileSize = 1000,
         },
         diagnostics = {
-          globals = {'hs', 'vim', 'it', 'describe', 'before_each', 'after_each', 'use'},
+          globals = {'vim'},
         }
       }
     }

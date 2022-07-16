@@ -24,7 +24,6 @@ local vanilla = {
   references = 'lua vim.lsp.buf.references()',
   document_symbol = 'lua vim.lsp.buf.document_symbol()',
   workspace_symbol = 'lua vim.lsp.buf.workspace_symbol()',
-  code_action = 'lua vim.lsp.buf.code_action()',
 }
 
 local telescope = {
@@ -34,7 +33,6 @@ local telescope = {
   references = 'Telescope lsp_references',
   document_symbol = 'Telescope lsp_document_symbols',
   workspace_symbol = 'Telescope lsp_workspace_symbols',
-  code_action = 'Telescope lsp_code_actions',
 }
 
 local function maybe_telescope(name)
@@ -45,6 +43,23 @@ local function maybe_telescope(name)
       vim.cmd(vanilla[name])
     end
   end
+end
+
+local format = {
+  sumneko_lua = false,
+}
+
+local lsp_formatting = function(bufnr)
+  vim.lsp.buf.format({
+    filter = function(client)
+      if format[client.name] ~= nil then
+        return format[client.name]
+      end
+      -- apply whatever logic you want (in this example, we'll only use null-ls)
+      return true
+    end,
+    bufnr = bufnr,
+  })
 end
 
 local bindings = {
@@ -61,12 +76,12 @@ local bindings = {
   { 'n', '<space>rr', maybe_telescope('references'), no_lsp_bind },
   { 'n', '<space>sd', maybe_telescope('document_symbol'), no_lsp_bind },
   { 'n', '<space>sD', maybe_telescope('workspace_symbol'), no_lsp_bind },
-  { 'n', '<space>ca', maybe_telescope('code_action'), no_lsp_bind },
+  { 'n', '<space>ca', vim.lsp.buf.code_action, no_lsp_bind },
+  { 'v', '<space>ca', vim.lsp.buf.range_code_action, no_lsp_bind },
 
   { 'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', no_lsp_bind, { silent = false } },
   { 'n', '<space>ee', '<cmd>lua vim.diagnostic.open_float(0, {scope = "line"})<CR>', no_lsp_bind },
-  -- custom format functions with fall back to Neoformat cmd
-  { 'n', '<space>af', '<cmd>lua vim.lsp.buf.formatting()<CR>', no_lsp_bind },
+  { 'n', '<space>af', lsp_formatting, no_lsp_bind },
   { 'v', '<space>af', ':lua vim.lsp.buf.range_formatting()<CR>', no_lsp_bind },
   { 'x', '<space>af', ':lua vim.lsp.buf.range_formatting()<CR>', no_lsp_bind },
 }
