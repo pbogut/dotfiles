@@ -48,7 +48,7 @@ local config = function()
       lualine_z = { s.diagnostics },
     },
     tabline = {
-      lualine_a = { { 'tabs', mode = 2 } },
+      lualine_a = { { 'tabs', mode = 2, max_length = vim.o.columns } },
       lualine_b = {},
       lualine_c = {},
       lualine_x = {},
