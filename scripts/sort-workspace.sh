@@ -5,13 +5,10 @@
 # date:   13/10/2021
 #=================================================
 current_ws=$(i3-msg -t get_workspaces | jq '.[] | select(.focused==true) | .name' -r)
-xprop=$(xprop -id $(xdpyinfo | grep -Eo 'window 0x[^,]+' | cut -d" " -f2))
+xprop="$(xprop -id "$(xdpyinfo | grep -Eo 'window 0x[^,]+' | cut -d" " -f2)")"
 wm_title=$(echo "$xprop" | grep '^WM_NAME' | sed 's,.* = "\(.*\)"$,\1,')
 wm_class=$(echo "$xprop" | grep '^WM_CLASS' | sed 's,.* = "\(.*\)"$,\1,' | sed 's/", "/ /')
 
-date >> /tmp/wmsort
-echo "TITLE: $wm_title" >> /tmp/wmsort
-echo "CLASS: $wm_class" >> /tmp/wmsort
 
 usage() {
   echo "Ussage: ${0##*/} [OPTIONS]"
@@ -60,6 +57,10 @@ set_floating() {
     > /dev/null
 }
 
+get_current_ws() {
+  i3-msg -t get_workspaces | jq -r '.[] | select(.focused == true).name'
+}
+
 while test $# -gt 0; do
   case "$1" in
     --extended|-e)
@@ -103,9 +104,6 @@ ws_game="0: gaming"
 if [[ $extended -eq 1 ]]; then
   found=1
   case  "$wm_class" in
-    "gl mpv")
-      move_and_swich "$ws_media"
-      ;;
     "qutebrowser qutebrowser")
       case "$wm_title" in
         *" - Invidious - "*)
@@ -120,6 +118,7 @@ if [[ $extended -eq 1 ]]; then
       case "$wm_title" in
         *~/Projects/*|*$HOME/Projects/*)
           project_name=${wm_title##*/}
+          project_name=${project_name%% |t*} #filter tmux session out
           move_and_swich "$ws_code $project_name"
           ;;
         *)
@@ -135,6 +134,12 @@ if [[ $extended -eq 1 ]]; then
 fi
 
 case  "$wm_class" in
+  "gl mpv")
+    move_and_swich "$ws_media"
+    ;;
+  "qutebrowser qutebrowser")
+    move_and_swich "$ws_browser"
+    ;;
   "Steam Steam"|"steam steam"|"heroic heroic")
     move_and_swich "$ws_game"
     ;;
@@ -158,7 +163,6 @@ case  "$wm_class" in
     ;;
   "VBoxSDL VBoxSDL"|\
   "VirtualBox Manager VirtualBox Manager"|\
-  "VirtualBox Machine VirtualBox Machine"|\
   "VirtualBox Machine VirtualBox Machine")
     move_and_swich "$ws_vm"
     ;;
@@ -185,6 +189,9 @@ case  "$wm_class" in
         ;;
     esac
     ;;
+  "ferdi Ferdi")
+    move_and_swich "$ws_comm"
+    ;;
   "urxvt URxvt"|"Alacritty Alacritty")
     case "$wm_title" in
       QB_FILE_SELECTION)
@@ -197,6 +204,10 @@ case  "$wm_class" in
         move_and_swich "$ws_comm"
         ;;
       *)
+        current_ws=$(get_current_ws)
+        if [[ "$current_ws" == "$ws_browser" ]]; then
+          move_and_swich "$ws_term"
+        fi
         exit 0
         ;;
     esac
