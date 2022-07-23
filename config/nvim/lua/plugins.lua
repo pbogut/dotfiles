@@ -105,7 +105,6 @@ require('packer').startup({
     use({ 'justinmk/vim-dirvish', config = config('vim_dirvish') })
     use({ 'justinmk/vim-sneak', config = config('vim_sneak') })
     use({ 'kristijanhusak/vim-dirvish-git', after = 'vim-dirvish' })
-    use({ 'jakewvincent/mkdnflow.nvim', ft = { 'markdown' }, config = config('mkdnflow') })
     use({ 'vim-scripts/ReplaceWithRegister', config = config('replacewithregister') })
     use({ 'kana/vim-textobj-user' })
     use({ 'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user' })
