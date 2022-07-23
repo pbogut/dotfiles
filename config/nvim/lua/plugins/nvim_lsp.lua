@@ -1,5 +1,6 @@
 local u = require('utils')
 local k = vim.keymap
+local config = require('config')
 local lspconfig = require('lspconfig')
 local has_lspstatus, lspstatus = pcall(require, 'lsp-status')
 local has_lsp_signature, lsp_signature = pcall(require, 'lsp_signature')
@@ -226,6 +227,32 @@ u.command('LspReload', function()
   cmd('edit')
 end)
 u.command('LspAttachBuffer', attach_lsp_to_new_buffer)
+
+-- Auto format on save
+u.augroup('x_lsp', {
+  BufWritePre = {
+    {
+      '*',
+      function()
+        if config.get('lsp.autoformat_on_save.enabled') then
+          local file_types = config.get('lsp.autoformat_on_save.file_types')
+          local file = vim.fn.expand('%:p')
+          local cwd = vim.fn.getcwd()
+          local ft = vim.bo.filetype
+
+          local for_filetype = #file_types == 0
+          for lang, on in pairs(file_types) do
+            for_filetype = lang == ft and on
+          end
+
+          if file:sub(1, #cwd) == cwd and for_filetype then
+            lsp_formatting(0)
+          end
+        end
+      end,
+    },
+  },
+})
 
 return {
   on_attach = on_attach,

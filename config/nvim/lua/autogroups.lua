@@ -1,4 +1,3 @@
-local config = require('config')
 local u = require('utils')
 local bo = vim.bo
 local b = vim.b
@@ -108,20 +107,3 @@ local config_group = {
 
 u.augroup('x_autogroups', config_group)
 
--- Auto format on save
-if config.get('autoformat_on_save.enabled') then
-  u.augroup('x_autoformat', {
-    BufWritePre = {
-      {
-        '*',
-        function()
-          local file = vim.fn.expand('%:p')
-          local cwd = vim.fn.getcwd()
-          if file:match('^' .. cwd) then
-            vim.lsp.buf.formatting()
-          end
-        end,
-      },
-    },
-  })
-end
