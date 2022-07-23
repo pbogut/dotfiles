@@ -3,16 +3,8 @@ local h = require('projector.helper')
 local fn = vim.fn
 local p = {}
 
-local function get_file_parts()
-  local cwd = fn.getcwd()
-  local filename = fn.expand('%:p')
-  local relative = filename:gsub('^' .. cwd .. '/', '')
-  local noext = relative:gsub('(.*)%..-$', '%1')
-  return u.split_string(noext, '/')
-end
-
 p.namespace = function()
-  local list = get_file_parts()
+  local list = h.get_file_parts()
   table.remove(list, #list)
   local result = ''
 
@@ -46,7 +38,7 @@ p.class = function()
 end
 
 p.class1 = function()
-  local list = get_file_parts()
+  local list = h.get_file_parts()
   local result = ''
 
   for _, el in ipairs(list) do

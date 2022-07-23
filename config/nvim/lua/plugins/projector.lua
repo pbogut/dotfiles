@@ -717,11 +717,12 @@ projector.setup({
 
 local function expand_snippet()
   local snippy = require('snippy')
-  local shared = require('snippy.shared')
 
-  for _, snippets in pairs(shared.cache) do
+  for _, snippets in pairs(snippy.snippets) do
     for _, snippet in pairs(snippets) do
-      snippet.body = l.placeholders_to_eval(snippet.body)
+      if snippet.body then
+        snippet.body = l.placeholders_to_eval(snippet.body)
+      end
     end
   end
 

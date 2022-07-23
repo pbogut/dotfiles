@@ -47,11 +47,8 @@ function M.map(list, fun)
 end
 
 function M.get_file_parts()
-  local cwd = fn.getcwd()
-  local filename = fn.expand('%:p')
-  local relative = filename:gsub('^' .. cwd .. '/', '')
-  local noext = relative:gsub('(.*)%..-$', '%1')
-  return u.split_string(noext, '/')
+  local filename = fn.expand('%:.:h')
+  return u.split_string(filename, '/')
 end
 
 function M.get_relative_line(num)
