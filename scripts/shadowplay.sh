@@ -17,6 +17,7 @@ usage() {
   echo "  -h, --help          display this help and exit"
   echo "  --screen-shot       take screenshot of the screen"
   echo "  --wait-and-shadow   wait for the fullscreen window and start recording"
+  echo "  --shadow-fullscreen {monitor}  start recording whole monitor"
   echo "  --save              save replay to file"
   echo "  --kill              kill screen recording"
 }
@@ -38,6 +39,12 @@ while test $# -gt 0; do
     ;;
   --wait-and-shadow | -w)
     action="wait"
+    shift
+    ;;
+  --shadow-fullscreen | -f)
+    action="fullscreen"
+    shift
+    screen="$1"
     shift
     ;;
   --help | -h)
@@ -73,15 +80,37 @@ if [[ $action == "screenshot" ]]; then
 fi
 
 if [[ $action == "kill" ]]; then
-  kill $(ps -ef | grep 'shadowplay.sh --wait-and-shadow' | grep -v grep | awk '{print $2}') \
+  kill -9 $(ps -ef | grep 'gpu-screen-recorder' | grep -v grep | awk '{print $2}') \
     >/dev/null 2>&1
-  kill $(ps -ef | grep 'gpu-screen-recorder' | grep -v grep | awk '{print $2}') \
+  kill $(ps -ef | grep 'shadowplay.sh' | grep bash | grep -v grep | awk '{print $2}') \
+    >/dev/null 2>&1
+  kill -9 $(ps -ef | grep 'gpu-screen-recorder' | grep -v grep | awk '{print $2}') \
     >/dev/null 2>&1
 fi
 
 if [[ $action == "save" ]]; then
   notify-send -u low "Saving replay..."
   kill -USR1 $(ps -ef | grep 'gpu-screen-recorder' | grep -v grep | awk '{print $2}')
+fi
+
+if [[ $action == "fullscreen" ]]; then
+  if [[ -z $screen ]]; then
+    usage
+    exit 1
+  fi
+  while :; do
+    notify-send -u low "Start Shadowing $screen"
+
+    path="$HOME/Videos/ShadowPlay"
+
+    mkdir -p "$path"
+
+    gpu-screen-recorder -w "$screen" \
+      -c mp4 -f $record_fps \
+      -a "$(pactl get-default-sink).monitor" \
+      -r $record_minutes \
+      -o "$path"
+  done
 fi
 
 if [[ $action == "wait" ]]; then

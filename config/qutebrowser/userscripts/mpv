@@ -15,9 +15,11 @@ echo "$QUTE_URL" | sed -E 's,https?://(www\.)?(.*?)/.*?\?(.*$),\3,' | (read -r q
     invidious.pbogut.me)
       domain="youtube.com"
       newurl="https://$domain/$path"
+      splash youtube
       mpv "$newurl"
       ;;
     *)
+      splash youtube
       mpv "$QUTE_URL"
   esac
 )

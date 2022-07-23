@@ -7,5 +7,4 @@
 dotfiles() {
   cd "$PROJECTS/github.com/pbogut/dotfiles"
   sort-workspace.sh -t "$PROJECTS/github.com/pbogut/dotfiles"
-  nvim
 }

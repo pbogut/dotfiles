@@ -13,14 +13,14 @@ while :; do
     if [[ $(grep MemAvailable /proc/meminfo | awk '{print $2}') -lt 250000 ]]; then
         notify-send -i /usr/share/icons/gnome/48x48/emblems/emblem-important.png "I'm killing it before it lay eggs"
         sudo killall -9 barriers
-        sudo killall -9 franz
+        flatpak kill org.ferdium.Ferdium
     fi
     if [[ $(grep MemAvailable /proc/meminfo | awk '{print $2}') -lt 150000 ]]; then
         notify-send -i /usr/share/icons/gnome/48x48/emblems/emblem-important.png "I'm killing it before it lay eggs"
         sudo killall -9 barriers
-        sudo killall -9 franz
         sudo killall -9 qutebrowser
         sudo killall -9 chrome
         sudo killall -9 java
+        flatpak kill org.ferdium.Ferdium
     fi
 done

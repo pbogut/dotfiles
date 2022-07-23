@@ -10,6 +10,7 @@ barrierc --disable-crypto --no-daemon "$1" | while read line; do
   fi
   if [[ $line =~ "leaving screen" ]]; then
     setxkbmap -option 'caps:ctrl_modifier'
+    xcape -e 'Caps_Lock=Escape'
     xcape -e 'Control_L=Escape'
     xcape -e 'Shift_L=parenleft'
     xcape -e 'Shift_R=parenright'

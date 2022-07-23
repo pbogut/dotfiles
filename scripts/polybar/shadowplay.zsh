@@ -14,7 +14,11 @@ main_action() {
   if [[ ! -z $win_id ]]; then
     title=$(xdotool getwindowname $win_id)
 
-    echo "REC ($title)"
+    if [[ -z $title ]]; then
+      echo "REC"
+    else
+      echo "REC ($title)"
+    fi
   else
     echo ''
   fi

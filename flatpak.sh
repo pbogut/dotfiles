@@ -5,7 +5,7 @@
 # date:   27/04/2022
 #=================================================
 flatpak install com.discordapp.Discord
-flatpak install com.getferdi.Ferdi
+flatpak install org.ferdium.Ferdium
 flatpak install com.github.tchx84.Flatseal
 flatpak install com.heroicgameslauncher.hgl
 flatpak install com.valvesoftware.Steam

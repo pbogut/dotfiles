@@ -17,7 +17,7 @@ else
 fi
 
 if [[ $action == "down" ]]; then
-  pulsemixer --change-volume -5 $id
+  pulsemixer --change-volume -1 $id
 elif [[ $action == "up" ]]; then
-  pulsemixer --change-volume +5 $id
+  pulsemixer --change-volume +1 $id
 fi

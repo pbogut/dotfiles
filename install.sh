@@ -68,6 +68,7 @@ read -d '' files <<"EOF"
     config/ncmpcpp/bindings
     config/nvim/after
     config/nvim/init.lua
+    config/nvim/filetype.lua
     config/nvim/lua
     config/nvim/ginit.vim
     config/nvim/config
@@ -91,6 +92,7 @@ read -d '' files <<"EOF"
     config/rofi/config.rasi
     config/roxterm.sourceforge.net
     config/Franz/Plugins/todoist
+    config/MangoHud
     gtk-2.0
     i3blocks.conf
     icons/polar

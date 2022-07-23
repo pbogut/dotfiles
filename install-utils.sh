@@ -30,6 +30,7 @@ paru -S \
     apg
     w3m \
     wmctrl \
+    xtitle \
     xcwd-git \
     copyq \
     paru \
@@ -73,11 +74,19 @@ paru -S \
     xrandr \
     xtitle \
     yarn \
+    yt-dlp \
+    yt-dlp-drop-in \
     ruby \
     noto-fonts-emoji \
     dunst
 
+if [[ $hoatname == 'silverspoon' ]]; then
+  paru -S \
+    intel-media-driver
+fi
+
 pip install \
+    steamctl \
     upnpclient \
     i3-py \
     i3ipc \

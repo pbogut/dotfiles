@@ -32,7 +32,6 @@ if [[ $1 == "--xcape" ]]; then
 fi
 
 # daemons
-rerun insync "insync start"
 rerun copyq copyq
 demonize nextcloud nextcloud
 demonize conky conky
@@ -42,8 +41,6 @@ demonize textaid "perl $scriptpath/edit-server.pl"
 demonize nm-applet nm-applet
 demonize dunst dunst
 demonize udisksvm "udisksvm -a"
-demonize mopidy "mopidy"
-demonize pomodoro "i3-gnome-pomodoro daemon"
 demonize memwatch ~/.scripts/memwatch.sh
 demonize mailsgoweb ~/.scripts/mailsgoweb.sh
 demonize kdeconnect kdeconnect-indicator

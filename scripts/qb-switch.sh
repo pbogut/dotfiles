@@ -14,6 +14,10 @@ echo "$QUTE_URL" | sed -E 's,https?://(www\.)?(.*?)/.*?\?(.*$),\3,' | (read -r q
         domain="google.com/search"
         newurl="https://$domain?q=$query"
         ;;
+      search.brave.com)
+        domain="google.com/search"
+        newurl="https://$domain?q=$query"
+        ;;
       google.com)
         domain="duckduckgo.com/"
         newurl="https://$domain?q=$query"

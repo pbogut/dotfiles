@@ -20,7 +20,7 @@ refresh() {
 
 info() {
   refresh
-  notify-send -i mouse "Mouse Battery" "$state% $action"
+  notify-send -i mouse "Mouse Battery" "$state% $action" > /dev/null 2>&1
 }
 
 update_state() {
@@ -37,20 +37,33 @@ update_state() {
 }
 
 show_state() {
+  icon=""
+  color=""
+
   if [[ $action == "Full" ]]; then
-    echo "%{u#2bb34b}%{+u}%{-u}" #green
-  elif [[ $action == "Unknown" ]] && [[ $state -gt 75 ]]; then
-    echo "%{u#2bb34b}%{+u}%{-u}" #green
-  elif [[ $action == "Unknown" ]] && [[ $state -gt 50 ]]; then
-    echo "%{u#2e9ef4}%{+u}%{-u}" #blue
-  elif [[ $action == "Unknown" ]] && [[ $state -gt 25 ]]; then
-    echo "%{u#bdbd40}%{+u}%{-u}" #yellow
-  elif [[ $action == "Unknown" ]] && [[ $state -gt 0 ]]; then
-    echo "%{u#bdbd40}%{+u}%{-u}" #yellow
-  elif [[ $action == "Discharging" ]] && [[ $state -lt 10 ]]; then
-    echo "%{u#bd2c40}%{+u}%{-u}" #red
-  elif [[ $action == "Discharging" ]] && [[ $state -lt 25 ]]; then
-    echo "%{u#bdbd40}%{+u}%{-u}" #yello
+    color="%{u#2bb34b}" #green
+    icon=""
+  elif [[ $state -gt 80 ]]; then
+    color="%{u#2bb34b}" #green
+    icon=""
+  elif [[ $state -gt 60 ]]; then
+    color="%{u#2e9ef4}" #blue
+    icon=""
+  elif [[ $state -gt 40 ]]; then
+    color="%{u#2e9ef4}" #blue
+    icon=""
+  elif [[ $state -gt 20 ]]; then
+    color="%{u#2e9ef4}" #yellow
+    icon=""
+  else
+    color="%{u#bd2c40}" #red
+    icon=""
+  fi
+
+  if [[ $action == "Full" || $action == "Unknown" ]]; then
+    echo "${color}%{+u}${icon}%{-u}"
+  elif [[ $action == "Discharging" && $state -lt 25 ]]; then
+    echo "${color}%{+u}${icon}%{-u}"
   else
     echo ""
   fi

@@ -105,7 +105,6 @@ set status_format="-%r-`config email/default/from`: %f [Msgs:%?M?%M/?%m%?n? New:
 # this can be copied to accounts file to set up different accounts on different machines
 # with things that I dont want to keep in public git repository
 # switch between accounts
-macro index \e1 ":set from=`config email/default/from`\n:set status_format=\"-%r-`config email/default/from`: %f [Msgs:%?M?%M/?%m%?n? New:%n?%?o? Old:%o?%?d? Del:%d?%?F? Flag:%F?%?t? Tag:%t?%?p? Post:%p?%?b? Inc:%b?%?l? %l?]---(%s/%S)-%>-(%P)---\"\n" "Switch to default (`config email/default/from`)"
 
 source ~/.mutt/accounts
 set reverse_name
