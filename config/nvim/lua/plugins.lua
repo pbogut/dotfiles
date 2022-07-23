@@ -57,6 +57,7 @@ require('packer').startup({
     -- My local plugins
     pcall(use, { fn.stdpath('config') .. '/local/projector', config = config('projector') })
     use({ fn.stdpath('config') .. '/local/remotesync', config = "require'remotesync'" })
+    use({ fn.stdpath('config') .. '/local/actions', config = 'require"actions"'})
 
     -- Github plugins
     use({ 'tpope/vim-scriptease' })

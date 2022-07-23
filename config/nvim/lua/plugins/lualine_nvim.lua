@@ -11,6 +11,7 @@ local s = {
   fileinfo = require('plugins.lualine.fileinfo'),
   location = require('plugins.lualine.location'),
   diagnostics = require('plugins.lualine.diagnostics'),
+  actions = require('plugins.lualine.actions'),
   mode_fmt = require('plugins.lualine.mode_fmt'),
 }
 
@@ -45,7 +46,7 @@ local config = function()
       lualine_c = { s.dapinfo, s.filename },
       lualine_x = { s.gps, s.dadbod },
       lualine_y = { s.fileinfo, s.location },
-      lualine_z = { s.diagnostics },
+      lualine_z = { s.actions, s.diagnostics },
     },
     tabline = {
       lualine_a = { { 'tabs', mode = 2, max_length = vim.o.columns } },
