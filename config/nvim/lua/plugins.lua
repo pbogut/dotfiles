@@ -130,12 +130,11 @@ require('packer').startup({
       cmd = 'DB',
       config = config('vim_dadbod'),
       fn = 'db#url_complete',
+      requires = { 'pbogut/vim-dadbod-ssh' }
     })
-    use({ 'pbogut/vim-dadbod-ssh' })
     use({ 'joosepalviste/nvim-ts-context-commentstring' })
     use({ 'numtostr/comment.nvim', config = config('comment_nvim') })
     use({ 'frankier/neovim-colors-solarized-truecolor-only' })
-    use({ 'kevinoid/vim-jsonc' })
     use({ 'sirtaj/vim-openscad', opt = false })
     use({ 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate', config = config('nvim_treesitter') })
 
@@ -148,7 +147,6 @@ require('packer').startup({
       requires = { 'nvim-lua/plenary.nvim' },
     })
     use({ 'rhysd/git-messenger.vim', config = config('git_messanger') })
-    -- use {'nvim-lua/plenary.nvim'}
 
     -- completion
     use({ 'dcampos/nvim-snippy', after = 'projector', config = config('nvim_snippy') })
