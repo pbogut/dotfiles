@@ -24,6 +24,7 @@
     },
     {
       "repo": "sumneko/lua-language-server",
+      "tag": "@latest",
       "run": [
         "git submodule update --init --recursive",
         "cd 3rd/luamake && ./compile/install.sh",

@@ -18,28 +18,28 @@ usage() {
 
 while test $# -gt 0; do
   case "$1" in
-    --rebuild|-r)
-      rebuild=1
+  --rebuild | -r)
+    rebuild=1
+    shift
+    ;;
+  --list | -l)
+    jq -c '.packages[] | .repo' "$json_file"
+    shift
+    exit 0
+    ;;
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  *)
+    if [[ -z $package ]]; then
+      package="$1"
       shift
-      ;;
-    --list|-l)
-      jq -c '.packages[] | .repo' $json_file
-      shift
-      exit 0
-      ;;
-    --help|-h)
+    else
       usage
-      exit 0
-      ;;
-    *)
-      if [[ -z $package ]]; then
-        package="$1"
-        shift
-      else
-        usage
-        exit 1
-      fi
-      ;;
+      exit 1
+    fi
+    ;;
   esac
 done
 
@@ -51,30 +51,47 @@ if [[ -z $package ]]; then
 fi
 
 install_package() {
-  cd "$1"
+  cd "$1" || return
   while read -r cmd; do
     # print -Pn "%F{006}"
     echo "❣️ $cmd"
     # print -Pn "%f"
     echo $cmd | xargs bash -c
-  done <<< $(jq -c '.run[]' <<< $json)
+  done <<<$(jq -c '.run[]' <<<$json)
 }
 
 process_package() {
-  repo=$(jq -r .repo <<< $json)
+  repo=$(jq -r .repo <<<"$json")
+  tag=$(jq -r .tag <<<"$json")
   echo "➤ Process $repo:"
   if [[ ! -d "$gitpac_dir/$repo" ]]; then
     echo "➡️ Chechout $repo"
     mkdir -p "$gitpac_dir/$repo"
     # print -Pn "%F{005}"
     git clone "https://github.com/$repo" "$gitpac_dir/$repo"
+    cd "$gitpac_dir/$repo" || exit
     # print -Pn "%f"
+    if [[ $tag != "null" ]]; then
+      git fetch --all --tags
+      if [[ $tag == "@latest" ]]; then
+        tag="$(git tag | tail -n 1)"
+      fi
+      git checkout "$tag"
+    fi
     install_package "$gitpac_dir/$repo"
   else
     echo "➡️ Check for update $repo"
-    cd "$gitpac_dir/$repo"
+    cd "$gitpac_dir/$repo" || exit
     current_hash=$(git log --pretty="tformat:%h" -1)
-    git pull --ff-only > /dev/null
+    if [[ $tag != "null" ]]; then
+      git fetch --all --tags
+      if [[ $tag == "@latest" ]]; then
+        tag="$(git tag | tail -n 1)"
+      fi
+      git checkout "$tag"
+    else
+      git pull --ff-only >/dev/null
+    fi
     new_hash=$(git log --pretty="tformat:%h" -1)
     if [[ $new_hash != $current_hash ]]; then
       echo "➡️ Hash changed $current_hash -> $new_hash, updating ..."
@@ -106,6 +123,6 @@ install_update() {
 
   while read -r json; do
     process_package
-  done <<< $list
+  done <<<$list
 }
 install_update
