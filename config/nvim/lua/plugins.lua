@@ -172,12 +172,7 @@ require('packer').startup({
         -- 'quangnguyen30192/cmp-nvim-tags', # dont even try, its slow trash
       },
     })
-
-    use({ 'emmanueltouzery/agitator.nvim' })
-
-    use({ 'f-person/git-blame.nvim', config = config('git_blame') })
     -- copilot after rsi due to binding conflict (<c-f>)
-    use({ 'github/copilot.vim', config = config('copilot'), after = 'vim-rsi'})
     -- lsp
     use({ 'ray-x/lsp_signature.nvim' })
     use({
