@@ -105,9 +105,12 @@ require('packer').startup({
     use({ 'AndrewRadev/sideways.vim', config = config('sideways_vim') })
     use({ 'vim-scripts/cmdalias.vim', config = config('cmdalias_vim') })
     use({ 'Shougo/echodoc.vim' })
-    use({ 'justinmk/vim-dirvish', config = config('vim_dirvish') })
+    use({
+      'justinmk/vim-dirvish',
+      config = config('vim_dirvish'),
+      requires = { 'kristijanhusak/vim-dirvish-git' },
+    })
     use({ 'justinmk/vim-sneak', config = config('vim_sneak') })
-    use({ 'kristijanhusak/vim-dirvish-git', after = 'vim-dirvish' })
     use({ 'vim-scripts/ReplaceWithRegister', config = config('replacewithregister') })
     use({ 'kana/vim-textobj-user' })
     use({ 'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user' })
