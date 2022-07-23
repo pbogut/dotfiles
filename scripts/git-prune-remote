@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   git-prune-remote
+# author: Pawel Bogut <https://pbogut.me>
+# date:   20/07/2022
+#=================================================
+master="$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
+branches=$(git branch --remote --merged "origin/$master" | grep -v "  origin/$master")
+
+if [[ -n $branches ]]; then
+  echo "Remote branches merged with origin/$master:"
+  echo "$branches"
+
+  echo "^ Remote branches above will be removed ^"
+  read -p "Continue? [y/n] " -r confirm
+
+  if [[ $confirm == "y" ]]; then
+    # shellcheck disable=SC2086,SC2046,SC2001
+    git push origin --delete $(sed 's,^  origin/,,g' <<< "$branches")
+  fi
+fi

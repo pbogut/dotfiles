@@ -26,6 +26,7 @@
     an = add -N
     rmc = rm --cached
     cob = checkout -b
+    br = "!. ~/.githelpers && git_clone_to_projects_bare"
     cl = "!. ~/.githelpers && git_clone_to_projects"
     gh = "!. ~/.githelpers && git_clone_to_projects"
     gl = "!. ~/.githelpers && git_clone_to_projects_gl"
@@ -125,3 +126,5 @@
     protocol = ssh
 [init]
     defaultBranch = master
+[safe]
+	directory = *
