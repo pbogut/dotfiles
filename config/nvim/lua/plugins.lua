@@ -116,6 +116,7 @@ require('packer').startup({
     use({ 'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user' })
     use({ 'MattesGroeger/vim-bookmarks', config = config('vim_bookmarks') })
     use({ 'rrethy/vim-illuminate' })
+    use({ 'rcarriga/nvim-notify', config = config('nvim_notify') })
     use({ 'lukas-reineke/indent-blankline.nvim', config = config('indent_blankline') })
     use({
       'nvim-telescope/telescope.nvim',
