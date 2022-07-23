@@ -63,10 +63,14 @@ c.input.insert_mode.auto_enter = True
 c.input.insert_mode.auto_leave = False
 
 c.url.searchengines = {
-    "DEFAULT": "https://duckduckgo.com/?q={}",
+    "DEFAULT": "https://search.brave.com/search?q={}",
+    "p":  "https://engine.presearch.org/search?q={}",
+    "b":  "https://search.brave.com/search?q={}",
     "d":  "https://duckduckgo.com/?q={}",
     "s":  "https://www.startpage.com/do/asearch?q={}",
     "g":  "https://google.com/search?q={}",
+    "pr": "https://www.protondb.com/search?q={}",
+    "whq":"https://search.brave.com/search?q={} site%3Aappdb.winehq.org",
     "aw": "https://wiki.archlinux.org/?search={}",
     "al": "https://allegro.pl/listing?string={}",
     "yt": "https://www.youtube.com/results?search_query={}",
@@ -146,14 +150,10 @@ config.bind(
     '<ctrl-y>',
     'spawn --userscript ~/.scripts/keepass.rb --type-pass', mode='insert')
 config.bind(
-    '<ctrl-;>',
+    '<ctrl-o>',
     'spawn --userscript ~/.scripts/keepass.rb --type-otpauth', mode='insert')
 
 
-config.bind('<ctrl-j>', 'fake-key <down>', mode='insert')
-config.bind('<ctrl-k>', 'fake-key <up>', mode='insert')
-config.bind('<ctrl-n>', 'fake-key <down>', mode='insert')
-config.bind('<ctrl-p>', 'fake-key <up>', mode='insert')
 config.bind(
     '<ctrl-w>',
     'fake-key <shift-ctrl-left> ;; fake-key <backspace>', mode='insert')
@@ -163,9 +163,7 @@ config.bind('<Ctrl-j>', 'completion-item-focus next', mode='command')
 config.bind('<Ctrl-k>', 'completion-item-focus prev', mode='command')
 config.bind('<Ctrl-n>', 'completion-item-focus next', mode='command')
 config.bind('<Ctrl-p>', 'completion-item-focus prev', mode='command')
-config.bind(
-    '<Ctrl-w>',
-    'fake-key -g <shift-ctrl-left> ;; fake-key -g <backspace>', mode='command')
+config.bind('<Ctrl-w>', 'rl-rubout "/ "', mode='command')
 
 config.bind('<Alt-n>', 'command-history-next', mode='command')
 config.bind('<Alt-j>', 'command-history-next', mode='command')
@@ -178,6 +176,7 @@ config.bind('J', 'tab-move +')
 config.bind('M', 'spawn --userscript nextcloud --add-bookmark')
 config.bind('b', 'spawn --userscript nextcloud --open-bookmark')
 config.bind('B', 'spawn --userscript nextcloud --open-bookmark --new-tab')
+config.bind(',ic', 'spawn --userscript nextcloud --import-cookbook')
 
 config.bind('yh', 'spawn --userscript ~/.scripts/qb-copy-html.sh -b')
 config.bind('ys', 'spawn --userscript ~/.scripts/qb-copy-text.sh -b')
