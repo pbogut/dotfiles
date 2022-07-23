@@ -78,7 +78,7 @@ local function config()
     )
   end
 
-  -- get config from .nvim-config.json
+  -- get config from config plugin
   for lang, _ in pairs(local_config) do
     for _, c in pairs(local_config[lang]) do
       load_config(lang, c)

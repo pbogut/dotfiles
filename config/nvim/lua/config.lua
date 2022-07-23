@@ -3,6 +3,9 @@ local fn = vim.fn
 
 local c = {}
 
+local modules = {}
+local config = {}
+
 local function read_file(file)
   local has_file, content = pcall(fn.readfile, file)
   if not has_file then
@@ -11,44 +14,46 @@ local function read_file(file)
 
   local can_decode, config = pcall(fn.json_decode, content)
   if not can_decode then
-    print('Config found but it is invalid! [' .. file .. ']')
+    vim.notify('Config found but it is invalid! [' .. file .. ']', vim.log.levels.WARN)
     return {}
   end
 
   return config
 end
 
-local function load_config()
-  local user_config = {}
-  local path_config = {}
-
-  local user_file = os.getenv('HOME') .. '/.nvim-config.json';
-  local path_file = fn.getcwd() .. '/.nvim-config.json';
-
-
-  if fn.filereadable(user_file) > 0 then
-    user_config = read_file(user_file)
+function c.load_modules()
+  modules = {}
+  local files = {}
+  for _, path in pairs(vim.split(vim.o.runtimepath, ',')) do
+    files = u.merge_tables(files, u.glob(path .. '/lua/config/*.lua'))
   end
-  if fn.filereadable(path_file) > 0 then
-    path_config = read_file(path_file)
-  end
-
-  local config = u.merge_tables(user_config, path_config)
-
-  for _, to_import in pairs(config.import or {}) do
-    if fn.filereadable(to_import) > 0 then
-      local import_config = read_file(to_import)
-      config = u.merge_tables(import_config, config)
+  for _, file in pairs(files) do
+    local mod_name = file:gsub('.*/config/(.*).lua', 'config.%1')
+    local ok, module = pcall(require, mod_name)
+    if ok == true then
+      modules[#modules+1] = module
     end
   end
-
-  return config
 end
 
-local config = load_config()
+function c.load_for_cwd()
+  config = {}
+  if #modules == 0 then
+    c.load_modules()
+  end
+  local cwd = vim.fn.getcwd()
+  for _, module in pairs(modules) do
+    if module.should_apply(cwd) then
+      config = u.merge_tables(module.get_config(cwd), config)
+    end
+  end
+end
+
+c.load_for_cwd()
 
 function c.reload_config()
-  config = load_config()
+  c.load_modules()
+  config = c.load_for_cwd()
 end
 
 function c.dump()

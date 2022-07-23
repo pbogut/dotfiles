@@ -2,4 +2,3 @@ tags
 /.padawan
 # ignore private hooks
 offlineimap-hooks/*
-.nvim-config.json

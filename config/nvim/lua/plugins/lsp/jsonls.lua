@@ -14,10 +14,6 @@ function me.setup(opts)
       json = {
         schemas = {
           {
-            fileMatch = { '.nvim-config.json' },
-            url = vim.fn.stdpath('config') .. '/nvim-config.json',
-          },
-          {
             fileMatch = { 'package.json' },
             url = 'https://json.schemastore.org/package.json',
           }
