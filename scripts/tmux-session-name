@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   tmux-session-name
+# author: Pawel Bogut <https://pbogut.me>
+# date:   22/07/2022
+#=================================================
+cwd="${1:-$(pwd)}"
+name=$(readlink -f "$cwd" | sha1sum | sed "s/^\(.\{8\}\).*/\1/")
+
+abs_path=$(git rev-parse --absolute-git-dir 2>/dev/null)
+top_path=$(git rev-parse --show-toplevel 2>/dev/null)
+is_bare=$(git rev-parse --is-bare-repository 2>/dev/null)
+
+
+if [[ "$top_path/.git" == "$abs_path" ]]; then
+  cwd=$(realpath "$top_path") # its normal repo
+elif [[ $is_bare == "true" ]]; then
+  cwd=$(realpath "$abs_path") # its bare not in branch
+elif [[ -n "$abs_path" && -n "$top_path" ]]; then
+  cwd="$(realpath "$top_path/..")" # its bare in branch
+fi
+
+name="$(basename "$cwd")_${name}"
+name="${name//[^A-Za-z0-9]/_}"
+
+echo "$name"
