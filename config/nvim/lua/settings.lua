@@ -24,16 +24,17 @@ o.hlsearch = false
 o.cursorline = true
 o.cursorcolumn = true
 o.completeopt = 'menuone,noselect,noinsert'
-o.cmdheight = 2
+o.cmdheight = 1
 o.tabstop = 2
 o.shiftwidth = 2
 o.expandtab = true
-o.scrolloff = 3
+o.scrolloff = 5
 o.number = true
 o.relativenumber = true
 o.lazyredraw = true
 o.wildmenu = true
 o.showcmd = true
+o.swapfile = false
 o.dir = os.getenv('HOME') .. '/.vim/swapfiles//'
 o.undodir = os.getenv('HOME') .. '/.vim/undofiles//'
 o.undofile = true
@@ -53,8 +54,7 @@ o.foldlevelstart = 99
 
 o.termguicolors = true
 o.background = 'dark'
-o.guicursor =
-  'n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor'
+o.guicursor = 'n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor'
 o.shell = '/bin/bash'
 
 o.inccommand = 'split'
