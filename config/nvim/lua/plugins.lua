@@ -68,6 +68,7 @@ require('packer').startup({
     use({ 'tpope/vim-rails', ft = { 'ruby' } })
     use({ 'vim-ruby/vim-ruby', ft = { 'ruby' } })
     use({ 'tpope/vim-unimpaired' })
+    use({ 'ThePrimeagen/harpoon', config = config('harpoon') })
     use({ 'lambdalisue/suda.vim' })
     use({ 'gioele/vim-autoswap' })
     use({ 'kylechui/nvim-surround', config = config('nvim_surround') })
