@@ -59,12 +59,12 @@ require('packer').startup({
     use({ fn.stdpath('config') .. '/local/remotesync', config = "require'remotesync'" })
 
     -- Github plugins
-    use({ 'editorconfig/editorconfig-vim', setup = setup('editorconfig') })
     use({ 'tpope/vim-scriptease' })
     use({ 'tpope/vim-eunuch' })
     use({ 'tpope/vim-rsi' })
     use({ 'tpope/vim-abolish' }) -- coercion thingis
     use({ 'tpope/vim-repeat' })
+    use({ 'tpope/vim-sleuth' })
     use({ 'tpope/vim-rails', ft = { 'ruby' } })
     use({ 'vim-ruby/vim-ruby', ft = { 'ruby' } })
     use({ 'tpope/vim-unimpaired' })
@@ -79,7 +79,9 @@ require('packer').startup({
     use({ 'mhinz/vim-signify', config = config('vim_signify') })
     use({ 'ntpeters/vim-better-whitespace', config = config('vim_better_whitespace') })
     use({ 'honza/vim-snippets' })
-    use({ 'andymass/vim-matchup' })
+    use({ 'andymass/vim-matchup', config = [[
+      vim.g.matchup_matchparen_offscreen = {}
+    ]]})
     use({
       'vim-test/vim-test',
       cmd = { 'TestNearest', 'TestFile', 'TestSuite', 'TestLast', 'TestLast', 'TestVisit' },
