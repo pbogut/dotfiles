@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+#=================================================
+# name:   yarn-upgrade-global
+# author: Pawel Bogut <https://pbogut.me>
+# date:   28/06/2022
+#=================================================
+cd ~/.config/yarn/global
+
+cp package.json package.json.old
+yarn-upgrade-all
+cp package.json package.json.new
+
+diff --color=always package.json.old package.json.new
+
+cd - > /dev/null 2>&1
