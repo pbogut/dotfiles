@@ -47,6 +47,11 @@ local sources = {
     builtin = null_ls.builtins.formatting.yapf,
     enabled = true,
   },
+  -- json
+  {
+    builtin = null_ls.builtins.diagnostics.jsonlint,
+    enabled = true,
+  },
   -- other
   {
     builtin = null_ls.builtins.completion.spell,

@@ -19,6 +19,7 @@ local packages = {
     '@tailwindcss/language-server',
     'intelephense',
     'vscode-langservers-extracted',
+    'jsonlint',
   },
   gem = {
     'solargraph',
