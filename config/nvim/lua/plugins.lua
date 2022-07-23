@@ -168,10 +168,10 @@ require('packer').startup({
         'ray-x/cmp-treesitter',
         'onsails/lspkind-nvim',
         'dcampos/cmp-snippy',
+        'kristijanhusak/vim-dadbod-completion',
         -- 'quangnguyen30192/cmp-nvim-tags', # dont even try, its slow trash
       },
     })
-    use({ 'kristijanhusak/vim-dadbod-completion', after = { 'nvim-cmp', 'vim-dadbod' } })
 
     use({ 'emmanueltouzery/agitator.nvim' })
 
