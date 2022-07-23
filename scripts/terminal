@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   terminal
+# author: Pawel Bogut <https://pbogut.me>
+# date:   14/06/2022
+#=================================================
+$TERMINAL $@

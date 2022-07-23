@@ -141,7 +141,7 @@ config.bind(
     'spawn --userscript ~/.scripts/keepass.rb --add', mode='insert')
 config.bind(
     '<ctrl-l>',
-    'spawn --userscript ~/.scripts/keepass.rb --type-user-and-pass',
+    'spawn --userscript ~/.scripts/keepass.rb --login',
     mode='insert')
 config.bind(
     '<ctrl-u>',

@@ -40,17 +40,18 @@ action, = ARGV
 if !action
   cmd = "rofi -dmenu -i -p 'select mode:'"
   selection, _, _ = Open3.capture3(cmd, stdin_data: [
-    "--copy-user-and-pass",
-    "--copy-user",
-    "--copy-pass",
-    "--type-user-and-pass",
-    "--type-user",
-    "--type-pass",
-    "--type-otpauth",
-    "--remove",
-    "--edit",
-    "--add",
-    "--show",
+    '--login',
+    '--copy-user-and-pass',
+    '--copy-user',
+    '--copy-pass',
+    '--type-user-and-pass',
+    '--type-user',
+    '--type-pass',
+    '--type-otpauth',
+    '--remove',
+    '--edit',
+    '--add',
+    '--show',
   ].join("\n"))
   selection = "--exit" if selection == ""
   selection, _, _ = Open3.capture3('keepass.rb ' + selection)
@@ -125,34 +126,36 @@ user_name = site_url.gsub(/\...\...$/, '').gsub(/\...$/, '').gsub(/\....$/, '').
 
 if action == "--add"
   open(ENV['TMPDIR'] + '/_lpass_url', 'w') { |f| f << url }
-  _, _, _ = Open3.capture3('urxvt', '-e', 'keepass-cli', 'new', (site_url.empty? ? 'new-site' : site_url), site_base_url, user_name)
+  _, _, _ = Open3.capture3('terminal', '-e', 'keepass-cli', 'new', (site_url.empty? ? 'new-site' : site_url), site_base_url, user_name)
   exit
 end
 
 prompt = case action
-  when "--copy-user"
-    "cpuser"
-  when "--copy-pass"
-    "cppass"
-  when "--copy-user-and-pass"
-    "copy"
-  when "--type-user-and-pass"
-    "login"
-  when "--type-user"
-    "user"
-  when "--type-pass"
-    "pass"
-  when "--type-otpauth"
-    "otpauth"
-  when "--remove"
-    "remove"
-  when "--edit"
-    "edit"
-  when "--show"
-    "show"
-  else
-    exit
-end
+         when '--copy-user'
+           'cpuser'
+         when '--copy-pass'
+           'cppass'
+         when '--copy-user-and-pass'
+           'copy'
+         when '--type-user-and-pass'
+           'login'
+         when '--login'
+           'login'
+         when '--type-user'
+           'user'
+         when '--type-pass'
+           'pass'
+         when '--type-otpauth'
+           'otpauth'
+         when '--remove'
+           'remove'
+         when '--edit'
+           'edit'
+         when '--show'
+           'show'
+         else
+           exit
+         end
 
 if !action
   action = "--copy-user-and-pass"
@@ -172,7 +175,13 @@ name = entry.xpath('./String/Key[text()="Title"]/../Value').text
 user = entry.xpath('./String/Key[text()="UserName"]/../Value').text
 pass = entry.xpath('./String/Key[text()="Password"]/../Value').text
 otpurl = entry.xpath('./String/Key[text()="otpauth"]/../Value').text
-otpauth = get_otp(otpurl) if !otpurl.empty?
+otpauth = get_otp(otpurl) unless otpurl.empty?
+autologin = entry.xpath('./String/Key[text()="autologin"]/../Value').text
+
+unless autologin.empty?
+  autologin.gsub!('{USER}', user)
+  autologin.gsub!('{PASS}', pass)
+end
 
 sleep 0.2
 
@@ -202,6 +211,36 @@ if action == '--type-pass'
   else
     Open3.capture3('sleep', '0.5s')
     Open3.capture3('xdotool', 'type', '--clearmodifiers', pass)
+  end
+end
+if action == '--login'
+  if ENV['QUTE_FIFO']
+    File.open(ENV['QUTE_FIFO'], 'w') do |file|
+      if !autologin.empty?
+        parts = autologin.split("\n").join("\n<tab>\n").split("\n")
+        parts.each do |part|
+          file.write("fake-key #{part}\n")
+          # file.write("fake-key <tab>\n")
+        end
+      else
+        file.write("fake-key #{user}\n")
+        file.write("fake-key <tab>\n")
+        file.write("fake-key #{pass}\n")
+      end
+    end
+  else
+    Open3.capture3('sleep', '0.5s')
+    if !autologin.empty?
+      parts = autologin.split("\n").join("\n\t\n").split("\n")
+      parts.each do |part|
+        Open3.capture3('xdotool', 'type', '--clearmodifiers', part)
+        Open3.capture3('sleep', '0.1s')
+      end
+    else
+      Open3.capture3('xdotool', 'type', '--clearmodifiers', user)
+      Open3.capture3('xdotool', 'type', '--clearmodifiers', "\t")
+      Open3.capture3('xdotool', 'type', '--clearmodifiers', pass)
+    end
   end
 end
 if action == '--type-user-and-pass' || action.empty?
