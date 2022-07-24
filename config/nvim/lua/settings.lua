@@ -7,13 +7,13 @@ require('settings.highlights')
 local cmd = vim.cmd
 local o = vim.opt
 
-cmd('syntax on')
 cmd('filetype plugin indent on')
 cmd('set fillchars=fold:\\ ,vert:\\│')
 cmd('set shortmess+=c')
 cmd('set runtimepath+=~/.vim')
 cmd('silent! colorscheme solarized')
 
+o.syntax = 'on'
 o.list = true
 o.updatetime = 100
 o.signcolumn = 'yes'

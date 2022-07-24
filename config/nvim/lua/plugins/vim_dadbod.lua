@@ -1,4 +1,5 @@
 local config = require('config')
+local dadbod = require('plugins.vim_dadbod')
 local u = require('utils')
 local k = vim.keymap
 local g = vim.g
@@ -7,10 +8,14 @@ local fn = vim.fn
 local cmd = vim.cmd
 local l = {}
 
-k.set('v', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
-k.set('v', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
-k.set('n', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
-k.set('n', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
+k.set('v', '<space>d', dadbod.db_with_warning)
+k.set('n', '<space>d', dadbod.db_with_warning)
+k.set('v', '<space>D', function()
+  dadbod.db_with_warning(true)
+end)
+k.set('n', '<space>D', function()
+  dadbod.db_with_warning(true)
+end)
 
 -- set up dadbod connections
 for _, connection in pairs(config.get('dadbod.connections')) do
@@ -30,30 +35,44 @@ function l.db_with_warning(whole)
   end
 
   if firstline == 0 then
-    cmd([[echo "No query selected"]])
+    print('No query selected')
   end
 
   if db == '' then
-    cmd([[echo "No DB selected"]])
+    print('No DB selected')
     return
   elseif db_selected == '' then
-    cmd([[echo "Unknown DB selected, be careful what you are doing."]])
-  elseif db_selected:match("_prod$") then
-    cmd([[echo "Production DB selected, be careful what you are doing."]])
+    print('Unknown DB selected, be careful what you are doing.')
+  elseif db_selected:match('_prod$') then
+    print('Production DB selected, be careful what you are doing.')
   end
 
   local has_change = false
   for _, line in ipairs(fn.getline(firstline, lastline)) do
     local checks = {
-      " insert ", "^insert ", " insert$",
-      " update ", "^update ", " update$",
-      " delete ", "^delete ", " delete$",
-      " upsert ", "^upsert ", " upsert$",
-      " truncate ", "^truncate ", " truncate$",
-      " alter ", "^alter ", " alter$",
-      " drop ", "^drop ", " drop$",
+      ' insert ',
+      '^insert ',
+      ' insert$',
+      ' update ',
+      '^update ',
+      ' update$',
+      ' delete ',
+      '^delete ',
+      ' delete$',
+      ' upsert ',
+      '^upsert ',
+      ' upsert$',
+      ' truncate ',
+      '^truncate ',
+      ' truncate$',
+      ' alter ',
+      '^alter ',
+      ' alter$',
+      ' drop ',
+      '^drop ',
+      ' drop$',
     }
-    if not line:match("^%s*%-%-") then  -- skip if comment
+    if not line:match('^%s*%-%-') then -- skip if comment
       for _, pattern in ipairs(checks) do
         if line:lower():match(pattern) then
           has_change = true
@@ -64,11 +83,11 @@ function l.db_with_warning(whole)
 
   local halt = false -- perform query
   if has_change then
-    halt = 1 ~= fn.confirm('You are about to do some changes, are you sure you know what you are doing?',
-                           "Yes\nNo", 'No')
-    if not halt and db_selected:match("_prod$") then
-      halt = 1 ~= fn.confirm('You know this is Production DB right? Are you sure you want to continue?',
-                             "Yes\nNo", 'No')
+    halt = 1
+      ~= fn.confirm('You are about to do some changes, are you sure you know what you are doing?', 'Yes\nNo', 'No')
+    if not halt and db_selected:match('_prod$') then
+      halt = 1
+        ~= fn.confirm('You know this is Production DB right? Are you sure you want to continue?', 'Yes\nNo', 'No')
     end
   end
 
@@ -79,33 +98,36 @@ end
 
 u.augroup('x_dadbod', {
   BufEnter = {
-    {'*.dbout', function()
+    {
+      '*.dbout',
+      function()
         -- fix line breaks in result
-        cmd([[set modifiable]])
-        if b.db and (type(b.db) == 'string' and b.db:match('^mysql'))
-          or (type(b.db) == 'table' and type(b.db.db_url) == 'string'  and b.db.db_url:match('^mysql'))
+        vim.bo.modifiable = true
+        if
+          b.db and (type(b.db) == 'string' and b.db:match('^mysql'))
+          or (type(b.db) == 'table' and type(b.db.db_url) == 'string' and b.db.db_url:match('^mysql'))
         then
-          cmd([[silent! %s/^\n/ /]])          --empty lines
+          cmd([[silent! %s/^\n/ /]]) --empty lines
           cmd([[silent! %s/[^\|\+]\zs\n/ /]]) --lines not ending with table
         end
-        cmd([[wincmd L]])
-        b.modifiable = false
+        cmd.wincmd('L')
+        vim.bo.modifiable = false
         -- alternate file override for dbout && sql file
         k.set('n', '<space>ta', function()
           local dbout = vim.fn.expand('%')
           local db = vim.b.db
-          vim.cmd('e ' .. vim.b.db_input)
+          cmd.edit(vim.b.db_input)
           vim.defer_fn(function()
             k.set('n', '<space>ta', function()
-              vim.cmd('e ' .. dbout)
+              cmd.edit(dbout)
             end, { buffer = true })
             k.set('n', 'q', '<c-w>q', { buffer = true })
             vim.b.db = db
           end, 100)
         end, { buffer = true })
-      end
-    }
-  }
+      end,
+    },
+  },
 })
 
 return l

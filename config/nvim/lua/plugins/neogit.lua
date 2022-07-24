@@ -13,41 +13,35 @@ local function config()
   neogit.setup({
     signs = {
       -- { CLOSED, OPENED }
-      section = { "+", "-" },
-      item = { " ", " " },
-      hunk = { "", "" },
+      section = { '+', '-' },
+      item = { ' ', ' ' },
+      hunk = { '', '' },
     },
     mappings = {
-      status = {
-      }
-    }
+      status = {},
+    },
   })
 
   u.augroup('x_neogit', {
-    FileType = {'NeogitStatus', function()
-      my.neogit_syntax()
-      my.neogit_mappings()
-    end}
+    FileType = {
+      'NeogitStatus',
+      function()
+        my.neogit_syntax()
+        my.neogit_mappings()
+      end,
+    },
   })
 
   u.command('Gst', function()
-    cmd('Neogit kind=vsplit')
-    cmd('wincmd H')
-  end)
-
-  u.command('Grevert', function()
-      cmd('Gread')
-      cmd('noautocmd w')
-      if fn.exists(':SignifyRefresh') then
-          cmd('SignifyRefresh')
-      end
+    cmd.Neogit('kind=vsplit')
+    cmd.wincmd('H')
   end)
 
   function my.neogit_syntax()
     local sections = {
-      MyNeogitModified = {pattern = "^Modified", color = "DiffChange"},
-      MyNeogitAdded = {pattern = "^Added", color = "DiffAdd"},
-      MyNeogitDeleted = {pattern = "^Deleted", color = "DiffDelete"},
+      MyNeogitModified = { pattern = '^Modified', color = 'DiffChange' },
+      MyNeogitAdded = { pattern = '^Added', color = 'DiffAdd' },
+      MyNeogitDeleted = { pattern = '^Deleted', color = 'DiffDelete' },
     }
 
     for id, section in pairs(sections) do
@@ -58,14 +52,23 @@ local function config()
 
     local section_names = table.concat(u.table_keys(sections), ',')
     local regions = {
-      MyNeogitUnstaged = {pattern = "^Unstaged changes", color = "vimCommand", title_color = "Function"},
-      MyNeogitStaged = {pattern = "^Staged changes", color = "gitcommitSelectedType ", title_color = "Function"},
-      MyNeogitUntracked = {pattern = "^Untracked files", color = "gitcommitDiscardedType ", title_color = "Function"},
+      MyNeogitUnstaged = { pattern = '^Unstaged changes', color = 'vimCommand', title_color = 'Function' },
+      MyNeogitStaged = { pattern = '^Staged changes', color = 'gitcommitSelectedType ', title_color = 'Function' },
+      MyNeogitUntracked = { pattern = '^Untracked files', color = 'gitcommitDiscardedType ', title_color = 'Function' },
     }
 
     for id, region in pairs(regions) do
       cmd('syn match ' .. id .. ' /' .. region.pattern .. '/ contained')
-      cmd('syn region ' .. id .. 'Region start=/' .. region.pattern .. [[\ze.*/ end=/\n\n/ contains=]] .. id .. ',' .. section_names)
+      cmd(
+        'syn region '
+          .. id
+          .. 'Region start=/'
+          .. region.pattern
+          .. [[\ze.*/ end=/\n\n/ contains=]]
+          .. id
+          .. ','
+          .. section_names
+      )
       cmd('hi def link ' .. id .. ' ' .. region.title_color)
       cmd('hi def link ' .. id .. 'Region ' .. region.color)
     end
@@ -92,15 +95,15 @@ local function config()
     end, { buffer = true })
     k.set('n', 'ap', function()
       local name = file_name() -- get file name before tab open
-      cmd('tabnew')
+      cmd.tabnew()
       cmd('silent !git add -N ' .. name)
       fn.termopen('git add -p ' .. name, {
         on_exit = function()
-          cmd('wincmd q')
+          cmd.wincmd('q')
           vim.defer_fn(neogit.dispatch_refresh, 250)
-        end
+        end,
       })
-      cmd('startinsert')
+      cmd.startinsert()
     end, { buffer = true })
   end
 end

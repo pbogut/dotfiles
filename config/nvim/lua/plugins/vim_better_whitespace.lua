@@ -1,7 +1,6 @@
 local u = require('utils')
 local g = vim.g
 local b = vim.b
-local cmd = vim.cmd
 
 g.strip_whitespace_on_save = 0
 
@@ -11,17 +10,17 @@ u.augroup('x_whitespace', {
       '*',
       function()
         if not b.whitespace_trim_disabled then
-          cmd('StripWhitespace')
+          vim.cmd.StripWhitespace()
         end
-      end
-    }
+      end,
+    },
   },
   FileType = {
     {
       'markdown',
       function()
         b.whitespace_trim_disabled = true
-      end
+      end,
     },
   },
   BufEnter = {
@@ -29,7 +28,7 @@ u.augroup('x_whitespace', {
       '.i3blocks.conf',
       function()
         b.whitespace_trim_disabled = true
-      end
+      end,
     },
-  }
+  },
 })

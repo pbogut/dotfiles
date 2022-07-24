@@ -19,10 +19,10 @@ u.augroup('x_plugins_save', {
   BufWritePost = {
     'plugins.lua',
     function()
-      cmd('luafile ' .. os.getenv('HOME') .. '/.config/nvim/lua/plugins.lua')
-      cmd('PackerClean')
-      cmd('PackerInstall')
-      cmd('PackerCompile')
+      cmd.luafile(os.getenv('HOME') .. '/.config/nvim/lua/plugins.lua')
+      cmd.PackerClean()
+      cmd.PackerInstall()
+      cmd.PackerCompile()
     end,
   },
   BufEnter = {
@@ -55,9 +55,9 @@ require('packer').startup({
     use({ 'wbthomason/packer.nvim', opt = true })
 
     -- My local plugins
-    pcall(use, { fn.stdpath('config') .. '/local/projector', config = config('projector') })
-    use({ fn.stdpath('config') .. '/local/remotesync', config = "require'remotesync'" })
-    use({ fn.stdpath('config') .. '/local/actions', config = 'require"actions"'})
+    use({ fn.stdpath('config') .. '/local/projector', config = config('projector') })
+    use({ fn.stdpath('config') .. '/local/actions', config = 'require"actions"' })
+    use({ fn.stdpath('config') .. '/local/remotesync', config = 'require"remotesync"' })
 
     -- Github plugins
     use({ 'tpope/vim-scriptease' })
@@ -131,7 +131,7 @@ require('packer').startup({
       cmd = 'DB',
       config = config('vim_dadbod'),
       fn = 'db#url_complete',
-      requires = { 'pbogut/vim-dadbod-ssh' }
+      requires = { 'pbogut/vim-dadbod-ssh' },
     })
     use({ 'joosepalviste/nvim-ts-context-commentstring' })
     use({ 'numtostr/comment.nvim', config = config('comment_nvim') })
@@ -191,7 +191,7 @@ require('packer').startup({
 
 if first_install then
   require('packages')
-  cmd('InstallExternalPackages')
-  cmd('PackerInstall')
-  cmd('PackerCompile')
+  cmd.InstallExternalPackages()
+  cmd.PackerInstall()
+  cmd.PackerCompile()
 end

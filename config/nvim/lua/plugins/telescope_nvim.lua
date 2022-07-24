@@ -80,7 +80,7 @@ k.set('n', '<space>fm', function()
       else
         content = 'empty line'
       end
-      result[#result+1] = file .. ":" .. line_nr .. ":0:" .. content
+      result[#result + 1] = file .. ':' .. line_nr .. ':0:' .. content
     end
   end
 
@@ -214,11 +214,11 @@ telescope.setup({
         ['<s-tab>'] = actions.toggle_selection + actions.move_selection_better,
         ['<c-q>'] = function(id)
           actions.send_selected_to_qflist(id)
-          vim.cmd('Trouble quickfix')
+          vim.cmd.Trouble('quickfix')
         end,
         ['<m-q>'] = function(id)
           actions.send_to_qflist(id)
-          vim.cmd('Trouble quickfix')
+          vim.cmd.Trouble('quickfix')
         end,
         ['<c-l>'] = actions.complete_tag,
         ['<c-_>'] = actions.which_key, -- keys from pressing <C-/>

@@ -1,27 +1,27 @@
 local u = require('utils')
-local function alias(from, to)
-  vim.cmd('Alias ' .. from .. ' ' .. to)
-end
+local a = vim.cmd.Alias
 
 u.augroup('x_alias', {
-  VimEnter = {'*', function()
-    alias('ag', 'Ag')
-    alias('agg', 'Agg')
-    alias('rg', 'Rg')
-    alias('rgg', 'Rgg')
-    alias('art', 'Artisan')
-    alias('artisan', 'Artisan')
-    alias('git', 'Git')
-    alias('gan', 'Gan')
-    alias('gst', 'Gst')
-    alias('gap', 'Gap')
-    alias('ge', 'Gedit')
-    alias('gedit', 'Gedit')
-    alias('grev', 'Grev')
-    alias('mix', 'Mix')
-    alias('repl', 'Repl')
-    alias('skel', 'Skel')
-    alias('db', 'DB')
-    alias('lg', 'LazyGit')
-  end}
+  VimEnter = {
+    '*',
+    function()
+      a('ag', 'Ag')
+      a('agg', 'Agg')
+      a('rg', 'Rg')
+      a('rgg', 'Rgg')
+      a('art', 'Artisan')
+      a('artisan', 'Artisan')
+      a('git', 'Git')
+      a('gan', 'Gan')
+      a('gst', 'Gst')
+      a('gap', 'Gap')
+      a('ge', 'Gedit')
+      a('gedit', 'Gedit')
+      a('mix', 'Mix')
+      a('repl', 'Repl')
+      a('skel', 'Skel')
+      a('db', 'DB')
+      a('lg', 'LazyGit')
+    end,
+  },
 })

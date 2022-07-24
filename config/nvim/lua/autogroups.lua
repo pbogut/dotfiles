@@ -1,18 +1,17 @@
 local u = require('utils')
 local bo = vim.bo
-local b = vim.b
 local wo = vim.wo
-local w = vim.w
 local cmd = vim.cmd
-local fn = vim.fn
 
 local config_group = {
-  -- fix alacritty startup resize bug
-  VimEnter = {
-    '*',
-    ':silent exec "!kill -s SIGWINCH $PPID"',
+  TextYankPost = {
+    {
+      '*',
+      function()
+        require('vim.highlight').on_yank({ timeout = 75, higroup = 'Search' })
+      end,
+    },
   },
-  -- fix terminal display
   TermOpen = {
     {
       '*',
@@ -34,7 +33,7 @@ local config_group = {
     },
     {
       'crontab.*',
-      function ()
+      function()
         bo.commentstring = '# %s'
       end,
     },
@@ -62,20 +61,16 @@ local config_group = {
     {
       'NeogitCommitMessage',
       function()
-        cmd([[
-          setlocal spell spelllang=en_gb
-        ]])
+        cmd('setlocal spell spelllang=en_gb')
       end,
     },
     {
       'mail',
       function()
-        cmd([[
-          setlocal spell spelllang=en_gb
-          setlocal textwidth=72
-          execute('normal gg')
-          call search('^$')
-        ]])
+        cmd('setlocal spell spelllang=en_gb')
+        vim.bo.textwidth = 72
+        vim.fn.execute('normal gg')
+        vim.fn.search('^$')
       end,
     },
     {
@@ -107,3 +102,11 @@ local config_group = {
 
 u.augroup('x_autogroups', config_group)
 
+vim.api.nvim_create_autocmd({ 'VimEnter' }, {
+  callback = function()
+    local pid, WINCH = vim.fn.getpid(), vim.loop.constants.SIGWINCH
+    vim.defer_fn(function()
+      vim.loop.kill(pid, WINCH)
+    end, 20)
+  end,
+})

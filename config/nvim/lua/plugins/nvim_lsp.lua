@@ -41,9 +41,9 @@ local telescope = {
 local function maybe_telescope(name)
   return function()
     if vim.fn.exists(':Telescope') then
-      vim.cmd(telescope[name])
+      cmd(telescope[name])
     else
-      vim.cmd(vanilla[name])
+      cmd(vanilla[name])
     end
   end
 end
@@ -217,14 +217,14 @@ local function attach_lsp_to_new_buffer()
     end
   end
   -- write to not lose any changes
-  cmd(':w')
+  cmd.write()
   -- then reload so lsp is attached when reloaded from actuall file
-  cmd(':edit')
+  cmd.edit()
 end
 
 u.command('LspReload', function()
   vim.lsp.stop_client(vim.lsp.get_active_clients())
-  cmd('edit')
+  cmd.edit()
 end)
 u.command('LspAttachBuffer', attach_lsp_to_new_buffer)
 

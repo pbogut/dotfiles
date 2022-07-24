@@ -9,14 +9,14 @@ local adapters = {
     type = 'executable',
     command = 'node',
     args = {
-      gitpac_path('xdebug/vscode-php-debug/out/phpDebug.js')
-    }
+      gitpac_path('xdebug/vscode-php-debug/out/phpDebug.js'),
+    },
   },
   mix_task = {
     type = 'executable',
     command = gitpac_path('elixir-lsp/elixir-ls/out/debugger.sh'),
-    args = {}
-  }
+    args = {},
+  },
 }
 
 local defaults = {
@@ -25,43 +25,43 @@ local defaults = {
     type = 'php',
     request = 'launch',
     name = 'Xdebug',
-    port = 9003
+    port = 9003,
   },
   elixir = {
-    type = "mix_task",
-    name = "mix test",
-    task = "test",
-    request = "launch",
-    projectDir = "${workspaceFolder}",
+    type = 'mix_task',
+    name = 'mix test',
+    task = 'test',
+    request = 'launch',
+    projectDir = '${workspaceFolder}',
     requireFiles = {
-      "test/**/test_helper.exs",
-      "test/**/*_test.exs"
+      'test/**/test_helper.exs',
+      'test/**/*_test.exs',
     },
     excludeModules = {
-      "Bcrypt"
-    }
-  }
+      'Bcrypt',
+    },
+  },
 }
 
 local configs = {
   elixir = {
     {
-      task = "test",
-      name = "test",
-      taskArgs = {"--trace"},
+      task = 'test',
+      name = 'test',
+      taskArgs = { '--trace' },
     },
     {
-      task = "test",
-      name = "test (phx)",
-      taskArgs = {"--trace"},
+      task = 'test',
+      name = 'test (phx)',
+      taskArgs = { '--trace' },
       startApps = true,
     },
     {
-      name = "phx.server",
-      task = "phx.server",
+      name = 'phx.server',
+      task = 'phx.server',
       startApps = true,
-    }
-  }
+    },
+  },
 }
 
 local function config()
@@ -72,10 +72,7 @@ local function config()
 
   local function load_config(lang, conf)
     dap.configurations[lang] = dap.configurations[lang] or {}
-    table.insert(
-      dap.configurations[lang],
-      vim.tbl_extend('keep', conf or {}, defaults[lang])
-    )
+    table.insert(dap.configurations[lang], vim.tbl_extend('keep', conf or {}, defaults[lang]))
   end
 
   -- get config from config plugin
@@ -87,9 +84,7 @@ local function config()
 
   -- if no config for lang get it from local configs
   for lang, _ in pairs(configs) do
-    if not dap.configurations[lang]
-      or #dap.configurations[lang] == 0
-    then
+    if not dap.configurations[lang] or #dap.configurations[lang] == 0 then
       for _, conf in pairs(configs[lang]) do
         load_config(lang, conf)
       end
@@ -98,9 +93,7 @@ local function config()
 
   -- if still no config for lang get it from local defaults
   for lang, _ in pairs(defaults) do
-    if not dap.configurations[lang]
-      or #dap.configurations[lang] == 0
-    then
+    if not dap.configurations[lang] or #dap.configurations[lang] == 0 then
       dap.configurations[lang] = { defaults[lang] }
     end
   end
@@ -114,7 +107,9 @@ local function config()
   k.set('n', '<space>dd', dap.toggle_breakpoint)
   k.set('n', '<space>dc', dap.continue)
   k.set('n', '<space>ds', dap.close)
-  k.set('n', '<space>dl', function() dap.run_last() end)
+  k.set('n', '<space>dl', function()
+    dap.run_last()
+  end)
   k.set('n', '<space>dr', dap.repl.toggle)
   k.set('n', '<space>dtc', dap.run_to_cursor)
   k.set('n', '<space>di', dap.step_into)
@@ -123,9 +118,9 @@ local function config()
   k.set('n', '<space>df', function()
     dap.list_breakpoints()
     if vim.fn.exists(':Trouble') > 0 then
-      vim.cmd('Trouble quickfix')
+      vim.cmd.Trouble('quickfix')
     else
-      vim.cmd('copen')
+      vim.cmd.copen()
     end
   end)
 
@@ -138,20 +133,23 @@ local function config()
   })
 
   u.signs({
-    DapBreakpoint = { text = i.breakpoint, texthl = "DapBreakpoint" },
-    DapBreakpointCondition = { text = i.breakpoint_condition, texthl = "DapBreakpointCondition" },
-    DapBreakpointRejected = { text = i.breakpoint_rejected, texthl = "DapBreakpointRejected" },
-    DapLogPoint = { text = i.breakpoint_info, texthl = "DapLogPoint" },
-    DapStopped = { text = i.breakpoint_current, texthl = "DapStopped" },
+    DapBreakpoint = { text = i.breakpoint, texthl = 'DapBreakpoint' },
+    DapBreakpointCondition = { text = i.breakpoint_condition, texthl = 'DapBreakpointCondition' },
+    DapBreakpointRejected = { text = i.breakpoint_rejected, texthl = 'DapBreakpointRejected' },
+    DapLogPoint = { text = i.breakpoint_info, texthl = 'DapLogPoint' },
+    DapStopped = { text = i.breakpoint_current, texthl = 'DapStopped' },
   })
 
   u.augroup('x_nvim_dap', {
-    FileType = {'elixir,eelixir', function()
-      require('plugins.dap.elixir').setup({defaults = defaults.elixir})
-    end}
+    FileType = {
+      'elixir,eelixir',
+      function()
+        require('plugins.dap.elixir').setup({ defaults = defaults.elixir })
+      end,
+    },
   })
 end
 
 return {
-  config = config
+  config = config,
 }

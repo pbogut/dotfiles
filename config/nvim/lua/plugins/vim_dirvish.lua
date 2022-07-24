@@ -9,13 +9,13 @@ g.dirvish_mode = [[:sort r /[^\/]$/]]
 g.echodoc_enable_at_startup = 1
 
 g.dirvish_git_indicators = {
-  Modified  = g.icon.changed,
-  Staged    = g.icon.added,
+  Modified = g.icon.changed,
+  Staged = g.icon.added,
   Untracked = '☒',
-  Renamed   = g.icon.renamed,
-  Unmerged  = '═',
-  Ignored   = g.icon.ignored,
-  Unknown   = '?'
+  Renamed = g.icon.renamed,
+  Unmerged = '═',
+  Ignored = g.icon.ignored,
+  Unknown = '?',
 }
 
 k.set('n', '\\won', '<Plug>(dirvish_up)', { remap = true })
@@ -26,7 +26,7 @@ u.augroup('x_dirvish', {
     {
       'dirvish',
       function()
-        k.set('n', 'q', '<c-w>q')
+        k.set('n', 'q', ':Bdelete<cr>', { buffer = true })
         k.set('n', '<bs>', '<Plug>(dirvish_up)', { remap = false, buffer = true })
         k.set('n', 'H', '<Plug>(dirvish_up)', { remap = false, buffer = true })
         k.set('n', 'cc', ':DirvishCopy<cr>', { buffer = true })
@@ -37,9 +37,9 @@ u.augroup('x_dirvish', {
         k.set('n', '/', [[/\ze[^\/]*[\/]\=$<Home>\c]], { silent = false, buffer = true })
         k.set('n', '?', [[?\ze[^\/]*[\/]\=$<Home>\c]], { silent = false, buffer = true })
         k.set('n', 'A', ':echo "Use K"<cr>', { buffer = true })
-      end
-    }
-  }
+      end,
+    },
+  },
 })
 
 local function mkdir_parent(to)
@@ -57,7 +57,7 @@ local function dirvish_create()
   fn.inputsave()
   local to = fn.input('create: ', from, 'file')
   fn.inputrestore()
-  cmd('redraw!')
+  cmd.redraw({ bang = true })
   if not to or to == '' then
     return
   end
@@ -70,17 +70,17 @@ local function dirvish_create()
   fn.system('mkdir -p ' .. dir)
   -- create empty file first
   fn.system('touch ' .. to)
-  cmd('e ' .. to)
+  cmd.edit(to)
 end
 
 local function dirvish_copy()
   local from = fn.getline('.')
   local extension = fn.substitute(from, [[.*/[^\.]*\(.\{-}\)$]], [[\1]], '')
-  local move_cursor = fn.substitute(extension, '.', t'<left>', 'g')
+  local move_cursor = fn.substitute(extension, '.', t('<left>'), 'g')
   fn.inputsave()
   local to = fn.input('!cp -r ' .. from .. ' -> ', from .. move_cursor, 'file')
   fn.inputrestore()
-  cmd('redraw!')
+  cmd.redraw({ bang = true })
   if to and to ~= '' then
     mkdir_parent(to)
     fn.system('cp -r ' .. from .. ' ' .. to)
@@ -92,11 +92,11 @@ end
 local function dirvish_move()
   local from = fn.getline('.')
   local extension = fn.substitute(from, [[.*/\(.\{-}\)$]], [[\1]], '')
-  local move_cursor = fn.substitute(extension, '.', t'<left>', 'g')
+  local move_cursor = fn.substitute(extension, '.', t('<left>'), 'g')
   fn.inputsave()
   local to = fn.input('!mv ' .. from .. ' -> ', from .. move_cursor, 'file')
   fn.inputrestore()
-  cmd('redraw!')
+  cmd.redraw({ bang = true })
   if to and to ~= '' then
     fn.system('mv ' .. from .. ' ' .. to)
     fn.setline('.', to)
@@ -113,11 +113,11 @@ local function dirvish_rename()
   local dir_name = fn.substitute(from, [[\(.*/\).\{-}$]], [[\1]], '')
   local file_name = fn.substitute(from, [[.*/\(.\{-}\)$]], [[\1]], '')
   local extension = fn.substitute(from, [[.*/[^\.]*\(.\{-}\)$]], [[\1]], '')
-  local move_cursor = fn.substitute(extension, '.', t'<left>', 'g')
+  local move_cursor = fn.substitute(extension, '.', t('<left>'), 'g')
   fn.inputsave()
   local to = fn.input('!mv ' .. from .. ' -> ' .. dir_name, file_name .. move_cursor, 'file')
   fn.inputrestore()
-  cmd('redraw!')
+  cmd.redraw({ bang = true })
   if to and to ~= '' then
     fn.system('mv ' .. from .. ' ' .. dir_name .. to)
     fn.setline('.', dir_name .. to .. suffix)
@@ -129,11 +129,11 @@ local function dirvish_delete()
   fn.inputsave()
   local confirm = fn.input('!rm -fr ' .. file .. ' // Are you sure? [yes|no]: ')
   fn.inputrestore()
-  cmd('redraw!')
+  cmd.redraw({ bang = true })
   if confirm == 'yes' then
     fn.system('rm -fr ' .. file)
     fn.system('bd! ' .. file)
-    cmd('Dirvish %')
+    cmd.Dirvish('%')
   end
 end
 

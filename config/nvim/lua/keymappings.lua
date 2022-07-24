@@ -10,16 +10,11 @@ local cmd = vim.cmd
 g.no_plugin_maps = 1
 
 k.set('n', '<bs>', ':Explore<cr>')
-k.set(
-  'n',
-  '<c-s>',
-  [[:echo synIDattr(synID(line('.'), col('.'), 1), "name")<cr>]]
-)
+k.set('n', '<c-s>', [[:echo synIDattr(synID(line('.'), col('.'), 1), "name")<cr>]])
 -- macros helper (more like scratch pad)
 k.set('n', '<space>em', ':tabnew ~/.vim/macros.vim<cr>')
 k.set('n', '<space>sm', ':source ~/.vim/macros.vim<cr>')
 -- nice to have
-k.set('n', 'R', '^Da')
 k.set('i', '<c-d>', '<del>')
 k.set('c', '<c-d>', '<del>')
 k.set('n', '<space><cr>', 'za')
@@ -49,8 +44,9 @@ k.set('n', '<c-w>v', ':rightbelow vsplit<cr>')
 k.set('n', '<c-w>s', ':rightbelow split<cr>')
 k.set('n', '<c-w>V', ':vsplit<cr>')
 k.set('n', '<c-w>S', ':split<cr>')
+k.set('n', '<c-w>O', ':tabonly<cr>')
 -- search helpers
-k.set('n', '<esc>', ':set nohls<cr>')
+k.set('n', '<esc>', ':set nohls<cr>', { silent = true })
 k.set('n', '*', ':set hls<cr>*')
 k.set('n', '#', ':set hls<cr>#')
 k.set('n', 'n', ':set hls<cr>n')
@@ -71,8 +67,8 @@ k.set('n', '<space><space>', function()
     if not term:match([[^\<%$]]) then
       term, _ = term:gsub([[^\<]], [[\<%$\=\zs]])
     end
-    vim.cmd('let @/="' .. vim.fn.escape(term, [["\]]) .. '"')
-    vim.cmd('set hls')
+    cmd('let @/="' .. vim.fn.escape(term, [["\]]) .. '"')
+    vim.o.hls = true
   end, 1)
 end)
 -- format file indentation
@@ -82,6 +78,14 @@ k.set('', '<m-l>', ':vertical resize +1<cr>')
 k.set('', '<m-h>', ':vertical resize -1<cr>')
 k.set('', '<m-j>', ':resize +1<cr>')
 k.set('', '<m-k>', ':resize -1<cr>')
+-- tmux
+k.set('n', '<c-q>', function()
+  if os.getenv('TMUX') then
+    os.execute('tmux detach')
+  else
+    cmd.quit()
+  end
+end)
 -- terminal - normal mode
 k.set('t', '<c-q>', [[<C-\><C-n>]])
 -- diffmode
@@ -91,24 +95,24 @@ k.set('n', 'dg', ':diffget<cr>')
 -- create parent dir while saving file
 k.set('n', '<space>w', function()
   fn.system('mkdir -p ' .. fn.expand('%:h'))
-  local success, err = pcall(cmd, 'w!')
+  local success, _ = pcall(cmd, 'w!')
   if not success then
-    cmd('SudaWrite')
+    cmd.SudaWrite()
   end
 end)
 -- open terminal
 k.set('n', 'got', function()
   local path = fn.expand('%:p:h')
   cmd('belowright 20split')
-  cmd('enew')
+  cmd.enew()
   fn.termopen('cd ' .. path .. ' && zsh')
-  cmd('startinsert')
+  cmd.startinsert()
 end)
 k.set('n', 'goT', function()
   cmd('belowright 20split')
-  cmd('enew ')
+  cmd.enew()
   fn.termopen('cd ' .. fn.getcwd() .. ' && zsh')
-  cmd('startinsert')
+  cmd.startinsert()
 end)
 -- toggle spell dictionaires
 k.set('n', '<space>ss', function()
@@ -136,21 +140,9 @@ k.set('n', '<space>ss', function()
   wo.spell = true
 end)
 -- yank file name
-k.set(
-  'n',
-  'yaf',
-  [[:let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>]]
-)
-k.set(
-  'n',
-  'yif',
-  [[:let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>]]
-)
-k.set(
-  'n',
-  'yrf',
-  [[:let @+=expand('%:.')<bar>echo 'Yanked: '.expand('%:.')<cr>]]
-)
+k.set('n', 'yaf', [[:let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>]])
+k.set('n', 'yif', [[:let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>]])
+k.set('n', 'yrf', [[:let @+=expand('%:.')<bar>echo 'Yanked: '.expand('%:.')<cr>]])
 
 -- quick change and search for next occurrence, change can be repeated
 -- by . N and n will search for the same selection, gn gN will select same
@@ -162,18 +154,8 @@ for _, keys in pairs({ 'w', 'iw', 'aw', 'e', 'W', 'iW', 'aW' }) do
   end
   k.set('n', 'cg' .. keys, motion .. ':exe("let @/=@+")<bar><esc>cgn')
   k.set('n', 'cg' .. keys, 'y' .. motion .. ':exe("let @/=@+")<bar><esc>cgn')
-  k.set(
-    'n',
-    '<space>s' .. keys,
-    'y' .. motion .. ':s/<c-r>+//g<left><left>',
-    { silent = false }
-  )
-  k.set(
-    'n',
-    '<space>%' .. keys,
-    'y' .. motion .. ':%s/<c-r>+//g<left><left>',
-    { silent = false }
-  )
+  k.set('n', '<space>s' .. keys, 'y' .. motion .. ':s/<c-r>+//g<left><left>', { silent = false })
+  k.set('n', '<space>%' .. keys, 'y' .. motion .. ':%s/<c-r>+//g<left><left>', { silent = false })
 end
 
 -- swap line navigation (for wraplines to be navigated by j/k)
@@ -196,11 +178,7 @@ u.augroup('x_keybindings', {
     {
       '*.keepass',
       function()
-        k.set(
-          'n',
-          'gp',
-          [[/^Password:<cr>:read !apg -m16 -n1 -MSNCL<cr>:%s/Password:.*\n/Password: /<cr><esc>]]
-        )
+        k.set('n', 'gp', [[/^Password:<cr>:read !apg -m16 -n1 -MSNCL<cr>:%s/Password:.*\n/Password: /<cr><esc>]])
       end,
     },
   },
