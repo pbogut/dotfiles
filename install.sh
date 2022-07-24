@@ -59,6 +59,7 @@ read -d '' files <<"EOF"
     config/i3/config
     config/i3/i3status.conf
     config/i3/workspaces
+    config/lazygit/config.yml
     config/mpv/input.conf
     config/mpv/mpv.conf
     config/mpv/script-settings/mpvDLNA.conf

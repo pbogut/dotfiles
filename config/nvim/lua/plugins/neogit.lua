@@ -1,10 +1,6 @@
 local u = require('utils')
 local k = vim.keymap
 
-local function setup()
-  k.set('n', '<space>lg', ':Neogit<cr>')
-end
-
 local function config()
   local neogit = require('neogit')
   local cmd = vim.cmd

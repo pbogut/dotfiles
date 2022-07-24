@@ -10,9 +10,14 @@ TERM=xterm-256color
 declare -a files
 declare -a args
 has_args=0
+no_tab=0
 
 while test $# -gt 0; do
   case "$1" in
+    --no-tab)
+      no_tab=1
+      shift
+      ;;
     --*|-*)
       args["${#args[@]}"]="$1"
       has_args=1
@@ -35,14 +40,20 @@ open_by_title() {
   # shellcheck disable=SC2001
   id=$(sed 's/.*:nvim:\([0-9]*\):.*/\1/g' <<<"$1")
   pid=/run/user/$UID/nvim.$id.0
+  open=":OpenFile"
+  if [[ $no_tab -eq 1 ]]; then
+    open=":edit"
+  fi
   for fn in "${files[@]}"; do
     file="$(readlink -f "$fn" || echo "$fn")"
-    nvr --servername "$pid" -c ":OpenFile $file"
+    nvr --servername "$pid" -c "$open $file"
   done
   # get first file focused
   file="$(readlink -f "${files[0]}" || echo "${files[0]}")"
-  nvr --servername "$pid" -c ":OpenFile $file"
-  tmux attach-session -t "$name"
+  nvr --servername "$pid" -c "$open $file"
+  if [[ -z $TMUX ]]; then
+    tmux attach-session -t "$name"
+  fi
 }
 
 if [[ -n $TMUX ]]; then
@@ -50,6 +61,7 @@ if [[ -n $TMUX ]]; then
   tmux switch-client -t "$session_name:nvim"
   title=$(cut -f1 --complement --delimiter='|' <<< "$(tmux display-message -p "#T")")
   open_by_title "$title"
+  exit 0
 fi
 
 session=$(tmux ls -F "#{session_name}|#{pane_title}" 2>/dev/null | grep "^$name")
