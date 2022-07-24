@@ -1,3 +1,6 @@
+[submodule "config/dircolors-solarized"]
+	path = config/dircolors-solarized
+	url = https://github.com/seebi/dircolors-solarized
 [submodule "zshrc.d/plugins/zsh-autosuggestions"]
 	path = zshrc.d/plugins/zsh-autosuggestions
 	url = https://github.com/zsh-users/zsh-autosuggestions.git
