@@ -1,5 +1,4 @@
 local config = require('config')
-local dadbod = require('plugins.vim_dadbod')
 local u = require('utils')
 local k = vim.keymap
 local g = vim.g
@@ -8,20 +7,19 @@ local fn = vim.fn
 local cmd = vim.cmd
 local l = {}
 
-k.set('v', '<space>d', dadbod.db_with_warning)
-k.set('n', '<space>d', dadbod.db_with_warning)
-k.set('v', '<space>D', function()
-  dadbod.db_with_warning(true)
-end)
-k.set('n', '<space>D', function()
-  dadbod.db_with_warning(true)
-end)
+-- behave different when changed to functions or <cmd>, so don't do it
+k.set('v', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
+k.set('v', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
+k.set('n', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
+k.set('n', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
 
 -- set up dadbod connections
-for _, connection in pairs(config.get('dadbod.connections')) do
-  local name = connection.name
-  local uri = connection.uri
-  g[name] = uri
+function l.load_connections()
+  for _, connection in pairs(config.get('dadbod.connections', {})) do
+    local name = connection.name
+    local uri = connection.uri
+    g[name] = uri
+  end
 end
 
 function l.db_with_warning(whole)
@@ -95,6 +93,8 @@ function l.db_with_warning(whole)
     fn['db#execute_command']('', false, firstline, lastline, '')
   end
 end
+
+l.load_connections()
 
 u.augroup('x_dadbod', {
   BufEnter = {
