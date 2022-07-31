@@ -1,5 +1,5 @@
 " ripgrep
-nmap <silent> gr :set opfunc=<sid>ripgrep_from_motion<CR>g@
+nmap <silent> gr :set opfunc=<sid>ripgrep_from_motion<cr>g@
 function! s:ripgrep_from_motion(type, ...)
   let l:tmp = @a
   if a:0  " Invoked from Visual mode, use '< and '> marks.

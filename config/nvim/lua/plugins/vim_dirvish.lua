@@ -18,25 +18,25 @@ g.dirvish_git_indicators = {
   Unknown = '?',
 }
 
-k.set('n', '\\won', '<Plug>(dirvish_up)', { remap = true })
-k.set('n', '<bs>', ':Dirvish %:p:h<cr>')
+k.set('n', '\\won', '<plug>(dirvish_up)', { remap = true })
+k.set('n', '<bs>', '<cmd>Dirvish %:p:h<cr>')
 
 u.augroup('x_dirvish', {
   FileType = {
     {
       'dirvish',
       function()
-        k.set('n', 'q', ':Bdelete<cr>', { buffer = true })
-        k.set('n', '<bs>', '<Plug>(dirvish_up)', { remap = false, buffer = true })
-        k.set('n', 'H', '<Plug>(dirvish_up)', { remap = false, buffer = true })
-        k.set('n', 'cc', ':DirvishCopy<cr>', { buffer = true })
-        k.set('n', 'rr', ':DirvishRename<cr>', { buffer = true })
-        k.set('n', 'mm', ':DirvishMove<cr>', { buffer = true })
-        k.set('n', 'dd', ':DirvishDelete<cr>', { buffer = true })
-        k.set('n', 'K', ':DirvishCreate<cr>', { buffer = true })
+        k.set('n', 'q', '<cmd>Bdelete<cr>', { buffer = true })
+        k.set('n', '<bs>', '<plug>(dirvish_up)', { remap = false, buffer = true })
+        k.set('n', 'H', '<plug>(dirvish_up)', { remap = false, buffer = true })
+        k.set('n', 'cc', '<cmd>DirvishCopy<cr>', { buffer = true })
+        k.set('n', 'rr', '<cmd>DirvishRename<cr>', { buffer = true })
+        k.set('n', 'mm', '<cmd>DirvishMove<cr>', { buffer = true })
+        k.set('n', 'dd', '<cmd>DirvishDelete<cr>', { buffer = true })
+        k.set('n', 'K', '<cmd>DirvishCreate<cr>', { buffer = true })
         k.set('n', '/', [[/\ze[^\/]*[\/]\=$<Home>\c]], { silent = false, buffer = true })
         k.set('n', '?', [[?\ze[^\/]*[\/]\=$<Home>\c]], { silent = false, buffer = true })
-        k.set('n', 'A', ':echo "Use K"<cr>', { buffer = true })
+        k.set('n', 'A', '<cmd>echo "Use K"<cr>', { buffer = true })
       end,
     },
   },

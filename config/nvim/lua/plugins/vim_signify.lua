@@ -11,11 +11,11 @@ g.signify_sign_change = g.icon.changed
 g.signify_sign_changedelete = g.icon.changed
 g.signify_sign_show_count = 0
 
-k.set('n', '<space>hh', ':SignifyToggleHighlight<cr>')
-k.set('n', '<space>hr', ':SignifyRefresh<cr>')
-k.set('n', '<space>hd', ':SignifyHunkDiff<cr>')
-k.set('n', '<space>hu', ':SignifyHunkUndo<cr>')
-k.set('n', '<space>gd', ':SignifyDiff<cr>')
+k.set('n', '<space>hh', '<cmd>SignifyToggleHighlight<cr>')
+k.set('n', '<space>hr', '<cmd>SignifyRefresh<cr>')
+k.set('n', '<space>hd', '<cmd>SignifyHunkDiff<cr>')
+k.set('n', '<space>hu', '<cmd>SignifyHunkUndo<cr>')
+k.set('n', '<space>gd', '<cmd>SignifyDiff<cr>')
 
 k.set('n', ']h', '<plug>(signify-next-hunk)', { remap = true })
 k.set('n', '[h', '<plug>(signify-prev-hunk)', { remap = true })

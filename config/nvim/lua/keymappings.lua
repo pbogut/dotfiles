@@ -9,22 +9,22 @@ local cmd = vim.cmd
 -- dont mess with me!
 g.no_plugin_maps = 1
 
-k.set('n', '<bs>', ':Explore<cr>')
-k.set('n', '<c-s>', [[:echo synIDattr(synID(line('.'), col('.'), 1), "name")<cr>]])
+k.set('n', '<bs>', '<cmd>Explore<cr>')
+k.set('n', '<c-s>', [[<cmd>echo synIDattr(synID(line('.'), col('.'), 1), "name")<cr>]])
 -- macros helper (more like scratch pad)
-k.set('n', '<space>em', ':tabnew ~/.vim/macros.vim<cr>')
-k.set('n', '<space>sm', ':source ~/.vim/macros.vim<cr>')
+k.set('n', '<space>em', '<cmd>tabnew ~/.vim/macros.vim<cr>')
+k.set('n', '<space>sm', '<cmd>source ~/.vim/macros.vim<cr>')
 -- nice to have
 k.set('i', '<c-d>', '<del>')
 k.set('c', '<c-d>', '<del>')
 k.set('n', '<space><cr>', 'za')
 k.set('v', '<space><cr>', 'zf')
-k.set('n', '<space>tw', ':lua vim.wo.wrap = not vim.wo.wrap<cr>')
-k.set('n', '<space>lq', ':copen<CR>')
-k.set('n', '<space>ll', ':lopen<CR>')
+k.set('n', '<space>tw', '<cmd>lua vim.wo.wrap = not vim.wo.wrap<cr>')
+k.set('n', '<space>lq', '<cmd>copen<cr>')
+k.set('n', '<space>ll', '<cmd>lopen<cr>')
 -- Shift + J/K moves selected lines down/up in visual mode
-k.set('v', 'J', [[:m '>+1<CR>gv=gv]])
-k.set('v', 'K', [[:m '<-2<CR>gv=gv]])
+k.set('v', 'J', [[:m '>+1<cr>gv=gv]])
+k.set('v', 'K', [[:m '<-2<cr>gv=gv]])
 -- regex helpers
 k.set('c', [[\\*]], [[\(.*\)]])
 k.set('c', [[\\-]], [[\(.\{-}\)]])
@@ -40,13 +40,13 @@ k.set('v', 'p', '"_dP')
 k.set('n', '<space>', '"*')
 k.set('v', '<space>', '"*')
 -- more natural split (always right/below)
-k.set('n', '<c-w>v', ':rightbelow vsplit<cr>')
-k.set('n', '<c-w>s', ':rightbelow split<cr>')
-k.set('n', '<c-w>V', ':vsplit<cr>')
-k.set('n', '<c-w>S', ':split<cr>')
-k.set('n', '<c-w>O', ':tabonly<cr>')
+k.set('n', '<c-w>v', '<cmd>rightbelow vsplit<cr>')
+k.set('n', '<c-w>s', '<cmd>rightbelow split<cr>')
+k.set('n', '<c-w>V', '<cmd>vsplit<cr>')
+k.set('n', '<c-w>S', '<cmd>split<cr>')
+k.set('n', '<c-w>O', '<cmd>tabonly<cr>')
 -- search helpers
-k.set('n', '<esc>', ':set nohls<cr>', { silent = true })
+k.set('n', '<esc>', '<cmd>set nohls<cr>', { silent = true })
 k.set('n', '*', ':set hls<cr>*')
 k.set('n', '#', ':set hls<cr>#')
 k.set('n', 'n', ':set hls<cr>n')
@@ -74,10 +74,10 @@ end)
 -- format file indentation
 k.set('n', '<space>=', 'migg=G`i')
 -- resize windows
-k.set('', '<m-l>', ':vertical resize +1<cr>')
-k.set('', '<m-h>', ':vertical resize -1<cr>')
-k.set('', '<m-j>', ':resize +1<cr>')
-k.set('', '<m-k>', ':resize -1<cr>')
+k.set('', '<m-l>', '<cmd>vertical resize +1<cr>')
+k.set('', '<m-h>', '<cmd>vertical resize -1<cr>')
+k.set('', '<m-j>', '<cmd>resize +1<cr>')
+k.set('', '<m-k>', '<cmd>resize -1<cr>')
 -- tmux
 k.set('n', '<c-q>', function()
   if os.getenv('TMUX') then
@@ -89,9 +89,9 @@ end)
 -- terminal - normal mode
 k.set('t', '<c-q>', [[<C-\><C-n>]])
 -- diffmode
-k.set('n', 'du', ':diffupdate<cr>') -- @todo check if should be silent?
-k.set('n', 'dp', ':diffput<cr>')
-k.set('n', 'dg', ':diffget<cr>')
+k.set('n', 'du', '<cmd>diffupdate<cr>') -- @todo check if should be silent?
+k.set('n', 'dp', '<cmd>diffput<cr>')
+k.set('n', 'dg', '<cmd>diffget<cr>')
 -- create parent dir while saving file
 k.set('n', '<space>w', function()
   fn.system('mkdir -p ' .. fn.expand('%:h'))
@@ -183,9 +183,9 @@ end
 
 -- insert above
 -- quick edit vimrc/zshrc and load vimrc bindings
--- nnoremap <space>ev :tabnew $MYVIMRC<CR>
--- nnoremap <space>ez :tabnew ~/.zshrc<CR>
--- nnoremap <space>sv :source $MYVIMRC<CR>
+-- nnoremap <space>ev :tabnew $MYVIMRC<cr>
+-- nnoremap <space>ez :tabnew ~/.zshrc<cr>
+-- nnoremap <space>sv :source $MYVIMRC<cr>
 -- mapping for local functions that use fzf
 
 u.augroup('x_keybindings', {
@@ -202,14 +202,14 @@ u.augroup('x_keybindings', {
       'netrw',
       function()
         k.set('n', '<bs>', '-', { remap = true, buffer = true })
-        k.set('n', 'q', ':bdelete!<cr>', { buffer = true })
+        k.set('n', 'q', '<cmd>bdelete!<cr>', { buffer = true })
       end,
     },
     {
       'qf',
       function()
         k.set('n', 'o', '<cr>', { buffer = true })
-        k.set('n', 'q', ':q', { buffer = true })
+        k.set('n', 'q', '<cmd>q<cr>', { buffer = true })
       end,
     },
     {

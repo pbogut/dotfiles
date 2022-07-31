@@ -3,28 +3,30 @@ local k = vim.keymap
 local g = vim.g
 
 local function setup()
-  k.set('n', '<space>tn', ':TestNearest<CR>')
-  k.set('n', '<space>tf', ':TestFile<CR>')
-  k.set('n', '<space>ts', ':TestSuite<CR>')
-  k.set('n', '<space>tl', ':TestLast<CR>')
-  k.set('n', '<space>tt', ':TestLast<CR>')
-  k.set('n', '<space>tv', ':TestVisit<CR>')
+  k.set('n', '<space>tn', '<cmd>TestNearest<cr>')
+  k.set('n', '<space>tf', '<cmd>TestFile<cr>')
+  k.set('n', '<space>ts', '<cmd>TestSuite<cr>')
+  k.set('n', '<space>tl', '<cmd>TestLast<cr>')
+  k.set('n', '<space>tt', '<cmd>TestLast<cr>')
+  k.set('n', '<space>tv', '<cmd>TestVisit<cr>')
 end
 
 local function config()
   u.augroup('x_test', {
     FileType = {
       {
-        '*', function()
+        '*',
+        function()
           g['test#filename_modifier'] = ''
-        end
+        end,
       },
       {
-        'elixir', function()
+        'elixir',
+        function()
           g['test#filename_modifier'] = ':p'
-        end
-      }
-    }
+        end,
+      },
+    },
   })
 
   vim.g['test#strategy'] = {

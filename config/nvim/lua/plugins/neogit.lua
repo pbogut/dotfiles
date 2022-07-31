@@ -106,5 +106,4 @@ end
 
 return {
   config = config,
-  setup = setup,
 }

@@ -7,14 +7,14 @@ local has_lsp_signature, lsp_signature = pcall(require, 'lsp_signature')
 
 local cmd = vim.cmd
 local g = vim.g
-local no_lsp_bind = '<cmd>lua print("No LSP attached")<CR>'
+local no_lsp_bind = '<cmd>lua print("No LSP attached")<cr>'
 
 local signature_action = crequire('lsp_signature', {
   done = function()
-    return '<cmd>lua require"lsp_signature".toggle_float_win()<CR>'
+    return '<cmd>lua require"lsp_signature".toggle_float_win()<cr>'
   end,
   fail = function()
-    return '<cmd>lua vim.lsp.buf.signature_help()<CR>'
+    return '<cmd>lua vim.lsp.buf.signature_help()<cr>'
   end,
 })
 
@@ -51,6 +51,24 @@ end
 local format = {
   sumneko_lua = false,
 }
+local rename = {
+  html = false,
+}
+
+local lsp_rename = function()
+  vim.lsp.buf.rename(nil, {
+    filter = function(client)
+      if rename[client.name] ~= nil then
+        return rename[client.name]
+      end
+      return true
+    end,
+  })
+end
+
+local formatting = function()
+  cmd.normal()
+end
 
 local lsp_formatting = function(bufnr)
   vim.lsp.buf.format({
@@ -58,7 +76,6 @@ local lsp_formatting = function(bufnr)
       if format[client.name] ~= nil then
         return format[client.name]
       end
-      -- apply whatever logic you want (in this example, we'll only use null-ls)
       return true
     end,
     bufnr = bufnr,
@@ -66,10 +83,10 @@ local lsp_formatting = function(bufnr)
 end
 
 local bindings = {
-  { 'n', ']d', ':lua vim.diagnostic.goto_next()<CR>', no_lsp_bind },
-  { 'n', '[d', ':lua vim.diagnostic.goto_prev()<CR>', no_lsp_bind },
-  { 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', false },
-  { 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', false },
+  { 'n', ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>', no_lsp_bind },
+  { 'n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>', no_lsp_bind },
+  { 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', false },
+  { 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', false },
   { 'n', '<C-k>', signature_action, no_lsp_bind },
   { 'i', '<C-k>', signature_action, no_lsp_bind },
 
@@ -82,12 +99,12 @@ local bindings = {
   { 'n', '<space>ca', vim.lsp.buf.code_action, no_lsp_bind },
   { 'v', '<space>ca', vim.lsp.buf.range_code_action, no_lsp_bind },
 
-  { 'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', no_lsp_bind, { silent = false } },
-  { 'n', '<space>el', '<cmd>lua vim.diagnostic.open_float(0, {scope = "line"})<CR>', no_lsp_bind },
+  { 'n', '<space>rn', lsp_rename, no_lsp_bind, { silent = false } },
+  { 'n', '<space>el', '<cmd>lua vim.diagnostic.open_float(0, {scope = "line"})<cr>', no_lsp_bind },
   { 'n', '<space>ee', maybe_telescope('diagnostics'), no_lsp_bind },
-  { 'n', '<space>af', lsp_formatting, no_lsp_bind },
-  { 'v', '<space>af', ':lua vim.lsp.buf.range_formatting()<CR>', no_lsp_bind },
-  { 'x', '<space>af', ':lua vim.lsp.buf.range_formatting()<CR>', no_lsp_bind },
+  { 'n', '<space>af', lsp_formatting, 'migg=G`i' },
+  { 'v', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', no_lsp_bind },
+  { 'x', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', no_lsp_bind },
 }
 
 -- prevent stupid errors when using mapping with no lsp attached
@@ -235,7 +252,7 @@ u.augroup('x_lsp', {
       '*',
       function()
         if config.get('lsp.autoformat_on_save.enabled') then
-          local file_types = config.get('lsp.autoformat_on_save.file_types')
+          local file_types = config.get('lsp.autoformat_on_save.file_types', {})
           local file = vim.fn.expand('%:p')
           local cwd = vim.fn.getcwd()
           local ft = vim.bo.filetype
@@ -246,7 +263,11 @@ u.augroup('x_lsp', {
           end
 
           if file:sub(1, #cwd) == cwd and for_filetype then
-            lsp_formatting(0)
+            if #vim.lsp.get_active_clients() > 0 then
+              lsp_formatting(0)
+            else
+              vim.cmd('normal! migg=G`i')
+            end
           end
         end
       end,
