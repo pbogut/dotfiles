@@ -1,3 +1,4 @@
+local command = vim.api.nvim_create_user_command
 local u = require('utils')
 local k = vim.keymap
 local config = require('config')
@@ -239,11 +240,11 @@ local function attach_lsp_to_new_buffer()
   cmd.edit()
 end
 
-u.command('LspReload', function()
+command('LspReload', function(_)
   vim.lsp.stop_client(vim.lsp.get_active_clients())
   cmd.edit()
-end)
-u.command('LspAttachBuffer', attach_lsp_to_new_buffer)
+end, {})
+command('LspAttachBuffer', attach_lsp_to_new_buffer, {})
 
 -- Auto format on save
 u.augroup('x_lsp', {

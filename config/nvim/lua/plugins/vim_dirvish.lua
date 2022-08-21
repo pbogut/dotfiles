@@ -1,3 +1,4 @@
+local command = vim.api.nvim_create_user_command
 local u = require('utils')
 local k = vim.keymap
 local t = u.termcodes
@@ -137,8 +138,8 @@ local function dirvish_delete()
   end
 end
 
-u.command('DirvishCreate', dirvish_create)
-u.command('DirvishCopy', dirvish_copy)
-u.command('DirvishMove', dirvish_move)
-u.command('DirvishRename', dirvish_rename)
-u.command('DirvishDelete', dirvish_delete)
+command('DirvishCreate', dirvish_create, {})
+command('DirvishCopy', dirvish_copy, {})
+command('DirvishMove', dirvish_move, {})
+command('DirvishRename', dirvish_rename, {})
+command('DirvishDelete', dirvish_delete, {})

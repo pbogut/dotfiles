@@ -1,3 +1,4 @@
+local command = vim.api.nvim_create_user_command
 local u = require('utils')
 local fn = vim.fn
 local config = require('config')
@@ -58,15 +59,16 @@ function _G.remotesync_complete(lead)
 end
 
 u.augroup('x_remotesync', config_group)
-u.command('RemoteSync', function(bang, name)
-  if bang then
-    vim.g.sync_remote = name
+command('RemoteSync', function(opt)
+  if opt.bang then
+    vim.g.sync_remote = opt.args
   else
-    vim.b.sync_remote = name
+    vim.b.sync_remote = opt.args
   end
-end, { complete = 'customlist,v:lua.remotesync_complete', nargs = '?', bang = true, qargs = true })
+end, { complete = 'customlist,v:lua.remotesync_complete', nargs = 1, bang = true })
 
-u.command('RemotePush', function(name)
+command('RemotePush', function(opt)
+  local name = opt.args
   local halt = false
   if name:match('prod') then
     halt = 1
@@ -85,4 +87,4 @@ u.command('RemotePush', function(name)
       print(' ')
     end, 1000)
   end
-end, { complete = 'customlist,v:lua.remotesync_complete', nargs = '?', bang = false, qargs = true })
+end, { complete = 'customlist,v:lua.remotesync_complete', nargs = 1, bang = false })

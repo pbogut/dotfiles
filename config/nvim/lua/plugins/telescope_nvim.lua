@@ -1,3 +1,4 @@
+local command = vim.api.nvim_create_user_command
 local u = require('utils')
 local k = vim.keymap
 local actions = require('telescope.actions')
@@ -142,7 +143,8 @@ end)
 k.set('n', '<space>gr', ':Rg<cr>')
 
 local last_query = ''
-u.command('Rg', function(bang, query)
+command('Rg', function(opt)
+  local query = opt.args
   if query == '' then
     query = last_query
   else
@@ -172,8 +174,8 @@ u.command('Rg', function(bang, query)
     message = message .. ' in ' .. table.concat(short_dirs, ', ')
   end
   print(message)
-  builtin.grep_string({ search = query, use_regex = bang, search_dirs = dirs })
-end, { nargs = '?', qargs = true, bang = true, complete = 'dir' })
+  builtin.grep_string({ search = query, use_regex = opt.bang, search_dirs = dirs })
+end, { nargs = '?', bang = true, complete = 'dir' })
 
 telescope.setup({
   defaults = {

@@ -1,3 +1,4 @@
+local command = vim.api.nvim_create_user_command
 local projector = require('projector')
 local h = require('projector.helper')
 local u = require('utils')
@@ -6,14 +7,14 @@ local bo = vim.bo
 local o = vim.o
 local l = {}
 
-u.command('Skel', 'lua require"projector".template_command(<q-args>)', {
+command('Skel', 'lua require"projector".template_command(<q-args>)', {
   nargs = '?',
-  complete = 'customlist,v:lua.projector.temp_completion'
+  complete = 'customlist,v:lua.projector.temp_completion',
 })
 
-u.command('Gen', 'lua require"projector".generate(<q-args>)', {
+command('Gen', 'lua require"projector".generate(<q-args>)', {
   nargs = '?',
-  complete = 'customlist,v:lua.projector.gen_completion'
+  complete = 'customlist,v:lua.projector.gen_completion',
 })
 
 k.set('n', '<space>ta', ':lua require"projector".go_alternate()<cr>', { silent = true })

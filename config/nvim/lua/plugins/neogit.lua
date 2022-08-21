@@ -1,3 +1,4 @@
+local command = vim.api.nvim_create_user_command
 local u = require('utils')
 local k = vim.keymap
 
@@ -28,10 +29,10 @@ local function config()
     },
   })
 
-  u.command('Gst', function()
+  command('Gst', function()
     cmd.Neogit('kind=vsplit')
     cmd.wincmd('H')
-  end)
+  end, {})
 
   function my.neogit_syntax()
     local sections = {
