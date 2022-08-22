@@ -31,13 +31,11 @@ k.set('x', '<plug>SneakTrash_S', '<plug>Sneak_S', { remap = true })
 k.set('o', '<plug>SneakTrash_s', '<plug>Sneak_s', { remap = true })
 k.set('o', '<plug>SneakTrash_S', '<plug>Sneak_S', { remap = true })
 
-u.augroup('x_sneak', {
-  VimEnter = {
-    '*',
-    function()
-      u.highlights({
-        Sneak = { link = 'Search' },
-      })
-    end,
-  },
+vim.api.nvim_create_autocmd('VimEnter', {
+  group = vim.api.nvim_create_augroup('x_sneak', { clear = true }),
+  callback = function()
+    u.highlights({
+      Sneak = { link = 'Search' },
+    })
+  end,
 })

@@ -1,5 +1,4 @@
 local command = vim.api.nvim_create_user_command
-local u = require('utils')
 local fn = vim.fn
 local config = require('config')
 
@@ -31,20 +30,17 @@ if config.get('sync.autosync.enabled', false) then
   })
 end
 
-local config_group = {
-  BufWritePost = {
-    {
-      '*',
-      function()
-        local remote = vim.b.sync_remote or ''
-        if remote == '' then
-          remote = vim.g.sync_remote or ''
-        end
-        sync(remote)
-      end,
-    },
-  },
-}
+vim.api.nvim_create_autocmd('BufWritePost', {
+  group = vim.api.nvim_create_augroup('x_remotesync', { clear = true }),
+  pattern = '*',
+  callback = function()
+    local remote = vim.b.sync_remote or ''
+    if remote == '' then
+      remote = vim.g.sync_remote or ''
+    end
+    sync(remote)
+  end,
+})
 
 function _G.remotesync_complete(lead)
   local keys = {}
@@ -58,7 +54,6 @@ function _G.remotesync_complete(lead)
   return keys
 end
 
-u.augroup('x_remotesync', config_group)
 command('RemoteSync', function(opt)
   if opt.bang then
     vim.g.sync_remote = opt.args

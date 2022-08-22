@@ -1,10 +1,12 @@
 local command = vim.api.nvim_create_user_command
-local u = require('utils')
 local k = vim.keymap
-local t = u.termcodes
 local g = vim.g
 local fn = vim.fn
 local cmd = vim.cmd
+
+local t = function(str)
+  return vim.api.nvim_replace_termcodes(str, true, true, true)
+end
 
 g.dirvish_mode = [[:sort r /[^\/]$/]]
 g.echodoc_enable_at_startup = 1
@@ -22,25 +24,22 @@ g.dirvish_git_indicators = {
 k.set('n', '\\won', '<plug>(dirvish_up)', { remap = true })
 k.set('n', '<bs>', '<cmd>Dirvish %:p:h<cr>')
 
-u.augroup('x_dirvish', {
-  FileType = {
-    {
-      'dirvish',
-      function()
-        k.set('n', 'q', '<cmd>Bdelete<cr>', { buffer = true })
-        k.set('n', '<bs>', '<plug>(dirvish_up)', { remap = false, buffer = true })
-        k.set('n', 'H', '<plug>(dirvish_up)', { remap = false, buffer = true })
-        k.set('n', 'cc', '<cmd>DirvishCopy<cr>', { buffer = true })
-        k.set('n', 'rr', '<cmd>DirvishRename<cr>', { buffer = true })
-        k.set('n', 'mm', '<cmd>DirvishMove<cr>', { buffer = true })
-        k.set('n', 'dd', '<cmd>DirvishDelete<cr>', { buffer = true })
-        k.set('n', 'K', '<cmd>DirvishCreate<cr>', { buffer = true })
-        k.set('n', '/', [[/\ze[^\/]*[\/]\=$<Home>\c]], { silent = false, buffer = true })
-        k.set('n', '?', [[?\ze[^\/]*[\/]\=$<Home>\c]], { silent = false, buffer = true })
-        k.set('n', 'A', '<cmd>echo "Use K"<cr>', { buffer = true })
-      end,
-    },
-  },
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('x_dirvish', { clear = true }),
+  pattern = 'dirvish',
+  callback = function()
+    k.set('n', 'q', '<cmd>Bdelete<cr>', { buffer = true })
+    k.set('n', '<bs>', '<plug>(dirvish_up)', { remap = false, buffer = true })
+    k.set('n', 'H', '<plug>(dirvish_up)', { remap = false, buffer = true })
+    k.set('n', 'cc', '<cmd>DirvishCopy<cr>', { buffer = true })
+    k.set('n', 'rr', '<cmd>DirvishRename<cr>', { buffer = true })
+    k.set('n', 'mm', '<cmd>DirvishMove<cr>', { buffer = true })
+    k.set('n', 'dd', '<cmd>DirvishDelete<cr>', { buffer = true })
+    k.set('n', 'K', '<cmd>DirvishCreate<cr>', { buffer = true })
+    k.set('n', '/', [[/\ze[^\/]*[\/]\=$<Home>\c]], { silent = false, buffer = true })
+    k.set('n', '?', [[?\ze[^\/]*[\/]\=$<Home>\c]], { silent = false, buffer = true })
+    k.set('n', 'A', '<cmd>echo "Use K"<cr>', { buffer = true })
+  end,
 })
 
 local function mkdir_parent(to)

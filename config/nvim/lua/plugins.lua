@@ -1,4 +1,3 @@
-local u = require('utils')
 local execute = vim.api.nvim_command
 local fn = vim.fn
 local cmd = vim.cmd
@@ -15,22 +14,23 @@ end
 execute('packadd packer.nvim')
 
 -- reload and recompile this file (plugins.lua) after change
-u.augroup('x_plugins_save', {
-  BufWritePost = {
-    'plugins.lua',
-    function()
-      cmd.luafile(os.getenv('HOME') .. '/.config/nvim/lua/plugins.lua')
-      cmd.PackerClean()
-      cmd.PackerInstall()
-      cmd.PackerCompile()
-    end,
-  },
-  BufEnter = {
-    'plugins.lua',
-    function()
-      vim.bo.path = fn.stdpath('config') .. '/lua/plugins/'
-    end,
-  },
+local ag_x_plugins_save = vim.api.nvim_create_augroup('x_plugins_save', { clear = true })
+vim.api.nvim_create_autocmd('BufWritePost', {
+  group = ag_x_plugins_save,
+  pattern = 'plugins.lua',
+  callback = function()
+    cmd.luafile(os.getenv('HOME') .. '/.config/nvim/lua/plugins.lua')
+    cmd.PackerClean()
+    cmd.PackerInstall()
+    cmd.PackerCompile()
+  end,
+})
+vim.api.nvim_create_autocmd('BufEnter', {
+  group = ag_x_plugins_save,
+  pattern = 'plugins.lua',
+  callback = function()
+    vim.bo.path = fn.stdpath('config') .. '/lua/plugins/'
+  end,
 })
 
 local function config(plugin)

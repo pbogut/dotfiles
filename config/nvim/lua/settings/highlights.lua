@@ -70,10 +70,11 @@ local function highlights()
   })
 end
 
-u.augroup('x_highlights', {
-  VimEnter = { '*', function()
+vim.api.nvim_create_autocmd('VimEnter', {
+  group = vim.api.nvim_create_augroup('x_highlights', { clear = true }),
+  callback = function()
     highlights()
-  end}
+  end,
 })
 
 highlights()

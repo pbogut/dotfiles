@@ -21,37 +21,6 @@ function u.call_mapping(no)
   mapping_callbacs[no]()
 end
 
--- definitions = {
---   EventName = {
---     {"*", function() print('test') end };
---   }
--- }
-function u.augroup(group_name, definitions)
-  cmd('augroup ' .. group_name)
-  cmd('autocmd!')
-  for event_type, definition in pairs(definitions) do
-    if type(definition[1]) ~= 'table' then
-      definition = { definition }
-    end
-    for _, def in pairs(definition) do
-      local callback = table.remove(def, #def)
-
-      table.insert(def, 1, 'autocmd')
-      table.insert(def, 2, event_type)
-      local command = table.concat(def, ' ')
-      if type(callback) == 'function' then
-        table.insert(autocmd_callbacs, callback)
-        callback = 'lua require("utils").call_autocmd('
-          .. #autocmd_callbacs
-          .. ')'
-      end
-      command = command .. ' ' .. callback
-      cmd(command)
-    end
-  end
-  cmd('augroup END')
-end
-
 -- Set indent for current buffer
 -- @param width Width in characters
 -- @param[opt=false] hardtab Use hard tab character

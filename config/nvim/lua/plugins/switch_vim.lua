@@ -99,73 +99,79 @@ local function addDefinition(data)
   b.switch_custom_definitions = u.merge_tables(current, data)
 end
 
-u.augroup('x_switch', {
-    FileType = {
-      {'*', function()
-          addDefinition({
-            l.switch_words_tf,
-            l.switch_words_lr,
-          })
-      end},
-      {'blade', function()
-          addDefinition({
-            l.switch_blade_echo,
-            l.switch_quotes,
-          })
-      end},
-      {'php', function()
-          addDefinition({
-            l.switch_c_like_if,
-            l.switch_c_like_while,
-            l.switch_php_class_string,
-            l.switch_php_array,
-            l.switch_php_comment,
-            l.switch_php_scope,
-            l.switch_php_magento_dispatch_event,
-            l.switch_php_laravel_facade,
-            l.switch_quotes,
-          })
-      end},
-      {'javascript', function()
-          addDefinition({
-            l.switch_c_like_if,
-            l.switch_quotes,
-          })
-      end},
-      {'javascript.jsx', function()
-          addDefinition({
-            l.switch_c_like_if,
-            l.switch_quotes,
-          })
-      end},
-      {'elixir', function()
-          addDefinition({
-            l.switch_elixir_assert,
-            l.switch_elixir_map,
-            l.switch_quotes,
-          })
-      end},
-      {'markdown,md', function()
-          addDefinition({
-            l.switch_md_checkbox,
-            l.switch_quotes,
-          })
-      end},
-      {'vimwiki', function()
-          addDefinition({
-            l.switch_vimwiki_checkbox,
-            l.switch_quotes,
-          })
-      end},
-      {'email', function()
-          addDefinition({
-            l.switch_quotes,
-          })
-      end},
-      {'diff', function()
-          addDefinition({
-            l.switch_diffline ,
-          })
-      end},
-    }
-})
+local augroup = vim.api.nvim_create_augroup('x_switch', { clear = true })
+local autocmds = {
+  ['*'] = function()
+    addDefinition({
+      l.switch_words_tf,
+      l.switch_words_lr,
+    })
+  end,
+  blade = function()
+    addDefinition({
+      l.switch_blade_echo,
+      l.switch_quotes,
+    })
+  end,
+  php = function()
+    addDefinition({
+      l.switch_c_like_if,
+      l.switch_c_like_while,
+      l.switch_php_class_string,
+      l.switch_php_array,
+      l.switch_php_comment,
+      l.switch_php_scope,
+      l.switch_php_magento_dispatch_event,
+      l.switch_php_laravel_facade,
+      l.switch_quotes,
+    })
+  end,
+  javascript = function()
+    addDefinition({
+      l.switch_c_like_if,
+      l.switch_quotes,
+    })
+  end,
+  ['javascript.jsx'] = function()
+    addDefinition({
+      l.switch_c_like_if,
+      l.switch_quotes,
+    })
+  end,
+  elixir = function()
+    addDefinition({
+      l.switch_elixir_assert,
+      l.switch_elixir_map,
+      l.switch_quotes,
+    })
+  end,
+  ['markdown,md'] = function()
+    addDefinition({
+      l.switch_md_checkbox,
+      l.switch_quotes,
+    })
+  end,
+  vimwiki = function()
+    addDefinition({
+      l.switch_vimwiki_checkbox,
+      l.switch_quotes,
+    })
+  end,
+  email = function()
+    addDefinition({
+      l.switch_quotes,
+    })
+  end,
+  diff = function()
+    addDefinition({
+      l.switch_diffline,
+    })
+  end,
+}
+for pattern, callback in pairs(autocmds) do
+  vim.api.nvim_create_autocmd('FileType', {
+    group = augroup,
+    pattern = pattern,
+    callback = callback,
+  })
+end

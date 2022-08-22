@@ -102,44 +102,43 @@ local function config()
       end,
     },
   })
-
-  u.augroup('x_cmp', {
-    FileType = {
-      {
-        'sql,mysql,plsql',
-        function()
-          cmp.setup.buffer({
-            sources = {
               src.db,
-              src.lsp,
-              src.ts,
-              src.tn,
-              src.snip,
-              src.path,
-              src.buf,
-              src.emo,
-            },
-          })
-        end,
-      },
-      {
-        'lua',
-        function()
-          cmp.setup.buffer({
-            sources = {
-              src.lua,
-              src.lsp,
-              src.ts,
-              src.tn,
-              src.snip,
-              src.path,
-              src.buf,
-              src.emo,
-            },
-          })
-        end,
-      },
-    },
+  local augroup = vim.api.nvim_create_augroup('x_cmp', { clear = true })
+  vim.api.nvim_create_autocmd('FileType', {
+    group = augroup,
+    pattern = 'sql,mysql,plsql',
+    callback = function()
+      cmp.setup.buffer({
+        sources = {
+          src.db,
+          src.lsp,
+          src.ts,
+          src.tn,
+          src.snip,
+          src.path,
+          src.buf,
+          src.emo,
+        },
+      })
+    end,
+  })
+  vim.api.nvim_create_autocmd('FileType', {
+    group = augroup,
+    pattern = 'lua',
+    callback = function()
+      cmp.setup.buffer({
+        sources = {
+          src.lua,
+          src.lsp,
+          src.ts,
+          src.tn,
+          src.snip,
+          src.path,
+          src.buf,
+          src.emo,
+        },
+      })
+    end,
   })
 end
 

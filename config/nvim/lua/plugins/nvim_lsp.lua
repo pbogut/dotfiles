@@ -247,33 +247,30 @@ end, {})
 command('LspAttachBuffer', attach_lsp_to_new_buffer, {})
 
 -- Auto format on save
-u.augroup('x_lsp', {
-  BufWritePre = {
-    {
-      '*',
-      function()
-        if config.get('lsp.autoformat_on_save.enabled') then
-          local file_types = config.get('lsp.autoformat_on_save.file_types', {})
-          local file = vim.fn.expand('%:p')
-          local cwd = vim.fn.getcwd()
-          local ft = vim.bo.filetype
+vim.api.nvim_create_autocmd('BufWritePre', {
+  group = vim.api.nvim_create_augroup('x_lsp', { clear = true }),
+  pattern = '*',
+  callback = function()
+    if config.get('lsp.autoformat_on_save.enabled') then
+      local file_types = config.get('lsp.autoformat_on_save.file_types', {})
+      local file = vim.fn.expand('%:p')
+      local cwd = vim.fn.getcwd()
+      local ft = vim.bo.filetype
 
-          local for_filetype = #file_types == 0
-          for lang, on in pairs(file_types) do
-            for_filetype = lang == ft and on
-          end
+      local for_filetype = #file_types == 0
+      for lang, on in pairs(file_types) do
+        for_filetype = lang == ft and on
+      end
 
-          if file:sub(1, #cwd) == cwd and for_filetype then
-            if #vim.lsp.get_active_clients() > 0 then
-              lsp_formatting(0)
-            else
-              vim.cmd('normal! migg=G`i')
-            end
-          end
+      if file:sub(1, #cwd) == cwd and for_filetype then
+        if #vim.lsp.get_active_clients() > 0 then
+          lsp_formatting(0)
+        else
+          vim.cmd('normal! migg=G`i')
         end
-      end,
-    },
-  },
+      end
+    end
+  end,
 })
 
 return {

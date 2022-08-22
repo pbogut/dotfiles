@@ -18,18 +18,18 @@ command('Gen', 'lua require"projector".generate(<q-args>)', {
 })
 
 k.set('n', '<space>ta', ':lua require"projector".go_alternate()<cr>', { silent = true })
-u.augroup('x_templates', {
-    ['BufNewFile,BufNew'] = {
-      {'*', function()
-          -- initially ft is not available and ultisnip is not working correctly
-          -- so we deffer to next loop when ft is set properly
-          vim.schedule(function()
-            if vim.fn.line('$') == 1 and vim.fn.getline('$') == '' then
-              require('projector').do_template()
-            end
-          end)
-      end},
-    },
+vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufNew' }, {
+  group = vim.api.nvim_create_augroup('x_templates', { clear = true }),
+  pattern = '*',
+  callback = function()
+    -- initially ft is not available and ultisnip is not working correctly
+    -- so we deffer to next loop when ft is set properly
+    vim.schedule(function()
+      if vim.fn.line('$') == 1 and vim.fn.getline('$') == '' then
+        require('projector').do_template()
+      end
+    end)
+  end,
 })
 
 function l.mag_rm_pool(text)
@@ -123,8 +123,10 @@ projector.setup({
         }
       },
       project_init = function()
-        u.augroup('x_magento', {
-          BufWritePost = {'*.html,*.css,*.js', function()
+        vim.api.nvim_create_autocmd('BufWritePost', {
+          group = vim.api.nvim_create_augroup('x_magento', { clear = true }),
+          pattern = '*.html,*.css,*.js',
+          callback = function()
             -- when template save remove generated one
             --
             -- app/design/frontend/menspharmacy/default/web/css/checkout.css
@@ -143,12 +145,12 @@ projector.setup({
             local ext = vim.fn.expand('%:e')
             local toremove = false
 
-            if parts[7] == "web" then
+            if parts[7] == 'web' then
               toremove = true
               local vendor = parts[3]
               local module = parts[4]
               u.table_remove(parts, 1, 7)
-              table.insert(parts, 1, vendor .. "_" .. module)
+              table.insert(parts, 1, vendor .. '_' .. module)
               table.insert(parts, 1, '*')
               table.insert(parts, 1, 'static')
               table.insert(parts, 1, 'pub')
@@ -156,13 +158,13 @@ projector.setup({
               dump(parts)
             end
 
-            if parts[2] == "design" then
+            if parts[2] == 'design' then
               toremove = true
-              parts[1] = "pub" -- change to pub static dir
-              parts[2] = "static"
-              if parts[6] == "web" then
+              parts[1] = 'pub' -- change to pub static dir
+              parts[2] = 'static'
+              if parts[6] == 'web' then
                 -- web folder directly in design
-                parts[6] = "*"
+                parts[6] = '*'
               else
                 -- web folder in module subfolder
                 table.remove(parts, 7) -- remove web
@@ -170,21 +172,19 @@ projector.setup({
               end
             end
 
-
             if toremove then
-              local glob = table.concat(parts, "/") .. '.' .. ext
+              local glob = table.concat(parts, '/') .. '.' .. ext
               dump(glob)
               local files = u.glob(glob)
               -- dump(files)
               for _, file in pairs(files) do
                 local success = os.remove(file)
                 if not success then
-                  vim.notify("Cant remove: " .. file)
+                  vim.notify('Cant remove: ' .. file)
                 end
               end
             end
-
-          end}
+          end,
         })
       end,
       generators = {
@@ -354,13 +354,15 @@ projector.setup({
     ["artisan&composer.json"] = {
       priority = 100,
       project_init = function()
-        u.augroup('x_laravel', {
-          FileType = {'php', function()
+        vim.api.nvim_create_autocmd('FileType', {
+          group = vim.api.nvim_create_augroup('x_laravel', { clear = true }),
+          pattern = 'php',
+          callback = function()
             -- copied from polyglot/blade so it works in controllers as well
             bo.suffixesadd = '.blade.php,.php'
             bo.includeexpr = [[substitute(v:fname,'\.','/','g')]]
             bo.path = o.path .. [[,resources/views;]]
-          end}
+          end,
         })
       end,
       snippy = {

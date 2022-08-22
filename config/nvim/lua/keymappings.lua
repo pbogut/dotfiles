@@ -188,35 +188,34 @@ end
 -- nnoremap <space>sv :source $MYVIMRC<cr>
 -- mapping for local functions that use fzf
 
-u.augroup('x_keybindings', {
-  BufEnter = {
-    {
-      '*.keepass',
-      function()
-        k.set('n', 'gp', [[/^Password:<cr>:read !apg -m16 -n1 -MSNCL<cr>:%s/Password:.*\n/Password: /<cr><esc>]])
-      end,
-    },
-  },
-  FileType = {
-    {
-      'netrw',
-      function()
-        k.set('n', '<bs>', '-', { remap = true, buffer = true })
-        k.set('n', 'q', '<cmd>bdelete!<cr>', { buffer = true })
-      end,
-    },
-    {
-      'qf',
-      function()
-        k.set('n', 'o', '<cr>', { buffer = true })
-        k.set('n', 'q', '<cmd>q<cr>', { buffer = true })
-      end,
-    },
-    {
-      'help',
-      function()
-        k.set('n', 'q', '<c-w>q', { buffer = true })
-      end,
-    },
-  },
+local augroup = vim.api.nvim_create_augroup('x_keybindings', { clear = true })
+vim.api.nvim_create_autocmd('BufEnter', {
+  group = augroup,
+  pattern = '*.keepass',
+  callback = function()
+    k.set('n', 'gp', [[/^Password:<cr>:read !apg -m16 -n1 -MSNCL<cr>:%s/Password:.*\n/Password: /<cr><esc>]])
+  end,
+})
+vim.api.nvim_create_autocmd('FileType', {
+  group = augroup,
+  pattern = 'netrw',
+  callback = function()
+    k.set('n', '<bs>', '-', { remap = true, buffer = true })
+    k.set('n', 'q', '<cmd>bdelete!<cr>', { buffer = true })
+  end,
+})
+vim.api.nvim_create_autocmd('FileType', {
+  group = augroup,
+  pattern = 'qf',
+  callback = function()
+    k.set('n', 'o', '<cr>', { buffer = true })
+    k.set('n', 'q', '<cmd>q<cr>', { buffer = true })
+  end,
+})
+vim.api.nvim_create_autocmd('FileType', {
+  group = augroup,
+  pattern = 'help',
+  callback = function()
+    k.set('n', 'q', '<c-w>q', { buffer = true })
+  end,
 })

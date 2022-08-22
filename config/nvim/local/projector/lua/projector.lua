@@ -44,8 +44,9 @@ function l.check_file(relative, pattern)
   return relative:match(pattern)
 end
 
-u.augroup('x_tttemplates', {
-  VimEnter = {'*', l.init_project},
+vim.api.nvim_create_autocmd('VimEnter', {
+  group = vim.api.nvim_create_augroup('x_projector_pr_init', { clear = true }),
+  callback = l.init_project,
 })
 
 a.get_config = shared.get_config

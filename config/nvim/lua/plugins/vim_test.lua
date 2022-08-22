@@ -1,4 +1,3 @@
-local u = require('utils')
 local k = vim.keymap
 local g = vim.g
 
@@ -12,21 +11,20 @@ local function setup()
 end
 
 local function config()
-  u.augroup('x_test', {
-    FileType = {
-      {
-        '*',
-        function()
-          g['test#filename_modifier'] = ''
-        end,
-      },
-      {
-        'elixir',
-        function()
-          g['test#filename_modifier'] = ':p'
-        end,
-      },
-    },
+  local ag_x_test = vim.api.nvim_create_augroup('x_test', { clear = true })
+  vim.api.nvim_create_autocmd('FileType', {
+    group = ag_x_test,
+    pattern = '*',
+    callback = function()
+      g['test#filename_modifier'] = ''
+    end,
+  })
+  vim.api.nvim_create_autocmd('FileType', {
+    group = ag_x_test,
+    pattern = 'elixir',
+    callback = function()
+      g['test#filename_modifier'] = ':p'
+    end,
   })
 
   vim.g['test#strategy'] = {
