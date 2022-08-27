@@ -30,6 +30,21 @@
         "cd 3rd/luamake && ./compile/install.sh",
         "./3rd/luamake/luamake rebuild"
       ]
+    },
+    {
+      "repo": "vadimcn/vscode-lldb",
+      "tag": "@latest",
+      "run": [
+        "mkdir -p build && cd build && cmake .. -DLLDB_PACKAGE=/ && make"
+      ]
+    },
+    {
+      "repo": "rust-analyzer/rust-analyzer",
+      "tag": "nightly",
+      "run": [
+        "cargo build --release",
+        "ln -sf $PWD/target/release/rust-analyzer ~/.bin/rust-analyzer"
+      ]
     }
   ]
 }

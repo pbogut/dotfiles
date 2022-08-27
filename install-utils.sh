@@ -22,7 +22,8 @@ paru -S \
     atool \
     enca \
     zenity \
-    rust \
+    rustup \
+    lldb \
     xdotool \
     ripgrep \
     bluez-hcitool \
@@ -115,6 +116,10 @@ go install github.com/nsf/gocode@latest
 go install github.com/pbogut/mails-go-web@latest
 go install github.com/pbogut/exail@latest
 go install golang.org/x/tools/gopls@latest
+
+rustup toolchain install nightly
+rustup component add rust-src --toolchain nightly
+rustup component add rust-src
 
 cargo install stylua
 

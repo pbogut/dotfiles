@@ -148,6 +148,7 @@ require('packer').startup({
       requires = { 'nvim-lua/plenary.nvim' },
     })
     use({ 'rhysd/git-messenger.vim', config = config('git_messanger') })
+    use({ 'simrat39/rust-tools.nvim', config = config('rust_tools') })
 
     -- completion
     use({ 'dcampos/nvim-snippy', after = 'projector', config = config('nvim_snippy') })
