@@ -165,9 +165,9 @@ done
 echo "Post install actions"
 
 echo -en "\tMaking scripts executable ... "
-find $dir -name "*.sh" -exec chmod +x {} \; >/dev/null 2>&1
-find $dir -name "*.zsh" -exec chmod +x {} \; >/dev/null 2>&1
-find $dir -name "*.phar" -exec chmod +x {} \; >/dev/null 2>&1
+find "$dir" -name "*.sh" -exec chmod +x {} \; >/dev/null 2>&1
+find "$dir" -name "*.zsh" -exec chmod +x {} \; >/dev/null 2>&1
+find "$dir" -name "*.phar" -exec chmod +x {} \; >/dev/null 2>&1
 chmod +x ~/.scripts/* >/dev/null 2>&1
 chmod +x ~/.offlineimap-hooks/* >/dev/null 2>&1
 echo "done"
@@ -206,9 +206,9 @@ echo -en "\t"$(
 # echo "done"
 
 echo -e "\nChange your shell if you wish:\n"
-which fish >/dev/null && echo -e "\tchsh $(id -un) -s $(which fish)"
-which zsh >/dev/null && echo -e "\tchsh $(id -un) -s $(which zsh)"
+test -f /usr/bin/fish && echo -e "\tchsh $(id -un) -s $(which fish)"
+test -f /usr/bin/zsh && echo -e "\tchsh $(id -un) -s $(which zsh)"
 
-read -p "Do you want to update bin folder? [yN]" -n 1 -s ask
+read -r -p "Do you want to update bin folder? [yN]" -n 1 -s ask
 echo ""
 [[ $ask == "y" ]] && ./install-bin.sh
