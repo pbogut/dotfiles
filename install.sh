@@ -69,6 +69,7 @@ read -d '' files <<"EOF"
     config/mpv/mpv.conf
     config/mpv/script-settings/mpvDLNA.conf
     config/mpv/scripts/minidlna-subs.lua
+    config/mpv/scripts/send-to-phone.lua
     config/mpv/scripts/trakt
     config/ncmpcpp/config
     config/ncmpcpp/bindings
