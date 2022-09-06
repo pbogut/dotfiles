@@ -12,7 +12,12 @@ chmod +x $(find -iname '*.sh')
 chmod +x $(find -iname '*.zsh')
 
 echo -n "Updating submodules ..."
-git submodule sync && git submodule update --init
+
+git submodule sync
+git submodule update --init config/dircolors-solarized
+git submodule update --init zshrc.d/plugins/zsh-autosuggestions
+git submodule update --init private
+
 echo "done"
 olddir=~/.dotfiles_backup/$(date +%s%N) # old dotfiles backup directory
 read -d '' files <<"EOF"
