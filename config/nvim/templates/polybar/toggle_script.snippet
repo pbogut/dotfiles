@@ -12,7 +12,7 @@ state="off"
 
 switch_state() {
 	update_state
-	if [[ $state == "on" ]]; then
+	if [[ \$state == "on" ]]; then
 		# turn off action
 		state="off"
 	else
@@ -30,7 +30,7 @@ update_state() {
 }
 
 show_state() {
-	if [[ $state == "on" ]]; then
+	if [[ \$state == "on" ]]; then
 		echo 
 	else
 		echo 
@@ -40,12 +40,12 @@ show_state() {
 trap "switch_state" USR1
 
 while true; do
-	if [[ $cycle -ge $((refresh / tick)) ]]; then
+	if [[ \$cycle -ge \$((refresh / tick)) ]]; then
 		update_state
 		show_state
 		cycle=0
 	fi
-	cycle=$((cycle + 1))
-	sleep ${tick}s
+	cycle=\$((cycle + 1))
+	sleep \${tick}s
 	wait
 done

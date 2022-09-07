@@ -20,16 +20,16 @@ class [[php.class]] extends Action implements HttpGetActionInterface
 	protected $_resultForwardFactory;
 
 	public function __construct(
-		ActionContext $context,
-		ResultForwardFactory $resultForwardFactory
+		ActionContext \$context,
+		ResultForwardFactory \$resultForwardFactory
 	) {
-		$this->_resultForwardFactory = $resultForwardFactory;
-		parent::__construct($context);
+		\$this->_resultForwardFactory = \$resultForwardFactory;
+		parent::__construct(\$context);
 	}
 
 	public function execute()
 	{
-		$resultForward = $this->_resultForwardFactory->create();
-		return $resultForward->forward('edit');$0
+		\$resultForward = \$this->_resultForwardFactory->create();
+		return \$resultForward->forward('edit');$0
 	}
 }

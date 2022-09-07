@@ -20,18 +20,18 @@ class [[php.class]] extends Command
 	 */
 	protected function configure()
 	{
-		$this->setName('${3:command:action}');
-		$this->setDescription('${4:Command description}');
+		\$this->setName('${3:command:action}');
+		\$this->setDescription('${4:Command description}');
 
-		$this->addArgument('${5:arg-name}', InputArgument::${6|REQUIRED,OPTIONAL,IS_ARRAY|}, '${7:Arg description}');
-		$this->addOption('${8:option-name}', '${9:o}', InputOption::${10|VALUE_NONE,VALUE_REQUIRED,VALUE_OPTIONAL,VALUE_IS_ARRAY|}, '${11:Option description}', null);
+		\$this->addArgument('${5:arg-name}', InputArgument::${6|REQUIRED,OPTIONAL,IS_ARRAY|}, '${7:Arg description}');
+		\$this->addOption('${8:option-name}', '${9:o}', InputOption::${10|VALUE_NONE,VALUE_REQUIRED,VALUE_OPTIONAL,VALUE_IS_ARRAY|}, '${11:Option description}', null);
 
 		parent::configure();
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output)
+	protected function execute(InputInterface \$input, OutputInterface \$output)
 	{
-		$options = $input->getOptions();
-		$arguments = $input->getArguments();
+		\$options = \$input->getOptions();
+		\$arguments = \$input->getArguments();
 	}
 }

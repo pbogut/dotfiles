@@ -18,17 +18,17 @@ class [[php.class]] extends AbstractModel implements IdentityInterface
 
 	protected function _construct()
 	{
-		$this->_init(ResourceModel\\[[php.class]]::class);
+		\$this->_init(ResourceModel\\[[php.class]]::class);
 	}
 
 	public function getIdentities()
 	{
-		return [$this->_cacheTag . '_' . $this->getId()];
+		return [\$this->_cacheTag . '_' . \$this->getId()];
 	}
 
 	public function getDefaultValues()
 	{
-		$values = [];
-		return $values;
+		\$values = [];
+		return \$values;
 	}
 }

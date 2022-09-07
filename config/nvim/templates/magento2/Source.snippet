@@ -11,7 +11,7 @@ use Magento\Framework\Data\OptionSourceInterface;
  */
 class [[php.class]] implements OptionSourceInterface
 {
-    protected $options = [
+    protected \$options = [
         ${0:// '0' => 'Zero',
         // '1' => 'One',}
     ];
@@ -23,13 +23,13 @@ class [[php.class]] implements OptionSourceInterface
      */
     public function toOptionArray()
     {
-        $options = [];
-        foreach ($this->options as $key => $value) {
-            $options[] = [
-                'label' => $value,
-                'value' => $key,
+        \$options = [];
+        foreach (\$this->options as \$key => \$value) {
+            \$options[] = [
+                'label' => \$value,
+                'value' => \$key,
             ];
         }
-        return $options;
+        return \$options;
     }
 }

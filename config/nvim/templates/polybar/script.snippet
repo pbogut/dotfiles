@@ -19,11 +19,11 @@ trap "${5:click_action}" USR1
 ${6:main_action}
 
 while true; do
-	if [[ $cycle -ge $((refresh / tick)) ]]; then
+	if [[ \$cycle -ge \$((refresh / tick)) ]]; then
 		${6:main_action}
 		cycle=0
 	fi
-	cycle=$((cycle + 1))
-	sleep ${tick}s
+	cycle=\$((cycle + 1))
+	sleep \${tick}s
 	wait
 done

@@ -14,9 +14,9 @@ use Magento\Framework\App\Action\Http${2|Get,Post|}ActionInterface;
 class ${3:[[php.class]]} extends Action implements Http${2:Get}ActionInterface
 {
     public function __construct(
-        ActionContext $context
+        ActionContext \$context
     ) {
-        parent::__construct($context);
+        parent::__construct(\$context);
     }
 
     public function execute()

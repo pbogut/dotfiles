@@ -30,10 +30,10 @@ class [[php.class]] extends Controller
 	 *
 	 * @return \Illuminate\Http\Response
 	 */
-	public function create(Request $request, ${4:Entity} $${5:entity})
+	public function create(Request \$request, ${4:Entity} $${5:entity})
 	{
-		$${5:entity}->fill($request->old());
-		$request->session()->reflash();
+		$${5:entity}->fill(\$request->old());
+		\$request->session()->reflash();
 
 		return view('${5:entity}.create', [
 			'${5:entity}' => $${5:entity}
@@ -43,12 +43,12 @@ class [[php.class]] extends Controller
 	/**
 	 * Store a newly created resource in storage.
 	 *
-	 * @param  \Illuminate\Http\Request $request
+	 * @param  \Illuminate\Http\Request \$request
 	 * @return \Illuminate\Http\Response
 	 */
-	public function store(Request $request, ${4:Entity} $${5:entity})
+	public function store(Request \$request, ${4:Entity} $${5:entity})
 	{
-		return $this->update($request, $${5:entity});
+		return \$this->update(\$request, $${5:entity});
 	}
 
 	/**
@@ -70,10 +70,10 @@ class [[php.class]] extends Controller
 	 * @param  ${4:Entity} $${5:entity}
 	 * @return \Illuminate\Http\Response
 	 */
-	public function edit(Request $request, ${4:Entity} $${5:entity})
+	public function edit(Request \$request, ${4:Entity} $${5:entity})
 	{
-		$${5:entity}->fill($request->old());
-		$request->session()->reflash();
+		$${5:entity}->fill(\$request->old());
+		\$request->session()->reflash();
 
 		return view('${5:entity}.edit', [
 			'${5:entity}' => $${5:entity}
@@ -83,18 +83,18 @@ class [[php.class]] extends Controller
 	/**
 	 * Update the specified resource in storage.
 	 *
-	 * @param  \Illuminate\Http\Request $request
+	 * @param  \Illuminate\Http\Request \$request
 	 * @param  ${4:Entity} $${5:entity}
 	 * @return \Illuminate\Http\Response
 	 */
-	public function update(Request $request, ${4:Entity} $${5:entity})
+	public function update(Request \$request, ${4:Entity} $${5:entity})
 	{
-		$request->flash();
+		\$request->flash();
 
-		$this->validate${4:Entity}($request);
+		\$this->validate${4:Entity}(\$request);
 
 		$${5:entity}
-			->fill($this->get${4:Entity}Params($request))
+			->fill(\$this->get${4:Entity}Params(\$request))
 			->save();
 
 		return redirect(route('${5:entity}.show', $${5:entity}));
@@ -112,16 +112,16 @@ class [[php.class]] extends Controller
 		return redirect(route('${5:entity}.index'));
 	}
 
-	protected function get${4:Entity}Params(Request $request)
+	protected function get${4:Entity}Params(Request \$request)
 	{
-		return array_only($request->input(), [
+		return array_only(\$request->input(), [
 			${7:// 'name',}
 		]);
 	}
 
-	protected function validate${4:Entity}(Request $request)
+	protected function validate${4:Entity}(Request \$request)
 	{
-		return $this->validate($request, [
+		return \$this->validate(\$request, [
 			${8:// 'name' => 'required|max:20',}
 		]);
 	}

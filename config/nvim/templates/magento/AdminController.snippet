@@ -14,10 +14,10 @@ class [[php.class]] extends Mage_Adminhtml_Controller_Action
 
 	protected function _initAction()
 	{
-		$this->loadLayout()
+		\$this->loadLayout()
 			->_setActiveMenu('${4:[[magento.module_key]]}');
 
-		return $this;
+		return \$this;
 	}
 
 	public function indexAction()

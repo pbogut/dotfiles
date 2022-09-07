@@ -13,13 +13,13 @@ use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 class [[php.class]] extends AbstractModel implements IdentityInterface
 {
 	public function __construct(
-		DbContext $context
+		DbContext \$context
 	) {
-		parent::__construct($context);
+		parent::__construct(\$context);
 	}
 
 	protected function _construct()
 	{
-		$this->_init('${3:[[magento2.module_key]]}_${4:[[magento2.snake_base_name]]}', '${5:[[magento2.snake_base_name]]_id}');
+		\$this->_init('${3:[[magento2.module_key]]}_${4:[[magento2.snake_base_name]]}', '${5:[[magento2.snake_base_name]]_id}');
 	}
 }
