@@ -7,7 +7,7 @@ snippet do
 		$0
 	done
 snippet dir "get script dir"
-	dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+	dir="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
 snippet args
 	usage() {
 		echo "Ussage: \${0##*/} [OPTIONS]"
@@ -33,7 +33,7 @@ snippet argpos
 		${1:posarg}="\$1"
 	fi
 snippet argflag
-	--${1:flag}${3:|-${2:f}})$4
+	--${1:flag}${3:|-${2:f}})
 		shift
 		;;$0
 snippet argopt
@@ -45,7 +45,7 @@ snippet argopt
 			_val="\$2"
 			shift; shift
 		fi
-		${4:${1:option}}="$_val"
+		${4:${1:option}}="\$_val"
 		;;
 snippet argopt-
 	--${1:option}${3:|-${2:o}})

@@ -11,6 +11,7 @@ local finders = require('telescope.finders')
 local action_state = require('telescope.actions.state')
 local conf = require('telescope.config').values
 
+k.set('n', '<space>fp', require('telescope').extensions['tmux-projects'].ls_projects)
 k.set('n', '<space>fr', function()
   builtin.live_grep()
 end)
@@ -38,12 +39,17 @@ k.set('n', '<space>fF', function()
     hidden = true,
   })
 end)
+k.set('n', '<space>fm', function()
+  vim.fn['fzf_mru#mrufiles#refresh']()
+  vim.cmd.Telescope('fzf_mru', 'current_path')
+end)
 k.set('n', '<space>fd', function()
+  require('plugins.vim_dadbod').load_connections()
   pickers
     .new({
       prompt_title = 'Database',
       finder = finders.new_table({
-        results = vim.fn['db#url_complete']('g:'),
+        results = vim.fn['db#url_complete']('g:') or {},
         -- entry_maker = ''
       }),
       sorter = conf.file_sorter({}),
@@ -66,7 +72,7 @@ k.set('n', '<space>fd', function()
     })
     :find()
 end)
-k.set('n', '<space>fm', function()
+k.set('n', '<space>fM', function()
   local result = {}
   local files = vim.fn['bm#all_files']()
   for _, file in ipairs(files) do
@@ -121,7 +127,7 @@ end)
 k.set('n', '<space>fn', function()
   builtin.find_files({ cwd = os.getenv('DOTFILES') .. '/config/nvim' })
 end)
-k.set('n', '<space>fp', function()
+k.set('n', '<space>fP', function()
   builtin.find_files({ cwd = vim.fn.stdpath('data') .. '/site/pack/packer/' })
 end)
 k.set('n', '<space>fg', function()
@@ -140,7 +146,7 @@ end)
 k.set('n', '<space>gw', function()
   builtin.grep_string()
 end)
-k.set('n', '<space>gr', ':Rg<cr>')
+k.set('n', '<space>gr', '<cmd>Rg<cr>')
 
 local last_query = ''
 command('Rg', function(opt)
@@ -179,9 +185,27 @@ end, { nargs = '?', bang = true, complete = 'dir' })
 
 telescope.setup({
   defaults = {
-    path_display = {
-      shorten = { len = 3, exclude = { 1, 2, -1, -2, -3 } },
-    },
+    -- path_display = {
+    --   shorten = { len = 3, exclude = { 1, 2, -1, -2, -3 } },
+    -- },
+    path_display = function(opts, path)
+      local cwd = vim.fn.getcwd()
+      local result = path
+      if path:sub(1, #cwd) == cwd then
+        result = '.' .. path:sub(#cwd + 1)
+      end
+      local parts = vim.split(result, '/')
+
+      for i, part in pairs(parts) do
+        if i ~= 1 and i ~= 2 and i ~= #parts and i ~= #parts - 1 and i ~= #parts - 2 then
+          if part:len() > 6 then
+            parts[i] = part:sub(1, 3) .. '…' .. part:sub(part:len() - 1)
+          end
+        end
+      end
+
+      return table.concat(parts, '/')
+    end,
     -- sorting_strategy = "ascending",
     -- layout_strategy = 'vertical',
     vimgrep_arguments = {
@@ -245,3 +269,7 @@ telescope.setup({
 })
 require('telescope').load_extension('fzf')
 require('telescope').load_extension('ui-select')
+require('telescope').load_extension('git_worktree')
+require('telescope').load_extension('tmux-git-worktree')
+require('telescope').load_extension('tmux-projects')
+require('telescope').load_extension('fzf_mru')

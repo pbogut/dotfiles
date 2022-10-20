@@ -6,31 +6,31 @@ local l = {}
 g.switch_custom_definitions = {
   {
     ['\\(===\\)'] = '==',
-    ['\\(==\\)'] =  '===',
+    ['\\(==\\)'] = '===',
   },
   {
     ['\\(!==\\)'] = '!=',
-    ['\\(!=\\)'] =  '!==',
+    ['\\(!=\\)'] = '!==',
   },
   {
     ['show'] = 'hide',
-    ['hide'] =  'show',
+    ['hide'] = 'show',
   },
 }
 l.switch_c_like_if = {
-  ['if (true || (\\(.*\\)))'] =          'if (false && (\\1))',
-  ['if (false && (\\(.*\\)))'] =         'if (\\1)',
+  ['if (true || (\\(.*\\)))'] = 'if (false && (\\1))',
+  ['if (false && (\\(.*\\)))'] = 'if (\\1)',
   ['if (\\%(true\\|false\\)\\@!\\(.*\\))'] = 'if (true || (\\1))',
 }
 l.switch_c_like_while = {
-  ['while (true || (\\(.*\\)))'] =          'while (false && (\\1))',
-  ['while (false && (\\(.*\\)))'] =         'while (\\1)',
+  ['while (true || (\\(.*\\)))'] = 'while (false && (\\1))',
+  ['while (false && (\\(.*\\)))'] = 'while (\\1)',
   ['while (\\%(true\\|false\\)\\@!\\(.*\\))'] = 'while (true || (\\1))',
 }
 l.switch_php_scope = {
-  ['\\<private\\>'] =   'protected',
+  ['\\<private\\>'] = 'protected',
   ['\\<protected\\>'] = 'public',
-  ['\\<public\\>'] =    'private',
+  ['\\<public\\>'] = 'private',
 }
 l.switch_php_class_string = { -- one way ticket, why would you use string!?
   ['create([\'"]\\\\\\=\\([a-zA-Z0-9_\\\\]*\\)[\'"])'] = 'create(\\\\\\1::class)',
@@ -42,11 +42,11 @@ l.switch_php_laravel_facade = {
   ['use Illuminate\\\\Support\\\\Facades\\\\\\([A-Z][A-Za-z]*\\);'] = 'use \\1;',
 }
 l.switch_php_array = {
-  ['\\<array(\\(.*\\))'] =      '[\\1]',
+  ['\\<array(\\(.*\\))'] = '[\\1]',
   ['\\(\\s*\\|^\\)\\[\\(.*\\)\\]'] = '\\1array(\\2)',
 }
 l.switch_php_comment = {
-  ['^\\(\\s*\\)/\\* \\(.*\\) \\*/$'] =      '\\1// \\2',
+  ['^\\(\\s*\\)/\\* \\(.*\\) \\*/$'] = '\\1// \\2',
   ['^\\(\\s*\\)// \\(.*\\)'] = '\\1/* \\2 */',
 }
 l.switch_php_magento_dispatch_event = {
@@ -58,16 +58,16 @@ l.switch_elixir_assert = {
   ['\\(refute\\)'] = 'assert',
 }
 l.switch_elixir_map = {
-  ['\\<\\([a-zA-Z0-9_]*\\): \\([^,]*\\),'] =   '"\\1" => \\2,',
+  ['\\<\\([a-zA-Z0-9_]*\\): \\([^,]*\\),'] = '"\\1" => \\2,',
   ['"\\([a-zA-Z0-9_]*\\)" => \\([^,]*\\),'] = '\\1: \\2,',
 }
 l.switch_blade_echo = {
-  ['{{\\(.\\{-}\\)}}'] =   '{!!\\1!!}',
-  ['{!!\\(.\\{-}\\)!!}'] =   '{{\\1}}',
+  ['{{\\(.\\{-}\\)}}'] = '{!!\\1!!}',
+  ['{!!\\(.\\{-}\\)!!}'] = '{{\\1}}',
 }
 l.switch_md_checkbox = {
-  ['\\[ \\]'] =   '[x]',
-  ['\\[x\\]'] =   '[ ]',
+  ['\\[ \\]'] = '[x]',
+  ['\\[x\\]'] = '[ ]',
 }
 l.switch_vimwiki_checkbox = {
   ['\\[ \\]'] = '[o]',
@@ -86,11 +86,11 @@ l.switch_diffline = {
   ['^\\s'] = '+',
 }
 l.switch_words_tf = {
-  ['\\<true\\>'] =   'false',
+  ['\\<true\\>'] = 'false',
   ['\\<false\\>'] = 'true',
 }
 l.switch_words_lr = {
-  ['\\<left\\>'] =   'right',
+  ['\\<left\\>'] = 'right',
   ['\\<right\\>'] = 'left',
 }
 

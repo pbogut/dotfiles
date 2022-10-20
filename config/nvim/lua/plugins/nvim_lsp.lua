@@ -8,6 +8,7 @@ local has_lsp_signature, lsp_signature = pcall(require, 'lsp_signature')
 
 local cmd = vim.cmd
 local g = vim.g
+local c = g.colors
 local no_lsp_bind = '<cmd>lua print("No LSP attached")<cr>'
 
 local signature_action = crequire('lsp_signature', {
@@ -92,13 +93,15 @@ local bindings = {
   { 'i', '<C-k>', signature_action, no_lsp_bind },
 
   { 'n', 'gd', maybe_telescope('definition'), false },
-  { 'n', '<space>i', maybe_telescope('implementation'), no_lsp_bind },
-  { 'n', '<space>T', maybe_telescope('type_definition'), no_lsp_bind },
-  { 'n', '<space>rr', maybe_telescope('references'), no_lsp_bind },
+  { 'n', '<space>ld', maybe_telescope('definition'), no_lsp_bind },
+  { 'n', '<space>lD', '<cmd>lua vim.lsp.buf.declaration()<cr>', no_lsp_bind },
+  { 'n', '<space>li', maybe_telescope('implementation'), no_lsp_bind },
+  { 'n', '<space>lt', maybe_telescope('type_definition'), no_lsp_bind },
+  { 'n', '<space>lr', maybe_telescope('references'), no_lsp_bind },
   { 'n', '<space>sd', maybe_telescope('document_symbol'), no_lsp_bind },
   { 'n', '<space>sD', maybe_telescope('workspace_symbol'), no_lsp_bind },
   { 'n', '<space>ca', vim.lsp.buf.code_action, no_lsp_bind },
-  { 'v', '<space>ca', vim.lsp.buf.range_code_action, no_lsp_bind },
+  { 'v', '<space>ca', vim.lsp.buf.code_action, no_lsp_bind },
 
   { 'n', '<space>rn', lsp_rename, no_lsp_bind, { silent = false } },
   { 'n', '<space>el', '<cmd>lua vim.diagnostic.open_float(0, {scope = "line"})<cr>', no_lsp_bind },
@@ -162,18 +165,18 @@ vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(vim.lsp.diagn
 
 u.highlights({
   FloatBorder = { guibg = g.colors.base0, guifg = vim.g.colors.base03 },
-  DiagnosticFloatingInfo = { guibg = '#a68f46', guifg = '#073642' },
-  DiagnosticFloatingHint = { guibg = '#9eab7d', guifg = '#073642' },
-  DiagnosticFloatingError = { guibg = '#dc322f', guifg = '#073642' },
-  DiagnosticFloatingWarning = { guibg = '#d33682', guifg = '#073642' },
-  DiagnosticSignError = { guibg = '#073642', guifg = '#dc322f' },
-  DiagnosticSignWarn = { guibg = '#073642', guifg = '#d33682' },
-  DiagnosticSignInfo = { guibg = '#073642', guifg = '#a68f46' },
-  DiagnosticSignHint = { guibg = '#073642', guifg = '#9eab7d' },
-  DiagnosticVirtualTextError = { guifg = '#dc322f' },
-  DiagnosticVirtualTextWarning = { guifg = '#d33682' },
-  DiagnosticVirtualTextInfo = { guifg = '#a68f46' },
-  DiagnosticVirtualTextHint = { guifg = '#9eab7d' },
+  DiagnosticFloatingInfo = { guibg = c.ad_info, guifg = c.base02 },
+  DiagnosticFloatingHint = { guibg = c.ad_hint, guifg = c.base02 },
+  DiagnosticFloatingError = { guibg = c.red, guifg = c.base02 },
+  DiagnosticFloatingWarning = { guibg = c.magenta, guifg = c.base02 },
+  DiagnosticSignError = { guibg = c.base02, guifg = c.red },
+  DiagnosticSignWarn = { guibg = c.base02, guifg = c.magenta },
+  DiagnosticSignInfo = { guibg = c.base02, guifg = c.ad_info },
+  DiagnosticSignHint = { guibg = c.base02, guifg = c.ad_hint },
+  DiagnosticVirtualTextError = { guifg = c.red },
+  DiagnosticVirtualTextWarning = { guifg = c.magenta },
+  DiagnosticVirtualTextInfo = { guifg = c.ad_info },
+  DiagnosticVirtualTextHint = { guifg = c.ad_hint },
   LspSignatureActiveParameter = { link = 'Search' },
 })
 
@@ -184,6 +187,7 @@ u.signs({
   DiagnosticSignHint = { text = g.icon.hint, texthl = 'DiagnosticSignHint' },
 })
 
+lspconfig.ccls.setup({ on_attach = on_attach })
 lspconfig.vimls.setup({ on_attach = on_attach })
 lspconfig.vuels.setup({ on_attach = on_attach })
 lspconfig.bashls.setup({ on_attach = on_attach })
@@ -193,6 +197,7 @@ lspconfig.cssls.setup({ on_attach = on_attach, capabilities = capabilities })
 lspconfig.jedi_language_server.setup({ on_attach = on_attach })
 lspconfig.dockerls.setup({ on_attach = on_attach })
 lspconfig.solargraph.setup({ on_attach = on_attach })
+lspconfig.rust_analyzer.setup({ on_attach = on_attach })
 -- require 'plugins.lsp.denols'.setup {on_attach = on_attach}
 require('plugins.lsp.tsserver').setup({ on_attach = on_attach })
 require('plugins.lsp.emmet_ls').setup({ on_attach = on_attach, capabilities = capabilities })
@@ -247,8 +252,18 @@ end, {})
 command('LspAttachBuffer', attach_lsp_to_new_buffer, {})
 
 -- Auto format on save
+local augroup = vim.api.nvim_create_augroup('x_lsp', { clear = true })
 vim.api.nvim_create_autocmd('BufWritePre', {
-  group = vim.api.nvim_create_augroup('x_lsp', { clear = true }),
+  group = augroup,
+  pattern = '*.rs',
+  callback = function()
+    if #vim.lsp.get_active_clients() > 0 then
+      lsp_formatting(0)
+    end
+  end,
+})
+vim.api.nvim_create_autocmd('BufWritePre', {
+  group = augroup,
   pattern = '*',
   callback = function()
     if config.get('lsp.autoformat_on_save.enabled') then

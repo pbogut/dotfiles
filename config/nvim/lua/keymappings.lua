@@ -12,16 +12,20 @@ g.no_plugin_maps = 1
 k.set('n', '<bs>', '<cmd>Explore<cr>')
 k.set('n', '<c-s>', [[<cmd>echo synIDattr(synID(line('.'), col('.'), 1), "name")<cr>]])
 -- macros helper (more like scratch pad)
-k.set('n', '<space>em', '<cmd>tabnew ~/.vim/macros.vim<cr>')
-k.set('n', '<space>sm', '<cmd>source ~/.vim/macros.vim<cr>')
+k.set('n', '<space>em', '<cmd>tabnew ~/.vim/macros.lua<cr>')
+k.set('n', '<space>sm', '<cmd>source ~/.vim/macros.lua<cr>')
 -- nice to have
 k.set('i', '<c-d>', '<del>')
 k.set('c', '<c-d>', '<del>')
 k.set('n', '<space><cr>', 'za')
+k.set('n', '<space><tab>', 'zA')
 k.set('v', '<space><cr>', 'zf')
 k.set('n', '<space>tw', '<cmd>lua vim.wo.wrap = not vim.wo.wrap<cr>')
 k.set('n', '<space>lq', '<cmd>copen<cr>')
 k.set('n', '<space>ll', '<cmd>lopen<cr>')
+-- center screen while scrolling
+k.set('n', '<c-d>', '<c-d>zz')
+k.set('n', '<c-u>', '<c-u>zz')
 -- Shift + J/K moves selected lines down/up in visual mode
 k.set('v', 'J', [[:m '>+1<cr>gv=gv]])
 k.set('v', 'K', [[:m '<-2<cr>gv=gv]])
@@ -35,7 +39,6 @@ k.set('c', '<c-j>', '<Down>')
 k.set('n', '<del>', '<c-d>', { remap = true })
 -- prevent pasting in visual from yanking seletion
 k.set('', 'Y', 'y$')
-k.set('s', 'p', '"_dP')
 k.set('v', 'p', '"_dP')
 k.set('n', '<space>', '"*')
 k.set('v', '<space>', '"*')
@@ -88,6 +91,7 @@ k.set('n', '<c-q>', function()
 end)
 -- terminal - normal mode
 k.set('t', '<c-q>', [[<C-\><C-n>]])
+k.set('t', '<esc>', [[<C-\><C-n>]])
 -- diffmode
 k.set('n', 'du', '<cmd>diffupdate<cr>') -- @todo check if should be silent?
 k.set('n', 'dp', '<cmd>diffput<cr>')
@@ -110,9 +114,14 @@ k.set('n', '<c-q>', function()
 end)
 -- git
 k.set('n', '<space>lg', function()
-  local err = os.execute('tmux switch-client -t "$(tmux display-message -p "#S"):lazygit" 2>/dev/null')
-  if err > 0 then
-    os.execute('tmux new-window env EDITOR="tmux-vim --no-tab" lazygit')
+  if os.getenv('TMUX') then
+    local err = os.execute('tmux switch-client -t "$(tmux display-message -p "#S"):lazygit" 2>/dev/null')
+    if err > 0 then
+      -- os.execute('tmux new-window env EDITOR="tmux-vim --no-tab" lazygit')
+      os.execute('tmux new-window lazygit')
+    end
+  else
+    vim.fn.jobstart('$TERMINAL -e lazygit')
   end
 end)
 -- open terminal
@@ -158,6 +167,19 @@ end)
 k.set('n', 'yaf', [[:let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>]])
 k.set('n', 'yif', [[:let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>]])
 k.set('n', 'yrf', [[:let @+=expand('%:.')<bar>echo 'Yanked: '.expand('%:.')<cr>]])
+
+k.set('n', '<space>R', function()
+  cmd('belowright 20split')
+  vim.cmd.enew()
+  vim.cmd.term('cargo run')
+  vim.cmd.startinsert()
+end)
+k.set('n', '<space>rr', function()
+  cmd('belowright 20split')
+  vim.cmd.enew()
+  vim.cmd.term('cargo run')
+  vim.cmd.startinsert()
+end)
 
 -- quick change and search for next occurrence, change can be repeated
 -- by . N and n will search for the same selection, gn gN will select same

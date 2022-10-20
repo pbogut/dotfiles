@@ -67,3 +67,8 @@ function _G.crequire(module_name, callback)
 
   return result
 end
+
+function _G.rerequire(module_name)
+  package.loaded[module_name] = nil
+  return require(module_name)
+end

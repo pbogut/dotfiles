@@ -3,7 +3,14 @@ local me = {}
 
 function me.setup(opts)
   opts = vim.tbl_deep_extend('keep', opts, {
-    filetypes = { "html", "php", "blade" }
+    filetypes = { 'html', 'php', 'blade' },
+    settings = {
+      html = {
+        validate = {
+          scripts = true, -- some issues when mixed with PHP
+        },
+      },
+    },
   })
   lspconfig.html.setup(opts)
 end

@@ -5,7 +5,7 @@ local u = require('utils')
 -- linters, etc)
 -- This script uses external tools to install and update them
 -- usage:
--- :exec('luafile ' . expand('%')) | UpdateExternalPackages
+-- :so | UpdateExternalPackages
 --
 local packages = {
   yarn = {
@@ -29,7 +29,8 @@ local packages = {
   },
   cargo = {
     'stylua',
-    'prosemd',
+    'selene',
+    'prosemd-lsp',
   },
   gitpac = {
     'sumneko/lua-language-server',
@@ -66,7 +67,7 @@ local managers = {
   },
 }
 
-u.command('UpdateExternalPackages', function()
+vim.api.nvim_create_user_command('UpdateExternalPackages', function()
   local cmds = {}
   for manager, package_list in pairs(packages) do
     for _, package in pairs(package_list) do
@@ -77,9 +78,9 @@ u.command('UpdateExternalPackages', function()
     done = 'done',
     prefix = '[Update]',
   })
-end)
+end, {})
 
-u.command('InstallExternalPackages', function()
+vim.api.nvim_create_user_command('InstallExternalPackages', function()
   local cmds = {}
   for manager, package_list in pairs(packages) do
     for _, package in pairs(package_list) do
@@ -90,4 +91,4 @@ u.command('InstallExternalPackages', function()
     done = 'done',
     prefix = '[Install]',
   })
-end)
+end, {})

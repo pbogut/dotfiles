@@ -31,7 +31,7 @@ function c.load_modules()
     local mod_name = file:gsub('.*/config/(.*).lua', 'config.%1')
     local ok, module = pcall(require, mod_name)
     if ok == true then
-      modules[#modules+1] = module
+      modules[#modules + 1] = module
     end
   end
 end
@@ -53,7 +53,7 @@ c.load_for_cwd()
 
 function c.reload_config()
   c.load_modules()
-  config = c.load_for_cwd()
+  c.load_for_cwd()
 end
 
 function c.dump()

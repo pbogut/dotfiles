@@ -53,11 +53,28 @@ require('packer').startup({
   function(use)
     -- Packer can manage itself as an optional plugin
     use({ 'wbthomason/packer.nvim', opt = true })
+    use({
+      'lewis6991/impatient.nvim',
+      config = [[
+        _G.__luacache_config = {
+          chunks = {
+            enable = true,
+            path = vim.fn.stdpath('cache')..'/luacache_chunks',
+          },
+          modpaths = {
+            enable = true,
+            path = vim.fn.stdpath('cache')..'/luacache_modpaths',
+          }
+        }
+        require('impatient')
+      ]],
+    })
 
-    -- My local plugins
+    use({ fn.stdpath('config') .. '/local/paranoic-backup', config = 'require"paranoic-backup"' })
     use({ fn.stdpath('config') .. '/local/projector', config = config('projector') })
     use({ fn.stdpath('config') .. '/local/actions', config = 'require"actions"' })
     use({ fn.stdpath('config') .. '/local/remotesync', config = 'require"remotesync"' })
+    use({ 'pbogut/fzf-mru.vim', config = config('fzf_mru') })
 
     -- Github plugins
     use({ 'tpope/vim-scriptease' })
@@ -71,18 +88,23 @@ require('packer').startup({
     use({ 'vim-ruby/vim-ruby', ft = { 'ruby' } })
     use({ 'tpope/vim-unimpaired' })
     use({ 'ThePrimeagen/harpoon', config = config('harpoon') })
+    use({ 'ThePrimeagen/git-worktree.nvim', config = config('git_worktree_nvim') })
     use({ 'lambdalisue/suda.vim' })
     use({ 'gioele/vim-autoswap' })
     use({ 'kylechui/nvim-surround', config = config('nvim_surround') })
     use({ 'nvim-lualine/lualine.nvim', config = config('lualine_nvim') })
     use({ 'kyazdani42/nvim-web-devicons', config = config('nvim_web_devicons') })
     use({ 'mfussenegger/nvim-dap', config = config('nvim_dap') })
-    use({ 'mhinz/vim-signify', config = config('vim_signify') })
+    use({ 'lewis6991/gitsigns.nvim', config = config('gitsigns_nvim') })
     use({ 'ntpeters/vim-better-whitespace', config = config('vim_better_whitespace') })
     use({ 'honza/vim-snippets' })
-    use({ 'andymass/vim-matchup', config = [[
-      vim.g.matchup_matchparen_offscreen = {}
-    ]]})
+    use({
+      'andymass/vim-matchup',
+      config = [[
+      -- when status available
+      vim.g.matchup_matchparen_offscreen = { method = 'status_manual' }
+    ]],
+    })
     use({
       'vim-test/vim-test',
       cmd = { 'TestNearest', 'TestFile', 'TestSuite', 'TestLast', 'TestLast', 'TestVisit' },
@@ -90,7 +112,6 @@ require('packer').startup({
       setup = setup('vim_test'),
     })
     use({ 'elmcast/elm-vim', ft = { 'elm' } })
-    use({ 'pbogut/vim-elmper', ft = { 'elm' } })
     use({ 'elixir-lang/vim-elixir', ft = { 'elixir', 'eelixir' } })
     use({ 'moll/vim-bbye', cmd = { 'Bdelete', 'Bwipeout' }, setup = setup('vim_bbye') })
     use({ 'will133/vim-dirdiff', cmd = 'DirDiff', config = config('vim_dirdiff') })
@@ -138,21 +159,23 @@ require('packer').startup({
     use({ 'frankier/neovim-colors-solarized-truecolor-only' })
     use({ 'sirtaj/vim-openscad', opt = false })
     use({ 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate', config = config('nvim_treesitter') })
+    use({ 'nvim-treesitter/playground' })
+    use({ 'nvim-treesitter/nvim-treesitter-context', config = config('nvim_treesitter_context') })
 
-    -- git
     use({ 'rhysd/git-messenger.vim', config = config('git_messanger') })
+
     use({ 'simrat39/rust-tools.nvim', config = config('rust_tools') })
 
     -- completion
-    use({ 'dcampos/nvim-snippy', after = 'projector', config = config('nvim_snippy') })
+    use({ 'l3mon4d3/luasnip', after = 'projector', config = config('luasnip') })
     use({ 'tzachar/cmp-tabnine', run = './install.sh', after = 'nvim-cmp' })
     use({
       'hrsh7th/nvim-cmp',
-      after = { 'nvim-snippy', 'projector' },
+      after = { 'luasnip', 'projector' },
       config = config('nvim_cmp'),
       setup = setup('nvim_cmp'),
       requires = {
-        'hrsh7th/cmp-buffer',
+        --[[ 'hrsh7th/cmp-buffer', ]]
         'hrsh7th/cmp-path',
         'hrsh7th/cmp-nvim-lsp',
         'hrsh7th/cmp-nvim-lua',
@@ -160,12 +183,10 @@ require('packer').startup({
         'tzachar/cmp-tabnine',
         'ray-x/cmp-treesitter',
         'onsails/lspkind-nvim',
-        'dcampos/cmp-snippy',
+        'saadparwaiz1/cmp_luasnip',
         'kristijanhusak/vim-dadbod-completion',
-        -- 'quangnguyen30192/cmp-nvim-tags', # dont even try, its slow trash
       },
     })
-    -- copilot after rsi due to binding conflict (<c-f>)
     -- lsp
     use({ 'ray-x/lsp_signature.nvim' })
     use({

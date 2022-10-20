@@ -5,6 +5,10 @@ local fn = vim.fn
 local cmd = vim.cmd
 
 g.colors = {
+  ad_dark1 = '#202328',
+  ad_info = '#a68f46',
+  ad_hint = '#9eab7d',
+
   base03 = '#002b36',
   base02 = '#073642',
   base01 = '#586e75',
@@ -40,6 +44,10 @@ g.colors = {
 }
 
 u.highlights({
+  ClTestAdDark1 = { guifg = g.colors.ad_dark1 },
+  ClTestAdInfo = { guifg = g.colors.ad_info },
+  ClTestAdHint = { guifg = g.colors.ad_hint },
+
   ClTestBase03 = { guifg = g.colors.base03 },
   ClTestBase02 = { guifg = g.colors.base02 },
   ClTestBase01 = { guifg = g.colors.base01 },
@@ -79,6 +87,9 @@ vim.api.nvim_create_autocmd('BufEnter', {
   pattern = 'colors.lua',
   callback = function()
     cmd.TSBufDisable('highlight')
+    fn.matchadd('ClTestAdDark1', 'ClTestAdDark1\\>')
+    fn.matchadd('ClTestAdInfo', 'ClTestAdInfo\\>')
+    fn.matchadd('ClTestAdHint', 'ClTestAdHint\\>')
     fn.matchadd('ClTestBase03', 'ClTestBase03\\>')
     fn.matchadd('ClTestBase02', 'ClTestBase02\\>')
     fn.matchadd('ClTestBase01', 'ClTestBase01\\>')

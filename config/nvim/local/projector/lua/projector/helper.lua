@@ -47,7 +47,7 @@ function M.map(list, fun)
 end
 
 function M.get_file_parts()
-  local filename = fn.expand('%:.:h')
+  local filename = fn.expand('%:.:r')
   return u.split_string(filename, '/')
 end
 

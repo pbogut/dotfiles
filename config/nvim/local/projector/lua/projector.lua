@@ -25,9 +25,9 @@ function a.setup(opts)
 end
 
 function a.ultisnip_template(name)
-  cmd("silent! normal! i_t" .. name .. t'<c-r>=UltiSnips#ExpandSnippet()<cr>')
+  cmd('silent! normal! i_t' .. name .. t('<c-r>=UltiSnips#ExpandSnippet()<cr>'))
   if not g.ulti_expand_res or g.ulti_expand_res == 0 then
-    cmd("silent! undo")
+    cmd('silent! undo')
   end
   return g.ulti_expand_res and g.ulti_expand_res ~= 0
 end
@@ -37,6 +37,11 @@ function l.init_project()
   local init = shared.get_config('project_init')
   if type(init) == 'function' then
     return init()
+  end
+  if type(init) == 'table' then
+    for _, fn in pairs(init) do
+      fn()
+    end
   end
 end
 

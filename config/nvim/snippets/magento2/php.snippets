@@ -18,8 +18,27 @@ snippet resultredirect "$resultRedirect"
 	$resultRedirect = $this->_resultFactory->create(ResultFactory::TYPE_REDIRECT);
 snippet objectmanager "$objectManager"
 	/** @var \Magento\Framework\ObjectManagerInterface */
-	$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+	\$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 snippet log "log"
 	\Magento\Framework\App\ObjectManager::getInstance()
 		->get(\Psr\Log\LoggerInterface::class)
 		->info($0);
+snippet adapterfn "adapter function"
+	/** @var \Magento\Framework\DB\Adapter\Pdo\Mysql */
+	protected \$adapter = null;
+
+	/**
+	 * @return \Magento\Framework\DB\Adapter\Pdo\Mysql
+	 */
+	protected function getAdapter()
+	{
+		if (\$this->adapter == null) {
+			/** @var \Magento\Framework\ObjectManagerInterface */
+			\$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+			\$this->adapter = \$objectManager->get(\Magento\Framework\App\ResourceConnection::class)
+				->getConnection()
+				->select()
+				->getAdapter();
+		}
+		return \$this->adapter;
+	}

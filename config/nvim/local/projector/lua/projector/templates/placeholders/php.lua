@@ -7,7 +7,6 @@ p.namespace = function()
   local list = h.get_file_parts()
   table.remove(list, #list)
   local result = ''
-
   for _, el in ipairs(list) do
     local sep = ''
     if result ~= '' then
@@ -65,19 +64,16 @@ end
 p.doc = function()
   local next_line = h.get_relative_line(1)
   print(next_line)
-  if (next_line:match('class')) then
+  if next_line:match('class') then
     return 'doc_class'
   end
-  if (next_line:match('function')) then
+  if next_line:match('function') then
     return 'doc_function'
   end
-  if (next_line:match('protected %$%l')
-    or next_line:match('public %$%l')
-    or next_line:match('private %$%l'))
-  then
+  if next_line:match('protected %$%l') or next_line:match('public %$%l') or next_line:match('private %$%l') then
     return 'doc_property'
   end
-  if (next_line:match('%s+%$%l')) then
+  if next_line:match('%s+%$%l') then
     return 'doc_variable'
   end
   return 'doc'

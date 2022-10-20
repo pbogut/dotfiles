@@ -26,8 +26,8 @@ c.url.default_page = 'http://localhost:46637'
 # c.url.default_page = 'https://duckduckgo.com/'
 
 c.fileselect.handler = "external"
-c.fileselect.single_file.command = [term, "-t", "QB_FILE_SELECTION", "-e", "ranger", "--choosefile={}"]
-c.fileselect.multiple_files.command = [term, "-t", "QB_FILE_SELECTION", "-e", "ranger", "--choosefiles={}"]
+c.fileselect.single_file.command = [term, "-t", "QB_FILE_SELECTION", "-e", "lf", "-selection-path", "{}"]
+c.fileselect.multiple_files.command = [term, "-t", "QB_FILE_SELECTION", "-e", "lf", "-selection-path", "{}"]
 
 c.downloads.open_dispatcher = '/bin/bash -c "QB_DOWNLOAD_FILE=1 download-sort-and-open.sh \'{}\'"'
 c.editor.command = [term, "-t", "NVIM_FOR_QB", "-e", "nvim", "{}"]
@@ -40,7 +40,8 @@ c.tabs.background = True
 c.tabs.last_close = "close"
 c.tabs.show = "multiple"
 c.tabs.position = "right"
-c.tabs.width = 200
+c.tabs.width = '10%'
+c.tabs.indicator.width = 2
 c.tabs.padding = {"top": 2, "bottom": 2, "left": 5, "right": 5}
 c.downloads.location.directory = "~/Downloads"
 # c.content.headers.user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
@@ -62,6 +63,10 @@ c.hints.chars = "arstdhneifuwy"
 c.input.insert_mode.auto_enter = True
 c.input.insert_mode.auto_leave = False
 
+# darkmode
+c.colors.webpage.preferred_color_scheme = 'dark'
+c.colors.webpage.bg = '#eee'
+
 c.url.searchengines = {
     "DEFAULT": "https://search.brave.com/search?q={}",
     "p":  "https://engine.presearch.org/search?q={}",
@@ -77,7 +82,11 @@ c.url.searchengines = {
     # "th": "https://www.thingiverse.com/search?q={}",
     "at": "https://alternativeto.net/browse/search?q={}",
     "th":  "https://duckduckgo.com/?q={} site:thingiverse.com",
+    "tr":  "https://translate.google.pl/?text={}",
 }
+
+c.scrolling.bar = 'overlay'
+
 # c.colors.completion.even.bg = "#333333"
 c.colors.completion.odd.bg = "#1f1f1f"
 c.colors.completion.even.bg = "#1f1f1f"
@@ -132,6 +141,8 @@ config.bind('<Return>', 'enter-mode insert')
 config.bind('do', 'download-open')
 config.bind('dc', 'download-clear')
 config.bind('dr', 'download-remove')
+config.bind('<Ctrl-t>', 'spawn --userscript tabswidth --toggle', mode='normal')
+config.bind('<Ctrl-t>', 'spawn --userscript tabswidth --toggle', mode='insert')
 
 config.bind('gc', 'spawn google-chrome-stable {url:pretty}')
 

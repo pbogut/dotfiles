@@ -3,7 +3,6 @@ local cmd = vim.cmd
 local fn = vim.fn
 local b = vim.b
 local bo = vim.bo
-local api = vim.api
 
 local autocmd_callbacs = {}
 local command_callbacs = {}
@@ -130,10 +129,18 @@ function u.table_keys(list)
 end
 
 function u.table_remove(list, start, length)
-  for _=1,length do
+  for _ = 1, length do
     table.remove(list, start)
   end
   return list
+end
+
+function u.combine(tabs)
+  local result = {}
+  for _, tab in pairs(tabs) do
+    result = u.merge_tables(tab, result)
+  end
+  return result
 end
 
 -- merges tables recursively, if both values
@@ -148,15 +155,9 @@ end
 -- other way around)
 function u.merge_tables(val1, val2, append)
   append = append or false
-  local fresh_one = nil
-  if
-    type(val1) == 'table'
-    and type(val2) == 'table'
-    and vim.tbl_islist(val1)
-    and vim.tbl_islist(val2)
-  then
+  local fresh_one = {}
+  if type(val1) == 'table' and type(val2) == 'table' and vim.tbl_islist(val1) and vim.tbl_islist(val2) then
     local uniqueness = {}
-    fresh_one = {}
     local t1 = val2
     local t2 = val1
     if append then
@@ -173,21 +174,16 @@ function u.merge_tables(val1, val2, append)
       end
     end
   elseif type(val1) == 'table' and type(val2) == 'table' then
-    fresh_one = {}
     for key1, subval1 in pairs(val1) do
       fresh_one[key1] = u.merge_tables(subval1, val2[key1])
     end
     for key2, subval2 in pairs(val2) do
       fresh_one[key2] = u.merge_tables(val1[key2], subval2)
     end
-  elseif val1 == nil and val2 == nil then
-    fresh_one = nil
   elseif val1 == nil then
     fresh_one = val2
-  elseif val2 == nil then
-    fresh_one = val1
   else
-    fresh_one = val2 -- override with second
+    fresh_one = val1
   end
   return fresh_one
 end
@@ -311,6 +307,7 @@ function u.process_shell_commands(commands, messages, callback)
   local to_process = u.clone_table(commands)
   local errors = 0
   local success = 0
+  local notify = nil
   local function process_next()
     if #to_process == 0 then
       local msg = messages.prefix
@@ -321,14 +318,9 @@ function u.process_shell_commands(commands, messages, callback)
         .. '] '
         .. (messages.done or 'Commands finished.')
       if errors > 0 then
-        msg = msg
-          .. ' ('
-          .. errors
-          .. ' '
-          .. (errors > 1 and 'errors' or 'error')
-          .. ')'
+        msg = msg .. ' (' .. errors .. ' ' .. (errors > 1 and 'errors' or 'error') .. ')'
       end
-      vim.notify(msg)
+      notify = vim.notify(msg, vim.log.levels.INFO, { replace = notify })
 
       if type(callback) == 'function' then
         callback()
@@ -338,17 +330,16 @@ function u.process_shell_commands(commands, messages, callback)
     local command = table.remove(to_process, 1)
     local progress = '[' .. #commands - #to_process .. '/' .. #commands .. '] '
 
-    vim.notify((messages.prefix or '[Running]') .. progress .. command)
+    notify =
+      vim.notify((messages.prefix or '[Running]') .. progress .. command, vim.log.levels.INFO, { replace = notify })
     vim.fn.jobstart(command, {
       on_stdout = function(_, lines)
         for _, line in pairs(lines) do
           if line:len() > 1 then
-            vim.notify(
-              (messages.prefix or '[Running]')
-                .. progress
-                .. command
-                .. ' | '
-                .. line
+            notify = vim.notify(
+              (messages.prefix or '[Running]') .. progress .. command .. ' | ' .. line,
+              vim.log.levels.INFO,
+              { replace = notify }
             )
           end
         end

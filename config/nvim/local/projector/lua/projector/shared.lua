@@ -15,7 +15,7 @@ local function sort(tab, key1, key2)
   if not tab[key2].priority then
     return true
   end
-  return tab[key1].priority < tab[key2].priority
+  return tab[key1].priority > tab[key2].priority
 end
 
 -- Get deep value of table
@@ -39,7 +39,7 @@ local function get_value(tbl, keys, default)
 end
 
 local function check_project(path, pattern)
-  if pattern == "*" then
+  if pattern == '*' then
     return true
   end
   if pattern:match('%|') then
@@ -113,7 +113,10 @@ function M.get_file_config(as_list)
   as_list = as_list or false
   local cwd = fn.getcwd()
   local filename = fn.expand('%:p')
-  local relative = filename:gsub('^' .. cwd .. '/', '')
+  local relative = filename
+  if filename:sub(1, #cwd) == cwd then
+    relative = filename:sub(#cwd + 2)
+  end
   local patterns = M.get_config('patterns', {})
   local result = {}
   for file_pattern, file_config in u.spairs(patterns, sort) do
@@ -123,7 +126,7 @@ function M.get_file_config(as_list)
       file_config.pattern = file_pattern
       -- collect all matching ones into list
       if as_list then
-        result[#result+1] = file_config
+        result[#result + 1] = file_config
       else
         result = u.merge_tables(file_config, result)
       end
