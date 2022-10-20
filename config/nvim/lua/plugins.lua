@@ -66,6 +66,7 @@ require('packer').startup({
     use({ 'tpope/vim-abolish' }) -- coercion thingis
     use({ 'tpope/vim-repeat' })
     use({ 'tpope/vim-sleuth' })
+    use({ 'tpope/vim-fugitive' })
     use({ 'tpope/vim-rails', ft = { 'ruby' } })
     use({ 'vim-ruby/vim-ruby', ft = { 'ruby' } })
     use({ 'tpope/vim-unimpaired' })
@@ -139,13 +140,6 @@ require('packer').startup({
     use({ 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate', config = config('nvim_treesitter') })
 
     -- git
-    use({
-      'timuntersberger/neogit',
-      config = config('neogit'),
-      setup = setup('neogit'),
-      cmd = { 'Neogit', 'Gst' },
-      requires = { 'nvim-lua/plenary.nvim' },
-    })
     use({ 'rhysd/git-messenger.vim', config = config('git_messanger') })
     use({ 'simrat39/rust-tools.nvim', config = config('rust_tools') })
 
