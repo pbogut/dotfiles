@@ -1,5 +1,3 @@
-call local#paranoicbackup#init()
-call local#wipeout#init()
 call local#combineselection#init()
 call local#repl#init()
 call local#setlocal#init()
