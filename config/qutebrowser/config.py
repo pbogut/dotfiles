@@ -199,6 +199,8 @@ config.bind('ds', 'open -t https://dissenter.com/discussion/begin?url={url}')
 
 config.bind('gs', 'spawn --userscript ~/.scripts/qb-switch.sh')
 
+config.bind('gw', 'open -w')
+
 config.bind(',m', 'spawn --userscript mpv')
 
 config.bind('sje', 'set content.javascript.enabled true')
