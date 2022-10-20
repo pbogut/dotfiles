@@ -49,7 +49,7 @@ local function mkdir_parent(to)
   else
     dir = fn.substitute(to, [[\(.*\)/[^/]\+]], [[\1]], '')
   end
-  fn.system('mkdir -p ' .. dir)
+  fn.system('mkdir -p ' .. fn.shellescape(dir))
 end
 
 local function dirvish_create()
@@ -67,10 +67,10 @@ local function dirvish_create()
   else
     dir = fn.substitute(to, [[\(.*\)/[^/]\+]], [[\1]], '')
   end
-  fn.system('mkdir -p ' .. dir)
+  fn.system('mkdir -p ' .. fn.shellescape(dir))
   -- create empty file first
-  fn.system('touch ' .. to)
-  cmd.edit(to)
+  fn.system('touch ' .. fn.shellescape(to))
+  cmd.edit(fn.fnameescape(to))
 end
 
 local function dirvish_copy()
@@ -83,8 +83,8 @@ local function dirvish_copy()
   cmd.redraw({ bang = true })
   if to and to ~= '' then
     mkdir_parent(to)
-    fn.system('cp -r ' .. from .. ' ' .. to)
-    fn.append(fn.line('.') - 1, to)
+    fn.system('cp -r ' .. fn.shellescape(from) .. ' ' .. fn.shellescape(to))
+    fn.append(fn.line('.') - 1, fn.fnameescape(to))
     fn.feedkeys('k')
   end
 end
@@ -98,7 +98,7 @@ local function dirvish_move()
   fn.inputrestore()
   cmd.redraw({ bang = true })
   if to and to ~= '' then
-    fn.system('mv ' .. from .. ' ' .. to)
+    fn.system('mv ' .. fn.shellescape(from) .. ' ' .. fn.shellescape(to))
     fn.setline('.', to)
   end
 end
@@ -119,7 +119,7 @@ local function dirvish_rename()
   fn.inputrestore()
   cmd.redraw({ bang = true })
   if to and to ~= '' then
-    fn.system('mv ' .. from .. ' ' .. dir_name .. to)
+    fn.system('mv ' .. fn.shellescape(from) .. ' ' .. fn.shellescape(dir_name .. to))
     fn.setline('.', dir_name .. to .. suffix)
   end
 end
@@ -131,8 +131,12 @@ local function dirvish_delete()
   fn.inputrestore()
   cmd.redraw({ bang = true })
   if confirm == 'yes' then
-    fn.system('rm -fr ' .. file)
-    fn.system('bd! ' .. file)
+    fn.system('rm -fr ' .. vim.fn.shellescape(file))
+    local cwd = vim.fn.getcwd()
+    if file:sub(0, cwd:len()) then
+      file = file:sub(cwd:len() + 2)
+    end
+    fn.execute('bd! ' .. fn.fnameescape(file))
     cmd.Dirvish('%')
   end
 end
