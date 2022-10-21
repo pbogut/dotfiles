@@ -32,6 +32,7 @@ read -d '' files <<"EOF"
     githelpers
     gitignore
     gitpac.json
+    grouppack.json
     inputrc
     jshintrc
     npmrc
