@@ -13,6 +13,10 @@ local sources = {
     enabled = false,
   },
   {
+    builtin = null_ls.builtins.diagnostics.selene,
+    enabled = false,
+  },
+  {
     builtin = null_ls.builtins.formatting.stylua,
     enabled = true,
   },
@@ -50,6 +54,17 @@ local sources = {
   -- json
   {
     builtin = null_ls.builtins.diagnostics.jsonlint,
+    enabled = true,
+  },
+  -- sql
+  {
+    builtin = null_ls.builtins.diagnostics.sqlfluff,
+    extra_args = { '--dialect', 'mysql' },
+    enabled = false,
+  },
+  {
+    builtin = null_ls.builtins.formatting.sqlfluff,
+    extra_args = { '--dialect', 'mysql' },
     enabled = true,
   },
   -- other
@@ -103,6 +118,11 @@ local function lower_servity(builtin, level)
 end
 
 for _, source in ipairs(sources) do
+  if source.extra_args then
+    source.builtin = source.builtin.with({
+      extra_args = source.extra_args,
+    })
+  end
   if source.lower_servity then
     source.builtin = lower_servity(source.builtin, source.lower_servity)
   end
@@ -112,11 +132,7 @@ for _, source in ipairs(sources) do
   if source.args then
     source.builtin._opts.args = source.args
   end
-  if
-    source.enabled == nil
-    or source.enabled == true
-    or type(source.enabled) == 'function' and source.enabled()
-  then
+  if source.enabled == nil or source.enabled == true or type(source.enabled) == 'function' and source.enabled() then
     cfg.sources[#cfg.sources + 1] = source.builtin
   end
 end

@@ -2,7 +2,7 @@ local u = require('utils')
 
 local function config()
   local cmp = require('cmp')
-  local snippy = require('snippy')
+  local luasnip = require('luasnip')
   local projector = require('plugins.projector')
 
   local src = {
@@ -11,7 +11,7 @@ local function config()
     ts = { name = 'treesitter' },
     db = { name = 'vim-dadbod-completion' },
     tn = { name = 'cmp_tabnine' },
-    snip = { name = 'snippy', keyword_length = 2 },
+    snip = { name = 'luasnip', keyword_length = 2 },
     path = { name = 'path' },
     tag = { name = 'tags', max_item_count = 15 },
     buf = { name = 'buffer' },
@@ -21,7 +21,7 @@ local function config()
   cmp.setup({
     snippet = {
       expand = function(args)
-        snippy.expand_snippet(args.body)
+        luasnip.lsp_expand(args.body)
       end,
     },
     mapping = cmp.mapping.preset.insert({
@@ -30,12 +30,12 @@ local function config()
         behavior = cmp.ConfirmBehavior.Replace,
         select = true,
       }),
-      ['<c-o>'] = cmp.mapping(function(fallback)
+      ['<c-o>'] = cmp.mapping(function(_)
         if cmp.visible() then
           cmp.close()
         end
       end),
-      ['<tab>'] = cmp.mapping(function(fallback)
+      ['<tab>'] = cmp.mapping(function(_fallback)
         local entry = cmp.core.view:get_selected_entry()
         if cmp.visible() and entry then
           local item = entry:get_completion_item()
@@ -52,15 +52,11 @@ local function config()
               select = true,
             })
           end
-        elseif snippy.can_expand_or_advance() then
-          projector.expand_snippet()
+        elseif luasnip.expandable() then
+          luasnip.expand()
         else
           -- fallback() -- this is broken for some reason
-          vim.api.nvim_feedkeys(
-            vim.api.nvim_replace_termcodes([[	]], true, true, true),
-            'n',
-            true
-          )
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes([[	]], true, true, true), 'n', true)
         end
       end, { 'i', 's' }),
     }),
@@ -80,9 +76,7 @@ local function config()
     formatting = {
       format = function(entry, vim_item)
         -- fancy icons and a name of kind
-        vim_item.kind = require('lspkind').presets.default[vim_item.kind]
-          .. ' '
-          .. vim_item.kind
+        vim_item.kind = require('lspkind').presets.default[vim_item.kind] .. ' ' .. vim_item.kind
 
         -- set a name for each source
         vim_item.menu = ({
@@ -92,6 +86,7 @@ local function config()
           cmp_tabnine = '[TN]',
           treesitter = '[TS]',
           snippy = '[Snippy]',
+          luasnip = '[LSnip]',
           path = '[Path]',
           emoji = '[Emoji]',
           tags = '[Tag]',
@@ -102,7 +97,6 @@ local function config()
       end,
     },
   })
-              src.db,
   local augroup = vim.api.nvim_create_augroup('x_cmp', { clear = true })
   vim.api.nvim_create_autocmd('FileType', {
     group = augroup,
@@ -142,48 +136,7 @@ local function config()
   })
 end
 
-local function setup()
-  local c = vim.g.colors
-  u.highlights({
-    CmpItemAbbr = {
-      gui = 'none',
-      guibg = c.base03,
-      guifg = c.base0,
-    },
-    CmpItemKind = {
-      gui = 'italic',
-      guibg = c.base02,
-      guifg = c.base0,
-    },
-    CmpItemMenu = {
-      gui = 'none',
-      guibg = c.base02,
-      guifg = c.base0,
-    },
-    CmpItemAbbrMatch = {
-      gui = 'bold',
-      guibg = c.base03,
-      guifg = c.base0,
-    },
-    CmpItemAbbrMatchFuzzy = {
-      gui = 'italic',
-      guibg = c.base03,
-      guifg = c.base0,
-    },
-    CmpItemAbbrDeprecated = {
-      gui = 'none',
-      guibg = c.base01,
-      guifg = c.base0,
-    },
-
-    -- broken after introducing different highlight for different kind
-    CmpItemKindDefault = {
-      gui = 'italic',
-      guibg = c.base02,
-      guifg = c.base0,
-    },
-  })
-end
+local function setup() end
 
 return {
   config = config,
