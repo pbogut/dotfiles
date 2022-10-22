@@ -1,6 +1,4 @@
 #!/bin/bash
-
-
 sleep=0
 while test $# -gt 0; do
   case "$1" in
@@ -16,12 +14,14 @@ while test $# -gt 0; do
   esac
 done
 
-
+i3lock-matrix () {
+  picom -b
+  matrixlock.py
+}
 
 try_to_run() {
-  type $1 > /dev/null 2>&1
-  if [[ $? == 0 ]]; then
-    $@
+  if type "$1" > /dev/null 2>&1; then
+    "$@"
     return 0
   fi
 
@@ -29,6 +29,7 @@ try_to_run() {
 }
 
 lock_screen() {
+  try_to_run i3lock-matrix ||
   try_to_run i3lock-fancy-dualmonitor ||
   try_to_run i3lock-fancy ||
   try_to_run gllock ||

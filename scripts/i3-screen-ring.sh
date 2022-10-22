@@ -53,6 +53,10 @@ action=""
 dest=""
 while test $# -gt 0; do
   case "$1" in
+    --move-win|-mw)
+      action="move-win"
+      shift
+      ;;
     --next|-n)
       dest=$(get_next)
       shift
@@ -81,6 +85,12 @@ while test $# -gt 0; do
 done
 
 case "$action" in
+  "move-win")
+    focus_id=$(xdotool getwindowfocus)
+    ~/.scripts/i3-create-empty-workspace.py --move
+    i3-msg move workspace to output "$dest"
+    xdotool windowfocus --sync "$focus_id"
+    ;;
   "move")
     focus_id=$(xdotool getwindowfocus)
     i3-msg move workspace to output $dest
