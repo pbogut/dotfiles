@@ -11,7 +11,7 @@ usage() {
   echo "Ussage: ${0##*/} <package> [OPTIONS]"
   echo ""
   echo "Options:"
-  echo "  -f, --rebuild    force rebuild (even if no update found)"
+  echo "  -r, --rebuild    force rebuild (even if no update found)"
   echo "  -l, --list       list all packages"
   echo "  -h, --help       display this help and exit"
 }
