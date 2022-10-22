@@ -130,6 +130,9 @@ git_clone_to_projects_bare() {
     git clone "$repo" "$dest.git" --bare
     cd "$dest.git" || exit
     git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+    # add group write, handy when using docker
+    setfacl -d -m "group:$(id -gn):rwx" .
+    chmod g+w . -R
   else
     echo "You must specify a repository to clone."
     echo
@@ -157,7 +160,11 @@ git_clone_to_projects() {
     dest="$2"
   fi
   if [[ -n $repo ]]; then
-    git clone $repo $dest
+    git clone "$repo" "$dest"
+    cd "$dest" || exit
+    # add group write, handy when using docker
+    setfacl -d -m "group:$(id -gn):rwx" .
+    chmod g+w . -R
   else
     echo "You must specify a repository to clone."
     echo

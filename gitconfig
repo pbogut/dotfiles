@@ -10,6 +10,7 @@
 [core]
     autocrlf = input
     excludesFile = ~/.gitignore
+    pager = diff-so-fancy | less --tabs=4 -RFX
 [push]
     default = simple
 [pull]
@@ -18,14 +19,17 @@
     user = pbogut
 [diff]
 [color]
-    ui = auto
+    ui = true
 [alias]
     #my aliases
     ai = add -i
     ap = !git add -N $1 && git add -p $1
     an = add -N
+    wt = worktree
     rmc = rm --cached
     cob = checkout -b
+    lm = "!. ~/.githelpers && list_merged_branches"
+    rm-merged-branches = "!. ~/.githelpers && rm_merged_branches"
     br = "!. ~/.githelpers && git_clone_to_projects_bare"
     cl = "!. ~/.githelpers && git_clone_to_projects"
     gh = "!. ~/.githelpers && git_clone_to_projects"
@@ -127,4 +131,21 @@
 [init]
     defaultBranch = master
 [safe]
-	directory = *
+    directory = *
+[commit]
+    verbose = true
+[interactive]
+    diffFilter = diff-so-fancy --patch
+[color "diff-highlight"]
+    oldNormal = red bold
+    oldHighlight = white bold red
+    newNormal = green bold
+    newHighlight = white bold green
+[color "diff"]
+    meta = 11
+    frag = magenta bold
+    func = 146 bold
+    commit = yellow bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
