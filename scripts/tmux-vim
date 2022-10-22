@@ -18,6 +18,9 @@ while test $# -gt 0; do
       no_tab=1
       shift
       ;;
+    --)
+      shift
+      ;;
     --*|-*)
       args["${#args[@]}"]="$1"
       has_args=1

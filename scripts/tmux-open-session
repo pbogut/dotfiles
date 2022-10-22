@@ -7,8 +7,6 @@
 cwd="${1:-$(pwd)}"
 name=$(readlink -f "$cwd" | sha1sum | sed "s/^\(.\{8\}\).*/\1/")
 
-cd "$cwd" || exit
-
 abs_path=$(git rev-parse --absolute-git-dir 2>/dev/null)
 top_path=$(git rev-parse --show-toplevel 2>/dev/null)
 is_bare=$(git rev-parse --is-bare-repository 2>/dev/null)
