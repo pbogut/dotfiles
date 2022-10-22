@@ -30,6 +30,26 @@ local function log(message)
   end
 end
 
+local last_enabled = false
+
+local function is_enabled()
+  local path = mp.get_property("path")
+  last_enabled = true
+  if path and path:match('http.?://.-invidious') or
+     path and path:match('http.?://.-youtube')
+  then
+    last_enabled = false
+  end
+
+  if path and not path:match('http://192.168') then
+    last_enabled = false
+  end
+
+  return last_enabled
+end
+
+last_enabled = is_enabled()
+
 local function trakt_cmd(opt)
   local args = {
     'python',
@@ -90,6 +110,9 @@ local function green(text)
 end
 
 local function trakt(action, title, progress)
+  if not is_enabled() then
+    return false
+  end
   if title == nil or progress == nil then
     return false
   end
@@ -108,7 +131,7 @@ local function trakt(action, title, progress)
     action = action,
   })
 
-  if result:match('^None') or result == "" then
+  if result:match('Response received: None') or result == "" then
     mp.osd_message(red('Trakt: ' .. action .. ' FAILED\n') .. title, 2)
     return false
   else
@@ -122,7 +145,7 @@ local last_progress = nil
 local stopped = false
 
 mp.register_event('shutdown', function()
-  if last_title then
+  if last_title and last_enabled then
     local success = trakt('stop', last_title, last_progress)
     local icon = ''
     local msg = ''
@@ -153,6 +176,8 @@ local function get_progress()
 end
 
 local function get_title()
+  -- log(mp.get_property('path'))
+  -- log(mp.get_property('path'):match('youtube'))
   return mp.get_property('media-title')
 end
 
