@@ -5,7 +5,6 @@ local c = vim.g.colors
 local s = {
   dapinfo = require('plugins.lualine.dapinfo'),
   filename = require('plugins.lualine.filename'),
-  diff = require('plugins.lualine.diff'),
   gps = require('plugins.lualine.gps'),
   dadbod = require('plugins.lualine.dadbod'),
   fileinfo = require('plugins.lualine.fileinfo'),
@@ -13,6 +12,9 @@ local s = {
   diagnostics = require('plugins.lualine.diagnostics'),
   actions = require('plugins.lualine.actions'),
   mode_fmt = require('plugins.lualine.mode_fmt'),
+  diff_change = require('plugins.lualine.diff').change,
+  diff_mode = require('plugins.lualine.diff').mode_green,
+  diff_mode_inactive = require('plugins.lualine.diff').mode,
 }
 
 local config = function()
@@ -42,7 +44,7 @@ local config = function()
     },
     sections = {
       lualine_a = { { 'mode', fmt = s.mode_fmt } },
-      lualine_b = { { s.diff, padding = 0 }, 'branch' },
+      lualine_b = { { s.diff_change, padding = 0 }, 'branch' },
       lualine_c = { s.dapinfo, s.filename },
       lualine_x = {},
       lualine_y = { s.fileinfo, s.location },
@@ -53,7 +55,7 @@ local config = function()
       lualine_b = {},
       lualine_c = { s.gps },
       lualine_x = { s.dadbod },
-      lualine_y = {},
+      lualine_y = { s.diff_mode },
       lualine_z = { s.filename },
     },
     inactive_winbar = {
@@ -61,7 +63,7 @@ local config = function()
       lualine_b = {},
       lualine_c = {},
       lualine_x = { s.dadbod },
-      lualine_y = { s.filename },
+      lualine_y = { s.diff_mode_inactive, s.filename },
       lualine_z = {},
     },
     tabline = {
