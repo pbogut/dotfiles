@@ -15,17 +15,16 @@ hostname=$(hostname)
 
 if [[ $hostname == "silverspoon" ]]; then
   echo "---" | tee -a /tmp/polybar1.log
-  MONITOR=eDP1     polybar silverspoon 2>&1 | tee -a /tmp/polybar1.log & disown
+  MONITOR=eDP1 polybar silverspoon 2>&1 | tee -a /tmp/polybar1.log & disown
 elif [[ $hostname = "redeye" ]]; then
   echo "---" | tee -a /tmp/polybar1.log /tmp/polybar2.log
-  MONITOR=HDMI-0   polybar primary     2>&1 | tee -a /tmp/polybar1.log & disown
-  # MONITOR=DVI-D-0  polybar secondary   2>&1 | tee -a /tmp/polybar2.log & disown
-  MONITOR=DP-2  polybar secondary   2>&1 | tee -a /tmp/polybar2.log & disown
-  MONITOR=DP-1  polybar secondary   2>&1 | tee -a /tmp/polybar2.log & disown
+  MONITOR=HDMI-0 polybar primary   2>&1 | tee -a /tmp/polybar1.log & disown
+  MONITOR=DP-4   polybar secondary 2>&1 | tee -a /tmp/polybar2.log & disown
+  MONITOR=DP-3   polybar secondary 2>&1 | tee -a /tmp/polybar3.log & disown
 else
   echo "---" | tee -a /tmp/polybar1.log
   primary=$(polybar -m | grep '(primary)' | awk '{gsub(/:$/, "", $1); print $1}')
-  MONITOR=$primary polybar primary     2>&1 | tee -a /tmp/polybar1.log & disown
+  MONITOR=$primary polybar primary 2>&1 | tee -a /tmp/polybar1.log & disown
 fi
 
 echo "Bars launched..."
