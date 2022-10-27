@@ -1,8 +1,13 @@
 local ls = require('luasnip')
 local sn = ls.sn
 local t = ls.t
+local f = ls.f
 
 local M = {}
+
+M.visual = f(function(_, snip)
+  return snip.env.TM_SELECTED_TEXT or {}
+end)
 
 function M.get_relative_line(num)
   num = num or 0

@@ -6,6 +6,14 @@ local s = ls.s
 local d = ls.d
 local sn = ls.sn
 
+local function get_variables(default)
+  local variables = require('plugins.luasnip.treesitter').php.get_variables()
+  if default then
+    table.insert(variables, 1, ls.i(nil, default))
+  end
+  return ls.sn(nil, { ls.c(1, variables) })
+end
+
 local function get_next_variable(_, _)
   local line = h.get_relative_line(1)
   if line:match('.-(%$[%w%_]+).*') then
@@ -16,6 +24,14 @@ local function get_next_variable(_, _)
   end
 end
 
+local function get_classes(default)
+  local classes = require('plugins.luasnip.treesitter').php.get_classes()
+  if default then
+    table.insert(classes, 1, ls.i(nil, default))
+  end
+  return classes
+end
+
 local function maybe_get_objmgr_class(_, _)
   local line = h.get_relative_line(1)
   local pattern = [[.*%-%>get%(['"](.+)['"]%).*]]
@@ -23,7 +39,7 @@ local function maybe_get_objmgr_class(_, _)
     local class_name = line:gsub([[.*%-%>get%(['"](.+)['"]%).*]], '%1')
     return sn(nil, { i(1, '\\' .. class_name) })
   else
-    return sn(nil, { ls.c(1, require('plugins.luasnip.treesitter').php.get_classes()) })
+    return sn(nil, { ls.c(1, get_classes('Type')) })
   end
 end
 
@@ -35,5 +51,24 @@ ls.add_snippets('php', {
       variable = d(2, get_next_variable),
       done = i(0),
     })
+  ),
+  s(
+    'each',
+    fmt(
+      [[
+        foreach ({collection} as {key} => {value}) {{
+        	{visual}{done}
+        }}
+      ]],
+      {
+        collection = ls.d(1, function()
+          return get_variables('$collection')
+        end),
+        key = i(2, '$key'),
+        value = i(3, '$value'),
+        visual = h.visual,
+        done = i(0),
+      }
+    )
   ),
 }, { default_priority = 2000 })

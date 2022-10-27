@@ -36,7 +36,7 @@ vim.keymap.set({ 'i', 's' }, '<c-k>', function()
   end
 end)
 
-vim.keymap.set({ 'i' }, '<c-l>', function()
+vim.keymap.set({ 'i', 's' }, '<c-l>', function()
   if ls.choice_active() then
     if #ls.get_current_choices() > 3 then
       select_choice()

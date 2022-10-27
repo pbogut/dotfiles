@@ -14,14 +14,18 @@ local snips = {
       return ph.module_name()
     end),
   }),
-  mod =
-  s('mod', {
+  mod = s('mod', {
     ls.f(function(_, _)
       return ph.module_name():lower()
     end),
   }),
 }
 
+ls.add_snippets('phtml', {
+  snips.Mod,
+  snips.mod,
+  ls.parser.parse_snippet('=ne', [[<?= /* @noEscape */ $TM_SELECTED_TEXT$0 ?>]]),
+}, { default_priority = 2000 })
 ls.add_snippets('php', {
   snips.Mod,
   snips.mod,
