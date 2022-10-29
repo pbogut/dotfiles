@@ -11,29 +11,31 @@ last_state="100"
 state="100"
 
 name=$1
-id=$(pulsemixer --list-sinks | grep "$name" | awk '{print $3}' | sed 's/,//')
 
-if [[ -z $name ]]; then
-  id=""
-else
-  name="Name: $name"
-  id="--id $id"
-fi
+fifo="$TMPDIR/_pavol_$(md5sum <<< "$name" | awk '{print $1}')"
+mkfifo "$fifo" > /dev/null 2>&1
+(tail -f "$fifo" | xob -s "$(hostname)") &
+
+id=$(pulsemixer --list-sinks | grep "$name" | awk '{print $3}' | sed 's/,//')
 
 update_state() {
   id=$(pulsemixer --list-sinks | grep "$name" | awk '{print $3}' | sed 's/,//')
-  state=$(pulsemixer --get-volume --id $id | awk '{ print $1 }' | sed 's,\(.*\),\1,')
+  state=$(pulsemixer --get-volume --id "$id" | awk '{ print $1 }' | sed 's,\(.*\),\1,')
 }
 
 show_state() {
-  echo ${state}%
+  echo "${state}%"
+  echo "${state}" >> "$fifo"
 }
 
 update_state
 show_state
 
 #watch changes in real time
-pactl subscribe | grep --line-buffered "sink" | while read x; do
+pactl subscribe | grep --line-buffered "sink" | while read -r _; do
+  last_state="$state"
   update_state
-  show_state
+  if [[ $last_state -ne $state ]]; then
+    show_state
+  fi
 done

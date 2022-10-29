@@ -39,6 +39,8 @@ read -d '' files <<"EOF"
     offlineimap-hooks
     offlineimap.py
     profile
+    profile.redeye
+    profile.silverspoon
     screenrc
     scripts
     terminfo
@@ -100,6 +102,7 @@ read -d '' files <<"EOF"
     config/roxterm.sourceforge.net
     config/Franz/Plugins/todoist
     config/MangoHud
+    config/xob
     gtk-2.0
     i3blocks.conf
     icons/polar

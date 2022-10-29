@@ -20,6 +20,7 @@ paru -S \
     base-devel \
     cmake \
     atool \
+    xob \
     enca \
     zenity \
     rustup \
@@ -35,6 +36,7 @@ paru -S \
     xcwd-git \
     copyq \
     paru \
+    polybar \
     inetutils \
     picom \
     dmenu \
