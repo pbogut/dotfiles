@@ -18,58 +18,94 @@ local function highlights()
 
     IndentBlanklineChar = { gui = 'none', guifg = c.base02 },
 
-    TSPunctBracket = { guifg = c.red },
-    TSPunctDelimiter = { guifg = c.alt_base0 },
-    TSPunctSpecial = { guifg = c.alt_base0 },
-    TSTagDelimiter = { guifg = c.alt_base0 },
+    ['@punctuation.bracket'] = { guifg = c.red },
+    ['@punctuation.delimiter'] = { guifg = c.alt_base0 },
+    ['@punctuation.special'] = { guifg = c.alt_base0 },
+    ['@tag.delimiter'] = { guifg = c.alt_base0 },
 
-    TSConstBuiltin = { guifg = c.yellow }, -- true/false/null
-    TSFuncBuiltin = { guifg = c.base1, gui = 'none' },
-    TSVariableBuiltin = { guifg = c.magenta }, -- $this/parent/static
-    TSConstructor = { guifg = c.base1, gui = 'italic' }, -- class name, namespace, const name
+    ["@constant.builtin"] = { guifg = c.yellow }, -- true/false/null
+    ["@function.builtin"] = { guifg = c.base1, gui = 'none' },
+    ["@variable.builtin"] = { guifg = c.magenta }, -- $this/parent/static
+    ["@constructor"] = { guifg = c.base1, gui = 'italic' }, -- class name, namespace, const name
 
-    TSVariable = { guifg = c.blue }, -- $variable, function $param
-    TSConstant = { guifg = c.violet },
-    -- TSConstMacro         = { guifg = c.orange },
-    -- TSString             = { guifg = c.orange },
-    -- TSStringRegex        = { guifg = c.orange },
-    -- TSLiteral            = { guifg = c.orange },
-    -- TSStringEscape       = { guifg = c.orange },
-    -- TSCharacter          = { guifg = c.orange },
-    TSNumber = { guifg = c.yellow },
-    TSFloat = { guifg = c.yellow },
-    TSBoolean = { guifg = c.yellow },
+    ["@variable"] = { guifg = c.blue }, -- $variable, function $param
+    ["@constant"] = { guifg = c.violet },
 
-    TSFunction = { guifg = c.base1 },
-    TSMethod = { guifg = c.base1 },
-    -- TSFuncMacro = { guifg = c.red },
-    -- TSParameter = { guifg = c.red },
-    -- TSField = { guifg = c.red },
-    TSProperty = { guifg = c.blue },
-    -- TSParameterReference = { guifg = c.red },
+    ["@number"] = { guifg = c.yellow },
+    ["@float"] = { guifg = c.yellow },
+    ["@boolean"] = { guifg = c.yellow },
 
-    -- TSAnnotation = { guifg = c.red },
-    -- TSAttribute = { guifg = c.red },
-    -- TSNamespace = { guifg = c.red },
-    -- TSInclude = { guifg = c.red },
+    ["@function"] = { guifg = c.base1 },
+    ["@method"] = { guifg = c.base1 },
 
-    -- TSConditional = { guifg = c.red },
-    -- TSRepeat = { guifg = c.red },
-    -- TSLabel = { guifg = c.red },
-    -- TSTag = { guifg = c.red },
-    -- TSOperator = { guifg = c.red },
-    -- TSKeywordOperator = { guifg = c.red },
+    ["@property"] = { guifg = c.blue },
 
-    TSKeyword = { guifg = c.alt_green }, -- public, function, class, extends, $, as
-    TSKeywordFunction = { guifg = c.orange },
+    ["@keyword"] = { guifg = c.alt_green }, -- public, function, class, extends, $, as
+    ["@keyword.function"] = { guifg = c.orange },
 
-    -- MatchParen ctermbg=blue guibg=lightblue cterm=italic gui=italic
-    MatchParen = { guifg = c.orange, guibg = c.base02 },
-    NormalFloat = { guibg = c.ad_dark1 },
+    -- TreeSitter
+    -- ["@constant.macro"] = { guifg = c.orange },
+    -- ["@string"] = { guifg = c.orange },
+    -- ["@string.regex"] = { guifg = c.orange },
+    -- ["@string.escape"] = { guifg = c.orange },
+    -- ["@string.special"] = { guifg = c.orange },
+    -- ["@character"] = { guifg = c.orange },
+    -- ["@character.special"] = { guifg = c.orange },
+    -- ["@method.call"] = { guifg = c.red },
+    -- ["@function.macro"] = { guifg = c.red },
+    -- ["@function.call"] = { guifg = c.red },
+    -- ["@parameter"] = { guifg = c.red },
+    -- ["@field"] = { guifg = c.red },
+    -- ["@parameter.reference"] = { guifg = c.red },
+    -- ["@annotation"] = { guifg = c.red },
+    -- ["@attribute"] = { guifg = c.red },
+    -- ["@namespace"] = { guifg = c.red },
+    -- ["@include"] = { guifg = c.red },
+    -- ["@conditional"] = { guifg = c.red },
+    -- ["@repeat"] = { guifg = c.red },
+    -- ["@label"] = { guifg = c.red },
+    -- ["@tag"] = { guifg = c.red },
+    -- ["@tag.attribute"] = { guifg = c.red },
+    -- ["@operator"] = { guifg = c.red },
+    -- ["@keyword.operator"] = { guifg = c.red },
+    -- ["@keyword.return"] = { guifg = c.red },
+    -- ["@comment"] = {},
+    -- ["@debug"] = {},
+    -- ["@define"] = {},
+    -- ["@error"] = {},
+    -- ["@exception"] = {},
+    -- ["@include"] = {},
+    -- ["@none"] = {},
+    -- ["@preproc"] = {},
+    -- ["@symbol"] = {},
+    -- ["@text"] = {},
+    -- ["@text.strong"] = {},
+    -- ["@text.emphasis"] = {},
+    -- ["@text.underline"] = {},
+    -- ["@text.strike"] = {},
+    -- ["@text.title"] = {},
+    -- ["@text.literal"] = {},
+    -- ["@text.uri"] = {},
+    -- ["@text.math"] = {},
+    -- ["@text.reference"] = {},
+    -- ["@text.environment"] = {},
+    -- ["@text.environment.name"] = {},
+    -- ["@text.note"] = {},
+    -- ["@text.warning"] = {},
+    -- ["@text.danger"] = {},
+    -- ["@todo"] = {},
+    -- ["@type"] = {},
+    -- ["@type.builtin"] = {},
+    -- ["@type.qualifier"] = {},
+    -- ["@type.definition"] = {},
 
     -- Context
     TSContext = { guibg = c.base02 },
     TreesitterContext = { link = 'TSContext' },
+
+    -- MatchParen ctermbg=blue guibg=lightblue cterm=italic gui=italic
+    MatchParen = { guifg = c.orange, guibg = c.base02 },
+    NormalFloat = { guibg = c.ad_dark1 },
 
     -- rrethy/vim-illuminate
     IlluminatedWordText = { gui = 'none', guibg = c.base02 },
@@ -96,16 +132,6 @@ local function highlights()
 end
 
 local group = vim.api.nvim_create_augroup('x_highlights', { clear = true })
-
---[[ vim.api.nvim_create_autocmd('BufWinEnter', { ]]
---[[   group = group, ]]
---[[   callback = function() ]]
---[[     vim.fn.matchadd('MyTodo', 'TODO') ]]
---[[     vim.fn.matchadd('MyFixme', 'FIXME') ]]
---[[     vim.fn.matchadd('MyFixme', 'FIX') ]]
---[[     vim.fn.matchadd('MyDebug', 'DEBUG') ]]
---[[   end, ]]
---[[ TODO 'TODO' ]]
 
 vim.api.nvim_create_autocmd('VimEnter', {
   group = group,
