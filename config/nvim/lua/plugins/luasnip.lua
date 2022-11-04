@@ -70,6 +70,7 @@ re_require('plugins.luasnip.common')
 re_require('plugins.luasnip.emojis')
 re_require('plugins.luasnip.phtml')
 re_require('plugins.luasnip.php')
+re_require('plugins.luasnip.js')
 re_require('plugins.luasnip.lua')
 re_require('plugins.luasnip.magento2')
 

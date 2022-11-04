@@ -1,7 +1,10 @@
 local h = require('plugins.luasnip.helper')
 local ls = require('luasnip')
 local fmt = require('luasnip.extras.fmt').fmt
+local ph_php = require('projector.templates.placeholders.php')
 local i = ls.i
+local t = ls.t
+local f = ls.f
 local s = ls.s
 local d = ls.d
 local sn = ls.sn
@@ -44,6 +47,11 @@ local function maybe_get_objmgr_class(_, _)
 end
 
 ls.add_snippets('php', {
+  s('ns', {
+    t('namespace '),
+    f(ph_php.namespace, {}),
+    t(';'),
+  }),
   s(
     'var',
     fmt('/** @var {class} {variable} */{done}', {

@@ -2,8 +2,17 @@ local ls = require('luasnip')
 local sn = ls.sn
 local t = ls.t
 local f = ls.f
+local d = ls.d
+local i = ls.i
 
 local M = {}
+
+M.df = function(n, fn)
+  local fun = function()
+    return sn(nil, { i(1, fn()) })
+  end
+  return d(n, fun)
+end
 
 M.visual = f(function(_, snip)
   return snip.env.TM_SELECTED_TEXT or {}
