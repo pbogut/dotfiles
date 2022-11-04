@@ -23,25 +23,30 @@ local function highlights()
     ['@punctuation.special'] = { guifg = c.alt_base0 },
     ['@tag.delimiter'] = { guifg = c.alt_base0 },
 
-    ["@constant.builtin"] = { guifg = c.yellow }, -- true/false/null
-    ["@function.builtin"] = { guifg = c.base1, gui = 'none' },
-    ["@variable.builtin"] = { guifg = c.magenta }, -- $this/parent/static
-    ["@constructor"] = { guifg = c.base1, gui = 'italic' }, -- class name, namespace, const name
+    ['@constant.builtin'] = { guifg = c.yellow }, -- true/false/null
+    ['@function.builtin'] = { guifg = c.base1, gui = 'none' },
+    ['@variable.builtin'] = { guifg = c.magenta }, -- $this/parent/static
+    ['@constructor'] = { guifg = c.base1, gui = 'italic' },
+    ['@namespace'] = { gui = 'italic' },
 
-    ["@variable"] = { guifg = c.blue }, -- $variable, function $param
-    ["@constant"] = { guifg = c.violet },
+    ['@variable'] = { guifg = c.blue }, -- $variable, function $param
+    ['@constant'] = { guifg = c.violet },
 
-    ["@number"] = { guifg = c.yellow },
-    ["@float"] = { guifg = c.yellow },
-    ["@boolean"] = { guifg = c.yellow },
+    ['@number'] = { guifg = c.yellow },
+    ['@float'] = { guifg = c.yellow },
+    ['@boolean'] = { guifg = c.yellow },
 
-    ["@function"] = { guifg = c.base1 },
-    ["@method"] = { guifg = c.base1 },
+    ['@function'] = { guifg = c.base1 },
+    ['@method'] = { guifg = c.base1 },
 
-    ["@property"] = { guifg = c.blue },
+    ['@property'] = { guifg = c.blue },
 
-    ["@keyword"] = { guifg = c.alt_green }, -- public, function, class, extends, $, as
-    ["@keyword.function"] = { guifg = c.orange },
+    ['@keyword'] = { guifg = c.alt_green }, -- public, function, class, extends, $, as
+    ['@keyword.function'] = { guifg = c.orange },
+    ['@symbol'] = { guifg = c.violet, gui = 'italic' },
+
+    ['@todo'] = { link = 'MyTodo' },
+    ['@debug'] = { link = 'MyDebug' },
 
     -- TreeSitter
     -- ["@constant.macro"] = { guifg = c.orange },
@@ -59,7 +64,6 @@ local function highlights()
     -- ["@parameter.reference"] = { guifg = c.red },
     -- ["@annotation"] = { guifg = c.red },
     -- ["@attribute"] = { guifg = c.red },
-    -- ["@namespace"] = { guifg = c.red },
     -- ["@include"] = { guifg = c.red },
     -- ["@conditional"] = { guifg = c.red },
     -- ["@repeat"] = { guifg = c.red },
@@ -70,7 +74,6 @@ local function highlights()
     -- ["@keyword.operator"] = { guifg = c.red },
     -- ["@keyword.return"] = { guifg = c.red },
     -- ["@comment"] = {},
-    -- ["@debug"] = {},
     -- ["@define"] = {},
     -- ["@error"] = {},
     -- ["@exception"] = {},
@@ -93,8 +96,8 @@ local function highlights()
     -- ["@text.note"] = {},
     -- ["@text.warning"] = {},
     -- ["@text.danger"] = {},
-    -- ["@todo"] = {},
-    -- ["@type"] = {},
+    -- ['@type'] = {},
+    ['@typeme'] = { guifg = c.red },
     -- ["@type.builtin"] = {},
     -- ["@type.qualifier"] = {},
     -- ["@type.definition"] = {},
