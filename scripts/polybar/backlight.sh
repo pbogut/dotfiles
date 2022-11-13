@@ -16,6 +16,11 @@ step=$(($max_brightness / 20))
 state=$(cat /sys/class/backlight/intel_backlight/brightness)
 last_state=$state
 
+fifo="$TMPDIR/_polybar_backlight"
+touch "$fifo" > /dev/null 2>&1
+(tail -f "$fifo" 2>/dev/null | xob -s "$(hostname)") &
+(tail -f "$fifo" 2>/dev/null | osd_cat -p top -i 1100 -o 30 -l 1 -d 1 -f "-misc-dejavu sans-*-*-*-*-*-*-*-*-*-*-*-*" -c "#285577" -O 2) &
+
 light_up() {
   state=$(($state + $step))
   echo $state | sudo tee /sys/class/backlight/intel_backlight/brightness
@@ -48,7 +53,8 @@ update_state() {
 }
 
 show_state() {
-  echo $(($state * 100 / $max_brightness))%
+  echo "$((state * 100 / max_brightness))%"
+  echo "$((state * 100 / max_brightness))" >> "$fifo"
 }
 
 trap "light_up"   SIGRTMIN+1
@@ -60,8 +66,12 @@ show_state
 
 while true; do
   if [[ $cycle -ge $((refresh / tick)) ]]; then
+    last_state="$state"
     update_state
-    show_state
+    if [[ $last_state -ne $state ]]; then
+      show_state
+  # truncate --size=0 "$fifo"
+    fi
     cycle=0
   fi
   cycle=$((cycle + 1))

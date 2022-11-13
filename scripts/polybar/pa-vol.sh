@@ -13,12 +13,14 @@ state="100"
 name=$1
 
 fifo="$TMPDIR/_pavol_$(md5sum <<< "$name" | awk '{print $1}')"
-mkfifo "$fifo" > /dev/null 2>&1
-(tail -f "$fifo" | xob -s "$(hostname)") &
+touch "$fifo" > /dev/null 2>&1
+(tail -f "$fifo" 2>/dev/null | xob -s "$(hostname)") &
+(tail -f "$fifo" 2>/dev/null | osd_cat -p top -i 1100 -o 30 -l 1 -d 1 -f "-misc-dejavu sans-*-*-*-*-*-*-*-*-*-*-*-*" -c "#285577" -O 2) &
 
 id=$(pulsemixer --list-sinks | grep "$name" | awk '{print $3}' | sed 's/,//')
 
 update_state() {
+  truncate --size=0 "$fifo"
   id=$(pulsemixer --list-sinks | grep "$name" | awk '{print $3}' | sed 's/,//')
   state=$(pulsemixer --get-volume --id "$id" | awk '{ print $1 }' | sed 's,\(.*\),\1,')
 }
