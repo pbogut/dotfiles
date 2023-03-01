@@ -99,7 +99,11 @@ run() {
     echo "Running: $@"
     echo "---"
   fi
-  eval "$@"
+
+  if ! eval "$@"; then
+  DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-"unix:path=/run/user/$(id -u)/bus"} \
+    dunstify -i error "Network sync error while running: $*"
+  fi
 }
 
 print_status() {
@@ -148,7 +152,7 @@ fi
 # sync calendars
 if [[ $action == "calendar" ]] || [[ $action == "all" ]]; then
   if [[ $quiet == "yes" ]]; then
-    run "$trickle vdirsyncer sync 2>&1 | grep -v '^Syncing '"
+    run "$trickle vdirsyncer sync > /dev/null 2>&1"
   else
     run "$trickle vdirsyncer sync 2>&1"
   fi
