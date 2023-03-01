@@ -5,10 +5,41 @@
 # date:   09/06/2017
 #=================================================
 
-find -L ~/Projects -maxdepth 5 -mindepth 3 -printf "%T+\t%p\n" -type d |
-    grep '\.git$\|CVS$\|\.svn$\|docker-compose.yml$\|composer.lock$' |
-    sort -r |
-    sed 's,.*\t'"$HOME"'/Projects/,,g' |
-    sed 's,\(.*\)/\(\.git\|CVS\|\.svn\|docker-compose.yml\|composer.lock\)$,\1,' |
-    awk '!x[$0]++'
+usage() {
+    echo "Ussage: ${0##*/} [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  -h, --help     display this help and exit"
+}
 
+full_path=0
+while test $# -gt 0; do
+    case "$1" in
+        --full-path|-fp)
+            full_path=1
+            shift
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+find -L ~/Projects -maxdepth 5 -mindepth 3 -printf "%T+\t%p\n" -type d |
+    grep '/\.git$\|CVS$\|\.svn$\|docker-compose.yml$\|composer.lock$' |
+    sort -r |
+    sed 's,.*\t,,g' | (
+        if [[ $full_path -eq 0 ]]; then
+            sed 's,^'"$HOME"'/Projects/,,g' < /dev/stdin
+        else
+            cat /dev/stdin
+        fi
+    ) |
+    sed 's,\(.*\)/\(\.git\|CVS\|\.svn\|docker-compose.yml\|composer.lock\)$,\1,' |
+    sed 's,/\.git$,,' |
+    awk '!x[$0]++'
