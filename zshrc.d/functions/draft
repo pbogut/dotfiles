@@ -6,7 +6,10 @@
 #=================================================
 draft() {
     ext=${1:-md}
-    cd ~/Drafts
+    mkdir -p ~/Drafts
+    cd ~/Drafts || exit
+    mkdir -p archive
+    find ./ -maxdepth 1 -type f -mtime +90 -exec mv {} archive/ \;
     rand=$(head -n1 /dev/urandom | sha256sum | sed 's,^\(.\{8\}\).*,\1,g')
     file="$(date +'%Y-%m-%d_%H-%M-%S')_$rand.$ext"
     nvim $file
