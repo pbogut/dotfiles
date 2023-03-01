@@ -28,7 +28,7 @@ message_id = mail.header['Message-ID'].to_s
 encoded_id = Base64.encode64(message_id).chop.gsub('=', '')
 tracking_base_url = MyConfig.get("email/open_tracking/api_url")
 tracking_url = "#{tracking_base_url}/image/#{encoded_id}.gif"
-tracking_pixel = "<img alt=\"Open Tracking\" style=\"border: 0px; width: 0px; max-width: 1px;\" src=\"#{tracking_url}\" />"
+tracking_pixel = "<img alt=\"Open pixel\" style=\"border: 0px; width: 0px; max-width: 1px;\" src=\"#{tracking_url}\" />"
 
 mail.parts.each do |part|
   if part.content_type =~ %r{^multipart/alternative}
