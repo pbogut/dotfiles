@@ -9,16 +9,63 @@ local has_lsp_signature, lsp_signature = pcall(require, 'lsp_signature')
 local cmd = vim.cmd
 local g = vim.g
 local c = g.colors
-local no_lsp_bind = '<cmd>lua print("No LSP attached")<cr>'
 
-local signature_action = crequire('lsp_signature', {
-  done = function()
-    return '<cmd>lua require"lsp_signature".toggle_float_win()<cr>'
-  end,
-  fail = function()
-    return '<cmd>lua vim.lsp.buf.signature_help()<cr>'
-  end,
-})
+local b = {}
+
+vim.diagnostic.config({ severity_sort = true })
+
+local servers = {
+  { name = 'ccls' },
+  { name = 'lemminx' },
+  { name = 'vimls' },
+  { name = 'vuels' },
+  { name = 'bashls' },
+  { name = 'gopls' },
+  --[[ { name = 'pyright' }, ]]
+  { name = 'jedi_language_server' },
+  --[[ { name = 'pylsp' }, ]]
+  { name = 'dockerls' },
+  { name = 'solargraph' },
+  { name = 'rust_analyzer' },
+  --[[ { name = 'denols' }, ]]
+  { name = 'tsserver' },
+  { name = 'emmet_ls', snippet_support = true },
+  { name = 'tailwindcss', snippet_support = true },
+  { name = 'lua_ls', snippet_support = true, format = false },
+  { name = 'intelephense', snippet_support = true },
+  { name = 'jsonls', snippet_support = true },
+  { name = 'html', snippet_support = true, rename = false },
+  { name = 'cssls', snippet_support = true },
+  { name = 'elixirls', snippet_support = true },
+}
+
+local bindings = function()
+  return {
+    { 'n', ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>', b.no_lsp_bind },
+    { 'n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>', b.no_lsp_bind },
+    { 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', false },
+    { 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', false },
+    { 'n', '<C-k>', b.signature_action, b.no_lsp_bind },
+    { 'i', '<C-k>', b.signature_action, b.no_lsp_bind },
+
+    { 'n', 'gd', b.maybe_telescope('definition'), false },
+    { 'n', '<space>ld', b.maybe_telescope('definition'), b.no_lsp_bind },
+    { 'n', '<space>lD', '<cmd>lua vim.lsp.buf.declaration()<cr>', b.no_lsp_bind },
+    { 'n', '<space>li', b.maybe_telescope('implementation'), b.no_lsp_bind },
+    { 'n', '<space>lt', b.maybe_telescope('type_definition'), b.no_lsp_bind },
+    { 'n', '<space>lr', b.maybe_telescope('references'), b.no_lsp_bind },
+    { 'n', '<space>ls', b.maybe_telescope('document_symbol'), b.no_lsp_bind },
+    { 'n', '<space>lS', b.maybe_telescope('workspace_symbol'), b.no_lsp_bind },
+    { 'n', '<space>lc', vim.lsp.buf.code_action, b.no_lsp_bind },
+
+    { 'n', '<space>rn', b.lsp_rename, b.no_lsp_bind, { silent = false } },
+    { 'n', '<space>el', '<cmd>lua vim.diagnostic.open_float(0, {scope = "line"})<cr>', b.no_lsp_bind },
+    { 'n', '<space>ee', b.maybe_telescope('diagnostics'), b.no_lsp_bind },
+    { 'n', '<space>af', b.lsp_formatting, 'migg=G`i' },
+    { 'v', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', b.no_lsp_bind },
+    { 'x', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', b.no_lsp_bind },
+  }
+end
 
 local vanilla = {
   definition = 'lua vim.lsp.buf.definition()',
@@ -40,7 +87,48 @@ local telescope = {
   diagnostics = [[lua require('telescope.builtin').diagnostics({bufnr = 0})]],
 }
 
-local function maybe_telescope(name)
+local server_cfg = function(server_name, key, default)
+  for _, server in ipairs(servers) do
+    if server.name == server_name then
+      if server[key] ~= nil then
+        return server[key]
+      end
+      break
+    end
+  end
+
+  return default
+end
+
+b.no_lsp_bind = '<cmd>lua print("No LSP attached")<cr>'
+
+b.lsp_formatting = function(bufnr)
+  vim.lsp.buf.format({
+    filter = function(client)
+      return server_cfg(client.name, 'format', true)
+    end,
+    bufnr = bufnr,
+  })
+end
+
+b.lsp_rename = function()
+  vim.lsp.buf.rename(nil, {
+    filter = function(client)
+      return server_cfg(client.name, 'rename', true)
+    end,
+  })
+end
+
+b.signature_action = crequire('lsp_signature', {
+  done = function()
+    return '<cmd>lua require"lsp_signature".toggle_float_win()<cr>'
+  end,
+  fail = function()
+    return '<cmd>lua vim.lsp.buf.signature_help()<cr>'
+  end,
+})
+
+b.maybe_telescope = function(name)
   return function()
     if vim.fn.exists(':Telescope') then
       cmd(telescope[name])
@@ -50,69 +138,8 @@ local function maybe_telescope(name)
   end
 end
 
-local format = {
-  sumneko_lua = false,
-}
-local rename = {
-  html = false,
-}
-
-local lsp_rename = function()
-  vim.lsp.buf.rename(nil, {
-    filter = function(client)
-      if rename[client.name] ~= nil then
-        return rename[client.name]
-      end
-      return true
-    end,
-  })
-end
-
-local formatting = function()
-  cmd.normal()
-end
-
-local lsp_formatting = function(bufnr)
-  vim.lsp.buf.format({
-    filter = function(client)
-      if format[client.name] ~= nil then
-        return format[client.name]
-      end
-      return true
-    end,
-    bufnr = bufnr,
-  })
-end
-
-local bindings = {
-  { 'n', ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>', no_lsp_bind },
-  { 'n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>', no_lsp_bind },
-  { 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', false },
-  { 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', false },
-  { 'n', '<C-k>', signature_action, no_lsp_bind },
-  { 'i', '<C-k>', signature_action, no_lsp_bind },
-
-  { 'n', 'gd', maybe_telescope('definition'), false },
-  { 'n', '<space>ld', maybe_telescope('definition'), no_lsp_bind },
-  { 'n', '<space>lD', '<cmd>lua vim.lsp.buf.declaration()<cr>', no_lsp_bind },
-  { 'n', '<space>li', maybe_telescope('implementation'), no_lsp_bind },
-  { 'n', '<space>lt', maybe_telescope('type_definition'), no_lsp_bind },
-  { 'n', '<space>lr', maybe_telescope('references'), no_lsp_bind },
-  { 'n', '<space>sd', maybe_telescope('document_symbol'), no_lsp_bind },
-  { 'n', '<space>sD', maybe_telescope('workspace_symbol'), no_lsp_bind },
-  { 'n', '<space>ca', vim.lsp.buf.code_action, no_lsp_bind },
-  { 'v', '<space>ca', vim.lsp.buf.code_action, no_lsp_bind },
-
-  { 'n', '<space>rn', lsp_rename, no_lsp_bind, { silent = false } },
-  { 'n', '<space>el', '<cmd>lua vim.diagnostic.open_float(0, {scope = "line"})<cr>', no_lsp_bind },
-  { 'n', '<space>ee', maybe_telescope('diagnostics'), no_lsp_bind },
-  { 'n', '<space>af', lsp_formatting, 'migg=G`i' },
-  { 'v', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', no_lsp_bind },
-  { 'x', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', no_lsp_bind },
-}
-
 -- prevent stupid errors when using mapping with no lsp attached
-for _, def in pairs(bindings) do
+for _, def in pairs(bindings()) do
   if def[4] then
     k.set(def[1], def[2], def[4])
   end
@@ -137,7 +164,7 @@ local on_attach = function(client, bufnr)
   end
 
   -- Mappings.
-  for _, def in pairs(bindings) do
+  for _, def in pairs(bindings()) do
     local opts = def[5] or {}
     opts.buffer = bufnr
     k.set(def[1], def[2], def[3], opts)
@@ -187,27 +214,19 @@ u.signs({
   DiagnosticSignHint = { text = g.icon.hint, texthl = 'DiagnosticSignHint' },
 })
 
-lspconfig.ccls.setup({ on_attach = on_attach })
-lspconfig.vimls.setup({ on_attach = on_attach })
-lspconfig.vuels.setup({ on_attach = on_attach })
-lspconfig.bashls.setup({ on_attach = on_attach })
-lspconfig.gopls.setup({ on_attach = on_attach })
-lspconfig.cssls.setup({ on_attach = on_attach, capabilities = capabilities })
--- lspconfig.pyright.setup {on_attach = on_attach}
-lspconfig.jedi_language_server.setup({ on_attach = on_attach })
-lspconfig.dockerls.setup({ on_attach = on_attach })
-lspconfig.solargraph.setup({ on_attach = on_attach })
-lspconfig.rust_analyzer.setup({ on_attach = on_attach })
--- require 'plugins.lsp.denols'.setup {on_attach = on_attach}
-require('plugins.lsp.tsserver').setup({ on_attach = on_attach })
-require('plugins.lsp.emmet_ls').setup({ on_attach = on_attach, capabilities = capabilities })
-require('plugins.lsp.tailwindcss').setup({ on_attach = on_attach, capabilities = capabilities })
-require('plugins.lsp.sumneko_lua').setup({ on_attach = on_attach, capabilities = capabilities })
-require('plugins.lsp.intelephense').setup({ on_attach = on_attach, capabilities = capabilities })
-require('plugins.lsp.jsonls').setup({ on_attach = on_attach, capabilities = capabilities })
-require('plugins.lsp.html').setup({ on_attach = on_attach, capabilities = capabilities })
-require('plugins.lsp.elixirls').setup({ on_attach = on_attach, capabilities = capabilities })
--- require 'plugins.lsp.prosemd'.setup {on_attach = on_attach}
+for _, server in ipairs(servers) do
+  local server_config = lspconfig[server.name]
+  local opts = { on_attach = on_attach }
+  if server.snippet_support then
+    opts.capabilities = capabilities
+  end
+  local has_config, my_config = pcall(require, 'plugins.lsp.' .. server.name)
+  if has_config then
+    my_config.setup(opts)
+  else
+    server_config.setup(opts)
+  end
+end
 
 local function get_active_client_map()
   local client_list = {}
@@ -258,7 +277,7 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = '*.rs',
   callback = function()
     if #vim.lsp.get_active_clients() > 0 then
-      lsp_formatting(0)
+      b.lsp_formatting(0)
     end
   end,
 })
@@ -279,7 +298,7 @@ vim.api.nvim_create_autocmd('BufWritePre', {
 
       if file:sub(1, #cwd) == cwd and for_filetype then
         if #vim.lsp.get_active_clients() > 0 then
-          lsp_formatting(0)
+          b.lsp_formatting(0)
         else
           vim.cmd('normal! migg=G`i')
         end

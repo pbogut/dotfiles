@@ -5,6 +5,7 @@
 # date:   02/04/2020
 #=================================================
 
+gem install english
 gem install nokogiri
 gem install clipboard
 gem install mail

@@ -7,7 +7,6 @@ lsp_config.prosemd = { default_config = {} }
 
 function me.setup(opts)
   opts = vim.tbl_deep_extend('keep', opts, {
-    cmd = { 'prosemd-lsp', '--stdio' },
     filetypes = { 'markdown', 'mail' },
     root_dir = function(fname)
       return lsp_util.find_git_ancestor(fname) or vim.fn.getcwd()

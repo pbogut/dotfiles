@@ -3,9 +3,7 @@ local me = {}
 
 function me.setup(opts)
   opts = vim.tbl_deep_extend('keep', opts, {
-    cmd = {
-      gitpac_path('elixir-lsp/elixir-ls/out/language_server.sh')
-    }
+    cmd = { 'elixir-ls' },
     -- settings = {
     --   elixirLS = {
     --     dialyzerEnabled = false;
