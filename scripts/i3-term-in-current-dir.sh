@@ -11,7 +11,7 @@ done
 cd "$cwd"
 
 if which "$TERMINAL"; then
-  $TERMINAL
+  $TERMINAL || xterm
 elif which alacritty; then
   alacritty
 elif which urxvt; then

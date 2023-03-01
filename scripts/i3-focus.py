@@ -1,10 +1,11 @@
 #!/usr/bin/python
-import re
-import os
-import i3
-import subprocess
 import argparse
+import os
+import re
+import subprocess
 from pathlib import Path
+
+import i3
 
 
 def validate_direction(parser, val):
@@ -25,6 +26,7 @@ parser.add_argument('--skip-vim',
                     ' (by default it goes to next)',
                     const=True,
                     default=False)
+
 
 args = parser.parse_args()
 

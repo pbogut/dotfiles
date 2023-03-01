@@ -59,7 +59,7 @@ bindsym $mod+Shift+colon $exec "~/.scripts/i3-dmenu-start-at-new-workspace.sh"
 # There also is the (new) i3-dmenu-desktop which only displays applications
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
-# bindsym $mod+d $exec "i3-dmenu-desktop"
+bindsym $mod+d exec "dunstctl context"
 
 # change focus
 set $focus exec --no-startup-id ~/.scripts/i3-focus.py
@@ -117,9 +117,6 @@ bindsym $mod+space focus mode_toggle
 
 # focus the parent container
 bindsym $mod+a focus parent
-
-# focus the child container
-bindsym $mod+d focus child
 
 # switch to workspace
 bindsym $mod+1 workspace 1
@@ -257,7 +254,6 @@ set $display_main DP-4
 # assign workspace to display
 workspace "$wscomm" output $display_right
 workspace "$wsmedia" output $display_top
-workspace "$wsmedia" output $display_top
 workspace "$wsgame" output $display_main
 workspace "$wssteam" output $display_right
 workspace "$wsbrowser" output $display_main
@@ -303,12 +299,12 @@ set $pressSound play ~/Media/test-44100Hz-le-1ch-4bytes.wav speed 2.0 vol 0.15
 set $releaseSound play ~/Media/test-44100Hz-le-1ch-4bytes.wav speed 3.0 vol 0.15
 
 # Media Keys
-bindsym XF86MonBrightnessUp $exec "~/.scripts/i3-brightness.sh up"
-bindsym XF86MonBrightnessDown $exec "~/.scripts/i3-brightness.sh down"
+bindsym XF86MonBrightnessUp $exec "/usr/bin/kill -SIGRTMIN+1 $(pgrep -f 'bash .*/polybar/backlight.sh')"
+bindsym XF86MonBrightnessDown $exec "/usr/bin/kill -SIGRTMIN+2 $(pgrep -f 'bash .*/polybar/backlight.sh')"
 bindsym Shift+XF86AudioRaiseVolume $exec "~/.scripts/volume.sh up 'Arctis Pro'"
 bindsym Shift+XF86AudioLowerVolume $exec "~/.scripts/volume.sh down 'Arctis Pro'"
-bindsym XF86AudioRaiseVolume $exec "~/.scripts/volume.sh up 'Starship/Matisse'"
-bindsym XF86AudioLowerVolume $exec "~/.scripts/volume.sh down 'Starship/Matisse'"
+bindsym XF86AudioRaiseVolume $exec "~/.scripts/volume.sh up $PA_DEFAULT_SINK"
+bindsym XF86AudioLowerVolume $exec "~/.scripts/volume.sh down $PA_DEFAULT_SINK"
 bindsym XF86AudioPause $exec "~/.scripts/playerctl.sh play-pause"
 bindsym XF86AudioPlay $exec "~/.scripts/playerctl.sh play-pause"
 bindsym XF86AudioNext $exec "~/.scripts/playerctl.sh next"
@@ -348,7 +344,6 @@ bindsym $mod+Ctrl+r $exec "~/.scripts/switch-or-launch.sh '^rssguard.RSS$' 'rssg
 
 bindsym $mod+Ctrl+s $exec "~/.scripts/switch-or-launch.sh --scratchpad '^Volume Control$' 'pavucontrol'"
 bindsym $mod+Ctrl+k $term -t FLOATING_WINDOW -e khal interactive
-bindsym $mod+Ctrl+m $exec "~/.scripts/switch-or-launch.sh '^www.deezer.com__en.Google-chrome$' 'google-chrome-stable --app=https://www.deezer.com/en/'"
 bindsym $mod+Ctrl+d $exec "~/.scripts/switch-or-launch.sh '^discord.discord$' 'discord.sh'"
 bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
 bindsym $mod+Ctrl+e $exec "~/.scripts/switch-or-launch.sh '^EMAIL_MUTT$' 'email'"
@@ -356,11 +351,15 @@ bindsym $mod+Ctrl+l $term -e ~/.scripts/dev-log
 
 bindsym $mod+b $exec "~/.scripts/switch-or-launch.sh '^qutebrowser.qutebrowser$' 'browser'"
 bindsym $mod+Ctrl+c workspace $wscode
-bindsym $mod+Shift+m $exec "~/.scripts/mangohud-mode-switch.sh"
-
-# move workspace to another monitor
-bindsym $mod+m $exec "~/.scripts/i3-screen-ring.sh --move --next"
-bindsym $mod+comma move workspace to output up
+bindsym $mod+m focus output DP-3
+bindsym $mod+comma focus output DP-4
+bindsym $mod+period focus output HDMI-0
+bindsym $mod+Ctrl+m move workspace to output DP-3
+bindsym $mod+Ctrl+comma move workspace to output DP-4
+bindsym $mod+Ctrl+period move workspace to output HDMI-0
+bindsym $mod+Shift+m move to output DP-3; focus output DP-3
+bindsym $mod+Shift+comma move to output DP-4; focus output DP-4
+bindsym $mod+Shift+period move to output HDMI-0; focus output HDMI-0
 bindsym $mod+apostrophe $exec "~/.scripts/i3-dmenu-copyq.sh"
 # browser shortcut
 bindsym $mod+slash $exec "~/.scripts/quickbrowser.sh"

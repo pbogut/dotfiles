@@ -16,4 +16,5 @@ else
 fi
 xset s off -dpms
 xset r rate 250 15
+
 source ~/.scripts/autostart.sh

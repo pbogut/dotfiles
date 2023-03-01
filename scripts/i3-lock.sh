@@ -14,39 +14,28 @@ while test $# -gt 0; do
   esac
 done
 
-i3lock-matrix () {
-  picom -b
-  matrixlock.py
-}
-
 try_to_run() {
   if type "$1" > /dev/null 2>&1; then
     "$@"
-    return 0
+    return $?
   fi
 
   return 1
 }
 
 lock_screen() {
-  try_to_run i3lock-matrix ||
   try_to_run i3lock-fancy-dualmonitor ||
   try_to_run i3lock-fancy ||
   try_to_run gllock ||
   try_to_run i3lock --nofork
 }
 
-fix_postsuspend() {
-  # fix laptop touchpad issues
-  sudo -n modprobe -r hid_multitouch
-  sudo -n modprobe hid_multitouch
-}
-
 # lay=`setxkbmap -print | grep 'pc+' | sed 's/.*pc+\([^+]*\)+.*/\1/' | sed 's/[()]/ /g' | sed 's/ / -variant /'`
 # setxkbmap pl
 dunstctl set-paused true
-(lock_screen &&
+(
+lock_screen &&
 dunstctl set-paused false &&
-fix_postsuspend
+picom -b > /dev/null 2>&1
 ) &
 sleep "${sleep}s";
