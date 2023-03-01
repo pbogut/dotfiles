@@ -2,6 +2,7 @@ local M = {}
 local command = vim.api.nvim_create_user_command
 local config = require('config')
 local u = require('utils')
+local action_output = 'actions://output'
 
 function M.run_action(action, opts)
   opts = opts or {}
@@ -41,6 +42,56 @@ local start_job = function(job)
   })
 end
 
+local function get_bufnr_by_name(name)
+  local bufs = vim.api.nvim_list_bufs()
+  for _, bufnr in ipairs(bufs) do
+    local bname = vim.api.nvim_buf_get_name(bufnr)
+    if bname == name then
+      return bufnr
+    end
+  end
+
+  return nil
+end
+
+local function get_output_bufnr()
+  local bufnr = get_bufnr_by_name(action_output)
+  if bufnr then
+    return bufnr
+  end
+
+  vim.cmd.badd(action_output)
+  return get_bufnr_by_name(action_output)
+end
+
+local function get_visible_windows()
+  local tabnr = vim.fn.tabpagenr()
+  local tabinfo = vim.fn.gettabinfo()
+  for _, tabopts in pairs(tabinfo) do
+    if tabopts.tabnr == tabnr then
+      return tabopts.windows
+    end
+  end
+  return {}
+end
+local function is_output_visible()
+  local bufnr = get_output_bufnr()
+  for _, winid in pairs(get_visible_windows()) do
+    if vim.api.nvim_win_get_buf(winid) == bufnr then
+      return true
+    end
+  end
+  return false
+end
+
+local function show_output_buffer()
+  if not is_output_visible() then
+    vim.cmd.vsplit()
+    vim.cmd.enew()
+    vim.cmd.buffer(get_output_bufnr())
+  end
+end
+
 function M.run_cmds(cmds, opts)
   opts = opts or {}
   if opts.cmd_print == nil then
@@ -55,7 +106,6 @@ function M.run_cmds(cmds, opts)
   local msg_run = opts.msg_run or 'Run command'
   local on_done = opts.on_done or function(_, _) end
   local on_exit = opts.on_exit or function(_, _) end
-  local show_output = opts.show_output or false
 
   if type(cmds) ~= 'table' or #cmds == 0 then
     out('[' .. module .. '] Nothing to run.')
@@ -67,18 +117,11 @@ function M.run_cmds(cmds, opts)
 
   local jobs = {}
 
-  local winnr = nil
-  local bufnr = nil
+  --[[ local winnr = nil ]]
+  local bufnr = get_output_bufnr()
 
-  if show_output then
-    vim.cmd.vsplit()
-    vim.cmd.enew()
-    bufnr = vim.fn.bufnr()
-    winnr = vim.api.nvim_get_current_win()
-
-    vim.keymap.set('n', 'q', '<cmd>bdelete!<cr>', { buffer = bufnr })
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { 'Output:' })
-  end
+  vim.keymap.set('n', 'q', '<cmd>bdelete!<cr>', { buffer = bufnr })
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { 'Output:' })
 
   local filter_empty = function(out)
     local result = {}
@@ -91,10 +134,8 @@ function M.run_cmds(cmds, opts)
   end
 
   local print_out = function(out)
-    if show_output then
-      vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, filter_empty(out))
-      vim.api.nvim_win_set_cursor(winnr, { vim.api.nvim_buf_line_count(bufnr), 0 })
-    end
+    vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, filter_empty(out))
+    --[[ vim.api.nvim_win_set_cursor(winnr, { vim.api.nvim_buf_line_count(bufnr), 0 }) ]]
   end
 
   local on_out = function(_, out)
@@ -147,7 +188,10 @@ function _G.action_complete(lead)
 end
 
 command('Action', function(opt)
-  M.run_action(opt.args, { show_output = opt.bang })
+  if opt.bang then
+    show_output_buffer()
+  end
+  M.run_action(opt.args)
 end, { complete = 'customlist,v:lua.action_complete', nargs = '?', bang = true })
 
 return M
