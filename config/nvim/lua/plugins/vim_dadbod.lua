@@ -6,11 +6,42 @@ local fn = vim.fn
 local cmd = vim.cmd
 local l = {}
 
--- behave different when changed to functions or <cmd>, so don't do it
-k.set('v', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
-k.set('v', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
-k.set('n', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
-k.set('n', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
+l.setup = function()
+  -- behave different when changed to functions or <cmd>, so don't do it
+  k.set('v', '<space>d', ':lua print("dadbod not loaded yet")<cr>')
+  k.set('v', '<space>D', ':lua print("dadbod not loaded yet")<cr>')
+  k.set('n', '<space>d', ':lua print("dadbod not loaded yet")<cr>')
+  k.set('n', '<space>D', ':lua print("dadbod not loaded yet")<cr>')
+end
+
+l.config = function()
+  -- behave different when changed to functions or <cmd>, so don't do it
+  k.set('v', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
+  k.set('v', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
+  k.set('n', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
+  k.set('n', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
+
+  vim.api.nvim_create_autocmd('BufEnter', {
+    group = vim.api.nvim_create_augroup('x_dadbod', { clear = true }),
+    pattern = '*.dbout',
+    callback = function()
+      cmd.wincmd('L')
+      -- alternate file override for dbout && sql file
+      k.set('n', '<space>ta', function()
+        local dbout = vim.fn.expand('%')
+        local db = vim.b.db
+        cmd.edit(vim.b.db_input)
+        vim.defer_fn(function()
+          k.set('n', '<space>ta', function()
+            cmd.edit(dbout)
+          end, { buffer = true })
+          k.set('n', 'q', '<c-w>q', { buffer = true })
+          vim.b.db = db
+        end, 100)
+      end, { buffer = true })
+    end,
+  })
+end
 
 -- set up dadbod connections
 function l.load_connections()
@@ -94,36 +125,5 @@ function l.db_with_warning(whole)
 end
 
 l.load_connections()
-
-vim.api.nvim_create_autocmd('BufEnter', {
-  group = vim.api.nvim_create_augroup('x_dadbod', { clear = true }),
-  pattern = '*.dbout',
-  callback = function()
-    -- fix line breaks in result
-    vim.bo.modifiable = true
-    if
-      b.db and (type(b.db) == 'string' and b.db:match('^mysql'))
-      or (type(b.db) == 'table' and type(b.db.db_url) == 'string' and b.db.db_url:match('^mysql'))
-    then
-      cmd([[silent! %s/^\n/ /]]) --empty lines
-      cmd([[silent! %s/[^\|\+]\zs\n/ /]]) --lines not ending with table
-    end
-    cmd.wincmd('L')
-    vim.bo.modifiable = false
-    -- alternate file override for dbout && sql file
-    k.set('n', '<space>ta', function()
-      local dbout = vim.fn.expand('%')
-      local db = vim.b.db
-      cmd.edit(vim.b.db_input)
-      vim.defer_fn(function()
-        k.set('n', '<space>ta', function()
-          cmd.edit(dbout)
-        end, { buffer = true })
-        k.set('n', 'q', '<c-w>q', { buffer = true })
-        vim.b.db = db
-      end, 100)
-    end, { buffer = true })
-  end,
-})
 
 return l
