@@ -15,6 +15,7 @@ k.set('n', '<c-s>', [[<cmd>echo synIDattr(synID(line('.'), col('.'), 1), "name")
 k.set('n', '<space>em', '<cmd>tabnew ~/.vim/macros.lua<cr>')
 k.set('n', '<space>sm', '<cmd>source ~/.vim/macros.lua<cr>')
 -- nice to have
+k.set('i', '<c-s>', '<esc>S')
 k.set('i', '<c-d>', '<del>')
 k.set('c', '<c-d>', '<del>')
 k.set('n', '<space><cr>', 'za')
