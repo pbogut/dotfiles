@@ -100,10 +100,8 @@ require('packer').startup({
     use({ 'honza/vim-snippets' })
     use({
       'andymass/vim-matchup',
-      config = [[
-      -- when status available
-      vim.g.matchup_matchparen_offscreen = { method = 'status_manual' }
-    ]],
+      config = config('vim_matchup'),
+      setup = setup('vim_matchup'),
     })
     use({
       'vim-test/vim-test',
