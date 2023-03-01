@@ -30,8 +30,6 @@ require('mason-tool-installer').setup({
     'psalm',
     'pyright',
     'python-lsp-server',
-    'rust-analyzer',
-    'rustfmt',
     'selene',
     'shellcheck',
     'shfmt',
