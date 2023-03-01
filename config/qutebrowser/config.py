@@ -20,10 +20,8 @@ c.qt.args = [('ppapi-widevine-path='
               '/usr/lib/qt/plugins/ppapi/libwidevinecdmadapter.so')]
 # /usr/share/qutebrowser/scripts/dictcli.py install pl-PL en-GB
 c.spellcheck.languages = ['pl-PL', 'en-GB']
-c.url.start_pages = ['http://localhost:46637']
-c.url.default_page = 'http://localhost:46637'
-# c.url.start_pages = ["https://duckduckgo.com/"]
-# c.url.default_page = 'https://duckduckgo.com/'
+c.url.start_pages = ['https://search.brave.com/']
+c.url.default_page = 'https://search.brave.com/'
 
 c.fileselect.handler = "external"
 c.fileselect.single_file.command = [term, "-t", "QB_FILE_SELECTION", "-e", "lf", "-selection-path", "{}"]
@@ -64,8 +62,10 @@ c.input.insert_mode.auto_enter = True
 c.input.insert_mode.auto_leave = False
 
 # darkmode
+# c.colors.webpage.darkmode.enabled = True
 c.colors.webpage.preferred_color_scheme = 'dark'
 c.colors.webpage.bg = '#eee'
+
 
 c.url.searchengines = {
     "DEFAULT": "https://search.brave.com/search?q={}",
@@ -96,7 +96,7 @@ c.colors.completion.item.selected.bg = c.colors.completion.category.bg
 c.colors.completion.item.selected.border.top = 'black'
 c.colors.completion.item.selected.border.bottom = 'black'
 c.colors.completion.scrollbar.fg = c.colors.completion.item.selected.bg
-c.colors.statusbar.insert.bg = "#b58900"
+c.colors.statusbar.insert.bg = "#5f8700"
 c.colors.statusbar.caret.bg = "#d33682"
 c.colors.statusbar.url.success.https.fg = "white"
 c.colors.tabs.odd.bg = c.colors.completion.odd.bg
@@ -141,6 +141,9 @@ config.bind('<Return>', 'enter-mode insert')
 config.bind('do', 'download-open')
 config.bind('dc', 'download-clear')
 config.bind('dr', 'download-remove')
+# config.bind('<Ctrl-t>', 'set tabs.width 10%')
+# config.bind('<Ctrl-t>', 'set tabs.width 10% ;; bind <ctrl-t> set tabs 3%')
+# config.bind('<Ctrl-Shift-T>', 'set tabs.width 3%')
 config.bind('<Ctrl-t>', 'spawn --userscript tabswidth --toggle', mode='normal')
 config.bind('<Ctrl-t>', 'spawn --userscript tabswidth --toggle', mode='insert')
 
@@ -164,11 +167,9 @@ config.bind(
     '<ctrl-o>',
     'spawn --userscript ~/.scripts/keepass.rb --type-otpauth', mode='insert')
 
-
 config.bind(
     '<ctrl-w>',
     'fake-key <shift-ctrl-left> ;; fake-key <backspace>', mode='insert')
-
 
 config.bind('<Ctrl-j>', 'completion-item-focus next', mode='command')
 config.bind('<Ctrl-k>', 'completion-item-focus prev', mode='command')
