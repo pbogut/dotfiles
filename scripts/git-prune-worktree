@@ -5,7 +5,7 @@
 # date:   18/08/2022
 #=================================================
 master="$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
-branches=$(git branch --merged "$master" | grep -v "^\*" | grep '^\+' | sed 's/^\+ /  /')
+branches=$(git branch --merged "$master" | grep -v "^\*" | grep '^+' | sed 's/^+ /  /')
 
 if [[ -n $branches ]]; then
   echo "Worktrees merged with $master:"

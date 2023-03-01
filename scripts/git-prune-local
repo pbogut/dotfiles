@@ -5,7 +5,7 @@
 # date:   20/07/2022
 #=================================================
 master="$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
-branches=$(git branch --merged "$master" | grep -v "^\*" | grep -v '^\+')
+branches=$(git branch --merged "$master" | grep -v "^\*" | grep -v '^+')
 
 if [[ -n $branches ]]; then
   echo "Branches merged with $master:"
