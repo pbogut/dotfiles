@@ -4,6 +4,7 @@ local c = vim.g.colors
 -- custom sections
 local s = {
   dapinfo = require('plugins.lualine.dapinfo'),
+  harpoon = require('plugins.lualine.harpoon'),
   filename = require('plugins.lualine.filename'),
   gps = require('plugins.lualine.gps'),
   dadbod = require('plugins.lualine.dadbod'),
@@ -45,7 +46,7 @@ local config = function()
     sections = {
       lualine_a = { { 'mode', fmt = s.mode_fmt } },
       lualine_b = { { s.diff_change, padding = 0 }, 'branch' },
-      lualine_c = { s.dapinfo, s.filename },
+      lualine_c = { s.dapinfo, s.harpoon, s.filename },
       lualine_x = {},
       lualine_y = { s.fileinfo, s.location },
       lualine_z = { s.actions, s.diagnostics },
