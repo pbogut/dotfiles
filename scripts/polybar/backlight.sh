@@ -18,7 +18,7 @@ last_state=$state
 
 fifo="$TMPDIR/_polybar_backlight"
 touch "$fifo" > /dev/null 2>&1
-(tail -f "$fifo" 2>/dev/null | xob -s "$(hostname)") &
+(tail -f "$fifo" 2>/dev/null | xob -q -s "$(hostname)") &
 (tail -f "$fifo" 2>/dev/null | osd_cat -p top -i 1100 -o 30 -l 1 -d 1 -f "-misc-dejavu sans-*-*-*-*-*-*-*-*-*-*-*-*" -c "#285577" -O 2) &
 
 light_up() {
