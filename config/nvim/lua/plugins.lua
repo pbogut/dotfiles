@@ -169,9 +169,10 @@ require('packer').startup({
     -- completion
     use({ 'l3mon4d3/luasnip', after = 'projector', config = config('luasnip') })
     use({ 'tzachar/cmp-tabnine', run = './install.sh', after = 'nvim-cmp' })
+    use({ 'zbirenbaum/copilot.lua', config = config('copilot') })
     use({
       'hrsh7th/nvim-cmp',
-      after = { 'luasnip', 'projector' },
+      after = { 'luasnip', 'projector', 'vim-rsi' },
       config = config('nvim_cmp'),
       setup = setup('nvim_cmp'),
       requires = {
@@ -184,9 +185,11 @@ require('packer').startup({
         'ray-x/cmp-treesitter',
         'onsails/lspkind-nvim',
         'saadparwaiz1/cmp_luasnip',
+        --[[ 'zbirenbaum/copilot-cmp', ]]
         'kristijanhusak/vim-dadbod-completion',
       },
     })
+
     -- lsp
     use({ 'ray-x/lsp_signature.nvim' })
     use({

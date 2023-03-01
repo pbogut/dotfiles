@@ -1,2 +1,12 @@
-vim.cmd([[imap <silent><script><expr> <m-cr> copilot#Accept("\<cr>")]])
-vim.cmd([[imap <silent><script><expr> <c-f> copilot#Accept("\<cr>")]])
+local copilot = require('copilot')
+copilot.setup({
+  suggestion = {
+    auto_trigger = true,
+    keymap = {
+      accept_line = '<C-e>',
+      accept_word = '<C-f>',
+      accept = '<C-g>',
+    },
+  },
+  panel = { enabled = false },
+})

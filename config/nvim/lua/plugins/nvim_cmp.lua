@@ -1,9 +1,10 @@
-local u = require('utils')
-
 local function config()
   local cmp = require('cmp')
   local luasnip = require('luasnip')
   local projector = require('plugins.projector')
+  local lspkind = require('lspkind')
+  --[[ local copilot_cmp = require('copilot_cmp') ]]
+  --[[ copilot_cmp.setup() ]]
 
   local src = {
     lsp = { name = 'nvim_lsp' },
@@ -15,6 +16,7 @@ local function config()
     path = { name = 'path' },
     tag = { name = 'tags', max_item_count = 15 },
     buf = { name = 'buffer' },
+    copilot = { name = 'copilot' },
     emo = { name = 'emoji' },
   }
 
@@ -25,6 +27,7 @@ local function config()
       end,
     },
     mapping = cmp.mapping.preset.insert({
+      ['<C-e>'] = cmp.config.disable,
       ['<c-space>'] = cmp.mapping.complete(),
       ['<c-y>S'] = cmp.mapping.confirm({
         behavior = cmp.ConfirmBehavior.Replace,
@@ -62,6 +65,7 @@ local function config()
     }),
     sources = {
       src.lsp,
+      --[[ src.copilot, ]]
       src.ts,
       src.tn,
       src.snip,
@@ -76,7 +80,14 @@ local function config()
     formatting = {
       format = function(entry, vim_item)
         -- fancy icons and a name of kind
-        vim_item.kind = require('lspkind').presets.default[vim_item.kind] .. ' ' .. vim_item.kind
+        local kind = lspkind.presets.default[vim_item.kind]
+        if not kind then
+          kind = vim_item.kind
+        end
+        if kind == 'Copilot' then
+          kind = ''
+        end
+        vim_item.kind = kind
 
         -- set a name for each source
         vim_item.menu = ({
@@ -91,6 +102,7 @@ local function config()
           emoji = '[Emoji]',
           tags = '[Tag]',
           spell = '[Spell]',
+          copilot = '[Copilot]',
           ['vim-dadbod-completion'] = '[DB]',
         })[entry.source.name]
         return vim_item
@@ -106,6 +118,7 @@ local function config()
         sources = {
           src.db,
           src.lsp,
+          --[[ src.copilot, ]]
           src.ts,
           src.tn,
           src.snip,
@@ -124,6 +137,7 @@ local function config()
         sources = {
           src.lua,
           src.lsp,
+          --[[ src.copilot, ]]
           src.ts,
           src.tn,
           src.snip,
