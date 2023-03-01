@@ -72,6 +72,11 @@ cdp() {
     project=$(ls-project | fzf -q "$1")
     if [[ ! $project == "" ]]; then
         cd "$HOME/Projects/$project"
+        if [[ -f .git || -d .git ]]; then
+            touch .git > /dev/null 2>&1
+        else
+            touch . > /dev/null 2>&1
+        fi
     fi
 }
 
@@ -117,8 +122,3 @@ vb() {
     fi
 }
 restore() { vb $@ }
-
-history() {
-    echo 'Use ctrl + r'
-    # cat $HISTFILE | grep '^:' | sed 's/^: [0-9]*:.;//' | fzf
-}
