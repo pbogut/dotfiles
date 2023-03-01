@@ -75,6 +75,8 @@ require('packer').startup({
     use({ fn.stdpath('config') .. '/local/projector', config = config('projector') })
     use({ fn.stdpath('config') .. '/local/actions', config = 'require"actions"' })
     use({ fn.stdpath('config') .. '/local/remotesync', config = 'require"remotesync"' })
+    use({ fn.stdpath('config') .. '/local/ripgrep', config = 'require"ripgrep"', after = 'telescope.nvim' })
+
     use({ 'williamboman/mason.nvim', config = 'require"mason".setup()' })
     use({ 'whoissethdaniel/mason-tool-installer.nvim', config = config('mason_tool_installer') })
     use({ 'pbogut/fzf-mru.vim', config = config('fzf_mru') })

@@ -1,7 +1,8 @@
-local builtin = require('telescope.builtin')
-local conf = require('telescope.config').values
 local k = vim.keymap
+local conf = require('telescope.config').values
+local builtin = require('telescope.builtin')
 
+local current_input = ''
 local last_query = ''
 
 local ripgrep = function(opt)
@@ -83,10 +84,38 @@ function _G.ripgrep_in_dir_complete(text)
   return result
 end
 
+-- grep
+k.set('c', '<c-o>', function()
+  vim.api.nvim_input('<esc>')
+  vim.schedule(function()
+    vim.ui.input({
+      prompt = 'Rg!: ',
+      default = current_input,
+      -- hack to get up to date input content
+      highlight = function(input)
+        current_input = input
+        return {}
+      end,
+      --[[ cancelreturn = 0, ]]
+      completion = 'customlist,v:lua.ripgrep_in_dir_complete',
+    }, function(query)
+      if query then
+        ripgrep({ args = query, regex = true })
+      end
+    end)
+  end)
+end)
+
 k.set('n', '<space>gg', function()
   vim.ui.input({
     prompt = 'Rg: ',
     default = '',
+    -- hack to get up to date input content
+    highlight = function(input)
+      current_input = input
+      return {}
+    end,
+    --[[ cancelreturn = 0, ]]
     completion = 'customlist,v:lua.ripgrep_in_dir_complete',
   }, function(query)
     if query then
@@ -106,3 +135,24 @@ k.set('n', '<space>gr', function()
     ripgrep({ args = query, regex = true })
   end
 end)
+
+vim.cmd([[
+  nmap <silent> gr :set opfunc=Ripgrep_from_motion<cr>g@
+  function! Ripgrep_from_motion(type, ...)
+    let l:tmp = @a
+    if a:0  " Invoked from Visual mode, use '< and '> marks.
+      silent exe("normal! `<" . a:type . "`>\"ay")
+    elseif a:type == 'line'
+      silent exe "normal! '[V']\"ay"
+    elseif a:type == 'block'
+      silent exe "normal! `[\<C-V>`]\"ay"
+    else
+      silent exe "normal! `[v`]\"ay"
+    endif
+    call v:lua.require('ripgrep').ripgrep({"args": trim(@a)})
+    " exe("Rg " . trim(@a))
+    let @a = l:tmp
+  endfunction
+]])
+
+return { ripgrep = ripgrep }

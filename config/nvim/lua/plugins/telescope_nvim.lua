@@ -1,4 +1,3 @@
-local command = vim.api.nvim_create_user_command
 local u = require('utils')
 local k = vim.keymap
 local actions = require('telescope.actions')
@@ -146,42 +145,6 @@ end)
 k.set('n', '<space>gw', function()
   builtin.grep_string()
 end)
-k.set('n', '<space>gr', '<cmd>Rg<cr>')
-
-local last_query = ''
-command('Rg', function(opt)
-  local query = opt.args
-  if query == '' then
-    query = last_query
-  else
-    last_query = query
-  end
-  local dirs = { vim.fn.getcwd() }
-  if query:match('%/$') then
-    local dir = query:gsub('(.-) ([^%s]+%/)$', '%2')
-    if dir:byte(1) ~= 47 then
-      local sep = '/./'
-      if dir:byte(1) == 46 then
-        sep = '/'
-      end
-      dir = vim.fn.getcwd() .. sep .. query:gsub('(.-) ([^%s]+%/)$', '%2')
-    end
-    dirs = { dir }
-    query = query:gsub('(.-) ([^%s]+%/)$', '%1')
-  end
-  local message = '"' .. query .. '"'
-  local short_dirs = {}
-  for _, dir in pairs(dirs) do
-    if dir ~= vim.fn.getcwd() then
-      short_dirs[#short_dirs + 1] = dir:gsub('^.*%.%/', '')
-    end
-  end
-  if #short_dirs > 0 then
-    message = message .. ' in ' .. table.concat(short_dirs, ', ')
-  end
-  print(message)
-  builtin.grep_string({ search = query, use_regex = opt.bang, search_dirs = dirs })
-end, { nargs = '?', bang = true, complete = 'dir' })
 
 telescope.setup({
   defaults = {
