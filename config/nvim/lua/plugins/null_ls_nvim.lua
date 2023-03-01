@@ -26,6 +26,10 @@ local sources = {
     args = { '-i', '2', '-filename', '$FILENAME' },
     enabled = true,
   },
+  {
+    builtin = null_ls.builtins.code_actions.shellcheck,
+    enabled = true,
+  },
   -- php
   {
     builtin = null_ls.builtins.diagnostics.phpcs,
@@ -41,7 +45,7 @@ local sources = {
   -- python
   {
     builtin = null_ls.builtins.diagnostics.flake8,
-    enabled = true,
+    enabled = false,
   },
   {
     builtin = null_ls.builtins.formatting.isort,
@@ -68,6 +72,12 @@ local sources = {
     enabled = true,
   },
   -- other
+  {
+    builtin = null_ls.builtins.diagnostics.editorconfig_checker,
+    enabled = function()
+      return vim.fn.filereadable(vim.fn.getcwd() .. '/.editorconfig') == 1
+    end,
+  },
   {
     builtin = null_ls.builtins.completion.spell,
     enabled = false,

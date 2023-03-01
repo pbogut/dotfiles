@@ -2,6 +2,8 @@ local fn = vim.fn
 local cmd = vim.cmd
 local command = vim.api.nvim_create_user_command
 
+command('DiffOn', 'windo diffthis', {})
+command('DiffOff', 'windo diffoff', {})
 command('BCloseAll', 'execute "%bd"', {})
 command('BCloseOther', 'execute "%bd | e#"', {})
 command('BCloseOtherForce', 'execute "%bd! | e#"', {})

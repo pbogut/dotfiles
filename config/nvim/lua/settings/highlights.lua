@@ -103,8 +103,9 @@ local function highlights()
     -- ["@type.definition"] = {},
 
     -- Context
-    TSContext = { guibg = c.base02 },
+    TSContext = { guibg = c.ad_dark1 },
     TreesitterContext = { link = 'TSContext' },
+    TreesitterContextLineNumber = { link = 'TSContext' },
 
     -- MatchParen ctermbg=blue guibg=lightblue cterm=italic gui=italic
     MatchParen = { guifg = c.orange, guibg = c.base02 },

@@ -49,6 +49,7 @@ local function setup(plugin)
     end]]
 end
 
+cmd.packadd('cfilter')
 require('packer').startup({
   function(use)
     -- Packer can manage itself as an optional plugin
@@ -74,6 +75,8 @@ require('packer').startup({
     use({ fn.stdpath('config') .. '/local/projector', config = config('projector') })
     use({ fn.stdpath('config') .. '/local/actions', config = 'require"actions"' })
     use({ fn.stdpath('config') .. '/local/remotesync', config = 'require"remotesync"' })
+    use({ 'williamboman/mason.nvim', config = 'require"mason".setup()' })
+    use({ 'whoissethdaniel/mason-tool-installer.nvim', config = config('mason_tool_installer') })
     use({ 'pbogut/fzf-mru.vim', config = config('fzf_mru') })
 
     -- Github plugins
@@ -87,6 +90,7 @@ require('packer').startup({
     use({ 'tpope/vim-rails', ft = { 'ruby' } })
     use({ 'vim-ruby/vim-ruby', ft = { 'ruby' } })
     use({ 'tpope/vim-unimpaired' })
+    use({ 'mbbill/undotree' })
     use({ 'ThePrimeagen/harpoon', config = config('harpoon') })
     use({ 'ThePrimeagen/git-worktree.nvim', config = config('git_worktree_nvim') })
     use({ 'lambdalisue/suda.vim' })
@@ -113,6 +117,7 @@ require('packer').startup({
     use({ 'elixir-lang/vim-elixir', ft = { 'elixir', 'eelixir' } })
     use({ 'moll/vim-bbye', cmd = { 'Bdelete', 'Bwipeout' }, setup = setup('vim_bbye') })
     use({ 'will133/vim-dirdiff', cmd = 'DirDiff', config = config('vim_dirdiff') })
+    use({ 'sindrets/diffview.nvim' })
     use({
       'dbakker/vim-projectroot',
       config = [[
@@ -149,6 +154,7 @@ require('packer').startup({
       'tpope/vim-dadbod',
       cmd = 'DB',
       config = config('vim_dadbod'),
+      setup = setup('vim_dadbod'),
       fn = 'db#url_complete',
       requires = { 'pbogut/vim-dadbod-ssh' },
     })

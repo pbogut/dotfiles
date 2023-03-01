@@ -14,6 +14,20 @@ function _G.dump(...)
   return ...
 end
 
+function _G.mason_bin(file)
+  if type(file) == 'string' then
+    local bin = vim.fn.stdpath('data') .. '/mason/bin/' .. file
+    if vim.fn.filereadable(bin) == 1 then
+      return bin
+    end
+  end
+  return nil
+end
+
+function _G.mason_pkg(path)
+  return vim.fn.stdpath('data') .. '/mason/packages/' .. path
+end
+
 function _G.plugin_path(path)
   local result = vim.fn.stdpath('data') .. '/site/pack/packer/start/' .. path
   if vim.fn.glob(result) == '' then

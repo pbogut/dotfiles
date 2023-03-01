@@ -28,14 +28,6 @@ vim.api.nvim_create_autocmd('BufEnter', {
     bo.commentstring = '# %s'
   end,
 })
-vim.api.nvim_create_autocmd('BufEnter', {
-  group = augroup,
-  pattern = '*.phtml',
-  callback = function()
-    bo.filetype = 'html'
-    bo.syntax = 'php'
-  end,
-})
 vim.api.nvim_create_autocmd('FileType', {
   group = augroup,
   pattern = 'html,css,scss,xml,java,elixir,eelixir,c,php,php.phtml,sql,blade,elm',
@@ -99,7 +91,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = augroup,
   pattern = '*',
   callback = function()
-    require('vim.highlight').on_yank({ timeout = 75, higroup = 'Search' })
+    require('vim.highlight').on_yank({ timeout = 50, higroup = 'Search' })
   end,
 })
 vim.api.nvim_create_autocmd({ 'VimEnter' }, {
