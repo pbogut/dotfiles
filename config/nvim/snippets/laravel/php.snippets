@@ -1,12 +1,16 @@
+snippet arr "Laravel Arr helper"
+  use Illuminate\Support\Arr;
+snippet str "Laravel Arr helper"
+  use Illuminate\Support\Str;
 snippet schcr "Laravel Schema::create"
-	Schema::create('${1:table_name}', function (Blueprint $table) {
-		${2:$table->${3:increments}('${4:id}')};$0
+	Schema::create('${1:table_name}', function (Blueprint \$table) {
+		${2:\$table->${3:increments}('${4:id}')};$0
 	});
 snippet schdr "Laravel Schema::drop"
 	Schema::drop('${1:table_name}');$0
 snippet schtab "Laravel Schema::table"
-	Schema::table('${1:table_name}', function (Blueprint $table) {
-		${2:$table->${3:increments}('${4:id}')};$0
+	Schema::table('${1:table_name}', function (Blueprint \$table) {
+		${2:\$table->${3:increments}('${4:id}')};$0
 	});
 snippet fac "use facade"
 	use Illuminate\Support\Facades\\${1|App,Artisan,Auth,Blade,Bus,Cache,Config,Cookie,Crypt,DB,Event,File,Hash,Input,Lang,Log,Mail,Password,Queue,Redirect,Redis,Request,Response,Route,Schema,Session,Storage,URL,Validator,View|};
@@ -34,10 +38,10 @@ snippet crud "Create CURD functions"
 	/**
 	 * Store a newly created resource in storage.
 	 *
-	 * @param  \Illuminate\Http\Request  $request
+	 * @param  \Illuminate\Http\Request  \$request
 	 * @return \Illuminate\Http\Response
 	 */
-	public function store(Request $request)
+	public function store(Request \$request)
 	{
 		return redirect('${1:entity}.show');
 	}
@@ -45,10 +49,10 @@ snippet crud "Create CURD functions"
 	/**
 	 * Display the specified resource.
 	 *
-	 * @param  int  $id
+	 * @param  int \$id
 	 * @return \Illuminate\Http\Response
 	 */
-	public function show($id)
+	public function show(\$id)
 	{
 		return view('${1:entity}.show');
 	}
@@ -56,10 +60,10 @@ snippet crud "Create CURD functions"
 	/**
 	 * Show the form for editing the specified resource.
 	 *
-	 * @param  int  $id
+	 * @param  int \$id
 	 * @return \Illuminate\Http\Response
 	 */
-	public function edit($id)
+	public function edit(\$id)
 	{
 		return view('${1:entity}.edit');
 	}
@@ -67,11 +71,11 @@ snippet crud "Create CURD functions"
 	/**
 	 * Update the specified resource in storage.
 	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @param  int  $id
+	 * @param  \Illuminate\Http\Request  \$request
+	 * @param  int \$id
 	 * @return \Illuminate\Http\Response
 	 */
-	public function update(Request $request, $id)
+	public function update(Request \$request, \$id)
 	{
 		return redirect('${1:entity}.show');
 	}
@@ -79,10 +83,10 @@ snippet crud "Create CURD functions"
 	/**
 	 * Remove the specified resource from storage.
 	 *
-	 * @param  int  $id
+	 * @param  int \$id
 	 * @return \Illuminate\Http\Response
 	 */
-	public function destroy($id)
+	public function destroy(\$id)
 	{
 		return redirect('${1:entity}.index');
 	}

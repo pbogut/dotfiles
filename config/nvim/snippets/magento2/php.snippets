@@ -11,11 +11,11 @@ snippet resultfactory "use ResultFactory"
 snippet urlbuilder "use UrlBuilder"
 	use Magento\Framework\UrlInterface as UrlBuilder;
 snippet resultredirect "$resultRedirect"
-	/** @var Magento\Framework\Controller\Result\Redirect $resultRedirect **/
-	$resultRedirect = $this->_resultFactory->create(ResultFactory::TYPE_REDIRECT);
+	/** @var Magento\Framework\Controller\Result\Redirect \$resultRedirect **/
+	\$resultRedirect = \$this->_resultFactory->create(ResultFactory::TYPE_REDIRECT);
 snippet resultredirect "$resultRedirect"
-	/** @var Magento\Framework\Controller\Result\Redirect $resultRedirect **/
-	$resultRedirect = $this->_resultFactory->create(ResultFactory::TYPE_REDIRECT);
+	/** @var Magento\Framework\Controller\Result\Redirect \$resultRedirect **/
+	\$resultRedirect = \$this->_resultFactory->create(ResultFactory::TYPE_REDIRECT);
 snippet objectmanager "$objectManager"
 	/** @var \Magento\Framework\ObjectManagerInterface */
 	\$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
@@ -33,7 +33,7 @@ snippet adapterfn "adapter function"
 	protected function getAdapter()
 	{
 		if (\$this->adapter == null) {
-			/** @var \Magento\Framework\ObjectManagerInterface */
+			/** @var \Magento\Framework\ObjectManagerInterface \$objectManager */
 			\$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 			\$this->adapter = \$objectManager->get(\Magento\Framework\App\ResourceConnection::class)
 				->getConnection()

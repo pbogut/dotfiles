@@ -1,3 +1,7 @@
+snippet display
+  DISPLAY=${DISPLAY:-$(w -hs | awk '{print $2}' | grep '^:' | head -n 1)}
+snippet dbus
+  DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-"unix:path=/run/user/$(id -u)/bus"}
 snippet then
 	then
 		$0
@@ -8,6 +12,10 @@ snippet do
 	done
 snippet dir "get script dir"
 	dir="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
+snippet ext "get file extention"
+	ext=\${${1:filename}##*.}
+snippet base "get file base name"
+	base_name=\${${1:filename}%%.*}
 snippet args
 	usage() {
 		echo "Ussage: \${0##*/} [OPTIONS]"

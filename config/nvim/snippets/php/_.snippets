@@ -1,5 +1,5 @@
 snippet fn
-	${1|public,protected,private|} function ${2:FnName}(${3:$args})
+	${1|public,protected,private|} function ${2:FnName}(${3:\$args})
 	{
 		$4
 	}$0
@@ -36,4 +36,4 @@ snippet doc_function "function doc"
 	 * @return ${2:mixed}
 	 */$0
 snippet doc_variable "variable doc"
-	/** @var ${1:PropertyType}$2 $[[php.get_variable_name]] */
+	/** @var ${1:PropertyType}$2 \$[[php.get_variable_name]] */
