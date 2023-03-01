@@ -18,7 +18,8 @@ colors:
 
   # Bright colors
   bright:
-    black:   '0x002b36'
+    # disabled as a workarond to fix lf invisible entry issue
+    # black:   '0x002b36'
     red:     '0xcb4b16'
     green:   '0x586e75'
     yellow:  '0x657b83'
@@ -55,7 +56,7 @@ hints:
 
   enabled:
   # urls
-  - regex: "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)//[a-zA-Z0-9,\\.\\-_/\\?=&%:]+"
+  - regex: "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)//[a-zA-Z0-9,'+\\.\\-_/\\?=&%:]+"
     command: xdg-open
     post_processing: true
     mouse:
