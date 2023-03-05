@@ -175,7 +175,7 @@ require('packer').startup({
     -- completion
     use({ 'l3mon4d3/luasnip', after = 'projector', config = config('luasnip') })
     use({ 'tzachar/cmp-tabnine', run = './install.sh', after = 'nvim-cmp' })
-    use({ 'zbirenbaum/copilot.lua', config = config('copilot') })
+    use({ 'zbirenbaum/copilot.lua', config = config('copilot'), after = { 'vim-rsi' } })
     use({
       'hrsh7th/nvim-cmp',
       after = { 'luasnip', 'projector', 'vim-rsi' },

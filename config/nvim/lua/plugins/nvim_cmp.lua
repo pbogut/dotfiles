@@ -3,8 +3,7 @@ local function config()
   local luasnip = require('luasnip')
   local projector = require('plugins.projector')
   local lspkind = require('lspkind')
-  --[[ local copilot_cmp = require('copilot_cmp') ]]
-  --[[ copilot_cmp.setup() ]]
+  local has_copilot, copilot_cmp = pcall(require, 'copilot_cmp')
 
   local src = {
     lsp = { name = 'nvim_lsp' },
@@ -19,6 +18,10 @@ local function config()
     copilot = { name = 'copilot' },
     emo = { name = 'emoji' },
   }
+
+  if has_copilot then
+    copilot_cmp.setup()
+  end
 
   cmp.setup({
     snippet = {
@@ -65,7 +68,7 @@ local function config()
     }),
     sources = {
       src.lsp,
-      --[[ src.copilot, ]]
+      src.copilot,
       src.ts,
       src.tn,
       src.snip,
@@ -118,7 +121,7 @@ local function config()
         sources = {
           src.db,
           src.lsp,
-          --[[ src.copilot, ]]
+          src.copilot,
           src.ts,
           src.tn,
           src.snip,
@@ -137,7 +140,7 @@ local function config()
         sources = {
           src.lua,
           src.lsp,
-          --[[ src.copilot, ]]
+          src.copilot,
           src.ts,
           src.tn,
           src.snip,
