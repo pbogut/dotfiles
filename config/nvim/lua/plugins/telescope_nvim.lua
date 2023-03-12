@@ -118,7 +118,10 @@ k.set('n', '<space>ft', function()
   })
 end)
 k.set('n', '<space>fs', function()
-  builtin.find_files({ cwd = os.getenv('DOTFILES') .. '/config/nvim/snippets' })
+  builtin.find_files({
+    cwd = os.getenv('DOTFILES') .. '/config/nvim',
+    search_dirs = { 'lua/plugins/luasnip.lua', 'snippets', 'lua/plugins/luasnip' },
+  })
 end)
 k.set('n', '<space>fc', function()
   builtin.find_files({
