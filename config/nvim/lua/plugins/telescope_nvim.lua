@@ -210,12 +210,15 @@ telescope.setup({
         ['<tab>'] = actions.toggle_selection + actions.move_selection_worse,
         ['<s-tab>'] = actions.toggle_selection + actions.move_selection_better,
         ['<c-q>'] = function(id)
-          actions.send_selected_to_qflist(id)
-          vim.cmd.Trouble('quickfix')
-        end,
-        ['<m-q>'] = function(id)
-          actions.send_to_qflist(id)
-          vim.cmd.Trouble('quickfix')
+          local picker = action_state.get_current_picker(id)
+
+          if #picker:get_multi_selection() > 0 then
+            actions.send_selected_to_qflist(id)
+            vim.cmd.Trouble('quickfix')
+          else
+            actions.send_to_qflist(id)
+            vim.cmd.Trouble('quickfix')
+          end
         end,
         ['<c-l>'] = actions.complete_tag,
         ['<c-_>'] = actions.which_key, -- keys from pressing <C-/>
