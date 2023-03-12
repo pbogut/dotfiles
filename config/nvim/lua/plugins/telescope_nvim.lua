@@ -121,13 +121,18 @@ k.set('n', '<space>fs', function()
   builtin.find_files({ cwd = os.getenv('DOTFILES') .. '/config/nvim/snippets' })
 end)
 k.set('n', '<space>fc', function()
-  builtin.find_files({ cwd = os.getenv('DOTFILES') })
+  builtin.find_files({
+    cwd = os.getenv('DOTFILES') .. '/..',
+    no_ignore_parent = true,
+    search_dirs = { 'dotfiles', 'dotfiles/config/nvim/lua/config' },
+  })
 end)
 k.set('n', '<space>fn', function()
-  builtin.find_files({ cwd = os.getenv('DOTFILES') .. '/config/nvim' })
-end)
-k.set('n', '<space>fP', function()
-  builtin.find_files({ cwd = vim.fn.stdpath('data') .. '/site/pack/packer/' })
+  builtin.find_files({
+    cwd = os.getenv('DOTFILES') .. '/config',
+    no_ignore_parent = true,
+    search_dirs = { 'nvim', 'nvim/lua/config' },
+  })
 end)
 k.set('n', '<space>fg', function()
   builtin.git_status()
