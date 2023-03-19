@@ -17,7 +17,9 @@ else
 fi
 
 if [[ $action == "down" ]]; then
+  # shellcheck disable=1009
   pulsemixer --change-volume -1 $id
 elif [[ $action == "up" ]]; then
+  # shellcheck disable=1009
   pulsemixer --change-volume +1 $id
 fi
