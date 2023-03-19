@@ -303,10 +303,11 @@ bindsym XF86MonBrightnessUp $exec "/usr/bin/kill -SIGRTMIN+1 $(pgrep -f 'bash .*
 bindsym XF86MonBrightnessDown $exec "/usr/bin/kill -SIGRTMIN+2 $(pgrep -f 'bash .*/polybar/backlight.sh')"
 bindsym Shift+XF86AudioRaiseVolume $exec "~/.scripts/volume.sh up 'Arctis Pro'"
 bindsym Shift+XF86AudioLowerVolume $exec "~/.scripts/volume.sh down 'Arctis Pro'"
-bindsym XF86AudioRaiseVolume $exec "~/.scripts/volume.sh up $PA_DEFAULT_SINK"
-bindsym XF86AudioLowerVolume $exec "~/.scripts/volume.sh down $PA_DEFAULT_SINK"
+bindsym XF86AudioRaiseVolume $exec "~/.scripts/volume.sh up ', Default$'"
+bindsym XF86AudioLowerVolume $exec "~/.scripts/volume.sh down ', Default$'"
 bindsym XF86AudioPause $exec "~/.scripts/playerctl.sh play-pause"
 bindsym XF86AudioPlay $exec "~/.scripts/playerctl.sh play-pause"
+bindsym Ctrl+XF86AudioPlay $exec "~/.scripts/audio.sh --next --without 'Arctis Pro'"
 bindsym XF86AudioNext $exec "~/.scripts/playerctl.sh next"
 bindsym XF86AudioPrev $exec "~/.scripts/playerctl.sh previous"
 
