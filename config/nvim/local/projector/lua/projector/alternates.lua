@@ -5,6 +5,13 @@ local fn = vim.fn
 local M = {}
 
 local function ask(list)
+  local cwd = fn.getcwd()
+  list = u.table_map(list, function(file)
+    if file:sub(1, cwd:len()) == cwd then
+      return file:sub(cwd:len() + 2)
+    end
+    return file
+  end)
   vim.ui.select(list, { prompt = 'Select Alternate' }, function(choice)
     vim.cmd.edit(choice)
   end)
