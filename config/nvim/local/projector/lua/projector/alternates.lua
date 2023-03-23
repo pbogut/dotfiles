@@ -5,12 +5,9 @@ local fn = vim.fn
 local M = {}
 
 local function ask(list)
-  local options = {
-    source = list,
-    options = '--prompt "Select Alternate> " ' .. vim.g.fzf_preview,
-    sink = 'e',
-  }
-  fn['fzf#run'](fn['fzf#wrap'](options))
+  vim.ui.select(list, { prompt = 'Select Alternate' }, function(choice)
+    vim.cmd.edit(choice)
+  end)
 end
 
 local function select_alternate(files)
