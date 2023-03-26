@@ -1,8 +1,6 @@
 local null_ls = require('null-ls')
-local h = require('null-ls.helpers')
 local on_attach = require('plugins.nvim_lsp').on_attach
-local s = h.diagnostics.severities
-local os = {}
+local severity = vim.diagnostic.severity
 
 local cfg = { sources = {}, on_attach = on_attach }
 
@@ -74,6 +72,7 @@ local sources = {
   -- other
   {
     builtin = null_ls.builtins.diagnostics.editorconfig_checker,
+    lower_servity = 3,
     enabled = function()
       return vim.fn.filereadable(vim.fn.getcwd() .. '/.editorconfig') == 1
     end,
@@ -89,12 +88,6 @@ local sources = {
   },
 }
 
--- store original servity
-os.error = s.error
-os.warning = s.warning
-os.information = s.information
-os.hint = s.hint
-
 local function min(a, b)
   if a < b then
     return a
@@ -102,25 +95,25 @@ local function min(a, b)
   return b
 end
 
-local function restore_servity()
-  s.error = os.error
-  s.warning = os.warning
-  s.information = os.information
-  s.hint = os.hint
-end
-
+--[[ local yo = 3 ]]
 local function lower_servity(builtin, level)
   level = level or 1
-  local on_output = builtin._opts.on_output
 
+  local lower_entry_servity = function(entry)
+    local current_servity = entry.severity or severity.ERROR
+    entry.severity = min(current_servity + level, severity.HINT)
+  end
+
+  local on_output = builtin._opts.on_output
   builtin._opts.on_output = function(...)
-    -- lower level of servity
-    s.error = min(os.error + level, os.hint)
-    s.warning = min(os.warning + level, os.hint)
-    s.information = min(os.information + level, os.hint)
-    s.hint = min(os.hint + level, os.hint)
     local result = on_output(...)
-    restore_servity()
+    if type(result) == 'table' and result.message then
+      lower_entry_servity(result)
+    elseif type(result) == 'table' and #result > 0 and result[1].message then
+      for _, entry in ipairs(result) do
+        lower_entry_servity(entry)
+      end
+    end
     return result
   end
 
