@@ -21,6 +21,10 @@ local adapters = {
 
 local defaults = {
   php = {
+    before = function()
+      vim.cmd([[ let $XDEBUG_TRIGGER=1 ]])
+      vim.notify('Xdebug enabled')
+    end,
     log = true,
     type = 'php',
     request = 'launch',
@@ -122,6 +126,17 @@ local function config()
     else
       vim.cmd.copen()
     end
+  end)
+  k.set('n', '<space>dx', function()
+    vim.cmd([[
+      if $XDEBUG_TRIGGER == 1
+        unlet $XDEBUG_TRIGGER
+        lua vim.notify('Xdebug disabled')
+      else
+        let $XDEBUG_TRIGGER=1
+        lua vim.notify('Xdebug enabled')
+      endif
+    ]])
   end)
 
   u.highlights({
