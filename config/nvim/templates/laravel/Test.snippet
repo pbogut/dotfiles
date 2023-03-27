@@ -1,7 +1,8 @@
 <?php
 
-namespace [[php.namespace]];;
+namespace Tests\[[php.namespace]];
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -11,5 +12,10 @@ use Tests\TestCase;
  */
 class [[php.class]] extends TestCase
 {
-	$0
+	use RefreshDatabase;
+
+	public function test${4:Something}()
+	{
+		${5:\$this->assertTrue(true);}$0
+	}
 }
