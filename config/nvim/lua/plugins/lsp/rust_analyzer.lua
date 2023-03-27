@@ -7,6 +7,7 @@ function me.setup(opts)
     cmd = { cmd },
   })
   lspconfig.rust_analyzer.setup(opts)
+  lspconfig.rust_analyzer.setup = function(_) end
 end
 
 return me
