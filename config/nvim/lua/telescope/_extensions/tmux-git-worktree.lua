@@ -9,6 +9,7 @@ local action_set = require('telescope.actions.set')
 local action_state = require('telescope.actions.state')
 local conf = require('telescope.config').values
 local git_worktree = require('git-worktree')
+local git = require('githelper')
 
 local force_next_deletion = false
 
@@ -122,25 +123,45 @@ local telescope_git_worktree = function(opts)
   opts = opts or {}
   local output = utils.get_os_command_output({ 'git', 'worktree', 'list' })
   local results = {}
+  local results_with_session = {}
   local widths = {
+    session = 0,
     path = 0,
     sha = 0,
     branch = 0,
   }
+  local session_map = tmux.get_path_session_name_map()
+
+  local is_bare, bare_path = git.is_bare(vim.fn.getcwd())
+  local cwd = vim.fn.getcwd()
+
+  local transform_path = function(path)
+    if is_bare then
+      cwd = bare_path
+    end
+
+    if path:sub(1, #cwd) == cwd then
+      return path:sub(#cwd + 2)
+    end
+
+    return path
+  end
 
   local parse_line = function(line)
     local fields = vim.split(string.gsub(line, '%s+', ' '), ' ')
+    local session = session_map[fields[1]] or { session_name = '' }
     local entry = {
+      session = session.session_name,
       path = fields[1],
       sha = fields[2],
       branch = fields[3],
     }
 
-    if entry.sha ~= '(bare)' then
+    if entry.sha ~= '(bare)' and entry.path ~= cwd then
       local index = #results + 1
       for key, val in pairs(widths) do
         if key == 'path' then
-          local new_path = utils.transform_path(opts, entry[key])
+          local new_path = transform_path(entry[key])
           local path_len = strings.strdisplaywidth(new_path or '')
           widths[key] = math.max(val, path_len)
         else
@@ -148,12 +169,20 @@ local telescope_git_worktree = function(opts)
         end
       end
 
-      table.insert(results, index, entry)
+      if entry.session ~= '' then
+        table.insert(results_with_session, index, entry)
+      else
+        table.insert(results, index, entry)
+      end
     end
   end
 
   for _, line in ipairs(output) do
     parse_line(line)
+  end
+
+  for _, entry in ipairs(results_with_session) do
+    table.insert(results, 1, entry)
   end
 
   if #results == 0 then
@@ -163,6 +192,7 @@ local telescope_git_worktree = function(opts)
   local displayer = require('telescope.pickers.entry_display').create({
     separator = ' ',
     items = {
+      { width = widths.session },
       { width = widths.branch },
       { width = widths.path },
       { width = widths.sha },
@@ -171,8 +201,9 @@ local telescope_git_worktree = function(opts)
 
   local make_display = function(entry)
     return displayer({
+      { entry.session, 'TelescopeResultsIdentifier' },
       { entry.branch, 'TelescopeResultsIdentifier' },
-      { utils.transform_path(opts, entry.path) },
+      { transform_path(entry.path) },
       { entry.sha },
     })
   end
@@ -185,7 +216,7 @@ local telescope_git_worktree = function(opts)
         results = results,
         entry_maker = function(entry)
           entry.value = entry.branch:gsub('^%[(.*)%]$', '%1')
-          entry.ordinal = entry.branch
+          entry.ordinal = entry.session .. ' ' .. entry.branch
           entry.display = make_display
           return entry
         end,
