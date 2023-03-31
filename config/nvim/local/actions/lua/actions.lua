@@ -1,7 +1,6 @@
 local M = {}
 local command = vim.api.nvim_create_user_command
 local config = require('config')
-local u = require('utils')
 local action_output = 'actions://output'
 
 function M.run_action(action, opts)
@@ -60,8 +59,11 @@ local function get_output_bufnr()
     return bufnr
   end
 
-  vim.cmd.badd(action_output)
-  return get_bufnr_by_name(action_output)
+  bufnr = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_name(bufnr, action_output)
+  vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'delete')
+
+  return bufnr
 end
 
 local function get_visible_windows()
@@ -193,5 +195,14 @@ command('Action', function(opt)
   end
   M.run_action(opt.args)
 end, { complete = 'customlist,v:lua.action_complete', nargs = '?', bang = true })
+
+local augroup = vim.api.nvim_create_augroup('x_actions', { clear = true })
+vim.api.nvim_create_autocmd('VimEnter', {
+  group = augroup,
+  pattern = '*',
+  callback = function()
+    vim.cmd.Action('quick_init')
+  end,
+})
 
 return M
