@@ -124,6 +124,26 @@ local function dirvish_rename()
   end
 end
 
+local function delete_buffers(file)
+  local path = nil
+
+  if file:sub(-1) == '/' then
+    path = file
+    file = file:sub(1, -2)
+  end
+
+  local bufs = vim.api.nvim_list_bufs()
+  for _, buf in ipairs(bufs) do
+    local name = vim.api.nvim_buf_get_name(buf)
+    if name == file then
+      vim.api.nvim_buf_delete(buf, { force = true })
+    end
+    if path and name:sub(0, path:len()) == path then
+      vim.api.nvim_buf_delete(buf, { force = true })
+    end
+  end
+end
+
 local function dirvish_delete()
   local file = fn.getline('.')
   fn.inputsave()
@@ -132,11 +152,7 @@ local function dirvish_delete()
   cmd.redraw({ bang = true })
   if confirm == 'yes' then
     fn.system('rm -fr ' .. vim.fn.shellescape(file))
-    local cwd = vim.fn.getcwd()
-    if file:sub(0, cwd:len()) then
-      file = file:sub(cwd:len() + 2)
-    end
-    fn.execute('bd! ' .. fn.fnameescape(file))
+    delete_buffers(file)
     cmd.Dirvish('%')
   end
 end
