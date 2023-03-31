@@ -29,6 +29,7 @@ local servers = {
   { name = 'rust_analyzer' },
   --[[ { name = 'denols' }, ]]
   { name = 'tsserver' },
+  { name = 'openscad_lsp' },
   { name = 'emmet_ls', snippet_support = true },
   { name = 'tailwindcss', snippet_support = true },
   { name = 'lua_ls', snippet_support = true, format = false },

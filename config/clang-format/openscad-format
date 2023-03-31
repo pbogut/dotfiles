@@ -1,0 +1,8 @@
+BasedOnStyle: Chromium
+IndentWidth: 2
+SpacesInContainerLiterals: false
+BinPackArguments: true
+AlignAfterOpenBracket: BlockIndent
+ColumnLimit: 100
+InsertNewlineAtEOF: true
+LineEnding: DeriveLF

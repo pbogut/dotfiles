@@ -4,6 +4,7 @@ require('mason-tool-installer').setup({
   -- start; they should be the names Mason uses for each tool
   ensure_installed = {
     'bash-language-server',
+    'clang-format',
     'codelldb',
     'css-lsp',
     'deno',
@@ -21,6 +22,7 @@ require('mason-tool-installer').setup({
     'jsonlint',
     'lemminx',
     'lua-language-server',
+    'openscad-lsp',
     'php-cs-fixer',
     'php-debug-adapter',
     'phpcbf',
