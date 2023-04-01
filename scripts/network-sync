@@ -7,83 +7,84 @@
 trickle=""
 action="help"
 quiet=""
-force=""
+cron="no"
 debug=""
 
 while test $# -gt 0; do
   case "$1" in
-    all)
-      action="inbox"
-      shift
-      ;;
-    inbox)
-      action="inbox"
-      shift
-      ;;
-    mail)
-      action="mail"
-      shift
-      ;;
-    calendar)
-      action="calendar"
-      shift
-      ;;
-    --trickle)
-      trickle="trickle -s -d 1024 -u 1024"
-      shift
-      ;;
-    --quiet)
-      quiet="yes"
-      shift
-      ;;
-    --debug)
-      debug="yes"
-      shift
-      ;;
-    --force)
-      force="yes"
-      shift
-      ;;
-    enable)
-      action="enable"
-      shift
-      ;;
-    disable)
-      action="disable"
-      shift
-      ;;
-    status)
-      action="status"
-      shift
-      ;;
-    --help|*)
-      action="help"
-      break
-      ;;
+  all)
+    action="inbox"
+    shift
+    ;;
+  inbox)
+    action="inbox"
+    shift
+    ;;
+  mail)
+    action="mail"
+    shift
+    ;;
+  calendar)
+    action="calendar"
+    shift
+    ;;
+  --trickle)
+    trickle="trickle -s -d 1024 -u 1024"
+    shift
+    ;;
+  --quiet)
+    quiet="yes"
+    shift
+    ;;
+  --debug)
+    debug="yes"
+    quiet="no"
+    shift
+    ;;
+  --cron)
+    quiet="yes"
+    cron="yes"
+    shift
+    ;;
+  enable)
+    action="enable"
+    shift
+    ;;
+  disable)
+    action="disable"
+    shift
+    ;;
+  status)
+    action="status"
+    shift
+    ;;
+  --help | *)
+    action="help"
+    break
+    ;;
   esac
 done
 
 if [[ $action == "help" ]]; then
-      echo "Usage:"
-      echo "  network-sync action [--options]"
-      echo "  "
-      echo "Actions:"
-      echo "  enable"
-      echo "  disable"
-      echo "  status"
-      echo "  inbox"
-      echo "  mail"
-      echo "  calendar"
-      echo "  "
-      echo "Options:"
-      echo "  --help"
-      echo "  --trickle"
-      echo "  --quiet"
-      echo "  --force"
-      echo "  --debug"
-      exit
+  echo "Usage:"
+  echo "  network-sync action [--options]"
+  echo "  "
+  echo "Actions:"
+  echo -e "  enable    \tenable auto sync (only respected when run with --cron flag"
+  echo -e "  disable   \tdisable auto sync (as above)"
+  echo -e "  status    \tshow cron enable/disable status"
+  echo -e "  inbox     \tsync email inbox only"
+  echo -e "  mail      \tsync full email"
+  echo -e "  calendar  \tsync calendars"
+  echo -e "  "
+  echo -e "Options:"
+  echo -e "  --help    \tdisplay this help message"
+  echo -e "  --trickle \tlimit network bandwidth to 1MB/s"
+  echo -e "  --quiet   \tdo not show output"
+  echo -e "  --cron    \trun in cron mode (do not show output, respect enable/disable)"
+  echo -e "  --debug   \tshow debug output"
+  exit
 fi
-
 
 if [[ $debug == "yes" ]]; then
   echo "---debug---"
@@ -91,33 +92,34 @@ if [[ $debug == "yes" ]]; then
   echo "  trickle: $trickle"
   echo "  action:  $action"
   echo "  quiet:   $quiet"
-  echo "  force:   $force"
+  echo "  cron:    $cron"
 fi
 
 run() {
   if [[ $debug == "yes" ]]; then
-    echo "Running: $@"
+    echo "Running: $*"
     echo "---"
   fi
 
+  # shellcheck disable=2294 # this is the way
   if ! eval "$@"; then
-  DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-"unix:path=/run/user/$(id -u)/bus"} \
-    dunstify -i error "Network sync error while running: $*"
+    DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-"unix:path=/run/user/$(id -u)/bus"} \
+      dunstify -i error "Network sync error while running: $*"
   fi
 }
 
 print_status() {
-  run [[ -f ~/.netsync-enabled ]] && echo "AutoSync Enabled" || echo "AutoSync Disabled"
+  [[ -f ~/.netsync-enabled ]] && echo "AutoSync Enabled" || echo "AutoSync Disabled"
 }
 
 # enable / disable / status
 if [[ $action == "enable" ]]; then
-  run touch ~/.netsync-enabled > /dev/null 2>&1
+  run touch ~/.netsync-enabled >/dev/null 2>&1
   print_status
   exit
 fi
 if [[ $action == "disable" ]]; then
-  rm -fr touch ~/.netsync-enabled > /dev/null 2>&1
+  rm -fr touch ~/.netsync-enabled >/dev/null 2>&1
   print_status
   exit
 fi
@@ -127,13 +129,12 @@ if [[ $action == "status" ]]; then
 fi
 
 # check status
-if [[ ! -f ~/.netsync-enabled ]] && [[ $force != "yes" ]]; then
+if [[ ! -f ~/.netsync-enabled ]] && [[ $cron == "yes" ]]; then
   if [[ $quiet != "yes" ]]; then
     echo "Doing nothing, sync disabled"
   fi
   exit
 fi
-
 
 # sync inbox
 if [[ $action == "inbox" ]]; then
