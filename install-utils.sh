@@ -31,6 +31,7 @@ paru -S \
     jq \
     apg
     w3m \
+    kmonad-bin \
     wmctrl \
     xtitle \
     xcwd-git \
@@ -73,7 +74,6 @@ paru -S \
     texlive-most \
     udevil \
     udisksvm \
-    xcape \
     xrandr \
     xtitle \
     yarn \

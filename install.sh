@@ -67,6 +67,7 @@ read -d '' files <<"EOF"
     config/i3/config
     config/i3/i3status.conf
     config/i3/workspaces
+    config/kmonad
     config/lazygit/config.yml
     config/mpv/input.conf
     config/mpv/mpv.conf
@@ -100,6 +101,7 @@ read -d '' files <<"EOF"
     config/ranger/rifle.conf
     config/rofi/config.rasi
     config/roxterm.sourceforge.net
+    config/systemd/user/kmonad.service
     config/Franz/Plugins/todoist
     config/MangoHud
     config/xob

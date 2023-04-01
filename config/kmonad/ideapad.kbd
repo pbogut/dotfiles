@@ -1,0 +1,62 @@
+(defcfg
+  input  (device-file "/dev/input/by-path/platform-i8042-serio-0-event-kbd")
+  output (uinput-sink "My KMonad output"
+    "/run/current-system/sw/bin/sleep 1 && /run/current-system/sw/bin/setxkbmap -option compose:ralt")
+
+  fallthrough true
+  allow-cmd false
+)
+
+
+(defalias
+  kil  C-A-del                ;; Bind kil to a button that Ctrl-Alt-deletes
+  kill M-S-q
+  lp S-9
+  rp S-0
+  ces (tap-hold-next 250 esc (layer-toggle lctl))
+  lsh (tap-hold-next 250 @lp lsft)
+  rsh (tap-hold-next 250 @rp rsft)
+  ctq (tap-hold-next 250 ' rctl)
+  tab (tap-hold-next 250 tab (layer-toggle prog))
+  bsl (tap-hold-next 250 \ (layer-toggle prog))
+)
+
+
+(defsrc
+  esc        f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  ins prnt del
+  grv        1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab        q    w    e    r    t    y    u    i    o    p    [    ]    ret
+  caps       a    s    d    f    g    h    j    k    l    ;    '    \
+  lsft  102d z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl  lmet lalt            spc                 ralt rctl left up down right
+)
+
+
+(deflayer main
+  esc        f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  ins prnt del
+  grv        1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  @tab       q    w    e    r    t    y    u    i    o    p    @bsl ]    ret
+  @ces       a    s    d    f    g    h    j    k    l    ;    @ctq \
+  @lsh  102d z    x    c    v    b    n    m    ,    .    /    @rsh
+  lctl  lmet lalt            spc                ralt rctl left up down right
+)
+
+
+(deflayer prog
+  esc        f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  ins prnt del
+  grv        1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  @tab       !    *    $    -    S--  .    7    8    9    +    [    ]    ret
+  @ces       &    #    ^    {    }    bspc 4    5    6    =    '    \
+  @lsh  102d ~    %    @    [    ]    0    1    2    3    /    @rsh
+  lctl  lmet lalt            spc                ralt rctl left up down right
+)
+
+;; its a bit of a hack, but it works, goal was to have ctlr+h behave as backspace
+(deflayer lctl
+  C-esc       C-f1 C-f2 C-f3 C-f4 C-f5 C-f6 C-f7 C-f8 C-f9 C-f10 C-f11 C-f12 C-ins C-prnt C-del
+  C-grv       C-1  C-2  C-3  C-4  C-5  C-6  C-7  C-8  C-9  C-0   C--   C-=   C-bspc
+  ~           C-q  C-w  C-e  C-r  C-t  C-y  C-u  C-i  C-o  C-p   C-[   C-]   C-ret
+  @ces        C-a  C-s  C-d  C-f  C-g  bspc C-j  C-k  C-l  C-;   C-'   C-\
+  C-@lsh 102d C-z  C-x  C-c  C-v  C-b  C-n  C-m  C-,  C-.  C-/   C-@rsh
+  lctl C-lmet C-lalt            C-spc            C-ralt C-rctl C-left C-up C-down C-right
+)

@@ -21,15 +21,6 @@ function rerun() {
 
 # numlock
 numlockx on
-# make use of the useless capslock
-killall xcape -9 >/dev/null 2>&1
-# only if run with xcape option (its not playing nicely with my ergodox)
-setxkbmap -option 'caps:ctrl_modifier'
-if [[ $1 == "--xcape" ]]; then
-  xcape -e 'Control_L=Escape'
-  xcape -e 'Shift_L=parenleft'
-  xcape -e 'Shift_R=parenright'
-fi
 
 # daemons
 rerun copyq copyq
