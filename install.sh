@@ -58,6 +58,7 @@ read -d '' files <<"EOF"
     composer/composer.json
     config/alacritty
     config/autostart/autostart.desktop
+    config/clang-format
     config/dircolors-solarized
     config/dircolors.256dark
     config/dunst/dunstrc
@@ -69,12 +70,14 @@ read -d '' files <<"EOF"
     config/i3/workspaces
     config/kmonad
     config/lazygit/config.yml
+    config/lf/lfrc
     config/mpv/input.conf
     config/mpv/mpv.conf
     config/mpv/script-settings/mpvDLNA.conf
     config/mpv/scripts/minidlna-subs.lua
     config/mpv/scripts/send-to-phone.lua
     config/mpv/scripts/trakt
+    config/networkmanager-dmenu/config.ini
     config/ncmpcpp/config
     config/ncmpcpp/bindings
     config/nvim/after
@@ -102,8 +105,10 @@ read -d '' files <<"EOF"
     config/rofi/config.rasi
     config/roxterm.sourceforge.net
     config/systemd/user/kmonad.service
+    config/systemd/user/syncthing.service
     config/Franz/Plugins/todoist
     config/MangoHud
+    config/gamemode.ini
     config/xob
     gtk-2.0
     i3blocks.conf
