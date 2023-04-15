@@ -3,59 +3,57 @@
 # .make.sh
 # This script creates symlinks from the home directory to any desired dotfiles in ~/dotfiles
 ############################
-
-########## Variables
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # dotfiles directory
+links_only=false
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -l, --links-only     only create symlinks and exit"
+  echo "  -h, --help           display this help and exit"
+}
+
+while test $# -gt 0; do
+  case "$1" in
+    --links-only|-l)
+      links_only=true
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
 
 # fix scripts executable attribute
-chmod +x $(find -iname '*.sh')
-chmod +x $(find -iname '*.zsh')
+find "$dir" -iname '*.sh' -exec chmod +x {} \;
+find "$dir" -iname '*.zsh' -exec chmod +x {} \;
 
 echo -n "Updating submodules ..."
 
 git submodule sync
 git submodule update --init config/dircolors-solarized
 git submodule update --init zshrc.d/plugins/zsh-autosuggestions
-git submodule update --init private
 
 echo "done"
 olddir=~/.dotfiles_backup/$(date +%s%N) # old dotfiles backup directory
-read -d '' files <<"EOF"
-    redeye.autostart.sh
-    silverspoon.autostart.sh
-    ackrc
-    aliases
-    bin
-    ctags
-    emacs.d/init.el
-    gitconfig
-    githelpers
-    gitignore
-    gitpac.json
-    grouppack.json
-    inputrc
-    jshintrc
-    npmrc
-    offlineimap-hooks
-    offlineimap.py
-    profile
-    profile.redeye
-    profile.silverspoon
-    screenrc
-    scripts
-    terminfo
-    urlview
-    vimrc
-    yaourtrc
-    zshrc
-    zshenv
-    zprofile
-    zshrc.d
-    bashrc
-    bash_profile
+read -r -d '' files <<"EOF"
     Xdefaults
     Xresources
+    ackrc
+    aliases
+    bash_profile
+    bashrc
+    bin
     composer/composer.json
+    config/Franz/Plugins/todoist
+    config/MangoHud
     config/alacritty
     config/autostart/autostart.desktop
     config/clang-format
@@ -64,6 +62,7 @@ read -d '' files <<"EOF"
     config/dunst/dunstrc
     config/feh/keys
     config/fish
+    config/gamemode.ini
     config/gtk-3.0/settings.ini
     config/i3/config
     config/i3/i3status.conf
@@ -77,25 +76,25 @@ read -d '' files <<"EOF"
     config/mpv/scripts/minidlna-subs.lua
     config/mpv/scripts/send-to-phone.lua
     config/mpv/scripts/trakt
-    config/networkmanager-dmenu/config.ini
-    config/ncmpcpp/config
     config/ncmpcpp/bindings
+    config/ncmpcpp/config
+    config/networkmanager-dmenu/config.ini
     config/nvim/after
-    config/nvim/init.lua
-    config/nvim/filetype.lua
-    config/nvim/lua
-    config/nvim/ginit.vim
     config/nvim/config
-    config/nvim/templates
-    config/nvim/snippets
+    config/nvim/filetype.lua
+    config/nvim/ginit.vim
+    config/nvim/init.lua
     config/nvim/local
+    config/nvim/lua
+    config/nvim/snippets
+    config/nvim/templates
     config/picom/picom.conf
     config/pip/pip.conf
     config/polybar
     config/qutebrowser/config.py
+    config/qutebrowser/js
     config/qutebrowser/keys.conf
     config/qutebrowser/qutebrowser.conf
-    config/qutebrowser/js
     config/qutebrowser/userscripts
     config/ranger/commands.py
     config/ranger/devicons.py
@@ -106,61 +105,85 @@ read -d '' files <<"EOF"
     config/roxterm.sourceforge.net
     config/systemd/user/kmonad.service
     config/systemd/user/syncthing.service
-    config/Franz/Plugins/todoist
-    config/MangoHud
-    config/gamemode.ini
     config/xob
+    ctags
+    emacs.d/init.el
+    gitconfig
+    githelpers
+    gitignore
+    gitpac.json
+    grouppack.json
     gtk-2.0
     i3blocks.conf
     icons/polar
-    local/share/applications/ranger.desktop
+    inputrc
+    jshintrc
     local/share/applications/browser.desktop
     local/share/applications/email.desktop
     local/share/applications/freetube.desktop
+    local/share/applications/ranger.desktop
     mutt/mailcap
     mutt/muttrc
     mutt/solarized-dark-16.muttrc
+    npmrc
+    offlineimap-hooks
+    offlineimap.py
+    profile
+    profile.redeye
+    profile.silverspoon
+    redeye.autostart.sh
+    screenrc
+    scripts
     scspell/dictionary.txt
+    silverspoon.autostart.sh
+    terminfo
+    urlview
     vim/autoload/plug.vim
     vim/ftplugin
     vim/plugin
+    vimrc
     weechat/alias.conf
     weechat/cron.txt
     weechat/weechat.conf
+    yaourtrc
+    zprofile
+    zshenv
+    zshrc
+    zshrc.d
 EOF
-read -d '' directories <<"EOF"
+
+read -r -d '' directories <<"EOF"
     .gocode
     .vim/backupfiles
     .vim/swapfiles
     .vim/undofiles
 EOF
-##########
 
 # create dotfiles_old in homedir
 echo -n "Creating $olddir for backup of any existing dotfiles in ~ ..."
-mkdir -p $olddir
+mkdir -p "$olddir"
 echo "done"
 
 # change to the dotfiles directory
 echo -n "Changing to the $dir directory ..."
-cd $dir
+cd "$dir" || exit 3
 echo "done"
 
 # create required directories
 echo "Creating missing directories"
 for directory in $directories; do
-  if [ ! -e ~/$directory ]; then
+  if [ ! -e "$HOME/$directory" ]; then
     echo -en "\t~/$directory "
-    mkdir -p ~/$directory
+    mkdir -p "$HOME/$directory"
     echo "done"
   fi
 done
 # move any existing dotfiles in homedir to dotfiles_old directory, then create symlinks from the homedir to any files in the ~/dotfiles directory specified in $files
 echo "Backing up current files to $olddir/"
 for file in $files; do
-  if [ -e ~/.$file ]; then
+  if [ -e "$HOME/.$file" ]; then
     echo -en "\t~/.$file "
-    mv ~/.$file $olddir/
+    mv "$HOME/.$file" "$olddir/"
     echo "done"
   fi
 done
@@ -168,10 +191,14 @@ echo "Creating symlinks in home directory"
 for file in $files; do
   echo -en "\t~/.$file "
   # crate directory if not exists
-  mkdir -p $(dirname $HOME/.$file)
-  ln -sf $dir/$file $HOME/.$file
+  mkdir -p "$(dirname "$HOME/.$file")"
+  ln -sf "$dir/$file" "$HOME/.$file"
   echo "done"
 done
+
+if $links_only; then
+  exit 0
+fi
 
 echo "Post install actions"
 
@@ -203,18 +230,13 @@ echo -en "\tSet freetube as default youtube handler (xdg-mime) ... "
 [[ -n $(command -v xdg-mime) ]] && xdg-mime default freetube.desktop 'x-scheme-handler/freetube'
 echo "done"
 
-echo -en "\t"$(
-  if [[ -n $(command -v gio) ]]; then
+echo -en "\t$(
+  if [[ -n "$(command -v gio)" ]]; then
     gio mime inode/directory ranger.desktop
   elif [[ -n $(command -v gvfs-mime) ]]; then
     gvfs-mime --set inode/directory ranger.desktop
   fi
-) && echo " ... done"
-
-# echo -en "\tInstall vim/neovim plugins ... "
-# [[ -n $(command -v /bin/vim) ]] && /bin/vim -u ./vim/silent.vimrc +PlugInstall +qa
-# [[ -n $(command -v /bin/nvim) ]] && /bin/nvim -u ./vim/silent.vimrc +PlugInstall +qa
-# echo "done"
+)" && echo " ... done"
 
 echo -e "\nChange your shell if you wish:\n"
 test -f /usr/bin/fish && echo -e "\tchsh $(id -un) -s $(which fish)"
@@ -222,4 +244,6 @@ test -f /usr/bin/zsh && echo -e "\tchsh $(id -un) -s $(which zsh)"
 
 read -r -p "Do you want to update bin folder? [yN]" -n 1 -s ask
 echo ""
-[[ $ask == "y" ]] && ./install-bin.sh
+if [[ $ask == "y" ]]; then
+  ./install-bin.sh
+fi

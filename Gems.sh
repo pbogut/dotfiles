@@ -5,12 +5,12 @@
 # date:   02/04/2020
 #=================================================
 
-gem install english
-gem install nokogiri
 gem install clipboard
+gem install english
+gem install erb
+gem install json
 gem install mail
+gem install nokogiri
 gem install redcarpet
 gem install rotp
 gem install yaml
-gem install json
-gem install erb
