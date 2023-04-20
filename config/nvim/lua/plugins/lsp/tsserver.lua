@@ -11,6 +11,13 @@ function me.setup(opts)
       'javascriptreact',
       'javascript.jsx',
     },
+    settings = {
+      typescript = {
+        format = {
+          semicolons = 'insert',
+        }
+      },
+    }
   })
   lspconfig.tsserver.setup(opts)
 end
