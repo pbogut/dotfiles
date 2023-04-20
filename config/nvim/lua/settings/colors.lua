@@ -6,6 +6,7 @@ local cmd = vim.cmd
 
 g.colors = {
   ad_dark1 = '#001c26',
+  ad_dark2 = '#00222b',
 
   ad_info = '#a68f46',
   ad_hint = '#9eab7d',
