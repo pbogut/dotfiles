@@ -127,6 +127,8 @@ if [[ -f ~/.zshrc.d/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
 fi
 
 setopt prompt_subst
+# starship prompt
+source <(/usr/bin/starship init zsh --print-full-init)
 
 # host specific config
 if [ -f $HOME/.$hostname.zsh ]; then

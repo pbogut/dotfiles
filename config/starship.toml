@@ -1,0 +1,127 @@
+add_newline = false
+# right_format = "$time"
+format = """
+${custom.time}$status$cmd_duration$all$shell
+$username$hostname$directory$git_branch$git_status$git_state$custom_time
+$character\
+"""
+
+[cmd_duration]
+format = '\[ﰌ [$duration]($style)\] '
+
+[status]
+format = '[$symbol$status]($style) '
+disabled = false
+
+[line_break]
+disabled = true
+
+[character]
+error_symbol = '[λ](bold red)'
+success_symbol = '[λ](bold red)'
+
+[hostname]
+ssh_only = false
+format= '[$hostname]($style)[\]](bold red) '
+style = 'gray'
+
+[username]
+show_always = true
+format= '[\[](bold red)[$user]($style)[@](bold red)'
+style_user = 'gray'
+
+[shell]
+format = '[$indicator]($style) '
+style = 'white'
+zsh_indicator = '' # default one
+disabled = false
+
+[directory]
+format = '[\(](bold red)[$path]($style)[\)](bold red)[$read_only]($read_only_style) '
+truncate_to_repo = false
+truncation_symbol = "…/"
+
+[directory.substitutions]
+'~/Projects/gitlab.com/assuredpharmacy' = '~ap'
+'~/Projects/github.com/pbogut' = '~pb'
+
+[git_status]
+disabled = true
+
+[git_state]
+disabled = true
+
+[git_branch]
+format = '[$symbol$branch(:$remote_branch)]($style) '
+style = 'blue'
+
+[custom.time]
+format = '[\[$symbol$output\]]($style) '
+command = 'date +"%H:%M:%S"'
+style = 'green'
+when = "true"
+
+[custom.elixir]
+symbol = '💧 '
+format = '[$symbol(v$output )]($style)'
+command = "elixir --short-version 2>/dev/null || (elixir --version | grep '^Elixir' | awk '{print $2}')"
+when = "test -f mix.exs"
+style = 'bold purple'
+# symbol = ' '
+
+[custom.docker]
+symbol = '🐳 '
+style = 'bold blue'
+command = '(docker-compose ls | awk "{print $3}" | grep "$(realpath $PWD)/docker-compose.yml" >/dev/null) && echo "up" || echo "down"'
+when = "test -f docker-compose.yml"
+
+# get rid of 'via ' prefix in package version info
+[package]
+format = '[$symbol($version )]($style)'
+[bun]
+format = '[$symbol($version )]($style)'
+[cmake]
+format = '[$symbol($version )]($style)'
+[deno]
+format = '[$symbol($version )]($style)'
+[elixir]
+format = '[$symbol($version )]($style)'
+disabled = true
+[elm]
+format = '[$symbol($version )]($style)'
+[erlang]
+format = '[$symbol($version )]($style)'
+[golang]
+format = '[$symbol($version )]($style)'
+[haskell]
+format = '[$symbol($version )]($style)'
+[java]
+format = '[$symbol($version )]($style)'
+[kotlin]
+format = '[$symbol($version )]($style)'
+[lua]
+format = '[$symbol($version )]($style)'
+[meson]
+format = '[$symbol($version )]($style)'
+[nim]
+format = '[$symbol($version )]($style)'
+[nix_shell]
+format = '[$symbol($version )]($style)'
+[nodejs]
+format = '[$symbol($version )]($style)'
+[perl]
+format = '[$symbol($version )]($style)'
+[php]
+format = '[$symbol($version )]($style)'
+[python]
+format = '[$symbol($version )]($style)'
+[ruby]
+format = '[$symbol($version )]($style)'
+[rust]
+format = '[$symbol($version )]($style)'
+[vagrant]
+format = '[$symbol($version )]($style)'
+[vlang]
+format = '[$symbol($version )]($style)'
+[zig]
+format = '[$symbol($version )]($style)'

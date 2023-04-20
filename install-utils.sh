@@ -59,6 +59,7 @@ paru -S \
   ruby \
   rustup \
   shfmt \
+  starship \
   texlive-most \
   tmux \
   udevil \

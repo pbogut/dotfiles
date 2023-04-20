@@ -103,6 +103,7 @@ read -r -d '' files <<"EOF"
     config/ranger/rifle.conf
     config/rofi/config.rasi
     config/roxterm.sourceforge.net
+    config/starship.toml
     config/systemd/user/kmonad.service
     config/systemd/user/syncthing.service
     config/xob
