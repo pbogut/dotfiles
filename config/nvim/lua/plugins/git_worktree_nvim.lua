@@ -30,22 +30,6 @@ end
 
 Status.next_status = function(_) end -- this messages are annoying
 
-if vim.fn.filereadable('HEAD') == 1 then
-  vim.defer_fn(function()
-    local is_bare, bare_path = git.is_bare()
-    if is_bare then
-      local cwt = bare_path .. '/current_worktree'
-      if vim.fn.filereadable(cwt) == 1 then
-        local wtpath = vim.fn.readfile(cwt)[1]
-        if vim.fn.isdirectory(wtpath) == 1 then
-          tmux.switch_to_path(wtpath)
-        end
-      end
-    end
-    require('telescope').extensions['tmux-git-worktree'].git_worktrees()
-  end, 100)
-end
-
 k.set('n', '<space>gl', require('telescope').extensions['tmux-git-worktree'].git_worktrees)
 k.set('n', '<space>gk', function()
   local branch_name = vim.fn.input('New worktree name > ')
