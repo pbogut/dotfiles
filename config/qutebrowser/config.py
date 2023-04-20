@@ -20,12 +20,12 @@ c.qt.args = [('ppapi-widevine-path='
               '/usr/lib/qt/plugins/ppapi/libwidevinecdmadapter.so')]
 # /usr/share/qutebrowser/scripts/dictcli.py install pl-PL en-GB
 c.spellcheck.languages = ['pl-PL', 'en-GB']
-c.url.start_pages = ['https://search.brave.com/']
-c.url.default_page = 'https://search.brave.com/'
+c.url.start_pages = ['https://monkeytype.com/']
+c.url.default_page = 'https://monkeytype.com/'
 
 c.fileselect.handler = "external"
-c.fileselect.single_file.command = [term, "-t", "QB_FILE_SELECTION", "-e", "lf", "-selection-path", "{}"]
-c.fileselect.multiple_files.command = [term, "-t", "QB_FILE_SELECTION", "-e", "lf", "-selection-path", "{}"]
+c.fileselect.single_file.command = [term, "-t", "QB_FILE_SELECTION", "-e", "lfrun", "-selection-path", "{}"]
+c.fileselect.multiple_files.command = [term, "-t", "QB_FILE_SELECTION", "-e", "lfrun", "-selection-path", "{}"]
 
 c.downloads.open_dispatcher = '/bin/bash -c "QB_DOWNLOAD_FILE=1 download-sort-and-open.sh \'{}\'"'
 c.editor.command = [term, "-t", "NVIM_FOR_QB", "-e", "nvim", "{}"]
@@ -203,6 +203,7 @@ config.bind('gs', 'spawn --userscript ~/.scripts/qb-switch.sh')
 config.bind('gw', 'open -w')
 
 config.bind(',m', 'spawn --userscript mpv')
+config.bind(',ch', 'spawn chromium {url}')
 
 config.bind('sje', 'set content.javascript.enabled true')
 config.bind('sjd', 'set content.javascript.enabled false')
