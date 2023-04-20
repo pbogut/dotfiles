@@ -8,35 +8,8 @@ local u = require('utils')
 -- :so | UpdateExternalPackages
 --
 local packages = {
-  yarn = {
-    '@tailwindcss/language-server',
-    'vim-language-server',
-    'vls',
-    'bash-language-server',
-    'pyright',
-    'dockerfile-language-server-nodejs',
-    'typescript-language-server',
-    '@tailwindcss/language-server',
-    'intelephense',
-    'vscode-langservers-extracted',
-    'jsonlint',
-  },
-  gem = {
-    'solargraph',
-  },
-  go = {
-    'golang.org/x/tools/gopls@latest',
-  },
-  cargo = {
-    'stylua',
-    'selene',
-    'prosemd-lsp',
-  },
   gitpac = {
-    'sumneko/lua-language-server',
     'pbogut/emmet-ls',
-    'elixir-lsp/elixir-ls',
-    'xdebug/vscode-php-debug',
   },
 }
 
