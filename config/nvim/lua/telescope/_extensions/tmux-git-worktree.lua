@@ -69,6 +69,26 @@ local confirm_deletion = function(forcing)
   return false
 end
 
+local close_session = function(finder)
+  return function(prompt_bufnr)
+    local selection = action_state.get_selected_entry(prompt_bufnr)
+    if selection.session then
+      tmux.close_session(selection.session)
+      selection.session = ''
+
+      local picker = action_state.get_current_picker(prompt_bufnr)
+      local selection_row = picker:get_selection_row()
+      local callbacks = { unpack(picker._completion_callbacks) } -- shallow copy
+      picker:register_completion_callback(function(self)
+        self:set_selection(selection_row)
+        self._completion_callbacks = callbacks
+      end)
+
+      picker:refresh(finder, { reset_prompt = false })
+    end
+  end
+end
+
 local delete_worktree = function(prompt_bufnr)
   if not confirm_deletion() then
     return
@@ -136,12 +156,13 @@ local telescope_git_worktree = function(opts)
   local cwd = vim.fn.getcwd()
 
   local transform_path = function(path)
+    local cwd_or_bare = cwd
     if is_bare then
-      cwd = bare_path
+      cwd_or_bare = bare_path
     end
 
-    if path:sub(1, #cwd) == cwd then
-      return path:sub(#cwd + 2)
+    if path:sub(1, #cwd_or_bare) == cwd_or_bare then
+      return path:sub(#cwd_or_bare + 2)
     end
 
     return path
@@ -158,7 +179,6 @@ local telescope_git_worktree = function(opts)
     }
 
     if entry.sha ~= '(bare)' and entry.path ~= cwd then
-      local index = #results + 1
       for key, val in pairs(widths) do
         if key == 'path' then
           local new_path = transform_path(entry[key])
@@ -169,10 +189,10 @@ local telescope_git_worktree = function(opts)
         end
       end
 
-      if entry.session ~= '' then
-        table.insert(results_with_session, index, entry)
+      if entry.session:len() > 0 then
+        results_with_session[#results_with_session + 1] = entry
       else
-        table.insert(results, index, entry)
+        results[#results + 1] = entry
       end
     end
   end
@@ -186,6 +206,7 @@ local telescope_git_worktree = function(opts)
   end
 
   if #results == 0 then
+    print('No worktrees found')
     return
   end
 
@@ -208,27 +229,27 @@ local telescope_git_worktree = function(opts)
     })
   end
 
+  local finder = finders.new_table({
+    results = results,
+    entry_maker = function(entry)
+      entry.value = entry.branch:gsub('^%[(.*)%]$', '%1')
+      entry.ordinal = entry.session .. ' ' .. entry.branch
+      entry.display = make_display
+      return entry
+    end,
+  })
+
   pickers
     .new(opts or {}, {
       prompt_title = 'Git Worktrees',
       previewer = previewers.git_branch_log.new(opts),
-      finder = finders.new_table({
-        results = results,
-        entry_maker = function(entry)
-          entry.value = entry.branch:gsub('^%[(.*)%]$', '%1')
-          entry.ordinal = entry.session .. ' ' .. entry.branch
-          entry.display = make_display
-          return entry
-        end,
-      }),
+      finder = finder,
       sorter = conf.generic_sorter(opts),
-      attach_mappings = function(_, map)
+      attach_mappings = function(bufnr, map)
         action_set.select:replace(switch_worktree)
 
-        map('i', '<c-d>', delete_worktree)
-        map('n', '<c-d>', delete_worktree)
-        map('i', '<c-f>', toggle_forced_deletion)
-        map('n', '<c-f>', toggle_forced_deletion)
+        map('i', '<c-x>', close_session(finder))
+        map('n', '<c-x>', close_session(finder))
 
         return true
       end,

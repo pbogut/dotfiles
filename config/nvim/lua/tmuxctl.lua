@@ -87,6 +87,12 @@ local function has_buffers()
   return false
 end
 
+function M.close_session(session_name)
+  if session_name:len() > 0 then
+    vim.fn.system('tmux kill-session -t ' .. vim.fn.shellescape(session_name))
+  end
+end
+
 function M.switch_to_path(path)
   local tmux = M
 
@@ -114,9 +120,6 @@ function M.switch_to_path(path)
       os.execute('[[ -d ' .. path .. '/.git || -f ' .. path .. '/.git ]] && touch ' .. path .. '/.git')
     end
     -- if current session seams empty jsut close it
-    if switched and not has_buffers() then
-      vim.cmd.quit()
-    end
   end
 end
 

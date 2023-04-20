@@ -1,9 +1,12 @@
+local putils = require('telescope.previewers.utils')
+local conf = require('telescope.config').values
 local tmux = require('tmuxctl')
 local utils = require('telescope.utils')
 local pickers = require('telescope.pickers')
 local finders = require('telescope.finders')
 local actions = require('telescope.actions')
 local sorters = require('telescope.sorters')
+local previewers = require('telescope.previewers')
 local action_state = require('telescope.actions.state')
 
 local switch_project = function(prompt_bufnr)
@@ -19,27 +22,24 @@ local switch_project = function(prompt_bufnr)
   tmux.switch_to_path(pr_path)
 end
 
-local hl_and_filter_sorter = function(opts)
-  opts = opts or {}
-  local fzy = opts.fzy_mod or require('telescope.algos.fzy')
+local close_session = function(finder)
+  return function(prompt_bufnr)
+    local selection = action_state.get_selected_entry(prompt_bufnr)
+    if selection.session_name then
+      tmux.close_session(selection.session_name)
+      selection.session_name = ''
 
-  local sorter = sorters.new({
-    filter_function = function(_, prompt, entry)
-      if fzy.has_match(prompt, entry.session_name .. entry.short_path) then
-        return 1
-      else
-        return -1
-      end
-    end,
-    scoring_function = function()
-      return 1
-    end,
-    highlighter = function(_, prompt, display)
-      return fzy.positions(prompt, display)
-    end,
-  })
+      local picker = action_state.get_current_picker(prompt_bufnr)
+      local selection_row = picker:get_selection_row()
+      local callbacks = { unpack(picker._completion_callbacks) } -- shallow copy
+      picker:register_completion_callback(function(self)
+        self:set_selection(selection_row)
+        self._completion_callbacks = callbacks
+      end)
 
-  return sorter
+      picker:refresh(finder, { reset_prompt = false })
+    end
+  end
 end
 
 local select_project = function(opts)
@@ -103,22 +103,58 @@ local select_project = function(opts)
     table.insert(results, idx, sess_entry)
     idx = idx + 1
   end
+  local finder = finders.new_table({
+    results = results,
+    entry_maker = function(entry)
+      entry.value = entry.path
+      entry.ordinal = entry.session_name .. ' ' .. entry.path
+      entry.display = make_display
+      return entry
+    end,
+  })
+
+  local previewer = previewers.new_buffer_previewer({
+    title = 'Git Stash Preview',
+    get_buffer_by_name = function(_, entry)
+      return entry.value
+    end,
+
+    define_preview = function(self, entry, _)
+      putils.job_maker(
+        {
+          'git',
+          '-C',
+          entry.value,
+          '--no-pager',
+          'log',
+          '--graph',
+          --[[ '--pretty=format:%h -%d %s (%cr)', ]]
+          '--pretty=format:%h %s (%cr)',
+          '--abbrev-commit',
+          '--date=relative',
+        },
+        self.state.bufnr,
+        {
+          value = entry.value,
+          bufname = self.state.bufname,
+          cwd = opts.cwd,
+        }
+      )
+    end,
+  })
 
   pickers
     .new(opts or {}, {
       prompt_title = 'Projects',
-      finder = finders.new_table({
-        results = results,
-        entry_maker = function(entry)
-          entry.value = entry.path
-          entry.ordinal = entry.session_name .. ' ' .. entry.path
-          entry.display = make_display
-          return entry
-        end,
-      }),
-      sorter = hl_and_filter_sorter(opts),
+      previewer = previewer,
+      finder = finder,
+      sorter = conf.generic_sorter(opts),
       attach_mappings = function(_, map)
         actions.select_default:replace(switch_project)
+
+        map('i', '<c-x>', close_session(finder))
+        map('n', '<c-x>', close_session(finder))
+
         return true
       end,
     })
