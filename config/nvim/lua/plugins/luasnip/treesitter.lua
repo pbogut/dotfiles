@@ -1,4 +1,5 @@
 local ls = require('luasnip')
+local get_node_text = vim.treesitter.get_node_text
 
 local function to_t(list)
   local result = {}
@@ -18,23 +19,8 @@ local function to_i(list)
   return result
 end
 
-local function get_node_text(node)
-  local start_line, start_col = node:start()
-  local end_line, end_col = node:end_()
-
-  local lines = vim.api.nvim_buf_get_lines(0, start_line, end_line + 1, false)
-
-  if #lines then
-    lines[1] = lines[1]:sub(start_col + 1, end_col)
-  else
-    lines[1] = lines[1]:sub(start_col + 1)
-    lines[#lines] = lines[#lines]:sub(0, end_col)
-  end
-  return lines[1]
-end
-
 local function get_nodes(language, query)
-  local nodes = vim.treesitter.parse_query(language, query)
+  local nodes = vim.treesitter.query.parse(language, query)
   local parser = vim.treesitter.get_parser(0, language)
   local root = parser:parse()[1]:root()
 
@@ -56,7 +42,7 @@ local function get_variables()
 
   local results = {}
   for _, node in ipairs(nodes) do
-    results[get_node_text(node)] = get_node_text(node)
+    results[get_node_text(node, 0)] = get_node_text(node, 0)
   end
 
   return to_i(results)
@@ -76,13 +62,13 @@ local function get_classes()
   local results = {}
   for _, node in ipairs(nodes) do
     if node:next_sibling() and node:next_sibling():type() == 'namespace_aliasing_clause' then
-      results[get_node_text(node)] = get_node_text(node:next_sibling():child(1))
+      results[get_node_text(node, 0)] = get_node_text(node:next_sibling():child(1), 0)
     elseif node:type() == 'namespace_use_clause' then
-      results[get_node_text(node)] = get_node_text(node)
+      results[get_node_text(node, 0)] = get_node_text(node, 0)
     elseif node:parent() and node:parent():type() == 'namespace_use_clause' then
-      results[get_node_text(node)] = get_node_text(node:child(1))
+      results[get_node_text(node, 0)] = get_node_text(node:child(1), 0)
     else
-      results[get_node_text(node)] = get_node_text(node)
+      results[get_node_text(node, 0)] = get_node_text(node, 0)
     end
   end
 
