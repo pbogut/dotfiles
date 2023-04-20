@@ -73,5 +73,6 @@ re_require('plugins.luasnip.php')
 re_require('plugins.luasnip.js')
 re_require('plugins.luasnip.lua')
 re_require('plugins.luasnip.magento2')
+re_require('plugins.luasnip.rust')
 
 vim.cmd([[ command! LuaSnipReload :so ~/.config/nvim/lua/plugins/luasnip.lua ]])
