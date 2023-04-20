@@ -131,38 +131,15 @@ projector.setup({
             end
           end, { nargs = '*', bang = true })
 
-          local run = require('actions').run_cmds
-          local magento_group = vim.api.nvim_create_augroup('x_magento', { clear = true })
-          vim.api.nvim_create_autocmd('BufWritePost', {
-            group = magento_group,
-            pattern = '*.csv',
+          vim.api.nvim_create_autocmd('FileType', {
+            group = vim.api.nvim_create_augroup('x_magento2', { clear = true }),
+            pattern = 'xml',
             callback = function()
-              run({
-                './mage-docker clear:cache translate',
-                './mage-docker clear:cache block_html',
-                './mage-docker clear:cache full_page',
-              })
-            end,
-          })
-          vim.api.nvim_create_autocmd('BufWritePost', {
-            group = magento_group,
-            pattern = '*.xml',
-            callback = function()
-              run({
-                './mage-docker clear:cache layout',
-                './mage-docker clear:cache block_html',
-                './mage-docker clear:cache full_page',
-              })
-            end,
-          })
-          vim.api.nvim_create_autocmd('BufWritePost', {
-            group = magento_group,
-            pattern = '*.phtml',
-            callback = function()
-              run({
-                './mage-docker clear:cache block_html',
-                './mage-docker clear:cache full_page',
-              })
+              -- let to use gf on FQN in xml files (at least for local modules)
+              bo.suffixesadd = '.php'
+              bo.includeexpr = [[substitute(v:fname,'\\','/','g')]]
+              bo.path = o.path .. [[,app/code;]]
+              o.isfname = '@,48-57,/,.,-,_,+,,,#,$,%,~,=,\\'
             end,
           })
         end,
@@ -182,6 +159,7 @@ projector.setup({
           php = { 'magento2/php' },
           xml = { 'magento2/xml' },
           html = { 'knockout/html' },
+          phtml = { 'knockout/html' },
         },
       },
       project_init = {
@@ -345,6 +323,14 @@ projector.setup({
         ['app/code/.*/registration.php'] = {
           template = 'magento2/registration.php',
           priority = 100,
+        },
+        ['app/code/([^/]+/[^/]+)/(.*)%.php'] = {
+          priority = 3000,
+          alternate = function(_, opt)
+            return {
+              'app/code/' .. opt.match[1] .. '/Test/' .. opt.match[2] .. 'Test.php',
+            }
+          end,
         },
         ['.*%.php'] = {
           template = 'php/Class',
