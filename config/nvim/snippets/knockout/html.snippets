@@ -1,2 +1,2 @@
 snippet kodump "dump knockout template data"
-	<div data-bind="text: ko.toJSON($data)"></div>
+	<pre data-bind="text: ko.toJSON(\$data, null, 2)"></pre>
