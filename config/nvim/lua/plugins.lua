@@ -100,6 +100,7 @@ require('packer').startup({
     use({ 'nvim-lualine/lualine.nvim', config = config('lualine_nvim') })
     use({ 'kyazdani42/nvim-web-devicons', config = config('nvim_web_devicons') })
     use({ 'mfussenegger/nvim-dap', config = config('nvim_dap') })
+    use({ 'rcarriga/nvim-dap-ui', requires = { 'mfussenegger/nvim-dap' }, config = config('nvim_dap_ui') })
     use({ 'lewis6991/gitsigns.nvim', config = config('gitsigns_nvim') })
     use({ 'ntpeters/vim-better-whitespace', config = config('vim_better_whitespace') })
     use({ 'honza/vim-snippets' })

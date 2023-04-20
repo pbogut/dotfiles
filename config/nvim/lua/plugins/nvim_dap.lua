@@ -7,14 +7,17 @@ local colors = vim.g.colors
 local adapters = {
   php = {
     type = 'executable',
-    command = 'node',
-    args = {
-      gitpac_path('xdebug/vscode-php-debug/out/phpDebug.js'),
-    },
+    command = mason_bin('php-debug-adapter'),
+    args = {},
   },
   mix_task = {
     type = 'executable',
-    command = gitpac_path('elixir-lsp/elixir-ls/out/debugger.sh'),
+    command = mason_bin('elixir-ls-debugger'),
+    args = {},
+  },
+  chrome = {
+    type = 'executable',
+    command = mason_bin('chrome-debug-adapter'),
     args = {},
   },
 }
