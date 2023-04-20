@@ -138,7 +138,16 @@ k.set('n', '<space>fn', function()
   })
 end)
 k.set('n', '<space>fg', function()
-  builtin.git_status()
+  builtin.git_status({
+    attach_mappings = function(bufnr, map)
+      -- disable stage change and use my default action
+      map({ 'i', 'n' }, '<tab>', function()
+        actions.toggle_selection(bufnr)
+        actions.move_selection_worse(bufnr)
+      end)
+      return true
+    end,
+  })
 end)
 k.set('n', '<space>gf', function()
   local file = u.string_under_coursor()
