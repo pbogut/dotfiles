@@ -7,7 +7,7 @@ require('settings.highlights')
 local cmd = vim.cmd
 local o = vim.opt
 
-cmd('filetype plugin indent on')
+cmd('filetype plugin indent off')
 cmd('set fillchars=fold:\\ ,vert:\\│')
 cmd('set shortmess+=c')
 cmd('set runtimepath+=~/.vim')
