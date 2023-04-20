@@ -10,3 +10,12 @@ copilot.setup({
   },
   panel = { enabled = false },
 })
+
+local augroup = vim.api.nvim_create_augroup('x_copilot', {})
+vim.api.nvim_create_autocmd('FileType', {
+  group = augroup,
+  pattern = 'gitcommit',
+  callback = function()
+    vim.cmd('Copilot! attach')
+  end,
+})
