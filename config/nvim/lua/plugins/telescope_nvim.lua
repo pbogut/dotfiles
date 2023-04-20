@@ -154,6 +154,21 @@ k.set('n', '<space>gw', function()
   builtin.grep_string()
 end)
 
+local augroup = vim.api.nvim_create_augroup('x_telescope', { clear = true })
+vim.api.nvim_create_autocmd('FileType', {
+  group = augroup,
+  pattern = 'TelescopePrompt',
+  callback = function()
+    -- some vim-rsi mappings for insert mode, otherwise overriden by my plugins
+    vim.cmd([[
+      inoremap <buffer>        <C-A> <C-O>^
+      inoremap <buffer> <expr> <C-B> getline('.')=~'^\s*$'&&col('.')>strlen(getline('.'))?"0\<Lt>C-D>\<Lt>Esc>kJs":"\<Lt>Left>"
+      inoremap <buffer> <expr> <C-E> col('.')>strlen(getline('.'))<bar><bar>pumvisible()?"\<Lt>C-E>":"\<Lt>End>"
+      inoremap <buffer> <expr> <C-F> col('.')>strlen(getline('.'))?"\<Lt>C-F>":"\<Lt>Right>"
+    ]])
+  end,
+})
+
 telescope.setup({
   defaults = {
     -- path_display = {

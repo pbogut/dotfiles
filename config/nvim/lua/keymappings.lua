@@ -242,3 +242,24 @@ vim.api.nvim_create_autocmd('FileType', {
     k.set('n', 'q', '<c-w>q', { buffer = true })
   end,
 })
+-- vim-rsi mappings (onle selected few)
+vim.cmd([[
+  inoremap        <C-A> <C-O>^
+  cnoremap        <C-A> <Home>
+  inoremap <expr> <C-B> getline('.')=~'^\s*$'&&col('.')>strlen(getline('.'))?"0\<Lt>C-D>\<Lt>Esc>kJs":"\<Lt>Left>"
+  cnoremap        <C-B> <Left>
+  inoremap <expr> <C-D> col('.')>strlen(getline('.'))?"\<Lt>C-D>":"\<Lt>Del>"
+  cnoremap <expr> <C-D> getcmdpos()>strlen(getcmdline())?"\<Lt>C-D>":"\<Lt>Del>"
+  inoremap <expr> <C-E> col('.')>strlen(getline('.'))<bar><bar>pumvisible()?"\<Lt>C-E>":"\<Lt>End>"
+  inoremap <expr> <C-F> col('.')>strlen(getline('.'))?"\<Lt>C-F>":"\<Lt>Right>"
+  cnoremap <expr> <C-F> getcmdpos()>strlen(getcmdline())?&cedit:"\<Lt>Right>"
+
+  noremap!        <M-b> <S-Left>
+  noremap!        <M-f> <S-Right>
+  noremap!        <M-d> <C-O>dw
+  cnoremap        <M-d> <S-Right><C-W>
+  noremap!        <M-n> <Down>
+  noremap!        <M-p> <Up>
+  noremap!        <M-BS> <C-W>
+  noremap!        <M-C-h> <C-W>
+]])

@@ -84,7 +84,6 @@ require('packer').startup({
     -- Github plugins
     use({ 'tpope/vim-scriptease' })
     use({ 'tpope/vim-eunuch' })
-    use({ 'tpope/vim-rsi' })
     use({ 'tpope/vim-abolish' }) -- coercion thingis
     use({ 'tpope/vim-repeat' })
     use({ 'tpope/vim-sleuth' })
