@@ -92,7 +92,6 @@ k.set('n', '<c-q>', function()
 end)
 -- terminal - normal mode
 k.set('t', '<c-q>', [[<C-\><C-n>]])
-k.set('t', '<esc>', [[<C-\><C-n>]])
 -- diffmode
 k.set('n', 'du', '<cmd>diffupdate<cr>') -- @todo check if should be silent?
 k.set('n', 'dp', '<cmd>diffput<cr>')
@@ -168,13 +167,6 @@ end)
 k.set('n', 'yaf', [[:let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>]])
 k.set('n', 'yif', [[:let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>]])
 k.set('n', 'yrf', [[:let @+=expand('%:.')<bar>echo 'Yanked: '.expand('%:.')<cr>]])
-
-k.set('n', '<space>R', function()
-  cmd('belowright 20split')
-  vim.cmd.enew()
-  vim.cmd.term('cargo run')
-  vim.cmd.startinsert()
-end)
 k.set('n', '<space>rr', function()
   cmd('belowright 20split')
   vim.cmd.enew()
@@ -242,6 +234,35 @@ vim.api.nvim_create_autocmd('FileType', {
     k.set('n', 'q', '<c-w>q', { buffer = true })
   end,
 })
+vim.api.nvim_create_autocmd('FileType', {
+  group = augroup,
+  pattern = 'php',
+  callback = function()
+    k.set('n', 'yqn', function()
+      local query = [[
+        (namespace_definition (namespace_name) @namespace)
+        (class_declaration (name) @class)
+      ]]
+
+      local nodes = vim.treesitter.query.parse('php', query)
+      local parser = vim.treesitter.get_parser(0, 'php')
+      local root = parser:parse()[1]:root()
+
+      local results = {}
+      for _, node, _ in nodes:iter_captures(root) do
+        results[#results + 1] = vim.treesitter.get_node_text(node, 0)
+        if #results == 2 then
+          break
+        end
+      end
+      local fqn = table.concat(results, '\\')
+
+      print('Yanked: ' .. fqn)
+      vim.fn.setreg('+', fqn)
+    end, { buffer = true })
+  end,
+})
+
 -- vim-rsi mappings (onle selected few)
 vim.cmd([[
   inoremap        <C-A> <C-O>^
