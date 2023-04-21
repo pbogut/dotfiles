@@ -38,7 +38,7 @@ local sources = {
   },
   {
     builtin = null_ls.builtins.formatting.phpcbf,
-    enabled = false,
+    enabled = true,
   },
   -- python
   {
