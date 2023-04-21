@@ -12,11 +12,17 @@ vim.api.nvim_create_autocmd('BufWritePost', {
     end
   end,
 })
-vim.api.nvim_create_autocmd('FileType', {
+vim.api.nvim_create_autocmd('FileType', { 
   group = augroup,
   pattern = 'markdown',
   callback = function()
     b.whitespace_trim_disabled = true
+  end,
+})
+vim.api.nvim_create_autocmd('TermOpen', {
+  group = augroup,
+  callback = function()
+    vim.cmd.DisableWhitespace()
   end,
 })
 vim.api.nvim_create_autocmd('BufEnter', {
