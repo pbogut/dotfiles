@@ -75,6 +75,7 @@ require('packer').startup({
     use({ fn.stdpath('config') .. '/local/projector', config = config('projector') })
     use({ fn.stdpath('config') .. '/local/actions', config = 'require"actions"' })
     use({ fn.stdpath('config') .. '/local/remotesync', config = 'require"remotesync"' })
+    use({ fn.stdpath('config') .. '/local/echo_notify', config = 'require"echo_notify".setup({})' })
     use({ fn.stdpath('config') .. '/local/ripgrep', config = 'require"ripgrep"', after = 'telescope.nvim' })
 
     use({ 'williamboman/mason.nvim', config = 'require"mason".setup()' })
@@ -144,7 +145,6 @@ require('packer').startup({
     use({ 'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user' })
     use({ 'MattesGroeger/vim-bookmarks', config = config('vim_bookmarks') })
     use({ 'rrethy/vim-illuminate' })
-    use({ 'rcarriga/nvim-notify', config = config('nvim_notify') })
     use({ 'lukas-reineke/indent-blankline.nvim', config = config('indent_blankline') })
     use({
       'nvim-telescope/telescope.nvim',
