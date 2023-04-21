@@ -24,10 +24,10 @@ numlockx on
 
 # daemons
 rerun copyq copyq
-demonize nextcloud nextcloud
+demonize nextcloud "nextcloud --background"
 demonize conky conky
 demonize geoclue /usr/lib/geoclue-2.0/demos/agent
-demonize redshift redshift-gtk
+demonize redshift redshift
 demonize textaid "perl $scriptpath/edit-server.pl"
 demonize nm-applet nm-applet
 demonize dunst dunst
@@ -35,12 +35,15 @@ demonize udisksvm "udisksvm -a"
 demonize memwatch ~/.scripts/memwatch.sh
 demonize mailsgoweb ~/.scripts/mailsgoweb.sh
 demonize kdeconnect kdeconnect-indicator
+demonize unclutter "unclutter -idle 1 -root"
 
 # sepcific for the computer
 if [[ -f "$HOME/.$host_name.autostart.sh" ]]; then
+  # shellcheck disable=1090
   source "$HOME/.$host_name.autostart.sh"
 fi
 # just local one, not versioned
 if [[ -f "$HOME/.autostart.local.sh" ]]; then
+  # shellcheck disable=1091
   source "$HOME/.autostart.local.sh"
 fi
