@@ -59,7 +59,7 @@ confirmOnQuit: false
 quitOnTopLevelReturn: false
 keybinding:
   universal:
-    quit: <c-q>
+    quit: q
     quit-alt1: <c-c>
     return: <esc>
     quitWithoutChangingDirectory: Q
@@ -187,18 +187,25 @@ keybinding:
     update: u
     bulkMenu: b
 os:
-  openCommand: tmux-vim --no-tab {{filename}}
-  openLinkCommand: sh -c "xdg-open {{link}} >/dev/null"
+  openCommand: '$TERMINAL -e nvim {{filename}}'
+  openLinkCommand: 'sh -c "xdg-open {{link}} >/dev/null 2>&1"'
 disableStartupPopups: false
 customCommands:
   - key: 'C'
     description: 'Commit changes with editor'
     context: 'global'
-    command: 'tmux new-window env EDITOR="nvim" git commit --verbose'
-  - key: 'q'
-    description: 'Go back to nvim'
-    context: 'global'
-    command: 'tmux switch-client -t "$(tmux display-message -p "#S"):nvim"'
+    command: 'git commit --verbose'
+    subprocess: true
+  - key: 'o'
+    description: 'Open file'
+    context: 'files'
+    command: 'nvim {{ .SelectedFile.Name }}'
+    subprocess: true
+  - key: 'o'
+    description: 'Open file'
+    context: 'staging'
+    command: 'nvim {{ .SelectedFile.Name }}'
+    subprocess: true
 
 # contexts: status, files, localBranches, remotes, remoteBranches,
 #           tags, commits, reflogCommits, subCommits, commitFiles,

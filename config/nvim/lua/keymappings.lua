@@ -112,18 +112,6 @@ k.set('n', '<c-q>', function()
     vim.cmd.quit()
   end
 end)
--- git
-k.set('n', '<space>lg', function()
-  if os.getenv('TMUX') then
-    local err = os.execute('tmux switch-client -t "$(tmux display-message -p "#S"):lazygit" 2>/dev/null')
-    if err > 0 then
-      -- os.execute('tmux new-window env EDITOR="tmux-vim --no-tab" lazygit')
-      os.execute('tmux new-window lazygit')
-    end
-  else
-    vim.fn.jobstart('$TERMINAL -e lazygit')
-  end
-end)
 -- open terminal
 k.set('n', 'got', function()
   local path = fn.expand('%:p:h')

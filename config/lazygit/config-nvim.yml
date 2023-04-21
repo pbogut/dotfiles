@@ -1,0 +1,34 @@
+os:
+  openCommand: 'nvr --servername "$NVIM" -c ":LazyGitToggle" -c ":edit {{filename}}"'
+customCommands:
+  - key: 'C'
+    description: 'Commit changes with editor'
+    context: 'global'
+    command: 'env EDITOR=nvim git commit --verbose'
+    subprocess: true
+  - key: 'q'
+    description: 'Go back to nvim'
+    context: 'global'
+    command: 'nvr --servername "$NVIM" -c ":LazyGitToggle"'
+  - key: 'e'
+    description: 'Edit file'
+    context: 'files'
+    command: 'nvr --servername "$NVIM" -c ":LazyGitToggle" -c ":edit {{ .SelectedFile.Name }}"'
+  - key: 'e'
+    description: 'Edit file'
+    context: 'staging'
+    command: 'nvr --servername "$NVIM" -c ":LazyGitToggle" -c ":edit {{ .SelectedFile.Name }}"'
+  - key: 'o'
+    description: 'Open file'
+    context: 'files'
+    command: 'nvr --servername "$NVIM" -c ":LazyGitToggle" -c ":edit {{ .SelectedFile.Name }}"'
+  - key: 'o'
+    description: 'Open file'
+    context: 'staging'
+    command: 'nvr --servername "$NVIM" -c ":LazyGitToggle" -c ":edit {{ .SelectedFile.Name }}"'
+
+# contexts: status, files, localBranches, remotes, remoteBranches,
+#           tags, commits, reflogCommits, subCommits, commitFiles,
+#           stash, normal, merging, patchBuilding, staging, menu,
+#           credentials, confirmation, search, commitMessage,
+#           submodules, suggestions, cmdLog

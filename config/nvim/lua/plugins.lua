@@ -88,6 +88,7 @@ require('packer').startup({
     use({ 'tpope/vim-repeat' })
     use({ 'tpope/vim-sleuth' })
     use({ 'tpope/vim-fugitive' })
+    use({ 'akinsho/toggleterm.nvim', config = config('toggleterm_nvim') })
     use({ 'tpope/vim-rails', ft = { 'ruby' } })
     use({ 'vim-ruby/vim-ruby', ft = { 'ruby' } })
     use({ 'tpope/vim-unimpaired' })
