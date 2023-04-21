@@ -48,6 +48,15 @@ local function highlights()
     ['@todo'] = { link = 'MyTodo' },
     ['@debug'] = { link = 'MyDebug' },
 
+    -- lsp tokens
+    ['@lsp.type.function'] = { guifg = c.base1 },
+    ['@lsp.type.method'] = { guifg = c.base1 },
+    ['@lsp.type.property'] = { guifg = c.blue },
+    ['@lsp.type.variable'] = { guifg = c.blue },
+    -- ['@lsp.type.decorator'] = { guifg = c.red },
+    -- ['@lsp.mod.deprecated']= { guifg = c.red },
+    -- ['@lsp.typemod.function.async']= { guifg = c.red },
+
     -- TreeSitter
     -- ["@constant.macro"] = { guifg = c.orange },
     -- ["@string"] = { guifg = c.orange },
