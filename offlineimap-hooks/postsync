@@ -70,8 +70,7 @@ done
 notmuch search --output=files from:notifications@github.com and tag:new | while read f; do
     # shellcheck disable=2002
     tag=$(cat "$f" | grep '^To: ' | sed 's/^To: \([^ ]*\).*/\1/g' | sed 's/^"\(.*\)"$/\1/')
-    # shellcheck disable=2002
-    id=$(cat "$f" | grep '^Message-ID: ' | sed 's/^Message-ID: <\([^ ]*\)>.*/\1/g')
+    id=$(exail -f "$f" --message-id)
     notmuch tag +"github/$tag" +github -- id:"$id"
 done
 
@@ -79,8 +78,7 @@ done
 notmuch search --output=files from:gitlab@mg.gitlab.com and tag:new | while read f; do
     # shellcheck disable=2002
     tag=$(cat "$f" | grep '^X-GitLab-Project-Path: ' | sed 's/^X-GitLab-Project-Path: \([^ ]*\).*/\1/g')
-    # shellcheck disable=2002
-    id=$(cat "$f" | grep '^Message-ID: ' | sed 's/^Message-ID: <\([^ ]*\)>.*/\1/g')
+    id=$(exail -f "$f" --message-id)
     notmuch tag +"gitlab/$tag" +gitlab -- id:"$id"
 done
 

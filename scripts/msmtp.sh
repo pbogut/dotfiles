@@ -1,14 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env bash
 tmp_file=$(mktemp)
 cat /dev/stdin > $tmp_file
 set -e
 set -o pipefail
 
-from=$(cat $tmp_file |
-    grep '^From: ' | head -n1 |
-    sed 's,From: [^<]*<\(.*\)>,\1,' |
-    sed 's,From: \([^\s]*\),\1,')
-acc=$(echo $from | sed 's,.*@,,')
+from=$(exail -f "$tmp_file" --from-email)
+acc=${from##*@}
 
 # mutt-pre-process.rb -- adds html version of email using markdown
 # mutt-put-on-imap.rb -- puts copy of email on the imap server
