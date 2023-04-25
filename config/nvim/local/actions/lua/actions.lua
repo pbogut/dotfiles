@@ -101,7 +101,7 @@ function M.run_cmds(cmds, opts)
   end
   local out = function(msg)
     if opts.cmd_print then
-      print(msg)
+      vim.notify(msg, vim.log.levels.INFO, { title = 'Actions', trim = true })
     end
   end
   local module = opts.module or 'actions'
@@ -110,11 +110,11 @@ function M.run_cmds(cmds, opts)
   local on_exit = opts.on_exit or function(_, _) end
 
   if type(cmds) ~= 'table' or #cmds == 0 then
-    out('[' .. module .. '] Nothing to run.')
+    out('Nothing to run.')
     return
   end
 
-  out('[' .. module .. '] ' .. msg_run .. ' 1/' .. #cmds .. ' : ' .. cmds[1])
+  out(msg_run .. ' 1/' .. #cmds .. ' : ' .. cmds[1])
   vim.g._actions_status = '1/' .. #cmds
 
   local jobs = {}
@@ -151,7 +151,7 @@ function M.run_cmds(cmds, opts)
       on_stdout = on_out,
       on_stderr = on_out,
       on_exit = function(j, res)
-        out('[' .. module .. '] ' .. msg_run .. ' ' .. i + 1 .. '/' .. #cmds .. ' : ' .. cmds[i + 1])
+        out(msg_run .. ' ' .. i + 1 .. '/' .. #cmds .. ' : ' .. cmds[i + 1])
         vim.g._actions_status = i + 1 .. '/' .. #cmds
         on_exit(j, res)
         if jobs[i + 1] then
@@ -163,7 +163,7 @@ function M.run_cmds(cmds, opts)
 
     if i == #cmds then
       opts.on_exit = function(j, res)
-        out('[' .. module .. '] ' .. msg_run .. ' ' .. i .. '/' .. #cmds .. ' : DONE')
+        out(msg_run .. ' ' .. i .. '/' .. #cmds .. ' : DONE')
         vim.g._actions_status = ''
         print_out({ '--', 'press [q] for exit' })
         on_done(j, res)
