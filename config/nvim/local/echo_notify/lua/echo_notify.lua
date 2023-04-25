@@ -6,7 +6,7 @@ local HlInfo = 'EchoNotifyINFO'
 local HlDebug = 'EchoNotifyDEBUG'
 local HlTrace = 'EchoNotifyTRACE'
 
-local options = {text = {}, hls = {}, icons = {}, level = 0}
+local options = { text = {}, hls = {}, icons = {}, level = 0 }
 
 echo.setup = function(opts)
   opts = vim.tbl_extend('keep', opts, {
@@ -61,6 +61,11 @@ echo.notify = function(message, level, opts)
   end
   local title = opts.title or options.text[level] or 'Msg'
   local group = options.hls[level] or HlInfo
+
+  if opts.trim then
+    local width = vim.api.nvim_win_get_width(0)
+    message = message:sub(1, width - title:len() - icon:len() - 15)
+  end
 
   vim.api.nvim_echo({ { '[' .. title .. ']' .. icon, group }, { ' ' .. tostring(message), nil } }, true, {})
 end
