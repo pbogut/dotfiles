@@ -8,7 +8,7 @@ tmpfile=$(mktemp)
 file=$1
 ranger --choosedir="$tmpfile" --selectfile="$file"
 filename=$(basename "$file")
-destination=$(cat $tmpfile)
+destination=$(cat "$tmpfile")
 should_move=$((echo "move";  echo "move and open"; echo "do nothing";) |
     rofi -dmenu -p "Move file $filename to $destination?")
 
@@ -21,7 +21,9 @@ handle_qb() {
 #back up if exists
 if [[ -f "$destination/$filename" ]]; then
     date=$(date +'%Y-%m-%d_%H:%M:%S.%N')
-    mv "$destination/$filename" "$destination/$filename.$date"
+    ext=${filename##*.}
+    basename=${filename%%.*}
+    mv "$destination/$filename" "$destination/$basename.$date.$ext"
 fi
 
 if [[ $should_move == "move" ]]; then
