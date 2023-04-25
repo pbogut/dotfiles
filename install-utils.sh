@@ -118,7 +118,7 @@ rustup component add rust-src --toolchain stable
 rustup component add rustfmt --toolchain nightly
 rustup component add rustfmt --toolchain stable
 
-cargo install stylua
+cargo install --git https://github.com/pbogut/enrichmail.git
 
 yarn global add \
   @mozilla/readability \
