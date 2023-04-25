@@ -19,7 +19,7 @@ ls.config.setup({
   end,
   ext_opts = {
     [types.choiceNode] = {
-      active = { virt_text = { { '     select choice <c-l>', 'DiagnosticInfo' } } },
+      active = { virt_text = { { '     select choice <c-s>', 'DiagnosticInfo' } } },
     },
   },
 })
@@ -36,7 +36,7 @@ vim.keymap.set({ 'i', 's' }, '<c-k>', function()
   end
 end)
 
-vim.keymap.set({ 'i', 's' }, '<c-l>', function()
+vim.keymap.set({ 'i', 's' }, '<c-s>', function()
   if ls.choice_active() then
     if #ls.get_current_choices() > 3 then
       select_choice()
