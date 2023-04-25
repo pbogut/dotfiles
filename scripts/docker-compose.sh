@@ -11,29 +11,26 @@ usage() {
     echo "Options:"
     echo "  is-up {dir?} checks if docker-compose is up for given directory"
     echo "                 (current directory by default)"
+    echo "  -s, --starship this help and exit"
     echo "  -h, --help     display this help and exit"
 }
 
+directory="$PWD"
+action=""
+starship=false
 while test $# -gt 0; do
     case "$1" in
         is-up)
+            action="is-up"
             shift
-            if [ -z "$1" ]; then
-                directory="."
-            else
+            if [ -n "$1" ]; then
                 directory=$1
                 shift
             fi
-            realpath=$(realpath "$directory")
-            while read -r docker_file; do
-                docker_dir=$(dirname "$docker_file")
-                if [[ "$realpath" == "$docker_dir" ]]; then
-                    echo "is-up: yes"
-                    exit 0
-                fi
-            done <<< "$(docker-compose ls | tail -n+2 | sed -E "s,[^ ]+[ ]+[^ ]+[ ]+(.*),\1,g")"
-            echo "is-up: no"
-            exit 5
+            ;;
+        --starship|-s)
+            starship=true
+            shift
             ;;
         --help|-h)
             usage
@@ -45,3 +42,25 @@ while test $# -gt 0; do
             ;;
     esac
 done
+
+if [[ $action == "is-up" ]]; then
+    realpath=$(realpath "$directory")
+    while read -r docker_file; do
+        docker_dir=$(dirname "$docker_file")
+        if [[ "$realpath" == "$docker_dir" ]]; then
+            if $starship; then
+                echo "up"
+            else
+                echo "is-up: yes"
+            fi
+            exit 0
+        fi
+    done <<< "$(docker-compose ls | tail -n+2 | sed -E "s,[^ ]+[ ]+[^ ]+[ ]+(.*),\1,g")"
+    if $starship; then
+        echo "down"
+        exit 0
+    else
+        echo "is-up: no"
+        exit 5
+    fi
+fi
