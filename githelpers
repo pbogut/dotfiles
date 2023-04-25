@@ -133,6 +133,12 @@ git_clone_to_projects_bare() {
     # add group write, handy when using docker
     setfacl -d -m "group:$(id -gn):rwx" .
     chmod g+w . -R
+    main_branch=$(awk '{print $2}' < HEAD)
+    main_branch=${main_branch##*/}
+    git worktree add "$main_branch"
+    cd "$main_branch" || exit
+    git fetch
+    git branch --set-upstream-to=origin/"$main_branch"
   else
     echo "You must specify a repository to clone."
     echo
