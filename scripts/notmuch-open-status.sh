@@ -16,18 +16,14 @@ fi
 if [[ $message_id == "--mutt-pipe" ]]; then
     clear
     mutt_pipe="yes"
-    message_id=$(cat /dev/stdin |
-        grep '^Message-ID: <.*>' |
-        sed 's/^Message-ID: <\(.*\)>/\1/' |
-        head -n1)
+    message_id=$(exail -f /dev/stdin --message-id)
 
-    echo    "+-------------------------------------------------------"
-    echo -n "| "
-    notmuch search id:$message_id
-    echo    "+------------------------"
+    header="$header+-------------------------------------------------------\n"
+    header="$header| $(notmuch search id:"$message_id")\n"
+    header="$header+------------------------\n"
 fi
 
-encoded_id=$(echo -n $message_id | base64 | sed "s,=,,g")
+encoded_id=$(echo -n "$message_id" | base64 -w 0 | sed "s,=,,g")
 token=$(config email/open_tracking/token)
 api_url=$(config email/open_tracking/api_url)
 data=$(curl "$api_url/rest/summary/$encoded_id" \
@@ -35,7 +31,7 @@ data=$(curl "$api_url/rest/summary/$encoded_id" \
     --header "Accept: application/json" \
     -G -s)
 
-echo $data | jq -C | more
+echo -e "$header\n$(echo "$data" | jq -C)" | more
 
 if [[ $mutt_pipe == "yes" ]]; then
     exit 1
