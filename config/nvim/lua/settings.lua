@@ -4,14 +4,13 @@ require('settings.terminal')
 require('settings.icons')
 require('settings.highlights')
 
-local cmd = vim.cmd
 local o = vim.opt
 
-cmd('filetype plugin indent off')
-cmd('set fillchars=fold:\\ ,vert:\\│')
-cmd('set shortmess+=c')
-cmd('set runtimepath+=~/.vim')
-cmd('silent! colorscheme solarized')
+vim.cmd('filetype plugin indent off')
+vim.cmd('set fillchars=fold:\\ ,vert:\\│')
+vim.cmd('set shortmess+=c')
+vim.cmd('set runtimepath+=~/.vim')
+vim.cmd('silent! colorscheme solarized')
 
 o.syntax = 'on'
 o.list = true

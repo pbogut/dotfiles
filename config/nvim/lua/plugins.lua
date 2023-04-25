@@ -87,7 +87,12 @@ require('packer').startup({
     use({ 'tpope/vim-eunuch' })
     use({ 'tpope/vim-abolish' }) -- coercion thingis
     use({ 'tpope/vim-repeat' })
-    use({ 'tpope/vim-sleuth' })
+    use({
+      'tpope/vim-sleuth',
+      config = function()
+        vim.g.sleuth_no_filetype_indent_on = 1
+      end,
+    })
     use({ 'tpope/vim-fugitive' })
     use({ 'akinsho/toggleterm.nvim', config = config('toggleterm_nvim') })
     use({ 'tpope/vim-rails', ft = { 'ruby' } })
