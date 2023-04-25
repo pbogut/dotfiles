@@ -46,13 +46,25 @@ hibernate() {
   fi
 }
 
+power_status() {
+  if [[ -n "$(acpi | grep 'Charging')" ]]; then
+    echo "charging"
+  elif [[ -n "$(acpi | grep 'Discharging')" ]]; then
+    echo "discharging"
+  fi
+}
+
 check_notification() {
   battery=$(battery_level)
   if [[ $notify -gt $battery ]] || [[ $notify -eq $battery ]]; then
-    notify
+    if [[ $(power_status) == "discharging" ]]; then
+      notify
+    fi
   fi
   if [[ $limit -gt $battery ]] || [[ $limit -eq $battery ]]; then
-    hibernate
+    if [[ $(power_status) == "discharging" ]]; then
+      hibernate
+    fi
   fi
 }
 
