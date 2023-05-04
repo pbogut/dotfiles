@@ -14,7 +14,7 @@ vim.api.nvim_create_autocmd('BufWritePost', {
 })
 vim.api.nvim_create_autocmd('FileType', { 
   group = augroup,
-  pattern = 'markdown',
+  pattern = 'markdown,diff',
   callback = function()
     b.whitespace_trim_disabled = true
   end,

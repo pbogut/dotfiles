@@ -8,6 +8,12 @@ local opts = {
   dap = {
     adapter = require('rust-tools.dap').get_codelldb_adapter(codelldb_path, liblldb_path),
   },
+  tools = {
+    inlay_hints = {
+      parameter_hints_prefix = '    <- ',
+      other_hints_prefix = '     => ',
+    },
+  },
 }
 
 vim.api.nvim_create_autocmd('BufEnter', {
@@ -27,4 +33,30 @@ vim.api.nvim_create_autocmd('BufEnter', {
   end,
 })
 
-require('rust-tools').setup(opts)
+local rusttools = require('rust-tools')
+rusttools.setup(opts)
+
+local inlay_hints = false
+
+local augroup = vim.api.nvim_create_augroup('x_rust_tools', { clear = true })
+vim.api.nvim_create_autocmd('BufEnter', {
+  group = augroup,
+  pattern = '*.rs',
+  callback = function()
+    vim.keymap.set('n', '<space>lh', function()
+      if inlay_hints then
+        require('rust-tools').inlay_hints.disable()
+        vim.notify('Inlay hints disabled', vim.log.levels.INFO, {
+          title = 'Rust Tools',
+        })
+        inlay_hints = false
+      else
+        require('rust-tools').inlay_hints.enable()
+        vim.notify('Inlay hints enabled', vim.log.levels.INFO, {
+          title = 'Rust Tools',
+        })
+        inlay_hints = true
+      end
+    end)
+  end,
+})

@@ -2,6 +2,7 @@ require('settings.indents')
 require('settings.title')
 require('settings.terminal')
 require('settings.icons')
+require('settings.colors')
 require('settings.highlights')
 
 local o = vim.opt

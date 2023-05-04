@@ -1,5 +1,4 @@
 local u = require('utils')
-require('settings.colors')
 
 local c = vim.g.colors
 

@@ -35,16 +35,6 @@ vim.api.nvim_create_autocmd('FileType', {
     u.set_indent(4)
   end,
 })
-vim.api.nvim_create_autocmd('BufEnter', {
-  group = augroup,
-  pattern = '*.php',
-  callback = function()
-    -- hack to get treesitter indent to work with php
-    -- be default it does not, not sure why
-    vim.cmd.TSBufDisable('indent')
-    vim.cmd.TSBufEnable('indent')
-  end,
-})
 vim.api.nvim_create_autocmd('FileType', {
   group = augroup,
   pattern = 'sh,vue,javascript,vim,lua,yaml,yaml.docker-compose,ruby',
