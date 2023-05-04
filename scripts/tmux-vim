@@ -60,10 +60,10 @@ open_by_title() {
 }
 
 if [[ -n $TMUX ]]; then
-  session_name=$(tmux display-message -p "#S")
-  tmux switch-client -t "$session_name:nvim"
+  tmux new-session -d -s "$name" nvim -p -- "${files[@]}"
+  tmux switch-client -t "$name:nvim" || tmux switch-client -t "$name"
   title=$(cut -f1 --complement --delimiter='|' <<< "$(tmux display-message -p "#T")")
-  open_by_title "$title"
+  open_by_title "$title" 2>/dev/null
   exit 0
 fi
 
