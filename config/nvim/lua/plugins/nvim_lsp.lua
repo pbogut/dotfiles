@@ -1,7 +1,6 @@
 local command = vim.api.nvim_create_user_command
 local u = require('utils')
 local k = vim.keymap
-local config = require('config')
 local lspconfig = require('lspconfig')
 local has_lspstatus, lspstatus = pcall(require, 'lsp-status')
 local has_lsp_signature, lsp_signature = pcall(require, 'lsp_signature')
@@ -12,7 +11,19 @@ local c = g.colors
 
 local b = {}
 
-vim.diagnostic.config({ severity_sort = true })
+vim.diagnostic.config({
+  severity_sort = true,
+  float = {
+    source = 'always',
+  },
+  virtual_text = {
+    spacing = 4,
+    prefix = '■',
+  },
+  signs = {
+    priority = 5, -- so dap signs are visible on error lines (dap defaults to 11)
+  },
+})
 
 local servers = {
   { name = 'ccls' },
@@ -30,7 +41,6 @@ local servers = {
   --[[ { name = 'denols' }, ]]
   { name = 'tsserver' },
   { name = 'openscad_lsp' },
-  { name = 'emmet_ls', snippet_support = true },
   { name = 'tailwindcss', snippet_support = true },
   { name = 'lua_ls', snippet_support = true, format = false },
   { name = 'intelephense', snippet_support = true },
@@ -61,10 +71,11 @@ local bindings = function()
 
     { 'n', '<space>rn', b.lsp_rename, b.no_lsp_bind, { silent = false } },
     { 'n', '<space>el', '<cmd>lua vim.diagnostic.open_float(0, {scope = "line"})<cr>', b.no_lsp_bind },
-    { 'n', '<space>ee', b.maybe_telescope('diagnostics'), b.no_lsp_bind },
+    { 'n', '<space>ee', '<cmd>Trouble document_diagnostics<cr>', b.no_lsp_bind },
+    { 'n', '<space>eo', '<cmd>DiagnosticsBufferToggle<cr>', b.no_lsp_bind },
     { 'n', '<space>af', b.lsp_formatting, 'migg=G`i' },
-    { 'v', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', b.no_lsp_bind },
-    { 'x', '<space>af', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', b.no_lsp_bind },
+    { 'v', '<space>af', b.lsp_formatting, b.no_lsp_bind },
+    { 'x', '<space>af', b.lsp_formatting, b.no_lsp_bind },
   }
 end
 
@@ -179,18 +190,6 @@ if has_lspstatus then
   lspstatus.register_progress()
 end
 
-vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
-  -- Enable underline, use default values
-  underline = true,
-  -- Enable virtual text, override spacing to 8
-  virtual_text = {
-    spacing = 4,
-    prefix = '■',
-  },
-  -- Disable a feature
-  update_in_insert = false,
-})
-
 u.highlights({
   FloatBorder = { guibg = g.colors.base0, guifg = vim.g.colors.base03 },
   DiagnosticFloatingInfo = { guibg = c.ad_info, guifg = c.base02 },
@@ -265,14 +264,46 @@ local function attach_lsp_to_new_buffer()
   cmd.edit()
 end
 
+local function update_diagnostics_visibility(visible)
+  if visible then
+    vim.diagnostic.config({
+      underline = true,
+      virtual_text = true,
+    })
+  else
+    vim.diagnostic.config({
+      underline = false,
+      virtual_text = false,
+    })
+  end
+end
+
 command('LspReload', function(_)
   vim.lsp.stop_client(vim.lsp.get_active_clients())
   cmd.edit()
 end, {})
 command('LspAttachBuffer', attach_lsp_to_new_buffer, {})
+command('DiagnosticsBufferToggle', function(_)
+  vim.b.diagnostic_hide = vim.b.diagnostic_hide ~= true
+  update_diagnostics_visibility(vim.b.diagnostic_hide ~= true)
+end, {})
+command('DiagnosticsBufferHide', function(_)
+  vim.b.diagnostic_hide = true
+  update_diagnostics_visibility(false)
+end, {})
+command('DiagnosticsBufferShow', function(_)
+  vim.b.diagnostic_hide = false
+  update_diagnostics_visibility(true)
+end, {})
 
--- Auto format on save
 local augroup = vim.api.nvim_create_augroup('x_lsp', { clear = true })
+vim.api.nvim_create_autocmd('BufEnter', {
+  group = augroup,
+  pattern = '*',
+  callback = function()
+    update_diagnostics_visibility(vim.b.diagnostic_hide ~= true)
+  end,
+})
 vim.api.nvim_create_autocmd('BufWritePre', {
   group = augroup,
   pattern = '*.rs',
@@ -286,6 +317,7 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   group = augroup,
   pattern = '*',
   callback = function()
+    local config = require('config')
     if config.get('lsp.autoformat_on_save.enabled') then
       local file_types = config.get('lsp.autoformat_on_save.file_types', {})
       local file = vim.fn.expand('%:p')
