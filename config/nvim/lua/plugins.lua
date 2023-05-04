@@ -130,6 +130,7 @@ require('packer').startup({
       requires = { 'kristijanhusak/vim-dirvish-git' },
     })
     use({ 'justinmk/vim-sneak', config = config('vim_sneak') })
+    use({ 'ggandor/leap.nvim', config = config('nvim_leap') })
     use({ 'vim-scripts/ReplaceWithRegister', config = config('replacewithregister') })
     use({ 'kana/vim-textobj-user' })
     use({ 'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user' })
