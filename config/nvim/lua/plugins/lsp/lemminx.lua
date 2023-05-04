@@ -6,6 +6,9 @@ function me.setup(opts)
   opts = vim.tbl_deep_extend('keep', opts, {
     settings = {
       xml = {
+        server = {
+          workDir = os.getenv('HOME') .. '/.cache/lemminx',
+        },
         catalogs = {
           '.lemminx.xml',
         },
