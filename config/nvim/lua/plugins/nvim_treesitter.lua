@@ -1,5 +1,5 @@
 require('nvim-treesitter.configs').setup({
-  ensure_installed = 'all', -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+  -- ensure_installed = 'all', -- very slow (>20% of start time), dont use it
   highlight = {
     enable = true, -- its buggy, I'm on fence with it
   },
@@ -7,7 +7,7 @@ require('nvim-treesitter.configs').setup({
     enable = true,
   },
   indent = {
-    enable = true, 
+    enable = true,
   },
   incremental_selection = {
     enable = true,
