@@ -1,5 +1,6 @@
 os:
   openCommand: 'nvr --servername "$NVIM" -c ":LazyGitToggle" -c ":edit {{filename}}"'
+notARepository: skip
 customCommands:
   - key: 'C'
     description: 'Commit changes with editor'
@@ -26,6 +27,11 @@ customCommands:
     description: 'Open file'
     context: 'staging'
     command: 'nvr --servername "$NVIM" -c ":LazyGitToggle" -c ":edit {{ .SelectedFile.Name }}"'
+  - key: 'p'
+    description: 'Git ap'
+    context: 'files'
+    command: 'git ap {{ .SelectedFile.Name }}'
+    subprocess: true
 
 # contexts: status, files, localBranches, remotes, remoteBranches,
 #           tags, commits, reflogCommits, subCommits, commitFiles,

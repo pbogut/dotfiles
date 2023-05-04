@@ -206,6 +206,11 @@ customCommands:
     context: 'staging'
     command: 'nvim {{ .SelectedFile.Name }}'
     subprocess: true
+  - key: 'p'
+    description: 'Git ap'
+    context: 'files'
+    command: 'git ap {{ .SelectedFile.Name }}'
+    subprocess: true
 
 # contexts: status, files, localBranches, remotes, remoteBranches,
 #           tags, commits, reflogCommits, subCommits, commitFiles,

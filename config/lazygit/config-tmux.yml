@@ -15,6 +15,11 @@ customCommands:
     description: 'Edit file'
     context: 'files'
     command: tmux-vim --no-tab {{filename}}
+  - key: 'p'
+    description: 'Git ap'
+    context: 'files'
+    command: 'git ap {{ .SelectedFile.Name }}'
+    subprocess: true
 
 # contexts: status, files, localBranches, remotes, remoteBranches,
 #           tags, commits, reflogCommits, subCommits, commitFiles,
