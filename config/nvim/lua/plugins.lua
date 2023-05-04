@@ -54,6 +54,7 @@ require('packer').startup({
   function(use)
     -- Packer can manage itself as an optional plugin
     use({ 'wbthomason/packer.nvim', opt = true })
+    use({ 'nvim-lua/plenary.nvim' })
 
     use({ fn.stdpath('config') .. '/local/paranoic-backup', config = 'require"paranoic-backup"' })
     use({ fn.stdpath('config') .. '/local/projector', config = config('projector') })
@@ -134,7 +135,6 @@ require('packer').startup({
     use({ 'beloglazov/vim-textobj-quotes', after = 'vim-textobj-user' })
     use({ 'MattesGroeger/vim-bookmarks', config = config('vim_bookmarks') })
     use({ 'rrethy/vim-illuminate' })
-    use({ 'lukas-reineke/indent-blankline.nvim', config = config('indent_blankline') })
     use({
       'nvim-telescope/telescope.nvim',
       config = config('telescope_nvim'),
@@ -153,15 +153,22 @@ require('packer').startup({
     use({ 'joosepalviste/nvim-ts-context-commentstring' })
     use({ 'numtostr/comment.nvim', config = config('comment_nvim') })
     use({ 'frankier/neovim-colors-solarized-truecolor-only' })
-    use({ 'sirtaj/vim-openscad', opt = false })
-    use({ 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate', config = config('nvim_treesitter') })
-    use({ 'nvim-treesitter/playground' })
     use({ 'nvim-treesitter/nvim-treesitter-context', config = config('nvim_treesitter_context') })
+    use({
+      'nvim-treesitter/nvim-treesitter',
+      run = function()
+        vim.cmd.TSUpdate()
+        vim.cmd.TSInstall('all')
+      end,
+      config = config('nvim_treesitter'),
+    })
+    use({ 'nvim-treesitter/playground', cmd = 'TSPlaygroundToggle' })
 
     use({ 'rhysd/git-messenger.vim', config = config('git_messanger') })
 
-    use({ 'simrat39/rust-tools.nvim', config = config('rust_tools') })
+    use({ 'simrat39/rust-tools.nvim', config = config('rust_tools'), ft = { 'rust' } })
 
+    use({ 'sirtaj/vim-openscad', ft = { 'openscad' } })
     -- completion
     use({ 'l3mon4d3/luasnip', after = 'projector', config = config('luasnip') })
     use({ 'tzachar/cmp-tabnine', run = './install.sh', after = 'nvim-cmp' })
