@@ -8,9 +8,18 @@ function me.setup(opts)
     _on_attach(client, bufnr)
     color_provider.buf_attach(bufnr)
   end
-  -- opts = vim.tbl_deep_extend('keep', opts, {
-  --   filetype = {}
-  -- })
+  opts = vim.tbl_deep_extend('keep', opts, {
+    init_options = {
+      userLanguages = {
+        eelixir = 'html-eex',
+        elixir = 'phoenix-heex',
+        heex = 'phoenix-heex',
+        surface = 'phoenix-heex',
+        svelte = 'html',
+        eruby = 'erb',
+      },
+    },
+  })
 
   lspconfig.tailwindcss.setup(opts)
 end
