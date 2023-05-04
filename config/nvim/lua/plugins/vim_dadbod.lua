@@ -1,4 +1,3 @@
-local config = require('config')
 local k = vim.keymap
 local g = vim.g
 local b = vim.b
@@ -45,6 +44,7 @@ end
 
 -- set up dadbod connections
 function l.load_connections()
+  local config = require('config')
   for _, connection in pairs(config.get('dadbod.connections', {})) do
     local name = connection.name
     local uri = connection.uri
@@ -123,7 +123,5 @@ function l.db_with_warning(whole)
     fn['db#execute_command']('', false, firstline, lastline, '')
   end
 end
-
-l.load_connections()
 
 return l
