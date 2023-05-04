@@ -1,3 +1,4 @@
+vim.loader.enable()
 -- common helper
 require('helper')
 -- config

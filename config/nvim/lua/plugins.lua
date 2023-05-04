@@ -54,22 +54,6 @@ require('packer').startup({
   function(use)
     -- Packer can manage itself as an optional plugin
     use({ 'wbthomason/packer.nvim', opt = true })
-    use({
-      'lewis6991/impatient.nvim',
-      config = [[
-        _G.__luacache_config = {
-          chunks = {
-            enable = true,
-            path = vim.fn.stdpath('cache')..'/luacache_chunks',
-          },
-          modpaths = {
-            enable = true,
-            path = vim.fn.stdpath('cache')..'/luacache_modpaths',
-          }
-        }
-        require('impatient')
-      ]],
-    })
 
     use({ fn.stdpath('config') .. '/local/paranoic-backup', config = 'require"paranoic-backup"' })
     use({ fn.stdpath('config') .. '/local/projector', config = config('projector') })
