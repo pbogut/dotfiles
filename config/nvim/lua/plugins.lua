@@ -120,7 +120,7 @@ require('packer').startup({
       ]],
     })
     use({ 'AndrewRadev/switch.vim', config = config('switch_vim') })
-    use({ 'AndrewRadev/splitjoin.vim' })
+    use({ 'wansmer/treesj', config = config('treesj') })
     use({ 'AndrewRadev/sideways.vim', config = config('sideways_vim') })
     use({ 'vim-scripts/cmdalias.vim', config = config('cmdalias_vim') })
     use({ 'Shougo/echodoc.vim' })
