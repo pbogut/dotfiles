@@ -85,8 +85,7 @@ if __name__ == '__main__':
             re.search(r".*:nvim:(.*?):.*", name).group(1) + ".0"
         if Path(vim_id).exists():
             subprocess.Popen("nvr --servername " + vim_id +
-                             " -c ':call local#i3focus#switch(\"" + direction +
-                             "\", \"" + vim_i3[direction] + "\")'",
+                             " -c ':Focus " + direction + " " + vim_i3[direction] + "'",
                              shell=True)
     elif bool(re.match(r'.*\|t\$\d+$', name)):
         session_id = "$" + re.search(r"\|t\$(\d+)$", name).group(1)

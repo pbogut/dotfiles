@@ -45,6 +45,15 @@ command('Dispatch', function(opt)
   end
 end, { bang = true, nargs = '?' })
 
+command('Focus', function(opt)
+  local oldw = vim.fn.winnr()
+  vim.cmd.wincmd(opt.fargs[2])
+  local neww = vim.fn.winnr()
+  if oldw == neww then
+    vim.fn.system('~/.scripts/i3-focus.py ' .. opt.fargs[1] .. ' --skip-vim > /dev/null')
+  end
+end, { nargs = '+' })
+
 command('OpenFile', function(opt)
   local tabs = vim.api.nvim_list_tabpages()
   for _, tab in ipairs(tabs) do
