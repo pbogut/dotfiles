@@ -51,6 +51,7 @@ end
 
 cmd.packadd('cfilter')
 require('packer').startup({
+  ---@param use function
   function(use)
     -- Packer can manage itself as an optional plugin
     use({ 'wbthomason/packer.nvim', opt = true })
@@ -60,6 +61,7 @@ require('packer').startup({
     use({ fn.stdpath('config') .. '/local/projector', config = config('projector') })
     use({ fn.stdpath('config') .. '/local/actions', config = 'require"actions"' })
     use({ fn.stdpath('config') .. '/local/remotesync', config = 'require"remotesync"' })
+    use({ fn.stdpath('config') .. '/local/mdpdf', config = 'require"mdpdf".setup()' })
     use({ fn.stdpath('config') .. '/local/echo_notify', config = 'require"echo_notify".setup({})' })
     use({ fn.stdpath('config') .. '/local/ripgrep', config = 'require"ripgrep"', after = 'telescope.nvim' })
 
