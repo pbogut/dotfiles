@@ -1,12 +1,12 @@
 local k = vim.keymap
 local trouble = require('trouble')
 
-k.set('n', '<space>ed', '<cmd>TroubleToggle document_diagnostics<cr>')
-k.set('n', '<space>ew', '<cmd>TroubleToggle workspace_diagnostics<cr>')
-k.set('n', '<space>lq', '<cmd>TroubleToggle quickfix<cr>')
-k.set('n', '<space>ll', '<cmd>TroubleToggle loclist<cr>')
+k.set('n', '<plug>(trouble-diagnostic-document)', '<cmd>TroubleToggle document_diagnostics<cr>')
+k.set('n', '<plug>(trouble-diagnostic-workspace)', '<cmd>TroubleToggle workspace_diagnostics<cr>')
+k.set('n', '<plug>(trouble-quickfix)', '<cmd>TroubleToggle quickfix<cr>')
+k.set('n', '<plug>(trouble-loclist)', '<cmd>TroubleToggle loclist<cr>')
 
-k.set('n', ']q', function()
+k.set('n', '<plug>(trouble-next-quickfix)', function()
   if trouble.is_open() then
     trouble.next({ skip_groups = true, jump = true })
   else
@@ -14,10 +14,26 @@ k.set('n', ']q', function()
   end
 end)
 
-k.set('n', '[q', function()
+k.set('n', '<plug>(trouble-prev-quickfix)', function()
   if trouble.is_open() then
     trouble.previous({ skip_groups = true, jump = true })
   else
     pcall(vim.cmd.cprevious)
+  end
+end)
+
+k.set('n', '<plug>(trouble-next-loclist)', function()
+  if trouble.is_open() then
+    trouble.next({ skip_groups = true, jump = true })
+  else
+    pcall(vim.cmd.lnext)
+  end
+end)
+
+k.set('n', '<plug>(trouble-prev-loclist)', function()
+  if trouble.is_open() then
+    trouble.previous({ skip_groups = true, jump = true })
+  else
+    pcall(vim.cmd.lprevious)
   end
 end)

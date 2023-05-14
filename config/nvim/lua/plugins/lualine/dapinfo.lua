@@ -6,6 +6,9 @@ vim.api.nvim_set_hl(0, 'sl_dap', {
 })
 
 return function()
+  if not require('lazy.core.config').plugins['nvim-dap']._.loaded then
+    return ''
+  end
   local dap = require('dap')
   local status = dap.status()
   if status:len() > 0 then

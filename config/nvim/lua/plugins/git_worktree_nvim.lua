@@ -1,8 +1,5 @@
 local tmux = require('tmuxctl')
 local wt = require('git-worktree')
-local config = require('config')
-local actions = require('actions')
-local u = require('utils')
 local k = vim.keymap
 local Status = require('git-worktree.status')
 
@@ -30,8 +27,8 @@ end
 
 Status.next_status = function(_) end -- this messages are annoying
 
-k.set('n', '<space>gl', require('telescope').extensions['tmux-git-worktree'].git_worktrees)
-k.set('n', '<space>gk', function()
+k.set('n', '<plug>(git-worktree-list)', require('telescope').extensions['tmux-git-worktree'].git_worktrees)
+k.set('n', '<plug>(git-worktree-create)', function()
   local branch_name = vim.fn.input('New worktree name > ')
   if branch_name:len() > 0 then
     wt.create_worktree(branch_name, branch_name)

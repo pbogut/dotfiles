@@ -46,13 +46,9 @@ local select_project = function(opts)
   opts = opts or {}
   local projects = utils.get_os_command_output({ 'ls-project', '--full-path' })
 
-  local pack_str = vim.fn.stdpath('data') .. '/site/pack/packer/start/'
-  local pack_opt = vim.fn.stdpath('data') .. '/site/pack/packer/opt/'
-  for _, plugin in pairs(utils.get_os_command_output({ 'ls', '-1' }, pack_str)) do
-    projects[#projects + 1] = pack_str .. plugin
-  end
-  for _, plugin in pairs(utils.get_os_command_output({ 'ls', '-1' }, pack_opt)) do
-    projects[#projects + 1] = pack_opt .. plugin
+  local lazy_dir = vim.fn.stdpath('data') .. '/lazy/'
+  for _, plugin in pairs(utils.get_os_command_output({ 'ls', '-1' }, lazy_dir)) do
+    projects[#projects + 1] = lazy_dir .. plugin
   end
 
   local results = {}

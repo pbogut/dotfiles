@@ -70,8 +70,8 @@ key_bindings:
   # toggle vi mode
   - { key: Escape, mods: Alt, mode: ~Vi, action: ToggleViMode }
   # start search in vi mode
-  - { key: S, mods: Alt, mode: ~Vi|~Search, action: ToggleViMode }
-  - { key: S, mods: Alt, mode: ~Vi, action: SearchBackward }
+  # - { key: S, mods: Alt, mode: ~Vi|~Search, action: ToggleViMode }
+  # - { key: S, mods: Alt, mode: ~Vi, action: SearchBackward }
   # paset and paste selection (compatible with my urxvt)
   - { key: P, mods: Alt, mode: ~Vi, action: Paste }
   - { key: V, mods: Alt, mode: ~Vi, action: PasteSelection }

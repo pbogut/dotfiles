@@ -3,6 +3,7 @@ local u = require('utils')
 local k = vim.keymap
 local i = vim.g.icon
 local colors = vim.g.colors
+local xdebug = {}
 
 local adapters = {
   php = {
@@ -25,8 +26,7 @@ local adapters = {
 local defaults = {
   php = {
     before = function()
-      vim.cmd([[ let $XDEBUG_TRIGGER=1 ]])
-      vim.notify('Xdebug enabled')
+      xdebug.enable()
     end,
     log = true,
     type = 'php',
@@ -47,6 +47,17 @@ local defaults = {
     excludeModules = {
       'Bcrypt',
     },
+  },
+  javascript = {
+    type = 'chrome',
+    name = 'qbwork',
+    request = 'attach',
+    program = '${file}',
+    cwd = vim.fn.getcwd(),
+    sourceMaps = true,
+    protocol = 'inspector',
+    port = 9224,
+    webRoot = '${workspaceFolder}',
   },
 }
 
@@ -105,24 +116,24 @@ local function config()
     end
   end
 
-  k.set('n', '<space>dbc', function()
+  k.set('n', '<plug>(dap-breakpoint-condition)', function()
     dap.set_breakpoint(vim.fn.input('Breakpoint condition: '))
   end)
-  k.set('n', '<space>dbl', function()
+  k.set('n', '<plug>(dap-breakpoint-log)', function()
     dap.set_breakpoint(nil, nil, vim.fn.input('Log point message: '))
   end)
-  k.set('n', '<space>dd', dap.toggle_breakpoint)
-  k.set('n', '<space>dc', dap.continue)
-  k.set('n', '<space>ds', dap.close)
-  k.set('n', '<space>dl', function()
+  k.set('n', '<plug>(dap-breakpoint-toggle)', dap.toggle_breakpoint)
+  k.set('n', '<plug>(dap-continue)', dap.continue)
+  k.set('n', '<plug>(dap-close)', dap.close)
+  k.set('n', '<plug>(dap-run-last)', function()
     dap.run_last()
   end)
-  k.set('n', '<space>dr', dap.repl.toggle)
-  k.set('n', '<space>dtc', dap.run_to_cursor)
-  k.set('n', '<space>di', dap.step_into)
-  k.set('n', '<space>dn', dap.step_over)
-  k.set('n', '<space>do', dap.step_out)
-  k.set('n', '<space>df', function()
+  k.set('n', '<plug>(dap-repl-toggle)', dap.repl.toggle)
+  k.set('n', '<plug>(dap-run-to-cursor)', dap.run_to_cursor)
+  k.set('n', '<plug>(dap-step-into)', dap.step_into)
+  k.set('n', '<plug>(dap-step-over)', dap.step_over)
+  k.set('n', '<plug>(dap-step-out)', dap.step_out)
+  k.set('n', '<plug>(dap-breakpoint-list)', function()
     dap.list_breakpoints()
     if vim.fn.exists(':Trouble') > 0 then
       vim.cmd.Trouble('quickfix')
@@ -130,16 +141,16 @@ local function config()
       vim.cmd.copen()
     end
   end)
-  k.set('n', '<space>dx', function()
-    vim.cmd([[
-      if $XDEBUG_TRIGGER == 1
-        unlet $XDEBUG_TRIGGER
-        lua vim.notify('Xdebug disabled')
-      else
-        let $XDEBUG_TRIGGER=1
-        lua vim.notify('Xdebug enabled')
-      endif
-    ]])
+  k.set('n', '<plug>(dap-xdebug-toggle)', function()
+    xdebug.toggle()
+  end)
+  k.set('n', '<plug>(dap-ui-hover)', function()
+    local has_dapui, dapui = pcall(require, 'dapui')
+    if has_dapui then
+      dapui.eval()
+    else
+      vim.notify('dap-ui is not installed', vim.log.levels.WARN, { title = 'dap' })
+    end
   end)
 
   u.highlights({
@@ -165,6 +176,34 @@ local function config()
       require('plugins.dap.elixir').setup({ defaults = defaults.elixir })
     end,
   })
+end
+
+function xdebug.enable()
+  if not xdebug.enabled then
+    vim.cmd.Lazy('load vim-test')
+    vim.g['test#php#phpunit#executable_orig'] = vim.fn['test#php#phpunit#executable']()
+    vim.g['test#php#phpunit#executable'] = 'env XDEBUG_TRIGGER=1 ' .. vim.g['test#php#phpunit#executable_orig']
+    xdebug.enabled = true
+  end
+  vim.notify('Xdebug enabled')
+end
+
+function xdebug.disable()
+  if xdebug.enabled then
+    vim.cmd.Lazy('load vim-test')
+    vim.g['test#php#phpunit#executable'] = vim.g['test#php#phpunit#executable_orig']
+    vim.g['test#php#phpunit#executable_orig'] = nil
+    xdebug.enabled = false
+  end
+  vim.notify('Xdebug disabled')
+end
+
+function xdebug.toggle()
+  if xdebug.enabled then
+    xdebug.disable()
+  else
+    xdebug.enable()
+  end
 end
 
 return {

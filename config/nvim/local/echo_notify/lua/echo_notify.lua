@@ -8,6 +8,8 @@ local HlTrace = 'EchoNotifyTRACE'
 
 local options = { text = {}, hls = {}, icons = {}, level = 0 }
 
+local suppressed_messages = {}
+
 echo.setup = function(opts)
   opts = vim.tbl_extend('keep', opts, {
     icons = {
@@ -18,7 +20,13 @@ echo.setup = function(opts)
       WARN = '',
     },
     level = 2,
+    suppress = {
+      message = {},
+      title = {},
+    },
   })
+
+  options.suppress = opts.suppress
 
   options.icons[vim.log.levels.ERROR] = opts.icons.ERROR
   options.icons[vim.log.levels.DEBUG] = opts.icons.DEBUG
@@ -47,6 +55,33 @@ echo.setup = function(opts)
   vim.api.nvim_set_hl(0, HlDebug, { fg = '#d484ff' })
 end
 
+local function show_message(message, title, icon, group)
+  local msg = title .. ': ' .. message
+  local suppress = false
+
+  for _, pattern in ipairs(options.suppress.title or {}) do
+    if title:match(pattern) then
+      suppress = true
+    end
+  end
+  for _, pattern in ipairs(options.suppress.message or {}) do
+    if message:match(pattern) then
+      suppress = true
+    end
+  end
+
+  if suppress then
+    if suppressed_messages[msg] then
+      suppressed_messages[msg] = suppressed_messages[msg] + 1
+    else
+      suppressed_messages[msg] = 1
+    end
+    return
+  end
+
+  vim.api.nvim_echo({ { '[' .. title .. ']' .. icon, group }, { ' ' .. tostring(message), nil } }, true, {})
+end
+
 echo.notify = function(message, level, opts)
   level = level or vim.log.levels.INFO
   opts = opts or {}
@@ -67,8 +102,12 @@ echo.notify = function(message, level, opts)
     message = message:sub(1, width - title:len() - icon:len() - 15)
   end
 
-  vim.api.nvim_echo({ { '[' .. title .. ']' .. icon, group }, { ' ' .. tostring(message), nil } }, true, {})
+  show_message(message, title, icon, group)
 end
+
+vim.api.nvim_create_user_command('NotifySuppressed', function(_)
+  vim.print(suppressed_messages)
+end, {nargs = 0})
 
 vim.notify = echo.notify
 return echo

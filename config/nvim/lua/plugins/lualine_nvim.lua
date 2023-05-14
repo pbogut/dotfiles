@@ -3,10 +3,10 @@ local c = vim.g.colors
 
 -- custom sections
 local s = {
+  navic = require('plugins.lualine.navic'),
   dapinfo = require('plugins.lualine.dapinfo'),
   harpoon = require('plugins.lualine.harpoon'),
   filename = require('plugins.lualine.filename'),
-  gps = require('plugins.lualine.gps'),
   dadbod = require('plugins.lualine.dadbod'),
   fileinfo = require('plugins.lualine.fileinfo'),
   location = require('plugins.lualine.location'),
@@ -16,6 +16,8 @@ local s = {
   diff_change = require('plugins.lualine.diff').change,
   diff_mode = require('plugins.lualine.diff').mode_green,
   diff_mode_inactive = require('plugins.lualine.diff').mode,
+  fugitive = require('plugins.lualine.fugitive').filename_green,
+  fugitive_inactive = require('plugins.lualine.fugitive').filename,
 }
 
 local config = function()
@@ -52,15 +54,14 @@ local config = function()
       lualine_z = { s.actions, s.diagnostics },
     },
     winbar = {
-      lualine_a = { s.filename },
-      lualine_b = {},
-      lualine_c = { s.gps },
+      lualine_a = { s.fugitive },
+      lualine_c = { s.navic },
       lualine_x = { s.dadbod },
       lualine_y = { s.diff_mode },
       lualine_z = {},
     },
     inactive_winbar = {
-      lualine_a = { s.filename },
+      lualine_a = { s.fugitive_inactive },
       lualine_b = {},
       lualine_c = {},
       lualine_x = { s.dadbod },

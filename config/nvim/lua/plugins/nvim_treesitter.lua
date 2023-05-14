@@ -1,7 +1,7 @@
 require('nvim-treesitter.configs').setup({
   -- ensure_installed = 'all', -- very slow (>20% of start time), dont use it
   highlight = {
-    enable = true, -- its buggy, I'm on fence with it
+    enable = true,
   },
   matchup = {
     enable = true,

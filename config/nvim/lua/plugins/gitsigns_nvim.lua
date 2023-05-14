@@ -1,12 +1,13 @@
 require('gitsigns').setup({
   --[[ sign_priority = 1, ]]
+  trouble = true,
   preview_config = {
     -- Options passed to nvim_open_win
     border = 'none',
     style = 'minimal',
     relative = 'cursor',
     row = 0,
-    col = 1
+    col = 1,
   },
 })
 

@@ -158,6 +158,11 @@ for _, def in pairs(bindings()) do
 end
 
 local on_attach = function(client, bufnr)
+  local has_navic, navic = pcall(require, 'nvim-navic')
+  if has_navic then
+    navic.attach(client, bufnr)
+  end
+
   if has_lsp_signature then
     lsp_signature.on_attach({
       bind = true,

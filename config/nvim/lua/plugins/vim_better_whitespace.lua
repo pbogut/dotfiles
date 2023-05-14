@@ -3,16 +3,16 @@ local b = vim.b
 
 g.strip_whitespace_on_save = 0
 local augroup = vim.api.nvim_create_augroup('x_whitespace', { clear = true })
-vim.api.nvim_create_autocmd('BufWritePost', {
+vim.api.nvim_create_autocmd('BufWritePre', {
   group = augroup,
   pattern = '*',
   callback = function()
     if not b.whitespace_trim_disabled then
-      vim.cmd.StripWhitespace()
+      vim.cmd([[silent! StripWhitespace]])
     end
   end,
 })
-vim.api.nvim_create_autocmd('FileType', { 
+vim.api.nvim_create_autocmd('FileType', {
   group = augroup,
   pattern = 'markdown,diff',
   callback = function()

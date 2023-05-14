@@ -201,7 +201,10 @@ vim.api.nvim_create_autocmd('VimEnter', {
   group = augroup,
   pattern = '*',
   callback = function()
-    vim.cmd.Action('quick_init')
+    local cmds = M.get_cmds_for_action('quick_init')
+    if #cmds > 0 then
+      M.run_cmds(cmds)
+    end
   end,
 })
 

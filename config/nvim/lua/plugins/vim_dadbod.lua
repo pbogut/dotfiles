@@ -7,10 +7,10 @@ local l = {}
 
 l.setup = function()
   -- behave different when changed to functions or <cmd>, so don't do it
-  k.set('v', '<space>d', ':lua print("dadbod not loaded yet")<cr>')
-  k.set('v', '<space>D', ':lua print("dadbod not loaded yet")<cr>')
-  k.set('n', '<space>d', ':lua print("dadbod not loaded yet")<cr>')
-  k.set('n', '<space>D', ':lua print("dadbod not loaded yet")<cr>')
+  k.set('v', '<space>d', ':lua print("dadbod not loaded yet, select DB first")<cr>')
+  k.set('v', '<space>D', ':lua print("dadbod not loaded yet, select DB first")<cr>')
+  k.set('n', '<space>d', ':lua print("dadbod not loaded yet, select DB first")<cr>')
+  k.set('n', '<space>D', ':lua print("dadbod not loaded yet, select DB first")<cr>')
 end
 
 l.config = function()
@@ -123,5 +123,40 @@ function l.db_with_warning(whole)
     fn['db#execute_command']('', false, firstline, lastline, '')
   end
 end
+
+k.set('n', '<plug>(dadbod-select-database)', function()
+  local actions = require('telescope.actions')
+  local finders = require('telescope.finders')
+  local pickers = require('telescope.pickers')
+  local action_state = require('telescope.actions.state')
+  local conf = require('telescope.config').values
+  l.load_connections()
+  pickers
+    .new({
+      prompt_title = 'Database',
+      finder = finders.new_table({
+        results = vim.fn['db#url_complete']('g:') or {},
+        -- entry_maker = ''
+      }),
+      sorter = conf.file_sorter({}),
+      attach_mappings = function(prompt_bufnr)
+        actions.select_default:replace(function()
+          local selection = action_state.get_selected_entry()
+          if selection == nil then
+            print('[telescope] Nothing currently selected')
+            return
+          end
+          actions.close(prompt_bufnr)
+          vim.b.db = vim.api.nvim_eval(selection[1])
+          vim.b.db_selected = selection[1]
+          vim.schedule(function()
+            vim.fn['db#adapter#ssh#create_tunnel'](vim.b.db)
+          end)
+        end)
+        return true
+      end,
+    })
+    :find()
+end)
 
 return l

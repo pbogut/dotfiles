@@ -1,144 +1,69 @@
 local u = require('utils')
 local k = vim.keymap
 local actions = require('telescope.actions')
-local make_entry = require('telescope.make_entry')
-local actions_layout = require('telescope.actions.layout')
-local builtin = require('telescope.builtin')
 local telescope = require('telescope')
-local pickers = require('telescope.pickers')
-local finders = require('telescope.finders')
-local action_state = require('telescope.actions.state')
-local conf = require('telescope.config').values
+local actions_layout = require('telescope.actions.layout')
+local function builtin()
+  return require('telescope.builtin')
+end
 
-k.set('n', '<space>fp', require('telescope').extensions['tmux-projects'].ls_projects)
-k.set('n', '<space>fr', function()
-  builtin.live_grep()
+k.set('n', '<plug>(telescope-tmux-list-projects)', require('telescope').extensions['tmux-projects'].ls_projects)
+k.set('n', '<plug>(telescope-live-grep)', function()
+  builtin().live_grep()
 end)
-k.set('n', '<space>fR', function()
-  builtin.live_grep({
-    search_dirs = {
-      vim.fn.getcwd() .. '/vendor',
-    },
-  })
+k.set('n', '<plug>(telescope-file-types)', function()
+  builtin().filetypes()
 end)
-k.set('n', '<space>st', function()
-  builtin.filetypes()
+k.set('n', '<plug>(telescope-find-files)', function()
+  builtin().find_files()
 end)
-k.set('n', '<space>fa', function()
-  builtin.find_files()
-end)
-k.set('n', '<space>ff', function()
-  builtin.find_files({
+k.set('n', '<plug>(telescope-find-files-no-ignore)', function()
+  builtin().find_files({
     no_ignore = true,
   })
 end)
-k.set('n', '<space>fF', function()
-  builtin.find_files({
+k.set('n', '<plug>(telescope-find-files-with-hidden)', function()
+  builtin().find_files({
     no_ignore = true,
     hidden = true,
   })
 end)
-k.set('n', '<space>fm', function()
-  vim.fn['fzf_mru#mrufiles#refresh']()
-  vim.cmd.Telescope('fzf_mru', 'current_path')
+k.set('n', '<plug>(telescope-buffers)', function()
+  builtin().buffers()
 end)
-k.set('n', '<space>fd', function()
-  require('plugins.vim_dadbod').load_connections()
-  pickers
-    .new({
-      prompt_title = 'Database',
-      finder = finders.new_table({
-        results = vim.fn['db#url_complete']('g:') or {},
-        -- entry_maker = ''
-      }),
-      sorter = conf.file_sorter({}),
-      attach_mappings = function(prompt_bufnr)
-        actions.select_default:replace(function()
-          local selection = action_state.get_selected_entry()
-          if selection == nil then
-            print('[telescope] Nothing currently selected')
-            return
-          end
-          actions.close(prompt_bufnr)
-          vim.b.db = vim.api.nvim_eval(selection[1])
-          vim.b.db_selected = selection[1]
-          vim.schedule(function()
-            vim.fn['db#adapter#ssh#create_tunnel'](vim.b.db)
-          end)
-        end)
-        return true
-      end,
-    })
-    :find()
+k.set('n', '<plug>(telescope-old-files-in-cwd)', function()
+  builtin().oldfiles({ only_cwd = true })
 end)
-k.set('n', '<space>fM', function()
-  local result = {}
-  local files = vim.fn['bm#all_files']()
-  for _, file in ipairs(files) do
-    local line_nrs = vim.fn['bm#all_lines'](file)
-    for _, line_nr in ipairs(line_nrs) do
-      local bookmark = vim.fn['bm#get_bookmark_by_line'](file, line_nr)
-      local content = ''
-      if bookmark.annotation:len() > 0 then
-        content = 'Annotation: ' .. bookmark.annotation
-      elseif bookmark.content:len() > 0 then
-        content = bookmark.content
-      else
-        content = 'empty line'
-      end
-      result[#result + 1] = file .. ':' .. line_nr .. ':0:' .. content
-    end
-  end
-
-  pickers
-    .new({
-      prompt_title = 'BookMarks',
-
-      finder = finders.new_table({
-        results = result,
-        entry_maker = make_entry.gen_from_vimgrep({}),
-      }),
-      previewer = conf.grep_previewer({}),
-      sorter = conf.generic_sorter({}),
-    })
-    :find()
+k.set('n', '<plug>(telescope-old-files)', function()
+  builtin().oldfiles()
 end)
-k.set('n', '<space>fb', function()
-  builtin.buffers()
-end)
-k.set('n', '<space>fo', function()
-  builtin.oldfiles({ only_cwd = true })
-end)
-k.set('n', '<space>fO', function()
-  builtin.oldfiles()
-end)
-k.set('n', '<space>ft', function()
-  builtin.find_files({
+k.set('n', '<plug>(ts-templates-list)', function()
+  builtin().find_files({
     cwd = os.getenv('DOTFILES') .. '/config/nvim/templates',
   })
 end)
-k.set('n', '<space>fs', function()
-  builtin.find_files({
+k.set('n', '<plug>(ts-snippets-list)', function()
+  builtin().find_files({
     cwd = os.getenv('DOTFILES') .. '/config/nvim',
     search_dirs = { 'lua/plugins/luasnip.lua', 'snippets', 'lua/plugins/luasnip' },
   })
 end)
-k.set('n', '<space>fc', function()
-  builtin.find_files({
+k.set('n', '<plug>(ts-config-files)', function()
+  builtin().find_files({
     cwd = os.getenv('DOTFILES') .. '/..',
     no_ignore_parent = true,
     search_dirs = { 'dotfiles', 'dotfiles/config/nvim/lua/config' },
   })
 end)
-k.set('n', '<space>fn', function()
-  builtin.find_files({
+k.set('n', '<plug>(ts-config-files-nvim)', function()
+  builtin().find_files({
     cwd = os.getenv('DOTFILES') .. '/config',
     no_ignore_parent = true,
     search_dirs = { 'nvim', 'nvim/lua/config' },
   })
 end)
-k.set('n', '<space>fg', function()
-  builtin.git_status({
+k.set('n', '<plug>(telescope-git-files)', function()
+  builtin().git_status({
     attach_mappings = function(bufnr, map)
       -- disable stage change and use my default action
       map({ 'i', 'n' }, '<tab>', function()
@@ -149,18 +74,13 @@ k.set('n', '<space>fg', function()
     end,
   })
 end)
-k.set('n', '<space>gf', function()
+k.set('n', '<plug>(telescope-grep-string)', function()
+  builtin().grep_string()
+end)
+k.set('n', '<plug>(ts-file-under-coursor)', function()
   local file = u.string_under_coursor()
   file = file:gsub('[~%.\\/]', ' ')
-  builtin.grep_string({ search = u.trim_string(file) })
-end)
-k.set('n', '<space>gF', function()
-  local file = u.string_under_coursor()
-  file = file:gsub('[~%.\\/]', ' ')
-  builtin.grep_string({ search = u.trim_string(file) })
-end)
-k.set('n', '<space>gw', function()
-  builtin.grep_string()
+  builtin().grep_string({ search = u.trim_string(file) })
 end)
 
 local augroup = vim.api.nvim_create_augroup('x_telescope', { clear = true })
@@ -180,10 +100,7 @@ vim.api.nvim_create_autocmd('FileType', {
 
 telescope.setup({
   defaults = {
-    -- path_display = {
-    --   shorten = { len = 3, exclude = { 1, 2, -1, -2, -3 } },
-    -- },
-    path_display = function(opts, path)
+    path_display = function(_, path)
       local cwd = vim.fn.getcwd()
       local result = path
       if path:sub(1, #cwd) == cwd then
@@ -234,6 +151,7 @@ telescope.setup({
         ['<tab>'] = actions.toggle_selection + actions.move_selection_worse,
         ['<s-tab>'] = actions.toggle_selection + actions.move_selection_better,
         ['<c-q>'] = function(id)
+          local action_state = require('telescope.actions.state')
           local picker = action_state.get_current_picker(id)
 
           if #picker:get_multi_selection() > 0 then
@@ -265,9 +183,9 @@ telescope.setup({
     },
   },
 })
-require('telescope').load_extension('fzf')
 require('telescope').load_extension('ui-select')
 require('telescope').load_extension('git_worktree')
 require('telescope').load_extension('tmux-git-worktree')
 require('telescope').load_extension('tmux-projects')
 require('telescope').load_extension('fzf_mru')
+require('telescope').load_extension('fzf')

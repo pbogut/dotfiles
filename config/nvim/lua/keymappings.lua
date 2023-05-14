@@ -155,12 +155,6 @@ end)
 k.set('n', 'yaf', [[:let @+=expand('%:p')<bar>echo 'Yanked: '.expand('%:p')<cr>]])
 k.set('n', 'yif', [[:let @+=expand('%:t')<bar>echo 'Yanked: '.expand('%:t')<cr>]])
 k.set('n', 'yrf', [[:let @+=expand('%:.')<bar>echo 'Yanked: '.expand('%:.')<cr>]])
-k.set('n', '<space>rr', function()
-  cmd('belowright 20split')
-  vim.cmd.enew()
-  vim.cmd.term('cargo run')
-  vim.cmd.startinsert()
-end)
 
 -- quick change and search for next occurrence, change can be repeated
 -- by . N and n will search for the same selection, gn gN will select same

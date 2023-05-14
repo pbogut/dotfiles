@@ -13,7 +13,7 @@ vim.cmd('set shortmess+=c')
 vim.cmd('set runtimepath+=~/.vim')
 vim.cmd('silent! colorscheme solarized')
 
-o.syntax = 'on'
+o.syntax = 'off'
 o.list = true
 o.updatetime = 100
 o.signcolumn = 'yes'
@@ -38,7 +38,7 @@ o.swapfile = false
 o.dir = os.getenv('HOME') .. '/.vim/swapfiles//'
 o.undodir = os.getenv('HOME') .. '/.vim/undofiles//'
 o.undofile = true
-o.listchars = 'tab:--▸,eol:¬,trail:⋅,extends:❯,precedes:❮,nbsp:%'
+o.listchars = 'tab:--▸,eol:¬,trail:⋅,nbsp:%'
 o.showbreak = '↪'
 o.history = 10000
 o.undolevels = 1000

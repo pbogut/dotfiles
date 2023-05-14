@@ -32,9 +32,10 @@ local function leap_all()
 end
 
 local maps = {
+  { { 'n', 'x', 'o' }, '<plug>(leap-everywhere)', leap_all, 'Leap all visible windows' },
   { { 'n', 'x', 'o' }, 's', '<Plug>(leap-forward-to)', 'Leap current window' },
   { { 'n', 'x', 'o' }, 'S', '<Plug>(leap-backward-to)', 'Leap current window' },
-  { { 'n', 'x', 'o' }, '<space>S', leap_all, 'Leap all visible windows' },
+  { { 'n', 'x', 'o' }, '<space>S', '<Plug>(leap-everywhere)', 'Leap all visible windows' },
 }
 
 for _, map in ipairs(maps) do

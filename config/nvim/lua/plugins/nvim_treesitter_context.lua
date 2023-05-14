@@ -9,6 +9,7 @@ require('treesitter-context').setup({
     -- appear in the context window.
     default = {
       'class',
+      'table',
       'function',
       'method',
       'for', -- These won't appear in the context

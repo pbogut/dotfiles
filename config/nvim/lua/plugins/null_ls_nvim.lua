@@ -1,5 +1,7 @@
 local null_ls = require('null-ls')
-local on_attach = require('plugins.nvim_lsp').on_attach
+local on_attach = function(client, bufnr)
+  require('plugins.nvim_lsp').on_attach(client, bufnr)
+end
 local severity = vim.diagnostic.severity
 
 local cfg = { sources = {}, on_attach = on_attach }
