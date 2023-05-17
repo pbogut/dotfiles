@@ -169,11 +169,42 @@ local function config()
     DapStopped = { text = i.breakpoint_current, texthl = 'DapStopped' },
   })
 
+  local augroup = vim.api.nvim_create_augroup('x_nvim_dap', { clear = true })
   vim.api.nvim_create_autocmd('FileType', {
-    group = vim.api.nvim_create_augroup('x_nvim_dap', { clear = true }),
+    group = augroup,
     pattern = 'elixir,eelixir',
     callback = function()
       require('plugins.dap.elixir').setup({ defaults = defaults.elixir })
+    end,
+  })
+
+  vim.api.nvim_create_autocmd('FileType', {
+    group = augroup,
+    pattern = 'dap-repl',
+    callback = function()
+      vim.cmd.resize(15)
+      vim.cmd([[
+        inoremap <buffer>        <C-A> <C-O>^
+        cnoremap <buffer>        <C-A> <Home>
+        inoremap <buffer> <expr> <C-B> getline('.')=~'^\s*$'&&col('.')>strlen(getline('.'))?"0\<Lt>C-D>\<Lt>Esc>kJs":"\<Lt>Left>"
+        cnoremap <buffer>        <C-B> <Left>
+        inoremap <buffer> <expr> <C-D> col('.')>strlen(getline('.'))?"\<Lt>C-D>":"\<Lt>Del>"
+        cnoremap <buffer> <expr> <C-D> getcmdpos()>strlen(getcmdline())?"\<Lt>C-D>":"\<Lt>Del>"
+        inoremap <buffer> <expr> <C-E> col('.')>strlen(getline('.'))<bar><bar>pumvisible()?"\<Lt>C-E>":"\<Lt>End>"
+        inoremap <buffer> <expr> <C-F> col('.')>strlen(getline('.'))?"\<Lt>C-F>":"\<Lt>Right>"
+        cnoremap <buffer> <expr> <C-F> getcmdpos()>strlen(getcmdline())?&cedit:"\<Lt>Right>"
+        inoremap <buffer>        <C-n> <Down>
+        inoremap <buffer>        <C-p> <Up>
+
+        noremap! <buffer>        <M-b> <S-Left>
+        noremap! <buffer>        <M-f> <S-Right>
+        noremap! <buffer>        <M-d> <C-O>dw
+        cnoremap <buffer>        <M-d> <S-Right><C-W>
+        noremap! <buffer>        <M-n> <Down>
+        noremap! <buffer>        <M-p> <Up>
+        noremap! <buffer>        <M-BS> <C-W>
+        noremap! <buffer>        <M-C-h> <C-W>
+      ]])
     end,
   })
 end

@@ -135,6 +135,12 @@ config.bind('<Ctrl-j>', 'tab-next')
 config.bind('<Ctrl-k>', 'tab-prev')
 config.bind('<Ctrl-n>', 'tab-next')
 config.bind('<Ctrl-p>', 'tab-prev')
+
+config.bind('<Ctrl-d>', 'jseval window.scrollBy(0,window.innerHeight/2)')
+config.bind('<Ctrl-u>', 'jseval window.scrollBy(0,-(window.innerHeight/2))')
+config.bind('G', 'jseval window.scrollTo(0,document.body.scrollHeight)')
+config.bind('gg', 'jseval window.scrollTo(0,0)')
+
 config.bind('<Ctrl-h>', 'fake-key <backspace>', mode='insert')
 config.bind('<Ctrl-h>', 'rl-backward-delete-char', mode='command')
 config.bind('<Return>', 'enter-mode insert')
@@ -214,7 +220,7 @@ config.bind(',rm', 'spawn --userscript ~/.scripts/qb-url-to-remarkable.sh')
 config.bind(',pdf', 'spawn --userscript ~/.scripts/qb-url-to-clean-pdf.sh')
 config.bind(',tp', 'spawn --userscript ~/.scripts/qb-send-to-phone.sh')
 
-config.bind(',xe', "jseval document.cookie = 'XDEBUG_SESSION=nvim-xdebug;'")
+config.bind(',xe', "jseval document.cookie = 'XDEBUG_SESSION=nvim-xdebug; path=/'")
 config.bind(',xd', "jseval document.cookie = `XDEBUG_SESSION=DISABLE; path=/; max-age=0;`;")
 
 bind_js(',jpp', 'pixel_perfect')

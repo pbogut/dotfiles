@@ -1,0 +1,185 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   git-wt
+# author: author <author_contact>
+# date:   29/03/2023
+#=================================================
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+}
+
+action=none
+orphans=false
+candidates=false
+
+worktree=""
+
+while test $# -gt 0; do
+  case "$1" in
+  add)
+    action=add
+    shift
+    ;;
+  list)
+    action=list
+    shift
+    ;;
+  remove)
+    action=remove
+    shift
+    ;;
+  --candidates)
+    action="--candidates"
+    shift
+    ;;
+  --orphans)
+    orphans=true
+    shift
+    ;;
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  *)
+    if [[ $action == "none" ]]; then
+      usage
+      exit 1
+    elif [[ $action == "remove" ]]; then
+      worktree=$1
+      shift
+    fi
+    shift
+    ;;
+  esac
+done
+
+trees=$(git worktree list)
+err=$?
+
+if [[ $err -ne 0 ]]; then
+  exit $err
+fi
+
+bare_path=$(echo "$trees" | grep '(bare)$' | awk '{print $1}')
+
+__gitwt__orphans() {
+  existing=$(__gitwt__list | awk '{print $1}')
+  potential=$(find "$bare_path" -mindepth 1 -maxdepth 1 -type d |
+    grep -E -v 'hooks|info|objects|refs|logs|branches|worktrees' |
+    while read -r path; do
+      rel_path=$(realpath --relative-to="$PWD" "$path")
+      echo -e "$rel_path"
+    done)
+
+  while read -r orphan; do
+    if [[ -n $orphan ]]; then
+      echo "$orphan ???????? [?]"
+    fi
+  done <<<"$( (
+    echo "$potential"
+    echo "$existing"
+  ) | sort | uniq -u)"
+}
+
+__gitwt__list() {
+  git worktree list | grep -v '(bare)$' | while read -r path sha branch; do
+    rel_path=$(realpath --relative-to="$PWD" "$path")
+    echo -e "$rel_path\t$sha\t$branch"
+  done
+}
+
+__gitwt__list_candidates() {
+  checked_out=$(git branch -v | grep '^[+\*]' | sed 's/^..//' | awk '{ print $2 }')
+  local=$(git branch -v | grep '^[+\*]' | sed 's/^..//' | awk '{ print $2 }')
+  echo '----'
+  git branch -v | sed 's/^..//' | awk '{ print $2 ":" $1 }'
+  git branch -v --remotes | awk '{ print $2 ":" $1 }'
+  echo '----'
+  echo "$checked_out"
+  echo '----'
+  echo "$local"
+}
+__gitwt__is_worktree() {
+  worktree=$1
+  if [[ ! -d $worktree ]]; then
+    return 1
+  fi
+  cd "$worktree" || return 1
+  if git status >/dev/null 2>&1; then
+    cd - >/dev/null || return 1
+    return 0
+  fi
+
+  cd - >/dev/null || return 1
+  return 1
+}
+
+if [[ $action == "--candidates" ]]; then
+  __gitwt__list_candidates
+  exit 0
+fi
+
+if [[ $action == "list" ]]; then
+  (
+    __gitwt__list
+
+    if $orphans; then
+      __gitwt__orphans
+    fi
+  ) | column -t
+
+  exit 0
+fi
+
+if [[ $action == "remove" ]] && [[ -n $worktree ]]; then
+  err=0
+  if __gitwt__is_worktree "$worktree"; then
+    if ! git worktree remove "$worktree"; then
+      cd "$worktree" || exit 1
+      git diff
+      echo "summary:"
+      git status -s
+      cd - >/dev/null || exit 1
+      echo "Remove worktree with --force? [y/N]"
+      read -r ans
+      if [[ $ans == "y" ]]; then
+        if ! git worktree remove --force "$worktree"; then
+          echo "Failed to remove directory: $worktree"
+          echo "Remove directory with sudo? [y/N]"
+          read -r ans
+          if [[ $ans == "y" ]]; then
+            sudo rm -rf "$worktree"
+            err=$?
+          fi
+        fi
+      fi
+    fi
+  else
+    echo "Not a git worktree: $worktree"
+    err=1
+    if [[ -d $worktree ]]; then
+      cd "$worktree" || exit 1
+      ls -l1 --color=always
+      cd - >/dev/null || exit 1
+      echo "Remove directory? [y/N]"
+      read -r ans
+      if [[ $ans == "y" ]]; then
+        if ! rm -rf "$worktree"; then
+          err=1
+          echo "Failed to remove directory: $worktree"
+          echo "Remove directory with sudo? [y/N]"
+          read -r ans
+          if [[ $ans == "y" ]]; then
+            sudo rm -rf "$worktree"
+            err=$?
+          fi
+        fi
+      fi
+    fi
+  fi
+  exit $err
+fi

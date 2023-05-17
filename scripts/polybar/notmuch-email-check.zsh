@@ -9,8 +9,8 @@ tick=0.2   #tick every n secnds
 refresh=6 #refresh every n seconds
 
 main_action() {
-  unread="$(notmuch search tag:unread and tag:inbox | wc -l)"
-  inbox="$(notmuch search tag:inbox | wc -l)"
+  unread="$(notmuch count -- tag:unread and tag:inbox)"
+  inbox="$(notmuch count --  tag:inbox)"
   # if [[ $unread != "0" ]] || [[ $inbox != "0" ]]; then
   if [[ $unread != "0" ]]; then
     echo $unread/$inbox

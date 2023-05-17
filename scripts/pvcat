@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   pvcat
+# author: author <pbogut@pbogut.me>
+# date:   25/11/2022
+#=================================================
+file="$1"
+cat "$file" | pv -s "$(du -sb "$file" | awk '{print $1}')"

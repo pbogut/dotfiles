@@ -1,20 +1,9 @@
 {
   "yarn": [
-    "@tailwindcss/language-server",
-    "vim-language-server",
-    "vls",
-    "bash-language-server",
-    "pyright",
-    "dockerfile-language-server-nodejs",
-    "typescript-language-server",
-    "@tailwindcss/language-server",
-    "intelephense",
     "vscode-langservers-extracted",
-    "yarn-upgrade-all",
-    "jsonlint"
+    "yarn-upgrade-all"
   ],
   "gem": [
-    "solargraph",
     "nokogiri",
     "clipboard",
     "mail",
@@ -25,22 +14,14 @@
     "erb"
   ],
   "go": [
-    "golang.org/x/tools/gopls@latest",
     "github.com/gokcehan/lf@latest",
-    "github.com/pbogut/freeport@latest"
-  ],
-  "cargo": [
-    "stylua",
-    "selene",
-    "prosemd-lsp"
+    "github.com/pbogut/freeport@latest",
+    "github.com/tigrawap/slit/cmd/slit@latest"
   ],
   "gitpac": [
     "all"
   ],
   "cargo": [
-    "stylua",
-    "selene",
-    "prosemd-lsp"
   ],
   "pip": [
     "sqlfluff"

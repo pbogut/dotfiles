@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   deezer
+# author: author <author_contact>
+# date:   08/11/2022
+#=================================================
+chromium --app=https://www.deezer.com/en/

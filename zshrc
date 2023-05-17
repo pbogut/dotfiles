@@ -128,12 +128,14 @@ fi
 
 setopt prompt_subst
 # starship prompt
-source <(/usr/bin/starship init zsh --print-full-init)
+source <(/usr/bin/starship init zsh --print-full-init 2>/dev/null)
 
 # host specific config
 if [ -f $HOME/.$hostname.zsh ]; then
   source $HOME/.$hostname.zsh
 fi
 
-[[ -f /opt/asdf-vm/asdf.sh ]] && source /opt/asdf-vm/asdf.sh
-alias arst="asdf" # for colemak
+eval "$(rtx activate zsh 2>/dev/null)"
+alias asdf="rtx"
+
+alias luamake=/home/pbogut/.gitpac/sumneko/lua-language-server/3rd/luamake/luamake

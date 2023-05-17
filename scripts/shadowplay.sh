@@ -98,18 +98,24 @@ if [[ $action == "fullscreen" ]]; then
     usage
     exit 1
   fi
+  count=0
   while :; do
+    count=$(( count + 1 ))
     notify-send -u low "Start Shadowing $screen"
 
     path="$HOME/Videos/ShadowPlay"
+    # path="$HOME/Videos/ShadowPlay/$(echo $title | sed 's/[^A-Za-z0-9]/_/g')"
 
     mkdir -p "$path"
 
-    gpu-screen-recorder -w "$screen" \
-      -c mp4 -f $record_fps \
-      -a "$(pactl get-default-sink).monitor" \
-      -r $record_minutes \
-      -o "$path"
+      gpu-screen-recorder -w "$screen" \
+        -c mp4 -f $record_fps \
+        -a "$(pactl get-default-sink).monitor" \
+        -r $record_minutes \
+        -o "$path"
+    if [[ $count -gt 100 ]] ;then
+      exit 1
+    fi
   done
 fi
 

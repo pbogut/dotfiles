@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   stl-to-png
+# author: author <author_contact>
+# date:   04/01/2023
+#=================================================
+
+input="$1"
+output="$2"
+
+realinput="$(realpath "$input")"
+dir="$(mktemp -d)"
+
+echo 'import("'"$realinput"'");' > "$dir/file.scad"
+openscad -o "$output" --viewall "$dir/file.scad"
