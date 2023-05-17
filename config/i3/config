@@ -62,7 +62,7 @@ bindsym $mod+Shift+colon $exec "~/.scripts/i3-dmenu-start-at-new-workspace.sh"
 bindsym $mod+d exec "dunstctl context"
 
 # change focus
-set $focus exec --no-startup-id ~/.scripts/i3-focus.py
+set $focus exec --no-startup-id i3-focus
 bindsym $mod+h $focus left
 bindsym $mod+j $focus down
 bindsym $mod+k $focus up
