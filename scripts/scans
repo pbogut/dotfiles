@@ -27,7 +27,7 @@ def do_action(action)
   if action == 'search'
     do_search(ARGV[1..].join(" "))
   end
-  if action == 'all'
+  if action == 'all' or action.nil?
     do_search("")
   end
 end

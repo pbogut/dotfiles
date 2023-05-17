@@ -79,4 +79,35 @@ ls.add_snippets('php', {
       }
     )
   ),
+  s(
+    'funu',
+    fmt(
+      [[
+        function ({args}) use({use}) {{
+        	{visual}{done}
+        }}
+      ]],
+      {
+        args = i(1, ''),
+        use = i(2, ''),
+        visual = h.visual,
+        done = i(0),
+      }
+    )
+  ),
+  s(
+    'fun',
+    fmt(
+      [[
+        function ({args}) {{
+        	{visual}{done}
+        }}
+      ]],
+      {
+        args = i(1, ''),
+        visual = h.visual,
+        done = i(0),
+      }
+    )
+  ),
 }, { default_priority = 2000 })

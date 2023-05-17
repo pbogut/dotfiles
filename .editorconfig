@@ -1,0 +1,13 @@
+[*]
+end_of_line = lf
+insert_final_newline = true
+
+[*.lua]
+trim_trailing_whitespace = true
+indent_style = space
+tab_width = 2
+
+[*.sh,*.zsh]
+trim_trailing_whitespace = true
+indent_style = space
+tab_width = 2
