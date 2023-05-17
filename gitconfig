@@ -18,6 +18,7 @@
 [github]
     user = pbogut
 [diff]
+    algorithm = histogram
 [color]
     ui = true
 [alias]
@@ -150,4 +151,4 @@
     new = green bold
     whitespace = red reverse
 [protocol "file"]
-	allow = always
+    allow = always

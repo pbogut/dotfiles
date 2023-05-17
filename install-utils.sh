@@ -5,10 +5,11 @@ sudo pacman -Sy
 # if no paru installed then build it with cargo
 if ! paru --version; then
   echo "Installing paru dependencies ..."
-  sudo pacman -S rustup
+  sudo pacman -S rustup gcc cmake pkgconf fakeroot
   echo "Installing paru ..."
+  rustup toolchain install stable
   cargo install paru
-  paru -S paru && cargo uninstall paru
+  "$HOME/.cargo/bin/paru" -S paru && cargo uninstall paru
 fi
 
 echo "Installing packages..."
@@ -19,8 +20,11 @@ paru -S \
   bluez-hcitool \
   cmake \
   copyq \
+  dbus-broker \
   dunst \
   enca \
+  fakeroot \
+  gcc \
   go \
   gtk3-print-backends \
   i3wm i3lock \
@@ -44,6 +48,7 @@ paru -S \
   pandoc \
   paru \
   picom \
+  pkgconf \
   playerctl \
   polybar \
   pulsemixer \
@@ -79,12 +84,14 @@ paru -S \
   yt-dlp \
   zenity
 
+sudo systemctl enable --now dbus-broker.service
+
 if [[ $(hostname) == 'silverspoon' ]]; then
   paru -S \
     intel-media-driver
 fi
 
-pip install \
+pip install --user \
   guessit \
   i3-py \
   i3ipc \
@@ -107,7 +114,6 @@ gem install \
 go install github.com/nsf/gocode@latest
 go install github.com/pbogut/exail@latest
 go install github.com/pbogut/mails-go-web@latest
-go install golang.org/x/tools/gopls@latest
 
 rustup toolchain install nightly
 rustup toolchain install stable
@@ -119,6 +125,13 @@ rustup component add rustfmt --toolchain nightly
 rustup component add rustfmt --toolchain stable
 
 cargo install --git https://github.com/pbogut/enrichmail.git
+cargo install --git https://github.com/pbogut/cargo-workspace.git
+cargo install --git https://github.com/pbogut/i-use-rust-btw.git
+
+cargo install \
+  mprocs \
+  rtx-cli \
+  bacon
 
 yarn global add \
   @mozilla/readability \
@@ -130,6 +143,10 @@ yarn global add \
   -y
 
 gitpac all
+
+flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak install -y org.ferdium.Ferdium
+
 
 # git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.3.0
 # source ~/.asdf/asdf.sh

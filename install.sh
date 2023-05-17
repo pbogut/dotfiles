@@ -57,6 +57,7 @@ read -r -d '' files <<"EOF"
     config/alacritty
     config/autostart/autostart.desktop
     config/clang-format
+    config/conky
     config/dircolors-solarized
     config/dircolors.256dark
     config/dunst/dunstrc
@@ -64,10 +65,12 @@ read -r -d '' files <<"EOF"
     config/fish
     config/gamemode.ini
     config/gtk-3.0/settings.ini
+    config/gtk-4.0/settings.ini
     config/i3/config
     config/i3/i3status.conf
     config/i3/workspaces
     config/kmonad
+    config/lazygit/config-nvim.yml
     config/lazygit/config.yml
     config/lf/lfrc
     config/mpv/input.conf
@@ -80,6 +83,7 @@ read -r -d '' files <<"EOF"
     config/ncmpcpp/config
     config/networkmanager-dmenu/config.ini
     config/nvim/after
+    config/nvim/colors
     config/nvim/config
     config/nvim/filetype.lua
     config/nvim/ginit.vim
@@ -106,6 +110,7 @@ read -r -d '' files <<"EOF"
     config/starship.toml
     config/systemd/user/kmonad.service
     config/systemd/user/syncthing.service
+    config/tmux
     config/xob
     ctags
     emacs.d/init.el
@@ -126,6 +131,7 @@ read -r -d '' files <<"EOF"
     mutt/mailcap
     mutt/muttrc
     mutt/solarized-dark-16.muttrc
+    mutt/solarized-dark-256.muttrc
     npmrc
     offlineimap-hooks
     offlineimap.py
@@ -196,6 +202,10 @@ for file in $files; do
   ln -sf "$dir/$file" "$HOME/.$file"
   echo "done"
 done
+
+mkdir -p "$HOME/.gpg-config"
+touch "$HOME/.profile.local"
+touch "$HOME/.profile.$(hostname)"
 
 if $links_only; then
   exit 0
