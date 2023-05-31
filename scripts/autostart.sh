@@ -38,9 +38,9 @@ demonize kdeconnect kdeconnect-indicator
 demonize unclutter "unclutter -idle 1 -root"
 
 # sepcific for the computer
-if [[ -f "$HOME/.$host_name.autostart.sh" ]]; then
+if [[ -f "$HOME/.autostart.$host_name.sh" ]]; then
   # shellcheck disable=1090
-  source "$HOME/.$host_name.autostart.sh"
+  source "$HOME/.autostart.$host_name.sh"
 fi
 # just local one, not versioned
 if [[ -f "$HOME/.autostart.local.sh" ]]; then

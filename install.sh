@@ -48,6 +48,8 @@ read -r -d '' files <<"EOF"
     Xresources
     ackrc
     aliases
+    autostart.redeye.sh
+    autostart.silverspoon.sh
     bash_profile
     bashrc
     bin
@@ -138,11 +140,9 @@ read -r -d '' files <<"EOF"
     profile
     profile.redeye
     profile.silverspoon
-    redeye.autostart.sh
     screenrc
     scripts
     scspell/dictionary.txt
-    silverspoon.autostart.sh
     terminfo
     urlview
     vim/autoload/plug.vim

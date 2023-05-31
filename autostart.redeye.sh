@@ -6,3 +6,4 @@
 #=================================================
 rerun barriers "barriers --disable-crypto"
 rerun picom "picom -b --xrender-sync-fence"
+rerun gamemode "gamemode.sh --watch"
