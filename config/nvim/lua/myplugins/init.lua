@@ -23,6 +23,15 @@ local function setup(plugin)
   end
 end
 
+local function init(plugin)
+  local _, xcfg = pcall(require, 'plugins.' .. plugin)
+  return function(plug, opts)
+    if type(xcfg) == 'table' and xcfg['init'] then
+      xcfg.init(plug, opts)
+    end
+  end
+end
+
 return {
   { 'nvim-lua/plenary.nvim', lazy = true },
   {
@@ -194,8 +203,10 @@ return {
     keys = {
       { '<bs>', '<cmd>Dirvish %:p:h<cr>', desc = 'Dirvish' },
     },
+    cmd = { 'Dirvish' },
     dependencies = 'kristijanhusak/vim-dirvish-git',
     config = config('vim_dirvish'),
+    init = init('vim_dirvish'),
   },
   {
     'justinmk/vim-sneak',
