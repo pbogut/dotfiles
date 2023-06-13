@@ -3,9 +3,9 @@ local g = vim.g
 local b = vim.b
 local fn = vim.fn
 local cmd = vim.cmd
-local l = {}
+local M = {}
 
-l.setup = function()
+M.init = function()
   -- behave different when changed to functions or <cmd>, so don't do it
   k.set('v', '<space>d', ':lua print("dadbod not loaded yet, select DB first")<cr>')
   k.set('v', '<space>D', ':lua print("dadbod not loaded yet, select DB first")<cr>')
@@ -13,7 +13,7 @@ l.setup = function()
   k.set('n', '<space>D', ':lua print("dadbod not loaded yet, select DB first")<cr>')
 end
 
-l.config = function()
+M.config = function()
   -- behave different when changed to functions or <cmd>, so don't do it
   k.set('v', '<space>d', ':lua require"plugins.vim_dadbod".db_with_warning()<cr>')
   k.set('v', '<space>D', ':lua require"plugins.vim_dadbod".db_with_warning(true)<cr>')
@@ -43,7 +43,7 @@ l.config = function()
 end
 
 -- set up dadbod connections
-function l.load_connections()
+function M.load_connections()
   local config = require('config')
   for _, connection in pairs(config.get('dadbod.connections', {})) do
     local name = connection.name
@@ -52,7 +52,7 @@ function l.load_connections()
   end
 end
 
-function l.db_with_warning(whole)
+function M.db_with_warning(whole)
   local db = b.db or ''
   local db_selected = b.db_selected or ''
   local firstline = fn.line("'<")
@@ -130,7 +130,7 @@ k.set('n', '<plug>(dadbod-select-database)', function()
   local pickers = require('telescope.pickers')
   local action_state = require('telescope.actions.state')
   local conf = require('telescope.config').values
-  l.load_connections()
+  M.load_connections()
   pickers
     .new({
       prompt_title = 'Database',
@@ -159,4 +159,4 @@ k.set('n', '<plug>(dadbod-select-database)', function()
     :find()
 end)
 
-return l
+return M

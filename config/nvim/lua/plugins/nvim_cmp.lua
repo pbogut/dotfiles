@@ -153,9 +153,6 @@ local function config()
   })
 end
 
-local function setup() end
-
 return {
   config = config,
-  setup = setup,
 }

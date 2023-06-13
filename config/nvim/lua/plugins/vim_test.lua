@@ -3,31 +3,36 @@ local k = vim.keymap
 local g = vim.g
 local has_dap, dap = pcall(require, 'dap')
 
-local function setup()
-  local strategy = function()
-    if has_dap and dap.status() and dap.status():len() > 0 then
-      vim.notify('DAP is running, test will be run in background', 'info')
-      return 'dispatch_background'
-    else
-      return 'neovim'
+local strategy = function()
+  if has_dap and dap.status() and dap.status():len() > 0 then
+    vim.notify('DAP is running, test will be run in background', vim.log.levels.INFO, { title = 'vim-test' })
+    if os.getenv('TMUX') then
+      return 'tmuxctl_hidden'
     end
-  end
 
-  local function run(command)
-    return function()
-      vim.cmd(command .. ' -strategy=' .. strategy())
+    return 'dispatch_background'
+  else
+    if os.getenv('TMUX') then
+      return 'tmuxctl'
     end
-  end
 
-  k.set('n', '<space>tn', run('TestNearest'))
-  k.set('n', '<space>tf', run('TestFile'))
-  k.set('n', '<space>ts', run('TestSuite'))
-  k.set('n', '<space>tl', run('TestLast'))
-  k.set('n', '<space>tt', run('TestLast'))
-  k.set('n', '<space>tv', run('TestVisit'))
+    return 'neovim'
+  end
 end
 
+local function init() end
+
 local function config()
+  vim.g['test#custom_strategies'] = {
+    tmuxctl = function(cmd)
+      require('tmuxctl').send_to_pane('vim_test', cmd, { open = true, focus = false })
+    end,
+    tmuxctl_hidden = function(cmd)
+      require('tmuxctl').send_to_pane('vim_test', cmd, { open = false, focus = false })
+    end,
+  }
+  vim.g['test#strategy'] = 'tmuxctl'
+
   local ag_x_test = vim.api.nvim_create_augroup('x_test', { clear = true })
   vim.api.nvim_create_autocmd('FileType', {
     group = ag_x_test,
@@ -49,9 +54,21 @@ local function config()
   if cfg.get('test.phpunit.executable') then
     vim.g['test#php#phpunit#executable'] = cfg.get('test.phpunit.executable')
   end
+
+  local function run(command)
+    return function()
+      vim.cmd(command .. ' -strategy=' .. strategy())
+    end
+  end
+
+  k.set('n', '<plug>(test-nearest)', run('TestNearest'))
+  k.set('n', '<plug>(test-file)', run('TestFile'))
+  k.set('n', '<plug>(test-suite)', run('TestSuite'))
+  k.set('n', '<plug>(test-last)', run('TestLast'))
+  k.set('n', '<plug>(test-visit)', run('TestVisit'))
 end
 
 return {
   config = config,
-  setup = setup,
+  init = init,
 }

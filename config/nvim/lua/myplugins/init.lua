@@ -16,13 +16,6 @@ local function config(plugin)
   end
 end
 
-local function setup(plugin)
-  local _, xcfg = pcall(require, 'plugins.' .. plugin)
-  if type(xcfg) == 'table' and xcfg['setup'] then
-    xcfg.setup()
-  end
-end
-
 local function init(plugin)
   local _, xcfg = pcall(require, 'plugins.' .. plugin)
   return function(plug, opts)
@@ -156,17 +149,30 @@ return {
     'andymass/vim-matchup',
     event = { 'BufWritePre', 'BufReadPre' },
     config = config('vim_matchup'),
-    setup = setup('vim_matchup'),
+    init = init('vim_matchup'),
   },
   {
     'vim-test/vim-test',
+    keys = {
+      { '<space>tn', '<plug>(test-nearest)', desc = 'Test nearest' },
+      { '<space>tf', '<plug>(test-file)', desc = 'Test file' },
+      { '<space>ts', '<plug>(test-suite)', desc = 'Test suite' },
+      { '<space>tl', '<plug>(test-last)', desc = 'Test last' },
+      { '<space>tt', '<plug>(test-last)', desc = 'Test last' },
+      { '<space>tv', '<plug>(test-visit)', desc = 'Test visit' },
+    },
     cmd = { 'TestNearest', 'TestFile', 'TestSuite', 'TestLast', 'TestLast', 'TestVisit' },
     config = config('vim_test'),
-    setup = setup('vim_test'),
+    init = init('vim_test'),
   },
   { 'elmcast/elm-vim', ft = { 'elm' } },
   { 'elixir-lang/vim-elixir', ft = { 'elixir', 'eelixir' } },
-  { 'moll/vim-bbye', cmd = { 'Bdelete', 'Bwipeout' }, setup = setup('vim_bbye') },
+  { 'moll/vim-bbye',
+    keys = {
+      {'<c-w>d', '<cmd>silent! Bdelete<cr>'},
+      {'<c-w>D', '<cmd>silent! Bdelete!<cr>'}
+    },
+    cmd = { 'Bdelete', 'Bwipeout' }, config = config('vim_bbye') },
   { 'will133/vim-dirdiff', cmd = 'DirDiff', config = config('vim_dirdiff') },
   { 'sindrets/diffview.nvim', cmd = { 'DiffviewOpen' } },
   {
@@ -291,7 +297,7 @@ return {
       { '<space>fd', '<plug>(dadbod-select-database)' },
     },
     config = config('vim_dadbod'),
-    setup = setup('vim_dadbod'),
+    init = init('vim_dadbod'),
     fn = 'db#url_complete',
     dependencies = { 'pbogut/vim-dadbod-ssh' },
   },
@@ -371,6 +377,7 @@ return {
   { 'vim-ruby/vim-ruby', ft = { 'ruby' } },
   {
     'jackmort/chatgpt.nvim',
+    keys = { { '<space>gpt', '<cmd>ChatGPT<cr>' } },
     config = config('chatgpt_nvim'),
     dependencies = {
       'muniftanjim/nui.nvim',
@@ -387,13 +394,12 @@ return {
     },
     config = config('luasnip'),
   },
-  -- { 'zbirenbaum/copilot.lua', config = config('copilot') },
-  { 'github/copilot.vim', event = 'InsertEnter', config = config('copilot_vim') },
+  { 'zbirenbaum/copilot.lua', event = 'InsertEnter', config = config('copilot') },
+  -- { 'github/copilot.vim', event = 'InsertEnter', config = config('copilot_vim') },
   {
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
     config = config('nvim_cmp'),
-    setup = setup('nvim_cmp'),
     dependencies = {
       { 'tzachar/cmp-tabnine', build = './install.sh', after = 'nvim-cmp' },
       'l3mon4d3/luasnip',
