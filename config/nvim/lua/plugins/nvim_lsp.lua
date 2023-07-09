@@ -26,28 +26,30 @@ vim.diagnostic.config({
 })
 
 local servers = {
+  -- { name = 'denols' },
+  -- { name = 'pylsp' },
+  -- { name = 'pyright' },
+  { name = 'bashls' },
   { name = 'ccls' },
+  { name = 'cssls', snippet_support = true },
+  { name = 'dockerls' },
+  { name = 'efm' },
+  { name = 'elixirls', snippet_support = true },
+  { name = 'gdscript' },
+  { name = 'gopls' },
+  { name = 'html', snippet_support = true, rename = false },
+  { name = 'intelephense', snippet_support = true },
+  { name = 'jedi_language_server' },
+  { name = 'jsonls', snippet_support = true },
   { name = 'lemminx' },
+  { name = 'lua_ls', snippet_support = true, format = false },
+  { name = 'openscad_lsp' },
+  { name = 'rust_analyzer' },
+  { name = 'solargraph' },
+  { name = 'tailwindcss', snippet_support = true },
+  { name = 'tsserver' },
   { name = 'vimls' },
   { name = 'vuels' },
-  { name = 'bashls' },
-  { name = 'gopls' },
-  --[[ { name = 'pyright' }, ]]
-  { name = 'jedi_language_server' },
-  --[[ { name = 'pylsp' }, ]]
-  { name = 'dockerls' },
-  { name = 'solargraph' },
-  { name = 'rust_analyzer' },
-  --[[ { name = 'denols' }, ]]
-  { name = 'tsserver' },
-  { name = 'openscad_lsp' },
-  { name = 'tailwindcss', snippet_support = true },
-  { name = 'lua_ls', snippet_support = true, format = false },
-  { name = 'intelephense', snippet_support = true },
-  { name = 'jsonls', snippet_support = true },
-  { name = 'html', snippet_support = true, rename = false },
-  { name = 'cssls', snippet_support = true },
-  { name = 'elixirls', snippet_support = true },
 }
 
 local bindings = function()

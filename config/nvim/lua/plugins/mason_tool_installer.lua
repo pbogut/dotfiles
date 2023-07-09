@@ -10,6 +10,7 @@ require('mason-tool-installer').setup({
     'deno',
     'dockerfile-language-server',
     'editorconfig-checker',
+    'efm',
     'elixir-ls',
     'eslint-lsp',
     'golangci-lint',
