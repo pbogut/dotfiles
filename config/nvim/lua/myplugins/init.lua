@@ -415,11 +415,6 @@ return {
     },
   },
   {
-    'jose-elias-alvarez/null-ls.nvim',
-    event = 'BufReadPre',
-    config = config('null_ls_nvim'),
-  },
-  {
     'folke/trouble.nvim',
     keys = {
       { '<space>ed', '<plug>(trouble-diagnostic-document)' },
