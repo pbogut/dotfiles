@@ -9,7 +9,20 @@ local lg_cmd = 'lazygit'
   .. ','
   .. (os.getenv('HOME') .. '/.config/lazygit/config-nvim.yml')
 
-local lazygit = Terminal:new({ cmd = lg_cmd, direction = 'float' })
+local lazygit = Terminal:new({
+  cmd = lg_cmd,
+  direction = 'float',
+  float_opts = {
+    width = function(_)
+      return vim.o.columns
+    end,
+    height = function(_)
+      local statusheight = 1
+      return vim.o.lines - vim.o.cmdheight - statusheight
+    end,
+    border = 'none',
+  },
+})
 
 command('LazyGitToggle', function()
   lazygit:toggle()

@@ -66,6 +66,7 @@ require('luasnip.loaders.from_snipmate').lazy_load({
   override_priority = 1250,
 })
 
+re_require('plugins.luasnip.helper');
 re_require('plugins.luasnip.common')
 re_require('plugins.luasnip.emojis')
 re_require('plugins.luasnip.phtml')

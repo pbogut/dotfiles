@@ -4,6 +4,8 @@ host_name=$(hostname -s)
 script=$(readlink -f "$0")
 scriptpath=$(dirname "$script")
 
+killall sway-prop -9
+
 function demonize() {
   pid="/tmp/__$(id -un)__$1.pid"
   # if no pid file or no process
@@ -15,7 +17,8 @@ function demonize() {
 }
 
 function rerun() {
-  killall $1 >/dev/null 2>&1
+  # killall "$1" >/dev/null 2>&1
+  kill $(pgrep -f "$2")
   $2 >/dev/null 2>&1 &
 }
 
@@ -24,18 +27,16 @@ numlockx on
 
 # daemons
 rerun copyq copyq
-demonize nextcloud "nextcloud --background"
-demonize conky conky
-demonize geoclue /usr/lib/geoclue-2.0/demos/agent
-demonize redshift redshift
-demonize textaid "perl $scriptpath/edit-server.pl"
+demonize nextcloud "nextcloud"
+demonize wlsunset "wlsunset -l 50 -L 17"
 demonize nm-applet nm-applet
 demonize dunst dunst
 demonize udisksvm "udisksvm -a"
 demonize memwatch ~/.scripts/memwatch.sh
 demonize mailsgoweb ~/.scripts/mailsgoweb.sh
 demonize kdeconnect kdeconnect-indicator
-demonize unclutter "unclutter -idle 1 -root"
+at now + 10 minutes <<< "nextcloud --background"
+# demonize nextcloud "nextcloud --background"
 
 # sepcific for the computer
 if [[ -f "$HOME/.autostart.$host_name.sh" ]]; then

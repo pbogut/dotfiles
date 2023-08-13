@@ -58,6 +58,8 @@
     amend = commit --amend
     aa = add --all
     ff = merge --ff-only --no-commit
+    pff = pull --ff-only
+    prb = pull --rebase=interactive
     pullff = pull --ff-only
     pullrb = pull --rebase=interactive
     noff = merge --no-ff --no-commit
@@ -152,3 +154,7 @@
     whitespace = red reverse
 [protocol "file"]
     allow = always
+[url "git@github.com:"]
+    insteadOf = https://github.com/
+[url "git@gitlab.com:"]
+    insteadOf = https://gitlab.com/

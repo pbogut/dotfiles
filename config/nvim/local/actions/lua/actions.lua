@@ -104,7 +104,6 @@ function M.run_cmds(cmds, opts)
       vim.notify(msg, vim.log.levels.INFO, { title = 'Actions', trim = true })
     end
   end
-  local module = opts.module or 'actions'
   local msg_run = opts.msg_run or 'Run command'
   local on_done = opts.on_done or function(_, _) end
   local on_exit = opts.on_exit or function(_, _) end
@@ -177,6 +176,21 @@ function M.run_cmds(cmds, opts)
     print_out({ '>> ' .. jobs[1].command })
     start_job(jobs[1])
   end
+end
+
+function M.pick_action()
+  local actions = M.list_actions()
+  if #actions == 0 then
+    vim.notify('No actions found.', vim.log.levels.INFO, { title = 'Actions' })
+    return
+  end
+  table.sort(actions, function (a1, a2) return a1 < a2 end )
+  vim.ui.select(actions, {prompt = 'Select action: '}, function(action)
+    if action then
+      M.run_action(action)
+    end
+    vim.cmd.stopinsert()
+  end)
 end
 
 function _G.action_complete(lead)

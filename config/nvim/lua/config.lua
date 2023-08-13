@@ -2,6 +2,15 @@ local u = require('utils')
 local fn = vim.fn
 
 local c = {}
+local h = {}
+
+function h.starts_with(str, start)
+  return str:sub(1, #start) == start
+end
+
+function h.contains(str, pattern)
+  return str:find(pattern, nil, true) ~= nil
+end
 
 local modules = {}
 local config = {}
@@ -43,7 +52,7 @@ function c.load_for_cwd()
   end
   local cwd = vim.fn.getcwd()
   for _, module in pairs(modules) do
-    if module.should_apply(cwd) then
+    if module.should_apply(cwd, h) then
       config = u.merge_tables(module.get_config(cwd), config)
     end
   end

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 #=================================================
 # name:   .zprofile
 # author: Pawel Bogut <https://pbogut.me>

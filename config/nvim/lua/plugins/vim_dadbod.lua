@@ -151,6 +151,7 @@ k.set('n', '<plug>(dadbod-select-database)', function()
           vim.b.db_selected = selection[1]
           vim.schedule(function()
             vim.fn['db#adapter#ssh#create_tunnel'](vim.b.db)
+            vim.o.filetype = vim.o.filetype -- make sure cmp loads dadbod
           end)
         end)
         return true

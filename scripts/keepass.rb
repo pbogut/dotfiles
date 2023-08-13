@@ -5,41 +5,107 @@
 # date:   14/02/2017
 #=================================================
 
-require "csv"
-require "open3"
-require "nokogiri"
-require "clipboard"
-require "rotp"
-require "uri"
+require 'open3'
+require 'nokogiri'
+require 'clipboard'
+require 'rotp'
+require 'uri'
+require 'csv'
 require 'cgi'
 
+# rubocop:disable Metrics/AbcSize,Metrics/MethodLength
 def get_otp(url)
   uri = URI.parse(url.gsub(' ', '%20'))
   return nil if uri.nil?
 
-  params = CGI::parse(uri.query)
+  params = CGI.parse(uri.query)
   secret = params['secret'][0]
   digits = params['digits'][0]
   digits = digits ? digits.to_i : 6
 
   if uri.host == 'totp'
     totp = ROTP::TOTP.new(secret, digits: digits)
-    return totp.now
+    totp.now
   elsif uri.host == 'steam'
     # print(uri.host)
     steam_user = uri.path.gsub(/^.*:/, '')
     code, = Open3.capture3("steamctl authenticator code #{steam_user}")
-    return code.strip
+    code.strip
   else
     raise "#{uri.host} not implemented"
   end
 end
+# rubocop:enable Metrics/AbcSize,Metrics/MethodLength
+
+def rofi(prompt, search, data)
+  Open3.capture3('rofi', '-dmenu', '-i', '-p', "#{prompt}:", '-filter', search, stdin_data: data)
+end
+
+# rubocop:disable Metrics/MethodLength
+def wofi(prompt, search, data)
+  Open3.capture3(
+    'wofi',
+    '--cache-file',
+    '/dev/null',
+    '--dmenu',
+    '-M',
+    'multi-contains',
+    '-i',
+    '-p',
+    "#{prompt}:",
+    '--search',
+    search,
+    stdin_data: data
+  )
+end
+# rubocop:enable Metrics/MethodLength
+
+def dmenu(prompt, search, data)
+  if ENV['WAYLAND_DISPLAY']
+    wofi(prompt, search, data || '')
+  else
+    rofi(prompt, search, data || '')
+  end
+end
+
+def type(text)
+  if ENV['WAYLAND_DISPLAY']
+    Open3.capture3('wtype', '-m', 'ctrl', '-m', 'shift', '-m', 'alt', '--', text)
+  else
+    Open3.capture3('xdotool', 'type', '--clearmodifiers', text)
+  end
+end
+
+# rubocop:disable Metrics/MethodLength
+def get_site_parts(url)
+  site_parts = []
+  url.gsub(%r{^.*?//(.*?)[/:].*}, '\1').split('.').reverse.each do |p|
+    should_add = true
+    [
+      /^www/,
+      /^local/,
+      /^login/,
+      /^dev/,
+      /^staging/,
+      /^online/,
+      /^system/,
+      /^app/,
+      /^dash/,
+      /^panel/,
+      /^dashboard/
+    ].each do |pattern|
+      should_add = false if p.match(pattern)
+    end
+    site_parts << p if should_add
+  end
+  site_parts
+end
+# rubocop:enable Metrics/MethodLength
 
 action, = ARGV
 
-if !action
-  cmd = "rofi -dmenu -i -p 'select mode:'"
-  selection, _, _ = Open3.capture3(cmd, stdin_data: [
+unless action
+  selection, = dmenu('select mode', '', [
     '--login',
     '--copy-user-and-pass',
     '--copy-user',
@@ -51,29 +117,25 @@ if !action
     '--remove',
     '--edit',
     '--add',
-    '--show',
+    '--show'
   ].join("\n"))
-  selection = "--exit" if selection == ""
-  selection, _, _ = Open3.capture3('keepass.rb ' + selection)
+  selection = '--exit' if selection == ''
+  Open3.capture3("keepass.rb #{selection}")
   exit
 end
-
 
 xml = `keepass-cli export`
 formated_list = ''
 no = 0
 doc = Nokogiri::XML(xml)
 entries = doc.xpath('//Root//Group/Entry')
-indexes = Hash.new
+indexes = {}
 entries.each do |entry|
   no += 1
   cat = entry.xpath('../Name').text
-  if cat == 'Recycle Bin'
-    next
-  end
-  if cat == 'Root'
-    cat = nil
-  end
+  next if cat == 'Recycle Bin'
+
+  cat = nil if cat == 'Root'
   name = entry.xpath('./String/Key[text()="Title"]/../Value').text
   url = entry.xpath('./String/Key[text()="URL"]/../Value').text
   user = entry.xpath('./String/Key[text()="UserName"]/../Value').text
@@ -82,51 +144,32 @@ entries.each do |entry|
   cat = "#{cat}/" if cat
 
   indexes[no] = entry
-  if name
-    formated_list <<  ('%3.3s| %-50.50s %-50.50s %-8.8s %s' % [no, "#{cat}#{name}" , user, otp, url]) + "\n"
-  end
+  next unless name
+
+  # rubocop:disable Style/FormatStringToken,Style/FormatString
+  formated_list << ("%3.3s| %-50.50s %-50.50s %-8.8s %s %s\n" % [
+    no,
+    "#{cat}#{name}",
+    user,
+    otp,
+    url,
+    get_site_parts(url).join(' ')
+  ])
+  # rubocop:enable Style/FormatStringToken,Style/FormatString
 end
 
-# get only top part of domain
-site_parts = []
 url = ENV['QUTE_URL'] || ''
-url.gsub(/^.*?\/\/(.*?)[\/:].*/, '\1').split('.').reverse.each do |p|
-  # if (p.length < 5 or !p.match(/\./)) and site_parts.reverse.join('.').length < 8
-  #   site_parts << p
-  # end
-  should_add = true
-  [
-    /^www/,
-    /^local/,
-    /^login/,
-    /^dev/,
-    /^staging/,
-    /^online/,
-    /^system/,
-    /^app/,
-    /^dash/,
-    /^panel/,
-    /^dashboard/,
-  ].each do |pattern|
-    if (p.match(pattern))
-      should_add = false
-    end
-  end
-  if (should_add)
-     site_parts << p
-  end
-end
+# get only top part of domain
+site_parts = get_site_parts(url)
 site_url = site_parts.reverse.join('.')
-site_base_url = url.gsub(/^(.*?\/\/.*?[\/:].*?\/?)+.*/, '\1')
+site_base_url = url.gsub(%r{^(.*?//.*?[/:].*?/?)+.*}, '\1')
 search_urls = site_parts.join(' ')
-if action == "--type-otpauth"
-  search_urls = ' ' + search_urls
-end
+search_urls = " #{search_urls}" if action == '--type-otpauth'
 user_name = site_url.gsub(/\...\...$/, '').gsub(/\...$/, '').gsub(/\....$/, '').gsub(/[^a-z0-9]/, '_')
 
-if action == "--add"
-  open(ENV['TMPDIR'] + '/_lpass_url', 'w') { |f| f << url }
-  _, _, _ = Open3.capture3('terminal', '-e', 'keepass-cli', 'new', (site_url.empty? ? 'new-site' : site_url), site_base_url, user_name)
+if action == '--add'
+  site_url = (site_url.empty? ? 'new-site' : site_url)
+  Open3.capture3(ENV['TERMINAL'], '-e', 'keepass-cli', 'new', site_url, site_base_url, user_name)
   exit
 end
 
@@ -157,12 +200,8 @@ prompt = case action
            exit
          end
 
-if !action
-  action = "--copy-user-and-pass"
-end
-
-cmd = "rofi -filter '#{search_urls} ' -dmenu -i -p '#{prompt}:'"
-selection, = Open3.capture3(cmd, stdin_data: formated_list)
+action ||= '--copy-user-and-pass'
+selection, = dmenu(prompt, search_urls, formated_list)
 selection = selection.force_encoding('utf-8').encode
 
 index = selection.gsub(/(\d+).*/, '\1').to_i
@@ -195,11 +234,10 @@ if action == '--type-user'
   if ENV['QUTE_FIFO']
     File.open(ENV['QUTE_FIFO'], 'w') do |file|
       file.write("fake-key #{user}\n")
-      # file.write("fake-key -g <esc>i\n")
     end
   else
-    cmd = "sleep 0.5s; xdotool type --clearmodifiers '#{user}'"
-    Open3.capture3(cmd)
+    Open3.capture3('sleep', '0.5s')
+    type(user)
   end
 end
 if action == '--type-pass'
@@ -210,7 +248,7 @@ if action == '--type-pass'
     end
   else
     Open3.capture3('sleep', '0.5s')
-    Open3.capture3('xdotool', 'type', '--clearmodifiers', pass)
+    type(pass)
   end
 end
 if action == '--login'
@@ -233,13 +271,13 @@ if action == '--login'
     if !autologin.empty?
       parts = autologin.split("\n").join("\n\t\n").split("\n")
       parts.each do |part|
-        Open3.capture3('xdotool', 'type', '--clearmodifiers', part)
+        type(part)
         Open3.capture3('sleep', '0.1s')
       end
     else
-      Open3.capture3('xdotool', 'type', '--clearmodifiers', user)
-      Open3.capture3('xdotool', 'type', '--clearmodifiers', "\t")
-      Open3.capture3('xdotool', 'type', '--clearmodifiers', pass)
+      type(user)
+      type("\t")
+      type(pass)
     end
   end
 end
@@ -252,9 +290,9 @@ if action == '--type-user-and-pass' || action.empty?
     end
   else
     Open3.capture3('sleep', '0.5s')
-    Open3.capture3('xdotool', 'type', '--clearmodifiers', user)
-    Open3.capture3('xdotool', 'type', '--clearmodifiers', "\t")
-    Open3.capture3('xdotool', 'type', '--clearmodifiers', pass)
+    type(user)
+    type("\t")
+    type(pass)
   end
 end
 if action == '--type-otpauth'
@@ -263,36 +301,36 @@ if action == '--type-otpauth'
       file.write("fake-key #{otpauth}\n")
     end
   else
-    cmd = "sleep 0.5s; xdotool type --clearmodifiers '#{otpauth}'"
-    Open3.capture3(cmd)
+    Open3.capture3('sleep', '0.5s')
+    type(otpauth)
   end
 end
-if action == "--edit"
+if action == '--edit'
   puts "keepass-cli change '#{name}'"
-  out, _, _ = Open3.capture3('urxvt', '-e', 'keepass-cli', 'change', name)
+  out, = Open3.capture3('urxvt', '-e', 'keepass-cli', 'change', name)
   puts out
 end
-if action == "--remove"
+if action == '--remove'
   puts "keepass-cli rm '#{name}'"
-  out, _, _ = Open3.capture3('keepass-cli', 'rm', name)
+  out, = Open3.capture3('keepass-cli', 'rm', name)
   puts out
 end
-if action == "--show"
+if action == '--show'
   puts "keepass-cli show '#{name}'"
-  out, _, _ = Open3.capture3('keepass-cli', 'show', name)
+  out, = Open3.capture3('keepass-cli', 'show', name)
 
   i = 0
   lines = []
   out.split("\n").each do |line|
     if line.match(/Password: .*/)
-      numbers = ""
-      passwds = ""
-      pass.split("").each do |c|
-        i = i + 1
+      numbers = ''
+      passwds = ''
+      pass.split('').each do |c|
+        i += 1
         numbers << "#{i}\t"
         passwds << "#{c}\t"
       end
-      lines << "Password:"
+      lines << 'Password:'
       lines << numbers
       lines << passwds
     else
@@ -300,5 +338,5 @@ if action == "--show"
     end
   end
   width = 100 + (i * 20)
-  out, _, _ = Open3.capture3("yad --title=\"keepass show\" --info --width=#{width} --text=\"#{lines.join("\n")}\"")
+  Open3.capture3("yad --title=\"keepass show\" --info --width=#{width} --text=\"#{lines.join("\n")}\"")
 end

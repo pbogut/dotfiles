@@ -104,6 +104,7 @@ k.set('n', '<space>w', function()
     cmd.SudaWrite()
   end
 end)
+k.set('n', '<space>r', '') --prevent replace when using <space>r*
 -- tmux
 k.set('n', '<c-q>', function()
   if os.getenv('TMUX') then
@@ -113,15 +114,59 @@ k.set('n', '<c-q>', function()
   end
 end)
 -- open terminal
-k.set('n', 'got', function()
+k.set('n', 'goT', function()
   local path = fn.expand('%:p:h')
-  cmd('belowright 20split')
+  cmd('belowright 15split')
   cmd.enew()
   fn.termopen('cd ' .. path .. ' && zsh')
   cmd.startinsert()
 end)
-k.set('n', 'goT', function()
-  cmd('belowright 20split')
+
+k.set('n', '<space>mp', function()
+  if os.getenv('TMUX') then
+    return require('tmuxctl').move_pane_to_project()
+  end
+end)
+k.set('n', '<space>ti', function()
+  if os.getenv('TMUX') then
+    return require('tmuxctl').show_pane('bottom', { height = 15, focus = true })
+  end
+  cmd('belowright 15split')
+  cmd.enew()
+  fn.termopen('cd ' .. fn.getcwd() .. ' && zsh')
+  cmd.startinsert()
+end)
+k.set('n', '<space>to', function()
+  local panes_count = vim.fn.system('tmux list-panes -F "#{pane_id}" | wc -l'):sub(1, -2)
+  if panes_count == '1' then
+    local tmux = require('tmuxctl')
+    return tmux.toggle_pane(tmux.get_last_pane() or 'bottom', { height = 15, focus = false })
+  else
+    return require('tmuxctl').hide_all_panes()
+  end
+end)
+
+k.set('n', '<space>;', function()
+  local panes_count = vim.fn.system('tmux list-panes -F "#{pane_id}" | wc -l'):sub(1, -2)
+  if panes_count == '1' then
+    local tmux = require('tmuxctl')
+    return tmux.toggle_pane(tmux.get_last_pane() or 'bottom', { height = 15, focus = false })
+  else
+    return require('tmuxctl').hide_all_panes()
+  end
+end)
+
+k.set('n', '<space>:', function()
+  local panes_count = vim.fn.system('tmux list-panes -F "#{pane_id}" | wc -l'):sub(1, -2)
+  local tmux = require('tmuxctl')
+  return tmux.show_pane(tmux.get_last_pane() or 'bottom', { height = 15, focus = true })
+end)
+
+k.set('n', 'got', function()
+  if os.getenv('TMUX') then
+    return require('tmuxctl').toggle_pane('bottom', { height = 15 })
+  end
+  cmd('belowright 15split')
   cmd.enew()
   fn.termopen('cd ' .. fn.getcwd() .. ' && zsh')
   cmd.startinsert()
@@ -244,6 +289,23 @@ vim.api.nvim_create_autocmd('FileType', {
     end, { buffer = true })
   end,
 })
+
+-- vim-unimpaired mapping for pasting lines above and below
+local function putline(how)
+  local body = vim.fn.getreg(vim.v.register)
+  local type = vim.fn.getregtype(vim.v.register)
+
+  vim.fn.setreg(vim.v.register, body, 'l')
+  vim.cmd.normal({ bang = true, args = { '"' .. vim.v.register .. how } })
+  vim.fn.setreg(vim.v.register, body, type)
+end
+
+k.set('n', '[p', function()
+  putline('[p')
+end, { silent = true })
+k.set('n', ']p', function()
+  putline(']p')
+end, { silent = true })
 
 -- vim-rsi mappings (onle selected few)
 vim.cmd([[

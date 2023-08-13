@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   base-dir
+# desc:   returns base dir for provided directory
+#         or current directory.
+#         It will be current directory for normal folders
+#         and main git directory for git folders.
+#         For git-worktree workflow it will return main
+#         bare directory, not branch one
+# author: Pawel Bogut <pbogut@assuredpharmacy.co.uk>
+# date:   26/07/2022
+#=================================================
+abs_path=$(git rev-parse --absolute-git-dir 2>/dev/null)
+top_path=$(git rev-parse --show-toplevel 2>/dev/null)
+is_bare=$(git rev-parse --is-bare-repository 2>/dev/null)
+
+cwd="${1:-$(pwd)}"
+
+if [[ "$top_path/.git" == "$abs_path" ]]; then
+  cwd=$(realpath "$top_path") # its normal repo
+elif [[ $is_bare == "true" ]]; then
+  cwd=$(realpath "$abs_path") # its bare not in branch
+elif [[ -n "$abs_path" && -n "$top_path" ]]; then
+  cwd="$(realpath "$top_path/..")" # its bare in branch
+fi
+
+realpath "$cwd"

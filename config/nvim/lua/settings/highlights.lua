@@ -56,6 +56,9 @@ local function highlights()
     -- ['@lsp.mod.deprecated']= { guifg = c.red },
     -- ['@lsp.typemod.function.async']= { guifg = c.red },
 
+    -- Inlay Hints
+    LspInlayHint = { guisp = c.ad_hint, guifg = c.ad_hint, guibg = c.base03, gui = 'italic,underline' },
+
     -- TreeSitter
     -- ["@constant.macro"] = { guifg = c.orange },
     -- ["@string"] = { guifg = c.orange },

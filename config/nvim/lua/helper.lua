@@ -29,11 +29,7 @@ function _G.mason_pkg(path)
 end
 
 function _G.plugin_path(path)
-  local result = vim.fn.stdpath('data') .. '/site/pack/packer/start/' .. path
-  if vim.fn.glob(result) == '' then
-    result = vim.fn.stdpath('data') .. '/site/pack/packer/opt/' .. path
-  end
-
+  local result = vim.fn.stdpath('data') .. '/lazy/' .. path
   return result
 end
 

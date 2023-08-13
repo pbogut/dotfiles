@@ -17,9 +17,11 @@ else
 fi
 
 if [[ $action == "down" ]]; then
-  # shellcheck disable=1009
+  # shellcheck disable=2086
   pulsemixer --change-volume -1 $id
 elif [[ $action == "up" ]]; then
-  # shellcheck disable=1009
+  # shellcheck disable=2086
   pulsemixer --change-volume +1 $id
 fi
+# shellcheck disable=2086
+pulsemixer --get-volume $id | awk '{print $1}' > "$XDG_RUNTIME_DIR/wob.sock"

@@ -2,7 +2,7 @@ add_newline = false
 # right_format = "$time"
 format = """
 ${custom.time}$status$cmd_duration$all$shell
-$username$hostname$directory$git_branch$git_status$git_state$custom_time
+$username$hostname${custom.local_host}${custom.remote_host}$directory$git_branch$git_status$git_state$custom_time
 $character\
 """
 
@@ -21,6 +21,7 @@ error_symbol = '[λ](bold red)'
 success_symbol = '[λ](bold red)'
 
 [hostname]
+disabled = true
 ssh_only = false
 format= '[$hostname]($style)[\]](bold red) '
 style = 'gray'
@@ -54,6 +55,18 @@ disabled = true
 [git_branch]
 format = '[$symbol$branch(:$remote_branch)]($style) '
 style = 'blue'
+
+[custom.local_host]
+format = '[$output]($style)[\]](bold red) '
+command = 'hostname'
+style = 'gray'
+when = 'test -z "$SSH_TTY"'
+
+[custom.remote_host]
+format = '[$output]($style)[\]](bold red) '
+command = 'hostname'
+style = 'bold yellow'
+when = 'test -n "$SSH_TTY"'
 
 [custom.time]
 format = '[\[$symbol$output\]]($style) '

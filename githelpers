@@ -23,22 +23,7 @@ FORMAT="$HASH}$RELATIVE_TIME}$AUTHOR}$REFS $SUBJECT"
 # due to column issue with colors
 FORMAT="$HASH | $RELATIVE_TIME | $AUTHOR | $REFS $SUBJECT"
 
-ANSI_BLACK='\033[30m'
-ANSI_BLACK_BOLD='\033[0;30;1m'
 ANSI_RED='\033[31m'
-ANSI_RED_BOLD='\033[0;31;1m'
-ANSI_GREEN='\033[32m'
-ANSI_GREEN_BOLD='\033[0;32;1m'
-ANSI_YELLOW='\033[33m'
-ANSI_YELLOW_BOLD='\033[0;33;1m'
-ANSI_BLUE='\033[34m'
-ANSI_BLUE_BOLD='\033[0;34;1m'
-ANSI_MAGENTA='\033[35m'
-ANSI_MAGENTA_BOLD='\033[0;35;1m'
-ANSI_CYAN='\033[36m'
-ANSI_CYAN_BOLD='\033[0;36;1m'
-ANSI_WHITE='\033[37m'
-ANSI_WHITE_BOLD='\033[0;37;1m'
 ANSI_RESET='\033[0m'
 
 show_git_head() {
@@ -52,12 +37,12 @@ create_clean_staging() {
 
 pretty_git_log() {
   width=$(stty size | awk '{print $2}')
-  width=$(expr $width - 12)
+  width=$((width - 12))
 
   ( echo    " ╭─────────╮"
     echo    " │ Git Log │"
     echo -n "─╯         ╰"
-    x=0; while test $x -lt $width; do echo -n '─'; x=$(expr $x + 1); done;
+    x=0; while test $x -lt $width; do echo -n '─'; x=$((x + 1)); done;
     echo ""
     git log --color=always --graph --pretty="tformat:${FORMAT}" $*
     ) |
@@ -114,6 +99,14 @@ git_clone_to_projects_bare() {
   if [[ ! "$1" =~ @ ]] && [[ ! "$1" =~ ^http ]]; then
     # use github by default
     repo="git@github.com:$repo.git"
+  fi
+
+  if [[ "$repo" =~ ^https://github.com/ ]]; then
+    repo="git@github.com:${repo##https://github.com/}.git"
+  fi
+
+  if [[ "$repo" =~ ^https://gitlab.com/ ]]; then
+    repo="git@gitlab.com:${repo##https://gitlab.com/}.git"
   fi
 
   if [[ "$2" == "" ]]; then

@@ -16,7 +16,7 @@ fi
 if [[ $message_id == "--mutt-pipe" ]]; then
     clear
     mutt_pipe="yes"
-    message_id=$(exail -f /dev/stdin --message-id)
+    message_id=$(enrichmail --get-message-id /dev/stdin)
 
     header="$header+-------------------------------------------------------\n"
     header="$header| $(notmuch search id:"$message_id")\n"

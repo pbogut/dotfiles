@@ -10,6 +10,14 @@ echo "$QUTE_URL" | sed -E 's,https?://(www\.)?(.*?)/.*?\?(.*$),\3,' | (read -r q
     domain=$(echo "$QUTE_URL" | sed -E 's,https?://(www\.)?([^/]+)/(.*$),\2,')
 
     case $domain in
+      protondb.com)
+        domain="store.steampowered.com"
+        newurl="https://$domain/$path"
+        ;;
+      store.steampowered.com)
+        domain="protondb.com"
+        newurl="https://$domain/$path"
+        ;;
       duckduckgo.com)
         domain="google.com/search"
         newurl="https://$domain?q=$query"

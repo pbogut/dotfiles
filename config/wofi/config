@@ -1,0 +1,5 @@
+key_up=Control_L-k
+key_down=Control_L-j
+width=100%
+yoffset=0
+layer=overlay

@@ -5,9 +5,17 @@ function! local#laravel#complete(A,L,P)
 endfun
 
 function! s:sink(cmd, winnr, c, lines, stream)
+  let filename = ''
+  let fullname = ''
+
   if (a:cmd == 'make:migration')
     let filename = substitute(a:lines[0], '.* \(\d\{4}_\d\{2}_\d\{2}_[a-zA-Z0-9_]*\).*', '\1', '')
     let fullname = 'database/migrations/' . l:filename . '.php'
+  endif
+  if (a:cmd == 'make:job')
+    echom(a:lines[0])
+    " let filename = substitute(a:lines[0], '.* \(\d\{4}_\d\{2}_\d\{2}_[a-zA-Z0-9_]*\).*', '\1', '')
+    " let fullname = 'database/migrations/' . l:filename . '.php'
   endif
 
   if !empty(l:fullname) && filereadable(l:fullname)
@@ -21,13 +29,8 @@ function! s:sink(cmd, winnr, c, lines, stream)
 endfunction
 
 function! local#laravel#run(bang, command)
-  let root = projectroot#guess()
+  let root = getcwd()
   let artisan = get(b:, 'laravel_artisan_command', 'php {}/artisan')
-
-  for [p_root, p_artisan] in projectionist#query('artisan_command')
-    let root = p_root
-    let artisan = p_artisan
-  endfor
 
   let artisan = substitute(artisan, '{}', root, '')
   if filereadable(root . '/artisan')

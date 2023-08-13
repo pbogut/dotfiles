@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   browser-work
+# author: author <author_contact>
+# date:   13/07/2023
+#=================================================
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+swaymsg '[app_id="org.qutebrowser.workbrowser"] focus' || "$dir/browser" --work

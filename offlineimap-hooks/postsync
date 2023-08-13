@@ -70,7 +70,7 @@ done
 notmuch search --output=files from:notifications@github.com and tag:new | while read f; do
     # shellcheck disable=2002
     tag=$(cat "$f" | grep '^To: ' | sed 's/^To: \([^ ]*\).*/\1/g' | sed 's/^"\(.*\)"$/\1/')
-    id=$(exail -f "$f" --message-id)
+    id=$(enrichmail --get-message-id "$f")
     notmuch tag +"github/$tag" +github -- id:"$id"
 done
 
@@ -78,7 +78,7 @@ done
 notmuch search --output=files from:gitlab@mg.gitlab.com and tag:new | while read f; do
     # shellcheck disable=2002
     tag=$(cat "$f" | grep '^X-GitLab-Project-Path: ' | sed 's/^X-GitLab-Project-Path: \([^ ]*\).*/\1/g')
-    id=$(exail -f "$f" --message-id)
+    id=$(enrichmail --get-message-id "$f")
     notmuch tag +"gitlab/$tag" +gitlab -- id:"$id"
 done
 
@@ -112,3 +112,4 @@ if [[ -f ~/.offlineimap-hooks/special-tags ]]; then
 fi
 
 notmuch tag -new -- tag:new #clear new tag
+pkill -RTMIN+25 -x waybar

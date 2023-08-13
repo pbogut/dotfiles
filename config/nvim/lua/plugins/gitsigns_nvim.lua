@@ -32,5 +32,9 @@ local c = vim.g.colors
 u.highlights({
   GitSignsAddLn = { guifg = c.green },
   GitSignsDeleteLn = { guifg = c.red },
-  --[[ MyGitSignsChangeLn = { guifg = c.ad_info }, ]]
+  GitSignsChangeLn = { guifg = c.yellow },
+
+  GitSignsAdd = { guifg = c.green, guibg = c.base02 },
+  GitSignsDelete = { guifg = c.red, guibg = c.base02 },
+  GitSignsChange = { guifg = c.yellow, guibg = c.base02 },
 })

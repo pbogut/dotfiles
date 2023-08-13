@@ -10,7 +10,8 @@ return {
   {
     'local/actions',
     config = function()
-      require('actions')
+      local actions = require('actions')
+      vim.keymap.set('n', '<space>ra', actions.pick_action)
     end,
     dev = true,
   },

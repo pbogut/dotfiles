@@ -4,8 +4,8 @@ copilot.setup({
     auto_trigger = true,
     keymap = {
       accept_line = '<C-e>',
-      accept_word = '<C-f>',
-      accept = '<C-g>',
+      accept_word = '<C-l>',
+      accept = '<C-f>',
     },
   },
   panel = { enabled = false },

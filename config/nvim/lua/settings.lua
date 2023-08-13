@@ -38,7 +38,7 @@ o.swapfile = false
 o.dir = os.getenv('HOME') .. '/.vim/swapfiles//'
 o.undodir = os.getenv('HOME') .. '/.vim/undofiles//'
 o.undofile = true
-o.listchars = 'tab:──,eol:󰌑,trail:⋅,nbsp:'
+o.listchars = 'tab: ,eol:󰌑,trail:⋅,nbsp:·'
 o.showbreak = '↪'
 o.history = 10000
 o.undolevels = 1000
@@ -57,7 +57,7 @@ o.background = 'dark'
 o.guicursor = 'n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor'
 o.shell = '/bin/bash'
 
-o.inccommand = 'split'
+o.inccommand = 'nosplit'
 -- rip grep as default grep program
 o.grepprg = 'rg --vimgrep --no-heading'
 -- bo.grepprg = 'rg --vimgrep --no-heading'

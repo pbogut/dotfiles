@@ -43,10 +43,10 @@ function! s:slice_stl(src_file, dst_file, verbose)
   if !empty(a:dst_file)
     let dst_file = a:dst_file
   else
-    let dst_file = $TMPDIR . "/" . substitute(a:src_file, '.*/\(.*\)$', '\1', '') . '.stl'
+    let dst_file = "/tmp/" . substitute(a:src_file, '.*/\(.*\)$', '\1', '') . '.stl'
   endif
   call s:export_stl(a:src_file, l:dst_file, a:verbose)
-  let cmd = '!i3-open ' . fnameescape(l:dst_file)
+  let cmd = '!~/.scripts/sway/open ' . fnameescape(l:dst_file)
   if (a:verbose)
     exec(l:cmd)
   else

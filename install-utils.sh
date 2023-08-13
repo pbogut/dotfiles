@@ -19,13 +19,16 @@ paru -S \
   base-devel \
   bluez-hcitool \
   cmake \
+  chafa \
   copyq \
   dbus-broker \
   dunst \
   enca \
   fakeroot \
   gcc \
+  gnome-keyring \
   go \
+  grim \
   gtk3-print-backends \
   i3wm i3lock \
   imagemagick \
@@ -64,7 +67,10 @@ paru -S \
   ruby \
   rustup \
   shfmt \
+  slurp \
   starship \
+  sway \
+  swayidle \
   texlive-most \
   tmux \
   udevil \
@@ -72,10 +78,19 @@ paru -S \
   ueberzug \
   unclutter \
   w3m \
+  waybar \
   wget \
   which \
+  wl-clipboard \
   wmctrl \
+  wob \
+  wofi \
+  wtype \
   xcwd-git \
+  xdg-desktop-portal \
+  xdg-desktop-portal-gtk \
+  xdg-desktop-portal-kde \
+  xdg-desktop-portal-wlr \
   xdotool \
   xob \
   xrandr \
@@ -85,6 +100,9 @@ paru -S \
   zenity
 
 sudo systemctl enable --now dbus-broker.service
+sudo systemctl --global disable gnome-keyring-daemon.socket
+
+systemctl --user enable gnome-keyring-daemon.service
 
 if [[ $(hostname) == 'silverspoon' ]]; then
   paru -S \
@@ -112,9 +130,9 @@ gem install \
   rotp
 
 go install github.com/nsf/gocode@latest
-go install github.com/pbogut/exail@latest
 go install github.com/pbogut/mails-go-web@latest
 
+rustup target add wasm32-unknown-unknown
 rustup toolchain install nightly
 rustup toolchain install stable
 rustup component add rust-analyzer --toolchain nightly
@@ -126,7 +144,10 @@ rustup component add rustfmt --toolchain stable
 
 cargo install --git https://github.com/pbogut/enrichmail.git
 cargo install --git https://github.com/pbogut/cargo-workspace.git
-cargo install --git https://github.com/pbogut/i-use-rust-btw.git
+
+git clone https://github.com/pbogut/i-use-rust-btw.git ~/.i-use-rust-btw
+cd ~/.i-use-rust-btw && cargo-workspace install
+cd -
 
 cargo install \
   mprocs \

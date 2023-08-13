@@ -10,7 +10,7 @@ lfrun -last-dir-path "$tmpfile" "$file"
 filename=$(basename "$file")
 destination=$(cat "$tmpfile")
 should_move=$((echo "move";  echo "move and open"; echo "do nothing";) |
-    rofi -dmenu -p "Move file $filename to $destination?")
+    wofi --dmenu -p "Move file $filename to $destination?")
 
 handle_qb() {
     if [[ "$QB_DOWNLOAD_FILE" == "1" ]]; then
@@ -31,6 +31,6 @@ if [[ $should_move == "move" ]]; then
     handle_qb
 elif [[ $should_move == "move and open" ]]; then
     mv "$file" "$destination/$filename"
-    i3-open "$destination/$filename"
+    "$HOME/.scripts/sway/open" "$destination/$filename"
     handle_qb
 fi

@@ -52,6 +52,15 @@ local servers = {
   { name = 'vuels' },
 }
 
+local navic_ext = {
+  phtml = { 'intelephense' },
+  php = { 'intelephense' },
+}
+local navic_disable = {
+  ['efm'] = true,
+  ['tailwindcss'] = true,
+}
+
 local bindings = function()
   return {
     { 'n', ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>', b.no_lsp_bind },
@@ -159,10 +168,32 @@ for _, def in pairs(bindings()) do
   end
 end
 
+local function get_ext(bufnr)
+  local bufinfo = vim.fn.getbufinfo(bufnr)
+  if #bufinfo > 0 then
+    local fname = bufinfo[1].name
+    return vim.fn.fnamemodify(fname, ':e')
+  end
+end
+
 local on_attach = function(client, bufnr)
+  client.server_capabilities.documentHighlightProvider = false
+  client.server_capabilities.foldingRangeProvider = false
+
   local has_navic, navic = pcall(require, 'nvim-navic')
   if has_navic then
-    navic.attach(client, bufnr)
+    if not navic_disable[client.name] then
+      local ext = get_ext(bufnr)
+      if navic_ext[ext] then
+        for _, allowed_client in pairs(navic_ext[ext]) do
+          if client.name == allowed_client then
+            navic.attach(client, bufnr)
+          end
+        end
+      else
+        navic.attach(client, bufnr)
+      end
+    end
   end
 
   if has_lsp_signature then
@@ -237,7 +268,7 @@ end
 
 local function get_active_client_map()
   local client_list = {}
-  for _, client in ipairs(vim.lsp.get_active_clients()) do
+  for _, client in ipairs(vim.lsp.get_clients()) do
     local root_dir = client.config.root_dir
     local filetypes = client.config.filetypes
     local client_id = client.id
@@ -286,7 +317,7 @@ local function update_diagnostics_visibility(visible)
 end
 
 command('LspReload', function(_)
-  vim.lsp.stop_client(vim.lsp.get_active_clients())
+  vim.lsp.stop_client(vim.lsp.get_clients())
   cmd.edit()
 end, {})
 command('LspAttachBuffer', attach_lsp_to_new_buffer, {})
@@ -315,7 +346,7 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   group = augroup,
   pattern = '*.rs',
   callback = function()
-    if #vim.lsp.get_active_clients() > 0 then
+    if #vim.lsp.get_clients() > 0 then
       b.lsp_formatting(0)
     end
   end,
@@ -337,7 +368,7 @@ vim.api.nvim_create_autocmd('BufWritePre', {
       end
 
       if file:sub(1, #cwd) == cwd and for_filetype then
-        if #vim.lsp.get_active_clients() > 0 then
+        if #vim.lsp.get_clients() > 0 then
           b.lsp_formatting(0)
         else
           vim.cmd('normal! migg=G`i')

@@ -4,21 +4,33 @@
 # author: Pawel Bogut <http://pbogut.me>
 # date:   24/03/2017
 #=================================================
-
+export DISPLAY=":0"
+export XAUTHORITY="/run/user/1000/gdm/Xauthority"
 
 case "$1" in
     disable)
-        xinput | grep 'AT Translated Set 2 keyboard' | sed 's/.*id=\([0-9]*\).*(\([0-9]*\).*/\1 \2/' | (read id master
-        if [[ -n $id ]]; then
-            echo "$id $master" > /tmp/__laptop-keyboard
-            xinput float $id
-        fi)
+        is_enabled=$(xinput | grep 'AT Translated Set 2 keyboard' | grep 'floating')
+        if [[ $is_enabled == "" ]]; then
+            xinput | grep 'AT Translated Set 2 keyboard' | sed 's/.*id=\([0-9]*\).*(\([0-9]*\).*/\1 \2/' | (read id master
+            if [[ -n $id ]]; then
+                echo "$id $master" > /tmp/__laptop-keyboard
+                xinput float $id
+            fi)
+	fi
         ;;
     enable)
-        more /tmp/__laptop-keyboard | (read id master
+        cat /tmp/__laptop-keyboard | (read id master
         if [[ -n $id ]]; then
             xinput reattach $id $master
         fi)
+        ;;
+    status)
+        is_enabled=$(xinput | grep 'AT Translated Set 2 keyboard' | grep 'floating')
+        if [[ $is_enabled == "" ]]; then
+            echo "enabled"
+        else
+            echo "disabled"
+        fi
         ;;
     *)
         is_enabled=$(xinput | grep 'AT Translated Set 2 keyboard' | grep 'floating')

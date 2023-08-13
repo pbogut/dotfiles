@@ -10,7 +10,7 @@ return function()
     errors = 0,
   }
 
-  if #vim.lsp.buf_get_clients() > 0 then
+  if #vim.lsp.get_clients() > 0 then
     no_lsp = false
     diagnostics = {
       hints = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.HINT }),

@@ -155,7 +155,6 @@ config.bind('<Ctrl-t>', 'spawn --userscript tabswidth --toggle', mode='insert')
 
 config.bind('gc', 'spawn google-chrome-stable {url:pretty}')
 
-config.bind('<Ctrl-i>', 'open-editor', mode='insert')
 config.bind(
     '<ctrl-i>',
     'spawn --userscript ~/.scripts/keepass.rb --add', mode='insert')

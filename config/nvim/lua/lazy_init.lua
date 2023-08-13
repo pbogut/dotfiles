@@ -8,6 +8,7 @@ end
 vim.opt.runtimepath:prepend(lazypath)
 
 require('lazy').setup('myplugins', {
+  lockfile = vim.fn.stdpath("config") .. "/lazy-lock.json",
   dev = {
     path = vim.fn.stdpath('config') .. '/local',
   },

@@ -20,6 +20,7 @@ export PATH="$HOME/.gocode/bin:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$HOME/.gem/ruby/3.0.0/bin:$PATH"
 export PATH="$HOME/.bin:$PATH"
+export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
 
 # export TERM=xterm-256color
 export TERMINAL="alacritty"
@@ -28,11 +29,16 @@ export PAGER="less"
 export LESS="-RXe"
 
 export QT_QPA_PLATFORMTHEME=qt5ct
-export QT_STYLE_OVERRIDE=gtk2
 
 # place for my common python scripts
 export PYTHONPATH="$SCRIPTS/_python"
 
-# set up unique TMPDIR per user
 export TMPDIR="/tmp/$USER"
-mkdir $TMPDIR -p
+
+if [[ -f "$HOME/.cargo/bin/sccache" ]]; then
+  export RUSTC_WRAPPER="$HOME/.cargo/bin/sccache"
+fi
+
+source "$HOME/.profile.local"
+# shellcheck disable=1090
+source "$HOME/.profile.$(hostname)"

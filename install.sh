@@ -58,11 +58,14 @@ read -r -d '' files <<"EOF"
     config/MangoHud
     config/alacritty
     config/autostart/autostart.desktop
+    config/chrome-flags.conf
+    config/chromium-flags.conf
     config/clang-format
     config/conky
     config/dircolors-solarized
     config/dircolors.256dark
     config/dunst/dunstrc
+    config/environment.d
     config/feh/keys
     config/fish
     config/gamemode.ini
@@ -80,20 +83,22 @@ read -r -d '' files <<"EOF"
     config/mpv/script-settings/mpvDLNA.conf
     config/mpv/scripts/minidlna-subs.lua
     config/mpv/scripts/send-to-phone.lua
+    config/mpv/scripts/slice.lua
     config/mpv/scripts/trakt
     config/ncmpcpp/bindings
     config/ncmpcpp/config
     config/networkmanager-dmenu/config.ini
     config/nvim/after
     config/nvim/colors
-    config/nvim/config
     config/nvim/filetype.lua
     config/nvim/ginit.vim
     config/nvim/init.lua
+    config/nvim/lazy-lock.json
     config/nvim/local
     config/nvim/lua
     config/nvim/snippets
     config/nvim/templates
+    config/paru/paru.conf
     config/picom/picom.conf
     config/pip/pip.conf
     config/polybar
@@ -102,6 +107,8 @@ read -r -d '' files <<"EOF"
     config/qutebrowser/keys.conf
     config/qutebrowser/qutebrowser.conf
     config/qutebrowser/userscripts
+    config/okularpartrc
+    config/okularrc
     config/ranger/commands.py
     config/ranger/devicons.py
     config/ranger/plugins/devicons_linemode.py
@@ -110,9 +117,14 @@ read -r -d '' files <<"EOF"
     config/rofi/config.rasi
     config/roxterm.sourceforge.net
     config/starship.toml
+    config/sway/config
     config/systemd/user/kmonad.service
+    config/systemd/user/swayidle.service
     config/systemd/user/syncthing.service
     config/tmux
+    config/waybar
+    config/wob
+    config/wofi
     config/xob
     ctags
     emacs.d/init.el

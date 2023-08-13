@@ -24,6 +24,7 @@ try_to_run() {
 }
 
 lock_screen() {
+  try_to_run swaylock -i /usr/share/i3-lock-session/locktile.png -t ||
   try_to_run i3lock --nofork --image /usr/share/i3-lock-session/locktile.png -t ||
   try_to_run i3lock-fancy-dualmonitor ||
   try_to_run i3lock-fancy ||

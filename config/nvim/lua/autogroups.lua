@@ -23,7 +23,21 @@ vim.api.nvim_create_autocmd('BufEnter', {
 })
 vim.api.nvim_create_autocmd('BufEnter', {
   group = augroup,
+  pattern = '*/waybar/config',
+  callback = function()
+    bo.filetype = 'jsonc'
+  end,
+})
+vim.api.nvim_create_autocmd('BufEnter', {
+  group = augroup,
   pattern = 'crontab.*',
+  callback = function()
+    bo.commentstring = '# %s'
+  end,
+})
+vim.api.nvim_create_autocmd('FileType', {
+  group = augroup,
+  pattern = 'zsh',
   callback = function()
     bo.commentstring = '# %s'
   end,
@@ -75,6 +89,13 @@ vim.api.nvim_create_autocmd('FileType', {
 })
 vim.api.nvim_create_autocmd('FileType', {
   group = augroup,
+  pattern = 'gdscript',
+  callback = function()
+    u.set_indent(4, true)
+  end,
+})
+vim.api.nvim_create_autocmd('FileType', {
+  group = augroup,
   pattern = 'javascript',
   callback = function()
     bo.iskeyword = '@,48-57,_,192-255' -- remove $ from keyword list, whiy tist there in js anyway?
@@ -97,6 +118,11 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 vim.api.nvim_create_autocmd({ 'VimEnter' }, {
   group = augroup,
   callback = function()
+    local buf = vim.fn.expand('%')
+    if buf == '' or vim.fn.isdirectory(buf) == 1 then
+      cmd('Dirvish')
+    end
+
     local pid, WINCH = vim.fn.getpid(), vim.loop.constants.SIGWINCH
     vim.defer_fn(function()
       vim.loop.kill(pid, WINCH)

@@ -1,0 +1,17 @@
+#!/bin/bash
+#=================================================
+# name:   open
+# author: Pawel Bogut <pbogut@ukpos.com> <http://pbogut.me>
+# date:   01/03/2017
+#=================================================
+if [[ -z $2 ]] && [[ $(/usr/bin/rifle -l "$1" | wc -l) -gt 1 ]]; then
+  /usr/bin/rifle -l "$1" |
+    wofi --dmenu -p "App:" --cache-file /dev/null |
+    sed 's/\([0-9]*\).*/\1/' |
+    (
+      read -r choice
+      [[ $choice != "" ]] && $TERMINAL -e /usr/bin/rifle "$1" -p "$choice"
+    )
+else
+  /usr/bin/rifle "$@"
+fi

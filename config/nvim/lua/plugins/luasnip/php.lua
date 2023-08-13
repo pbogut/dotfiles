@@ -47,6 +47,12 @@ local function maybe_get_objmgr_class(_, _)
 end
 
 ls.add_snippets('php', {
+  s('php', {
+    t('<?php '),
+    f(function(_, snip) return snip.env.TM_SELECTED_TEXT or "" end),
+    i(0),
+    t(' ?>'),
+  }),
   s('ns', {
     t('namespace '),
     f(ph_php.namespace, {}),

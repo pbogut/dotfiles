@@ -4,7 +4,7 @@ if [[ "$1" == "" ]]; then
 else
     email_content="$1"
 fi
-query=$(exail -f "$email_content" --message-id | base64)
+query=$(enrichmail --get-message-id "$email_content" | base64)
 if [[ "" == "$query" ]]; then
   exit 1
 fi
@@ -12,6 +12,6 @@ fi
 if [[ "$2" == "-" ]]; then
   echo "http://localhost:6245?q=$query"
 else
-  (browser --target window "http://localhost:6245?q=$query" &) > /dev/null 2>&1         # open in browser
+  (gio open "http://localhost:6245?q=$query" &) > /dev/null 2>&1         # open in browser
 fi
 

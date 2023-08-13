@@ -48,9 +48,8 @@ cmd extract %{{
 cmd open $set -f; rifle -p 0 $f
 cmd openall $set -f; rifle -p 0 $fx
 
-#map o %i3-open $f
 map x extract
-map <c-o> %i3-open $f
+map <c-o> %$HOME/.scripts/sway/open $f
 map o open
 map O openall
 

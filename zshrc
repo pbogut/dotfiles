@@ -33,7 +33,7 @@ if [ -d $HOME/.zshrc.d ]; then
   done
   export FPATH="$FPATH:$HOME/.zshrc.d/functions"
   for file in "$HOME/.zshrc.d/functions/"*; do
-    autoload -Uz $(basename $file)
+    autoload -Uz "$(basename "$file")"
   done
 fi
 # cdr already exists in zsh apparently, so override right away

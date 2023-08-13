@@ -87,18 +87,19 @@ while test $# -gt 0; do
   esac
 done
 
-ws_code="0:"
-ws_term="0: term"
-ws_comm="0:/ comm"
-ws_media="0: media"
-ws_browser="0: browser"
+ws_browser="0:1  browser"
+ws_term="0:2  term"
+ws_comm="0:3 / comm"
+ws_code="0:4  code"
+ws_media="0:5  media"
+ws_qbwork="0:6  qbwork"
 ws_db="0: db"
 ws_dash="0: dash"
 ws_rss="0: rss"
 ws_vm="0: VM"
-ws_lol="0: LoL"
 ws_steam="0: steam"
 ws_game="0: gaming"
+ws_3d="0: 3d"
 
 
 if [[ $extended -eq 1 ]]; then
@@ -114,12 +115,12 @@ if [[ $extended -eq 1 ]]; then
           ;;
       esac
       ;;
-    "urxvt URxvt"|"Alacritty Alacritty")
+    "urxvt URxvt"|"Alacritty Alacritty"|"neovide neovide")
       case "$wm_title" in
         *~/Projects/*|*$HOME/Projects/*)
           project_name=${wm_title##*/}
           project_name=${project_name%% |t*} #filter tmux session out
-          move_and_swich "$ws_code $project_name"
+          move_and_swich "$ws_code"
           ;;
         *)
           move_and_swich "$ws_term"
@@ -134,14 +135,32 @@ if [[ $extended -eq 1 ]]; then
 fi
 
 case  "$wm_class" in
+  "www.deezer.com__en Chromium")
+    set_floating 1600px 900px
+    ;;
+  *".exe")
+    move_and_swich "$ws_game"
+    ;;
+  "prusa-slicer PrusaSlicer")
+    move_and_swich "$ws_3d"
+    ;;
+  "openscad OpenSCAD")
+    move_and_swich "$ws_3d"
+    ;;
   "gl mpv")
     move_and_swich "$ws_media"
+    ;;
+  "qbmedia qutebrowser")
+    move_and_swich "$ws_media"
+    ;;
+  "qbwork qutebrowser")
+    move_and_swich "$ws_qbwork"
     ;;
   "qutebrowser qutebrowser")
     move_and_swich "$ws_browser"
     ;;
-  "Steam Steam"|"steam steam"|"heroic heroic")
-    move_and_swich "$ws_game"
+  "Steam Steam"|"steam steam"|"heroic heroic"|"steamwebhelper steamwebhelper"|"steamwebhelper steam")
+    move_and_swich "$ws_steam"
     ;;
   "obs obs")
     move_and_swich "$ws_game"
@@ -152,20 +171,12 @@ case  "$wm_class" in
   "chiaki Chiaki")
     move_and_swich "$ws_game"
     ;;
-  "leagueclient.exe leagueclient.exe")
-    move_and_swich "$ws_lol"
-    ;;
-  "leagueclientux.exe leagueclientux.exe")
-    move_and_swich "$ws_lol"
-    ;;
-  "league of legends.exe league of legends.exe")
-    move_and_swich "$ws_lol"
-    ;;
   "VBoxSDL VBoxSDL"|\
   "VirtualBox Manager VirtualBox Manager"|\
   "VirtualBox Machine VirtualBox Machine")
     move_and_swich "$ws_vm"
     ;;
+  "NewsFlashGTK NewsFlashGTK"|\
   "rssguard RSS Guard")
     move_and_swich "$ws_rss"
     ;;
@@ -189,11 +200,14 @@ case  "$wm_class" in
         ;;
     esac
     ;;
-  "ferdi Ferdi")
+  "ferdi Ferdi"|"signal Signal")
     move_and_swich "$ws_comm"
     ;;
   "urxvt URxvt"|"Alacritty Alacritty")
     case "$wm_title" in
+      FLOATING_WINDOW)
+        set_floating 800px 600px
+        ;;
       QB_FILE_SELECTION)
         set_floating 1200px 800px
         ;;

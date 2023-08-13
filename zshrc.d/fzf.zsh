@@ -80,6 +80,19 @@ cdp() {
     fi
 }
 
+pr() {
+  project=$(ls-project | fzf -q "$1")
+  if [[ ! $project == "" ]]; then
+      cd "$HOME/Projects/$project"
+      if [[ -f .git || -d .git ]]; then
+          touch .git > /dev/null 2>&1
+      else
+          touch . > /dev/null 2>&1
+      fi
+      tmux-vim
+  fi
+}
+
 #vim backup
 vb() {
     dir="$1"

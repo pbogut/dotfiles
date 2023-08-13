@@ -56,6 +56,15 @@ projector.setup({
     path = os.getenv('HOME') .. '/.config/nvim/templates',
   },
   projections = {
+    -- zola... maybe
+    ['themes&templates&content&config.toml'] = {
+      priority = 100,
+      luasnip = {
+        paths = {
+          vim.fn.stdpath('config') .. '/snippets/zola',
+        },
+      },
+    },
     --magento project
     ['composer.json&app/Mage.php'] = {
       priority = 100,

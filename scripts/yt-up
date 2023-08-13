@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   yt-quickupload
+# author: author <author_contact>
+# date:   22/07/2023
+#=================================================
+file="$1"
+youtube-upload --title "$file" --privacy=unlisted "$file"

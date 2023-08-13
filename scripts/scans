@@ -36,7 +36,7 @@ def do_delete()
   result, _, _ = Open3.capture3('find', @data_dir, '-iname', '*.jpg', '-type', 'f')
   selected_file = ""
   # Open3.popen2('fzf', '--height=100%', '--preview', 'scans-display-image.sh {-1}') do |stdin, stdout, wait_thr|
-  Open3.popen2('fzfimg.sh', '--height=100%') do |stdin, stdout, wait_thr|
+  Open3.popen2('fzfimg.sh', '--height=100%') do |stdin, stdout, _wait_thr|
     stdin << "\n"
     stdin << result
     selected_file = stdout.read
@@ -51,18 +51,19 @@ end
 
 def do_search(query)
   result, _, _ = Open3.capture3('rg', '-liuu', query, @data_dir)
-  selected_file = ""
-  Open3.popen2('fzfimg.sh', '--height=100%') do |stdin, stdout, wait_thr|
+  selected_file = ''
+  Open3.popen2('fzfimg.sh', '--height=100%') do |stdin, stdout, _wait_thr|
     stdin << "\n"
     result.split("\n").each do |file|
       stdin << file.gsub(/\/\.(.*).txt$/, "/\\1\n")
     end
     selected_file = stdout.read
   end
-  if not selected_file.chop.empty?
-    puts "#{selected_file}"
-    Open3.capture3("i3-open #{selected_file}")
-  end
+
+  return if selected_file.chop.empty?
+
+  puts selected_file
+  Open3.capture3("~/.scripts/sway/open #{selected_file}")
 end
 
 def do_process()

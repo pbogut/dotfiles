@@ -18,11 +18,23 @@ obsidian.setup({
   },
   note_id_func = function(title)
     local parts = vim.split(title, '|')
-    local file_name = parts[1]
-
-    return vim.fn.expand('%:h') .. '/' .. file_name
+    return parts[1]
   end,
 })
+
+local obsidian_commands = require('obsidian.command')
+-- create note relative to current note when following new link
+local follow = false
+local cmd_new = obsidian_commands.new
+obsidian_commands.new = function(client, data)
+  if follow then
+    follow = false
+    local note = client:new_note(data.args, nil, vim.fn.expand('%:h'))
+    vim.api.nvim_command("e " .. tostring(note.path))
+  else
+    cmd_new(client, data)
+  end
+end
 
 command('Notes', function()
   local builtin = require('telescope.builtin')
@@ -34,10 +46,12 @@ end, {})
 command('NToday', function()
   vim.cmd.edit('~/Wiki/daily_notes/' .. os.date('%Y-%m-%d') .. '.md')
 end, {})
+
 vim.keymap.set('n', '<space>fN', '<cmd>Notes<cr>', { noremap = true })
 vim.keymap.set('n', 'gf', function()
   if obsidian.util.cursor_on_markdown_link() then
-    return '<cmd>ObsidianFollowLink<CR>'
+    follow = true
+    return '<cmd>ObsidianFollowLink<cr>'
   else
     return 'gf'
   end

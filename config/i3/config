@@ -42,8 +42,9 @@ set $update_volume exec --no-startup-id pkill -SIGRTMIN+11 i3blocks
 popup_during_fullscreen leave_fullscreen
 
 # start a terminal
-bindsym $mod+Return $exec "~/.scripts/i3-term-in-current-dir.sh"
-bindsym $mod+Shift+Return $exec "~/.scripts/i3-term-in-current-dir.sh --new-workspace"
+bindsym $mod+Return $exec "~/.scripts/i3-term-in-current-dir.sh --tmux"
+bindsym $mod+Ctrl+Return $exec "~/.scripts/i3-term-in-current-dir.sh --project"
+bindsym $mod+Shift+Return $exec "~/.scripts/i3-term-in-current-dir.sh --force-new"
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -53,6 +54,7 @@ bindsym $mod+Shift+q kill
 
 bindsym $mod+o $exec "rofi -show combi"
 bindsym $mod+colon $exec "rofi -show run"
+bindsym $mod+semicolon $exec "rofi -show run"
 bindsym $mod+Ctrl+colon $exec "rofi -show drun"
 
 bindsym $mod+Shift+colon $exec "~/.scripts/i3-dmenu-start-at-new-workspace.sh"
@@ -119,16 +121,16 @@ bindsym $mod+space focus mode_toggle
 bindsym $mod+a focus parent
 
 # switch to workspace
-bindsym $mod+1 workspace 1
-bindsym $mod+2 workspace 2
-bindsym $mod+3 workspace 3
-bindsym $mod+4 workspace 4
-bindsym $mod+5 workspace 5
-bindsym $mod+6 workspace 6
-bindsym $mod+7 workspace 7
-bindsym $mod+8 workspace 8
-bindsym $mod+9 workspace 9
-bindsym $mod+0 workspace 10
+bindsym $mod+1 workspace --no-auto-back-and-forth $wsbrowser
+bindsym $mod+2 workspace --no-auto-back-and-forth $wsterm
+bindsym $mod+3 workspace --no-auto-back-and-forth $wscomm
+bindsym $mod+4 workspace --no-auto-back-and-forth $wscode
+bindsym $mod+5 workspace --no-auto-back-and-forth $wsmedia
+bindsym $mod+6 workspace --no-auto-back-and-forth $wsqbwork
+bindsym $mod+7 workspace --no-auto-back-and-forth 7
+bindsym $mod+8 workspace --no-auto-back-and-forth 8
+bindsym $mod+9 workspace --no-auto-back-and-forth 9
+bindsym $mod+0 workspace --no-auto-back-and-forth 10
 
 # move focused container to workspace and switch workspace
 bindsym $mod+Shift+1 move container to workspace 1; workspace 1
@@ -155,12 +157,12 @@ bindsym $mod+Ctrl+9 move container to workspace 9
 bindsym $mod+Ctrl+0 move container to workspace 10
 
 # named workspaces
-set $wscode    0: code
-set $wsterm    0: term
-set $wscomm    0:/ comm
-set $wsmedia   0: media
-set $wsbrowser 0: browser
-set $wsqbwork  0: qbwork
+set $wsbrowser 0:1  browser
+set $wsterm    0:2  term
+set $wscomm    0:3 / comm
+set $wscode    0:4  code
+set $wsmedia   0:5  media
+set $wsqbwork  0:6  qbwork
 set $wsdb      0: db
 set $wsdash    0: dash
 set $wsrss     0: rss
@@ -247,13 +249,13 @@ hide_edge_borders both
 # workspace_layout tabbed
 workspace_layout stacking
 
-set $display_top DP-3
-set $display_right HDMI-0
-set $display_main DP-4
+set $display_left DisplayPort-1
+set $display_right HDMI-A-0
+set $display_main DisplayPort-0
 
 # assign workspace to display
 workspace "$wscomm" output $display_right
-workspace "$wsmedia" output $display_top
+workspace "$wsmedia" output $display_left
 workspace "$wsbrowser" output $display_main
 workspace "$wsgame" output $display_main
 workspace "$wssteam" output $display_right
@@ -290,6 +292,7 @@ for_window [title="SPLASH_SCREEN"] border pixel 1
 # fake-outputs 3288x1080+0+0
 $exec "setxkbmap pl"
 $exec "~/.scripts/i3-startup.sh"
+exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 bindsym Mod1+Shift+Ctrl+space exec --no-startup-id ~/.scripts/i3-keyboard-layout-toggle.sh; $update_keylayout
 
@@ -340,7 +343,7 @@ bindsym $mod+i $exec "~/.scripts/i3-screen-ring.sh --move-win --next"
 bindsym $mod+Ctrl+f $exec "~/.scripts/switch-or-launch.sh '^Ferdium -' 'org.ferdium.Ferdium'"
 bindsym $mod+Ctrl+b $exec "~/.scripts/dmenu-bluetooth"
 bindsym $mod+Ctrl+n $exec "~/.scripts/networkmanager_dmenu"
-bindsym $mod+Ctrl+r $exec "~/.scripts/switch-or-launch.sh '^rssguard.RSS$' 'rssguard'"
+bindsym $mod+Ctrl+r $exec "~/.scripts/switch-or-launch.sh '^NewsFlash$' 'newsflash'"
 
 bindsym $mod+Ctrl+p $exec "~/.scripts/switch-or-launch.sh --scratchpad 'Deezer$' 'deezer'"
 bindsym $mod+Ctrl+s $exec "~/.scripts/switch-or-launch.sh --scratchpad '^Volume Control$' 'pavucontrol'"
@@ -352,15 +355,15 @@ bindsym $mod+Ctrl+l $term -e ~/.scripts/dev-log
 
 bindsym $mod+b $exec "~/.scripts/switch-or-launch.sh '^qutebrowser.qutebrowser$' 'browser'"
 bindsym $mod+Ctrl+c workspace $wscode
-bindsym $mod+m focus output DP-3
-bindsym $mod+comma focus output DP-4
-bindsym $mod+period focus output HDMI-0
-bindsym $mod+Ctrl+m move workspace to output DP-3
-bindsym $mod+Ctrl+comma move workspace to output DP-4
-bindsym $mod+Ctrl+period move workspace to output HDMI-0
-bindsym $mod+Shift+m move to output DP-3; focus output DP-3
-bindsym $mod+Shift+comma move to output DP-4; focus output DP-4
-bindsym $mod+Shift+period move to output HDMI-0; focus output HDMI-0
+bindsym $mod+m focus output $display_left
+bindsym $mod+comma focus output $display_main
+bindsym $mod+period focus output $display_right
+bindsym $mod+Ctrl+m move workspace to output $display_left
+bindsym $mod+Ctrl+comma move workspace to output $display_main
+bindsym $mod+Ctrl+period move workspace to output $display_right
+bindsym $mod+Shift+m move to output $display_left; focus output $display_left
+bindsym $mod+Shift+comma move to output $display_main; focus output $display_main
+bindsym $mod+Shift+period move to output $display_right; focus output $display_right
 bindsym $mod+apostrophe $exec "~/.scripts/i3-dmenu-copyq.sh"
 # browser shortcut
 bindsym $mod+slash $exec "~/.scripts/quickbrowser.sh"

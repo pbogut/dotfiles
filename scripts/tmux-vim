@@ -7,6 +7,9 @@
 name=$(tmux-session-name)
 TERM=xterm-256color
 
+echo "$PWD" >> /tmp/tmux-vim.log
+echo "$@" >> /tmp/tmux-vim.log
+
 declare -a files
 declare -a args
 has_args=0
@@ -49,11 +52,11 @@ open_by_title() {
   fi
   for fn in "${files[@]}"; do
     file="$(readlink -f "$fn" || echo "$fn")"
-    nvr --servername "$pid" -c "$open $file"
+    nvim --server "$pid" --remote "$file"
   done
   # get first file focused
   file="$(readlink -f "${files[0]}" || echo "${files[0]}")"
-  nvr --servername "$pid" -c "$open $file"
+  nvim --server "$pid" --remote "$file"
   if [[ -z $TMUX ]]; then
     tmux attach-session -t "$name"
   fi
@@ -69,7 +72,9 @@ fi
 
 session=$(tmux ls -F "#{session_name}|#{pane_title}" 2>/dev/null | grep "^$name")
 if [[ -z $session ]]; then
-  tmux new-session -s "$name" nvim -p -- "${files[@]}"
+  if ! tmux new-session -s "$name" nvim -p -- "${files[@]}"; then
+    tmux attach-session -t "$name" || tmux switch-client -t "$name"
+  fi
 elif [[ -z "${files[*]}" ]]; then
   tmux attach-session -t "$name"
 else

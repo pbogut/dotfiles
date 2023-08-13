@@ -150,6 +150,7 @@ return {
     event = { 'BufWritePre', 'BufReadPre' },
     config = config('vim_matchup'),
     init = init('vim_matchup'),
+    cond = true,
   },
   {
     'vim-test/vim-test',
@@ -167,12 +168,15 @@ return {
   },
   { 'elmcast/elm-vim', ft = { 'elm' } },
   { 'elixir-lang/vim-elixir', ft = { 'elixir', 'eelixir' } },
-  { 'moll/vim-bbye',
+  {
+    'moll/vim-bbye',
     keys = {
-      {'<c-w>d', '<cmd>silent! Bdelete<cr>'},
-      {'<c-w>D', '<cmd>silent! Bdelete!<cr>'}
+      { '<c-w>d', '<cmd>silent! Bdelete<cr>' },
+      { '<c-w>D', '<cmd>silent! Bdelete!<cr>' },
     },
-    cmd = { 'Bdelete', 'Bwipeout' }, config = config('vim_bbye') },
+    cmd = { 'Bdelete', 'Bwipeout' },
+    config = config('vim_bbye'),
+  },
   { 'will133/vim-dirdiff', cmd = 'DirDiff', config = config('vim_dirdiff') },
   { 'sindrets/diffview.nvim', cmd = { 'DiffviewOpen' } },
   {
@@ -261,7 +265,7 @@ return {
     },
     config = config('vim_bookmarks'),
   },
-  { 'rrethy/vim-illuminate', event = 'BufReadPre' },
+  { 'rrethy/vim-illuminate', event = 'BufReadPre', cond = true },
   {
     'nvim-telescope/telescope.nvim',
     keys = {
@@ -327,6 +331,7 @@ return {
     'nvim-treesitter/nvim-treesitter-context',
     event = { 'BufWritePre', 'BufReadPre', 'FileType' },
     config = config('nvim_treesitter_context'),
+    cond = true,
   },
   {
     'nvim-treesitter/nvim-treesitter',
@@ -336,6 +341,14 @@ return {
       vim.cmd.TSInstall('all')
     end,
     config = config('nvim_treesitter'),
+    dependencies = {
+      {
+        'karanahlawat/tree-sitter-blade',
+        build = 'tree-sitter generate && tree-sitter test',
+        cond = true,
+      },
+    },
+    cond = true,
   },
   { 'nvim-treesitter/playground', cmd = 'TSPlaygroundToggle' },
 
@@ -371,6 +384,25 @@ return {
     end,
     dev = true,
   },
+
+  { 'nicwest/vim-http', cmd = { 'Http', 'HttpShowCurl', 'HttpShowRequest', 'HttpClean', 'HttpAuth' },
+    keys = {
+      { '<space>C', '<cmd>Http<cr>', desc = 'Run Http' },
+    },
+    config = function()
+    vim.g.vim_http_split_vertically = 1
+    vim.g.vim_http_tempbuffer = 1
+    vim.g.vim_http_right_below = 1
+
+    vim.api.nvim_create_autocmd('BufEnter', {
+      group = vim.api.nvim_create_augroup('x_vim_http', { clear = true }),
+      pattern = '*.response.*.http',
+      callback = function()
+        vim.keymap.set('n', 'q', '<cmd>bd<cr>', { buffer = true })
+      end,
+    })
+  end },
+
   { 'kmonad/kmonad-vim', ft = { 'kbd' } },
   { 'sirtaj/vim-openscad', ft = { 'openscad' } },
   { 'tpope/vim-rails', ft = { 'ruby' } },
@@ -413,6 +445,7 @@ return {
       --[[ 'zbirenbaum/copilot-cmp', ]]
       'kristijanhusak/vim-dadbod-completion',
     },
+    cond = true,
   },
   {
     'folke/trouble.nvim',
@@ -430,9 +463,35 @@ return {
     config = config('trouble_nvim'),
   },
   {
+    'stevearc/profile.nvim',
+    config = function()
+      local function toggle_profile()
+        local prof = require('profile')
+        if prof.is_recording() then
+          prof.stop()
+          vim.ui.input(
+            { prompt = 'Save profile to:', completion = 'file', default = 'profile.json' },
+            function(filename)
+              if filename then
+                prof.export(filename)
+                vim.notify(string.format('Wrote %s', filename))
+              end
+            end
+          )
+        else
+          prof.start('*')
+        end
+      end
+      vim.keymap.set('', '<f1>', toggle_profile)
+    end,
+  },
+  {
     'neovim/nvim-lspconfig',
     event = 'BufReadPre',
-    dependencies = { 'ray-x/lsp_signature.nvim', 'smiteshp/nvim-navic' },
+    dependencies = {
+      { 'ray-x/lsp_signature.nvim', cond = true },
+      { 'smiteshp/nvim-navic', cond = true },
+    },
     config = config('nvim_lsp'),
   },
 }

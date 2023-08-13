@@ -42,19 +42,32 @@ cat > $filename.end <<STYLE
 </body>
 STYLE
 
-readable --low-confidence force "$url" > $filename.content
-if [[ $? != 0 ]]; then
-    echo "Can not convert to readable format :("
-    exit 1
+file=$(basename "$url")
+# if file sent from phone
+if [[ -f "/tmp/pbogut/torm/$file" ]]; then
+    file="/tmp/pbogut/torm/$file"
 fi
+ext=$(echo ${file##*.} | tr '[:upper:]' '[:lower:]')
 
-cat $filename.begin $filename.content $filename.end > $filename.html
 
-# google-chrome-stable --headless --disable-gpu --print-to-pdf $filename.html
-wkhtmltopdf $filename.html $filename.pdf
-if [[ $? != 0 ]]; then
-    echo "Can not convert to pdf :("
-    exit 2
+if [[ -f "$file" ]]; then
+    if [[ $ext =~ jpg|jpeg|png|gif ]]; then
+        convert "$file" $filename.pdf
+    fi
+elif [[ $url =~ ^http ]]; then
+    readable --low-confidence force "$url" > $filename.content
+    if [[ $? != 0 ]]; then
+        echo "Can not convert to readable format :("
+        exit 1
+    fi
+    cat $filename.begin $filename.content $filename.end > $filename.html
+
+    # google-chrome-stable --headless --disable-gpu --print-to-pdf $filename.html
+    wkhtmltopdf $filename.html $filename.pdf
+    if [[ $? != 0 ]]; then
+        echo "Can not convert to pdf :("
+        exit 2
+    fi
 fi
 
 # mv *.pdf $filename.pdf
