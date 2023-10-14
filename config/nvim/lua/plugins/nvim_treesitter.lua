@@ -11,6 +11,12 @@ parser_config.blade = {
   -- filetype = 'php', -- if filetype does not match the parser name
 }
 
+for ft, lang in pairs({
+  dotenv = 'bash',
+}) do
+  vim.treesitter.language.register(lang, ft)
+end
+
 require('nvim-treesitter.configs').setup({
   -- ensure_installed = 'all', -- very slow (>20% of start time), dont use it
   highlight = {

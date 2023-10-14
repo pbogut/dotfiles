@@ -16,47 +16,14 @@ local opts = {
   },
 }
 
-vim.api.nvim_create_autocmd('BufEnter', {
-  group = vim.api.nvim_create_augroup('x_rust_tools', { clear = true }),
-  pattern = '*.rs',
-  callback = function()
-    vim.keymap.set('n', '<space>dc', function()
-      if not dap.adapters.rt_lldb then
-        require('rust-tools.dap').setup_adapter()
-      end
-      if dap.status() ~= '' then
-        dap.continue()
-      else
-        require('rust-tools').debuggables.debuggables()
-      end
-    end)
-  end,
-})
+-- override dap contine for rust files
+vim.keymap.set('n', '<plug>(dap-continue)', function()
+  if dap.status() ~= '' then
+    dap.continue()
+  else
+    require('rust-tools').debuggables.debuggables()
+  end
+end)
 
 local rusttools = require('rust-tools')
 rusttools.setup(opts)
-
-local inlay_hints = false
-
-local augroup = vim.api.nvim_create_augroup('x_rust_tools', { clear = true })
-vim.api.nvim_create_autocmd('BufEnter', {
-  group = augroup,
-  pattern = '*.rs',
-  callback = function()
-    vim.keymap.set('n', '<space>lh', function()
-      if inlay_hints then
-        require('rust-tools').inlay_hints.disable()
-        vim.notify('Inlay hints disabled', vim.log.levels.INFO, {
-          title = 'Rust Tools',
-        })
-        inlay_hints = false
-      else
-        require('rust-tools').inlay_hints.enable()
-        vim.notify('Inlay hints enabled', vim.log.levels.INFO, {
-          title = 'Rust Tools',
-        })
-        inlay_hints = true
-      end
-    end)
-  end,
-})

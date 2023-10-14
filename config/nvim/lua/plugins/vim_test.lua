@@ -34,18 +34,18 @@ local function config()
   vim.g['test#strategy'] = 'tmuxctl'
 
   local ag_x_test = vim.api.nvim_create_augroup('x_test', { clear = true })
-  vim.api.nvim_create_autocmd('FileType', {
+  vim.api.nvim_create_autocmd('BufEnter', {
     group = ag_x_test,
-    pattern = '*',
+    pattern = '*.ex,*.exs',
     callback = function()
-      g['test#filename_modifier'] = ''
+      g['test#filename_modifier'] = ':p'
     end,
   })
   vim.api.nvim_create_autocmd('FileType', {
     group = ag_x_test,
-    pattern = 'elixir',
+    pattern = '*.rs',
     callback = function()
-      g['test#filename_modifier'] = ':p'
+      g['test#filename_modifier'] = ':.'
     end,
   })
 

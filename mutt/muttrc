@@ -127,6 +127,7 @@ virtual-mailboxes \
     " Payments"          "notmuch://?query=tag:payment"                                                                   \
     " Subscriptions"     "notmuch://?query=tag:newsletter"                                                                \
     "   ├ Tech"           "notmuch://?query=tag:newsletter and tag:tech"                                                   \
+    "   ├ Gaming"        "notmuch://?query=tag:newsletter and tag:gaming"                                                \
     "   ├ Leisure"        "notmuch://?query=tag:newsletter and tag:leisure"                                                \
     "   ├ Job"            "notmuch://?query=tag:newsletter and tag:jobs"                                                   \
     "   ├ Food"           "notmuch://?query=tag:newsletter and tag:food"                                                   \
@@ -154,6 +155,7 @@ macro index gp "<change-vfolder>  Projects / Issues<enter>" "Go to Project
 macro index gw "<change-vfolder>  Work<enter>" "Go to Work"
 macro index gb "<change-vfolder>  Bookkeeping<enter>" "Go to Bookkeeping"
 macro index gm "<change-vfolder> Sendmail<enter>" "Go to Sendmail"
+macro index gG "<change-vfolder>    ├ Gaming<enter>" "Go to Sendmail"
 
 # index format
 #"opened"  "✓"

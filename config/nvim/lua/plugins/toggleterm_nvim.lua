@@ -24,6 +24,28 @@ local lazygit = Terminal:new({
   },
 })
 
+local bacon = Terminal:new({
+  cmd = 'bacon',
+  direction = 'float',
+  on_open = function(term)
+    vim.keymap.set({ 't', 'n', 'i' }, 'q', '<cmd>BaconToggle<cr>', { buffer = term.bufnr })
+  end,
+  float_opts = {
+    width = function(_)
+      return vim.o.columns
+    end,
+    height = function(_)
+      local statusheight = 1
+      return vim.o.lines - vim.o.cmdheight - statusheight
+    end,
+    border = 'none',
+  },
+})
+
 command('LazyGitToggle', function()
   lazygit:toggle()
+end, {})
+
+command('BaconToggle', function()
+  bacon:toggle()
 end, {})

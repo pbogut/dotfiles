@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 #=================================================
-# name:   deezer
+# name:   waybar-launcher
 # author: author <author_contact>
-# date:   08/11/2022
+# date:   26/08/2023
 #=================================================
-chromium --app=https://www.deezer.com/en/
+trap "killall waybar" EXIT
+
+while :; do
+  waybar
+done

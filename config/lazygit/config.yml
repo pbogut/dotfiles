@@ -105,8 +105,8 @@ keybinding:
         createPatchOptionsMenu: <c-p>
         nextTab: ']'
         prevTab: '['
-        nextScreenMode: '{'
-        prevScreenMode: '}'
+        nextScreenMode: '-'
+        prevScreenMode: '_'
         undo: z
         redo: <c-z>
         filteringMenu: <c-s>
@@ -193,6 +193,16 @@ customCommands:
       description: 'Commit changes with editor'
       context: 'global'
       command: 'git commit --verbose'
+      subprocess: true
+    - key: <c-l>
+      description: 'Commit changes with editor'
+      context: 'global'
+      command: 'git pullff'
+      subprocess: true
+    - key: <c-r>
+      description: 'Pull rebase'
+      context: 'global'
+      command: 'git pullrb'
       subprocess: true
     - key: 'o'
       description: 'Open file'

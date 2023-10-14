@@ -12,6 +12,7 @@ _gitwt_get_command_list() {
     "lock" \
     "move" \
     "remove" \
+    "checkout" \
     "repair" \
     "unlock"
 }
@@ -29,6 +30,10 @@ _gitwt () {
         fi
         if [[ ${words[3]} =~ "remove|move|repair|lock|unlock" ]]; then
           compadd $(git-wt list --orphans | awk '{print $1}')
+          return 0
+        fi
+        if [[ ${words[3]} =~ "checkout" ]]; then
+          compadd $(git branch -r | sed -E 's,.[^/]+/,,')
           return 0
         fi
         if [[ ${words[3]} =~ "add" ]]; then

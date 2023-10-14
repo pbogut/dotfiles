@@ -8,12 +8,24 @@
 usage() {
   echo "Ussage: ${0##*/} [OPTIONS]"
   echo ""
+  echo "Actions:"
+  echo "  add <branch>"
+  echo "  list"
+  echo "  checkout <branch>"
+  echo "  remove <branch>"
+  echo "  prune               remove worktrees that are already merged"
+  echo ""
   echo "Options:"
-  echo "  -h, --help     display this help and exit"
+  echo "  --candidates      list for worktree completion"
+  echo "  --orphans         include orphan worktrees"
+  echo "  --upstream|-u     set upstream (default: origin)"
+  echo "  -h, --help        display this help and exit"
 }
 
-action=none
+action="none"
 orphans=false
+force=false
+upstream="origin"
 candidates=false
 
 worktree=""
@@ -23,13 +35,28 @@ while test $# -gt 0; do
   add)
     action=add
     shift
+    worktree="$1"
+    shift
     ;;
   list)
     action=list
     shift
     ;;
+  checkout)
+    action=checkout
+    shift
+    ;;
   remove)
     action=remove
+    shift
+    ;;
+  prune)
+    action=prune
+    shift
+    ;;
+  --upstream)
+    shift
+    upstream="$1"
     shift
     ;;
   --candidates)
@@ -40,6 +67,10 @@ while test $# -gt 0; do
     orphans=true
     shift
     ;;
+  --force)
+    force=true
+    shift
+    ;;
   --help | -h)
     usage
     exit 0
@@ -48,7 +79,7 @@ while test $# -gt 0; do
     if [[ $action == "none" ]]; then
       usage
       exit 1
-    elif [[ $action == "remove" ]]; then
+    elif [[ $action == "remove" ]] || [[ $action == "checkout" ]]; then
       worktree=$1
       shift
     fi
@@ -56,6 +87,20 @@ while test $# -gt 0; do
     ;;
   esac
 done
+
+if [[ $action == "none" ]]; then
+  usage
+  exit 0
+fi
+
+__wt_base_dir() {
+  base_dir="$(git worktree list | grep '(bare)$' | awk '{print $1}')"
+  if [[ $base_dir =~ \.bare$ ]]; then
+    base_dir="$(dirname "$base_dir")"
+  fi
+  echo "$base_dir"
+}
+
 
 trees=$(git worktree list)
 err=$?
@@ -123,6 +168,24 @@ if [[ $action == "--candidates" ]]; then
   exit 0
 fi
 
+if [[ $action == "checkout" ]]; then
+  bare_path=$(__wt_base_dir)
+  if ! git worktree add "$bare_path/$worktree" "$worktree"; then
+    exit $?
+  fi
+  cd "$bare_path/$worktree" || exit 1
+  git branch --set-upstream-to="$upstream"/"$worktree"
+fi
+
+if [[ $action == "add" ]]; then
+  bare_path=$(__wt_base_dir)
+  if ! git worktree add "$bare_path/$worktree"; then
+    exit $?
+  fi
+  cd "$bare_path/$worktree" || exit 1
+  git branch --set-upstream-to="$upstream"/"$worktree"
+fi
+
 if [[ $action == "list" ]]; then
   (
     __gitwt__list
@@ -133,6 +196,23 @@ if [[ $action == "list" ]]; then
   ) | column -t
 
   exit 0
+fi
+
+if [[ $action == "prune" ]]; then
+  git -C "$bare_path" branch --merged | grep '^[^*]' | while read -r branch; do
+    branch="$(awk '{print $2}' <<< "$branch")"
+    if [[ "$branch" == "" ]]; then
+      continue
+    fi
+    git wt remove "$branch"
+  done
+  git -C "$bare_path" branch --merged | grep '^[^*]' | while read -r branch; do
+    branch="$(awk '{print $2}' <<< "$branch")"
+    if [[ "$branch" == "" ]]; then
+      continue
+    fi
+    echo git wt remove "$branch" --force
+  done
 fi
 
 if [[ $action == "remove" ]] && [[ -n $worktree ]]; then

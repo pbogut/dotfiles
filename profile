@@ -4,6 +4,7 @@
 # author: Pawel Bogut <pbogut@pbogut.net>
 # date:   11/11/2017
 #=================================================
+stty -ixon
 export PROFILE_LOADED=true
 
 export GOPATH="$HOME/.gocode"
@@ -33,10 +34,15 @@ export QT_QPA_PLATFORMTHEME=qt5ct
 # place for my common python scripts
 export PYTHONPATH="$SCRIPTS/_python"
 
-export TMPDIR="/tmp/$USER"
+export COMPOSER_IGNORE_PLATFORM_REQS=1
 
-if [[ -f "$HOME/.cargo/bin/sccache" ]]; then
-  export RUSTC_WRAPPER="$HOME/.cargo/bin/sccache"
+export GAMEMODERUNEXEC="env __GL_SYNC_TO_VBLANK=0 env __VK_SYNC_TO_VBLANK=0 mangohud"
+
+export TMPDIR="/tmp/$USER"
+mkdir "$TMPDIR" -p
+
+if which sccache > /dev/null 2>&1; then
+  export RUSTC_WRAPPER="sccache"
 fi
 
 source "$HOME/.profile.local"

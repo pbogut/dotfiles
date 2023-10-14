@@ -63,8 +63,8 @@ if [[ $action == "start" ]]; then
   killall wlsunset
 
   # lock mouse on game screen
-  notify-send -t 2500 -u low "Lock mouse on screen"
-  sway 'output DP-1 pos 1920 2000'
+  #notify-send -t 2500 -u low "Lock mouse on screen"
+  #sway 'output DP-1 pos 1920 2000'
   sway 'seat * hide_cursor when-typing disable'
 
 
@@ -85,9 +85,9 @@ elif [[ $action == "end" ]]; then
   at now <<< "wlsunset -l 50 -L 17" > /dev/null 2>&1
 
   # release mouse from game screen
-  sway 'output DP-1 pos 1920 0'
+  #sway 'output DP-1 pos 1920 0'
   sway 'seat * hide_cursor when-typing disable'
-  notify-send -t 2500 -u low "Release mouse lock from screen"
+  #notify-send -t 2500 -u low "Release mouse lock from screen"
   # stop shadowing
   ~/.scripts/sway/shadowplay.sh --kill
 
@@ -103,14 +103,14 @@ elif [[ $action == "watch" ]]; then
   sway-prop -l | tee -a /tmp/swayprop | while read -r props; do
     class=$(jq -r '.class' <<< "$props")
     case "$class" in
-      steam_app_*|gamescope|csgo_linux64)
+      steam_app_*|gamescope|csgo_linux64|cs2|steamwebhelper.exe|steam.exe)
         if [[ $was_on -eq 0 ]]; then
           was_on=1
           $0 --start
         fi
         ;;
       *)
-        if ! pgrep -f '[Ss]team/.*/reaper' && [[ $was_on -eq 1 ]]; then
+        if ! pgrep -f '[Ss]team/.*/reaper' && ! pgrep -f '[Ss]team/.*/reaper.exe' && [[ $was_on -eq 1 ]]; then
           was_on=0
           $0 --end
         fi

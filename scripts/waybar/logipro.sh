@@ -10,6 +10,10 @@ status=$(cat /sys/class/power_supply/hidpp_battery_*/status | tail -n1)
 # echo "$pct"
 # echo "$status"
 
+if [[ $pct == "" ]]; then
+  exit 0
+fi
+
 if [[ $status == "Charging" ]]; then
   echo "<span color='#ed7f21'></span> $pct%"
 elif [[ $status == "Full" ]]; then

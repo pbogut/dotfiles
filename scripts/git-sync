@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   git-sync
+# author: author <author_contact>
+# date:   25/08/2023
+#=================================================
+
+remote=""
+verbose=false
+pull=true
+push=true
+
+usage() {
+  echo "Ussage: ${0##*/} <remote> [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+  echo "  --pull         only pull remote changes to local"
+  echo "  --push         only push local changes to remote"
+  echo "  -v, --verbose  verbose output"
+}
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+while test $# -gt 0; do
+  case "$1" in
+    --pull)
+      push=false
+      shift
+      ;;
+    --push)
+      pull=false
+      shift
+      ;;
+    --verbose | -v)
+      verbose=true
+      shift
+      ;;
+    --help | -h)
+      usage
+      exit 0
+      ;;
+    *)
+      if [[ -z "$remote" ]]; then
+        remote="$1"
+        shift
+      else
+        usage
+        exit 1
+      fi
+      ;;
+  esac
+done
+
+if [[ -z "$remote" ]]; then
+  usage
+  exit 1
+fi
+
+local_diff=$(mktemp)
+local_cached_diff=$(mktemp)
+local_combined=$(mktemp)
+local_untracked=$(mktemp)
+remote_combined=$(mktemp)
+quiet="-q"
+if $verbose; then quiet=""; fi
+
+local_commit=$(git rev-parse HEAD)
+
+echo -e "${BLUE}>${ORANGE} Create diff on $remote${NC}"
+
+diff_files=$(
+  if $push; then
+    git diff --cached | base64 -w0 2> /dev/null
+    echo ''
+    git diff | base64 -w0 2> /dev/null
+    echo ''
+    git ls-files --others --exclude-standard |
+      while read -r untracked_file; do
+        git diff /dev/null "$untracked_file"
+      done | base64 -w0 2> /dev/null
+    echo ''
+  fi |
+    ssh "$remote" -t \
+      "if [[ \$(git -C '$PWD' rev-parse HEAD) != '$local_commit' ]]; then" \
+      "  echo 'WRONG_COMMIT';" \
+      "  exit 1;" \
+      "fi;" \
+      "tmp=\$(mktemp);" \
+      "log=\$(mktemp);" \
+      "cat - >\"\$tmp\";" \
+      "awk 'NR == 1' \"\$tmp\" | base64 -d | git -C '$PWD' apply $quiet          > \$log 2>&1;" \
+      "awk 'NR == 1' \"\$tmp\" | base64 -d | git -C '$PWD' apply $quiet --cached > \$log 2>&1;" \
+      "awk 'NR == 2' \"\$tmp\" | base64 -d | git -C '$PWD' apply $quiet          > \$log 2>&1;" \
+      "awk 'NR == 3' \"\$tmp\" | base64 -d | git -C '$PWD' apply $quiet --reject > \$log 2>&1;" \
+      "git -C '$PWD' diff --cached | base64 -w0 2>/dev/null;" \
+      "echo '';" \
+      "git -C '$PWD' diff          | base64 -w0 2>/dev/null;" \
+      "echo '';" \
+      "git -C '$PWD' ls-files --others --exclude-standard |" \
+      "  while read -r untracked_file; do " \
+      "    git -C '$PWD' diff /dev/null \"\$untracked_file\";" \
+      "  done | base64 -w0;" \
+      "echo '';" \
+      "base64 -w0 \$log;" \
+      2> /dev/null |
+    sed 's,\r,,g'
+)
+
+if [[ $(awk 'NR == 1' <<< "$diff_files") == "WRONG_COMMIT" ]]; then
+  echo -e "${RED}× Repos are not on the same commit${NC}"
+  exit 1
+fi
+
+# use unison to sync (with git ignore)
+echo -e "${BLUE}>${ORANGE} Sync using unison${NC}"
+unison-gi "ssh://$remote/$PWD" "$PWD"
+
+awk 'NR == 1' <<< "$diff_files" | base64 -d > "$local_cached_diff"
+awk 'NR == 2' <<< "$diff_files" | base64 -d > "$local_diff"
+awk 'NR == 3' <<< "$diff_files" | base64 -d > "$local_untracked"
+# show remote logs
+awk 'NR == 4' <<< "$diff_files" | base64 -d
+
+echo -e "${BLUE}>${ORANGE} Pull diff from $remote${NC}"
+
+cat "$local_diff" "$local_cached_diff" "$local_untracked" > "$remote_combined"
+
+if $pull; then
+  echo -e "${BLUE}>${ORANGE} Apply diff locally${NC}"
+  git apply $quiet "$local_diff"
+  git apply $quiet "$local_cached_diff"
+  git apply $quiet --cached "$local_cached_diff"
+  git apply $quiet --reject "$local_untracked"
+fi
+
+git diff > "$local_combined"
+git diff --cached >> "$local_combined"
+
+git ls-files --others --exclude-standard |
+  while read -r untracked_file; do
+    git diff /dev/null "$untracked_file" >> "$local_combined"
+  done
+
+remote_local_diff=$(diff "$local_combined" "$remote_combined")
+if [[ -z "$remote_local_diff" ]]; then
+  echo -e "${GREEN}✓ Repos are in sync${NC}"
+  exit 0
+else
+  echo -e "${RED}× Repos still differ after syncing:${NC}"
+  if $verbose; then
+    echo "$remote_local_diff"
+  else
+    echo "$remote_local_diff" | grep '< diff --git '
+  fi
+fi

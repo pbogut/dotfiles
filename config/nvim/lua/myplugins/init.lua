@@ -1,5 +1,12 @@
 local function config(plugin)
   return function(plug, opts)
+    if plug['_'].loaded.ft then
+      -- if loaded by filetype trigger filetype event again
+      vim.schedule(function()
+        vim.o.filetype = vim.o.filetype
+      end)
+    end
+
     local _, xcfg = pcall(require, 'plugins.' .. plugin)
     if type(xcfg) == 'table' and xcfg['config'] then
       return xcfg.config(plug, opts)
@@ -10,7 +17,7 @@ local function config(plugin)
       local parser = require('lazy.core.handler.keys')
       for _, keymap in pairs(plug.keys_after) do
         local keys = parser.parse(keymap)
-        vim.keymap.set(keys.mode, keys[1], keys[2], parser.opts(keys))
+        vim.keymap.set(keys.mode, keys.lhs, keys.rhs, parser.opts(keys))
       end
     end
   end
@@ -60,6 +67,7 @@ return {
     'akinsho/toggleterm.nvim',
     keys = {
       { '<space>lg', '<cmd>LazyGitToggle<cr>', desc = 'LazyGitToggle' },
+      { '<space>eb', '<cmd>BaconToggle<cr>', desc = 'BaconToggle' },
     },
     cmd = 'LazyGitToggle',
     config = config('toggleterm_nvim'),
@@ -74,7 +82,6 @@ return {
       { 'ð', '<plug>(harpoon-nav-2)', desc = 'Harpoon nave file 2' },
       { 'ś', '<plug>(harpoon-nav-3)', desc = 'Harpoon nave file 3' },
       { 'ą', '<plug>(harpoon-nav-4)', desc = 'Harpoon nave file 4' },
-      { 'h', '<plug>(harpoon-count)', desc = 'Harpoon count navigate' },
     },
     config = config('harpoon'),
   },
@@ -259,8 +266,8 @@ return {
     'MattesGroeger/vim-bookmarks',
     event = 'BufReadPre',
     keys = {
-      { 'mm', '<plug>BookmarToggle' },
-      { 'mi', '<plug>BookmarAnnotate' },
+      { 'mm', '<cmd>BookmarToggle<cr>' },
+      { 'mi', '<cmd>BookmarAnnotate<cr>' },
       { '<space>fM', '<plug>(bookmarks-list)' },
     },
     config = config('vim_bookmarks'),
@@ -374,49 +381,102 @@ return {
   },
   {
     'pbogut/magento2-ls',
-    ft = { 'xml' },
-    build = 'npm install && npm run build',
+    branch = 'develop',
+    ft = { 'xml', 'javascript' },
+    build = 'cargo build --release',
     config = function()
       require('magento2_ls').setup()
     end,
     enabled = function()
       return vim.fn.filereadable('bin/magento') == 1
     end,
-    dev = true,
+    dev = false,
   },
 
-  { 'nicwest/vim-http', cmd = { 'Http', 'HttpShowCurl', 'HttpShowRequest', 'HttpClean', 'HttpAuth' },
+  {
+    'nicwest/vim-http',
+    cmd = { 'Http', 'HttpShowCurl', 'HttpShowRequest', 'HttpClean', 'HttpAuth' },
     keys = {
       { '<space>C', '<cmd>Http<cr>', desc = 'Run Http' },
     },
     config = function()
-    vim.g.vim_http_split_vertically = 1
-    vim.g.vim_http_tempbuffer = 1
-    vim.g.vim_http_right_below = 1
+      vim.g.vim_http_split_vertically = 1
+      vim.g.vim_http_tempbuffer = 1
+      vim.g.vim_http_right_below = 1
 
-    vim.api.nvim_create_autocmd('BufEnter', {
-      group = vim.api.nvim_create_augroup('x_vim_http', { clear = true }),
-      pattern = '*.response.*.http',
-      callback = function()
-        vim.keymap.set('n', 'q', '<cmd>bd<cr>', { buffer = true })
-      end,
-    })
-  end },
+      vim.api.nvim_create_autocmd('BufEnter', {
+        group = vim.api.nvim_create_augroup('x_vim_http', { clear = true }),
+        pattern = '*.response.*.http',
+        callback = function()
+          vim.keymap.set('n', 'q', '<cmd>bd<cr>', { buffer = true })
+        end,
+      })
+    end,
+  },
 
+  {
+    'gpanders/nvim-parinfer',
+    config = config('_'),
+    ft = {
+      'clojure',
+      'scheme',
+      'lisp',
+      'racket',
+      'hy',
+      'fennel',
+      'janet',
+      'carp',
+      'wast',
+      'yuck',
+      'dune',
+    },
+    cmd = {
+      'ParinferOn',
+      'ParinferOff',
+      'ParinferToggle',
+      'ParinferLog',
+    },
+  },
   { 'kmonad/kmonad-vim', ft = { 'kbd' } },
   { 'sirtaj/vim-openscad', ft = { 'openscad' } },
   { 'tpope/vim-rails', ft = { 'ruby' } },
   { 'vim-ruby/vim-ruby', ft = { 'ruby' } },
   {
     'jackmort/chatgpt.nvim',
-    keys = { { '<space>gpt', '<cmd>ChatGPT<cr>' } },
+    keys = {
+      { '<space>gpt', '<cmd>ChatGPT<cr>' },
+      {
+        '<space>rg',
+        function()
+          vim.cmd('Lazy load telescope.nvim')
+          local actions = {
+            'email_casual',
+            'email_professional',
+            'grammar_correction',
+          }
+          if #actions == 0 then
+            vim.notify('No actions found.', vim.log.levels.INFO, { title = 'Actions' })
+            return
+          end
+          table.sort(actions, function(a1, a2)
+            return a1 < a2
+          end)
+          vim.ui.select(actions, { prompt = 'Select action: ' }, function(action)
+            if action then
+              vim.cmd.ChatGPTRun(action)
+            end
+            vim.cmd.stopinsert()
+          end)
+        end,
+      },
+    },
+    cmd = { 'ChatGPT', 'ChatEditWithInstructions', 'ChatGPTRun' },
     config = config('chatgpt_nvim'),
     dependencies = {
       'muniftanjim/nui.nvim',
       'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope.nvim',
     },
-    cmd = { 'ChatGPT' },
   },
   {
     'l3mon4d3/luasnip',
@@ -428,6 +488,14 @@ return {
   },
   { 'zbirenbaum/copilot.lua', event = 'InsertEnter', config = config('copilot') },
   -- { 'github/copilot.vim', event = 'InsertEnter', config = config('copilot_vim') },
+  -- Use your favorite package manager to install, for example in lazy.nvim
+  {
+    'sourcegraph/sg.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+
+    -- If you have a recent version of lazy.nvim, you don't need to add this!
+    build = 'nvim -l build/init.lua',
+  },
   {
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
@@ -442,7 +510,8 @@ return {
       'ray-x/cmp-treesitter',
       'onsails/lspkind-nvim',
       'saadparwaiz1/cmp_luasnip',
-      --[[ 'zbirenbaum/copilot-cmp', ]]
+      -- {'zbirenbaum/copilot-cmp', after = 'copilot.lua'},
+      {'pbogut/copilot-cmp', branch = "single-line-suggestion", after = 'copilot.lua'},
       'kristijanhusak/vim-dadbod-completion',
     },
     cond = true,

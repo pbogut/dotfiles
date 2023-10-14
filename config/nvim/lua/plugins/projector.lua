@@ -65,6 +65,19 @@ projector.setup({
         },
       },
     },
+    ['autoexec.cfg&cs2-autoexec.cfg&link.sh'] = {
+      project_init = {
+        function()
+          vim.api.nvim_create_autocmd('BufWritePost', {
+            group = vim.api.nvim_create_augroup('x_csgo', { clear = true }),
+            pattern = '*.cfg',
+            callback = function()
+              vim.cmd.Action('link')
+            end,
+          })
+        end,
+      },
+    },
     --magento project
     ['composer.json&app/Mage.php'] = {
       priority = 100,

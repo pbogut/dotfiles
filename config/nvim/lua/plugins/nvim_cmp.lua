@@ -90,6 +90,12 @@ local function config()
         if kind == 'Copilot' then
           kind = ''
         end
+        if kind == 'CopLine' then
+          kind = ''
+        end
+        if kind == 'TabNine' then
+          kind = ''
+        end
         vim_item.kind = kind
 
         -- set a name for each source

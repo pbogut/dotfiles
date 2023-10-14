@@ -16,20 +16,6 @@ vim.api.nvim_create_autocmd('TermOpen', {
 })
 vim.api.nvim_create_autocmd('BufEnter', {
   group = augroup,
-  pattern = 'env.*',
-  callback = function()
-    bo.filetype = 'sh'
-  end,
-})
-vim.api.nvim_create_autocmd('BufEnter', {
-  group = augroup,
-  pattern = '*/waybar/config',
-  callback = function()
-    bo.filetype = 'jsonc'
-  end,
-})
-vim.api.nvim_create_autocmd('BufEnter', {
-  group = augroup,
   pattern = 'crontab.*',
   callback = function()
     bo.commentstring = '# %s'

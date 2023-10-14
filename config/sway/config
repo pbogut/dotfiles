@@ -20,9 +20,9 @@ set $term exec $TERMINAL
 # is used in the bar {} block below.
 font pango:monospace 8
 
-# hide coursor
-seat * hide_cursor when-typing enable
-seat * hide_cursor 5000
+# hide coursor, use exec to avoid trigerring it again when reloading config
+exec swaymsg "seat * hide_cursor when-typing enable"
+exec swaymsg "seat * hide_cursor 5000"
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
@@ -62,16 +62,16 @@ bindsym $mod+semicolon $exec "wofi --show run"
 # named workspaces
 set $wsbrowser 1:  browser
 set $wsterm    2:  term
-set $wscomm    3: / comm
+set $ws_comm    3: / comm
 set $wscode    4:  code
 set $wsmedia   5:  media
 set $wsqbwork  6:  qbwork
 set $wsdb       db
-set $wsdash     dash
+set $ws_dash    9:  dash
 set $wsrss      rss
 set $wsvm       VM
 set $wssteam   8:  steam
-set $wsgame    9:  gaming
+set $wsgame    7:  gaming
 set $ws3d       3d
 
 bindsym $mod+Shift+colon $exec "~/.scripts/i3-dmenu-start-at-new-workspace.sh"
@@ -140,13 +140,13 @@ bindsym $mod+a focus parent
 # switch to workspace
 bindsym $mod+1 workspace --no-auto-back-and-forth $wsbrowser
 bindsym $mod+2 workspace --no-auto-back-and-forth $wsterm
-bindsym $mod+3 workspace --no-auto-back-and-forth $wscomm
+bindsym $mod+3 workspace --no-auto-back-and-forth $ws_comm
 bindsym $mod+4 workspace --no-auto-back-and-forth $wscode
 bindsym $mod+5 workspace --no-auto-back-and-forth $wsmedia
 bindsym $mod+6 workspace --no-auto-back-and-forth $wsqbwork
-bindsym $mod+7 workspace --no-auto-back-and-forth 7
+bindsym $mod+7 workspace --no-auto-back-and-forth $wsgame
 bindsym $mod+8 workspace --no-auto-back-and-forth $wssteam
-bindsym $mod+9 workspace --no-auto-back-and-forth $wsgame
+bindsym $mod+9 workspace --no-auto-back-and-forth $ws_dash
 bindsym $mod+0 workspace --no-auto-back-and-forth 10
 
 # move focused container to workspace and switch workspace
@@ -228,7 +228,7 @@ bindsym $mod+q mode "$mode_system"
 
 # fixes dbus issue for some reason (long gtk apps startup)
 exec systemctl --user import-environment
-exec waybar
+exec $HOME/.scripts/waybar-launcher
 exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec swaybg -i "$(find ~/Pictures/wallpaper -type f | shuf -n 1)"
 exec_always $HOME/.scripts/sway-startup.sh
@@ -267,7 +267,8 @@ set $display_main DP-1
 # assign workspace to display
 workspace "$wsbrowser" output $display_laptop
 workspace "$wsbrowser" output $display_main
-workspace "$wscomm" output $display_right
+workspace "$ws_comm" output $display_right
+workspace "$ws_dash" output $display_right
 workspace "$wsmedia" output $display_left
 workspace "$wsgame" output $display_main
 workspace "$wssteam" output $display_right
@@ -278,15 +279,15 @@ workspace "$wscode" output $display_main
 # assign apps to specific workspaces
 assign [title="^DBeaver" class="^SWT$"] $wsdb
 assign [title="^Dbeaver$"] $wsdb
-assign [title="^toggl$"] $wsdash
-assign [title="^todoist$"] $wsdash
-assign [title="^jira$"] $wsdash
-assign [class="^Ferdium$"] $wscomm
-assign [class="^discord$"] $wscomm
+assign [title="^toggl$"] $ws_dash
+assign [title="^todoist$"] $ws_dash
+assign [title="^jira$"] $ws_dash
+assign [class="^Ferdium$"] $ws_comm
+assign [class="^discord$"] $ws_comm
 assign [title="Freezer"] $wsmedia
 
-#for_window [app_id="^discord$"] workspace --no-auto-back-and-forth $wscomm
-#for_window [instance="^ferdium$"] workspace --no-auto-back-and-forth $wscomm
+#for_window [app_id="^discord$"] workspace --no-auto-back-and-forth $ws_comm
+#for_window [instance="^ferdium$"] workspace --no-auto-back-and-forth $ws_comm
 
 for_window [title="^.*$"] $exec ~/.scripts/sway/sort-workspace.sh
 
@@ -341,19 +342,20 @@ bindsym $mod+Ctrl+i $sh '~/.scripts/vim-anywhere.sh --selection'
 # bindsym $mod+u $sh '~/.scripts/users.sh --switch'
 bindsym $mod+u $exec "~/.scripts/i3-screen-ring.sh --move-win --prev"
 bindsym $mod+i $exec "~/.scripts/i3-screen-ring.sh --move-win --next"
-
 bindsym $mod+Ctrl+f $exec swaymsg '[class="^Ferdium$"] focus' || flatpak run org.ferdium.Ferdium
 bindsym $mod+Ctrl+b $exec "~/.scripts/dmenu-bluetooth"
 bindsym $mod+Ctrl+n $exec "~/.scripts/networkmanager_dmenu"
 bindsym $mod+Ctrl+r $exec swaymsg '[app_id="com.gitlab.newsflash"] focus' || newsflash
 
-bindsym $mod+Ctrl+p $exec "~/.scripts/sway/switch-or-launch.sh --scratchpad 'Deezer$' 'deezer'"
+bindsym $mod+Ctrl+p $exec swaymsg '[app_id="chrome-www.deezer.com__en_-Default"] focus' || chromium --app=https://www.deezer.com/en/
 bindsym $mod+Ctrl+s $exec "~/.scripts/sway/switch-or-launch.sh --scratchpad '^Volume Control$' 'pavucontrol'"
-bindsym $mod+Ctrl+k $term -t FLOATING_WINDOW -e khal interactive
+bindsym $mod+Ctrl+k $term -t FLOATING_WINDOW -e zsh -ic "khal interactive"
 bindsym $mod+Ctrl+d $exec swaymsg '[app_id="discord"] focus' || discord.sh
 bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
 bindsym $mod+Ctrl+e $exec swaymsg '[title="^EMAIL_MUTT$"] focus' || email
 bindsym $mod+Ctrl+l $term -e ~/.scripts/dev-log
+bindsym $mod+Ctrl+h $exec swaymsg '[app_id="org.gnome.Hamster.GUI"] focus' || hamster
+bindsym $mod+backspace $exec swaymsg '[app_id="org.gnome.Hamster.GUI"] focus' || hamster
 
 bindsym $mod+b $exec swaymsg '[app_id="org.qutebrowser.qutebrowser"] focus' || browser
 bindsym $mod+Ctrl+c workspace $wscode

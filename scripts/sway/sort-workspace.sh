@@ -10,9 +10,6 @@ wm_title=$(echo "$prop" | jq '.title' -r)
 wm_class=$(echo "$prop" | jq '.instance + " " + .class' -r)
 wm_app_id=$(echo "$prop" | jq '.app_id' -r)
 echo "$@"
-echo $wm_class
-echo $wm_title
-echo $wm_app_id
 
 
 log() {
@@ -111,11 +108,11 @@ ws_code="4:  code"
 ws_media="5:  media"
 ws_qbwork="6:  qbwork"
 ws_db=" db"
-ws_dash=" dash"
+ws_dash="9:  dash"
 ws_rss=" rss"
 ws_vm=" VM"
 ws_steam="8:  steam"
-ws_game="9:  gaming"
+ws_game="7:  gaming"
 ws_3d=" 3d"
 
 
@@ -142,11 +139,15 @@ if [[ $extended -eq 1 ]]; then
   [[ $found -eq 1 ]] && exit 0
 fi
 case  "$wm_app_id" in
+  "org.gnome.Hamster.GUI")
+    move_and_swich "$ws_dash"
+    ;;
   "discord")
     move_and_swich "$ws_comm"
     ;;
   "chrome-www.deezer.com__en_-Default")
-    set_floating 1600px 900px
+    # set_floating 1600px 900px
+    move_and_swich "$ws_media"
     ;;
   "com.gitlab.newsflash")
     move_and_swich "$ws_rss"

@@ -9,6 +9,12 @@ local cmd = vim.cmd
 -- dont mess with me!
 g.no_plugin_maps = 1
 
+k.set('n', '<c-c>', function()
+  if fn.confirm('Do you really want to quit with error?', 'Yes\nNo', 'No') == 1 then
+    cmd.cquit()
+  end
+end)
+
 k.set('n', '<bs>', '<cmd>Explore<cr>')
 k.set('n', '<c-s>', [[<cmd>echo synIDattr(synID(line('.'), col('.'), 1), "name")<cr>]])
 -- macros helper (more like scratch pad)
@@ -113,14 +119,6 @@ k.set('n', '<c-q>', function()
     vim.cmd.quit()
   end
 end)
--- open terminal
-k.set('n', 'goT', function()
-  local path = fn.expand('%:p:h')
-  cmd('belowright 15split')
-  cmd.enew()
-  fn.termopen('cd ' .. path .. ' && zsh')
-  cmd.startinsert()
-end)
 
 k.set('n', '<space>mp', function()
   if os.getenv('TMUX') then
@@ -162,6 +160,17 @@ k.set('n', '<space>:', function()
   return tmux.show_pane(tmux.get_last_pane() or 'bottom', { height = 15, focus = true })
 end)
 
+-- open terminal
+k.set('n', 'goT', function()
+  local path = fn.expand('%:p:h')
+  if os.getenv('TMUX') then
+    return require('tmuxctl').toggle_pane('bottom' .. path, { height = 15 , dir = path })
+  end
+  cmd('belowright 15split')
+  cmd.enew()
+  fn.termopen('cd ' .. path .. ' && zsh')
+  cmd.startinsert()
+end)
 k.set('n', 'got', function()
   if os.getenv('TMUX') then
     return require('tmuxctl').toggle_pane('bottom', { height = 15 })

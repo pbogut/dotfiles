@@ -189,6 +189,7 @@ local function def_opts(opts, override)
     create_cmd = nil,
     cmd = true,
     open = true,
+    dir = vim.fn.getcwd(),
   })
   return vim.tbl_extend('keep', override or {}, opts)
 end
@@ -223,7 +224,7 @@ function M.create_pane(name, opts)
     cmd = vim.fn.shellescape(opts.create_cmd)
   end
   local id = tmux(
-    'split-window -v -P -F "#{pane_id}" ' .. cmd .. opts_to_tmux_str(opts, { height = true, focus = true })
+    'split-window -v -P -F "#{pane_id}" -c ' .. vim.fn.shellescape(opts.dir) .. " " .. cmd .. opts_to_tmux_str(opts, { height = true, focus = true })
   ):gsub('\n', '')
   pane_names[name] = id
 

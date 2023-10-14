@@ -13,17 +13,22 @@ local ripgrep = function(opt)
     last_query = query
   end
   local dirs = { vim.fn.getcwd() }
-  if query:match('%/$') then
-    local dir = query:gsub('(.-) ([^%s]+%/)$', '%2')
-    if dir:byte(1) ~= 47 then
-      local sep = '/./'
-      if dir:byte(1) == 46 then
-        sep = '/'
-      end
-      dir = vim.fn.getcwd() .. sep .. query:gsub('(.-) ([^%s]+%/)$', '%2')
+
+  if query:match('%s[%w%p]*%/$') then
+    local dir = query:gsub('(.-) ([^%s]*%/)$', '%2')
+    if dir:byte(1) ~= 47 then -- /
+      dir = query:gsub('(.-) ([^%s]+%/)$', '%2')
     end
     dirs = { dir }
     query = query:gsub('(.-) ([^%s]+%/)$', '%1')
+  elseif query:match('%s%%$') then
+    dirs = { vim.fn.expand('%') }
+    query = query:gsub('(.-) %%$', '%1')
+  end
+
+  if query:match([[^!(.*)$]]) then
+    query = query:gsub([[^!(.*)$]], '%1')
+    opt.regex = true
   end
 
   local options = ''
@@ -38,7 +43,13 @@ local ripgrep = function(opt)
     options = '[-i] '
   end
 
-  local message = options .. '"' .. query .. '"'
+  local message = ''
+  if opt.regex then
+    message = options .. 'r/' .. query .. '/'
+  else
+    message = options .. '"' .. query .. '"'
+  end
+
   local short_dirs = {}
   for _, dir in pairs(dirs) do
     if dir ~= vim.fn.getcwd() then

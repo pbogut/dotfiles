@@ -25,7 +25,7 @@ function me.setup(opts)
         rootMarkers = { '.phpcs.xml', 'phpcs.xml', '.phpcs.xml.dist', 'phpcs.xml.dist', 'composer.json' },
       },
       shfmt = {
-        formatCommand = exec('shfmt', '-'),
+        formatCommand = exec('shfmt', '-ci -sr -i 4 -'),
         formatStdin = true,
         rootMarkers = {},
       },
@@ -56,8 +56,8 @@ function me.setup(opts)
       },
       phpcs = {
         prefix = 'phpcs',
-        lintCommand = exec('phpcs', '--no-colors --report=emacs -'),
-        lintStdin = true,
+        lintCommand = exec('phpcs', '--no-colors --report=emacs'),
+        lintStdin = false,
         lintFormats = {
           '%.%#:%l:%c: %trror - %m',
           '%.%#:%l:%c: %tarning - %m',

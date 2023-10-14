@@ -12,6 +12,40 @@
       }
     }
   },
+  "email_casual": {
+    "type": "chat",
+    "opts": {
+      "template": "Keep each line at 80 characters length. Make it look like casual email. Correct this to standard {{lang}}:\n\n{{input}}",
+      "strategy": "replace",
+      "params": {
+        "model": "gpt-3.5-turbo"
+      }
+    },
+    "args": {
+      "lang": {
+        "type": "string",
+        "optional": "true",
+        "default": "english"
+      }
+    }
+  },
+  "email_professional": {
+    "type": "chat",
+    "opts": {
+      "template": "Keep each line at 80 characters length. Make it look like profesional email. Correct this to standard {{lang}}:\n\n{{input}}",
+      "strategy": "replace",
+      "params": {
+        "model": "gpt-3.5-turbo"
+      }
+    },
+    "args": {
+      "lang": {
+        "type": "string",
+        "optional": "true",
+        "default": "english"
+      }
+    }
+  },
   "grammar_correction": {
     "type": "chat",
     "opts": {

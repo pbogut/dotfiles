@@ -48,6 +48,7 @@ read -r -d '' files <<"EOF"
     Xresources
     ackrc
     aliases
+    asoundrc
     autostart.redeye.sh
     autostart.silverspoon.sh
     bash_profile
@@ -58,6 +59,7 @@ read -r -d '' files <<"EOF"
     config/MangoHud
     config/alacritty
     config/autostart/autostart.desktop
+    config/bacon
     config/chrome-flags.conf
     config/chromium-flags.conf
     config/clang-format
@@ -70,7 +72,9 @@ read -r -d '' files <<"EOF"
     config/fish
     config/gamemode.ini
     config/gtk-3.0/settings.ini
+    config/gtk-3.0/gtk.css
     config/gtk-4.0/settings.ini
+    config/gtk-4.0/gtk.css
     config/i3/config
     config/i3/i3status.conf
     config/i3/workspaces
@@ -118,6 +122,7 @@ read -r -d '' files <<"EOF"
     config/roxterm.sourceforge.net
     config/starship.toml
     config/sway/config
+    config/sway/locktile.png
     config/systemd/user/kmonad.service
     config/systemd/user/swayidle.service
     config/systemd/user/syncthing.service

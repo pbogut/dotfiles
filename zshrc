@@ -120,6 +120,10 @@ if [[ -f ~/.fzf.zsh ]]; then
   source ~/.fzf.zsh
 fi
 
+if [[ -f ~/.opam/opam-init/init.zsh ]]; then
+  source /home/pbogut/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
+fi
+
 if [[ -f ~/.zshrc.d/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
   source ~/.zshrc.d/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
   export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=240"
@@ -139,3 +143,4 @@ eval "$(rtx activate zsh 2>/dev/null)"
 alias asdf="rtx"
 
 alias luamake=/home/pbogut/.gitpac/sumneko/lua-language-server/3rd/luamake/luamake
+

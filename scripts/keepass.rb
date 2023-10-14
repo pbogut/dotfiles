@@ -140,6 +140,7 @@ entries.each do |entry|
   url = entry.xpath('./String/Key[text()="URL"]/../Value').text
   user = entry.xpath('./String/Key[text()="UserName"]/../Value').text
   otpauth = entry.xpath('./String/Key[text()="otpauth"]/../Value').text
+  notes = entry.xpath('./String/Key[text()="Notes"]/../Value').text
   otp = ' 2FA' if otpauth.length.positive?
   cat = "#{cat}/" if cat
 
@@ -147,13 +148,15 @@ entries.each do |entry|
   next unless name
 
   # rubocop:disable Style/FormatStringToken,Style/FormatString
-  formated_list << ("%3.3s| %-50.50s %-50.50s %-8.8s %s %s\n" % [
+  formated_list << ("%3.3s| %-50.50s %-50.50s %-8.8s %-100.100s %s %s %s\n" % [
     no,
     "#{cat}#{name}",
     user,
     otp,
     url,
-    get_site_parts(url).join(' ')
+    get_site_parts(url).join(' '),
+    url.split(%r{[\s/.]}).reverse.join(' '),
+    notes.split("\n").each { |line| line.split('.').reverse.join(' ') }.join(';')
   ])
   # rubocop:enable Style/FormatStringToken,Style/FormatString
 end

@@ -10,6 +10,7 @@ g.colors = {
 
   ad_info = '#a68f46',
   ad_hint = '#9eab7d',
+  ad_inlay = '#305677',
 
   base03 = '#002b36',
   base02 = '#073642',

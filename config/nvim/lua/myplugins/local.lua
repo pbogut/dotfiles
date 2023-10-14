@@ -11,7 +11,10 @@ return {
     'local/actions',
     config = function()
       local actions = require('actions')
-      vim.keymap.set('n', '<space>ra', actions.pick_action)
+      vim.keymap.set('n', '<space>ra', function()
+        vim.cmd('Lazy load telescope.nvim')
+        actions.pick_action()
+      end)
     end,
     dev = true,
   },

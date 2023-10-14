@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+#=================================================
+# name:   cargo-sweep
+# author: author <author_contact>
+# date:   26/09/2023
+#=================================================
+
+cd "$HOME/Projects" &&
+  fd -a Cargo.toml |
+  xargs dirname |
+  while read proj; do
+    if [[ -d "$proj/target" ]]; then
+      cargo sweep --time 7 "$proj";
+    fi
+  done
+cd -

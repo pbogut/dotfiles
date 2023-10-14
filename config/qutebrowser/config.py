@@ -225,6 +225,7 @@ config.bind(',xd', "jseval document.cookie = `XDEBUG_SESSION=DISABLE; path=/; ma
 bind_js(',jpp', 'pixel_perfect')
 bind_js(',jve', 'visual_event')
 bind_js(',dd', 'developer_mode')
+bind_js(',dm', 'darkmode_toggle')
 
 dir_path = os.path.dirname(__file__)
 if os.path.exists(dir_path + '/secure_config.py'):

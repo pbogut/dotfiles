@@ -127,7 +127,8 @@
             "car": "",
             "default": ["", "", ""]
         },
-        "on-click": "pavucontrol"
+        "on-click": "pavucontrol",
+        "on-click-right": "systemctl --user restart pipewire.service"
     },
     "custom/shadowplay": {
         "format": "<span color=\"#bd2c40\">{icon} {}</span>",
@@ -181,14 +182,25 @@
             "default": "UK"
         },
     },
+    "custom/gamemode": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {}",
+        "interval": 3600,
+        "signal": 17,
+        "exec": "$HOME/.scripts/waybar/gaming.sh",
+        "format-icons": {
+            "default": ""
+        },
+        "on-click-right": "$HOME/.scripts/waybar/gaming.sh --toggle; pkill -RTMIN+17 -x waybar"
+    },
     "custom/logipro": {
         "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
-        "interval": 3,
+        "interval": 600,
+        "signal": 16,
         "exec": "$HOME/.scripts/waybar/logipro.sh",
         "format-icons": {
             "default": "󰍽"
         },
-        "on-click": "$TERMINAL -t FLOATING_WINDOW -e khal interactive"
+        "on-click": "pkill -RTMIN+16 -x waybar"
     },
     "custom/weather": {
         "format": "{}",

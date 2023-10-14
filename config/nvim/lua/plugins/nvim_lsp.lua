@@ -1,3 +1,6 @@
+-- disable lsp poll watcher
+require('plugins.lsp.fswatch')
+
 local command = vim.api.nvim_create_user_command
 local u = require('utils')
 local k = vim.keymap
@@ -39,6 +42,7 @@ local servers = {
   { name = 'gopls' },
   { name = 'html', snippet_support = true, rename = false },
   { name = 'intelephense', snippet_support = true },
+  -- { name = 'phpactor', snippet_support = true },
   { name = 'jedi_language_server' },
   { name = 'jsonls', snippet_support = true },
   { name = 'lemminx' },
@@ -50,6 +54,7 @@ local servers = {
   { name = 'tsserver' },
   { name = 'vimls' },
   { name = 'vuels' },
+  { name = 'ocamllsp' },
 }
 
 local navic_ext = {
@@ -67,8 +72,9 @@ local bindings = function()
     { 'n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>', b.no_lsp_bind },
     { 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', false },
     { 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', false },
-    { 'n', '<C-k>', b.signature_action, b.no_lsp_bind },
-    { 'i', '<C-k>', b.signature_action, b.no_lsp_bind },
+    -- { 'n', '<c-k>', b.signature_action, b.no_lsp_bind },
+    -- { 'i', '<c-k>', b.signature_action, b.no_lsp_bind },
+    { { 'n', 'i' }, '<c-k>', '<cmd>lua vim.lsp.inlay_hint(0)<cr>', b.no_lsp_bind },
 
     { 'n', 'gd', b.maybe_telescope('definition'), false },
     { 'n', '<space>ld', b.maybe_telescope('definition'), b.no_lsp_bind },
@@ -101,7 +107,7 @@ local vanilla = {
 }
 
 local telescope = {
-  definition = 'Telescope lsp_definitions',
+  definition = 'lua require("telescope.builtin").lsp_definitions({show_line = false})',
   implementation = 'Telescope lsp_implementations',
   type_definition = 'Telescope lsp_type_definitions',
   references = 'Telescope lsp_references',
@@ -179,6 +185,8 @@ end
 local on_attach = function(client, bufnr)
   client.server_capabilities.documentHighlightProvider = false
   client.server_capabilities.foldingRangeProvider = false
+  -- vim.notify(client.name)
+  -- vim.print(client.server_capabilities)
 
   local has_navic, navic = pcall(require, 'nvim-navic')
   if has_navic then

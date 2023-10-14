@@ -20,6 +20,9 @@ function me.setup(opts)
         diagnostics = {
           globals = { 'vim' },
         },
+        hint = {
+          enable = true,
+        },
       },
     },
   })

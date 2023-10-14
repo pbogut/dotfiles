@@ -20,7 +20,7 @@ fi
 cp "$mdfile" "$tmpfile"
 
 pandoc \
-  --metadata title="pdf" \
+  --metadata title="" \
   --to=html5 \
   --css="$cssfile" \
   --embed-resources \

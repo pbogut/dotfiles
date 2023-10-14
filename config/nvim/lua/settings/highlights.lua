@@ -7,9 +7,9 @@ local function highlights()
     Folded = { term = 'NONE', cterm = 'NONE', gui = 'NONE' },
     VertSplit = { guibg = '#073642', guifg = 'fg' },
     WinSeparator = { guibg = 'none', guifg = 'fg' },
-    NonText = { gui = 'none', guifg = '#586e75' },
-    SpecialKey = { gui = 'none', guifg = '#586e75' },
-    Whitespace = { gui = 'none', guifg = '#586e75' },
+    NonText = { gui = 'none', guifg = c.ad_inlay },
+    SpecialKey = { gui = 'none', guifg = c.ad_inlay },
+    Whitespace = { gui = 'none', guifg = c.ad_inlay },
 
     MyTodo = { gui = 'bold', guifg = '#d33682' },
     MyFixme = { gui = 'bold', guifg = '#d33682' },
@@ -57,7 +57,11 @@ local function highlights()
     -- ['@lsp.typemod.function.async']= { guifg = c.red },
 
     -- Inlay Hints
-    LspInlayHint = { guisp = c.ad_hint, guifg = c.ad_hint, guibg = c.base03, gui = 'italic,underline' },
+    LspInlayHint = {
+      guifg =  c.ad_inlay,
+      guibg = c.base03,
+      gui = 'italic',
+    },
 
     -- TreeSitter
     -- ["@constant.macro"] = { guifg = c.orange },

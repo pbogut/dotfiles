@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #=================================================
-# name:   deezer
+# name:   kill-steam
 # author: author <author_contact>
-# date:   08/11/2022
+# date:   16/09/2023
 #=================================================
-chromium --app=https://www.deezer.com/en/
+kill -9 $(ps aux | grep steam | grep -v kill | awk '{print $2}')
