@@ -63,6 +63,7 @@ fi
 
 # set as wallpaper using feh
 # DISPLAY=${DISPLAY-:0} feh --bg-fill $saveDir$picName
+at now <<< "swaybg -i '$saveDir$picName'"
 
 
 # Remove pictures older than 30 days

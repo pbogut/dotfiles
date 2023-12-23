@@ -42,7 +42,7 @@ floating_modifier $mod
 popup_during_fullscreen leave_fullscreen
 
 # start a terminal
-bindsym $mod+Return $exec "~/.scripts/i3-term-in-current-dir.sh --tmux"
+bindsym $mod+Return $exec "~/.scripts/i3-term-in-current-dir.sh --zellij"
 bindsym $mod+Ctrl+Return $exec "~/.scripts/i3-term-in-current-dir.sh --project"
 bindsym $mod+Shift+Return $exec "~/.scripts/i3-term-in-current-dir.sh --force-new"
 
@@ -62,12 +62,12 @@ bindsym $mod+semicolon $exec "wofi --show run"
 # named workspaces
 set $wsbrowser 1:  browser
 set $wsterm    2:  term
-set $ws_comm    3: / comm
+set $ws_comm   3: / comm
 set $wscode    4:  code
 set $wsmedia   5:  media
 set $wsqbwork  6:  qbwork
 set $wsdb       db
-set $ws_dash    9:  dash
+set $ws_dash   9:  dash
 set $wsrss      rss
 set $wsvm       VM
 set $wssteam   8:  steam
@@ -285,13 +285,15 @@ assign [title="^jira$"] $ws_dash
 assign [class="^Ferdium$"] $ws_comm
 assign [class="^discord$"] $ws_comm
 assign [title="Freezer"] $wsmedia
+assign [instance="^Godot_Engine$"] $ws3d
+assign [instance="^Godot_Editor$"] $ws3d
 
 #for_window [app_id="^discord$"] workspace --no-auto-back-and-forth $ws_comm
 #for_window [instance="^ferdium$"] workspace --no-auto-back-and-forth $ws_comm
 
 for_window [title="^.*$"] $exec ~/.scripts/sway/sort-workspace.sh
 
-for_window [class="^Yad$"] floating enable
+for_window [app_id="yad"] floating enable
 for_window [class="explorer.exe"] floating enable
 for_window [class="krusader"] floating disable
 for_window [class="^feh$"] fullscreen enable
@@ -301,6 +303,9 @@ for_window [title="SPLASH_SCREEN"] title_format "<span alpha='1'>%title</span>"
 for_window [title="SPLASH_SCREEN"] border pixel 1
 for_window [title="FLOATING_WINDOW"] floating enable
 for_window [class="^csgo_linux64"] floating disable
+for_window [instance="^Godot_Engine$"] floating enable
+for_window [instance="^Godot_Editor$"] floating enable
+
 
 # Media Keys
 bindsym XF86MonBrightnessUp $exec "/usr/bin/kill -SIGRTMIN+1 $(pgrep -f 'bash .*/polybar/backlight.sh')"
@@ -347,7 +352,7 @@ bindsym $mod+Ctrl+b $exec "~/.scripts/dmenu-bluetooth"
 bindsym $mod+Ctrl+n $exec "~/.scripts/networkmanager_dmenu"
 bindsym $mod+Ctrl+r $exec swaymsg '[app_id="com.gitlab.newsflash"] focus' || newsflash
 
-bindsym $mod+Ctrl+p $exec swaymsg '[app_id="chrome-www.deezer.com__en_-Default"] focus' || chromium --app=https://www.deezer.com/en/
+bindsym $mod+Ctrl+m $exec swaymsg '[app_id="chrome-www.deezer.com__en_-Default"] focus' || chromium --app=https://www.deezer.com/en/
 bindsym $mod+Ctrl+s $exec "~/.scripts/sway/switch-or-launch.sh --scratchpad '^Volume Control$' 'pavucontrol'"
 bindsym $mod+Ctrl+k $term -t FLOATING_WINDOW -e zsh -ic "khal interactive"
 bindsym $mod+Ctrl+d $exec swaymsg '[app_id="discord"] focus' || discord.sh
@@ -357,12 +362,14 @@ bindsym $mod+Ctrl+l $term -e ~/.scripts/dev-log
 bindsym $mod+Ctrl+h $exec swaymsg '[app_id="org.gnome.Hamster.GUI"] focus' || hamster
 bindsym $mod+backspace $exec swaymsg '[app_id="org.gnome.Hamster.GUI"] focus' || hamster
 
+bindsym $mod+Ctrl+p $exec "~/.scripts/zellij-project"
+
 bindsym $mod+b $exec swaymsg '[app_id="org.qutebrowser.qutebrowser"] focus' || browser
 bindsym $mod+Ctrl+c workspace $wscode
 bindsym $mod+m focus output $display_left
 bindsym $mod+comma focus output $display_main
 bindsym $mod+period focus output $display_right
-bindsym $mod+Ctrl+m move workspace to output $display_left
+bindsym $mod+Ctrl+u $exec "~/.scripts/browser-from-clip.sh"
 bindsym $mod+Ctrl+comma move workspace to output $display_main
 bindsym $mod+Ctrl+period move workspace to output $display_right
 bindsym $mod+Shift+m move to output $display_left; focus output $display_left

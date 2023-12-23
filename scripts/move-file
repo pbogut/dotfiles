@@ -6,11 +6,16 @@
 #=================================================
 tmpfile=$(mktemp)
 file=$1
+unset TMUX
 lfrun -last-dir-path "$tmpfile" "$file"
 filename=$(basename "$file")
 destination=$(cat "$tmpfile")
 should_move=$((echo "move";  echo "move and open"; echo "do nothing";) |
     wofi --dmenu -p "Move file $filename to $destination?")
+
+if [[ $should_move == "do nothing" ]]; then
+    exit 0
+fi
 
 handle_qb() {
     if [[ "$QB_DOWNLOAD_FILE" == "1" ]]; then

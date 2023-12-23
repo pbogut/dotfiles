@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   nvim-godot
+# author: author <author_contact>
+# date:   03/12/2023
+#=================================================
+dir="$PWD"
+session_name=$(zellij-session-name "$dir")
+store="/tmp/nvim_godot/$session_name"
+escaped_session=$session_name
+escaped_session=${escaped_session//\[/\\\[}
+escaped_session=${escaped_session//\]/\\\]}
+
+mkdir -p "$(dirname "$store")"
+
+_start_nvim_godot() {
+  nvim -c "lua write_to_file('$store', vim.v.servername)"
+}
+
+if zellij ls | grep -F "$(zellij-session-name)" | grep -F '[Created'; then
+  socket=$(head -n1 "$store")
+  nvru -c "edit $1" --servername "$socket" || _start_nvim_godot
+  swaymsg '[title="Zellij \('"$escaped_session"'\)"] focus'
+else
+  _start_nvim_godot
+fi

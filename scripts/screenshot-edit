@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   edit-last-screenshot
+# author: author <author_contact>
+# date:   17/08/2023
+#=================================================
+dest="$HOME/Pictures/screenshots/"
+# shellcheck disable=SC2012
+columns=$(tput cols)
+lines=$(tput lines)
+width="$(( (columns / 2) - 4 ))" # -4 to fit within border
+height="$(( lines ))"
+sixel=""
+if [[ -z $TMUX ]]; then
+  sixel="-f sixel"
+fi
+selection=""
+if [[ $TERM == "dumb" ]]; then
+  selection=$(ls -r "$dest" | wofi --dmenu)
+else
+  selection=$(ls -r "$dest" | fzf --height="100%" --preview="chafa $sixel -s '${width}x${height}' $dest/{}")
+fi
+if [[ -n $selection ]]; then
+    gimp "${dest}${selection}"
+fi

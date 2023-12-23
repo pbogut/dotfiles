@@ -26,6 +26,7 @@ paru -S \
   enca \
   fakeroot \
   gcc \
+  glow \
   gnome-keyring \
   go \
   grim \
@@ -36,6 +37,7 @@ paru -S \
   inotify-tools \
   jq \
   kmonad-bin \
+  libpipewire \
   lldb \
   maim slop \
   mopidy mpc \
@@ -51,6 +53,7 @@ paru -S \
   pandoc \
   paru \
   picom \
+  pipewire-media-session \
   pkgconf \
   playerctl \
   polybar \
@@ -97,6 +100,7 @@ paru -S \
   xtitle \
   yarn \
   yt-dlp \
+  zellij \
   zenity
 
 sudo systemctl enable --now dbus-broker.service

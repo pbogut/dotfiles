@@ -14,6 +14,11 @@ end
 function me.setup(opts)
   local cfg = {
     format = {
+      gdformat = {
+        formatCommand = exec('gdformat', '-'),
+        formatStdin = true,
+        rootMarkers = { 'project.godot' },
+      },
       stylua = {
         formatCommand = exec('stylua', '--color Never -'),
         formatStdin = true,
@@ -40,8 +45,17 @@ function me.setup(opts)
       },
     },
     lint = {
+      golangci_lint = {
+        prefix = 'golangci-lint',
+        lintSource = 'efm/golangci-lint',
+        lintCommand = exec('golangci-lint', 'run --color never --out-format tab "${INPUT}"'),
+        lintStdin = false,
+        lintFormats = { '%.%#:%l:%c %m' },
+        rootMarkers = {},
+      },
       editorconfig_checker = {
         prefix = 'editorconfig',
+        lintSource = 'efm/editorconfig',
         lintCommand = exec('editorconfig-checker', '-no-color'),
         lintStdin = false,
         lintFormats = {
@@ -56,6 +70,7 @@ function me.setup(opts)
       },
       phpcs = {
         prefix = 'phpcs',
+        lintSource = 'efm/phpcs',
         lintCommand = exec('phpcs', '--no-colors --report=emacs'),
         lintStdin = false,
         lintFormats = {
@@ -76,6 +91,7 @@ function me.setup(opts)
       },
       shellcheck = {
         prefix = 'shellcheck',
+        lintSource = 'efm/shellcheck',
         lintCommand = exec('shellcheck', '--color=never --format=gcc -'),
         lintStdin = true,
         lintFormats = {
@@ -85,9 +101,9 @@ function me.setup(opts)
         },
         rootMarkers = {},
       },
-
       jsonlint = {
         prefix = 'jsonlint',
+        lintSource = 'efm/jsonlint',
         lintCommand = exec('jsonlint', '--compact'),
         lintStdin = true,
         lintFormats = { 'line %l, col %c, %m' },
@@ -101,18 +117,21 @@ function me.setup(opts)
     settings = {
       rootMarkers = { '.git/' },
       languages = {
+        css = { cfg.format.prettier },
+        gdscript = { cfg.format.gdformat },
+        go = { cfg.lint.golangci_lint },
+        handlebars = { cfg.format.prettier },
+        javascript = { cfg.format.prettier },
+        json = { cfg.lint.jsonlint },
+        less = { cfg.format.prettier },
         lua = { cfg.format.stylua },
-        sh = { cfg.lint.shellcheck, cfg.format.shfmt },
+        markdown = { cfg.format.prettier },
         php = { cfg.lint.phpcs, cfg.format.phpcbf },
         python = { cfg.format.yapf },
-        json = { cfg.lint.jsonlint },
-        css = { cfg.format.prettier },
-        less = { cfg.format.prettier },
         sass = { cfg.format.prettier },
         scss = { cfg.format.prettier },
-        javascript = { cfg.format.prettier },
+        sh = { cfg.lint.shellcheck, cfg.format.shfmt },
         typescript = { cfg.format.prettier },
-        markdown = { cfg.format.prettier },
         ['='] = { cfg.lint.editorconfig_checker },
       },
     },

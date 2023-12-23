@@ -3,10 +3,66 @@ local conf = require('telescope.config').values
 local builtin = require('telescope.builtin')
 
 local last_query = ''
+local rip_grep_mode = false
+local rip_grep_options = {}
+local opt_def = { s = 1, i = 1, u = 3 }
+
+local toggle_option = function(opt_name)
+    local count = 0
+    for _, v in ipairs(rip_grep_options) do
+      if v == '-' .. opt_name then
+        count = count + 1
+      end
+    end
+    if count >= opt_def[opt_name] then
+      local to_remove = {}
+      for i, v in ipairs(rip_grep_options) do
+        if v == '-' .. opt_name then
+          to_remove[#to_remove + 1] = i
+        end
+      end
+      table.sort(to_remove, function(x, y) return x > y end)
+      for _, i in ipairs(to_remove) do
+        table.remove(rip_grep_options, i)
+      end
+    else
+      rip_grep_options[#rip_grep_options + 1] = '-' .. opt_name
+    end
+    require('lualine').refresh()
+    vim.cmd.redrawstatus()
+end
+
+local get_options = function()
+  local options = {}
+  for _, opt in ipairs(conf.vimgrep_arguments) do
+      options[#options + 1] = opt
+  end
+  for _, opt in ipairs(rip_grep_options) do
+    options[#options + 1] = opt
+  end
+
+  return options
+end
+
+local statusline = function()
+  if rip_grep_mode then
+    local res = {}
+    for i, v in ipairs(rip_grep_options) do
+      res[#res + 1] = v:gsub('^%-(.)$', '%1')
+    end
+    if #res > 0 then
+      return 'rg [' .. table.concat(res, '') .. ']'
+    else
+      return 'rg'
+    end
+  end
+  return ''
+end
 
 local ripgrep = function(opt)
   local query = opt.args
   local vimgrep_arguments = conf.vimgrep_arguments
+  dump(vimgrep_arguments)
   if query == '' then
     query = last_query
   else
@@ -35,12 +91,21 @@ local ripgrep = function(opt)
   if query:match('^%-s ') then
     query = query:sub(4)
     vimgrep_arguments[#vimgrep_arguments + 1] = '-s'
-    options = '[-s] '
+    options = options .. 's'
   end
   if query:match('^%-i ') then
     query = query:sub(4)
     vimgrep_arguments[#vimgrep_arguments + 1] = '-i'
-    options = '[-i] '
+    options = options .. 'i'
+  end
+  if query:match('^%-u ') then
+    query = query:sub(4)
+    vimgrep_arguments[#vimgrep_arguments + 1] = '-u'
+    options = options .. 'u'
+  end
+
+  if options:len() > 0 then
+    options = '[' .. options .. '] '
   end
 
   local message = ''
@@ -64,7 +129,7 @@ local ripgrep = function(opt)
     search = query,
     use_regex = opt.regex,
     search_dirs = dirs,
-    vimgrep_arguments = vimgrep_arguments,
+    vimgrep_arguments = get_options(),
   })
 end
 
@@ -95,11 +160,28 @@ function _G.ripgrep_in_dir_complete(text)
 end
 
 k.set('n', '<plug>(ripgrep-search)', function()
+  rip_grep_mode = true
+
+  k.set('c', '<c-i>', function()
+    toggle_option('i')
+  end, { noremap = false })
+
+  k.set('c', '<c-s>', function()
+    toggle_option('s')
+  end, { noremap = false })
+
+  k.set('c', '<c-u>', function()
+    toggle_option('u')
+  end, { noremap = false })
   vim.ui.input({
     prompt = 'Rg: ',
     default = '',
     completion = 'customlist,v:lua.ripgrep_in_dir_complete',
   }, function(query)
+    rip_grep_mode = false
+    k.del('c', '<c-i>')
+    k.del('c', '<c-s>')
+    k.del('c', '<c-u>')
     if query then
       ripgrep({ args = query, regex = false })
     end
@@ -137,4 +219,4 @@ vim.cmd([[
   endfunction
 ]])
 
-return { ripgrep = ripgrep }
+return { ripgrep = ripgrep, statusline = statusline }

@@ -13,10 +13,13 @@ usage() {
   echo "  -h, --help     display this help and exit"
 }
 
+use_sudo=false
+
 while test $# -gt 0; do
   case "$1" in
     --force)
       tree_params="$tree_params --force"
+      use_sudo=true
       shift
       ;;
     --help|-h)
@@ -70,6 +73,11 @@ __prune_worktree() {
       while read -r branch; do
         # shellcheck disable=SC2086
         git worktree remove $tree_params "$branch"
+        result_code=$?
+        if [[ $result_code -eq 255 ]] && $use_sudo; then
+          echo ">> Branch removed but catalog could not be removed, using sudo!"
+          echo "sudo rm $branch"
+        fi
       done <<< "$branches"
     fi
   else

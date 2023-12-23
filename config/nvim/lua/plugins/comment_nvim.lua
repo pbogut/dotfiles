@@ -9,6 +9,10 @@ local function config()
   local ft = require('Comment.ft')
   ft.asm = '//%s'
   ft.heex = { '<%# %s #%>', '<%# %s #%>' }
+  ft.devicetree = { '// %s', '/* %s */' }
+  ft.swayconfig = '# %s'
+  ft.openscad = '// %s'
+  ft.kdl = '// %s'
 end
 
 return {

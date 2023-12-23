@@ -7,7 +7,6 @@ local function builtin()
   return require('telescope.builtin')
 end
 
-k.set('n', '<plug>(telescope-tmux-list-projects)', require('telescope').extensions['tmux-projects'].ls_projects)
 k.set('n', '<plug>(telescope-live-grep)', function()
   builtin().live_grep()
 end)
@@ -118,8 +117,10 @@ telescope.setup({
 
       return table.concat(parts, '/')
     end,
-    -- sorting_strategy = "ascending",
-    -- layout_strategy = 'vertical',
+    sorting_strategy = 'ascending',
+    layout_config = {
+      prompt_position = 'top',
+    },
     vimgrep_arguments = {
       'rg',
       '--color=never',

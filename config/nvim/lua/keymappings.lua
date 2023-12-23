@@ -15,6 +15,8 @@ k.set('n', '<c-c>', function()
   end
 end)
 
+k.set('n', '$', '$zszH', { remap = true })
+k.set('n', '^', '^zezH', { remap = true })
 k.set('n', '<bs>', '<cmd>Explore<cr>')
 k.set('n', '<c-s>', [[<cmd>echo synIDattr(synID(line('.'), col('.'), 1), "name")<cr>]])
 -- macros helper (more like scratch pad)
@@ -83,11 +85,6 @@ k.set('n', '<space><space>', function()
 end)
 -- format file indentation
 k.set('n', '<space>=', 'migg=G`i')
--- resize windows
-k.set('', '<m-l>', '<cmd>vertical resize +1<cr>')
-k.set('', '<m-h>', '<cmd>vertical resize -1<cr>')
-k.set('', '<m-j>', '<cmd>resize +1<cr>')
-k.set('', '<m-k>', '<cmd>resize -1<cr>')
 -- tmux
 k.set('n', '<c-q>', function()
   if os.getenv('TMUX') then
@@ -164,7 +161,7 @@ end)
 k.set('n', 'goT', function()
   local path = fn.expand('%:p:h')
   if os.getenv('TMUX') then
-    return require('tmuxctl').toggle_pane('bottom' .. path, { height = 15 , dir = path })
+    return require('tmuxctl').toggle_pane('bottom' .. path, { height = 15, dir = path })
   end
   cmd('belowright 15split')
   cmd.enew()

@@ -30,14 +30,16 @@ while test $# -gt 0; do
     esac
 done
 
-find -L ~/Projects -maxdepth 5 -mindepth 3 -printf "%T+\t%p\n" -type d |
-    grep '/\.git$\|CVS$\|\.svn$\|docker-compose.yml$\|composer.lock$' |
-    grep -v '\.bare$' |
+find -L "$PROJECTS" \
+    -regextype egrep \
+    -maxdepth 5 -mindepth 2 \
+    -iregex '.*(\.git|\.bare)$' |
+    sed -E 's,/(\.git|\.bare)$,,' |
+    sort |
+    uniq -u |
+    xargs -d"\n" stat -c "%Y %n" |
     sort -r |
-    sed 's,.*\t,,g' |
+    sed -E 's,[0-9]+\s,,' |
     if [[ $full_path -eq 0 ]]; then
-        sed 's,^'"$HOME"'/Projects/,,g'
-    fi |
-    sed 's,\(.*\)/\(\.git\|CVS\|\.svn\|docker-compose.yml\|composer.lock\)$,\1,' |
-    sed 's,/\.git$,,' |
-    awk '!x[$0]++'
+        sed 's,^'"$PROJECTS/"',,g'
+    fi

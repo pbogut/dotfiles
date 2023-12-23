@@ -30,6 +30,7 @@ o.shiftwidth = 2
 o.expandtab = true
 o.scrolloff = 8
 o.number = true
+o.wrap = false
 o.relativenumber = true
 o.lazyredraw = true
 o.wildmenu = true

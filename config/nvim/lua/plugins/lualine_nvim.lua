@@ -1,8 +1,6 @@
 local lualine = require('lualine')
 local c = vim.g.colors
 
----@type string|nil
-local starship_cache = ''
 -- custom sections
 local s = {
   navic = require('plugins.lualine.navic'),
@@ -20,20 +18,8 @@ local s = {
   diff_mode_inactive = require('plugins.lualine.diff').mode,
   fugitive = require('plugins.lualine.fugitive').filename_green,
   fugitive_inactive = require('plugins.lualine.fugitive').filename,
-  starship = function()
-    if starship_cache ~= nil then
-      return starship_cache
-    end
-    starship_cache = vim.fn
-      .system([[
-      STARSHIP_SHELL="sh" starship prompt |
-        head -n1 |
-        sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g'
-    ]])
-      :gsub('%s*\n$', '')
-      :gsub('^%[.-%] ', '')
-    return starship_cache
-  end,
+  ripgrep = require('plugins.lualine.ripgrep'),
+  starship = require('plugins.lualine.starship'),
 }
 
 local config = function()
@@ -62,7 +48,7 @@ local config = function()
       globalstatus = true,
     },
     sections = {
-      lualine_a = { { 'mode', fmt = s.mode_fmt } },
+      lualine_a = { { 'mode', fmt = s.mode_fmt }, s.ripgrep },
       lualine_b = { { s.diff_change, padding = 0 }, 'branch' },
       lualine_c = { s.dapinfo, s.harpoon, s.filename },
       lualine_x = { s.starship },
@@ -105,13 +91,5 @@ local config = function()
   -- override lualine setup, just show tabs when more than one is open
   vim.o.showtabline = 1
 end
-
-local augroup = vim.api.nvim_create_augroup('x_lualine', { clear = true })
-vim.api.nvim_create_autocmd('BufLeave', {
-  group = augroup,
-  callback = function()
-    starship_cache = nil
-  end,
-})
 
 return { config = config }

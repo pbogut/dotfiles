@@ -9,15 +9,6 @@
 #=================================================
 
 # fzf config
-export FZF_DEFAULT_OPTS="
-  --reverse
-  --cycle
-  --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview
-  --bind=alt-j:preview-down,alt-k:preview-up
-  --bind=ctrl-d:preview-half-page-down,ctrl-u:preview-half-page-up
-  --bind=ctrl-w:backward-kill-word
-  --height 40%
-  "
 
 fe() {
     # fe - Open the selected files with the default editor
@@ -72,11 +63,7 @@ cdp() {
     project=$(ls-project | fzf -q "$1")
     if [[ ! $project == "" ]]; then
         cd "$HOME/Projects/$project"
-        if [[ -f .git || -d .git ]]; then
-            touch .git > /dev/null 2>&1
-        else
-            touch . > /dev/null 2>&1
-        fi
+        touch -h "$HOME/Projects/$project"
     fi
 }
 

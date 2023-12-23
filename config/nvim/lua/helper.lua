@@ -1,3 +1,12 @@
+function _G.write_to_file(file, text)
+  local f = io.open(file, 'w')
+  if f == nil then
+    return
+  end
+  f:write(text)
+  f:close()
+end
+
 function _G.dump(...)
   local objects = {}
   for i = 1, select('#', ...) do

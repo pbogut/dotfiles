@@ -18,7 +18,11 @@ vim.api.nvim_create_autocmd('BufEnter', {
     else
       local nvim_addr = vim.v.servername or ''
       local addr = fn.substitute(nvim_addr, [[/run/user/[0-9]\+/nvim\.\(.*\)\.0]], [[\1]], 'g')
-      o.titlestring = user .. '@' .. host .. ':nvim:' .. addr .. ':' .. cwd
+      -- force updat a sworkoround for zellij title not being updated properly
+      o.titlestring = ""
+      vim.schedule(function()
+        o.titlestring = user .. '@' .. host .. ':nvim:' .. addr .. ':' .. cwd
+      end)
     end
   end,
 })

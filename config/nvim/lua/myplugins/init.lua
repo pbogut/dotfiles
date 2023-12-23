@@ -75,6 +75,7 @@ return {
   { 'mbbill/undotree', cmd = { 'UndotreeToggle', 'UndotreeFocus', 'UndotreeShow', 'UndotreeHide' } },
   {
     'theprimeagen/harpoon',
+    branch = 'harpoon2',
     keys = {
       { 'ŋ', '<plug>(harpoon-toggle-menu)', desc = 'Harpoon toggle menu' },
       { '„', '<plug>(harpoon-add-file)', desc = 'Harpoon add file' },
@@ -84,14 +85,6 @@ return {
       { 'ą', '<plug>(harpoon-nav-4)', desc = 'Harpoon nave file 4' },
     },
     config = config('harpoon'),
-  },
-  {
-    'theprimeagen/git-worktree.nvim',
-    keys = {
-      { '<space>gl', '<plug>(git-worktree-list)', desc = 'Git worktree list' },
-      { '<space>gk', '<plug>(git-worktree-create)', desc = 'Create git worktree' },
-    },
-    config = config('git_worktree_nvim'),
   },
   { 'lambdalisue/suda.vim', cmd = 'SudaWrite' },
   { 'gioele/vim-autoswap', event = 'SwapExists' },
@@ -158,6 +151,20 @@ return {
     config = config('vim_matchup'),
     init = init('vim_matchup'),
     cond = true,
+  },
+  {
+    'mattn/emmet-vim',
+  },
+  {
+    'laytan/tailwind-sorter.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-lua/plenary.nvim' },
+    build = 'cd formatter && npm i && npm run build',
+    config = function()
+      require('tailwind-sorter').setup({
+        on_save_enabled = true,
+        on_save_pattern = { '*.blade.php', '*.html', '*.phtml', '*.eex', '*.ex', '*.hbs' },
+      })
+    end,
   },
   {
     'vim-test/vim-test',
@@ -276,7 +283,6 @@ return {
   {
     'nvim-telescope/telescope.nvim',
     keys = {
-      { '<space>fp', '<plug>(telescope-tmux-list-projects)' },
       { '<space>fr', '<plug>(telescope-live-grep)' },
       { '<space>st', '<plug>(telescope-file-types)' },
       { '<space>fa', '<plug>(telescope-find-files)' },
@@ -348,16 +354,9 @@ return {
       vim.cmd.TSInstall('all')
     end,
     config = config('nvim_treesitter'),
-    dependencies = {
-      {
-        'karanahlawat/tree-sitter-blade',
-        build = 'tree-sitter generate && tree-sitter test',
-        cond = true,
-      },
-    },
     cond = true,
   },
-  { 'nvim-treesitter/playground', cmd = 'TSPlaygroundToggle' },
+  { 'nvim-treesitter/playground', cmd = 'TSCaptureUnderCursor', 'TSPlaygroundToggle' },
 
   {
     'rhysd/git-messenger.vim',
@@ -387,7 +386,7 @@ return {
     config = function()
       require('magento2_ls').setup()
     end,
-    enabled = function()
+    cond = function()
       return vim.fn.filereadable('bin/magento') == 1
     end,
     dev = false,
@@ -397,21 +396,9 @@ return {
     'nicwest/vim-http',
     cmd = { 'Http', 'HttpShowCurl', 'HttpShowRequest', 'HttpClean', 'HttpAuth' },
     keys = {
-      { '<space>C', '<cmd>Http<cr>', desc = 'Run Http' },
+      { '<space>H', '<cmd>Http<cr>', desc = 'Run Http' },
     },
-    config = function()
-      vim.g.vim_http_split_vertically = 1
-      vim.g.vim_http_tempbuffer = 1
-      vim.g.vim_http_right_below = 1
-
-      vim.api.nvim_create_autocmd('BufEnter', {
-        group = vim.api.nvim_create_augroup('x_vim_http', { clear = true }),
-        pattern = '*.response.*.http',
-        callback = function()
-          vim.keymap.set('n', 'q', '<cmd>bd<cr>', { buffer = true })
-        end,
-      })
-    end,
+    config = config('vim_http'),
   },
 
   {
@@ -495,6 +482,7 @@ return {
 
     -- If you have a recent version of lazy.nvim, you don't need to add this!
     build = 'nvim -l build/init.lua',
+    enabled = false,
   },
   {
     'hrsh7th/nvim-cmp',
@@ -511,7 +499,7 @@ return {
       'onsails/lspkind-nvim',
       'saadparwaiz1/cmp_luasnip',
       -- {'zbirenbaum/copilot-cmp', after = 'copilot.lua'},
-      {'pbogut/copilot-cmp', branch = "single-line-suggestion", after = 'copilot.lua'},
+      { 'pbogut/copilot-cmp', branch = 'single-line-suggestion', after = 'copilot.lua' },
       'kristijanhusak/vim-dadbod-completion',
     },
     cond = true,
@@ -562,5 +550,9 @@ return {
       { 'smiteshp/nvim-navic', cond = true },
     },
     config = config('nvim_lsp'),
+  },
+  {
+    'codethread/qmk.nvim',
+    config = config('qmk'),
   },
 }

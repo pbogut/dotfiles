@@ -4,6 +4,8 @@ vim.filetype.add({
   extension = {
     conf = 'conf',
     env = 'dotenv',
+    keymap = 'devicetree',
+    http = 'http',
   },
   filename = {
     ['.env'] = 'dotenv',
@@ -14,5 +16,6 @@ vim.filetype.add({
   pattern = {
     ['%.?env%.[%w_%..-]+'] = 'dotenv',
     ['.*/waybar/config'] = 'jsonc',
+    ['/tmp/.*%.dump'] = 'zellijdump',
   },
 })

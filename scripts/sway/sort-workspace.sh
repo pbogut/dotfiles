@@ -119,7 +119,7 @@ ws_3d=" 3d"
 if [[ $extended -eq 1 ]]; then
   found=1
   case  "$wm_app_id" in
-    "Alacritty")
+    "Alacritty"|"foot")
       case "$wm_title" in
         *~/Projects/*|*$HOME/Projects/*)
           project_name=${wm_title##*/}
@@ -149,20 +149,24 @@ case  "$wm_app_id" in
     # set_floating 1600px 900px
     move_and_swich "$ws_media"
     ;;
-  "com.gitlab.newsflash")
+  "com.gitlab.newsflash"|"io.gitlab.news_flash.NewsFlash")
     move_and_swich "$ws_rss"
     ;;
   "org.qutebrowser.mediabrowser")
-      move_and_swich "$ws_media"
+    move_and_swich "$ws_media"
     ;;
   "org.qutebrowser.workbrowser")
-      move_and_swich "$ws_qbwork"
+    move_and_swich "$ws_qbwork"
     ;;
   "org.qutebrowser.qutebrowser")
-      move_and_swich "$ws_browser"
+    move_and_swich "$ws_browser"
     ;;
   "mpv")
     move_and_swich "$ws_media"
+    ;;
+  "gamescope")
+    move_and_swich "$ws_game"
+    set_fullscreen
     ;;
 esac
 case  "$wm_class" in
@@ -216,7 +220,7 @@ case  "$wm_class" in
   "ferdi Ferdi"|"signal Signal"|"ferdium Ferdium")
     move_and_swich "$ws_comm"
     ;;
-  "urxvt URxvt"|"Alacritty Alacritty")
+  "urxvt URxvt"|"Alacritty Alacritty"|"foot foot")
     case "$wm_title" in
       FLOATING_WINDOW)
         set_floating 800px 600px

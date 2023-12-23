@@ -5,4 +5,7 @@
 # date:   22/07/2023
 #=================================================
 file="$1"
-youtube-upload --title "$file" --privacy=unlisted "$file"
+title=$(basename "$file" | yad --form --field=Title:text)
+if [[ $title != "" ]]; then
+  youtube-upload --title "$title" --privacy=unlisted "$file"
+fi

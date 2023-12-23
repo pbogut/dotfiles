@@ -6,7 +6,6 @@
 #=================================================
 echo "$@" >>/tmp/last_url-"$USER"
 
-export TERMINAL=alacritty
 export PATH="$PATH:/home/$USER/.bin"
 export PATH="$PATH:/home/$USER/.scripts"
 
@@ -45,6 +44,13 @@ elif [[ $url =~ ^https://www\.youtube\.com/watch\?v= ]]; then
   url=${url//www.youtube.com/invidious.pbogut.me}
   url=${url//watch\?v=/embed/}
   url=${url/&/?}
+  target="window"
+  # shellcheck disable=2086
+  qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}"
+  exit 0
+elif [[ $url =~ ^https://open\.spotify\.com ]]; then
+  shift
+  qbmode="$qbmode --qt-arg name qbmedia --desktop-file-name org.qutebrowser.mediabrowser --basedir $HOME/.config/qutebrowser/media --config-py $HOME/.config/qutebrowser/config.py $proxypac"
   target="window"
   # shellcheck disable=2086
   qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}"

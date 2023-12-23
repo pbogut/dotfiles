@@ -39,7 +39,8 @@ CONF = configparser.ConfigParser()
 CONF.read(expanduser("~/.config/networkmanager-dmenu/config.ini"))
 
 separator = "---------"
-connected = "🌐 "
+connected = "󰄙  "
+
 
 def is_separator(sel):
     return sel == "   " + separator + "\n"

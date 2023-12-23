@@ -127,3 +127,12 @@ vim.api.nvim_create_autocmd('InsertLeave', {
     vim.wo.wrap = vim.wo.wrap
   end,
 })
+vim.api.nvim_create_autocmd('FileType', {
+  group = augroup,
+  pattern = 'zellijdump',
+  callback = function()
+    vim.o.signcolumn = 'no'
+    vim.o.number = false
+    vim.o.relativenumber = false
+  end,
+})

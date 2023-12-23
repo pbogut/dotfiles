@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   remouse
+# author: author <author_contact>
+# date:   18/12/2023
+#=================================================
+cd /home/pbogut/Projects/pyenv/remouse || exit 1
+./bin/remarkable-mouse --evdev

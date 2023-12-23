@@ -192,6 +192,16 @@
         },
         "on-click-right": "$HOME/.scripts/waybar/gaming.sh --toggle; pkill -RTMIN+17 -x waybar"
     },
+    "custom/dualsense": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "interval": 600,
+        "signal": 18,
+        "exec": "$HOME/.scripts/waybar/dualsense.sh",
+        "format-icons": {
+            "default": ""
+        },
+        "on-click": "pkill -RTMIN+18 -x waybar"
+    },
     "custom/logipro": {
         "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
         "interval": 600,

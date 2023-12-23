@@ -2,6 +2,7 @@
 cwd=$HOME
 
 tmux=false
+zellij=false
 project=false
 force_new=false
 
@@ -22,6 +23,10 @@ while test $# -gt 0; do
       ;;
     --tmux)
       tmux=true
+      shift
+      ;;
+    --zellij)
+      zellij=true
       shift
       ;;
     --project)
@@ -51,7 +56,7 @@ __start_terminal() {
   if ! "$@"; then
     end=$(date '+%s')
     if [[ $((end-start)) -lt 5 ]]; then
-      notify-send "Terminal failed to start, falling back to xterm"
+      notify-send "Terminal $1 failed to start, falling back to xterm"
       xterm
     fi
   fi
@@ -77,10 +82,17 @@ if $tmux; then
   fi
 fi
 
+if $zellij; then
+  __start_terminal "$TERMINAL" -e zl options --default-cwd "$cwd"
+  exit 0
+fi
+
 if which "$TERMINAL"; then
   __start_terminal "$TERMINAL"
 elif which alacritty; then
   __start_terminal alacritty
+elif which foot; then
+  __start_terminal foot
 elif which urxvt; then
   __start_terminal urxvt
 else

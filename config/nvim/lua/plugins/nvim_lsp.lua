@@ -74,7 +74,7 @@ local bindings = function()
     { 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', false },
     -- { 'n', '<c-k>', b.signature_action, b.no_lsp_bind },
     -- { 'i', '<c-k>', b.signature_action, b.no_lsp_bind },
-    { { 'n', 'i' }, '<c-k>', '<cmd>lua vim.lsp.inlay_hint(0)<cr>', b.no_lsp_bind },
+    { { 'n', 'i' }, '<c-k>', '<cmd>lua vim.lsp.buf.inlay_hint(0)<cr>', b.no_lsp_bind },
 
     { 'n', 'gd', b.maybe_telescope('definition'), false },
     { 'n', '<space>ld', b.maybe_telescope('definition'), b.no_lsp_bind },
@@ -237,7 +237,6 @@ if has_lspstatus then
 end
 
 u.highlights({
-  FloatBorder = { guibg = g.colors.base0, guifg = vim.g.colors.base03 },
   DiagnosticFloatingInfo = { guibg = c.ad_info, guifg = c.base02 },
   DiagnosticFloatingHint = { guibg = c.ad_hint, guifg = c.base02 },
   DiagnosticFloatingError = { guibg = c.red, guifg = c.base02 },
@@ -276,7 +275,7 @@ end
 
 local function get_active_client_map()
   local client_list = {}
-  for _, client in ipairs(vim.lsp.get_clients()) do
+  for _, client in ipairs(vim.lsp.buf_get_clients()) do
     local root_dir = client.config.root_dir
     local filetypes = client.config.filetypes
     local client_id = client.id
@@ -325,7 +324,7 @@ local function update_diagnostics_visibility(visible)
 end
 
 command('LspReload', function(_)
-  vim.lsp.stop_client(vim.lsp.get_clients())
+  vim.lsp.stop_client(vim.lsp.buf_get_clients())
   cmd.edit()
 end, {})
 command('LspAttachBuffer', attach_lsp_to_new_buffer, {})
@@ -354,7 +353,7 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   group = augroup,
   pattern = '*.rs',
   callback = function()
-    if #vim.lsp.get_clients() > 0 then
+    if #vim.lsp.buf_get_clients() > 0 then
       b.lsp_formatting(0)
     end
   end,
@@ -376,7 +375,7 @@ vim.api.nvim_create_autocmd('BufWritePre', {
       end
 
       if file:sub(1, #cwd) == cwd and for_filetype then
-        if #vim.lsp.get_clients() > 0 then
+        if #vim.lsp.buf_get_clients() > 0 then
           b.lsp_formatting(0)
         else
           vim.cmd('normal! migg=G`i')

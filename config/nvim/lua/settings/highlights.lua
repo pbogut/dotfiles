@@ -35,8 +35,11 @@ local function highlights()
     ['@float'] = { guifg = c.yellow },
     ['@boolean'] = { guifg = c.yellow },
 
-    ['@function'] = { guifg = c.base1 },
-    ['@method'] = { guifg = c.base1 },
+    ['@function'] = {gui = 'italic',  guifg = c.base1 },
+    ['@method'] = {gui = 'italic',  guifg = c.base1 },
+
+    ["@method.call"] = {guifg = c.base1 },
+    ["@function.call"] = {guifg = c.base1 },
 
     ['@property'] = { guifg = c.blue },
 
@@ -65,15 +68,13 @@ local function highlights()
 
     -- TreeSitter
     -- ["@constant.macro"] = { guifg = c.orange },
-    -- ["@string"] = { guifg = c.orange },
+    ["@string"] = { guifg = c.cyan },
     -- ["@string.regex"] = { guifg = c.orange },
     -- ["@string.escape"] = { guifg = c.orange },
     -- ["@string.special"] = { guifg = c.orange },
     -- ["@character"] = { guifg = c.orange },
     -- ["@character.special"] = { guifg = c.orange },
-    -- ["@method.call"] = { guifg = c.red },
     -- ["@function.macro"] = { guifg = c.red },
-    -- ["@function.call"] = { guifg = c.red },
     -- ["@parameter"] = { guifg = c.red },
     -- ["@field"] = { guifg = c.red },
     -- ["@parameter.reference"] = { guifg = c.red },
@@ -85,7 +86,7 @@ local function highlights()
     -- ["@label"] = { guifg = c.red },
     -- ["@tag"] = { guifg = c.red },
     -- ["@tag.attribute"] = { guifg = c.red },
-    -- ["@operator"] = { guifg = c.red },
+    ["@operator"] = { guifg = c.alt_green },
     -- ["@keyword.operator"] = { guifg = c.red },
     -- ["@keyword.return"] = { guifg = c.red },
     -- ["@comment"] = {},
@@ -117,6 +118,9 @@ local function highlights()
     -- ["@type.qualifier"] = {},
     -- ["@type.definition"] = {},
 
+    ['Function'] = { guifg = c.base1 },
+    ['String'] = { guifg = c.cyan },
+
     -- Context
     TSContext = { guibg = c.ad_dark1 },
     TreesitterContext = { link = 'TSContext' },
@@ -147,6 +151,11 @@ local function highlights()
 
     -- Gitsigns
     GitSignsAdd = { link = 'DiffAdd' },
+
+    FloatBorder = { guifg = c.base1, guibg = c.ad_dark1 },
+    FloatTitle = { guifg = c.base1, guibg = c.ad_dark1 },
+
+    TelescopeNormal = { guifg = c.base1, guibg = c.ad_dark1 },
   })
 end
 

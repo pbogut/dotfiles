@@ -82,6 +82,8 @@ fi
 
 if which "$TERMINAL"; then
   __start_terminal "$TERMINAL"
+elif which foot; then
+  __start_terminal foot
 elif which alacritty; then
   __start_terminal alacritty
 elif which urxvt; then

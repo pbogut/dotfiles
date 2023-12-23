@@ -16,6 +16,7 @@ local function config()
     tag = { name = 'tags', max_item_count = 15 },
     buf = { name = 'buffer' },
     copilot = { name = 'copilot' },
+    cody = { name = 'cody' },
     emo = { name = 'emoji' },
   }
 
@@ -30,7 +31,11 @@ local function config()
       end,
     },
     mapping = cmp.mapping.preset.insert({
-      ['<C-e>'] = cmp.config.disable,
+      ['<c-j>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+      ['<c-k>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+      ['<c-u>'] = cmp.mapping.scroll_docs(-4),
+      ['<c-d>'] = cmp.mapping.scroll_docs(4),
+      ['<c-e>'] = cmp.config.disable,
       ['<c-space>'] = cmp.mapping.complete(),
       ['<c-y>S'] = cmp.mapping.confirm({
         behavior = cmp.ConfirmBehavior.Replace,
@@ -69,6 +74,7 @@ local function config()
     sources = {
       src.lsp,
       src.copilot,
+      src.cody,
       src.ts,
       src.tn,
       src.snip,
@@ -112,6 +118,7 @@ local function config()
           tags = '[Tag]',
           spell = '[Spell]',
           copilot = '[Copilot]',
+          cody = '[Cody]',
           ['vim-dadbod-completion'] = '[DB]',
         })[entry.source.name]
         return vim_item
@@ -128,6 +135,7 @@ local function config()
           src.db,
           src.lsp,
           src.copilot,
+          src.cody,
           src.ts,
           src.tn,
           src.snip,
@@ -147,6 +155,7 @@ local function config()
           src.lua,
           src.lsp,
           src.copilot,
+          src.cody,
           src.ts,
           src.tn,
           src.snip,

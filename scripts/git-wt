@@ -14,6 +14,7 @@ usage() {
   echo "  checkout <branch>"
   echo "  remove <branch>"
   echo "  prune               remove worktrees that are already merged"
+  echo "  changes <branch>    create branch from current diff"
   echo ""
   echo "Options:"
   echo "  --candidates      list for worktree completion"
@@ -34,6 +35,12 @@ while test $# -gt 0; do
   case "$1" in
   add)
     action=add
+    shift
+    worktree="$1"
+    shift
+    ;;
+  changes)
+    action=changes
     shift
     worktree="$1"
     shift
@@ -99,6 +106,12 @@ __wt_base_dir() {
     base_dir="$(dirname "$base_dir")"
   fi
   echo "$base_dir"
+}
+
+__wt_main_branch() {
+  bare_path=$(__wt_base_dir)
+  ref="$(cat "$bare_path/.bare/HEAD")"
+  echo "${ref##*/}"
 }
 
 
@@ -184,6 +197,18 @@ if [[ $action == "add" ]]; then
   fi
   cd "$bare_path/$worktree" || exit 1
   git branch --set-upstream-to="$upstream"/"$worktree"
+fi
+
+if [[ $action == "changes" ]]; then
+  bare_path=$(__wt_base_dir)
+  main_branch=$(__wt_main_branch)
+  if ! git worktree add "$bare_path/$worktree" -b "$worktree" "$main_branch"; then
+    exit $?
+  fi
+  git diff | git -C "$bare_path/$worktree" apply
+  cd "$bare_path/$worktree" || exit 1
+  git branch --set-upstream-to="$upstream"/"$worktree"
+  git commit --verbose -a
 fi
 
 if [[ $action == "list" ]]; then

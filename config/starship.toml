@@ -75,15 +75,25 @@ style = 'green'
 when = "true"
 
 [custom.elixir]
-symbol = '💧 '
+# symbol = '💧 '
+symbol = ' '
 format = '[$symbol(v$output )]($style)'
 command = "elixir --short-version 2>/dev/null || (elixir --version | grep '^Elixir' | awk '{print $2}')"
 when = "test -f mix.exs"
 style = 'bold purple'
+
+[custom.godot]
+symbol = ' '
+format = '[$symbol(v$output )]($style)'
+command = 'godot --version | sed -E "s/(^[0-9\.]+[0-9]).*/\1/"'
+when = "test -f project.godot"
+style = 'bold blue'
 # symbol = ' '
 
 [custom.docker]
-symbol = '🐳 '
+# symbol = '🐳 '
+symbol = '󰡨 '
+
 style = 'bold blue'
 command = '(docker-compose ls | awk "{print $3}" | grep "$(realpath $PWD)/docker-compose.yml" >/dev/null) && echo "up" || echo "down"'
 when = "test -f docker-compose.yml"
@@ -95,6 +105,7 @@ format = '[$symbol($version )]($style)'
 format = '[$symbol($version )]($style)'
 [cmake]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [deno]
 format = '[$symbol($version )]($style)'
 [elixir]
@@ -102,18 +113,25 @@ format = '[$symbol($version )]($style)'
 disabled = true
 [elm]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [erlang]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [golang]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [haskell]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [java]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [kotlin]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [lua]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [meson]
 format = '[$symbol($version )]($style)'
 [nim]
@@ -122,16 +140,22 @@ format = '[$symbol($version )]($style)'
 format = '[$symbol($version )]($style)'
 [nodejs]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [perl]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [php]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [python]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [ruby]
 format = '[$symbol($version )]($style)'
+symbol = ' '
 [rust]
 format = '[$symbol($version )]($style)'
+symbol  = ' '
 [vagrant]
 format = '[$symbol($version )]($style)'
 [vlang]

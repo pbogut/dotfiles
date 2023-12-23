@@ -8,19 +8,15 @@ project=false
 if [[ $TERM == "dumb" ]]; then
     project=$(ls-project | rofi -dmenu -q "$1")
 else
-    project=$(ls-project | fzf -q "$1")
+    project=$(ls-project | fzf -q "$1" --height=100%)
 fi
 
 if [[ ! $project == "" ]]; then
-  cd "$HOME/Projects/$project" || exit
-  if [[ -f .git || -d .git ]]; then
-      touch .git > /dev/null 2>&1
-  else
-      touch . > /dev/null 2>&1
-  fi
+    cd "$HOME/Projects/$project" || exit
+    touch -h "$HOME/Projects/$project"
     if [[ $TERM == "dumb" ]]; then
-      alacritty -e tmux-vim
+        $TERMINAL -e tmux-vim
     else
-      tmux-vim
+        tmux-vim
     fi
 fi

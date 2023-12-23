@@ -45,14 +45,6 @@
         "cargo build --release",
         "ln -sf $PWD/target/release/rust-analyzer ~/.bin/rust-analyzer"
       ]
-    },
-    {
-      "repo": "cirala/lfimg",
-      "run": [
-        "ln -sf $PWD/preview $HOME/.config/lf/preview",
-        "ln -sf $PWD/cleaner $HOME/.config/lf/cleaner",
-        "ln -sf $PWD/lfrun $HOME/.bin/lfrun"
-      ]
     }
   ]
 }

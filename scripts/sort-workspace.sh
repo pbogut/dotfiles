@@ -115,7 +115,7 @@ if [[ $extended -eq 1 ]]; then
           ;;
       esac
       ;;
-    "urxvt URxvt"|"Alacritty Alacritty"|"neovide neovide")
+    "urxvt URxvt"|"Alacritty Alacritty"|"neovide neovide"|"foot foot")
       case "$wm_title" in
         *~/Projects/*|*$HOME/Projects/*)
           project_name=${wm_title##*/}
@@ -203,7 +203,7 @@ case  "$wm_class" in
   "ferdi Ferdi"|"signal Signal")
     move_and_swich "$ws_comm"
     ;;
-  "urxvt URxvt"|"Alacritty Alacritty")
+  "urxvt URxvt"|"Alacritty Alacritty"|"foot foot")
     case "$wm_title" in
       FLOATING_WINDOW)
         set_floating 800px 600px

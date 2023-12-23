@@ -102,7 +102,12 @@ elif [[ $action == "watch" ]]; then
   was_on=0
   sway-prop -l | tee -a /tmp/swayprop | while read -r props; do
     class=$(jq -r '.class' <<< "$props")
-    case "$class" in
+    id=$(jq -r '.app_id' <<< "$props")
+    match=$class
+    if [[ $class == "null" ]]; then
+      match=$id
+    fi
+    case "$match" in
       steam_app_*|gamescope|csgo_linux64|cs2|steamwebhelper.exe|steam.exe)
         if [[ $was_on -eq 0 ]]; then
           was_on=1

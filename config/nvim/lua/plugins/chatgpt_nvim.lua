@@ -2,7 +2,7 @@ local M = {}
 
 function M.config()
   require('chatgpt').setup({
-    api_key_cmd = os.getenv('HOME').. '/.scripts/gpg-config get chatgpt_api_key',
+    api_key_cmd = 'bash ' .. os.getenv('HOME') .. '/.scripts/gpg-config get chatgpt_api_key',
     chat = {
       keymaps = {
         cycle_modes = '<M-m>',

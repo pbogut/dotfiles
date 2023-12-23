@@ -18,8 +18,9 @@
 #   Arch repositories: dmenu, bluez-utils (contains bluetoothctl)
 
 # Constants
-divider="---------"
-goback="Back"
+pad="   "
+divider="${pad}---------"
+goback="${pad}Back"
 
 # Checks if bluetooth controller is powered on
 power_on() {
@@ -47,10 +48,10 @@ toggle_power() {
 # Checks if controller is scanning for new devices
 scan_on() {
     if bluetoothctl show | grep -F -q "Discovering: yes"; then
-        echo "Scan: on"
+        echo "   Scan: on"
         return 0
     else
-        echo "Scan: off"
+        echo "   Scan: off"
         return 1
     fi
 }
@@ -72,10 +73,10 @@ toggle_scan() {
 # Checks if controller is able to pair to devices
 pairable_on() {
     if bluetoothctl show | grep -F -q "Pairable: yes"; then
-        echo "Pairable: on"
+        echo "${pad}Pairable: on"
         return 0
     else
-        echo "Pairable: off"
+        echo "${pad}Pairable: off"
         return 1
     fi
 }
@@ -94,10 +95,10 @@ toggle_pairable() {
 # Checks if controller is discoverable by other devices
 discoverable_on() {
     if bluetoothctl show | grep -F -q "Discoverable: yes"; then
-        echo "Discoverable: on"
+        echo "${pad}Discoverable: on"
         return 0
     else
-        echo "Discoverable: off"
+        echo "${pad}Discoverable: off"
         return 1
     fi
 }
@@ -110,6 +111,39 @@ toggle_discoverable() {
     else
         bluetoothctl discoverable on
         show_menu
+    fi
+}
+
+# Battery level
+battery_level() {
+    device_info=$(bluetoothctl info "$1")
+    battery_level=$(echo "$device_info" | grep -F 'Battery Percentage' | sed -E 's,.*\(([0-9]+)\)$,\1,')
+    if [[ "$battery_level" == "" ]]; then
+        return 0
+    elif [[ $battery_level -gt 99 ]]; then
+        echo "󰁹 $battery_level%"
+    elif [[ $battery_level -ge 90 ]]; then
+        echo "󰂂 $battery_level%"
+    elif [[ $battery_level -ge 80 ]]; then
+        echo "󰂁 $battery_level%"
+    elif [[ $battery_level -ge 70 ]]; then
+        echo "󰂀 $battery_level%"
+    elif [[ $battery_level -ge 60 ]]; then
+        echo "󰁿 $battery_level%"
+    elif [[ $battery_level -ge 50 ]]; then
+        echo "󰁾 $battery_level%"
+    elif [[ $battery_level -ge 40 ]]; then
+        echo "󰁽 $battery_level%"
+    elif [[ $battery_level -ge 30 ]]; then
+        echo "󰁼 $battery_level%"
+    elif [[ $battery_level -ge 20 ]]; then
+        echo "󰁻 $battery_level%"
+    elif [[ $battery_level -ge 10 ]]; then
+        echo "󰁺 $battery_level%"
+    elif [[ $battery_level -ge 0 ]]; then
+        echo "󰂎 $battery_level%"
+    else
+        return 0
     fi
 }
 
@@ -138,10 +172,10 @@ toggle_connection() {
 device_paired() {
     device_info=$(bluetoothctl info "$1")
     if echo "$device_info" | grep -F -q "Paired: yes"; then
-        echo "Paired: yes"
+        echo "${pad}Paired: yes"
         return 0
     else
-        echo "Paired: no"
+        echo "${pad}Paired: no"
         return 1
     fi
 }
@@ -161,10 +195,10 @@ toggle_paired() {
 device_trusted() {
     device_info=$(bluetoothctl info "$1")
     if echo "$device_info" | grep -F -q "Trusted: yes"; then
-        echo "Trusted: yes"
+        echo "${pad}Trusted: yes"
         return 0
     else
-        echo "Trusted: no"
+        echo "${pad}Trusted: no"
         return 1
     fi
 }
@@ -218,13 +252,17 @@ device_menu() {
 
     # Build options
     if device_connected "$mac"; then
-        connected="Connected: yes"
+        connected="${pad}Connected: yes"
     else
-        connected="Connected: no"
+        connected="${pad}Connected: no"
     fi
     paired=$(device_paired "$mac")
     trusted=$(device_trusted "$mac")
-    options="$connected\n$paired\n$trusted\n$divider\n$goback\nExit"
+    battery_level="$(battery_level "$mac")"
+    if [[ $battery_level != "" ]]; then
+        battery_level="${pad}Battery: $battery_level\n"
+    fi
+    options="$connected\n$paired\n$trusted\n${battery_level}$divider\n$goback\n${pad}Exit"
 
     # Open dmenu menu, read chosen option
     chosen="$(echo -e "$options" | run_dmenu "$device_name")"
@@ -253,20 +291,21 @@ device_menu() {
 show_menu() {
     # Get menu options
     if power_on; then
-        power="Power: on"
+        power="${pad}Power: on"
 
         # Human-readable names of devices, one per line
         # If scan is off, will only list paired devices
         devices=$(bluetoothctl devices | grep -F Device | while read -r device; do
             device_name="$(echo "$device" | cut -d ' ' -f 3-)"
             mac="$(echo "$device" | cut -d ' ' -f 2)"
-            icon=""
+            icon="  "
 
             if device_connected "$mac"; then
-                icon=" "
+                icon=" "
             fi
 
-            echo "$device_name${icon}"
+            battery_level=$(battery_level "$mac")
+            echo -e "${icon} ${device_name} ${battery_level}"
         done)
 
         # Get controller flags
@@ -275,10 +314,10 @@ show_menu() {
         discoverable=$(discoverable_on)
 
         # Options passed to dmenu
-        options="$devices\n$divider\n$power\n$scan\n$pairable\n$discoverable\nExit"
+        options="$devices\n$divider\n$power\n$scan\n$pairable\n$discoverable\n${pad}Exit"
     else
-        power="Power: off"
-        options="$power\nExit"
+        power="${pad}Power: off"
+        options="$power\n${pad}Exit"
     fi
 
     # Open dmenu menu, read chosen option
@@ -302,7 +341,8 @@ show_menu() {
             toggle_pairable
             ;;
         *)
-            device=$(bluetoothctl devices | grep -F "${chosen// /}")
+            chosen=$(sed -E 's,.* (.*) .*,\1,' <<< "$chosen")
+            device=$(bluetoothctl devices | grep -F "$chosen")
             # Open a submenu if a device is selected
             if [[ $device ]]; then device_menu "$device"; fi
             ;;
@@ -314,7 +354,7 @@ original_args=("$@")
 # dmenu command to pipe into. Extra arguments to dmenu-bluetooth are passed through to dmenu. This
 # allows the user to set fonts, sizes, colours, etc.
 run_dmenu() {
-    dmenu "${original_args[@]}" -i -p "$1"
+    wofi --cache-file /dev/null --dmenu "${original_args[@]}" -i -p "$1"
 }
 
 case "$1" in

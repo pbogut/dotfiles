@@ -96,9 +96,14 @@ git_clone_to_projects_gl() {
 }
 git_clone_to_projects_bare() {
   repo=$1
+  domain="github.com"
+  if [[ "$1" =~ .*/.*/.* ]]; then
+    domain=$(sed -E 's,([^/]*).*,\1,' <<< "$1")
+    repo=$(sed -E 's,[^/]*/(.*),\1,' <<< "$1")
+  fi
   if [[ ! "$1" =~ @ ]] && [[ ! "$1" =~ ^http ]]; then
     # use github by default
-    repo="git@github.com:$repo.git"
+    repo="git@$domain:$repo.git"
   fi
 
   if [[ "$repo" =~ ^https://github.com/ ]]; then
@@ -120,18 +125,20 @@ git_clone_to_projects_bare() {
     dest="$2"
   fi
   if [[ -n $repo ]]; then
-    git clone "$repo" "$dest.git" --bare
-    cd "$dest.git" || exit
-    git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+    unset GIT_DIR
+    git clone "$repo" "$dest/.bare" --bare
+    cd "$dest" || exit
+    echo "gitdir: ./.bare" > .git
+    git -C "$dest" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
     # add group write, handy when using docker
     setfacl -d -m "group:$(id -gn):rwx" .
     chmod g+w . -R
-    main_branch=$(awk '{print $2}' < HEAD)
+    main_branch=$(awk '{print $2}' < .bare/HEAD)
     main_branch=${main_branch##*/}
-    git worktree add "$main_branch"
+    git -C "$dest" worktree add "$dest/$main_branch"
     cd "$main_branch" || exit
-    git fetch
-    git branch --set-upstream-to=origin/"$main_branch"
+    git -C "$dest" fetch
+    git -C "$dest" branch --set-upstream-to=origin/"$main_branch"
   else
     echo "You must specify a repository to clone."
     echo

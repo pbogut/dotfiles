@@ -70,6 +70,7 @@ read -r -d '' files <<"EOF"
     config/environment.d
     config/feh/keys
     config/fish
+    config/foot/foot.ini
     config/gamemode.ini
     config/gtk-3.0/settings.ini
     config/gtk-3.0/gtk.css
@@ -81,7 +82,9 @@ read -r -d '' files <<"EOF"
     config/kmonad
     config/lazygit/config-nvim.yml
     config/lazygit/config.yml
+    config/lf/cleaner
     config/lf/lfrc
+    config/lf/preview
     config/mpv/input.conf
     config/mpv/mpv.conf
     config/mpv/script-settings/mpvDLNA.conf
@@ -131,6 +134,7 @@ read -r -d '' files <<"EOF"
     config/wob
     config/wofi
     config/xob
+    config/zellij
     ctags
     emacs.d/init.el
     gitconfig

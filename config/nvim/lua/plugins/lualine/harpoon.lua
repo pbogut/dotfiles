@@ -5,14 +5,18 @@ return function()
     return ''
   end
 
-  local has_harpoon, mark = pcall(require, 'harpoon.mark')
+  local has_harpoon, harpoon = pcall(require, 'harpoon')
   if not has_harpoon then
     return ''
   end
 
-  local result = mark.get_index_of(vim.fn.expand('%'))
+  local result = harpoon:list():get_by_display(vim.fn.expand('%'))
   if result then
-    return '󰇇' .. result
+    for i, item in ipairs(harpoon:list().items) do
+      if item == result then
+        return '󰣉' .. i
+      end
+    end
   end
 
   return ''

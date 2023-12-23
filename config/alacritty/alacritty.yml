@@ -77,7 +77,7 @@ key_bindings:
   - { key: P, mods: Alt|Control, mode: ~Vi, action: Paste }
   - { key: V, mods: Alt|Control, mode: ~Vi, action: PasteSelection }
   # tmux window change (mirror for my harpoon in vim)
-  - { key: J, mods: Alt, chars: "1" }
-  - { key: K, mods: Alt, chars: "2" }
-  - { key: L, mods: Alt, chars: "3" }
-  - { key: Semicolon, mods: Alt, chars: "4" }
+  #  - { key: J, mods: Alt, chars: "1" }
+  #  - { key: K, mods: Alt, chars: "2" }
+  #  - { key: L, mods: Alt, chars: "3" }
+  #  - { key: Semicolon, mods: Alt, chars: "4" }

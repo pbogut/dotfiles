@@ -77,5 +77,6 @@ map gD cd ~/Downloads
 map gn cd ~/Nextcloud
 map gm go_media
 map gf go_faktury
+map gs cd ~/Pictures/screenshots
 
 map <enter> open

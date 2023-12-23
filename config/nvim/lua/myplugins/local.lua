@@ -37,7 +37,6 @@ return {
   {
     'local/ripgrep',
     keys = {
-      { '<space>gr', '<plug>(ripgrep-with-regex)', desc = 'ripgrep with regex' },
       { '<space>gg', '<plug>(ripgrep-search)', desc = 'ripgrep search' },
       { 'gr', '<plug>(ripgrep-op)', desc = 'ripgrep motion' },
     },
@@ -61,6 +60,14 @@ return {
     config = function(_, opts)
       require('echo_notify').setup(opts)
     end,
+    dev = true,
+  },
+  {
+    'local/openscad',
+    config = function()
+      require('openscad').config()
+    end,
+    ft = 'openscad',
     dev = true,
   },
   {

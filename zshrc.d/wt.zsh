@@ -25,6 +25,7 @@ wt() {
   cd $(__wt_base_dir) || return 2
   newdir="$(__wt_select_dir)"
   if [[ "$newdir" != "" ]]; then
+    touch "$newdir"
     cd "$newdir"
   else
     cd - > /dev/null
