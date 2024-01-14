@@ -1,4 +1,4 @@
-local u = require('utils')
+local u = require('pbogut.utils')
 local h = require('projector.helper')
 local fn = vim.fn
 local p = {}

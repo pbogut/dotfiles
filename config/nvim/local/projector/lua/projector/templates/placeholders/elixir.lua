@@ -1,5 +1,5 @@
 local h = require('projector.helper')
-local c = require('config')
+local c = require('pbogut.config')
 local p = {}
 
 p.module_name_parts = function()
@@ -16,7 +16,7 @@ p.module_name_parts = function()
       'channels',
       'live',
       -- for tests
-      'features'
+      'features',
     }
 
     local drop = false

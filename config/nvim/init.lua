@@ -4,10 +4,10 @@ vim.g.loaded_netrwPlugin = true
 
 vim.loader.enable()
 -- common helper
-require('helper')
+require('pbogut.helper')
 -- config
-prequire('settings')
-prequire('autogroups')
-prequire('keymappings')
-prequire('commands')
-prequire('lazy_init')
+prequire('pbogut.settings')
+prequire('pbogut.autocmds')
+prequire('pbogut.keys')
+prequire('pbogut.commands')
+prequire('pbogut.lazy')

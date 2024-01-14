@@ -107,7 +107,7 @@ end
 
 vim.api.nvim_create_user_command('NotifySuppressed', function(_)
   vim.print(suppressed_messages)
-end, {nargs = 0})
+end, { nargs = 0 })
 
 vim.notify = echo.notify
 return echo

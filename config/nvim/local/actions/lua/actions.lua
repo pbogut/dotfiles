@@ -1,6 +1,6 @@
 local M = {}
 local command = vim.api.nvim_create_user_command
-local config = require('config')
+local config = require('pbogut.config')
 local action_output = 'actions://output'
 
 function M.run_action(action, opts)
@@ -184,8 +184,10 @@ function M.pick_action()
     vim.notify('No actions found.', vim.log.levels.INFO, { title = 'Actions' })
     return
   end
-  table.sort(actions, function (a1, a2) return a1 < a2 end )
-  vim.ui.select(actions, {prompt = 'Select action: '}, function(action)
+  table.sort(actions, function(a1, a2)
+    return a1 < a2
+  end)
+  vim.ui.select(actions, { prompt = 'Select action: ' }, function(action)
     if action then
       M.run_action(action)
     end

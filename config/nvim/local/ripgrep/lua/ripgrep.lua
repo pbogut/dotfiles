@@ -7,35 +7,39 @@ local rip_grep_mode = false
 local rip_grep_options = {}
 local opt_def = { s = 1, i = 1, u = 3 }
 
+_G.lazy_loaded.ripgrep = true
+
 local toggle_option = function(opt_name)
-    local count = 0
-    for _, v in ipairs(rip_grep_options) do
+  local count = 0
+  for _, v in ipairs(rip_grep_options) do
+    if v == '-' .. opt_name then
+      count = count + 1
+    end
+  end
+  if count >= opt_def[opt_name] then
+    local to_remove = {}
+    for i, v in ipairs(rip_grep_options) do
       if v == '-' .. opt_name then
-        count = count + 1
+        to_remove[#to_remove + 1] = i
       end
     end
-    if count >= opt_def[opt_name] then
-      local to_remove = {}
-      for i, v in ipairs(rip_grep_options) do
-        if v == '-' .. opt_name then
-          to_remove[#to_remove + 1] = i
-        end
-      end
-      table.sort(to_remove, function(x, y) return x > y end)
-      for _, i in ipairs(to_remove) do
-        table.remove(rip_grep_options, i)
-      end
-    else
-      rip_grep_options[#rip_grep_options + 1] = '-' .. opt_name
+    table.sort(to_remove, function(x, y)
+      return x > y
+    end)
+    for _, i in ipairs(to_remove) do
+      table.remove(rip_grep_options, i)
     end
-    require('lualine').refresh()
-    vim.cmd.redrawstatus()
+  else
+    rip_grep_options[#rip_grep_options + 1] = '-' .. opt_name
+  end
+  require('lualine').refresh()
+  vim.cmd.redrawstatus()
 end
 
 local get_options = function()
   local options = {}
   for _, opt in ipairs(conf.vimgrep_arguments) do
-      options[#options + 1] = opt
+    options[#options + 1] = opt
   end
   for _, opt in ipairs(rip_grep_options) do
     options[#options + 1] = opt

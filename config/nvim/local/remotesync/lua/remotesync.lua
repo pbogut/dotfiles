@@ -1,6 +1,6 @@
 local command = vim.api.nvim_create_user_command
 local fn = vim.fn
-local config = require('config')
+local config = require('pbogut.config')
 
 local remotes = {}
 for _, remote in pairs(config.get('sync.remotes', {})) do
@@ -55,10 +55,26 @@ function _G.remotesync_complete(lead)
 end
 
 command('RemoteSync', function(opt)
-  if opt.bang then
-    vim.g.sync_remote = opt.args
+  local name = opt.args
+  local halt = false
+  if name:match('prod') then
+    halt = 1
+      ~= fn.confirm('You are about to do some changes, are you sure you know what you are doing?', 'Yes\nNo', 'No')
+  end
+  if not halt then
+    if opt.bang then
+      vim.g.sync_remote = opt.args
+    else
+      vim.b.sync_remote = opt.args
+    end
+    vim.cmd.RemotePush(opt)
   else
-    vim.b.sync_remote = opt.args
+    vim.defer_fn(function()
+      vim.notify('File sync aborted!', vim.log.levels.WARN, { title = 'RemoteSync' })
+    end, 1)
+    vim.defer_fn(function()
+      print(' ')
+    end, 1000)
   end
 end, { complete = 'customlist,v:lua.remotesync_complete', nargs = 1, bang = true })
 
@@ -76,7 +92,7 @@ command('RemotePush', function(opt)
     end, 1)
   else
     vim.defer_fn(function()
-      print('File push aborted!')
+      vim.notify('File push aborted!', vim.log.levels.WARN, { title = 'RemoteSync' })
     end, 1)
     vim.defer_fn(function()
       print(' ')

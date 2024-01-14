@@ -10,7 +10,7 @@ local generators = require('projector.generators')
 local alternates = require('projector.alternates')
 local templates = require('projector.templates')
 local shared = require('projector.shared')
-local u = require('utils')
+local u = require('pbogut.utils')
 
 local t = u.termcodes
 local g = vim.g

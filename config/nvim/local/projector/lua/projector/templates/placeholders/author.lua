@@ -1,4 +1,4 @@
-local config = require('config')
+local config = require('pbogut.config')
 
 local p = function()
   return config.get('templates.author')

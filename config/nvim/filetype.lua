@@ -5,6 +5,7 @@ vim.filetype.add({
     conf = 'conf',
     env = 'dotenv',
     keymap = 'devicetree',
+    overlay = 'devicetree',
     http = 'http',
   },
   filename = {

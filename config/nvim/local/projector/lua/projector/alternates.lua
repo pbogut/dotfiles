@@ -1,5 +1,5 @@
 local shared = require('projector.shared')
-local u = require('utils')
+local u = require('pbogut.utils')
 local fn = vim.fn
 
 local M = {}
