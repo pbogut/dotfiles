@@ -67,7 +67,10 @@ command('RemoteSync', function(opt)
     else
       vim.b.sync_remote = opt.args
     end
-    vim.cmd.RemotePush(opt)
+    vim.defer_fn(function()
+      print('Syncing...')
+      sync(name)
+    end, 1)
   else
     vim.defer_fn(function()
       vim.notify('File sync aborted!', vim.log.levels.WARN, { title = 'RemoteSync' })

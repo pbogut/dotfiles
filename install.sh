@@ -80,6 +80,7 @@ read -r -d '' files <<"EOF"
     config/i3/i3status.conf
     config/i3/workspaces
     config/kmonad
+    config/lazygit/config-zellij.yml
     config/lazygit/config-nvim.yml
     config/lazygit/config.yml
     config/lf/cleaner
@@ -88,6 +89,7 @@ read -r -d '' files <<"EOF"
     config/mpv/input.conf
     config/mpv/mpv.conf
     config/mpv/script-settings/mpvDLNA.conf
+    config/mpv/scripts/lazy_open.lua
     config/mpv/scripts/minidlna-subs.lua
     config/mpv/scripts/send-to-phone.lua
     config/mpv/scripts/slice.lua
@@ -131,6 +133,7 @@ read -r -d '' files <<"EOF"
     config/systemd/user/syncthing.service
     config/tmux
     config/waybar
+    config/wezterm/wezterm.lua
     config/wob
     config/wofi
     config/xob
@@ -227,6 +230,18 @@ done
 mkdir -p "$HOME/.gpg-config"
 touch "$HOME/.profile.local"
 touch "$HOME/.profile.$(hostname)"
+
+# qutebrowser profiles {{{
+mkidr -p "$HOME/.config/qutebrowser/media"
+mkidr -p "$HOME/.config/qutebrowser/qbwork"
+
+if [[ ! -d "$HOME/.config/qutebrowser/media/config/userscripts" ]]; then
+  ln -s "config/qutebrowser/userscripts" "$HOME/.config/qutebrowser/media/config/userscripts"
+fi
+if [[ ! -d "$HOME/.config/qutebrowser/qbwork/config/userscripts" ]]; then
+  ln -s "config/qutebrowser/userscripts" "$HOME/.config/qutebrowser/qbwork/config/userscripts"
+fi
+# qutebrowser profiles }}}
 
 if $links_only; then
   exit 0

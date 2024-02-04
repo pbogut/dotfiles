@@ -4,6 +4,7 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   01/03/2019
 #=================================================
+TERMINAL="alacritty"
 if [[ "$1" =~ ^mailto: ]]; then
     mailto_url="$1"
 

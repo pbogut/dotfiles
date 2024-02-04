@@ -5,4 +5,8 @@
 # date:   18/12/2023
 #=================================================
 cd /home/pbogut/Projects/pyenv/remouse || exit 1
-./bin/remarkable-mouse --evdev
+if [[ $1 == "wifi" ]]; then
+    ./bin/remarkable-mouse --evdev --address 192.168.1.111
+else
+    ./bin/remarkable-mouse --evdev
+fi

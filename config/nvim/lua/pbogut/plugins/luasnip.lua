@@ -83,6 +83,7 @@ return {
     re_require('pbogut.plugins.luasnip.magento2')
     re_require('pbogut.plugins.luasnip.rust')
     re_require('pbogut.plugins.luasnip.elixir')
+    re_require('pbogut.plugins.luasnip.go')
 
     local command = vim.api.nvim_create_user_command
     command('LuaSnipReload', function(_)

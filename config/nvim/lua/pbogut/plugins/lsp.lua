@@ -38,33 +38,35 @@ return {
     })
 
     local servers = {
+      -- { name = 'clangd', snippet_support = true },
       -- { name = 'denols' },
+      -- { name = 'phpactor', snippet_support = true },
       -- { name = 'pylsp' },
       -- { name = 'pyright' },
       { name = 'bashls' },
       { name = 'ccls' },
       { name = 'cssls', snippet_support = true },
-      -- { name = 'clangd', snippet_support = true },
       { name = 'dockerls' },
       { name = 'efm' },
       { name = 'elixirls', snippet_support = true },
       { name = 'gdscript' },
       { name = 'gopls' },
       { name = 'html', snippet_support = true, rename = false },
+      { name = 'htmx', snippet_support = true },
       { name = 'intelephense', snippet_support = true },
-      -- { name = 'phpactor', snippet_support = true },
       { name = 'jedi_language_server' },
       { name = 'jsonls', snippet_support = true },
       { name = 'lemminx' },
       { name = 'lua_ls', snippet_support = true, format = false },
+      { name = 'ocamllsp' },
       { name = 'openscad_lsp' },
       { name = 'rust_analyzer' },
       { name = 'solargraph' },
       { name = 'tailwindcss', snippet_support = true },
+      { name = 'templ' },
       { name = 'tsserver' },
       { name = 'vimls' },
       { name = 'vuels' },
-      { name = 'ocamllsp' },
     }
 
     local navic_ext = {
@@ -84,7 +86,14 @@ return {
         { 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', false },
         -- { 'n', '<c-k>', b.signature_action, b.no_lsp_bind },
         -- { 'i', '<c-k>', b.signature_action, b.no_lsp_bind },
-        { { 'n', 'i' }, '<c-k>', '<cmd>lua vim.lsp.buf.inlay_hint(0)<cr>', b.no_lsp_bind },
+        {
+          { 'n', 'i' },
+          '<c-k>',
+          function()
+            vim.lsp.inlay_hint.enable(0, vim.lsp.inlay_hint.is_enabled(0))
+          end,
+          b.no_lsp_bind,
+        },
 
         { 'n', 'gd', b.maybe_telescope('definition'), false },
         { 'n', '<space>ld', b.maybe_telescope('definition'), b.no_lsp_bind },

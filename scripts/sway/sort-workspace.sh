@@ -61,6 +61,10 @@ set_fullscreen() {
   swaymsg fullscreen enable > /dev/null
 }
 
+unset_floating() {
+  swaymsg "floating disable;"
+}
+
 set_floating() {
   width=${1:-725px}
   height=${2:-430px}
@@ -119,7 +123,7 @@ ws_3d=" 3d"
 if [[ $extended -eq 1 ]]; then
   found=1
   case  "$wm_app_id" in
-    "Alacritty"|"foot")
+    "Alacritty"|"foot"|"org.wezfurlong.wezterm")
       case "$wm_title" in
         *~/Projects/*|*$HOME/Projects/*)
           project_name=${wm_title##*/}
@@ -188,8 +192,9 @@ case  "$wm_class" in
   "obs obs"|\
   "chiaki Chiaki"|\
   "gamescope gamescope"|\
-  "csgo_linux64 csgo_linux64"|steam_app*|steam_proton*)
+  "csgo_linux64 csgo_linux64"|"cs2 cs2"|steam_app*|steam_proton*)
     move_and_swich "$ws_game"
+    unset_floating
     set_fullscreen
     ;;
   "VBoxSDL VBoxSDL"|\

@@ -65,8 +65,7 @@ if [[ $action == "start" ]]; then
   # lock mouse on game screen
   #notify-send -t 2500 -u low "Lock mouse on screen"
   #sway 'output DP-1 pos 1920 2000'
-  sway 'seat * hide_cursor when-typing disable'
-
+  swaymsg 'seat * hide_cursor when-typing disable'
 
   # shadow play for selected games
   at now <<< "$HOME/.scripts/sway/shadowplay.sh --shadow-fullscreen DP-1" > /dev/null 2>&1
@@ -85,9 +84,7 @@ elif [[ $action == "end" ]]; then
   at now <<< "wlsunset -l 50 -L 17" > /dev/null 2>&1
 
   # release mouse from game screen
-  #sway 'output DP-1 pos 1920 0'
-  sway 'seat * hide_cursor when-typing disable'
-  #notify-send -t 2500 -u low "Release mouse lock from screen"
+  swaymsg 'seat * hide_cursor when-typing enable'
   # stop shadowing
   ~/.scripts/sway/shadowplay.sh --kill
 

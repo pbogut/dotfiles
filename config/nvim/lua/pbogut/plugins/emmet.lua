@@ -2,6 +2,6 @@
 return {
   'mattn/emmet-vim',
   keys = {
-    { '<c-y>,', '<plug>(emmet-expand-abbr)', mode = { 'n', 'v' } },
+    { '<c-y>,', '<plug>(emmet-expand-abbr)', mode = { 'n', 'v', 'i' } },
   },
 }

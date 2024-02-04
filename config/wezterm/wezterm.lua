@@ -2,24 +2,24 @@
 local wezterm = require('wezterm')
 local act = wezterm.action
 
--- This table will hold the configuration.
+function os.capture(cmd, raw)
+  local f = assert(io.popen(cmd, 'r'))
+  local s = assert(f:read('*a'))
+  f:close()
+  if raw then
+    return s
+  end
+  s = string.gsub(s, '^%s+', '')
+  s = string.gsub(s, '%s+$', '')
+  s = string.gsub(s, '[\n\r]+', ' ')
+  return s
+end
+
 local c = {}
 
--- In newer versions of wezterm, use the config_builder which will
--- help provide clearer error messages
 if wezterm.config_builder then
   c = wezterm.config_builder()
 end
-
--- os.execute("dunstify siema" .. os.getenv('WEZ_MSG'))
-
--- This is where you actually apply your config choices
-
--- For example, changing the color scheme:
-c.enable_tab_bar = true
-c.tab_bar_at_bottom = true
-c.tab_max_width = 16
-c.use_fancy_tab_bar = false
 
 c.window_padding = {
   left = 0,
@@ -27,6 +27,11 @@ c.window_padding = {
   top = 0,
   bottom = 0,
 }
+
+c.enable_tab_bar = true
+c.tab_bar_at_bottom = true
+c.tab_max_width = 16
+c.use_fancy_tab_bar = false
 
 c.font = wezterm.font('InputMono Nerd Font Mono')
 c.font_size = 12
@@ -94,7 +99,7 @@ c.colors = {
   -- In copy_mode, the color of the active text is:
   -- 1. copy_mode_active_highlight_* if additional text was selected using the mouse
   -- 2. selection_* otherwise
-  copy_mode_active_highlight_bg = { Color = '#000000' },
+  copy_mode_active_highlight_bg = { Color = '#b58900' },
   -- use `AnsiColor` to specify one of the ansi color palette values
   -- (index 0-15) using one of the names "Black", "Maroon", "Green",
   --  "Olive", "Navy", "Purple", "Teal", "Silver", "Grey", "Red", "Lime",
@@ -174,6 +179,79 @@ function my_act.ActivateOrCreateTab(no)
 end
 
 c.leader = { key = 'g', mods = 'CTRL', timeout_milliseconds = 1000 }
+
+local copy_mode = {
+  {
+    key = 'Escape',
+    mods = 'NONE',
+    action = act.Multiple({
+      act.CopyMode('ClearPattern'),
+      act.CopyMode('Close'),
+    }),
+  },
+  {
+    key = '/',
+    mods = 'NONE',
+    action = act.CopyMode('EditPattern'),
+  },
+  {
+    key = 'n',
+    mods = 'NONE',
+    action = act.Multiple({
+      act.CopyMode('PriorMatch'),
+      act.CopyMode({ SetSelectionMode = 'Cell' }),
+    }),
+  },
+  {
+    key = 'N',
+    mods = 'NONE',
+    action = act.Multiple({
+      act.CopyMode('NextMatch'),
+      act.CopyMode({ SetSelectionMode = 'Cell' }),
+    }),
+  },
+  {
+    key = 'p',
+    mods = 'NONE',
+    action = act.Multiple({
+      act.CopyMode('NextMatch'),
+      act.CopyMode({ SetSelectionMode = 'Cell' }),
+    }),
+  },
+  {
+    key = 'y',
+    mods = 'NONE',
+    action = act.Multiple({
+      act.CopyTo('Clipboard'),
+      act.ClearSelection,
+      act.CopyMode('ClearPattern'),
+      act.CopyMode('Close'),
+    }),
+  },
+}
+local search_mode = {
+  {
+    key = 'Escape',
+    mods = 'NONE',
+    action = act.Multiple({
+      act.CopyMode('ClearPattern'),
+      act.CopyMode('Close'),
+    }),
+  },
+  {
+    key = 'Enter',
+    mods = 'NONE',
+    action = act.Multiple({
+      act.CopyMode({ SetSelectionMode = 'Cell' }),
+      act.CopyMode('AcceptPattern'),
+    }),
+  },
+  {
+    key = '/',
+    mods = 'NONE',
+    action = act.CopyMode('EditPattern'),
+  },
+}
 c.keys = {
   {
     key = 'g',
@@ -200,6 +278,11 @@ c.keys = {
     end),
   },
   {
+    key = 'l',
+    mods = 'LEADER',
+    action = act.ShowDebugOverlay,
+  },
+  {
     key = 'p',
     mods = 'CTRL|ALT',
     action = act.PasteFrom('Clipboard'),
@@ -214,7 +297,14 @@ c.keys = {
     mods = 'ALT',
     action = act.ActivateCopyMode,
   },
-
+  {
+    key = 'u',
+    mods = 'LEADER|CTRL',
+    action = wezterm.action_callback(function(window, pane)
+      window:perform_action(act.ActivateCopyMode, pane)
+      window:perform_action(act.CopyMode({ MoveByPage = -0.5 }), pane)
+    end),
+  },
   {
     key = 'u',
     mods = 'ALT',
@@ -229,6 +319,11 @@ c.keys = {
         wezterm.open_with(url)
       end),
     }),
+  },
+  {
+    key = 'e',
+    mods = 'LEADER',
+    action = wezterm.action.EmitEvent('x-scrollback-nvim'),
   },
 
   -- Create a new workspace with a random name and switch to it
@@ -269,6 +364,11 @@ c.keys = {
     mods = 'CTRL|ALT',
     action = act.ActivatePaneDirection('Down'),
   },
+  {
+    key = 'z',
+    mods = 'LEADER',
+    action = act.TogglePaneZoomState,
+  },
   -- tabs
   {
     key = 'c',
@@ -297,78 +397,41 @@ c.keys = {
   },
 }
 
-local SOLID_LEFT_ARROW = wezterm.nerdfonts.pl_right_hard_divider
-local SOLID_RIGHT_ARROW = wezterm.nerdfonts.pl_left_hard_divider
-
--- c.tab_bar_style = {
--- 	active_tab_left = wezterm.format {
--- 		{ Background = { Color = '#0b0022' } },
--- 		{ Foreground = { Color = '#2b2042' } },
--- 		{ Text = SOLID_LEFT_ARROW },
--- 	},
--- 	active_tab_right = wezterm.format {
--- 		{ Background = { Color = '#0b0022' } },
--- 		{ Foreground = { Color = '#2b2042' } },
--- 		{ Text = SOLID_RIGHT_ARROW },
--- 	},
--- 	inactive_tab_left = wezterm.format {
--- 		{ Background = { Color = '#0b0022' } },
--- 		{ Foreground = { Color = '#1b1032' } },
--- 		{ Text = SOLID_LEFT_ARROW },
--- 	},
--- 	inactive_tab_right = wezterm.format {
--- 		{ Background = { Color = '#0b0022' } },
--- 		{ Foreground = { Color = '#1b1032' } },
--- 		{ Text = SOLID_RIGHT_ARROW },
--- 	},
--- }
-
--- This function returns the suggested title for a tab.
--- It prefers the title that was set via `tab:set_title()`
--- or `wezterm cli set-tab-title`, but falls back to the
--- title of the active pane in that tab.
-local function tab_title(tab_info)
-  local title = tab_info.tab_title
-  -- if the tab title is explicitly set, take that
-  if title and #title > 0 then
-    return title
-  end
-  -- Otherwise, use the title from the active pane
-  -- in that tab
-  return tab_info.active_pane.title
-end
-
 wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
   local title = tab.tab_title
 
   -- if the tab title is explicitly set, take that
   if not title or #title == 0 then
-    local process_name = tab.active_pane.foreground_process_name
-    if process_name and #process_name > 0 then
-      title = process_name:gsub('^.*/', '')
-    end
+    title = tab.active_pane.title
+    -- local process_name = tab.active_pane.foreground_process_name
+    -- if process_name and #process_name > 0 then
+    --   title = process_name:gsub('^.*/', '')
+    -- end
   end
-
   title = (tab.tab_index + 1) .. ': ' .. title
   if #title >= c.tab_max_width - 1 then
-    title = title:sub(1, c.tab_max_width - 2)
+    title = title:sub(1, c.tab_max_width - 4)
   end
 
-  local before_sep = ' '
-  local after_sep = ' '
+  local before_sep = '  '
+  local after_sep = '  '
   local fg_color = c.colors.tab_bar.inactive_tab.fg_color
   -- local bg_color = c.colors.tab_bar.inactive_tab.bg_color
   local bg_color = c.colors.tab_bar.inactive_tab.bg_color
   local fg_sep = c.colors.tab_bar.inactive_tab.fg_color
   local bg_sep = c.colors.tab_bar.inactive_tab.bg_color
   if tab.is_active then
-    before_sep = ''
-    after_sep = ''
+    before_sep = '█'
+    after_sep = '█'
     fg_color = c.colors.tab_bar.active_tab.fg_color
     bg_color = c.colors.tab_bar.active_tab.bg_color
     fg_sep = bg_color
-    if tab.tab_index == 0 then
+  end
+  if tab.tab_index == 0 then
+    if tab.is_active then
       before_sep = '█'
+    else
+      before_sep = ' '
     end
   end
 
@@ -385,25 +448,115 @@ wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_wid
   }
 end)
 
+local status_cache = {
+  right = {},
+  title = {},
+}
+
+local function get_status(cwd_uri, status_type)
+  status_type = status_type or 'right'
+  if cwd_uri and not status_cache[status_type][cwd_uri] then
+    local cwd = ''
+    local hostname = ''
+    if type(cwd_uri) == 'userdata' then
+      -- Running on a newer version of wezterm and we have
+      -- a URL object here, making this simple!
+
+      cwd = cwd_uri.file_path
+      hostname = cwd_uri.host or wezterm.hostname()
+    else
+      -- an older version of wezterm, 20230712-072601-f4abf8fd or earlier,
+      -- which doesn't have the Url object
+      cwd_uri = cwd_uri:sub(8)
+      local slash = cwd_uri:find('/')
+      if slash then
+        hostname = cwd_uri:sub(1, slash - 1)
+        -- and extract the cwd from the uri, decoding %-encoding
+        cwd = cwd_uri:sub(slash):gsub('%%(%x%x)', function(hex)
+          return string.char(tonumber(hex, 16))
+        end)
+      end
+    end
+    cwd = cwd:gsub('%/$', '')
+
+    local session_name = os.capture('wezterm-status ' .. cwd .. ' --' .. status_type)
+    status_cache[status_type][cwd_uri] = session_name
+  end
+
+  return status_cache[status_type][cwd_uri] or ''
+end
+
+local function get_pid()
+  local socket = os.getenv('WEZTERM_UNIX_SOCKET')
+  if not socket then
+    return
+  end
+  local pid = socket:gsub('.*%-(%d+)', '%1')
+  return pid
+end
+
 wezterm.on('format-window-title', function(tab, pane, tabs, panes, config)
   local zoomed = ''
   if tab.active_pane.is_zoomed then
     zoomed = '[Z] '
   end
 
-  local id = ' |w$' .. pane.pane_id
+  local status_text = os.getenv('WEZTERM_PROJECT') or '' -- get_status(cwd_uri, 'title')
+  if status_text and status_text:len() > 0 then
+    status_text = '[' .. status_text .. '] '
+  end
+  local id = ' |w$' .. get_pid() .. ':' .. pane.pane_id
   local index = ''
   if #tabs > 1 then
     index = string.format('[%d/%d] ', tab.tab_index + 1, #tabs)
   end
 
-  return zoomed .. index .. tab.active_pane.title .. ' ' .. id
+  return zoomed .. status_text .. index .. tab.active_pane.title .. ' ' .. id
 end)
 
-wezterm.on('update-right-status', function(window, pane)
-  window:set_right_status(window:active_workspace())
+wezterm.on('update-right-status', function(window, _)
+  local status_text = os.getenv('WEZTERM_PROJECT') or '' -- get_status(cwd_uri, 'title')
+  window:set_right_status(status_text)
 end)
 
--- and finally, return the configuration to wezterm
+wezterm.on('x-scrollback-nvim', function(window, pane)
+  local scrollback = pane:get_lines_as_text()
+  local name = os.tmpname()
+  local f = io.open(name, 'w+')
+  if not f then
+    return
+  end
+
+  f:write(scrollback)
+  f:flush()
+  f:close()
+
+  window:perform_action(
+    wezterm.action({ SpawnCommandInNewWindow = {
+      args = { 'nvim', name },
+    } }),
+    pane
+  )
+
+  wezterm.sleep_ms(1000)
+  os.remove(name)
+end)
+
+-- merge custom keys with default keys
+local copy_mode_keys = wezterm.gui.default_key_tables().copy_mode
+local search_mode_keys = wezterm.gui.default_key_tables().search_mode
+
+for _, v in ipairs(copy_mode) do
+  table.insert(copy_mode_keys, v)
+end
+
+for _, v in ipairs(search_mode) do
+  table.insert(search_mode_keys, v)
+end
+
+c.key_tables = {
+  copy_mode = copy_mode_keys,
+  search_mode = search_mode_keys,
+}
+
 return c
-

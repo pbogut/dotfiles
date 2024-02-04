@@ -4,8 +4,6 @@ import os
 c = c  # type: ignore # noqa: F821 pylint: disable=E0602,C0103
 config = config  # type: ignore # noqa: F821 pylint: disable=E0602,C0103
 
-term = os.getenv("TERMINAL")
-
 def bind_js(binding, js_name):
     dir_path = os.path.dirname(__file__)
     js_path = dir_path + "/js/" + js_name + ".js"
@@ -14,6 +12,9 @@ def bind_js(binding, js_name):
     js_content = js_content.replace("\n", "")
     file.close()
     config.bind(binding, ("jseval " + js_content))
+
+def font(size):
+    return size + " InputMono Nerd Font Mono"
 
 c.backend = 'webengine'
 c.qt.args = [('ppapi-widevine-path='
@@ -24,11 +25,11 @@ c.url.start_pages = ['https://monkeytype.com/']
 c.url.default_page = 'https://monkeytype.com/'
 
 c.fileselect.handler = "external"
-c.fileselect.single_file.command = [term, "-t", "QB_FILE_SELECTION", "-e", "lfrun", "-selection-path", "{}"]
-c.fileselect.multiple_files.command = [term, "-t", "QB_FILE_SELECTION", "-e", "lfrun", "-selection-path", "{}"]
+c.fileselect.single_file.command = ["alacritty", "-t", "QB_FILE_SELECTION", "-e", "lf", "-selection-path", "{}"]
+c.fileselect.multiple_files.command = ["alacritty", "-t", "QB_FILE_SELECTION", "-e", "lf", "-selection-path", "{}"]
 
 c.downloads.open_dispatcher = '/bin/bash -c "QB_DOWNLOAD_FILE=1 download-sort-and-open.sh \'{}\'"'
-c.editor.command = [term, "-t", "NVIM_FOR_QB", "-e", "nvim", "{}"]
+c.editor.command = ["alacritty", "-t", "NVIM_FOR_QB", "-e", "nvim", "{}"]
 c.downloads.position = "bottom"
 c.confirm_quit = ["multiple-tabs", "downloads"]
 c.scrolling.bar = "always"
@@ -44,6 +45,7 @@ c.tabs.padding = {"top": 2, "bottom": 2, "left": 5, "right": 5}
 c.downloads.location.directory = "~/Downloads"
 # c.content.headers.user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
 c.content.plugins = True
+c.content.javascript.clipboard = "access"
 c.content.blocking.method = "both"
 c.content.blocking.whitelist = [
     "piwik.org", "analytics.google.com", "apis.google.com", "thepiratebay.org",
@@ -107,17 +109,18 @@ c.colors.tabs.selected.even.bg = c.colors.completion.category.bg
 c.colors.tabs.bar.bg = "#1c1c1c"
 c.colors.messages.error.bg = "#dc322f"
 c.colors.prompts.bg = c.colors.tabs.bar.bg
+# c.fonts.monospace = "InputMono Nerd Font Mono"
 # c.fonts.monospace = ('"Sauce Code Pro Nerd Fonts", Terminus, Monospace, '
 #                      '"DejaVu Sans Mono", Monaco, "Bitstream Vera Sans Mono", '
 #                      '"Andale Mono", "Courier New", Courier, '
 #                      '"Liberation Mono", monospace, Fixed, Consolas, Terminal')
-c.fonts.hints = "12pt monospace"
+c.fonts.hints = font("12pt")
 c.fonts.prompts = "10pt sans-serif"
-c.fonts.completion.entry = "8pt monospace"
-c.fonts.completion.category = "bold 8pt monospace"
-c.fonts.statusbar = "8pt monospace"
-c.fonts.tabs.selected = "8pt monospace"
-c.fonts.tabs.unselected = "8pt monospace"
+c.fonts.completion.entry = font("9pt")
+c.fonts.completion.category = font("bold 9pt")
+c.fonts.statusbar = font("9pt")
+c.fonts.tabs.selected = font("9pt")
+c.fonts.tabs.unselected = font("9pt")
 
 config.unbind('<ctrl-v>', mode='normal')
 config.unbind('d', mode='normal')

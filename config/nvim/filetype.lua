@@ -7,6 +7,7 @@ vim.filetype.add({
     keymap = 'devicetree',
     overlay = 'devicetree',
     http = 'http',
+    templ = 'templ',
   },
   filename = {
     ['.env'] = 'dotenv',

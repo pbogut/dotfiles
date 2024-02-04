@@ -698,6 +698,23 @@ return {
             },
           },
         },
+        -- godot
+        ['project.godot'] = {
+          project_init = {
+            function()
+              vim.fn.jobstart({ 'bash', '-c', 'sha1sum <<< "' .. vim.fn.getcwd() .. '" |' .. "awk '{print $1}'" }, {
+                stdout_buffered = true,
+                stderr_buffered = true,
+                on_stdout = function(_, out)
+                  local hash = out[1]
+                  local file = '/tmp/nvim_godot/' .. hash
+                  write_to_file(file, vim.v.servername)
+                end,
+              })
+              vim.fn.jobstart({ 'rtx', 'x', '--', 'godot', 'project.godot' })
+            end,
+          },
+        },
         -- match anything
         ['*'] = {
           priority = 5000,

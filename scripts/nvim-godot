@@ -5,11 +5,8 @@
 # date:   03/12/2023
 #=================================================
 dir="$PWD"
-session_name=$(zellij-session-name "$dir")
+session_name=$(sha1sum <<< "$dir" | awk '{print $1}')
 store="/tmp/nvim_godot/$session_name"
-escaped_session=$session_name
-escaped_session=${escaped_session//\[/\\\[}
-escaped_session=${escaped_session//\]/\\\]}
 
 mkdir -p "$(dirname "$store")"
 
@@ -17,10 +14,13 @@ _start_nvim_godot() {
   nvim -c "lua write_to_file('$store', vim.v.servername)"
 }
 
-if zellij ls | grep -F "$(zellij-session-name)" | grep -F '[Created'; then
+if [[ -f "$store" ]]; then
   socket=$(head -n1 "$store")
+  nvru -c "silent! !wezterm cli activate-tab --tab-index 0" --servername "$socket"
   nvru -c "edit $1" --servername "$socket" || _start_nvim_godot
-  swaymsg '[title="Zellij \('"$escaped_session"'\)"] focus'
+  # shellcheck disable=SC2001
+  socket_id=$(sed 's/.*nvim\.\(.*\)\..*/\1/' <<< "$socket")
+  swaymsg '[title=":nvim:'"$socket_id"':"] focus'
 else
   _start_nvim_godot
 fi

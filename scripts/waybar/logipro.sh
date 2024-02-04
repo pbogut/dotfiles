@@ -15,7 +15,7 @@ if [[ $pct == "" ]]; then
 fi
 
 if [[ $status == "Charging" ]]; then
-  echo "<span color='#ed7f21'></span> $pct%"
+  echo "<span color='#ed7f21'></span>"
 elif [[ $status == "Full" ]]; then
   echo "<span color='#66cc99'></span> $pct%"
 elif [[ $pct -le 15 ]]; then

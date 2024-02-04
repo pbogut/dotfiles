@@ -14,13 +14,13 @@ none() {
 }
 
 compact() {
-  cmd set tabs.width 50
+  cmd set tabs.width 26
   cmd set tabs.title.alignment right
   cmd set tabs.title.format "{index}"
 }
 
 full() {
-  cmd set tabs.width 200
+  cmd set tabs.width 10%
   cmd set tabs.title.alignment left
   cmd set tabs.title.format "'{audio}{index}: {current_title}'"
 }

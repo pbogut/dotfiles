@@ -41,6 +41,7 @@ paru -S \
   lldb \
   maim slop \
   mopidy mpc \
+  mpv mpv-mpris \
   ncmpcpp \
   neomutt \
   neovim \

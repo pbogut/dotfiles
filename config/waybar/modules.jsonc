@@ -212,6 +212,36 @@
         },
         "on-click": "pkill -RTMIN+16 -x waybar"
     },
+    "custom/bt_kyria": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "interval": 600,
+        "signal": 15,
+        "exec": "$HOME/.scripts/waybar/bt_battery.sh F3:1C:1A:A4:D1:61",
+        "format-icons": {
+            "default": "󰰊"
+        },
+        "on-click": "pkill -RTMIN+15 -x waybar"
+    },
+    "custom/bt_dactyl": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "interval": 600,
+        "signal": 14,
+        "exec": "$HOME/.scripts/waybar/bt_battery.sh F2:8A:E4:9E:DC:8C",
+        "format-icons": {
+            "default": "󰯵"
+        },
+        "on-click": "pkill -RTMIN+14 -x waybar"
+    },
+    "custom/bt_xbox": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "interval": 600,
+        "signal": 13,
+        "exec": "$HOME/.scripts/waybar/bt_battery.sh 40:8E:2C:16:B7:E5 100",
+        "format-icons": {
+            "default": "󰖺"
+        },
+        "on-click": "pkill -RTMIN+13 -x waybar"
+    },
     "custom/weather": {
         "format": "{}",
         //"return-type": "json",

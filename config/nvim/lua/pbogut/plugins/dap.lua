@@ -139,7 +139,7 @@ return {
 
     local function load_config(lang, conf)
       dap.configurations[lang] = dap.configurations[lang] or {}
-      table.insert(dap.configurations[lang], vim.tbl_extend('keep', conf or {}, opts.defaults[lang]))
+      table.insert(dap.configurations[lang], vim.tbl_extend('keep', conf or {}, opts.adapters.defaults[lang]))
     end
 
     -- get config from config plugin
@@ -159,9 +159,9 @@ return {
     end
 
     -- if still no config for lang get it from local defaults
-    for lang, _ in pairs(opts.defaults) do
+    for lang, _ in pairs(opts.adapters.defaults) do
       if not dap.configurations[lang] or #dap.configurations[lang] == 0 then
-        dap.configurations[lang] = { opts.defaults[lang] }
+        dap.configurations[lang] = { opts.adapters.defaults[lang] }
       end
     end
 
@@ -226,7 +226,7 @@ return {
       group = augroup,
       pattern = 'elixir,eelixir',
       callback = function()
-        require('pbogut.plugins.dap.elixir').setup({ defaults = opts.defaults.elixir })
+        require('pbogut.plugins.dap.elixir').setup({ defaults = opts.adapters.defaults.elixir })
       end,
     })
 

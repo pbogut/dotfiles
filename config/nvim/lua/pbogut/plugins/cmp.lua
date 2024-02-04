@@ -46,6 +46,7 @@ return {
           luasnip.lsp_expand(args.body)
         end,
       },
+      preselect = cmp.PreselectMode.None,
       mapping = cmp.mapping.preset.insert({
         -- this is annoying as fuck, but cmp is retarded, why the fuck you force
         -- yorself on my keybindings you fucking cunt ?
@@ -128,6 +129,9 @@ return {
       },
       sorting = {
         priority_weight = 2,
+      },
+      completion = {
+        completeopt = 'menu,menuone,noinsert,noselect',
       },
       formatting = {
         format = function(entry, vim_item)

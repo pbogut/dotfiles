@@ -4,7 +4,6 @@
 # author: Pawel Bogut <pbogut@ukpos.com> <http://pbogut.me>
 # date:   09/06/2017
 #=================================================
-
 usage() {
     echo "Ussage: ${0##*/} [OPTIONS]"
     echo ""
@@ -30,13 +29,17 @@ while test $# -gt 0; do
     esac
 done
 
-find -L "$PROJECTS" \
-    -regextype egrep \
-    -maxdepth 5 -mindepth 2 \
-    -iregex '.*(\.git|\.bare)$' |
-    sed -E 's,/(\.git|\.bare)$,,' |
+(
+    find -L "$PROJECTS" \
+        -regextype egrep \
+        -maxdepth 5 -mindepth 2 \
+        -iregex '.*(\.git|\.bare)$' |
+        sed -E 's,/(\.git|\.bare)$,,'
+    echo "$DOTFILES"
+    echo "$DOTFILES/config/nvim"
+) |
     sort |
-    uniq -u |
+    uniq |
     xargs -d"\n" stat -c "%Y %n" |
     sort -r |
     sed -E 's,[0-9]+\s,,' |

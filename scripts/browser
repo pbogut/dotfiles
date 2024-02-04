@@ -29,11 +29,30 @@ url="$1"
 target="tab"
 
 # open youtube links in mpv
+use_mpv=true
 if [[ $url =~ ^https://invidious\.pbogut\.me/watch\?v= ]]; then
   qbmode="$qbmode --qt-arg name qbmedia --desktop-file-name org.qutebrowser.mediabrowser --basedir $HOME/.config/qutebrowser/media --config-py $HOME/.config/qutebrowser/config.py $proxypac"
   shift
+
+  mpv_url=${url//invidious.pbogut.me/www.youtube.com}
   url=${url//watch\?v=/embed/}
   url=${url/&/?}
+
+  if $use_mpv; then
+    start=$(date '+%s')
+    mpv_url=${mpv_url//invidious.pbogut.me/www.youtube.com}
+    LAZY_OPEN="$mpv_url" mpv
+    if ! "$@"; then
+      end=$(date '+%s')
+      if [[ $((end-start)) -lt 10 ]]; then
+        notify-send "Failed to start MPV"
+      fi
+    else
+      exit 0
+    fi
+    exit 0
+  fi
+
   target="window"
   # shellcheck disable=2086
   qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}"
@@ -41,9 +60,27 @@ if [[ $url =~ ^https://invidious\.pbogut\.me/watch\?v= ]]; then
 elif [[ $url =~ ^https://www\.youtube\.com/watch\?v= ]]; then
   qbmode="$qbmode --qt-arg name qbmedia --desktop-file-name org.qutebrowser.mediabrowser --basedir $HOME/.config/qutebrowser/media --config-py $HOME/.config/qutebrowser/config.py $proxypac"
   shift
+
+  mpv_url="$url"
   url=${url//www.youtube.com/invidious.pbogut.me}
   url=${url//watch\?v=/embed/}
   url=${url/&/?}
+
+  if $use_mpv; then
+    start=$(date '+%s')
+    mpv_url=${mpv_url//invidious.pbogut.me/www.youtube.com}
+    LAZY_OPEN="$mpv_url" mpv
+    if ! "$@"; then
+      end=$(date '+%s')
+      if [[ $((end-start)) -lt 10 ]]; then
+        notify-send "Failed to start MPV"
+      fi
+    else
+      exit 0
+    fi
+    exit 0
+  fi
+
   target="window"
   # shellcheck disable=2086
   qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}"
@@ -78,7 +115,6 @@ fi
 
 browser_wm=$(wmctrl -d | grep '0:. '"$qbwm" | awk '{print $url}')
 qb_win=$(wmctrl -l | grep "${qbname}"'$' | grep "  $browser_wm " | awk '{print $url}')
-qb_alt=$(wmctrl -l | grep "${qbname}"'$' | awk '{print $url}')
 
 if [[ -n $qb_win ]]; then
   wmctrl -ia "$qb_win"

@@ -101,6 +101,7 @@ when = "test -f docker-compose.yml"
 # get rid of 'via ' prefix in package version info
 [package]
 format = '[$symbol($version )]($style)'
+symbol = '󰏗 '
 [bun]
 format = '[$symbol($version )]($style)'
 [cmake]

@@ -28,9 +28,9 @@ k.set('n', '<space>sm', '<cmd>source ~/.vim/macros.lua<cr>')
 k.set('i', '<c-s>', '<esc>S')
 k.set('i', '<c-d>', '<del>')
 k.set('c', '<c-d>', '<del>')
-k.set('n', '<space><cr>', 'za')
-k.set('n', '<space><tab>', 'zA')
-k.set('v', '<space><cr>', 'zf')
+k.set('n', '<space><cr>', 'za', { desc = 'Toggle fold' })
+k.set('n', '<space><tab>', 'zA', { desc = 'Toggle fold recursively' })
+k.set('v', '<space><cr>', 'zf', { desc = 'Create fold' })
 k.set('n', '<space>tw', '<cmd>lua vim.wo.wrap = not vim.wo.wrap<cr>')
 k.set('n', '<space>lq', '<cmd>copen<cr>')
 k.set('n', '<space>ll', '<cmd>lopen<cr>')
@@ -51,8 +51,6 @@ k.set('n', '<del>', '<c-d>', { remap = true })
 -- prevent pasting in visual from yanking seletion
 k.set('', 'Y', 'y$')
 k.set('v', 'p', '"_dP')
-k.set('n', '<space>', '"*')
-k.set('v', '<space>', '"*')
 -- more natural split (always right/below)
 k.set('n', '<c-w>v', '<cmd>rightbelow vsplit<cr>')
 k.set('n', '<c-w>s', '<cmd>rightbelow split<cr>')
@@ -84,7 +82,7 @@ k.set('n', '<space><space>', function()
     cmd('let @/="' .. vim.fn.escape(term, [["\]]) .. '"')
     vim.o.hls = true
   end, 1)
-end)
+end, { desc = 'Highlight word under cursor' })
 -- format file indentation
 k.set('n', '<space>=', 'migg=G`i')
 -- tmux
@@ -97,6 +95,8 @@ k.set('n', '<c-q>', function()
 end)
 -- terminal - normal mode
 k.set('t', '<c-q>', [[<C-\><C-n>]])
+-- shift space in wezterm produce wierd shit
+k.set('t', '<s-space>', '<space>')
 -- diffmode
 k.set('n', 'du', '<cmd>diffupdate<cr>') -- @todo check if should be silent?
 k.set('n', 'dp', '<cmd>diffput<cr>')

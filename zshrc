@@ -107,6 +107,11 @@ if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
     zle -N zle-line-finish
 fi
 
+# ctrl-v to edit command line in $EDITOR
+autoload -z edit-command-line
+zle -N edit-command-line
+bindkey "^V" edit-command-line
+
 eval `dircolors ~/.config/dircolors-solarized/dircolors.256dark`
 
 abbrev-alias --init

@@ -1,0 +1,39 @@
+os:
+  openCommand: tmux-vim --no-tab {{filename}}
+  openLinkCommand: 'sh -c "xdg-open {{link}} >/dev/null 2>&1"'
+customCommands:
+  - key: 'C'
+    description: 'Commit changes with editor'
+    context: 'global'
+    command: 'tmux new-window env EDITOR="nvim" git commit --verbose'
+    subprocess: true
+  - key: <c-l>
+    description: 'Pull fast-forward'
+    context: 'global'
+    command: 'git pullff'
+    subprocess: true
+  - key: <c-r>
+    description: 'Pull rebase'
+    context: 'global'
+    command: 'git pullrb'
+    subprocess: true
+  - key: 'q'
+    description: 'Go back to nvim'
+    context: 'global'
+    command: 'lazygit-zellij back-to-nvim'
+
+  - key: 'e'
+    description: 'Edit file'
+    context: 'files'
+    command: nvim-in-zellij {{ .SelectedFile.Name }}
+  - key: 'p'
+    description: 'Git ap'
+    context: 'files'
+    command: 'git ap {{ .SelectedFile.Name }}'
+    subprocess: true
+
+# contexts: status, files, localBranches, remotes, remoteBranches,
+#           tags, commits, reflogCommits, subCommits, commitFiles,
+#           stash, normal, merging, patchBuilding, staging, menu,
+#           credentials, confirmation, search, commitMessage,
+#           submodules, suggestions, cmdLog

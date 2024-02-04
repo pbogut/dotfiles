@@ -70,11 +70,21 @@ cmd go_faktury %{{
   lf -remote "send $id cd $dest"
 }}
 
-map gp cd ~/Projects
+cmd go_project ${{
+  clear
+  project="$(ls-project | fzf)"
+  if [[ ! $project == "" ]]; then
+    dest="$HOME/Projects/$project"
+    touch -h "$dest"
+    lf -remote "send $id cd $dest"
+  fi
+}}
+
 map gw cd ~/Work
 map gd cd ~/Documents
 map gD cd ~/Downloads
 map gn cd ~/Nextcloud
+map gp go_project
 map gm go_media
 map gf go_faktury
 map gs cd ~/Pictures/screenshots

@@ -68,6 +68,16 @@ def dmenu(prompt, search, data)
   end
 end
 
+def to_clipboard(text, primary: false)
+  if ENV['WAYLAND_DISPLAY']
+    type = primary ? '-p' : '-b'
+    Open3.capture3("xsel #{type} -i", stdin_data: text)
+  else
+    type = primary ? '-p' : ''
+    Open3.capture3('wl-copy', type, text)
+  end
+end
+
 def type(text)
   if ENV['WAYLAND_DISPLAY']
     Open3.capture3('wtype', '-m', 'ctrl', '-m', 'shift', '-m', 'alt', '--', text)
@@ -227,11 +237,11 @@ end
 
 sleep 0.2
 
-Open3.capture3('xsel -b -i', stdin_data: user) if action == '--copy-user'
-Open3.capture3('xsel -p -i', stdin_data: pass) if action == '--copy-pass'
+to_clipboard(user) if action == '--copy-user'
+to_clipboard(pass, primary: true) if action == '--copy-pass'
 if action == '--copy-user-and-pass'
-  Open3.capture3('xsel -b -i', stdin_data: user)
-  Open3.capture3('xsel -p -i', stdin_data: pass)
+  to_clipboard(user) if action == '--copy-user'
+  to_clipboard(pass, primary: true) if action == '--copy-pass'
 end
 if action == '--type-user'
   if ENV['QUTE_FIFO']
