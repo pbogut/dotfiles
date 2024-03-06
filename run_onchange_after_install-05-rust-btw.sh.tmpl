@@ -5,7 +5,7 @@
 # date:   06/03/2024
 #=================================================
 # Include i-use-rust-btw head hash so this script runs on repo update
-{{ $head_file := (print .chezmoi.homeDir "/.i-use-rust-btw/.git/FETCH_HEAD") }}
+{{ $head_file := (print .chezmoi.homeDir "/.i-use-rust-btw/.git/refs/heads/master") }}
 # {{ include $head_file | sha256sum }}
 if [[ -d ~/.i-use-rust-btw ]]; then
     cd ~/.i-use-rust-btw && cargo-workspace install
