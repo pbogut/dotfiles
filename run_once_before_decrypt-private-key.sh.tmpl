@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+#=================================================
+# name:   run_once_before_decrypt-private-key
+# author: pbogut <pbogut@pbogut.me>
+# date:   06/03/2024
+#=================================================
+if [ ! -f "{{ .chezmoi.homeDir }}/.config/chezmoi/key.txt" ]; then
+    mkdir -p "{{ .chezmoi.homeDir }}/.config/chezmoi"
+    chezmoi age decrypt --output "{{ .chezmoi.homeDir }}/.config/chezmoi/key.txt" --passphrase "{{ .chezmoi.sourceDir }}/key.txt.age"
+    chmod 600 "{{ .chezmoi.homeDir }}/.config/chezmoi/key.txt"
+fi
