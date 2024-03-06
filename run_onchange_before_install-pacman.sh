@@ -22,6 +22,7 @@ paru -S \
     --skipreview \
     --needed \
     age \
+    alacritty-sixel-git \
     apg \
     atool \
     base-devel \
@@ -84,6 +85,7 @@ paru -S \
     unclutter \
     w3m \
     waybar \
+    wezterm \
     wget \
     which \
     wireplumber \
