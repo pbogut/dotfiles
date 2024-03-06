@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=lf
+Exec=alacritty -e lf %f
+Categories=System;FileTools;FileManager;Utility;
+MimeType=inode/directory;

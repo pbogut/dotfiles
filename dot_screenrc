@@ -1,0 +1,7 @@
+escape ^Bb
+encoding UTF-8
+bindkey ^q quit
+bindkey q detach
+msgwait 0
+maptimeout 0
+defc1 off

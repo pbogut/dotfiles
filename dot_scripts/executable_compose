@@ -1,0 +1,13 @@
+#!/bin/bash
+#=================================================
+# name:   compose
+# author: Pawel Bogut <http://pbogut.me>
+# date:   11/06/2017
+#=================================================
+if [[ $1 == "reup" ]]; then
+  docker-compose down && docker-compose up ${@:2}
+elif [[ $1 == "run" ]]; then
+  docker-compose run --rm "${@:2}"
+else
+  docker-compose "$@"
+fi

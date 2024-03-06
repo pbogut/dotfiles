@@ -1,0 +1,10 @@
+defmodule ${1:[[elixir.module_name]]} do
+	use ExUnit.Case
+	alias ${2:[[elixir.tested_module_name]]}
+
+	doctest ${2:[[elixir.tested_module_name]]}
+
+	test "${3:test something}" do
+		$0${4:assert true}
+	end
+end

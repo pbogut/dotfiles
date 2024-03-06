@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   browser-work
+# author: author <author_contact>
+# date:   13/07/2023
+#=================================================
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+url="$1"
+if [[ $url == "" ]]; then
+  swaymsg '[app_id="org.qutebrowser.workbrowser"] focus' || "$dir/browser" --work
+else
+  "$dir/browser" --open-in-tab --work "$url"
+fi

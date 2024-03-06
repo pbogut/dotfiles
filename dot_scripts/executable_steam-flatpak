@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   steam-flatpak
+# author: author <author_contact>
+# date:   13/07/2023
+#=================================================
+flatpak kill com.valvesoftware.Steam
+flatpak run com.valvesoftware.Steam

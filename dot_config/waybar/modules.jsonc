@@ -1,0 +1,275 @@
+{
+    "keyboard-state": {
+        "numlock": true,
+        "capslock": true,
+        "format": "{name} {icon}",
+        "format-icons": {
+            "locked": "",
+            "unlocked": ""
+        }
+    },
+    "sway/mode": {
+        "format": "<span style=\"italic\">{}</span>"
+    },
+    // "sway/window": {
+    //   "max-length": 400,
+    // },
+    "sway/scratchpad": {
+        "format": "{icon} {count}",
+        "show-empty": false,
+        "format-icons": ["", ""],
+        "tooltip": true,
+        "tooltip-format": "{app}: {title}"
+    },
+    "mpd": {
+        "format": "{stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ⸨{songPosition}|{queueLength}⸩ {volume}% ",
+        "format-disconnected": "Disconnected ",
+        "format-stopped": "{consumeIcon}{randomIcon}{repeatIcon}{singleIcon}Stopped ",
+        "unknown-tag": "N/A",
+        "interval": 2,
+        "consume-icons": {
+            "on": " "
+        },
+        "random-icons": {
+            "off": "<span color=\"#f53c3c\"></span> ",
+            "on": " "
+        },
+        "repeat-icons": {
+            "on": " "
+        },
+        "single-icons": {
+            "on": "1 "
+        },
+        "state-icons": {
+            "paused": "",
+            "playing": ""
+        },
+        "tooltip-format": "MPD (connected)",
+        "tooltip-format-disconnected": "MPD (disconnected)"
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    },
+    "tray": {
+        // "icon-size": 21,
+        "spacing": 10
+    },
+    "clock": {
+        "timezone": "Europe/Warsaw",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format": "<big></big> {:%H:%M:%S}",
+        "format-alt": "{:%Y-%m-%d}"
+    },
+    "cpu": {
+        "format": "<span color=\"#2e9ef4\"></span>  {usage}%",
+        "tooltip": false
+    },
+    "memory": {
+        "format": "{}% "
+    },
+    "temperature": {
+        // "thermal-zone": 2,
+        // "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
+        "critical-threshold": 80,
+        // "format-critical": "{temperatureC}°C {icon}",
+        "format": "{temperatureC}°C {icon}",
+        "format-icons": ["", "", ""]
+    },
+    "backlight": {
+        // "device": "acpi_video1",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {percent}%",
+        "format-icons": ["", "", "", "", "", "", "", "", ""]
+    },
+    "battery": {
+        "states": {
+            // "good": 95,
+            "warning": 15,
+            "critical": 10
+        },
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {capacity}%",
+        "format-charging": "<span color=\"#2e9ef4\"> {icon}</span> {capacity}%",
+        "format-plugged": "<span color=\"#2e9ef4\"> {icon}</span> {capacity}%",
+        "format-alt": "<span color=\"#2e9ef4\">{icon}</span> {time}",
+        // "format-good": "", // An empty format will hide the module
+        // "format-full": "",
+        "format-icons": ["", "", "", "", ""]
+    },
+    "battery#bat2": {
+        "bat": "BAT2"
+    },
+    "network": {
+        // "interface": "wlp2*", // (Optional) To force the use of this interface
+        "format-wifi": "{essid} ({signalStrength}%) ",
+        "format-ethernet": "{ipaddr}/{cidr} ",
+        "tooltip-format": "{ifname} via {gwaddr} ",
+        "format-linked": "{ifname} (No IP) ",
+        "format-disconnected": "Disconnected ⚠",
+        "format-alt": "{ifname}: {ipaddr}/{cidr}"
+    },
+    "pulseaudio": {
+        // "scroll-step": 1, // %, can be a float
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {volume}% {format_source}",
+        "format-bluetooth": "{volume}% {icon} {format_source}",
+        "format-bluetooth-muted": " {icon} {format_source}",
+        "format-muted": " {format_source}",
+        "format-source": "<span color=\"#2e9ef4\"></span> {volume}%",
+        "format-source-muted": "",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol",
+        "on-click-right": "systemctl --user restart pipewire.service"
+    },
+    "custom/shadowplay": {
+        "format": "<span color=\"#bd2c40\">{icon} {}</span>",
+        "interval": 360,
+        "signal": 15,
+        "exec": "pgrep wl-screenrec -a | sed 's,.* -o \\([^ ]*\\).*,\\1,'",
+        "format-icons": {
+            "default": "雷"
+        },
+    },
+    "custom/notmuch": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {}",
+        "interval": 60,
+        "signal": 25,
+        "exec": "c() { u=\"$(notmuch count -- tag:unread and tag:inbox)\"; i=\"$(notmuch count --  tag:inbox)\"; if [[ $u != \"0\" ]]; then echo $u/$i; else echo \"\"; fi }; c",
+        "on-click": "email",
+        "format-icons": {
+            "default": ""
+        },
+    },
+    "custom/memory_left": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {}",
+        "interval": 30,
+        "exec": "free -h | grep 'Mem' | awk '{print $7 \" (\"$4\")\"}'",
+        "format-icons": {
+            "default": ""
+        },
+    },
+    "custom/date": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {}",
+        "interval": 60,
+        "exec": "date +'%Y-%m-%d (%a)'",
+        "format-icons": {
+            "default": ""
+        },
+        "on-click": "$TERMINAL -t FLOATING_WINDOW -e khal interactive"
+    },
+    "custom/time": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {}",
+        "interval": 1,
+        "exec": "env TZ='Europe/Warsaw' date +'%H:%M:%S'",
+        "format-icons": {
+            "default": ""
+        },
+    },
+    "custom/time_uk": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "interval": 60,
+        "exec": "env TZ='Europe/London' date +'%H:%M'",
+        "format-icons": {
+            "default": "UK"
+        },
+    },
+    "custom/gamemode": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {}",
+        "interval": 3600,
+        "signal": 17,
+        "exec": "$HOME/.scripts/waybar/gaming.sh",
+        "format-icons": {
+            "default": ""
+        },
+        "on-click-right": "$HOME/.scripts/waybar/gaming.sh --toggle; pkill -RTMIN+17 -x waybar"
+    },
+    "custom/dualsense": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "interval": 600,
+        "signal": 18,
+        "exec": "$HOME/.scripts/waybar/dualsense.sh",
+        "format-icons": {
+            "default": ""
+        },
+        "on-click": "pkill -RTMIN+18 -x waybar"
+    },
+    "custom/logipro": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "interval": 600,
+        "signal": 16,
+        "exec": "$HOME/.scripts/waybar/logipro.sh",
+        "format-icons": {
+            "default": "󰍽"
+        },
+        "on-click": "pkill -RTMIN+16 -x waybar"
+    },
+    "custom/bt_kyria": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "interval": 600,
+        "signal": 15,
+        "exec": "$HOME/.scripts/waybar/bt_battery.sh F3:1C:1A:A4:D1:61",
+        "format-icons": {
+            "default": "󰰊"
+        },
+        "on-click": "pkill -RTMIN+15 -x waybar"
+    },
+    "custom/bt_dactyl": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "interval": 600,
+        "signal": 14,
+        "exec": "$HOME/.scripts/waybar/bt_battery.sh F2:8A:E4:9E:DC:8C",
+        "format-icons": {
+            "default": "󰯵"
+        },
+        "on-click": "pkill -RTMIN+14 -x waybar"
+    },
+    "custom/bt_xbox": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "interval": 600,
+        "signal": 13,
+        "exec": "$HOME/.scripts/waybar/bt_battery.sh 40:8E:2C:16:B7:E5 100",
+        "format-icons": {
+            "default": "󰖺"
+        },
+        "on-click": "pkill -RTMIN+13 -x waybar"
+    },
+    "custom/weather": {
+        "format": "{}",
+        //"return-type": "json",
+        "format-icons": {
+            "default": ""
+        },
+        "escape": false,
+        "exec": "zsh -c $HOME/.scripts/waybar/weather.zsh 2> /dev/null", // Script in resources folder
+        "on-click": "browser https://pogoda.interia.pl"
+    },
+    "custom/switches": {
+        "format": "<span color=\"#e60053\"></span>  ",
+        "format-icons": {
+            "default": ""
+        },
+        "escape": false,
+        "on-click": "$HOME/.scripts/sway/hidden-switches.sh"
+    },
+    "custom/media": {
+        "format": "{icon} {}",
+        "return-type": "json",
+        "max-length": 40,
+        "format-icons": {
+            "spotify": "",
+            "default": "🎜"
+        },
+        "escape": true,
+        "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
+        // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
+    }
+}

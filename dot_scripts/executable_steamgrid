@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   steamgrid
+# author: Pawel Bogut <https://pbogut.me>
+# date:   13/03/2022
+#=================================================
+flatpak=0
+
+PARAMS=""
+
+refresh="1172470 1938090 730"
+
+while test $# -gt 0; do
+  case "$1" in
+    -flatpak|--flatpak)
+      flatpak=1
+      PARAMS="$PARAMS --steamdir $HOME/.var/app/com.valvesoftware.Steam/data/Steam"
+      shift
+      ;;
+    *)
+      PARAMS="$PARAMS $1"
+      shift
+      ;;
+  esac
+done
+
+if [[ $flatpak -eq 1 ]]; then
+  for no in $refresh; do
+    rm "$HOME/.var/app/com.valvesoftware.Steam/data/Steam/userdata/68292141/config/grid/$no"* > /dev/null 2>&1
+    rm "$HOME/.var/app/com.valvesoftware.Steam/data/Steam/userdata/68292141/config/grid/originals/$no"* > /dev/null 2>&1
+  done
+else
+  for no in $refresh; do
+    rm "$HOME/.local/share/Steam/userdata/68292141/config/grid/$no"* > /dev/null 2>&1
+    rm "$HOME/.local/share/Steam/userdata/68292141/config/grid/originals/$no"* > /dev/null 2>&1
+  done
+fi
+
+/usr/bin/steamgrid --steamgriddb "$(config steam/steamgriddb/api_key)" $PARAMS

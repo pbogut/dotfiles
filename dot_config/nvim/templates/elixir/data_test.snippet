@@ -1,0 +1,11 @@
+defmodule ${1:[[elixir.module_name]]} do
+	use ${2:[[elixir.base_module]]}.DataCase, async: true
+
+	alias ${3:[[elixir.tested_module_name]]}
+
+	describe "${4:function_name/0}" do
+		test "${5:test description}" do
+			${0:assert false == true}
+		end
+	end
+end

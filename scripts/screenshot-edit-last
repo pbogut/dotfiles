@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-#=================================================
-# name:   edit-last-screenshot
-# author: author <author_contact>
-# date:   17/08/2023
-#=================================================
-dest="$HOME/Pictures/screenshots/"
-# shellcheck disable=SC2012
-pinta "${dest}$(ls -r "$dest" | head -n1)"

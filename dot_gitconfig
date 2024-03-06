@@ -1,0 +1,160 @@
+# ================================================================ #
+# Pawel Bogut .gitconfig                                           #
+#                                                                  #
+# Based on Gary's Bernhard .gitconfig                              #
+# https://github.com/garybernhardt/dotfiles/blob/master/.gitconfig #
+# ================================================================ #
+[user]
+    name = Pawel Bogut
+    email = pbogut@pbogut.me
+[core]
+    autocrlf = input
+    excludesFile = ~/.gitignore
+    pager = diff-so-fancy | less --tabs=4 -RFX
+[push]
+    default = simple
+[pull]
+    rebase = false
+[github]
+    user = pbogut
+[diff]
+    algorithm = histogram
+[color]
+    ui = true
+[alias]
+    #my aliases
+    ai = add -i
+    ap = !git add -N $1 && git add -p $1
+    an = add -N
+    wt = worktree
+    rmc = rm --cached
+    cob = checkout -b
+    lm = "!. ~/.githelpers && list_merged_branches"
+    rm-merged-branches = "!. ~/.githelpers && rm_merged_branches"
+    br = "!. ~/.githelpers && git_clone_to_projects_bare"
+    cl = "!. ~/.githelpers && git_clone_to_projects"
+    gh = "!. ~/.githelpers && git_clone_to_projects"
+    gl = "!. ~/.githelpers && git_clone_to_projects_gl"
+    ccstaging = "!. ~/.githelpers && create_clean_staging"
+    au = "update-index --assume-unchanged" #  assume unchanged
+    nau = "update-index --no-assume-unchanged" #  no assume unchanged
+    sau = "!git ls-files -v | grep '^[a-z]' | cut -f2 -d' '" # show assumed unchanged
+    ignored = "!git ls-files -v | grep '^[a-z]'" # show assumed unchanged
+    pushup = "!. ~/.githelpers && git_push_upstream"
+    diff-export = "!. ~/.githelpers && git_diff_export"
+    push-with-tags = "!git push && git push --tags"
+    diffls = diff-tree --no-commit-id --name-only -r
+    ls = "!. ~/.githelpers && git_ls"
+    fst = "!. ~/.githelpers && git_fzf_st"
+    cc = "!. ~/.githelpers && git_checkout_or_create_branch"
+
+    #Create branch
+    cb = checkout -b
+    st = status
+    ci = commit --verbose
+    co = checkout
+    di = diff
+    dc = diff --cached
+    amend = commit --amend
+    aa = add --all
+    ff = merge --ff-only --no-commit
+    pff = pull --ff-only
+    prb = pull --rebase=interactive
+    pullff = pull --ff-only
+    pullrb = pull --rebase=interactive
+    noff = merge --no-ff --no-commit
+    noffci = merge --no-ff
+    mesq =  merge --squash
+    merge = merge --no-commit
+    nofc = !git merge --no-ff --no-commit $1 && git commit --verbose && :
+    fa = fetch --all
+    pom = push origin master
+    b = branch
+    ds = diff --stat=160,120
+    dh1 = diff HEAD~1
+
+    ri = rebase --interactive
+
+    # Get pull request locally
+    cpr = "!. ~/.githelpers && git_checkout_pull_request"
+    pullpr = "!. ~/.githelpers && git_pull_pull_request"
+
+
+    add-upstream = "!. ~/.githelpers && git_add_parent_upstream"
+    sync-upstream = "!. ~/.githelpers && git_sync_upstream"
+
+    # funny
+    whatthecommit = "!git commit --verbose -m \"`curl -qs http://whatthecommit.com/index.txt`\""
+    wtc = "!echo \"`curl -qs http://whatthecommit.com/index.txt`\""
+
+    # Divergence (commits we added and commits remote added)
+    div = divergence.sh
+    fdiv = !git fetch && git divergence.sh
+
+    # Goodness (summary of diff lines added/removed/total)
+    gn = goodness
+    gnc = goodness --cached
+
+    wtf = what-the-hell-just-happened
+
+    # Fancy logging.
+    #   h = head
+    #   hp = head with patch
+    #   r = recent commits, only current branch
+    #   ra = recent commits, all reachable refs
+    #   l = all commits, only current branch
+    #   la = all commits, all reachable refs
+    head = !git r -1
+    h = !git head
+    hp = "!. ~/.githelpers && show_git_head"
+    r = !GIT_NO_PAGER=1 git l -30
+    ra = !git r --all
+    l = "!. ~/.githelpers && pretty_git_log"
+    la = !git l --all
+    pull-stash-rebase = !git stash && git pullrb && git stash apply
+[merge]
+    ; tool = nvimdiff_nomod2
+    tool = vim_mergetool
+    conflictStyle = diff3
+[mergetool "nvimdiff"]
+    cmd = nvim -d $LOCAL $BASE $REMOTE $MERGED -c '$wincmd w' -c 'wincmd J'
+[mergetool "nvimdiff2"]
+    cmd = nvim -d $LOCAL $MERGED $REMOTE
+[mergetool "nvimdiff2d"]
+    cmd = nvim -d $LOCAL $REMOTE $MERGED -c '$wincmd w' -c 'wincmd J'
+[mergetool "nvimdiff_nomod"]
+    cmd = nvim -d $LOCAL $BASE $REMOTE $MERGED -c 'set nomodifiable' -c 'wincmd l' -c 'set nomodifiable' -c 'wincmd l' -c 'set nomodifiable' -c 'wincmd l' -c 'wincmd J'
+[mergetool "nvimdiff_nomod2"]
+    cmd = nvim -d $LOCAL $MERGED $REMOTE -c 'set nomodifiable' -c 'wincmd l' -c 'wincmd l' -c 'set nomodifiable'
+[mergetool "vim_mergetool"]
+    cmd = nvim -f -c "MergetoolStart" "$MERGED" "$BASE" "$LOCAL" "$REMOTE"
+    trustExitCode = true
+[hub]
+    protocol = ssh
+[init]
+    defaultBranch = master
+[safe]
+    directory = *
+[commit]
+    verbose = true
+[interactive]
+    diffFilter = diff-so-fancy --patch
+[color "diff-highlight"]
+    oldNormal = red bold
+    oldHighlight = white bold red
+    newNormal = green bold
+    newHighlight = white bold green
+[color "diff"]
+    meta = 11
+    frag = magenta bold
+    func = 146 bold
+    commit = yellow bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
+[protocol "file"]
+    allow = always
+[url "git@github.com:"]
+    insteadOf = https://github.com/
+[url "git@gitlab.com:"]
+    insteadOf = https://gitlab.com/

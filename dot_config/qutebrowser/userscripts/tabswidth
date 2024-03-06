@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   tabswidth
+# author: author <author_contact>
+# date:   12/08/2022
+#=================================================
+
+cmd() {
+  echo "$@" >>"$QUTE_FIFO"
+}
+
+none() {
+  cmd set tabs.width 1
+}
+
+compact() {
+  cmd set tabs.width 26
+  cmd set tabs.title.alignment right
+  cmd set tabs.title.format "{index}"
+}
+
+full() {
+  cmd set tabs.width 10%
+  cmd set tabs.title.alignment left
+  cmd set tabs.title.format "'{audio}{index}: {current_title}'"
+}
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+}
+
+action=""
+while test $# -gt 0; do
+  case "$1" in
+  --toggle | -t)
+    action='toggle'
+    shift
+    ;;
+  --help | -h)
+    usage
+    exit 8
+    ;;
+  *)
+    usage
+    exit 7
+    ;;
+  esac
+done
+
+if [[ $action == "" ]]; then
+  usage
+  exit 1
+fi
+
+if [[ $action == "toggle" ]]; then
+  is_full_file=/tmp/__"$USER"_qb_is_full
+  if [[ -f $is_full_file ]]; then
+    rm "$is_full_file"
+    compact
+  else
+    touch /tmp/__"$USER"_qb_is_full
+    full
+  fi
+fi

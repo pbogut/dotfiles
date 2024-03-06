@@ -1,0 +1,115 @@
+[
+    {
+        // "layer": "top",
+        // "position": "bottom",
+        "name": "redeye1",
+        "output": [
+            "DP-1",
+            "DP-2"
+        ],
+        "include": [
+            "~/.config/waybar/modules.jsonc",
+        ],
+        "modules-left": [
+            "sway/workspaces",
+            "sway/mode",
+            "sway/scratchpad"
+        ],
+        "modules-center": [
+            "sway/window"
+        ],
+        "modules-right": [
+            "idle_inhibitor",
+            "custom/memory_left",
+            "cpu",
+            "backlight",
+            "pulseaudio",
+            "custom/weather",
+            "custom/date",
+            "custom/time",
+            "custom/logipro",
+            "custom/dualsense",
+            "battery",
+            "battery#bat2",
+            "custom/notmuch",
+            "custom/gamemode",
+            "custom/switches"
+        ],
+    },
+    {
+        // "layer": "top",
+        // "position": "bottom",
+        "name": "redeye2",
+        "output": [
+            "HDMI-A-1",
+        ],
+        "include": [
+            "~/.config/waybar/modules.jsonc",
+        ],
+        "modules-left": [
+            "sway/workspaces",
+            "sway/mode",
+            "sway/scratchpad"
+        ],
+        "modules-center": [
+            "sway/window"
+        ],
+        "modules-right": [
+            "idle_inhibitor",
+            "custom/shadowplay",
+            "custom/memory_left",
+            "cpu",
+            "backlight",
+            "pulseaudio",
+            "custom/weather",
+            "custom/date",
+            "custom/time",
+            "custom/time_uk",
+            "custom/logipro",
+            "custom/dualsense",
+            "custom/bt_kyria",
+            "custom/bt_dactyl",
+            "custom/bt_xbox",
+            "custom/notmuch",
+            "custom/gamemode",
+            "tray",
+            "custom/switches"
+        ],
+    },
+    {
+        // "layer": "top",
+        // "position": "bottom",
+        "name": "silverspoon",
+        "output": [
+            "eDP-1"
+        ],
+        "include": [
+            "~/.config/waybar/modules.jsonc",
+        ],
+        "modules-left": [
+            "sway/workspaces",
+            "sway/mode",
+            "sway/scratchpad"
+        ],
+        "modules-center": [
+            "sway/window"
+        ],
+        "modules-right": [
+            "idle_inhibitor",
+            "custom/memory_left",
+            "cpu",
+            "backlight",
+            "pulseaudio",
+            "custom/weather",
+            "custom/date",
+            "custom/time",
+            "custom/time_uk",
+            "battery",
+            "battery#bat2",
+            "custom/notmuch",
+            "custom/gamemode",
+            "tray",
+            "custom/switches"
+        ],
+    },
+]

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   nvim-godot
+# author: author <author_contact>
+# date:   03/12/2023
+#=================================================
+dir="$PWD"
+session_name=$(sha1sum <<< "$dir" | awk '{print $1}')
+store="/tmp/nvim_godot/$session_name"
+
+mkdir -p "$(dirname "$store")"
+
+_start_nvim_godot() {
+  nvim -c "lua write_to_file('$store', vim.v.servername)"
+}
+
+if [[ -f "$store" ]]; then
+  socket=$(head -n1 "$store")
+  nvru -c "silent! !wezterm cli activate-tab --tab-index 0" --servername "$socket"
+  nvru -c "edit $1" --servername "$socket" || _start_nvim_godot
+  # shellcheck disable=SC2001
+  socket_id=$(sed 's/.*nvim\.\(.*\)\..*/\1/' <<< "$socket")
+  swaymsg '[title=":nvim:'"$socket_id"':"] focus'
+else
+  _start_nvim_godot
+fi

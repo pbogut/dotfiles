@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   waybar-launcher
+# author: author <author_contact>
+# date:   26/08/2023
+#=================================================
+trap "killall waybar" EXIT
+
+while :; do
+  waybar
+done

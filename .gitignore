@@ -1,7 +1,4 @@
-/bin/*
-*.secret.vimrc
 .vim-bookmarks
 _python
 __pycache__
 *.pyi
-config/nvim/plugin/packer_compiled.lua

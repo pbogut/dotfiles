@@ -1,7 +1,0 @@
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Ranger
-Exec=urxvt -e ranger %f
-Categories=System;FileTools;FileManager;Utility;
-MimeType=inode/directory;

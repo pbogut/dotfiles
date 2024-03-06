@@ -1,0 +1,13 @@
+#!/bin/bash
+#=================================================
+# name:   email-in-browser
+# author: Pawel Bogut <https://pbogut.me>
+# date:   17/12/2018
+#=================================================
+src=$1
+tmp=$(mktemp -d)
+dest=$tmp/email.html
+log=$tmp/browser.log
+cp $src $dest
+browser $dest > $log 2>&1
+#sleep 1s

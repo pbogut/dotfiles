@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   mdtopdf
+# author: author <author_contact>
+# date:   06/02/2023
+#=================================================
+mktemp
+tmpfile="$(mktemp -d)/input.md"
+mdfile="$1"
+pdffile="${2:-$mdfile.pdf}"
+
+cssfile="$HOME/.cache/mdpdf/github.css"
+cssurl="https://gist.githubusercontent.com/pbogut/9e322fa8be0a85e464cd84a1c3b97d00/raw/github.css"
+
+if [[ ! -f "$cssfile" ]]; then
+  mkdir -p ~/.cache/mdpdf
+  curl -s "$cssurl" > "$cssfile"
+fi
+
+cp "$mdfile" "$tmpfile"
+
+pandoc \
+  --metadata title="" \
+  --to=html5 \
+  --css="$cssfile" \
+  --embed-resources \
+  -V margin-top=2cm \
+  -V margin-left=2cm \
+  -V margin-right=2cm \
+  -V margin-bottom=2cm \
+  -V papersize=a4  \
+  "$tmpfile" -o "$pdffile"

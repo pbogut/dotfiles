@@ -1,0 +1,290 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   git-wt
+# author: author <author_contact>
+# date:   29/03/2023
+#=================================================
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Actions:"
+  echo "  add <branch>"
+  echo "  list"
+  echo "  checkout <branch>"
+  echo "  remove <branch>"
+  echo "  prune               remove worktrees that are already merged"
+  echo "  changes <branch>    create branch from current diff"
+  echo ""
+  echo "Options:"
+  echo "  --candidates      list for worktree completion"
+  echo "  --orphans         include orphan worktrees"
+  echo "  --upstream|-u     set upstream (default: origin)"
+  echo "  -h, --help        display this help and exit"
+}
+
+action="none"
+orphans=false
+force=false
+upstream="origin"
+candidates=false
+
+worktree=""
+
+while test $# -gt 0; do
+  case "$1" in
+  add)
+    action=add
+    shift
+    worktree="$1"
+    shift
+    ;;
+  changes)
+    action=changes
+    shift
+    worktree="$1"
+    shift
+    ;;
+  list)
+    action=list
+    shift
+    ;;
+  checkout)
+    action=checkout
+    shift
+    ;;
+  remove)
+    action=remove
+    shift
+    ;;
+  prune)
+    action=prune
+    shift
+    ;;
+  --upstream)
+    shift
+    upstream="$1"
+    shift
+    ;;
+  --candidates)
+    action="--candidates"
+    shift
+    ;;
+  --orphans)
+    orphans=true
+    shift
+    ;;
+  --force)
+    force=true
+    shift
+    ;;
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  *)
+    if [[ $action == "none" ]]; then
+      usage
+      exit 1
+    elif [[ $action == "remove" ]] || [[ $action == "checkout" ]]; then
+      worktree=$1
+      shift
+    fi
+    shift
+    ;;
+  esac
+done
+
+if [[ $action == "none" ]]; then
+  usage
+  exit 0
+fi
+
+__wt_base_dir() {
+  base_dir="$(git worktree list | grep '(bare)$' | awk '{print $1}')"
+  if [[ $base_dir =~ \.bare$ ]]; then
+    base_dir="$(dirname "$base_dir")"
+  fi
+  echo "$base_dir"
+}
+
+__wt_main_branch() {
+  bare_path=$(__wt_base_dir)
+  ref="$(cat "$bare_path/.bare/HEAD")"
+  echo "${ref##*/}"
+}
+
+
+trees=$(git worktree list)
+err=$?
+
+if [[ $err -ne 0 ]]; then
+  exit $err
+fi
+
+bare_path=$(echo "$trees" | grep '(bare)$' | awk '{print $1}')
+
+__gitwt__orphans() {
+  existing=$(__gitwt__list | awk '{print $1}')
+  potential=$(find "$bare_path" -mindepth 1 -maxdepth 1 -type d |
+    grep -E -v 'hooks|info|objects|refs|logs|branches|worktrees' |
+    while read -r path; do
+      rel_path=$(realpath --relative-to="$PWD" "$path")
+      echo -e "$rel_path"
+    done)
+
+  while read -r orphan; do
+    if [[ -n $orphan ]]; then
+      echo "$orphan ???????? [?]"
+    fi
+  done <<<"$( (
+    echo "$potential"
+    echo "$existing"
+  ) | sort | uniq -u)"
+}
+
+__gitwt__list() {
+  git worktree list | grep -v '(bare)$' | while read -r path sha branch; do
+    rel_path=$(realpath --relative-to="$PWD" "$path")
+    echo -e "$rel_path\t$sha\t$branch"
+  done
+}
+
+__gitwt__list_candidates() {
+  checked_out=$(git branch -v | grep '^[+\*]' | sed 's/^..//' | awk '{ print $2 }')
+  local=$(git branch -v | grep '^[+\*]' | sed 's/^..//' | awk '{ print $2 }')
+  echo '----'
+  git branch -v | sed 's/^..//' | awk '{ print $2 ":" $1 }'
+  git branch -v --remotes | awk '{ print $2 ":" $1 }'
+  echo '----'
+  echo "$checked_out"
+  echo '----'
+  echo "$local"
+}
+__gitwt__is_worktree() {
+  worktree=$1
+  if [[ ! -d $worktree ]]; then
+    return 1
+  fi
+  cd "$worktree" || return 1
+  if git status >/dev/null 2>&1; then
+    cd - >/dev/null || return 1
+    return 0
+  fi
+
+  cd - >/dev/null || return 1
+  return 1
+}
+
+if [[ $action == "--candidates" ]]; then
+  __gitwt__list_candidates
+  exit 0
+fi
+
+if [[ $action == "checkout" ]]; then
+  bare_path=$(__wt_base_dir)
+  if ! git worktree add "$bare_path/$worktree" "$worktree"; then
+    exit $?
+  fi
+  cd "$bare_path/$worktree" || exit 1
+  git branch --set-upstream-to="$upstream"/"$worktree"
+fi
+
+if [[ $action == "add" ]]; then
+  bare_path=$(__wt_base_dir)
+  if ! git worktree add "$bare_path/$worktree"; then
+    exit $?
+  fi
+  cd "$bare_path/$worktree" || exit 1
+  git branch --set-upstream-to="$upstream"/"$worktree"
+fi
+
+if [[ $action == "changes" ]]; then
+  bare_path=$(__wt_base_dir)
+  main_branch=$(__wt_main_branch)
+  if ! git worktree add "$bare_path/$worktree" -b "$worktree" "$main_branch"; then
+    exit $?
+  fi
+  git diff | git -C "$bare_path/$worktree" apply
+  cd "$bare_path/$worktree" || exit 1
+  git branch --set-upstream-to="$upstream"/"$worktree"
+  git commit --verbose -a
+fi
+
+if [[ $action == "list" ]]; then
+  (
+    __gitwt__list
+
+    if $orphans; then
+      __gitwt__orphans
+    fi
+  ) | column -t
+
+  exit 0
+fi
+
+if [[ $action == "prune" ]]; then
+  git -C "$bare_path" branch --merged | grep '^[^*]' | while read -r branch; do
+    branch="$(awk '{print $2}' <<< "$branch")"
+    if [[ "$branch" == "" ]]; then
+      continue
+    fi
+    git wt remove "$branch"
+  done
+  git -C "$bare_path" branch --merged | grep '^[^*]' | while read -r branch; do
+    branch="$(awk '{print $2}' <<< "$branch")"
+    if [[ "$branch" == "" ]]; then
+      continue
+    fi
+    echo git wt remove "$branch" --force
+  done
+fi
+
+if [[ $action == "remove" ]] && [[ -n $worktree ]]; then
+  err=0
+  if __gitwt__is_worktree "$worktree"; then
+    if ! git worktree remove "$worktree"; then
+      cd "$worktree" || exit 1
+      git diff
+      echo "summary:"
+      git status -s
+      cd - >/dev/null || exit 1
+      echo "Remove worktree with --force? [y/N]"
+      read -r ans
+      if [[ $ans == "y" ]]; then
+        if ! git worktree remove --force "$worktree"; then
+          echo "Failed to remove directory: $worktree"
+          echo "Remove directory with sudo? [y/N]"
+          read -r ans
+          if [[ $ans == "y" ]]; then
+            sudo rm -rf "$worktree"
+            err=$?
+          fi
+        fi
+      fi
+    fi
+  else
+    echo "Not a git worktree: $worktree"
+    err=1
+    if [[ -d $worktree ]]; then
+      cd "$worktree" || exit 1
+      ls -l1 --color=always
+      cd - >/dev/null || exit 1
+      echo "Remove directory? [y/N]"
+      read -r ans
+      if [[ $ans == "y" ]]; then
+        if ! rm -rf "$worktree"; then
+          err=1
+          echo "Failed to remove directory: $worktree"
+          echo "Remove directory with sudo? [y/N]"
+          read -r ans
+          if [[ $ans == "y" ]]; then
+            sudo rm -rf "$worktree"
+            err=$?
+          fi
+        fi
+      fi
+    fi
+  fi
+  exit $err
+fi

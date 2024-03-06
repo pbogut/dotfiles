@@ -1,0 +1,9 @@
+#!/bin/bash
+#=================================================
+# name:   tunnelssh.zsh
+# author: Pawel Bogut <https://pbogut.me>
+# date:   29/06/2018
+#=================================================
+tunnelssh() {
+  sshuttle --dns -vr "$1" 0/0
+}

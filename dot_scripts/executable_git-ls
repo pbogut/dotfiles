@@ -1,0 +1,7 @@
+#!/bin/bash
+#=================================================
+# name:   git-ls
+# author: Pawel Bogut <http://pbogut.me>
+# date:   26/10/2017
+#=================================================
+git -c color.status=always status --short; git ls-files | while read l; do echo -e "\033[0;34mG\033[0m  $l";done

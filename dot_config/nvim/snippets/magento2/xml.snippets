@@ -1,0 +1,36 @@
+snippet m2commands
+	<type name="Magento\Framework\Console\CommandListInterface">
+		m2command$1
+	</type>$0
+snippet m2command
+	<arguments>
+		<argument name="commands" xsi:type="array">
+			<item name="${1:[[magento2.module_key]]}_${2:plugin_name}" xsi:type="object">${3:[[magento2.module_namespace]]}\\Console\\${4:PluginClass}</item>
+		</argument>
+	</arguments>
+snippet m2plugin
+	<type name="${1:Class\\To\\Plug\\In\\To}">
+		<plugin name="${2:[[magento2.module_key]]}_${3:plugin_name}"
+		        type="${4:[[magento2.module_namespace]]}\\Plugin\\${5:PluginClass}"/>
+	</type>$0
+snippet m2event
+	<event name="${1:event_name}">
+		<observer name="${2:[[magento2.module_key]]}_${1:event_name}"
+		          instance="${3:[[magento2.module_namespace]]}\\Observer\\${4:ObserverClass}"/>
+	</event>
+snippet m2grid
+	<!-- ${1:Entity} - START -->
+	<type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+		<arguments>
+			<argument name="collections" xsi:type="array">
+				<item name="${2:[[magento2.module_key]]}_${3:entity}_listing_data_source" xsi:type="string">${4:[[magento2.module_namespace]]}\Model\ResourceModel\\${1:Entity}\GridCollection</item>
+			</argument>
+		</arguments>
+	</type>
+	<virtualType name="${4:[[magento2.module_namespace]]}\Model\ResourceModel\\${1:Entity}\GridCollection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+		<arguments>
+			<argument name="mainTable" xsi:type="string">${5:[[magento2.module_key]]}_${3:entity}</argument>
+			<argument name="resourceModel" xsi:type="string">${4:[[magento2.module_namespace]]}\Model\ResourceModel\\${1:Entity}</argument>
+		</arguments>
+	</virtualType>
+	<!-- ${1:Entity} - END -->

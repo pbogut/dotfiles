@@ -1,0 +1,100 @@
+#!/usr/bin/env ruby
+#=================================================
+# name:   scans
+# author: Pawel Bogut <https://pbogut.me>
+# date:   02/01/2021
+#=================================================
+
+require 'fileutils'
+require 'open3'
+require 'digest/sha1'
+
+require File.dirname(__FILE__) + '/config'
+
+action, = ARGV
+
+@langs = MyConfig.get("scans/langs")
+@data_dir = MyConfig.get("scans/data_dir")
+@src_globs = MyConfig.get("scans/src_globs")
+
+def do_action(action)
+  if action == 'process'
+    do_process()
+  end
+  if action == 'delete'
+    do_delete()
+  end
+  if action == 'search'
+    do_search(ARGV[1..].join(" "))
+  end
+  if action == 'all' or action.nil?
+    do_search("")
+  end
+end
+
+def do_delete()
+  result, _, _ = Open3.capture3('find', @data_dir, '-iname', '*.jpg', '-type', 'f')
+  selected_file = ""
+  # Open3.popen2('fzf', '--height=100%', '--preview', 'scans-display-image.sh {-1}') do |stdin, stdout, wait_thr|
+  Open3.popen2('fzfimg.sh', '--height=100%') do |stdin, stdout, _wait_thr|
+    stdin << "\n"
+    stdin << result
+    selected_file = stdout.read
+  end
+  if not selected_file.chop.empty?
+    FileUtils.remove(selected_file.chop.gsub(/(.*)\/(.*?)$/, '\1/.\2.txt'))
+    FileUtils.remove(selected_file.chop)
+    puts "rm #{selected_file}"
+    puts "rm " + selected_file.gsub(/(.*)\/(.*?)$/, '\1/.\2.txt')
+  end
+end
+
+def do_search(query)
+  result, _, _ = Open3.capture3('rg', '-liuu', query, @data_dir)
+  selected_file = ''
+  Open3.popen2('fzfimg.sh', '--height=100%') do |stdin, stdout, _wait_thr|
+    stdin << "\n"
+    result.split("\n").each do |file|
+      stdin << file.gsub(/\/\.(.*).txt$/, "/\\1\n")
+    end
+    selected_file = stdout.read
+  end
+
+  return if selected_file.chop.empty?
+
+  puts selected_file
+  Open3.capture3("~/.scripts/sway/open #{selected_file}")
+end
+
+def do_process()
+  @src_globs.each do |glob|
+    Dir.glob(glob) do |src|
+      basename = File.basename(src).gsub(/[\s;]/, '_')
+      # FileUtils.madir_p
+      sha1 = Digest::SHA1.hexdigest(basename)
+      sub_path = "#{sha1[0]}/#{sha1[1]}/#{sha1[2..7]}"
+      data_path = "#{@data_dir}/#{sub_path}"
+      text_path = "#{data_path}/.#{basename}.txt"
+      dest = "#{data_path}/#{basename}"
+      if not File.exist?(dest)
+        print "Processing file: #{dest} ..."
+        FileUtils.mkdir_p(data_path)
+        FileUtils.copy(src, dest)
+
+        text = ""
+        for lang in @langs
+          text << "-------------------#{lang}----------------------"
+          result, _, _ = Open3.capture3('tesseract', '-l', lang, dest, '-')
+          text << result
+        end
+
+        File.write(text_path, text)
+        puts "done"
+      else
+        $stderr.puts "File already exists: #{dest}"
+      end
+    end
+  end
+end
+
+do_action(action)

@@ -1,0 +1,35 @@
+[".i-use-rust-btw"]
+    type = "git-repo"
+    url = "https://github.com/pbogut/i-use-rust-btw.git"
+    refreshPeriod = "168h"
+
+[".fonts"]
+    type = "archive"
+    url = "https://github.com/pbogut/dot-fonts/archive/master.tar.gz"
+    exact = true
+    stripComponents = 1
+    refreshPeriod = "168h"
+
+[".config/dircolors-solarized"]
+    type = "archive"
+    url = "https://github.com/seebi/dircolors-solarized/archive/master.tar.gz"
+    exact = true
+    stripComponents = 1
+    refreshPeriod = "168h"
+
+[".icons/polar"]
+    type = "archive"
+    url = "https://github.com/pbogut/polar-theme/archive/master.tar.gz"
+    exact = true
+    stripComponents = 1
+    refreshPeriod = "168h"
+
+[".zshrc.d/plugins/zsh-autosuggestions"]
+    type = "git-repo"
+    url = "https://github.com/zsh-users/zsh-autosuggestions.git"
+    refreshPeriod = "168h"
+
+[".config/mpv/scripts/mpvDLNA"]
+    type = "git-repo"
+    url = "https://github.com/chachmu/mpvDLNA.git"
+    refreshPeriod = "168h"

@@ -1,0 +1,48 @@
+alias time="\time -f '%es'"
+alias tvi=tmux-vim
+alias tv=tmux-vim
+alias vit=tmux-vim
+alias vip="tmux new-session nvim '+Telescope tmux-projects ls_projects'"
+alias vim=nvim
+alias tmux="TERM=xterm-256color /usr/bin/tmux"
+
+alias composer="composer-smart.sh"
+
+alias irb="irb -r 'irb/completion'"
+alias sc="bash -c \"\`cat ~/.commands | fzf | sed 's,[^;]*;;; ,,'\`\""
+alias q="exit"
+alias :q="exit"
+alias m="ncmpcpp"
+alias s="spt"
+alias i="ssh-weechat"
+alias e="mutt"
+alias o="$HOME/.scripts/sway/open"
+
+
+alias ls="ls --color=auto"
+alias ll="ls -lhA --color=auto"
+alias pacman="pacman --color=auto"
+
+alias xo="xdg-open"
+alias ro="rifle" #rifle open
+alias so="source"
+alias clone="~/.scripts/term-in-current-dir.sh"
+alias c="clone"
+
+
+alias php_debug_on="export XDEBUG_CONFIG=\"idekey=PHPSTORM\""
+alias php_debug_off="export XDEBUG_CONFIG="
+alias ctags_php="ctags -h \".php\" -R --exclude=\".git\" --exclude=\"tests\" --exclude=\"*.js\" --PHP-kinds=+cf"
+
+# built in zsh kill suck ballz
+alias kill=/usr/bin/kill
+
+alias lg="lazygit"
+
+alias genpass="apg -m16 -n1 -MSNCL"
+
+alias greasemonkey="cd ~/Nextcloud/Sync/GreaseMonkey && vim"
+alias mpvscripts="cd ~/Projects/github.com/pbogut/dotfiles/config/mpv/scripts && vim"
+
+alias apexshaders="cd /storage/SteamLibrary/steamapps/shadercache/1172470 && du -sh * && du -s *"
+alias flatup="flatpak update && flatpak remove --unused"

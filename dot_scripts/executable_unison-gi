@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   unison-gi
+# author: author <author_contact>
+# date:   27/08/2023
+#=================================================
+venv_path="$HOME/.venv/unison-gitignore"
+unison_gitignore="$venv_path/bin/unison-gitignore"
+if [[ ! -d $venv_path ]]; then
+    python -m venv "$venv_path"
+fi
+if [[ ! -f $unison_gitignore ]]; then
+    "$venv_path/bin/pip" install unison-gitignore
+fi
+if [[ ! -f /usr/bin/unison ]]; then
+    echo "unison not installed"
+    exit 1
+fi
+
+if [[ -f $unison_gitignore ]]; then
+    $unison_gitignore "$@"
+fi

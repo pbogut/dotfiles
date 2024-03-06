@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+	<router id="${1|standard,admin|}">
+		<route id="${2:[[magento2.module_key]]}" frontName="${3:[[magento2.module_key]]}">
+			<module name="${4:[[magento2.module_name]]}" ${5:before="${4:Magento_Backend}" }/>
+		</route>
+	</router>
+</config>

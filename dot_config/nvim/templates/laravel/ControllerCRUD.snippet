@@ -1,0 +1,128 @@
+<?php
+
+namespace [[php.namespace]];
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use ${3:App\\Model\\}${4:Entity};
+$0
+/**
+ * Class [[php.class]]
+ *
+ * @author ${1:[[author]]} <${2:[[author_contact]]}>
+ */
+class [[php.class]] extends Controller
+{
+	/**
+	 * Display a listing of the resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function index(${4:Entity} $${5:entity})
+	{
+		return view('${5:entity}.index', [
+			'${6:entities}' => $${5:entity}::all()
+		]);
+	}
+
+	/**
+	 * Show the form for creating a new resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function create(Request \$request, ${4:Entity} $${5:entity})
+	{
+		$${5:entity}->fill(\$request->old());
+		\$request->session()->reflash();
+
+		return view('${5:entity}.create', [
+			'${5:entity}' => $${5:entity}
+		]);
+	}
+
+	/**
+	 * Store a newly created resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request \$request
+	 * @return \Illuminate\Http\Response
+	 */
+	public function store(Request \$request, ${4:Entity} $${5:entity})
+	{
+		return \$this->update(\$request, $${5:entity});
+	}
+
+	/**
+	 * Display the specified resource.
+	 *
+	 * @param  ${4:Entity} $${5:entity}
+	 * @return \Illuminate\Http\Response
+	 */
+	public function show(${4:Entity} $${5:entity})
+	{
+		return view('${5:entity}.show', [
+			'${5:entity}' => $${5:entity}
+		]);
+	}
+
+	/**
+	 * Show the form for editing the specified resource.
+	 *
+	 * @param  ${4:Entity} $${5:entity}
+	 * @return \Illuminate\Http\Response
+	 */
+	public function edit(Request \$request, ${4:Entity} $${5:entity})
+	{
+		$${5:entity}->fill(\$request->old());
+		\$request->session()->reflash();
+
+		return view('${5:entity}.edit', [
+			'${5:entity}' => $${5:entity}
+		]);
+	}
+
+	/**
+	 * Update the specified resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request \$request
+	 * @param  ${4:Entity} $${5:entity}
+	 * @return \Illuminate\Http\Response
+	 */
+	public function update(Request \$request, ${4:Entity} $${5:entity})
+	{
+		\$request->flash();
+
+		\$this->validate${4:Entity}(\$request);
+
+		$${5:entity}
+			->fill(\$this->get${4:Entity}Params(\$request))
+			->save();
+
+		return redirect(route('${5:entity}.show', $${5:entity}));
+	}
+
+	/**
+	 * Remove the specified resource from storage.
+	 *
+	 * @param  ${4:Entity} $${5:entity}
+	 * @return \Illuminate\Http\Response
+	 */
+	public function destroy(${4:Entity} $${5:entity})
+	{
+		$${5:entity}->delete();
+		return redirect(route('${5:entity}.index'));
+	}
+
+	protected function get${4:Entity}Params(Request \$request)
+	{
+		return array_only(\$request->input(), [
+			${7:// 'name',}
+		]);
+	}
+
+	protected function validate${4:Entity}(Request \$request)
+	{
+		return \$this->validate(\$request, [
+			${8:// 'name' => 'required|max:20',}
+		]);
+	}
+}

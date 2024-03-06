@@ -1,0 +1,183 @@
+#!/bin/bash
+#=================================================
+# name:   qutebrowser_ukpos.sh
+# author: Pawel Bogut <http://pbogut.me>
+# date:   16/01/2017
+#=================================================
+echo "$@" >>/tmp/last_url-"$USER"
+
+export PATH="$PATH:/home/$USER/.bin"
+export PATH="$PATH:/home/$USER/.scripts"
+
+qbmode="--qt-flag ignore-gpu-blacklist --qt-flag enable-gpu-rasterization --qt-flag enable-native-gpu-memory-buffers --qt-flag num-raster-threads=4 "
+qbname="qutebrowser"
+qbwm="browser"
+port=9223
+
+proxypac="--qt-flag proxy-pac-url=file:///home/$USER/.proxy.pac"
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help        display this help and exit"
+  echo "  -w, --work        work mode"
+  echo "  --open-in-tab     work mode"
+}
+
+work=false
+tab=false
+
+while test $# -gt 0; do
+  case "$1" in
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --work|-w)
+      work=true
+      shift
+      ;;
+    --open-in-tab)
+      tab=true
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+# todo wrap everything in one function and pass qb version as param
+if $work; then
+  qbmode="$qbmode --desktop-file-name org.qutebrowser.workbrowser --qt-arg name qbwork --basedir $HOME/.config/qutebrowser/qbwork --config-py $HOME/.config/qutebrowser/config.py $proxypac"
+  qbname="qbwork"
+  qbwm="qbwork"
+  port=9224
+  shift
+fi
+
+url="$1"
+target="tab"
+
+# open youtube links in mpv
+use_mpv=true
+if [[ $url =~ ^https://invidious\.pbogut\.me/watch\?v= ]]; then
+  qbmode="$qbmode --qt-arg name qbmedia --desktop-file-name org.qutebrowser.mediabrowser --basedir $HOME/.config/qutebrowser/media --config-py $HOME/.config/qutebrowser/config.py $proxypac"
+  shift
+
+  mpv_url=${url//invidious.pbogut.me/www.youtube.com}
+  url=${url//watch\?v=/embed/}
+  url=${url/&/?}
+
+  if $use_mpv; then
+    start=$(date '+%s')
+    mpv_url=${mpv_url//invidious.pbogut.me/www.youtube.com}
+    LAZY_OPEN="$mpv_url" mpv
+    if ! "$@"; then
+      end=$(date '+%s')
+      if [[ $((end-start)) -lt 10 ]]; then
+        notify-send "Failed to start MPV"
+      fi
+    else
+      exit 0
+    fi
+    exit 0
+  fi
+
+  target="window"
+  # shellcheck disable=2086
+  qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}"
+  exit 0
+elif [[ $url =~ ^https://www\.youtube\.com/watch\?v= ]]; then
+  qbmode="$qbmode --qt-arg name qbmedia --desktop-file-name org.qutebrowser.mediabrowser --basedir $HOME/.config/qutebrowser/media --config-py $HOME/.config/qutebrowser/config.py $proxypac"
+  shift
+
+  mpv_url="$url"
+  url=${url//www.youtube.com/invidious.pbogut.me}
+  url=${url//watch\?v=/embed/}
+  url=${url/&/?}
+
+  if $use_mpv; then
+    start=$(date '+%s')
+    mpv_url=${mpv_url//invidious.pbogut.me/www.youtube.com}
+    LAZY_OPEN="$mpv_url" mpv
+    if ! "$@"; then
+      end=$(date '+%s')
+      if [[ $((end-start)) -lt 10 ]]; then
+        notify-send "Failed to start MPV"
+      fi
+    else
+      exit 0
+    fi
+    exit 0
+  fi
+
+  target="window"
+  # shellcheck disable=2086
+  qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}"
+  exit 0
+elif [[ $url =~ ^https://open\.spotify\.com ]]; then
+  shift
+  qbmode="$qbmode --qt-arg name qbmedia --desktop-file-name org.qutebrowser.mediabrowser --basedir $HOME/.config/qutebrowser/media --config-py $HOME/.config/qutebrowser/config.py $proxypac"
+  target="window"
+  # shellcheck disable=2086
+  qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}"
+  exit 0
+elif [[ $url =~ ^https://rumble\.com ]]; then
+  shift
+  mpv "$url" && exit 0
+  id=$(yt-dlp --no-warnings -J --flat-playlist --sub-format ass/srt/best --format bestvideo+bestaudio/best --all-subs --no-playlist -- "$url" | jq '.id' -r)
+  if [[ -n $id ]]; then
+    qbmode="$qbmode --qt-arg name qbmedia --desktop-file-name org.qutebrowser.mediabrowser --basedir $HOME/.config/qutebrowser/media --config-py $HOME/.config/qutebrowser/config.py $proxypac"
+    # shellcheck disable=2086
+    qutebrowser $qbmode --target window "https://rumble.com/embed/$id" "${@//\[\[AMPERSAND\]\]/&}"
+    exit 0
+  fi
+fi
+
+# # open youtube links in mpv
+# if [[ $url =~ ^https://invidious\. ]]; then
+#   mpv "$url" && exit 0
+# elif [[ $url =~ ^https://rumble\.com ]]; then
+#   mpv "$url" && exit 0
+# elif [[ $url =~ ^https://www\.youtube\.com ]]; then
+#   mpv "$url" && exit 0
+# fi
+
+browser_wm=$(wmctrl -d | grep '0:. '"$qbwm" | awk '{print $url}')
+qb_win=$(wmctrl -l | grep "${qbname}"'$' | grep "  $browser_wm " | awk '{print $url}')
+# qb_alt=$(wmctrl -l | grep "${qbname}"'$' | awk '{print $url}')
+
+if [[ -n $qb_win ]]; then
+  wmctrl -ia "$qb_win"
+  if [[ -n $1 ]]; then
+    # shellcheck disable=SC2086
+    qutebrowser $qbmode --target "$target" "$url" "${@//\[\[AMPERSAND\]\]/&}"
+  fi
+  exit 0
+fi
+
+# if [[ -n $qb_alt ]]; then
+#   wmctrl -ia "$qb_alt"
+#   if [[ -n $1 ]]; then
+#     # shellcheck disable=SC2086
+#     qutebrowser $qbmode --target "$target" "$url" "${@//\[\[AMPERSAND\]\]/&}"
+#   fi
+#   exit 0
+# fi
+
+if [[ $1 =~ ^https://appear.in/ || $1 =~ url=https%3A%2F%2Fappear.in%2F ]]; then
+  chromium --app="$1" "${@:2}"
+elif [[ $1 =~ ^http://chromecast.smplayer.info/ ]]; then
+  google-chrome-stable --app="$1" "${@:2}"
+else
+  # shellcheck disable=SC2086
+  # NODE_PATH="$(npm root -g)" \
+  # QTWEBENGINE_REMOTE_DEBUGGING=9222 \
+  # DISPLAY=${DISPLAY:-:1} \
+  NODE_PATH="$(npm root -g)" \
+  QTWEBENGINE_REMOTE_DEBUGGING=${port:-9222} \
+    qutebrowser $proxypac $qbmode --target "$target" "${@//\[\[AMPERSAND\]\]/&}"
+
+fi

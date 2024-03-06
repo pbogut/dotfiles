@@ -1,0 +1,9 @@
+# image/*; ~/.scripts/muttimage.sh %s; copiousoutput;
+text/html; email-in-browser %s; test=test -n "$DISPLAY"; needsterminal;
+text/html; w3m -I %{charset} -T text/html; copiousoutput;
+image/*; feh -. -Z %s
+application/pdf; pdftotext -layout %s -; copiousoutput;
+text/calendar; ~/.scripts/mutt-ics.sh %s int; needsterminal;
+text/calendar; ~/.scripts/mutt-ics.sh %s; copiousoutput;
+application/ics; ~/.scripts/mutt-ics.sh %s int; needsterminal;
+application/ics; ~/.scripts/mutt-ics.sh %s; copiousoutput;

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   wezterm-project
+# author: author <author_contact>
+# date:   02/01/2024
+#=================================================
+wezterm cli list --format json | jq '.[].cwd' -r

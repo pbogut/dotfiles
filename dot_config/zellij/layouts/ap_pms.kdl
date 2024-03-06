@@ -1,0 +1,21 @@
+layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="zellij:compact-bar"
+        }
+    }
+    tab name="nvim" focus=true {
+        pane command="nvim"
+    }
+    tab name="log" {
+        pane command="docker-compose" {
+            args "logs" "-f"
+        }
+    }
+    tab name="vite" {
+        pane command="bash" {
+            args "-c" "npm install && npm run dev"
+        }
+    }
+}

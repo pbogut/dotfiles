@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   tmux-project
+# author: author <author_contact>
+# date:   26/04/2023
+#=================================================
+project=false
+if [[ $TERM == "dumb" ]]; then
+    project=$(ls-project | rofi -dmenu -q "$1")
+else
+    project=$(ls-project | fzf -q "$1" --height=100%)
+fi
+
+if [[ ! $project == "" ]]; then
+    cd "$HOME/Projects/$project" || exit
+    touch -h "$HOME/Projects/$project"
+    if [[ $TERM == "dumb" ]]; then
+        $TERMINAL -e tmux-vim
+    else
+        tmux-vim
+    fi
+fi

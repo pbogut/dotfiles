@@ -1,0 +1,16 @@
+#!/bin/bash
+#=================================================
+# name:   tab2csv
+# author: Pawel Bogut <pbogut@ukpos.com> <http://pbogut.me>
+# date:   29/06/2017
+#=================================================
+if [[ $1 == "--debug" ]]; then
+  echo -e "\n\n\n"
+fi
+cat /dev/stdin | sed 's/"/_!_DOUBLE_!_QUOTE_!_/g' \
+               | sed 's/\t/","/g' \
+               | sed 's/\(.*\)/"\1"/g' \
+               | sed 's/,"\([^,]*\)",/,\1,/g' \
+               | sed 's/^"\([^,]*\)",/\1,/g' \
+               | sed 's/,"\([^,]*\)"$/,\1/g' \
+               | sed 's/_!_DOUBLE_!_QUOTE_!_/""/g'

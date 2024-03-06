@@ -1,0 +1,92 @@
+snippet arr "Laravel Arr helper"
+  use Illuminate\Support\Arr;
+snippet str "Laravel Arr helper"
+  use Illuminate\Support\Str;
+snippet schcr "Laravel Schema::create"
+	Schema::create('${1:table_name}', function (Blueprint \$table) {
+		${2:\$table->${3:increments}('${4:id}')};$0
+	});
+snippet schdr "Laravel Schema::drop"
+	Schema::drop('${1:table_name}');$0
+snippet schtab "Laravel Schema::table"
+	Schema::table('${1:table_name}', function (Blueprint \$table) {
+		${2:\$table->${3:increments}('${4:id}')};$0
+	});
+snippet fac "use facade"
+	use Illuminate\Support\Facades\\${1|App,Artisan,Auth,Blade,Bus,Cache,Config,Cookie,Crypt,DB,Event,File,Hash,Input,Lang,Log,Mail,Password,Queue,Redirect,Redis,Request,Response,Route,Schema,Session,Storage,URL,Validator,View|};
+snippet crud "Create CURD functions"
+	/**
+	 * Display a listing of the resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function index()
+	{
+		return view('${1:entity}.index');
+	}
+
+	/**
+	 * Show the form for creating a new resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function create()
+	{
+		return view('${1:entity}.create');
+	}
+
+	/**
+	 * Store a newly created resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  \$request
+	 * @return \Illuminate\Http\Response
+	 */
+	public function store(Request \$request)
+	{
+		return redirect('${1:entity}.show');
+	}
+
+	/**
+	 * Display the specified resource.
+	 *
+	 * @param  int \$id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function show(\$id)
+	{
+		return view('${1:entity}.show');
+	}
+
+	/**
+	 * Show the form for editing the specified resource.
+	 *
+	 * @param  int \$id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function edit(\$id)
+	{
+		return view('${1:entity}.edit');
+	}
+
+	/**
+	 * Update the specified resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  \$request
+	 * @param  int \$id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function update(Request \$request, \$id)
+	{
+		return redirect('${1:entity}.show');
+	}
+
+	/**
+	 * Remove the specified resource from storage.
+	 *
+	 * @param  int \$id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function destroy(\$id)
+	{
+		return redirect('${1:entity}.index');
+	}

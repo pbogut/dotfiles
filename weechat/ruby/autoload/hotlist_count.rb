@@ -1,1 +1,0 @@
-../hotlist_count.rb

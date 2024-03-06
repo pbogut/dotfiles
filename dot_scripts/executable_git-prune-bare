@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   git-prune-branches
+# author: Pawel Bogut <pbogut@assuredpharmacy.co.uk>
+# date:   05/10/2023
+#=================================================
+tree_params=""
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+}
+
+use_sudo=false
+
+while test $# -gt 0; do
+  case "$1" in
+    --force)
+      tree_params="$tree_params --force"
+      use_sudo=true
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+
+
+__get_main_branch() {
+  dir="$1"
+  sed -n 's/ref: refs\/heads\///p' < "$dir/HEAD"
+}
+
+__prune_local() {
+  main_branch="$1"
+  branches=$(git branch --merged "$main_branch" | grep -v "^\*" | grep -v '^+')
+
+  if [[ -n $branches ]]; then
+    echo "Branches merged with $main_branch:"
+    echo "$branches"
+    echo "^ Branches above will be removed ^"
+    read -p "Continue? [y/n] " -r confirm
+
+    if [[ $confirm == "y" ]]; then
+      # shellcheck disable=SC2086
+      git branch -d $branches
+    fi
+  else
+    echo "No local branches to remove"
+  fi
+}
+
+__prune_worktree() {
+  main_branch="$1"
+  branches=$(git branch --merged "$main_branch" | grep -v "^\*" | grep '^+' | sed 's/^+ /  /')
+
+  if [[ -n $branches ]]; then
+    echo "Worktrees merged with $main_branch:"
+    echo "$branches"
+    echo "^ Branches above will be removed ^"
+    read -p "Continue? [y/n] " -r confirm
+
+    if [[ $confirm == "y" ]]; then
+      while read -r branch; do
+        # shellcheck disable=SC2086
+        git worktree remove $tree_params "$branch"
+        result_code=$?
+        if [[ $result_code -eq 255 ]] && $use_sudo; then
+          echo ">> Branch removed but catalog could not be removed, using sudo!"
+          echo "sudo rm $branch"
+        fi
+      done <<< "$branches"
+    fi
+  else
+    echo "No worktrees to remove"
+  fi
+}
+
+__main() {
+  dir="$1"
+  main_branch=$(__get_main_branch "$dir")
+  cd "$dir" || exit 2
+  echo "Main branch: $main_branch"
+  __prune_worktree "$main_branch"
+  __prune_local "$main_branch"
+}
+
+if [[ $(git rev-parse --is-bare-repository 2> /dev/null) == "true" ]]; then
+  dir="$(realpath "$(git rev-parse --git-dir)")"
+  echo "Bare folder: $dir"
+  __main "$dir"
+else
+  git_dir="$(realpath "$(git rev-parse --git-dir)")"
+  top_level="$(realpath "$(git rev-parse --show-toplevel)")"
+  if [[ "$git_dir" == "$top_level/.git" ]]; then
+    echo "Normal git repo not supported! $top_level"
+    exit 1
+  else
+    dir="$(realpath "$(git rev-parse --git-dir)/../../")"
+    echo "Bare folder: $dir"
+    __main "$dir"
+  fi
+fi

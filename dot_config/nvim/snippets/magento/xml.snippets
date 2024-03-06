@@ -1,0 +1,156 @@
+snippet mconfig "Magento Config"
+	<?xml version="1.0"?>
+	<config>
+		<modules>
+			<${1:[[magento.module_key]]}>
+				<version>${2:0.1.0}</version>
+			</${1:[[magento.module_key]]}>
+		</modules>
+		mglobal$3
+		mdefault$4
+		madminhtml$4
+	</config>
+snippet mglobal "Magento Global Section"
+	${1:[[base_name]]}$0
+	<global>
+		mhelpers$1
+		mmodels$2
+		msetup$3
+	</global>
+snippet mdefault "Magento Setup Resource"
+	<default>
+		<${1:[[magento.module_key]]}>
+			<${2:section}>
+				<${3:field}>${4:value}</${3:field}>
+			</${2:section}>
+		</${1:[[magento.module_key]]}>
+	</default>
+snippet msetup "Magento Setup Resource"
+	<resources>
+		<${1:[[magento.module_key]]}_setup>
+			<setup>
+				<module>${2:[[magento.module_name]]}</module>
+			</setup>
+		</${1:[[magento.module_key]]}_setup>
+	</resources>
+snippet madminhtml "Magento Adminhtml Section"
+	<adminhtml>
+		macl$1
+	</adminhtml>
+snippet macl "Magento ACL Section"
+	<acl>
+		<resources>
+			<admin>
+				<children>
+					<system>
+						<children>
+							<config>
+								<children>
+									<${1:[[magento.module_key]]}>
+										<title>${2:[[magento.module_name_str]]}</title>
+									</${1:[[magento.module_key]]}>
+								</children>
+							</config>
+						</children>
+					</system>
+				</children>
+			</admin>
+		</resources>
+	</acl>
+snippet mhelpers "Magento Helpers"
+	<helpers>
+		mhelper$0
+	</helpers>
+snippet mhelper "Magento Helper"
+	<${1:[[magento.module_key]]}>
+		<class>${2:[[magento.module_name]]}_Helper</class>
+	</${1:[[magento.module_key]]}>
+snippet mmodels "Magento Models"
+	<models>
+		mmodel$1
+		mmodelresource$2
+	</models>
+snippet mmodel "Magento Model"
+	<${1:[[magento.module_key]]}>
+		<class>${2:[[magento.module_name]]}_Model</class>
+		<resourceModel>${3:[[magento.module_key]]}_resource</resourceModel>
+	</${1:[[magento.module_key]]}>
+snippet mmodelresource "Magento Model Resource"
+	<${1:[[magento.module_key]]}_resource>
+		<class>${2:[[magento.module_name]]}_Model_Resource</class>
+	</${1:[[magento.module_key]]}_resource>
+snippet mentities "Magento Model Resource"
+	<entities>
+		mentity$0
+	</entities>
+snippet mentity "Magento Model Resource"
+	<${1:entity}>
+		<table>${2:[[magento.module_key]]}_${1:entity}</table>
+	</${1:entity}>
+snippet mevents "Magento Events"
+	<events>
+		mevent$0
+	</events>
+snippet mevent "Magento Events"
+	<${1:core_block_abstract_to_html_before}>
+		<observers>
+			<${2:[[magento.module_key]]}_${1:core_block_abstract_to_html_before}>
+				<class>${3:[[magento.module_key]]}/${4:observer}</class>
+				<method>${5:yourMethod}</method>
+				<type>${6|singleton,model|}</type>
+			</${2:[[magento.module_key]]}>
+		</observers>
+	</$1>
+snippet mtabs "Magento System Tabs"
+	<tabs>
+		mtab$1
+	</tabs>
+snippet mtab "Magento System Tab"
+	<${1:[[magento.module_key]]}>
+		<label>${2:Tab Name}</label>
+		<sort_order>${3:100}</sort_order>
+		<show_in_default>${4:1}</show_in_default>
+		<show_in_website>${5:1}</show_in_website>
+		<show_in_store>${6:1}</show_in_store>
+	</${1:[[magento.module_key]]}>
+snippet msections "Magento Sections"
+	<sections>
+		msection$1
+	</sections>
+snippet msection "Magento Section"
+	<${1:[[magento.module_key]]}>
+		<label>${2:Section Name}</label>
+		<tab>${3:General}</tab>
+		<sort_order>${4:100}</sort_order>
+		<show_in_default>${5:1}</show_in_default>
+		<show_in_website>${6:1}</show_in_website>
+		<show_in_store>${7:1}</show_in_store>
+		<groups>
+			mgroup$8
+		</groups>
+	</${1:[[magento.module_key]]}>
+snippet mgroup "Magento Group"
+	<${1:group_key}>
+		<label>${2:Group Label}</label>
+		<sort_order>${3:100}</sort_order>
+		<show_in_default>${4:1}</show_in_default>
+		<show_in_website>${5:1}</show_in_website>
+		<show_in_store>${6:1}</show_in_store>
+		<fields>
+			mfield$7
+		</fields>
+	</${1:group_key}>
+snippet mfield "Magento Group"
+	<${1:field_key}>
+		<label>${2:Group Label}</label>
+		<sort_order>${3:10}</sort_order>
+		<frontend_type>${4:text}</frontend_type>
+		<show_in_default>${5:1}</show_in_default>
+		<show_in_website>${6:1}</show_in_website>
+		<show_in_store>${7:1}</show_in_store>
+	</${1:field_key}>
+snippet msystem "Magento System"
+	<?xml version="1.0"?>
+	<config>
+		msections$3
+	</config>

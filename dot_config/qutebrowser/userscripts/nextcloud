@@ -1,0 +1,409 @@
+#!/usr/bin/env python3
+
+"""
+Behavior:
+    A qutebrowser userscript that connects with Nextcloud API.
+
+Requirements:
+    requests
+
+userscript setup:
+    Optionally create ~/.config/qutebrowser/nextcloud.ini like:
+
+[nextcloud]
+HOST=https://nextcloud.example.com
+USER=username
+;PASSWORD=lamepassword
+DESCRIPTION=None
+;TAGS=just-one
+TAGS=read-me-later,added-by-qutebrowser, Another-One
+
+    If settings aren't in the configuration file, the user will be prompted during
+    bookmark creation.  If DESCRIPTION and TAGS are set to None, they will be left
+    blank. If the user does not want to be prompted for a password, it is recommended
+    to set up an 'app password'.  See the following for instructions:
+    https://docs.nextcloud.com/server/latest/user_manual/en/session_management.html#managing-devices  # noqa: E501
+
+qutebrowser setup:
+    add bookmark via hints
+        config.bind('X', 'hint links userscript nextcloud --add-bookmark')
+
+    add bookmark of current URL
+        config.bind('X', 'spawn --userscript nextcloud --add-bookmark')
+
+    open bookmark with dmenu
+        config.bind('X', 'spawn --userscript nextcloud --open-bookmark')
+
+troubleshooting:
+    Errors detected within this userscript will have an exit of 231.  All other
+    exit codes will come from requests.
+"""
+
+import configparser
+import subprocess
+import re
+import json
+import argparse
+from os import environ, path
+from sys import argv, exit
+
+from PyQt5.QtWidgets import QApplication, QInputDialog, QLineEdit
+from requests import get, post, delete
+from requests.auth import HTTPBasicAuth
+
+
+if "QUTE_FIFO" not in environ:
+    print(
+        "This script is designed to run as a qutebrowser userscript, "
+        "not as a standalone script."
+    )
+    exit(231)
+
+if "QUTE_CONFIG_DIR" not in environ:
+    if "XDG_CONFIG_HOME" in environ:
+        QUTE_CONFIG_DIR = environ["XDG_CONFIG_HOME"] + "/qutebrowser"
+    else:
+        QUTE_CONFIG_DIR = environ["HOME"] + "/.config/qutebrowser"
+else:
+    QUTE_CONFIG_DIR = environ["QUTE_CONFIG_DIR"]
+
+parser = argparse.ArgumentParser(
+    description='Toggle between visible workspaces.')
+parser.add_argument('--add-bookmark', dest='action', action='store_const',
+                    help='add url to bookmarks app',
+                    const="add_bookmark", default=False)
+parser.add_argument('--open-bookmark', dest='action', action='store_const',
+                    help='show bookmarks and open selected',
+                    const="open_bookmark", default=False)
+parser.add_argument('--delete-bookmark', dest='action', action='store_const',
+                    help='show bookmarks and delete selected',
+                    const="delete_bookmark", default=False)
+parser.add_argument('--sync-bookmark', dest='action', action='store_const',
+                    help='sync bookmarks',
+                    const="sync_bookmark", default=False)
+parser.add_argument('--rofi', dest='rofi', action='store',
+                    help='show rofi open / delete interface',
+                    nargs='?', const=None, default=False)
+parser.add_argument('--import-cookbook', dest='action', action='store_const',
+                    help='import recipe into nextcloud cookbook',
+                    const="import_cookbook", default=False)
+parser.add_argument('--new-tab', dest='new_tab', action='store_const',
+                    help='open url in new tab', const=True, default=False)
+
+args = parser.parse_args()
+
+if not args.action:
+    print(parser.format_help())
+    exit(1)
+
+
+class NextcloudApi():
+    def __init__(self, host, auth):
+        self.host = host
+        self.auth = HTTPBasicAuth(auth["user"], auth["password"])
+        self.headers = {"Content-Type": "application/json"}
+
+    def get(self, url_action, params = {}):
+        r = get(
+            self.host + '/' + url_action,
+            auth=self.auth,
+            headers=self.headers,
+            params=params,
+            timeout=(3.05, 27),
+        )
+        data = r.json()['data']
+        return data
+
+    def post(self, url_action, data = {}):
+        r = post(
+            self.host + "/" + url_action,
+            data=json.dumps(data),
+            headers=self.headers,
+            auth=self.auth,
+            timeout=(3.05, 27)
+        )
+        return (r.status_code, r)
+
+    def delete(self, url_action, data = {}):
+        r = delete(
+            self.host + "/" + url_action,
+            headers=self.headers,
+            auth=self.auth,
+            timeout=(3.05, 27)
+        )
+        return (r.status_code, r)
+
+    def get_bookmark(self, url):
+        return self.get("index.php/apps/bookmarks/public/rest/v2/bookmark", {
+            "url": url
+        })
+
+    def get_bookmarks(self):
+        return self.get("index.php/apps/bookmarks/public/rest/v2/bookmark", {
+            "page": -1
+        })
+
+    def add_bookmark(self, url: str, title: str, tags: list[str] = []):
+        status_code, _ = self.post("index.php/apps/bookmarks/public/rest/v2/bookmark", {
+            "url": url,
+            "title": title,
+            # "description": description,
+            "tags": tags,
+        })
+        return (status_code == 200, status_code)
+
+    def delete_bookmark(self, id: int):
+        status_code, _ = self.delete(
+            "index.php/apps/bookmarks/public/rest/v2/bookmark/" + str(id))
+        return (status_code == 200, status_code)
+
+    def import_cookbook(self, url):
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        r = post(
+            self.host + "/index.php/apps/cookbook/import",
+            data="url=" + url,
+            headers=headers,
+            auth=self.auth,
+            timeout=(3.05, 27)
+        )
+        msg = r.status_code
+        if len(r.text) < 255:
+            msg = r.text
+        return (r.status_code == 200, msg)
+
+
+def command(cmd):
+    with open(environ["QUTE_FIFO"], "w") as fifo:
+        fifo.write(cmd)
+        fifo.flush()
+
+def message(level, text):
+    """display message"""
+    command('message-{} "nextcloud userscript: {}"\n'.format(level, text))
+
+def get_local_bookmarks():
+    """Get bookmarks from local cache."""
+    try:
+        with open(QUTE_CONFIG_DIR + "/nextcloud-bookmarks.json", "r") as fifo:
+            data = json.loads(fifo.read())
+            fifo.close()
+    except:
+        data = {}
+
+    return data
+
+def set_local_bookmarks(data):
+    """Save bookmarks to local cache."""
+    with open(QUTE_CONFIG_DIR + "/nextcloud-bookmarks.json", "w") as fifo:
+        fifo.write(json.dumps(data))
+        fifo.flush()
+        fifo.close()
+
+    message("info", "bookmarks cache updated")
+
+def get_settings():
+    config_file = QUTE_CONFIG_DIR + "/nextcloud.ini"
+    if path.isfile(config_file):
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        settings = dict(config.items("nextcloud"))
+    else:
+        settings = {}
+
+    settings_info = []
+    if args.action == "open_bookmark":
+        settings_info = [
+            ("host", "host information.", "required"),
+            ("user", "username.", "required"),
+            ("password", "password.", "required")
+        ]
+
+    if args.action == "add_bookmark":
+        settings_info = [
+            ("host", "host information.", "required"),
+            ("user", "username.", "required"),
+            ("password", "password.", "required"),
+            ("title", "title or leave blank for auto", "optional"),
+            # ("description", "description or leave blank", "optional"),
+            ("tags", "tags (comma separated) or leave blank for read-me-later", "optional"),
+        ]
+
+    if args.action == "import_cookbook":
+        settings_info = [
+            ("host", "host information.", "required"),
+            ("user", "username.", "required"),
+            ("password", "password.", "required")
+        ]
+
+    # check for settings that need user interaction and clear optional setting if need be
+    for setting in settings_info:
+        if setting[0] not in settings:
+            userInput = get_text(setting[0], setting[1])
+            settings[setting[0]] = userInput
+        if setting[2] == "optional":
+            if settings[setting[0]] == "None":
+                settings[setting[0]] = ""
+
+    return settings
+
+
+def get_text(name, info):
+    """Get input from the user."""
+    _app = QApplication(argv)  # noqa: F841
+    _app
+    if name == "password":
+        text, ok = QInputDialog.getText(
+            None,
+            "goto-nextcloud-bookmarks userscript",
+            "Please enter {}".format(info),
+            QLineEdit.Password,
+        )
+    else:
+        text, ok = QInputDialog.getText(
+            None, "goto-nextcloud-bookmarks userscript", "Please enter {}".format(info)
+        )
+    if not ok:
+        message("info", "Dialog box canceled.")
+        exit(0)
+    return text
+
+
+settings = get_settings()
+
+qute_url = environ["QUTE_URL"]
+api_url = settings["host"] + "/index.php/apps/"
+
+nextcloud = NextcloudApi(settings['host'], settings)
+
+if args.action == "add_bookmark":
+    tags = settings["tags"].split(",")
+    if tags and len(tags) > 0:
+        pass
+    else:
+        tags = ['read-me-later']
+    title = settings["title"]
+    if title and len(title) > 0:
+        pass
+    else:
+        if environ["QUTE_MODE"] == "hints":
+            title = qute_url
+        else:
+            title = environ["QUTE_TITLE"]
+
+    bookmark = nextcloud.get_bookmark(qute_url)
+    if bookmark and len(bookmark) > 0:
+        message("info", "bookmark {} already exists".format(qute_url))
+    else:
+        success, _ = nextcloud.add_bookmark(qute_url, title, tags)
+        if success:
+            message("info", "bookmark {} added".format(qute_url))
+        else:
+            message("error", "something went wrong {} bookmark not added".format(qute_url))
+
+        # sync bookmarks with local cache
+        bookmarks = nextcloud.get_bookmarks()
+        set_local_bookmarks(bookmarks)
+
+
+if args.action == "sync_bookmark":
+    bookmarks = nextcloud.get_bookmarks()
+    set_local_bookmarks(bookmarks)
+
+
+def print_open_bookmark(data):
+    print("\0prompt\x1fOpen Bookmark")
+    icon = " "
+    if args.new_tab:
+        icon = " "
+    for entry in data:
+        line = icon + entry['title'] + ' | ' + entry[
+            'url'] + ' [' + ', '.join(
+                entry['tags']) + ']' + '\0info\x1f' + str(entry['id'])
+        print(line)
+
+
+def print_delete_bookmark(data):
+    print("\0prompt\x1fDelete Bookmark")
+    for entry in data:
+        line = " " + entry['title'] + ' | ' + entry[
+            'url'] + ' [' + ', '.join(
+                entry['tags']) + ']' + '\0info\x1f' + str(entry['id'])
+        print(line)
+
+
+def rofi_open_bookmark(selected):
+    data = get_local_bookmarks()
+    if selected is None:
+        print_open_bookmark(data)
+    else:
+        for entry in data:
+            id = environ["ROFI_INFO"]
+            if int(id) == entry['id']:
+                if args.new_tab:
+                    open_cmd = 'open -t {}\n'
+                else:
+                    open_cmd = 'open {}\n'
+                command(open_cmd.format(entry['url']))
+                command('spawn --userscript nextcloud --sync-bookmark')
+
+
+def rofi_delete_bookmark(selected):
+    data = get_local_bookmarks()
+    if selected is None:
+        print_delete_bookmark(data)
+    elif re.match(r'^confirmed:(.*)', selected):
+        id = re.match(r'^confirmed:(.*)', selected)[1]
+        nextcloud.delete_bookmark(int(id))
+        command('spawn --userscript nextcloud --sync-bookmark')
+    elif selected == "Yes":
+        id = environ["ROFI_INFO"]
+        command('spawn --userscript nextcloud --delete-bookmark --rofi confirmed:' + id)
+    elif selected == "No":
+        exit(0)
+    else:
+        for entry in data:
+            id = environ["ROFI_INFO"]
+            if int(id) == entry['id']:
+                data.remove(entry)
+                print("\0prompt\x1fConfirm Bookmark Deletion (" +
+                      entry['url'] + ")")
+                print('Yes\0info\x1f' + str(id))
+                print('No\0info\x1f0' + str(id))
+
+
+if args.action == 'delete_bookmark':
+    if args.rofi is not False:
+        rofi_delete_bookmark(args.rofi)
+    else:
+        if args.new_tab:
+            new_tab = ' --new-tab '
+        else:
+            new_tab = ' '
+        p = subprocess.run([
+            'rofi', '-show', 'd', '-modi',
+            'o:' + argv[0] + ' --open-bookmark' + new_tab + '--rofi,d:' +
+            argv[0] + ' --delete-bookmark --rofi'
+        ])
+
+if args.action == 'open_bookmark':
+    if args.rofi is not False:
+        rofi_open_bookmark(args.rofi)
+    else:
+        if args.new_tab:
+            new_tab = ' --new-tab '
+        else:
+            new_tab = ' '
+        p = subprocess.run([
+            'rofi', '-show', 'o', '-modi',
+            'o:' + argv[0] + ' --open-bookmark' + new_tab + '--rofi,d:' +
+            argv[0] + ' --delete-bookmark --rofi'
+        ])
+
+if args.action == "import_cookbook":
+    success, msg = nextcloud.import_cookbook(qute_url)
+    if success:
+        message("info", "recipe from {} added.".format(qute_url))
+    else:
+        message("warning", "cookbook app reports {}".format(msg))
+
+exit(0)

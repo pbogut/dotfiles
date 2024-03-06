@@ -1,9 +1,0 @@
-#!/bin/bash
-#=================================================
-# name:   dotfiles
-# author: Pawel Bogut <https://pbogut.me>
-# date:   04/02/2021
-#=================================================
-dotfiles() {
-  cd "$PROJECTS/github.com/pbogut/dotfiles"
-}

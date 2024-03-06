@@ -1,0 +1,11 @@
+#!/bin/bash
+#=================================================
+# name:   fzf-dmenu
+# author: Pawel Bogut <https://pbogut.me>
+# date:   14/01/2019
+#=================================================
+urxvt -T fzf-dmenu -e fzf
+_i3-msg "floating enable;
+    move absolute position 0px -16px;
+    resize set width 1920px"
+

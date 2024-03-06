@@ -1,0 +1,9 @@
+defmodule ${1:[[elixir.module_name]]} do
+	use ${2:[[elixir.base_module]]}.FeatureCase, async: false
+
+	test "${3:test description}", %{session: session} do
+		session
+		${4:|> visit("")
+		|> assert_has($0)}
+	end
+end

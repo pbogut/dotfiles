@@ -1,1 +1,0 @@
-shadowplay.wlsr.sh

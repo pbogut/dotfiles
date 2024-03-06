@@ -1,0 +1,44 @@
+snippet =ne "echo"
+	<?= /* @noEscape */ ${VISUAL}$0 ?>
+snippet customersession "use CustomerSession"
+	use Magento\Customer\Model\Session as CustomerSession;
+snippet checkoutsession "use CheckoutSession"
+	use Magento\Checkout\Model\Session as CheckoutSession;
+snippet messagemanager "use MessageManager"
+	use Magento\Framework\Message\Manager as MessageManager;
+snippet resultfactory "use ResultFactory"
+	use Magento\Framework\Controller\ResultFactory;
+snippet urlbuilder "use UrlBuilder"
+	use Magento\Framework\UrlInterface as UrlBuilder;
+snippet resultredirect "$resultRedirect"
+	/** @var Magento\Framework\Controller\Result\Redirect \$resultRedirect **/
+	\$resultRedirect = \$this->_resultFactory->create(ResultFactory::TYPE_REDIRECT);
+snippet resultredirect "$resultRedirect"
+	/** @var Magento\Framework\Controller\Result\Redirect \$resultRedirect **/
+	\$resultRedirect = \$this->_resultFactory->create(ResultFactory::TYPE_REDIRECT);
+snippet objectmanager "$objectManager"
+	/** @var \Magento\Framework\ObjectManagerInterface */
+	\$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+snippet log "log"
+	\Magento\Framework\App\ObjectManager::getInstance()
+		->get(\Psr\Log\LoggerInterface::class)
+		->info($0);
+snippet adapterfn "adapter function"
+	/** @var \Magento\Framework\DB\Adapter\Pdo\Mysql */
+	protected \$adapter = null;
+
+	/**
+	 * @return \Magento\Framework\DB\Adapter\Pdo\Mysql
+	 */
+	protected function getAdapter()
+	{
+		if (\$this->adapter == null) {
+			/** @var \Magento\Framework\ObjectManagerInterface \$objectManager */
+			\$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+			\$this->adapter = \$objectManager->get(\Magento\Framework\App\ResourceConnection::class)
+				->getConnection()
+				->select()
+				->getAdapter();
+		}
+		return \$this->adapter;
+	}

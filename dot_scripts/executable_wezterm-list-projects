@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   wezterm-list-projects
+# author: author <author_contact>
+# date:   04/01/2024
+#=================================================
+action="select"
+
+usage() {
+  echo "Ussage: ${0##*/} <ACTION> [OPTIONS]"
+  echo ""
+  echo "Actions:"
+  echo "  select                                 - select project (default)"
+  echo "  create_or_attach <session_name> <path> - create session or attach to it"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+}
+
+path=$PWD
+name=""
+
+while test $# -gt 0; do
+  case "$1" in
+    create_or_attach)
+      action="create_or_attach"
+      name=$2
+      path=$3
+      if [[ $name == "" ]] || [[ $path == "" ]]; then
+        echo "Session name and path are required"
+        exit 1
+      fi
+      shift
+      shift
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ $action == "create_or_attach" ]]; then
+    cd "$path" || exit 1
+    layout="nvim"
+
+    if [[ -f ./project.godot ]]; then
+      layout="godot"
+    fi
+    if [[ -f ./Cargo.toml ]]; then
+      layout="cargo"
+    fi
+
+    base_dir="$(dirname "$(git worktree list | grep '(bare)' | awk '{print $1}')")"
+    if [[ $? -ne 0 ]]; then
+      base_dir="$(git rev-parse --show-toplevel)"
+    fi
+    if [[ $base_dir != "" ]]; then
+      maybe_layout=$(jq -r '.["'"$base_dir"'"]' < ~/.config/zellij/layouts/sessions.json)
+      if [[ $maybe_layout != "null" ]]; then
+        layout="$maybe_layout"
+      fi
+    fi
+
+    zellij -s "$name" -l "$layout" options --default-cwd "$path" || zellij attach "$name"
+    exit 0
+fi
+
+project=false
+if [[ $TERM == "dumb" ]]; then
+    project=$(ls-project | wofi --dmenu -q "$1" --cache-file /dev/null)
+else
+    project=$(ls-project | fzf -q "$1" --height=100%)
+fi
+
+
+if [[ $project != "" ]]; then
+    cd "$HOME/Projects/$project" || exit
+    touch -h "$HOME/Projects/$project"
+    wezterm-project "$PWD" "$(wezterm-status "$PWD" --title)"
+    # disown
+fi

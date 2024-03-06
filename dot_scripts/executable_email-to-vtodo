@@ -1,0 +1,54 @@
+#!/bin/bash
+#=================================================
+# name:   email-to-vtodo
+# author: Pawel Bogut <https://pbogut.me>
+# date:   09/11/2019
+#=================================================
+while [[ $# -gt 0 ]]; do
+    key="$1"
+
+    case $key in
+    -m | --mail)
+        EMAIL_FILE="$2"
+        shift # past argument
+        shift # past value
+        ;;
+    -l | --list)
+        CAL_LIST="$2"
+        shift # past argument
+        shift # past value
+        ;;
+    -c | --category)
+        CATEGORY="$2"
+        shift # past argument
+        shift # past value
+        ;;
+    *) # unknown option
+        POSITIONAL+=("$1") # save it in an array for later
+        shift              # past argument
+        ;;
+    esac
+done
+
+if [[ $EMAIL_FILE == "-" ]]; then
+    EMAIL_FILE="/dev/stdin"
+fi
+email_content=$(mktemp)
+cat $EMAIL_FILE >$email_content
+
+message_id=$(enrichmail --get-message-id "$email_content" | base64 | sed 'N;s,[^A-Za-z0-9],,g')
+subject=$(enrichmail --get-subject "$email_content" | sed 's,",,')
+
+description="http://localhost:6245?q=$message_id"
+
+if [[ "$CAL_LIST" == "" ]]; then
+    CAL_LIST=$(echo "personal
+work" | fzf --prompt "Select calendar (press ESC to cancel): ")
+fi
+if [[ "$CAL_LIST" == "" ]]; then
+    exit 0 #
+fi
+
+echo $description | todo new -r -l $CAL_LIST "$subject @$CATEGORY"
+task_id=$(todo list | sort -h | tail -n1 | awk '{print $1}')
+urxvt -geometry 130x35 -T FLOATING_WINDOW -e zsh -ic "todo edit $task_id" &

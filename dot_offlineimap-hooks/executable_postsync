@@ -1,0 +1,115 @@
+#!/bin/bash
+
+notmuch new
+
+account="$1"
+if [[ $account == "" ]]; then
+  sort_filter="*"
+else
+  sort_filter="$account"
+fi
+
+# if [[ ! -z "$(ps -e | grep neomutt)" ]]; then
+#   exit 0
+# fi
+
+# tags as directories
+# im removing new tag so I can set everything
+# before archive, which in gmails contain all mails by default (fy Google)
+notmuch tag +sort_directories -- tag:new
+# shellcheck disable=2012
+ls -1d --color=never "$HOME/Maildir/$sort_filter/INBOX" \
+    | sed "s#$HOME/Maildir/#folder:#g" \
+    | xargs notmuch tag -sort_directories +inbox -- tag:sort_directories and
+# shellcheck disable=2012
+ls -1d --color=never "$HOME/Maildir/$sort_filter/drafts" \
+    | sed "s#$HOME/Maildir/#folder:#g" \
+    | xargs notmuch tag -sort_directories +drafts +draft -inbox -- tag:sort_directories and
+# shellcheck disable=2012
+ls -1d --color=never "$HOME/Maildir/$sort_filter/sent" \
+    | sed "s#$HOME/Maildir/#folder:#g" \
+    | xargs notmuch tag -sort_directories +sent -inbox -- tag:sort_directories and
+# shellcheck disable=2012
+ls -1d --color=never "$HOME/Maildir/$sort_filter/trash" \
+    | sed "s#$HOME/Maildir/#folder:#g" \
+    | xargs notmuch tag -sort_directories +trash -inbox -- tag:sort_directories and
+# shellcheck disable=2012
+ls -1d --color=never "$HOME/Maildir/$sort_filter/spam" \
+    | sed "s#$HOME/Maildir/#folder:#g" \
+    | xargs notmuch tag -sort_directories +spam -inbox -- tag:sort_directories and
+# shellcheck disable=2012
+ls -1d --color=never "$HOME/Maildir/$sort_filter/archive" \
+    | sed "s#$HOME/Maildir/#folder:#g" \
+    | xargs notmuch tag -sort_directories +archive -inbox -- tag:sort_directories and
+# sorted, get rid of remaining (if any?)
+notmuch tag -sort_directories -- tag:sort_directories
+
+# hook up after directories are sorted, so we dont mess with them anymore
+if [[ -f ~/.offlineimap-hooks/mails-to-myself ]]; then
+    ~/.offlineimap-hooks/mails-to-myself
+fi
+
+notmuch tag +spam -inbox -- 'tag:new and subject:^[SPAM]'
+
+notmuch tag +drafts -- folder:/drafts/ tag:new
+notmuch tag +sent -- folder:/sent/ tag:new
+notmuch tag +trash -- folder:/trash/ tag:new
+notmuch tag +spam -- folder:/spam/ tag:new
+notmuch tag +sendmail -unread -inbox -- folder:sendmail tag:new
+
+# add image tag
+notmuch tag +image -- tag:new and mimetype:image
+notmuch tag +attachment -- tag:new and attachment
+# set up account tag
+notmuch search --output=threads tag:new | while read -r thread; do
+    notmuch search --output=files "$thread" | grep -v 'Maildir/sent' | sed 's#.*Maildir/\([^/]*\)/.*#+account-\1#' | while read -r account; do
+        notmuch tag "$account" -- "$thread"
+    done
+done
+# tag github messages
+notmuch search --output=files from:notifications@github.com and tag:new | while read f; do
+    # shellcheck disable=2002
+    tag=$(cat "$f" | grep '^To: ' | sed 's/^To: \([^ ]*\).*/\1/g' | sed 's/^"\(.*\)"$/\1/')
+    id=$(enrichmail --get-message-id "$f")
+    notmuch tag +"github/$tag" +github -- id:"$id"
+done
+
+# tag gitlab messages
+notmuch search --output=files from:gitlab@mg.gitlab.com and tag:new | while read f; do
+    # shellcheck disable=2002
+    tag=$(cat "$f" | grep '^X-GitLab-Project-Path: ' | sed 's/^X-GitLab-Project-Path: \([^ ]*\).*/\1/g')
+    id=$(enrichmail --get-message-id "$f")
+    notmuch tag +"gitlab/$tag" +gitlab -- id:"$id"
+done
+
+# notmuch tag -inbox -- "(tag:work and tag:inbox) and not tag:unread"
+
+# emails from myself
+notmuch tag -inbox -unread +sent -- from:"Pawel Bogut" and tag:new
+notmuch tag -inbox -unread +sent -- from:"Paweł Bogut" and tag:new
+# todoist tasks
+notmuch tag -inbox -unread +archive -- to:add.task%todoist.net and tag:new
+
+# custom spam filter +spam tag
+if [[ -f ~/.offlineimap-hooks/spam-filter ]]; then
+    ~/.offlineimap-hooks/spam-filter
+fi
+
+# add senders to abook
+# notmuch search --output=files tag:new | while read l; do cat "$l" | abook --add-email-quiet; done
+# remove duplicates
+# ~/.scripts/abook-remove-duplicates.sh
+
+# auto archivie couses issues with gmail - wrrrr....
+#notmuch tag +archive -- date:..`date --date='6 month ago' +%Y-%m-%d`
+
+# Thread view - Add sent and archive items to inbox if part of the thread is in inbox
+# shellcheck disable=2046,2005
+notmuch tag +inbox -archive -- "(tag:inbox $(echo $(notmuch search --output=threads tag:inbox and tag:new and not:gitlab and not:github | awk '{print "or " $1}')))"
+
+if [[ -f ~/.offlineimap-hooks/special-tags ]]; then
+    ~/.offlineimap-hooks/special-tags
+fi
+
+notmuch tag -new -- tag:new #clear new tag
+pkill -RTMIN+25 -x waybar

@@ -1,0 +1,281 @@
+#!/bin/bash
+
+# Log output:
+#
+# * 51c333e    (12 days)    <Gary Bernhardt>   add vim-eunuch
+#
+# The time massaging regexes start with ^[^<]* because that ensures that they
+# only operate before the first "<". That "<" will be the beginning of the
+# author name, ensuring that we don't destroy anything in the commit message
+# that looks like time.
+#
+# The log format uses } characters between each field, and `column` is later
+# used to split on them. A } in the commit subject or any other field will
+# break this.
+
+HASH="%C(yellow)%h%Creset"
+RELATIVE_TIME="%Cgreen(%ar)%Creset"
+AUTHOR="%C(bold blue)<%an>%Creset"
+REFS="%C(bold red)%d%Creset"
+SUBJECT="%s"
+
+FORMAT="$HASH}$RELATIVE_TIME}$AUTHOR}$REFS $SUBJECT"
+# due to column issue with colors
+FORMAT="$HASH | $RELATIVE_TIME | $AUTHOR | $REFS $SUBJECT"
+
+ANSI_RED='\033[31m'
+ANSI_RESET='\033[0m'
+
+show_git_head() {
+  pretty_git_log -1
+  git show -p --pretty="tformat:"
+}
+
+create_clean_staging() {
+  git co master && git branch -D staging && git cc staging
+}
+
+pretty_git_log() {
+  width=$(stty size | awk '{print $2}')
+  width=$((width - 12))
+
+  ( echo    " ╭─────────╮"
+    echo    " │ Git Log │"
+    echo -n "─╯         ╰"
+    x=0; while test $x -lt $width; do echo -n '─'; x=$((x + 1)); done;
+    echo ""
+    git log --color=always --graph --pretty="tformat:${FORMAT}" $*
+    ) |
+    # Replace (2 years ago) with (2 years)
+    sed -Ee 's/(^[^<]*) ago\)/\1)/' |
+    # Replace (2 years, 5 months) with (2 years)
+    sed -Ee 's/(^[^<]*), [[:digit:]]+ .*months?\)/\1)/' |
+    # Line columns up based on } delimiter
+    # Disabled due to column issue with colors
+    # column -s '}' -t |
+    sed -Ee 's,\(\s\{20\}\), ,g' |
+    # sed 's,},\t\t,' |
+    # sed 's,\(.*\)}\(.*\)}\(.*\)}\(.*\),\1\t\t\2\t\3\t\t\4,g' |
+    # Color merge commits specially
+    sed -Ee "s/(Merge (branch|remote-tracking branch|pull request) .*$)/$(printf $ANSI_RED)\1$(printf $ANSI_RESET)/" |
+    # Page only if we're asked to.
+    if [ -n "$GIT_NO_PAGER" ]; then
+      cat
+    else
+      # Page only if needed.
+      less --quit-if-one-screen --no-init --RAW-CONTROL-CHARS --chop-long-lines
+    fi
+}
+
+git_clone_to_projects_gl() {
+  repo=$1
+  if [[ ! "$1" =~ @ ]] && [[ ! "$1" =~ ^http ]]; then
+    repo="git@gitlab.com:$repo.git"
+  fi
+
+  if [[ "$2" == "" ]]; then
+    dest="$HOME/Projects/$(echo "$repo" |
+      sed 's#[^@]*@##' |
+      sed 's#^\(https\|http\)://##g' |
+      sed 's#:#/#g' |
+      sed 's#\.git$##g' |
+      awk '{print tolower($0)}')"
+  else
+    dest="$2"
+  fi
+  if [[ -n $repo ]]; then
+    git clone $repo $dest
+  else
+    echo "You must specify a repository to clone."
+    echo
+    echo "usage: git cl <repo> [<dir>]"
+    echo
+    echo "If no dir provided then ~/Projects/<git-host>/<repo-owner>/<repo-name> is used."
+    echo
+  fi
+}
+git_clone_to_projects_bare() {
+  repo=$1
+  domain="github.com"
+  if [[ "$1" =~ .*/.*/.* ]]; then
+    domain=$(sed -E 's,([^/]*).*,\1,' <<< "$1")
+    repo=$(sed -E 's,[^/]*/(.*),\1,' <<< "$1")
+  fi
+  if [[ ! "$1" =~ @ ]] && [[ ! "$1" =~ ^http ]]; then
+    # use github by default
+    repo="git@$domain:$repo.git"
+  fi
+
+  if [[ "$repo" =~ ^https://github.com/ ]]; then
+    repo="git@github.com:${repo##https://github.com/}.git"
+  fi
+
+  if [[ "$repo" =~ ^https://gitlab.com/ ]]; then
+    repo="git@gitlab.com:${repo##https://gitlab.com/}.git"
+  fi
+
+  if [[ "$2" == "" ]]; then
+    dest="$HOME/Projects/$(echo "$repo" |
+      sed 's#[^@]*@##' |
+      sed 's#^\(https\|http\)://##g' |
+      sed 's#:#/#g' |
+      sed 's#\.git$##g' |
+      awk '{print tolower($0)}')"
+  else
+    dest="$2"
+  fi
+  if [[ -n $repo ]]; then
+    unset GIT_DIR
+    git clone "$repo" "$dest/.bare" --bare
+    cd "$dest" || exit
+    echo "gitdir: ./.bare" > .git
+    git -C "$dest" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+    # add group write, handy when using docker
+    setfacl -d -m "group:$(id -gn):rwx" .
+    chmod g+w . -R
+    main_branch=$(awk '{print $2}' < .bare/HEAD)
+    main_branch=${main_branch##*/}
+    git -C "$dest" worktree add "$dest/$main_branch"
+    cd "$main_branch" || exit
+    git -C "$dest" fetch
+    git -C "$dest" branch --set-upstream-to=origin/"$main_branch"
+  else
+    echo "You must specify a repository to clone."
+    echo
+    echo "usage: git br <repo> [<dir>]"
+    echo
+    echo "If no dir provided then ~/Projects/<git-host>/<repo-owner>/<repo-name> is used."
+    echo
+  fi
+}
+git_clone_to_projects() {
+  repo=$1
+  if [[ ! "$1" =~ @ ]] && [[ ! "$1" =~ ^http ]]; then
+    # use github by default
+    repo="git@github.com:$repo.git"
+  fi
+
+  if [[ "$2" == "" ]]; then
+    dest="$HOME/Projects/$(echo "$repo" |
+      sed 's#[^@]*@##' |
+      sed 's#^\(https\|http\)://##g' |
+      sed 's#:#/#g' |
+      sed 's#\.git$##g' |
+      awk '{print tolower($0)}')"
+  else
+    dest="$2"
+  fi
+  if [[ -n $repo ]]; then
+    git clone "$repo" "$dest"
+    cd "$dest" || exit
+    # add group write, handy when using docker
+    setfacl -d -m "group:$(id -gn):rwx" .
+    chmod g+w . -R
+  else
+    echo "You must specify a repository to clone."
+    echo
+    echo "usage: git cl <repo> [<dir>]"
+    echo
+    echo "If no dir provided then ~/Projects/<git-host>/<repo-owner>/<repo-name> is used."
+    echo
+  fi
+}
+git_push_upstream() {
+  git push --set-upstream origin $(git branch | grep \* | cut -d ' ' -f2)
+}
+
+git_fzf_st() {
+  git -c color.status=always status --short | fzf \
+    --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview,ctrl-w:backward-kill-word \
+    --ansi \
+    --preview 'sh -c "[ -f {-1} ] && (
+        (
+          (
+             git diff {-1} > /dev/null 2>&1 && git diff --color=always -- {-1} || cat {-1}
+          ) | sed 1,4d; ccat --color=always {-1}
+        ) | head -n 250
+      ) || echo Preview is not available."' | tee >/dev/null
+  git st
+}
+
+git_pull_pull_request() {
+  current_branch=$(git branch | grep '^\*' | awk '{ print $2 }')
+  pr=$(git branch | grep '^\*' | awk '{ print $2 }' | sed 's,pull_request/\([0-9]*\)$,\1,' | sed 's,[^0-9]*,,')
+  if [[ ! $pr == "" ]]; then
+    git pull ${1:-origin} "pull/$pr/head:pull_request/$pr"
+  else
+    echo "I don't think this is a pr branch"
+  fi
+}
+
+git_checkout_pull_request() {
+  current_branch=$(git branch | grep '^\*' | awk '{ print $2 }')
+  if [[ $current_branch == "pull_request/$1" ]]; then
+    git fetch
+  else
+    git fetch ${3:-origin} "pull/$1/head:${2:-pull_request/$1}"
+  fi
+  git checkout "pull_request/$1"
+}
+
+git_ls() {
+  git ls-files |
+    while read l; do echo -e "\033[0;34mG\033[0m  $l"; done
+  git -c color.status=always status --short
+}
+git_add_and_apply_patch() {
+  echo $1 $2 $3 $4
+  echo $(pwd)
+  git add -N $1
+  git add -p $1
+}
+
+git_add_parent_upstream() {
+  git remote -v | grep 'github\.com' | sed -E 's,.*\s.*github\.com.(.*)/(.*)\s.*,\1 \2,' | (
+    read user repo
+    repo=${repo%%.git}
+    parent=$(curl https://api.github.com/repos/$user/$repo 2>/dev/null | jq -r .parent.ssh_url)
+    echo $parent $user $repo
+    if [[ -z "$user" || -z "$repo" || -z "$parent" ]]; then
+      echo "Cant find parent repo."
+      exit 1
+    fi
+    echo -n "Adding $parent as upstream ..."
+    git remote add upstream $parent
+    if [[ $? -eq 0 ]]; then
+      echo "done"
+    fi
+  )
+}
+
+git_sync_upstream() {
+  git pull upstream $(git branch | grep '^\* ' | sed 's,^\* ,,')
+}
+
+git_checkout_or_create_branch() {
+  branch=$1
+  if [[ "$branch" == "" ]]; then
+    branch=$(git branch | rofi -dmenu -i)
+  fi
+
+  output=$(git checkout $branch 2>&1 >/dev/null)
+  if [[ $? != 0 ]]; then
+    output2=$(git checkout -b $branch 2>&1 >/dev/null)
+    if [[ $? != 0 ]]; then
+      echo "$output"
+    else
+      echo "$output2"
+    fi
+  else
+    echo "$output"
+  fi
+}
+
+git_diff_export() {
+  master="${1:-master}"
+  branch="${2:-$(git branch | grep '^\* ' | sed 's,^\* ,,')}"
+  file="$branch.diff"
+  echo "git diff \$(git merge-base $master $branch) > $file"
+  echo git diff $(git merge-base $master $branch) '>' $file
+  git diff $(git merge-base $master $branch) >$file
+}

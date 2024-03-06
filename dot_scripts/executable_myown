@@ -1,0 +1,18 @@
+#!/bin/bash
+#=================================================
+# name:   myown
+# author: Pawel Bogut <http://pbogut.me>
+# date:   11/06/2017
+#=================================================
+if [[ ! $1 == "" ]]; then
+  sudo chown $(id -un):$(id -gn) $1 $2
+  if [[ $2 == "-f" ]]; then
+    inotifywait -rqme create --format '%w%f' ${1:-.} | while read l; do
+      sudo chown $(id -un):$(id -gn) $l
+      echo chown $(id -un):$(id -gn) $l
+    done
+  fi
+else
+  echo "Usage:"
+  echo -e "\tmyown <path|file> [-f]"
+fi

@@ -1,0 +1,11 @@
+snippet postgres "PostgerSQL service"
+	${2:db}:
+		image: postgres
+		hostname: ${1:app_name}.postgres.local
+		restart: always
+		environment:
+			POSTGRES_PASSWORD: postgres
+snippet mail "Mailhog service"
+	${2:mailhog}:
+		image: mailhog/mailhog:latest
+		hostname: ${1:app_name}.mailhog.local

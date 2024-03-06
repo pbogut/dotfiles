@@ -1,0 +1,39 @@
+snippet fn
+	${1|public,protected,private|} function ${2:FnName}(${3:\$args})
+	{
+		$4
+	}$0
+snippet cl "class name (file name)"
+	class ${1:[[base_name]]}$0
+snippet cl1 "class psr-1"
+	class ${1:[[php.class1]]}$0
+snippet ns "namespace"
+	namespace ${1:[[php.namespace]]};$0
+snippet cn "constructor"
+	/**
+	 * Constructor$1
+	 */
+	public function __construct($2)
+	{
+	  $3
+	}$0
+snippet doc "documentation"
+	[[php.doc]]$0
+snippet doc_class "class doc"
+	/**
+	 * Class ${1:[[php.get_class_name]]}
+	 * $4
+	 * @author ${2:[[author]]} <${3:[[author_contact]]}>
+	 */$0
+snippet doc_property "property doc"
+	/**
+	 * @var ${1:PropertyType}$2
+	 */$0
+snippet doc_function "function doc"
+	/**
+	 * ${1:Documenttation}
+	 *
+	 * @return ${2:mixed}
+	 */$0
+snippet doc_variable "variable doc"
+	/** @var ${1:PropertyType}$2 \$[[php.get_variable_name]] */

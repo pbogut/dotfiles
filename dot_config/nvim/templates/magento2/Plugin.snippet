@@ -1,0 +1,32 @@
+<?php
+
+namespace [[php.namespace]];
+
+use ${1:Some\Class} as Subject;
+
+/**
+ * Class [[php.class]]
+ *
+ * @author ${2:[[author]]} <${3:[[author_contact]]}>
+ */
+class [[php.class]]
+{
+	public function before${4:Action}(Subject \$subject, \$arg)
+	{
+		\$subject;
+		return [\$arg];
+	}
+
+	public function after$4(Subject \$subject, \$result, ...\$args)
+	{
+		\$subject;
+		return \$result;
+	}
+
+	public function around$4(Subject \$subject, callable \$proceed, ...\$args)
+	{
+		\$subject;
+		\$result = \$proceed(...\$args);
+		return \$result;
+	}
+}

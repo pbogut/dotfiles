@@ -1,0 +1,88 @@
+#!/bin/bash
+#=================================================
+# name:   docnet.sh
+# author: Pawel Bogut <pbogut@ukpos.com> <http://pbogut.me>
+# date:   18/05/2017
+#=================================================
+if [[ ! $(id -u) == 0 ]]; then
+  echo Must be run as a user, try: sudo $(basename $0)
+  exit 1
+fi
+
+dnsip=$(ifconfig docker0 | awk '/inet /{print $2}')
+hosts="/etc/hosts"
+
+__clear() {
+  sed -i '/# managed by docnet$/d' $hosts
+}
+
+__disconnet() {
+  sed -i "/#$1# managed by docnet$/d" $hosts
+}
+
+__remove() {
+  if [[ -n $1 && -n $2 && -n $3 ]]; then
+    sed -i "/$1 $2 .*#$3# managed by docnet$/d" $hosts
+  fi
+}
+
+__add() {
+  if [[ -n $1 && -n $2 && -n $3 ]]; then
+    __remove $1 $2 $3
+
+    padded="$(echo $1 $2 | awk '{x=$0;for(i=length;i<70;i++)x=x " ";}END{print x}')"
+
+    echo "$padded #$3# managed by docnet" | tee -a $hosts
+  fi
+}
+
+__connect() {
+      hash=$1
+      echo $hash
+      inspect=$(docker inspect $hash 2>/dev/null)
+      if [[ $? == 0 ]]; then
+        host=$(echo $inspect | jq '.[0].Config.Hostname' -r)
+        domain=$(echo $inspect | jq '.[0].Config.Domainname' -r)
+        if [[ $domain == "" ]]; then
+          url=$host
+        else
+          url=$host.$domain
+        fi
+
+        ip=$(echo $inspect | jq '.[0].NetworkSettings.IPAddress' -r)
+        if [[ $ip == "" ]]; then
+          ip=$(echo $inspect |jq '.[0].NetworkSettings.Networks | map(.IPAddress) | first' -r)
+        fi
+        __add $ip $url $hash
+
+        docker inspect $hash 2>/dev/null |
+          jq  '.[0].NetworkSettings.Networks | map(select(.Aliases)) | map(.Aliases[])[]' -r |
+          grep '\.' | while read alias; do
+            __add $ip $alias $hash
+          done
+      fi
+}
+
+__clear
+
+while :; do # in case something crashes we want to restart it
+
+  # set up already started containers
+  docker ps | awk '{print $1}' | while read hash; do
+    hash=$(echo $hash |sed 's,^\(.\{12\}\).*,\1,')
+    __connect $hash
+  done
+
+  # systemctl restart dnsmasq
+
+  docker events | while read line; do
+    echo $line | grep 'network \(connect\|disconnect\)' | sed 's,.*network \(disconnect\|connect\).*container=\([0-9a-z]*\)\,.*,\1 \2,' | (read action hash
+      hash=$(echo $hash |sed 's,^\(.\{12\}\).*,\1,')
+      if [[ $action == "connect" ]]; then
+        __connect $hash
+      elif [[ $action == "disconnect" ]]; then
+        __disconnet $hash
+      fi
+    )
+  done
+done

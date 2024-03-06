@@ -1,0 +1,213 @@
+<?php
+
+/**
+ * Class ${1:[[php.class1]]}
+ *
+ * @author ${2:[[author]]} <${3:[[author_contact]]}>
+ */
+class [[php.class1]] extends Mage_Adminhtml_Controller_Action
+{
+		protected function _isAllowed()
+		{
+				return Mage::getSingleton('admin/session')->isAllowed('admin/promo/${5:module_entity}');
+		}
+
+
+		protected function _initAction()
+		{
+				\$this->loadLayout()
+						->_setActiveMenu('promo/${5:module_entity}/promotion');
+
+				return \$this;
+		}
+
+		/**
+		 * Displays the '${4:module_key}/adminhtml_promotion' block
+		 * - this is a Mage_Adminhtml_Block_Widget_Grid_Container block
+		 * - - this automatically adds the child grid block: [CONTAINERS-_blockGroup]/[CONTAINERS-_controller]_grid'
+		 *     => ${4:module_key}/adminhtml_promotion_grid
+		 */
+		public function indexAction()
+		{
+				\$this->_initAction()
+						->_addContent(\$this->getLayout()->createBlock('${4:module_key}/adminhtml_promotion'))
+						->renderLayout();
+
+		}
+
+		/**
+		 * Displays the '${4:module_key}/adminhtml_promotion_edit' block
+		 * - this is a Mage_Adminhtml_Block_Widget_Form_Container block
+		 * - - this automatically adds the child grid block: [CONTAINERS-_blockGroup]/[CONTAINERS-_controller]_[CONTAINERS-_mode]_form'
+		 *     => ${4:module_key}/adminhtml_promotion_edit_form
+		 */
+		public function newAction()
+		{
+				//\$template = \$this->getRequest()->getParam('template', false);
+				\$template = 'boxes';
+				if (\$template) {
+						try {
+								if (!Mage::getModel('${4:module_key}/template_' . \$template)) {
+										throw new Exception('${4:module_key}/template_' . \$template . ' does not exists.');
+								};
+								\$model = Mage::getModel('${4:module_key}/promotion');
+								\$model->setTemplate(\$template);
+								Mage::register('current_ukpos_promolist_promotion', \$model);
+						} catch (Exception \$e) {
+								Mage::getSingleton('adminhtml/session')->addError(\$this->__('Template does not exist.'));
+								Mage::log(\$e);
+						}
+				}
+				\$this->_initAction()
+						->_addContent(\$this->getLayout()->createBlock('${4:module_key}/adminhtml_promotion_edit'))
+						->renderLayout();
+		}
+
+		/**
+		 * Loads requested '${4:module_key}/promotion' model and stores in registry
+		 *
+		 * Displays the '${4:module_key}/adminhtml_promotion_edit' block
+		 * - this is a Mage_Adminhtml_Block_Widget_Form_Container block
+		 * - - this automatically adds the child grid block: [CONTAINERS-_blockGroup]/[CONTAINERS-_controller]_[CONTAINERS-_mode]_form'
+		 *     => ${4:module_key}/adminhtml_promotion_edit_form
+		 */
+		public function editAction() {
+				\$model  = Mage::getModel('${4:module_key}/promotion');
+				\$entityId = \$this->getRequest()->getParam('id', null);
+
+				if (\$entityId) {
+						\$model->load(\$entityId);
+						if (!\$model->getId()) {
+								\$this->_getSession()->addError(\$this->__('This entity no longer exists'));
+								return \$this->_redirect('*/*');
+						}
+				}
+
+				\$data = Mage::getSingleton('adminhtml/session')->getFormData(true);
+				if (!empty(\$data)) {
+						\$model->addData(\$data);
+				}
+
+				Mage::register('current_ukpos_promolist_promotion', \$model);
+				try {
+						return \$this->_initAction()
+								->_addContent(\$this->getLayout()->createBlock('${4:module_key}/adminhtml_promotion_edit'))
+								->renderLayout();
+				} catch (Exception \$e) {
+						Mage::getSingleton('adminhtml/session')->addError(\$e->getMessage());
+						Mage::log(\$e);
+						return \$this->_redirect('*/*');
+				}
+		}
+
+		public function saveAction()
+		{
+				\$redirectPath   = '*/*/';
+				\$redirectParams = array();
+
+				\$data = \$this->getRequest()->getPost();
+				if (\$this->getRequest()->isPost() && \$data) {
+						\$model          = Mage::getModel('${4:module_key}/promotion');
+						\$redirectBack   = \$this->getRequest()->getParam('back', false);
+						\$hasError       = false;
+
+						\$entityId = \$this->getRequest()->getParam('id');
+						try {
+								if (\$entityId) {
+										\$model->load(\$entityId);
+										if (\$entityId != \$model->getId()) {
+												Mage::throwException(\$this->__('Wrong promotion specified.'));
+										}
+								}
+								if (empty(\$data['id'])) {
+										unset(\$data['id']);
+								}
+								\$model->setData(\$data);
+								\$model->save();
+
+								\$this->_getSession()->addSuccess(
+										\$this->__('The entity has been saved.')
+								);
+
+								if (\$redirectBack) {
+										\$this->_redirect('*/*/edit', array(
+												'id'       => \$model->getId(),
+												'_current' => true,
+										));
+										return;
+								}
+						} catch (Mage_Core_Exception \$e) {
+								\$this->_getSession()->addError(\$e->getMessage());
+								\$hasError = true;
+						} catch (Exception \$e) {
+								\$this->_getSession()->addException(\$e,
+										\$this->__('An error occurred while saving the entity.')
+								);
+								Mage::getSingleton('adminhtml/session')->addError(\$e->getMessage());
+								Mage::getSingleton('adminhtml/session')->setPageData(\$data);
+								\$this->_redirect('*/*/edit', array('id' => \$entityId));
+								return;
+						}
+
+						if (\$hasError) {
+								\$this->_getSession()->setFormData(\$data);
+						}
+
+						if (\$hasError || \$redirectBack) {
+								\$redirectPath = '*/*/edit';
+								\$redirectParams['id'] = \$model->getId();
+						}
+				}
+				\$this->_redirect(\$redirectPath, \$redirectParams);
+		}
+
+		public function deleteAction() {
+				\$model  = Mage::getModel('${4:module_key}/promotion');
+				\$entityId = \$this->getRequest()->getParam('id', null);
+				try {
+						if (!\$entityId) {
+								throw new Exception('Promotion id not provided.');
+						}
+						\$model->load(\$entityId)->delete();
+
+				} catch (Exception \$e) {
+						Mage::getSingleton('adminhtml/session')->addError(\$e->getMessage());
+						Mage::log(\$e);
+				}
+				return \$this->_redirect('*/*');
+		}
+
+		public function previewAction() {
+				\$jsonString = json_decode(\$this->getRequest()->getParam('json', '{}'), true);
+				\$template = \$this->getRequest()->getParam('template', false);
+				\$storeId = \$this->getRequest()->getParam('store_id', 0);
+				try {
+						\$templateObj = @Mage::getModel('${4:module_key}/template_' . \$template);
+						if (\$templateObj) {
+								die(\$templateObj->setStoreId(\$storeId)->getPreviewHtml(\$jsonString));
+						} else {
+								throw new Exception('Template ' .\$template . ' does not exists.');
+						}
+				} catch (Exception \$e) {
+						Mage::log(\$e);
+						die(\$e->getMessage());
+				}
+		}
+
+		public function fullPreviewAction() {
+				\$id = \$this->getRequest()->getParam('id', false);
+				\$storeId = \$this->getRequest()->getParam('storeId', false);
+				\$baseUrl = Mage::app()->getStore(\$storeId)->getConfig('web/unsecure/base_url');
+				\$url = "{\$baseUrl}${5:module_entity}/preview/index/id/{\$id}";
+				\$hash = Mage::helper('core')->getHash(\$url.now(true));
+				\$url .= "/h/\$hash";
+				\$this->getResponse()->setRedirect(\$url);
+		}
+
+		public function cleanProductCacheAction() {
+				\$cacheTags = array("ukpos_promolist_promotion");
+				Mage::app()->getCache()->clean('matchingTag', \$cacheTags);
+				Mage::getSingleton('adminhtml/session')->addSuccess('Landing page products cache has been cleaned');
+				\$this->_redirect('adminhtml/system_config/edit', array('section' => '${4:module_key}'));
+		}
+}

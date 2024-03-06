@@ -1,0 +1,11 @@
+#!/bin/bash
+#=================================================
+# name:   locate - fake locate script
+# author: Pawel Bogut <https://pbogut.me>
+# date:   15/12/2020
+#=================================================
+target=$1
+if [[ $target =~ .*\.so ]]; then
+    find /lib64/ -iname $target 2>/dev/null
+    find /lib/ -iname $target 2>/dev/null
+fi

@@ -1,0 +1,24 @@
+#!/usr/bin/env zsh
+#=================================================
+# name:   pacman-fix-keys
+# author: Pawel Bogut <https://pbogut.me>
+# date:   19/11/2021
+#=================================================
+echo "### try this ###"
+echo sudo pacman-key --recv-key 8DC2CE3A3D245E64
+echo sudo pacman-key --lsign-key 8DC2CE3A3D245E64
+
+function confirm_run() {
+  echo "💻 $@"
+  echo -n "> Press enter to continue (ctrl+c to cancel)"; read -r
+  $@
+}
+
+# pacman-key --refresh-keys
+pacman -Sy archlinux-keyring
+if [[ $? -gt 0 ]]; then
+  echo -n "> Pass keyid in quiestion (ctrl-c to cancel): "
+  read -r keyid
+  confirm_run pacman-key --recv-keys "$keyid"
+  confirm_run pacman-key --lsign-key "$keyid"
+fi

@@ -1,0 +1,20 @@
+snippet )|
+
+	|> $0
+snippet }|
+
+	|> $0
+snippet |
+	|> $0
+snippet do
+	do
+		$1
+	end$0
+snippet tosql "Ecto query to sql"
+	${0:query} |> (fn q -> Ecto.Adapters.SQL.to_sql(:all, Repo, q) end).() |> IO.inspect
+snippet in "Inspect"
+	|> IO.inspect
+snippet """ "Here doc"
+	"""
+	${VISUAL}$0
+	"""

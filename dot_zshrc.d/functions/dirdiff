@@ -1,0 +1,16 @@
+#!/bin/zsh
+#=================================================
+# name:   dirdiff.zsh
+# author: Pawel Bogut <https://pbogut.me>
+# date:   29/06/2018
+#=================================================
+dirdiff() {
+  if [[ -z $2 ]]; then
+    echo "Usage: dirdiff /path/to/dir/one /path/to/dir/two"
+  else
+    # escape spaces in file name
+    file_a=$(echo "$1" | sed 's,\(\s\),\\\1,g')
+    file_b=$(echo "$2" | sed 's,\(\s\),\\\1,g')
+    nvim +"DirDiff $file_a $file_b"
+  fi
+}

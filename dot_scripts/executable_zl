@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   zl
+# author: author <author_contact>
+# date:   25/11/2023
+#=================================================
+# shellcheck disable=SC2002
+
+usage() {
+  echo "Ussage: ${0##*/} [ACTION] [OPTIONS]"
+  echo ""
+  echo "Actions: - pass-through to zellij if other than listed below"
+  echo "  kill-current-session - start new client and session"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+}
+
+while test $# -gt 0; do
+  case "$1" in
+    kill-current-session)
+      zellij kill-session "$ZELLIJ_SESSION_NAME"
+      exit 0
+      ;;
+    --help|-h)
+      zellij --help
+      usage
+      exit 0
+      ;;
+    *)
+      zellij "$@"
+      exit 0;
+      ;;
+  esac
+done
+
+
+# open_session=$(cat /tmp/open_zellij_session 2>/dev/null| head -n1)
+# if [[ $open_session == "" ]]; then
+#   rm /tmp/open_zellij_session 2>/dev/null
+#   zellij "$@"
+#   echo $?
+# else
+#   zellij attach -c "$open_session"
+# fi

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+	<event name="${1:event_name}">
+		<observer name="[[magento2.module_key]]_${1:event_name}"
+		          instance="[[magento2.module_namespace]]\\Observer\\${2:EventHandlerClass}" />
+	</event>
+</config>

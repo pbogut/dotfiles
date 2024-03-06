@@ -1,0 +1,37 @@
+<?php
+
+namespace [[php.namespace]];
+
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+
+/**
+ * Class [[php.class]]
+ *
+ * @author ${1:[[author]]} <${2:[[author_contact]]}>
+ */
+class [[php.class]] extends Command
+{
+	/**
+	 * Define command attributes such as name, description, arguments
+	 */
+	protected function configure()
+	{
+		\$this->setName('${3:command:action}');
+		\$this->setDescription('${4:Command description}');
+
+		\$this->addArgument('${5:arg-name}', InputArgument::${6|REQUIRED,OPTIONAL,IS_ARRAY|}, '${7:Arg description}');
+		\$this->addOption('${8:option-name}', '${9:o}', InputOption::${10|VALUE_NONE,VALUE_REQUIRED,VALUE_OPTIONAL,VALUE_IS_ARRAY|}, '${11:Option description}', null);
+
+		parent::configure();
+	}
+
+	protected function execute(InputInterface \$input, OutputInterface \$output)
+	{
+		\$options = \$input->getOptions();
+		\$arguments = \$input->getArguments();
+	}
+}

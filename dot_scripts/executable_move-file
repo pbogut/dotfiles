@@ -1,0 +1,41 @@
+#!/bin/bash
+#=================================================
+# name:   move-file
+# author: Pawel Bogut <https://pbogut.me>
+# date:   18/12/2020
+#=================================================
+tmpfile=$(mktemp)
+file=$1
+unset TMUX
+lfrun -last-dir-path "$tmpfile" "$file"
+filename=$(basename "$file")
+destination=$(cat "$tmpfile")
+should_move=$((echo "move";  echo "move and open"; echo "do nothing";) |
+    wofi --dmenu -p "Move file $filename to $destination?")
+
+if [[ $should_move == "do nothing" ]]; then
+    exit 0
+fi
+
+handle_qb() {
+    if [[ "$QB_DOWNLOAD_FILE" == "1" ]]; then
+        browser :download-remove
+    fi
+}
+
+#back up if exists
+if [[ -f "$destination/$filename" ]]; then
+    date=$(date +'%Y-%m-%d_%H:%M:%S.%N')
+    ext=${filename##*.}
+    basename=${filename%%.*}
+    mv "$destination/$filename" "$destination/$basename.$date.$ext"
+fi
+
+if [[ $should_move == "move" ]]; then
+    mv "$file" "$destination/$filename"
+    handle_qb
+elif [[ $should_move == "move and open" ]]; then
+    mv "$file" "$destination/$filename"
+    "$HOME/.scripts/sway/open" "$destination/$filename"
+    handle_qb
+fi

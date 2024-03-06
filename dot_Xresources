@@ -1,0 +1,6 @@
+Xcursor.theme: polar
+
+xterm*faceName:   :Input Nerd Font Mono:pixelsize=14
+
+xterm*vt100.background: #002b36
+xterm*vt100.foreground: #839496

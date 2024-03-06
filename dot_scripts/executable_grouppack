@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   grouppack
+# author: author <author_contact>
+# date:   29/08/2022
+#=================================================
+cfg_file="$HOME/.grouppack.json"
+package_managers=$(jq -r 'keys[]' "$cfg_file")
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -u, --update     display this help and exit"
+  echo "  -i, --install    display this help and exit"
+  echo "  -h, --help       display this help and exit"
+}
+
+action=""
+manager=""
+while test $# -gt 0; do
+  case "$1" in
+  --install | -i)
+    action="install"
+    if [[ -n "$2" ]]; then
+      manager=$2
+      shift
+    fi
+    shift
+    ;;
+  --update | -u)
+    action="update"
+    if [[ -n "$2" ]]; then
+      manager=$2
+      shift
+    fi
+    shift
+    ;;
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+  esac
+done
+
+_install() {
+  case $1 in
+  yarn)
+    for package in $(jq -r '.yarn[]' "$cfg_file"); do
+      yarn global add "$package"
+    done
+    ;;
+  cargo)
+    for package in $(jq -r '.cargo[]' "$cfg_file"); do
+      cargo install "$package"
+    done
+    ;;
+  go)
+    for package in $(jq -r '.go[]' "$cfg_file"); do
+      go install "$package"
+    done
+    ;;
+  gitpac)
+    for package in $(jq -r '.gitpac[]' "$cfg_file"); do
+      gitpac "$package"
+    done
+    ;;
+  gem)
+    for package in $(jq -r '.gem[]' "$cfg_file"); do
+      gem install "$package"
+    done
+    ;;
+  pip)
+    for package in $(jq -r '.pip[]' "$cfg_file"); do
+      pip install "$package"
+    done
+    ;;
+  esac
+}
+
+_update() {
+  case $1 in
+  yarn)
+    cd ~/.config/yarn/global
+    cp package.json package.json.old
+    yarn-upgrade-all
+    cp package.json package.json.new
+    diff --color=always package.json.old package.json.new
+    cd - >/dev/null 2>&1
+    ;;
+  cargo)
+    for package in $(jq -r '.cargo[]' "$cfg_file"); do
+      cargo install "$package"
+    done
+    ;;
+  go)
+    for package in $(jq -r '.go[]' "$cfg_file"); do
+      go install "$package"
+    done
+    ;;
+  gitpac)
+    for package in $(jq -r '.gitpac[]' "$cfg_file"); do
+      gitpac "$package"
+    done
+    ;;
+  gem)
+    for package in $(jq -r '.gem[]' "$cfg_file"); do
+      gem update "$package"
+    done
+    ;;
+  pip)
+    for package in $(jq -r '.pip[]' "$cfg_file"); do
+      pip install --upgrade "$package"
+    done
+    ;;
+  esac
+}
+
+if [[ $manager == "" ]]; then
+  for manager in $package_managers; do
+    case $action in
+    update)
+      _update "$manager"
+      ;;
+    install)
+      _install "$manager"
+      ;;
+    esac
+  done
+else
+  case $action in
+  update)
+    _update "$manager"
+    ;;
+  install)
+    _install "$manager"
+    ;;
+  esac
+fi

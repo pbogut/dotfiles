@@ -1,0 +1,10 @@
+defmodule ${1:[[elixir.module_name]]} do
+	use ${2:[[elixir.base_module]]}.ConnCase, async: true
+
+	# Bring render/3 and render_to_string/3 for testing custom views
+	import Phoenix.View
+
+	test "${3:test description}" do
+		${0:assert false == true}
+	end
+end

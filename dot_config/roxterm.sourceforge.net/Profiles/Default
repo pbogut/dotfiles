@@ -1,0 +1,26 @@
+[roxterm profile]
+full_screen=0
+maximise=1
+saturation=1,000000
+colour_scheme=Solarized Dark
+font=DroidSansMonoForPowerline NF 11
+disable_menu_access=1
+disable_tab_menu_shortcuts=1
+disable_menu_shortcuts=1
+scrollbar_pos=0
+audible_bell=0
+hide_mouse=1
+bell_highlights_tab=0
+tab_pos=4
+hide_menubar=1
+show_add_tab_btn=0
+always_show_tabs=0
+backspace_binding=0
+login_shell=1
+win_title=%s
+ssh_spawn_type=1
+browser=chromium
+mailer=roxterm --separate -e zsh -ic "mutt %s"
+ssh=ssh
+filer=roxterm --separate -e zsh -ic "ranger %s"
+dir_filer=roxterm --separate -e zsh -ic "ranger %s"

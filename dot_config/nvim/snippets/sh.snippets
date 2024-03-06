@@ -1,0 +1,72 @@
+snippet display
+  DISPLAY=${DISPLAY:-$(w -hs | awk '{print $2}' | grep '^:' | head -n 1)}
+snippet dbus
+  DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-"unix:path=/run/user/$(id -u)/bus"}
+snippet then
+	then
+		$0
+	fi
+snippet do
+	do
+		$0
+	done
+snippet dir "get script dir"
+	dir="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
+snippet ext "get file extention"
+	ext=\${${1:filename}##*.}
+snippet base "get file base name"
+	base_name=\${${1:filename}%%.*}
+snippet args
+	usage() {
+		echo "Ussage: \${0##*/} [OPTIONS]"
+		echo ""
+		echo "Options:"
+		echo "  -h, --help     display this help and exit"
+	}
+
+	while test \$# -gt 0; do
+		case "\$1" in$0
+			--help|-h)
+				usage
+				exit 0
+				;;
+			*)
+				usage
+				exit 1
+				;;
+		esac
+	done
+snippet argpos
+	if [[ -z \$${1:posarg} ]]; then
+		${1:posarg}="\$1"
+	fi
+snippet argflag
+	--${1:flag}${3:|-${2:f}})
+		shift
+		;;$0
+snippet argopt
+	--${1:option}|--${1:option}=*${3:|-${2:o}})
+		if [[ \$1 =~ --[a-z]+= ]]; then
+			_val="\${1//--${1:option}=/}"
+			shift
+		else
+			_val="\$2"
+			shift; shift
+		fi
+		${4:${1:option}}="\$_val"
+		;;
+snippet argopt-
+	--${1:option}${3:|-${2:o}})
+		${1:option}="\$2"$4
+		shift; shift
+		;;$0
+snippet argopt=
+	--${1:option}=*)
+		${1:option}="\${1//--${1:option}=/}"$2
+		shift
+		;;$0
+snippet argopt==
+	--${1:option}=*})
+		${1:option}="$(sed 's,--[a-z]\+=\(.*\)$,\1,' <<< "\$1")"$2
+		shift
+		;;$0

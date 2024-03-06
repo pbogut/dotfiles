@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   tmux-worktree
+# author: author <author_contact>
+# date:   26/04/2023
+#=================================================
+worktree=false
+if [[ $TERM == "dumb" ]]; then
+  worktree=$(ls-worktree | rofi -dmenu -q "$PWD")
+else
+  worktree=$(git wt list | fzf -q "$1" --height=100% | awk '{print $1}')
+fi
+
+if [[ ! $worktree == "" ]]; then
+  touch "$worktree"
+  cd "$worktree" || exit
+  if [[ $TERM == "dumb" ]]; then
+    $TERMINAL -e tmux-vim
+  else
+    tmux-vim
+  fi
+fi

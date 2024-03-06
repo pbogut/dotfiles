@@ -1,0 +1,40 @@
+#!/bin/bash
+#=================================================
+# name:   email
+# author: Pawel Bogut <https://pbogut.me>
+# date:   01/03/2019
+#=================================================
+TERMINAL="alacritty"
+if [[ "$1" =~ ^mailto: ]]; then
+    mailto_url="$1"
+
+    #Strip off the protocol
+    mail_data=$(echo "$mailto_url" | /bin/sed -s 's/^[Mm][Aa][Ii][Ll][Tt][Oo]://')
+
+    #Get Recipient and strip it off
+    recipient=$(echo "$mail_data" | cut -d? -f1 -)
+    mail_data=$(echo "$mail_data" | /bin/sed -s s/^$recipient//)
+
+    #Get Subject, BCC and CC
+    subject=$(echo "$mail_data" |
+        /bin/sed -s 's/.*?[Ss][Uu][Bb][Jj][Ee][Cc][Tt]=//' | /bin/sed -s 's/?.*//')
+    bcc=$(echo "$mail_data" | /bin/sed -s 's/.*?[Bb][Cc][Cc]=//' |
+        /bin/sed -s 's/?.*//')
+    cc=$(echo "$mail_data" | /bin/sed -s 's/.*?[Cc][Cc]=//' |
+        /bin/sed -s 's/?.*//')
+
+    # $TERMINAL -t "EMAIL_MUTT" -e zsh -ic neomutt "$recipient" -b "$bcc" -c "$cc" -s "$subject" \
+    cmd='neomutt "'"$recipient"'" -b "'"$bcc"'" -c "'"$cc"'" -s "'"$subject"'"'
+    # $TERMINAL -t "EMAIL_MUTT" -e zsh -ic "$cmd" \
+    # echo $cmd
+    $TERMINAL -e zsh -ic "$cmd" \
+        && pkill -SIGRTMIN+13 i3blocks
+elif [[ -f "$1" ]]; then
+    # $TERMINAL -t "EMAIL_MUTT" -e zsh -ic neomutt -a "$1" \
+    cmd='neomutt -a "'"$1"'"'
+    $TERMINAL -e zsh -ic "$cmd" \
+        && pkill -SIGRTMIN+13 i3blocks
+else
+    $TERMINAL -t "EMAIL_MUTT" -e zsh -ic neomutt \
+        && pkill -SIGRTMIN+13 i3blocks
+fi

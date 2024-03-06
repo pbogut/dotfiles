@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   gitpac
+# author: Pawel Bogut <https://pbogut.me>
+# date:   24/11/2021
+#=================================================
+gitpac_dir="$HOME/.gitpac"
+json_file="$HOME/.gitpac.json"
+
+usage() {
+  echo "Ussage: ${0##*/} <package> [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -r, --rebuild    force rebuild (even if no update found)"
+  echo "  -l, --list       list all packages"
+  echo "  -h, --help       display this help and exit"
+}
+
+while test $# -gt 0; do
+  case "$1" in
+  --rebuild | -r)
+    rebuild=1
+    shift
+    ;;
+  --list | -l)
+    jq -c '.packages[] | .repo' "$json_file"
+    shift
+    exit 0
+    ;;
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  *)
+    if [[ -z $package ]]; then
+      package="$1"
+      shift
+    else
+      usage
+      exit 1
+    fi
+    ;;
+  esac
+done
+
+if [[ -z $package ]]; then
+  echo "Error: Missing package repo, use 'all' for all packages"
+  echo ""
+  usage
+  exit 1
+fi
+
+install_package() {
+  cd "$1" || return
+  while read -r cmd; do
+    # print -Pn "%F{006}"
+    echo "❣️ $cmd"
+    # print -Pn "%f"
+    echo $cmd | xargs bash -c
+  done <<<$(jq -c '.run[]' <<<$json)
+}
+
+process_package() {
+  repo=$(jq -r .repo <<<"$json")
+  tag=$(jq -r .tag <<<"$json")
+  echo "➤ Process $repo:"
+  if [[ ! -d "$gitpac_dir/$repo" ]]; then
+    echo "➡️ Chechout $repo"
+    mkdir -p "$gitpac_dir/$repo"
+    # print -Pn "%F{005}"
+    git clone "https://github.com/$repo" "$gitpac_dir/$repo"
+    cd "$gitpac_dir/$repo" || exit
+    # print -Pn "%f"
+    if [[ $tag != "null" ]]; then
+      git fetch --all --tags
+      if [[ $tag == "@latest" ]]; then
+        tag="$(git tag | tail -n 1)"
+      fi
+      git checkout "$tag"
+    fi
+    install_package "$gitpac_dir/$repo"
+  else
+    echo "➡️ Check for update $repo"
+    cd "$gitpac_dir/$repo" || exit
+    current_hash=$(git log --pretty="tformat:%h" -1)
+    if [[ $tag != "null" ]]; then
+      git fetch --all --tags
+      if [[ $tag == "@latest" ]]; then
+        tag="$(git tag | tail -n 1)"
+      fi
+      git checkout "$tag"
+    else
+      git pull --ff-only >/dev/null
+    fi
+    new_hash=$(git log --pretty="tformat:%h" -1)
+    if [[ $new_hash != $current_hash ]]; then
+      echo "➡️ Hash changed $current_hash -> $new_hash, updating ..."
+      install_package
+    else
+      echo "➡️ No updates found"
+      if [[ $rebuild -eq 1 ]]; then
+        install_package
+      fi
+    fi
+  fi
+
+  echo " done"
+}
+
+install_update() {
+  if [[ $package == 'all' ]]; then
+    list=$(jq -c '.packages[]' $json_file)
+  else
+    list=$(jq -c --arg pack "$package" '.packages[] | select(.repo == $pack)' $json_file)
+  fi
+
+  if [[ -z $list ]]; then
+    echo "Error: Unknown package name $package"
+    echo ""
+    usage
+    exit 2
+  fi
+
+  while read -r json; do
+    process_package
+  done <<<$list
+}
+install_update

@@ -1,0 +1,34 @@
+#!/bin/bash
+#=================================================
+# name:   vimdraft.zsh
+# author: Pawel Bogut <pbogut@ukpos.com> <http://pbogut.me>
+# date:   24/05/2017
+#=================================================
+draft() {
+    ext="${1:-md}"
+    mkdir -p ~/Drafts
+    cd ~/Drafts || exit
+    mkdir -p archive
+    find ./ -maxdepth 1 -type f -mtime +90 -exec mv {} archive/ \;
+
+    select="new"
+    if [[ $1 == "" ]]; then
+        select="$( (echo "new"; find ./ -maxdepth 2 -type f) | fzf --preview="bat --color=always --decorations=never {}")"
+
+    fi
+
+    file=""
+    if [[ $select == "" ]]; then
+        return 0
+    else
+        file=$select
+    fi
+
+    if [[ $select == "new" ]]; then
+        rand=$(head -n1 /dev/urandom | sha256sum | sed 's,^\(.\{8\}\).*,\1,g')
+        file="$(date +'%Y-%m-%d_%H-%M-%S')_$rand.$ext"
+    fi
+
+    nvim "$file"
+    cd - || exit
+}

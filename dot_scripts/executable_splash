@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   splash
+# author: Pawel Bogut <https://pbogut.me>
+# date:   10/01/2022
+#=================================================
+
+
+feh --title SPLASH_SCREEN ~/Pictures/splash/"$1".png &
+pid=$!
+
+sleep 0.1s && xtitle -s | while read line; do
+  if [[ $line != "SPLASH_SCREEN" ]]; then
+    kill $pid
+    sleep 0.25s
+    exit 0
+  fi
+done &

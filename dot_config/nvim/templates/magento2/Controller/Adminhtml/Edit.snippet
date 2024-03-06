@@ -1,0 +1,50 @@
+<?php
+
+namespace [[php.namespace]];
+
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context as ActionContext;
+use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\View\Result\PageFactory as ResultPageFactory;
+use [[php.module_namespace]]\Model\\${1:[[magento2.resource_name]]};
+
+/**
+ * Class [[php.class]]
+ *
+ * @author ${2:[[author]]} <${3:[[author_contact]]}>
+ */
+class [[php.class]] extends Action implements HttpGetActionInterface
+{
+	const ADMIN_RESOURCE = '${4:[[magento2.module_namespace]]}::${5:[[magento2.resource_name]]}';
+
+	/** @var ResultPageFactory */
+	protected $_resultPageFactory;
+
+	public function __construct(
+		ActionContext \$context,
+		ResultPageFactory \$resultPageFactory
+	) {
+		\$this->_resultPageFactory = \$resultPageFactory;
+		parent::__construct(\$context);
+	}
+
+	public function execute()
+	{
+		\$resultPage = \$this->_resultPageFactory->create();
+		\$this->_setActiveMenu('${4:[[magento2.module_namespace]]}::${6:[[magento2.resource_name]]}');
+
+		\$id = \$this->_request->getParam('${7:[[magento2.resource_key]]_id}');
+		\$model = \$this->_objectManager->create(${1:[[magento2.resource_name]]}::class);
+
+		if (\$id) {
+			\$model->load(\$id);
+			if (!\$model->getMapId()) {
+				\$this->messageManager->addErrorMessage(__('This ${8:[[magento2.resource_name]]} no longer exists.'));
+				\$this->_redirect('*/*/index');
+				return;
+			}
+		}
+
+		return \$resultPage;$0
+	}
+}

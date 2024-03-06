@@ -1,0 +1,83 @@
+# Colors (Solarized Dark)
+colors:
+  # Default colors
+  primary:
+    background: '0x002b36'
+    foreground: '0x839496'
+
+  # Normal colors
+  normal:
+    black:   '0x073642'
+    red:     '0xdc322f'
+    green:   '0x859900'
+    yellow:  '0xb58900'
+    blue:    '0x268bd2'
+    magenta: '0xd33682'
+    cyan:    '0x2aa198'
+    white:   '0xeee8d5'
+
+  # Bright colors
+  bright:
+    # disabled as a workarond to fix lf invisible entry issue
+    black:   '0x002b36'
+    red:     '0xcb4b16'
+    green:   '0x586e75'
+    yellow:  '0x657b83'
+    blue:    '0x839496'
+    magenta: '0x6c71c4'
+    cyan:    '0x93a1a1'
+    white:   '0xfdf6e3'
+
+font:
+  normal:
+    family: InputMono Nerd Font Mono
+    style: Regular
+
+  bold:
+    family: InputMono Nerd Font Mono
+    style: Bold
+
+  italic:
+    family: InputMono Nerd Font Mono
+    style: Italic
+
+
+  bold_italic:
+    family: InputMono Nerd Font Mono
+    style: Bold Italic
+
+  size: 12
+  scale_with_dpi: true
+
+
+hints:
+  # Keys used for the hint labels.
+  alphabet: "jfkdls;ahgurieowpq"
+
+  enabled:
+  # urls
+  - regex: "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)//[a-zA-Z0-9,'+\\.\\-_/\\?=&%:]+"
+    command: xdg-open
+    post_processing: true
+    mouse:
+      enabled: true
+    binding:
+      key: U
+      mods: Alt
+
+key_bindings:
+  # produce c-return
+  - { key: Return, mods: Control, chars: "\x1b[13;5u" }
+  # toggle vi mode
+  - { key: Escape, mods: Alt, mode: ~Vi, action: ToggleViMode }
+  # start search in vi mode
+  - { key: S, mods: Alt|Control, mode: ~Vi|~Search, action: ToggleViMode }
+  - { key: S, mods: Alt|Control, mode: ~Vi, action: SearchBackward }
+  # paset and paste selection (compatible with my urxvt)
+  - { key: P, mods: Alt|Control, mode: ~Vi, action: Paste }
+  - { key: V, mods: Alt|Control, mode: ~Vi, action: PasteSelection }
+  # tmux window change (mirror for my harpoon in vim)
+  #  - { key: J, mods: Alt, chars: "1" }
+  #  - { key: K, mods: Alt, chars: "2" }
+  #  - { key: L, mods: Alt, chars: "3" }
+  #  - { key: Semicolon, mods: Alt, chars: "4" }

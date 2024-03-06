@@ -1,0 +1,107 @@
+#!/bin/bash
+# if [[ ! -z "$(ps -e | grep neomutt)" ]]; then
+#   exit 0
+# fi
+
+account="$1"
+if [[ $account == "" ]]; then
+  _account_filter="."
+  folder_filter=".*"
+else
+  _account_filter="/Maildir/$account/"
+  folder_filter="/^$account"
+fi
+notmuch tag +archive -- folder:"/INBOX/" not tag:inbox
+
+# fix microsoft mail ids
+rg 'Message-ID: <\[.*\]>' -l "$HOME/Maildir/$account/" |
+  xargs sed -E 's/^Message-ID: <\[(.*)\]>/Message-ID: <\1>/' -i
+
+if [[ -f ~/.offlineimap-hooks/spam-filter ]]; then
+    ~/.offlineimap-hooks/spam-filter
+fi
+
+# shellcheck disable=2162
+read -d '' directories <<"EOF"
+  sent
+  drafts
+  trash
+  spam
+EOF
+
+for directory in $directories; do
+  echo notmuch tag -archive -- tag:archive tag:"$directory" folder:"$folder_filter/"
+  notmuch tag -archive -- tag:archive tag:"$directory" folder:"$folder_filter/"
+done
+
+# if something is archive, then it should not be inbox
+notmuch tag -unread -inbox -- tag:archive
+notmuch tag -inbox -- tag:inbox and folder:/\\.archive/
+notmuch tag -inbox -- tag:inbox and folder:/archive/
+
+echo notmuch search --output=files tag:sent folder:"$folder_filter/" not folder:"/sent/" not tag:drafts not tag:trash
+# notmuch search --output=files tag:sent folder:"$folder_filter/" not folder:"/sent/" not tag:drafts not tag:trash
+notmuch search --output=files tag:sent folder:"$folder_filter/" not folder:"/sent/" \
+  not tag:drafts not tag:trash |
+  while read -r line; do
+    echo "$line"
+    dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/sent\3\/\4#")"
+    if [[ $line != "$dest" ]]; then
+      echo mv "$line" "$dest"
+      # mv "$line" "$dest" > /dev/null 2>&1
+      mv "$line" "$dest"
+    fi
+  done
+echo notmuch search --output=files tag:drafts folder:"$folder_filter/" not folder:"/drafts/" not tag:trash
+# notmuch search --output=files tag:drafts folder:"$folder_filter/" not folder:"/drafts/" not tag:trash
+notmuch search --output=files tag:drafts folder:"$folder_filter/" not folder:"/drafts/" \
+  not tag:trash |
+  while read -r line; do
+    dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/drafts\3\/\4#")"
+    if [[ $line != "$dest" ]]; then
+      echo mv "$line" "$dest"
+      # mv "$line" "$dest" > /dev/null 2>&1
+      mv "$line" "$dest"
+    fi
+  done
+echo notmuch search --output=files tag:trash folder:"$folder_filter/" not folder:"/trash/"
+# notmuch search --output=files tag:trash folder:"$folder_filter/" not folder:"/trash/"
+notmuch search --output=files tag:trash folder:"$folder_filter/" not folder:"/trash/" |
+  while read -r line; do
+    dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/trash\3\/\4#")"
+    if [[ $line != "$dest" ]]; then
+      echo mv "$line" "$dest"
+      # mv "$line" "$dest" > /dev/null 2>&1
+      mv "$line" "$dest"
+    fi
+  done
+echo notmuch search --output=files tag:spam folder:"$folder_filter/" not folder:"/spam/"
+# notmuch search --output=files tag:spam folder:"$folder_filter/" not folder:"/spam/"
+notmuch search --output=files tag:spam folder:"$folder_filter/" not folder:"/spam/" |
+  while read -r line; do
+    dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/spam\3\/\4#")"
+    if [[ $line != "$dest" ]]; then
+      echo mv "$line" "$dest"
+      # mv "$line" "$dest" > /dev/null 2>&1
+      mv "$line" "$dest"
+    fi
+  done
+echo notmuch search --output=files tag:archive folder:"$folder_filter/" folder:"/INBOX/"
+# notmuch search --output=files tag:archive folder:"$folder_filter/" folder:"/INBOX/"
+notmuch search --output=files tag:archive folder:"$folder_filter/" folder:"/INBOX/" |
+  while read -r line; do
+    dest="$(echo "$line" | sed -E "s#Maildir/(.*)/([^.]+)(\..*?)?/(cur|new)#Maildir/\1/archive\3\/\4#")"
+    if [[ $line != "$dest" ]]; then
+      echo mv "$line" "$dest"
+      # mv "$line" "$dest" > /dev/null 2>&1
+      mv "$line" "$dest"
+    fi
+  done
+
+# archive only on redeye
+if [[ $(hostname) == "redeye" ]]; then
+    "$HOME/.offlineimap-hooks/archive" "$account"
+fi
+
+# detect moved files and update database
+notmuch new

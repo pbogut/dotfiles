@@ -1,0 +1,214 @@
+# IMAP: offlineimap
+set folder = "`echo $HOME`/Maildir"
+set mailcap_path=~/.mutt/mailcap
+set sendmail = "msmtp.sh"
+set postponed = ~/.mutt/postponed
+#mailboxes = `echo $MAIL` `ls -1d --color=never ~/Maildir/*/* | grep 'INBOX\|sent\|drafts\|archive\|trash' | sed 's#.*Maildir/#+#' | while read line; do echo -n " $line"; done`
+
+my_hdr X-Mutt: markdown
+
+set query_command="khard email --parsable '%s'"
+macro index,pager \cv "<pipe-message>urlview<return>" "url view"
+macro index,pager \ci "<pipe-message>~/.scripts/mail-to-web.sh<return>" "html view in browser"
+macro index,pager \ca "<pipe-message>khard add-email<return>" "add the sender address to khard"
+
+macro index,pager \cs "<pipe-message>~/.scripts/notmuch-open-status.sh --mutt-pipe<return>" "check open status"
+
+macro index \cd "<current-top><next-page><current-bottom>" "page-down vim style"
+macro index \cu "<current-bottom><previous-page><current-top>" "page-up vim style"
+
+bind pager \cd next-page
+bind pager \cu previous-page
+
+# setup headers visibility
+unignore folder
+unignore tags
+
+bind index <space> tag-entry
+
+macro index,pager \ct "<pipe-message>email-to-vtodo -m - -c email\n"     # add todo entry to work calendar
+
+#macro generic,index,pager a "<shell-escape>abook<return>" "launch abook"
+bind editor <Tab> complete-query
+bind editor \cT complete
+bind index,pager r group-reply
+
+# some vim bindings
+bind generic,browser,attach,index,pager g noop
+bind generic,browser,attach,index N search-opposite
+bind generic,browser,attach,index gg first-entry
+bind generic,browser,attach,index G last-entry
+bind pager gg top
+bind pager G bottom
+
+set sort = threads
+set sort_aux = last-date-received
+set edit_headers = yes
+# set record = "+sent"
+set record = ~/.mutt/sent
+set pager_stop = yes
+set use_from = yes
+set reverse_name = yes
+
+set fast_reply=yes
+set include=yes
+
+# set nm_record = yes
+# set nm_record_tags = "-index +sent +inbox"
+set smart_wrap
+set wrap=135 # 20 ish is for sidebar
+set markers=no
+set wait_key=no
+
+# forward with attachments
+set mime_forward
+set mime_forward_rest=yes
+
+set realname = "Pawel Bogut"
+set from = "`config email/default/from`"
+# Sidebar
+set sidebar_visible = yes
+set sidebar_format="%D%?F? [%F]?%* %?N?%N/?%S"
+# set sidebar_short_path = yes
+set sidebar_divider_char = '│'
+set sidebar_width = 30
+# Ctrl-n, Ctrl-p to select next, previous folder.
+# Ctrl-o to open selected folder.
+# Ctrl-v to toggle vfolders with folders
+
+set date_format="!%a, %b %d, %Y at %I:%M %p (%z)"
+# set attribution="On %d, %f wrote:"
+
+bind index,pager \CP sidebar-prev
+bind index,pager \CN sidebar-next
+bind index,pager \CO sidebar-open
+bind index,pager \CV sidebar-toggle-virtual
+# scroll half page
+bind pager <space> half-down
+bind pager - half-up
+bind pager k previous-line
+bind pager j next-line
+
+bind compose Y send-message
+bind compose y noop
+macro compose H ':set sendmail="msmtp.sh --preview"<enter><send-message>:set sendmail="msmtp.sh"<enter>'
+
+# macro index,pager \cr '<shell-escape>echo -n "Checking for new emails... " && OFFLINEIMAP_INBOX_ONLY=1 offlineimap > /dev/null 2>&1 <enter>'
+macro index,pager \cr '<shell-escape>echo -n "Checking for new emails... " && offlineimap-reload.sh <enter>'
+
+# open attachments with rifle
+macro attach \co '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>$HOME/.scripts/sway/open /tmp/.mutt-tmp/* <enter>'
+macro compose \co '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>$HOME/.scripts/sway/open /tmp/.mutt-tmp/* <enter>'
+# status format with current account info
+set status_format="-%r-`config email/default/from`: %f [Msgs:%?M?%M/?%m%?n? New:%n?%?o? Old:%o?%?d? Del:%d?%?F? Flag:%F?%?t? Tag:%t?%?p? Post:%p?%?b? Inc:%b?%?l? %l?]---(%s/%S)-%>-(%P)---"
+
+# this can be copied to accounts file to set up different accounts on different machines
+# with things that I dont want to keep in public git repository
+# switch between accounts
+
+source ~/.mutt/accounts
+set reverse_name
+
+# notmuch
+set nm_default_uri="notmuch://`echo $HOME`/Maildir" # path to the maildir
+set virtual_spoolfile=yes                           # enable virtual folders
+virtual-mailboxes \
+    " Inbox"             "notmuch://?query=tag:inbox and NOT tag:archive and NOT tag:sendmail"                            \
+    "   └ 🟍 Pined"        "notmuch://?query=tag:pin"                                                                       \
+    " Unread"            "notmuch://?query=tag:unread and NOT tag:spam"                                                   \
+    " Sent"              "notmuch://?query=tag:sent and date:`date --date="90 days ago" '+%Y-%m-%d'`.. and NOT tag:spam"  \
+    "   └ all"            "notmuch://?query=tag:sent"                                                                      \
+    " Projects / Issues" "notmuch://?query=(tag:github or tag:gitlab) and date:`date --date="90 days ago" '+%Y-%m-%d'`.." \
+    "   └ all"            "notmuch://?query=(tag:github or tag:gitlab)"                                                    \
+    " Bookkeeping"       "notmuch://?query=tag:bookkeeping and date:`date --date="365 days ago" '+%Y-%m-%d'`.."           \
+    "   └ all"            "notmuch://?query=tag:bookkeeping"                                                               \
+    " Work"              "notmuch://?query=tag:work"                                                                      \
+    "   └ AP"             "notmuch://?query=tag:work/ap"                                                                   \
+    " Drafts"            "notmuch://?query=tag:drafts"                                                                    \
+    " Payments"          "notmuch://?query=tag:payment"                                                                   \
+    " Subscriptions"     "notmuch://?query=tag:newsletter"                                                                \
+    "   ├ Tech"           "notmuch://?query=tag:newsletter and tag:tech"                                                   \
+    "   ├ Gaming"         "notmuch://?query=tag:newsletter and tag:gaming"                                                 \
+    "   ├ Leisure"        "notmuch://?query=tag:newsletter and tag:leisure"                                                \
+    "   ├ Job"            "notmuch://?query=tag:newsletter and tag:jobs"                                                   \
+    "   ├ Food"           "notmuch://?query=tag:newsletter and tag:food"                                                   \
+    "   ├ Locals"         "notmuch://?query=tag:newsletter and tag:locals"                                                 \
+    "   └ Politics"       "notmuch://?query=tag:newsletter and tag:politics"                                               \
+    "Everything"          "notmuch://?query=not tag:spam"                                                                  \
+    " ├  Last 3 months"  "notmuch://?query=date:`date --date="3 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
+    " ├  Last 6 months"  "notmuch://?query=date:`date --date="6 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
+    " ├  Last year"      "notmuch://?query=date:`date --date="12 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"             \
+    " ├  Flagged"        "notmuch://?query=tag:flagged and not tag:spam and not tag:sendmail"                                                  \
+    " ├  trash"          "notmuch://?query=tag:trash and not tag:spam and not tag:sendmail"                                                    \
+    " └ ﯍ spam"           "notmuch://?query=tag:spam and not tag:sendmail" \
+    "Sendmail"            "notmuch://?query=tag:sendmail and NOT tag:archive" \
+    " └ all"              "notmuch://?query=tag:sendmail"
+
+# quick jump between boxes
+macro index gi "<change-vfolder>  Inbox<enter>" "Go to Inbox"
+macro index gu "<change-vfolder>  Unread<enter>" "Go to Unread"
+macro index ga "<change-vfolder>  ├  Last 3 months<enter>" "Go to Archive"
+macro index gs "<change-vfolder>  Sent<enter>" "Go to Sent Mail"
+macro index gS "<change-vfolder>  ↳ all sent<enter>" "Go to Sent Mail"
+macro index gd "<change-vfolder> Drafts<enter>" "Go to Drafts"
+macro index gt "<change-vfolder> Todo<enter>" "Go to Drafts"
+macro index gp "<change-vfolder>  Projects / Issues<enter>" "Go to Projects"
+macro index gw "<change-vfolder>  Work<enter>" "Go to Work"
+macro index gb "<change-vfolder>  Bookkeeping<enter>" "Go to Bookkeeping"
+macro index gm "<change-vfolder> Sendmail<enter>" "Go to Sendmail"
+macro index gG "<change-vfolder>    ├ Gaming<enter>" "Go to Sendmail"
+
+# index format
+#"opened"  "✓"
+tag-transforms "inbox"      "i"  \
+               "unread"     "✉"  \
+               "opened"     ""  \
+               "replied"    "↻"  \
+               "sent"       "→"  \
+               "todo"       "☑"  \
+               "archive"    ""  \
+               "attachment" ""  \
+               "invites"    "≣"
+
+tag-formats    "inbox"      "GI" \
+               "unread"     "GU" \
+               "opened"     "GO" \
+               "replied"    "GR" \
+               "sent"       "GS" \
+               "todo"       "GT" \
+               "archive"    "GA" \
+               "attachment" "Ga" \
+               "deleted"    "GD" \
+               "invites"    "Gi"
+
+set to_chars=" +TCFL"
+
+# notmuch tags indicators
+set index_format="%4C %zt%?GR?%GR& ?%?GO?%GO& ?%?Ga?%Ga& ?%?GA?%GA& ? %<[y?%<[m?%<[d?%[ %H:%M]&%[%a %d]>&%[%b %d]>&%[%m/%y ]> %-15.15L (%<l?%4l&%4c>) %s"
+
+# notmuch bindings
+macro pager,index \\ "<vfolder-from-query>"                         # looks up a hand made query
+macro pager,index \` "<modify-labels>"                              # change notmuch labels
+macro index A "<modify-labels-then-hide>+archive -inbox -unread\n"  # tag as Archived
+macro pager A "<modify-labels-then-hide>+archive -inbox -unread\nq" # tag as Archived
+macro attach A "qA"                                                 # tag as Archived
+macro index R "<modify-labels>-unread\n"  # mark as read
+
+# macro index I "<modify-labels>-inbox\n"                             # remove from inbox
+macro index B "<modify-labels>+inbox -archive\n"                    # remove from inbox
+
+macro index P "<modify-labels-then-hide>-inbox +project/"           # tag as project
+macro pager P "<modify-labels-then-hide>-inbox +project/"           # tag as project
+macro attach P "qP"                                                 # tag as project
+
+
+auto_view text/html                                                 # view html automatically
+auto_view text/calendar                                             # view ics automatically
+alternative_order text/calendar text/plain text/enriched text/html  # save html for last
+set implicit_autoview
+
+# theme
+# source ~/.mutt/solarized-dark-16.muttrc
+source ~/.mutt/solarized-dark-256.muttrc
+source ~/.mutt/hooks
+#folder-hook ! archive "color index red default \"~Y '\W?archive\W?'\""

@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   vim
+# author: Pawel Bogut <https://pbogut.me>
+# date:   11/07/2022
+#=================================================
+name=$(tmux-session-name)
+TERM=xterm-256color
+
+echo "$PWD" >> /tmp/tmux-vim.log
+echo "$@" >> /tmp/tmux-vim.log
+
+declare -a files
+declare -a args
+has_args=0
+no_tab=0
+
+while test $# -gt 0; do
+  case "$1" in
+    --no-tab)
+      no_tab=1
+      shift
+      ;;
+    --)
+      shift
+      ;;
+    --*|-*)
+      args["${#args[@]}"]="$1"
+      has_args=1
+      shift
+      ;;
+    *)
+      args["${#args[@]}"]="$1"
+      files["${#files[@]}"]="$1"
+      shift
+      ;;
+  esac
+done
+
+if [[ $has_args -eq 1 ]]; then
+  nvim "${args[@]}"
+  exit 0
+fi
+
+open_by_title() {
+  # shellcheck disable=SC2001
+  id=$(sed 's/.*:nvim:\([0-9]*\):.*/\1/g' <<<"$1")
+  pid=/run/user/$UID/nvim.$id.0
+  open=":OpenFile"
+  if [[ $no_tab -eq 1 ]]; then
+    open=":edit"
+  fi
+  for fn in "${files[@]}"; do
+    file="$(readlink -f "$fn" || echo "$fn")"
+    nvim --server "$pid" --remote "$file"
+  done
+  # get first file focused
+  file="$(readlink -f "${files[0]}" || echo "${files[0]}")"
+  nvim --server "$pid" --remote "$file"
+  if [[ -z $TMUX ]]; then
+    tmux attach-session -t "$name"
+  fi
+}
+
+if [[ -n $TMUX ]]; then
+  tmux new-session -d -s "$name" nvim -p -- "${files[@]}"
+  tmux switch-client -t "$name:nvim" || tmux switch-client -t "$name"
+  title=$(cut -f1 --complement --delimiter='|' <<< "$(tmux display-message -p "#T")")
+  open_by_title "$title" 2>/dev/null
+  exit 0
+fi
+
+session=$(tmux ls -F "#{session_name}|#{pane_title}" 2>/dev/null | grep "^$name")
+if [[ -z $session ]]; then
+  if ! tmux new-session -s "$name" nvim -p -- "${files[@]}"; then
+    tmux attach-session -t "$name" || tmux switch-client -t "$name"
+  fi
+elif [[ -z "${files[*]}" ]]; then
+  tmux attach-session -t "$name"
+else
+  title=$(cut -f1 --complement --delimiter='|' <<<"$session")
+  open_by_title "$title"
+fi

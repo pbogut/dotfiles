@@ -1,0 +1,6 @@
+#!/bin/bash
+if [[ -f './vendor/bin/phpunit' ]]; then
+    ./vendor/bin/phpunit $@
+elif [[ -f './phpunit.phar' ]]; then
+    php ./phpunit.phar $@
+fi

@@ -1,0 +1,25 @@
+<?php
+
+namespace [[php.namespace]];
+
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
+
+/**
+ * Class [[php.class]]
+ *
+ * @author ${1:[[author]]} <${2:[[author_contact]]}>
+ */
+class [[php.class]] extends AbstractDb
+{
+	public function __construct(
+		DbContext \$context
+	) {
+		parent::__construct(\$context);
+	}
+
+	protected function _construct()
+	{
+		\$this->_init('${3:[[magento2.module_key]]}_${4:[[magento2.snake_base_name]]}', '${5:[[magento2.snake_base_name]]_id}');
+	}
+}

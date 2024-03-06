@@ -1,0 +1,48 @@
+#!/bin/bash
+#=================================================
+# name:   napi
+# author: Pawel Bogut <http://pbogut.me>
+# date:   01/11/2017
+#=================================================
+file="$1"
+filename="${file%.*}"
+ext="${file##*.}"
+
+dir=$(dirname "$filename")
+cd $dir
+
+timestamp=$(date '+%s')
+mkdir -p ".backup/$timestamp"
+
+# ls * | grep -v "$file" | grep -v "$ext"'$\|nfo$\|jpg$\|png$' | while read tobackup; do
+# done
+ls "$filename"* | grep -v "$ext"'$\|nfo$\|jpg$\|png$' | while read tobackup; do
+    mv "$tobackup" ".backup/$timestamp/$tobackup"
+done
+
+napi-bash "$file"
+if [[ $? == 0 ]]; then
+    subtitles=$(ls "$filename"* | grep -v "$ext"'$\|nfo$\|jpg$\|png$' | head -n1)
+    # enconv -L polish -c -V -x UTF8 "$subtitles"
+    encoding=$(enconv -L polish -gi "$subtitles")
+    framerate=$(ffprobe -show_streams "$file" 2>&1 | grep fps | awk '{split($0,a,"fps")}END{print a[1]}' | awk '{print $NF}')
+    echo File encoding: $encoding
+    echo '==> Converting '$encoding' to UTF-8...'
+    iconv -f $encoding -t UTF-8 <"$subtitles" >"$subtitles.new"
+    mv "$subtitles.new" "$subtitles"
+
+    if [[ $2 == "ff" ]]; then
+        echo '==> Fixing framerate...'
+        napi-fix-framerate.php $subtitles $framerate > "$subtitles.new"
+    else
+        cp "$subtitles" "$subtitles.new"
+    fi
+    rm "${filename}.vtt" > /dev/null 2>&1
+    mv "$subtitles.new" "$subtitles"
+    echo '==> Generating vtt subtitles...'
+    ffmpeg -loglevel warning -i "$subtitles" "${filename}.vtt"
+    rm "${filename}.srt" > /dev/null 2>&1
+    echo '==> Generating srt subtitles...'
+    ffmpeg -loglevel warning -i "${filename}.vtt" "${filename}.srt"
+    echo '==> Done'
+fi

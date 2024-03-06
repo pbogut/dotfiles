@@ -1,0 +1,107 @@
+3 screens: Height=1010
+3 screens: Width=1920
+3 screens: XPosition=3840
+3 screens: YPosition=70
+DP-3 DP-4 HDMI-0=HDMI-0
+State=AAAA/wAAAAD9AAAAAQAAAAAAAABeAAADpvwCAAAAAfsAAAAcAG8AawB1AGwAYQByAF8AcwBpAGQAZQBiAGEAcgEAAABMAAADpgAAAQ4BAAACAAAHIQAAA6YAAAAEAAAABAAAAAgAAAAI/AAAAAIAAAABAAAAAQAAACwAcQB1AGkAYwBrAEEAbgBuAG8AdABhAHQAaQBvAG4AVABvAG8AbABCAGEAcgIAAAAA/////wAAAAAAAAAAAAAAAgAAAAIAAAAWAG0AYQBpAG4AVABvAG8AbABCAGEAcgEAAAAA/////wAAAAAAAAAAAAAAIgBhAG4AbgBvAHQAYQB0AGkAbwBuAFQAbwBvAGwAQgBhAHIAAAAEi/////8AAAAAAAAAAA==
+
+[Desktop Entry]
+FullScreen=false
+
+[General]
+LockSidebar=true
+ShowSidebar=false
+
+[KFileDialog Settings]
+Recent Files[$e]=podpis.png,file:$HOME/output.pdf,file:$HOME/Work/AP/Info for TD/questionnaire.pdf,file:$HOME/Documents/podpis-na-a4.png,file:$HOME/Documents/podpis.png
+Recent URLs[$e]=file:$HOME/Documents/,file:$HOME/,file:$HOME/Work/AP/Info for TD/,file:///tmp/pbogut/tmp.3CJLOPrP0N/
+detailViewIconSize=16
+
+[MainWindow]
+3 screens: Height=1061
+3 screens: Width=1915
+3 screens: Window-Maximized=true
+3 screens: XPosition=0
+3 screens: YPosition=16
+DP-2 HDMI-0 DP-1 Height 1920x1080=969
+DP-2 HDMI-0 DP-1 Width 1920x1080=1918
+DP-2 HDMI-0 DP-1 XPosition 1920x1080=1921
+DP-2 HDMI-0 DP-1 YPosition 1920x1080=1190
+DP-3 DP-4 HDMI-0=DP-4
+DP-4 HDMI-0 DP-3=DP-4
+DP-4 HDMI-0 DP-3 Height 1920x1080=1028
+DP-4 HDMI-0 DP-3 Height 1920x1080 DP-3=992
+DP-4 HDMI-0 DP-3 Height 1920x1080 DP-4=992
+DP-4 HDMI-0 DP-3 Height 1920x1080 HDMI-0=1064
+DP-4 HDMI-0 DP-3 Width 1920x1080=1920
+DP-4 HDMI-0 DP-3 Width 1920x1080 DP-3=959
+DP-4 HDMI-0 DP-3 Width 1920x1080 DP-4=1920
+DP-4 HDMI-0 DP-3 Width 1920x1080 HDMI-0=1920
+DP-4 HDMI-0 DP-3 XPosition 1920x1080=1920
+DP-4 HDMI-0 DP-3 XPosition 1920x1080 DP-3=961
+DP-4 HDMI-0 DP-3 XPosition 1920x1080 DP-4=1920
+DP-4 HDMI-0 DP-3 XPosition 1920x1080 HDMI-0=3840
+DP-4 HDMI-0 DP-3 YPosition 1920x1080=52
+DP-4 HDMI-0 DP-3 YPosition 1920x1080 DP-3=88
+DP-4 HDMI-0 DP-3 YPosition 1920x1080 DP-4=88
+DP-4 HDMI-0 DP-3 YPosition 1920x1080 HDMI-0=16
+DVI-D-0 HDMI-0 Height 1920x1080=1041
+DVI-D-0 HDMI-0 Width 1920x1080=1918
+DVI-D-0 HDMI-0 XPosition 1920x1080=1
+DVI-D-0 HDMI-0 YPosition 1920x1080=38
+DisplayPort-0 DisplayPort-1 HDMI-A-0=DisplayPort-1
+HDMI-0 DVI-D-0 Height 1080=1041
+HDMI-0 DVI-D-0 Height 1920x1080=1023
+HDMI-0 DVI-D-0 Width 1920=1918
+HDMI-0 DVI-D-0 Width 1920x1080=958
+HDMI-0 DVI-D-0 XPosition=1921
+HDMI-0 DVI-D-0 XPosition 1920x1080=1
+HDMI-0 DVI-D-0 YPosition=38
+HDMI-0 DVI-D-0 YPosition 1920x1080=56
+Height 1080=1024
+State=AAAA/wAAAAD9AAAAAQAAAAAAAABeAAADdPwCAAAAAfsAAAAcAG8AawB1AGwAYQByAF8AcwBpAGQAZQBiAGEAcgAAAABcAAADdAAAAAcBAAAGAAAHgAAAA1QAAAAEAAAABAAAAAgAAAAI/AAAAAIAAAABAAAAAQAAACwAcQB1AGkAYwBrAEEAbgBuAG8AdABhAHQAaQBvAG4AVABvAG8AbABCAGEAcgIAAAAA/////wAAAAAAAAAAAAAAAgAAAAIAAAAWAG0AYQBpAG4AVABvAG8AbABCAGEAcgEAAAAA/////wAAAAAAAAAAAAAAIgBhAG4AbgBvAHQAYQB0AGkAbwBuAFQAbwBvAGwAQgBhAHIAAAAEi/////8AAAAAAAAAAA==
+ToolBarsMovable=Disabled
+Width 1920=1918
+
+[MainWindow][Toolbar mainToolBar]
+IconSize=16
+ToolButtonStyle=TextUnderIcon
+
+[Print Preview]
+3 screens: Height=500
+3 screens: Width=600
+DP-2 HDMI-0 DP-1 Height 1920x1080=500
+DP-2 HDMI-0 DP-1 Width 1920x1080=600
+DP-4 HDMI-0 DP-3 Height 1920x1080 DP-4=500
+DP-4 HDMI-0 DP-3 Width 1920x1080 DP-4=600
+HDMI-0 DVI-D-0 Height 1080=500
+HDMI-0 DVI-D-0 Height 1920x1080=500
+HDMI-0 DVI-D-0 Width 1920=600
+HDMI-0 DVI-D-0 Width 1920x1080=600
+Height 1080=500
+Width 1920=600
+
+[Recent Files]
+File1[$e]=$HOME/Documents/Axolit/Faktury/2023/07/DigitalOcean Invoice 2023 Jun (1639190-460656912).pdf
+File10[$e]=$HOME/Documents/Bielska/mapy/wymiary.pdf
+File2[$e]=$HOME/Downloads/_pdf/AP-2023-1000737683.pdf
+File3[$e]=$HOME/Downloads/_pdf/faktura-vat-02-07-2023.pdf
+File4[$e]=/tmp/.mutt-tmp/faktura-vat-02-07-2023.pdf
+File5[$e]=/tmp/.mutt-tmp/TA_PdfFileTitle_20180219_092833.pdf
+File6[$e]=$HOME/m1.pdf
+File7[$e]=$HOME/Documents/Bielska/mapy/centralne_ogrzewanie.pdf
+File8[$e]=$HOME/Documents/Bielska/mapy/przylaczenie_wody.pdf
+File9[$e]=$HOME/Documents/Bielska/mapy/rzut_mieszkanie_garaz.pdf
+Name1[$e]=DigitalOcean Invoice 2023 Jun (1639190-460656912).pdf
+Name10[$e]=wymiary.pdf
+Name2[$e]=AP-2023-1000737683.pdf
+Name3[$e]=faktura-vat-02-07-2023.pdf
+Name4[$e]=faktura-vat-02-07-2023.pdf
+Name5[$e]=TA_PdfFileTitle_20180219_092833.pdf
+Name6[$e]=m1.pdf
+Name7[$e]=centralne_ogrzewanie.pdf
+Name8[$e]=przylaczenie_wody.pdf
+Name9[$e]=rzut_mieszkanie_garaz.pdf
+
+[UiSettings]
+ColorScheme=Breeze Dark

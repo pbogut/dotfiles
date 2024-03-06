@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+#=================================================
+# name:   cht
+# author: Pawel Bogut <https://pbogut.me>
+# date:   08/10/2021
+#=================================================
+cht() {
+  curl "cht.sh/$1" 2>/dev/null | less
+}

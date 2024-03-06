@@ -1,0 +1,48 @@
+#!/bin/bash
+#=================================================
+# name:   ls-project
+# author: Pawel Bogut <pbogut@ukpos.com> <http://pbogut.me>
+# date:   09/06/2017
+#=================================================
+usage() {
+    echo "Ussage: ${0##*/} [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  -h, --help     display this help and exit"
+}
+
+full_path=0
+while test $# -gt 0; do
+    case "$1" in
+        --full-path | -fp)
+            full_path=1
+            shift
+            ;;
+        --help | -h)
+            usage
+            exit 0
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+(
+    find -L "$PROJECTS" \
+        -regextype egrep \
+        -maxdepth 5 -mindepth 2 \
+        -iregex '.*(\.git|\.bare)$' |
+        sed -E 's,/(\.git|\.bare)$,,'
+    echo "$DOTFILES"
+    echo "$DOTFILES/config/nvim"
+) |
+    sort |
+    uniq |
+    xargs -d"\n" stat -c "%Y %n" |
+    sort -r |
+    sed -E 's,[0-9]+\s,,' |
+    if [[ $full_path -eq 0 ]]; then
+        sed 's,^'"$PROJECTS/"',,g'
+    fi

@@ -1,0 +1,35 @@
+<?php
+
+namespace [[magento2.namespace]];
+
+use Magento\Framework\Data\OptionSourceInterface;
+
+/**
+ * Class [[php.class]]
+ *
+ * @author ${1:[[author]]} <${2:[[author_contact]]}>
+ */
+class [[php.class]] implements OptionSourceInterface
+{
+    protected \$options = [
+        ${0:// '0' => 'Zero',
+        // '1' => 'One',}
+    ];
+
+    /**
+     * Get options
+     *
+     * @return array
+     */
+    public function toOptionArray()
+    {
+        \$options = [];
+        foreach (\$this->options as \$key => \$value) {
+            \$options[] = [
+                'label' => \$value,
+                'value' => \$key,
+            ];
+        }
+        return \$options;
+    }
+}

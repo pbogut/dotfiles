@@ -1,0 +1,8 @@
+#!/bin/bash
+#=================================================
+# name:   dev-log
+# author: Pawel Bogut <https://pbogut.me>
+# date:   22/02/2021
+#=================================================
+touch /tmp/doclog.log
+LC_ALL=en_GB.utf8 screen -U -D -RR slit slit --always-term=true -f "/tmp/doclog.log"

@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   zellij-vim
+# author: Pawel Bogut <https://pbogut.me>
+# date:   11/07/2022
+#=================================================
+name=$(zellij-session-name)
+
+declare -a files
+declare -a args
+has_args=0
+no_tab=0
+
+while test $# -gt 0; do
+  case "$1" in
+    --no-tab)
+      no_tab=1
+      shift
+      ;;
+    --)
+      shift
+      ;;
+    --*|-*)
+      args["${#args[@]}"]="$1"
+      has_args=1
+      shift
+      ;;
+    *)
+      args["${#args[@]}"]="$1"
+      files["${#files[@]}"]="$1"
+      shift
+      ;;
+  esac
+done
+
+if [[ $has_args -eq 1 ]]; then
+  nvim "${args[@]}"
+  exit 0
+fi
+
+open_by_title() {
+  # shellcheck disable=SC2001
+  id=$(sed 's/.*:nvim:\([0-9]*\):.*/\1/g' <<<"$1")
+  pid=/run/user/$UID/nvim.$id.0
+  open=":OpenFile"
+  if [[ $no_tab -eq 1 ]]; then
+    open=":edit"
+  fi
+  for fn in "${files[@]}"; do
+    file="$(readlink -f "$fn" || echo "$fn")"
+    nvim --server "$pid" --remote "$file"
+  done
+  # get first file focused
+  file="$(readlink -f "${files[0]}" || echo "${files[0]}")"
+  nvim --server "$pid" --remote "$file"
+  if [[ -z $ZELLIJ ]]; then
+    zellij attach "$name"
+  fi
+}
+
+# if [[ -n $ZELLIJ ]]; then
+#   tmux new-session -d -s "$name" nvim -p -- "${files[@]}"
+#   tmux switch-client -t "$name:nvim" || tmux switch-client -t "$name"
+#   title=$(cut -f1 --complement --delimiter='|' <<< "$(tmux display-message -p "#T")")
+#   open_by_title "$title" 2>/dev/null
+#   exit 0
+# fi
+
+escaped_session=$name
+escaped_session=${escaped_session//\[/\\\[}
+escaped_session=${escaped_session//\]/\\\]}
+if swaymsg '[title="Zellij \('"$escaped_session"'\)"] focus'; then
+  exit 0
+fi
+
+session=$(zellij ls 2>/dev/null | grep "^$name")
+layout="nvim"
+base_dir="$(dirname "$(git worktree list | grep '(bare)' | awk '{print $1}')")"
+if [[ $? -ne 0 ]]; then
+  base_dir="$(git rev-parse --show-toplevel)"
+fi
+if [[ $base_dir != "" ]]; then
+  maybe_layout=$(jq -r '.["'"$base_dir"'"]' < ~/.config/zellij/layouts/sessions.json)
+  if [[ $maybe_layout != "null" ]]; then
+    layout="$maybe_layout"
+  fi
+fi
+
+if [[ -z $session ]]; then
+  zellij -s "$name" -l "$layout" || zellij attach "$name"
+else
+  title=$(cut -f1 --complement --delimiter='|' <<<"$session")
+  open_by_title "$title"
+fi

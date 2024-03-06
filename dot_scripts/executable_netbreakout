@@ -1,0 +1,7 @@
+#!/bin/bash
+#=================================================
+# name:   netbreakout
+# author: Pawel Bogut <http://pbogut.me>
+# date:   22/06/2017
+#=================================================
+ssh -nNT -R '*:12021:localhost:80' centipede.pbogut.me

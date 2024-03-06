@@ -1,0 +1,29 @@
+<?php
+
+namespace ${1:[[magento2.namespace]]};
+
+use Magento\Framework\ObjectManagerInterface;
+
+/**
+ * Class ${2:[[php.class]]}
+ *
+ * @author ${3:[[author]]} <${4:[[author_contact]]}>
+ */
+class ${2:[[php.class]]}
+{
+	/** @var ObjectManagerInterface **/
+	protected $_objectManager = null;
+	/** @var Collection **/
+	protected $_instanceName = null;
+
+	public function __construct(ObjectManagerInterface \$objectManager, \$instanceName = Collection::class)
+	{
+		\$this->_objectManager = \$objectManager;
+		\$this->_instanceName = \$instanceName;
+	}
+
+	public function create(array \$data = [])
+	{
+		return \$this->_objectManager->create(\$this->_instanceName, \$data);
+	}
+}

@@ -1,0 +1,51 @@
+#!/bin/env zsh
+#=================================================
+# name:   ${1:[[file_name]]}
+# author: ${2:[[author]]} <${3:[[author_contact]]}>
+# date:   ${4:[[current_date]]}
+#=================================================
+cycle=0    #init cycle
+tick=0.2   #tick every n secnds
+refresh=30 #refresh every n seconds
+
+state="off"
+
+switch_state() {
+	update_state
+	if [[ \$state == "on" ]]; then
+		# turn off action
+		state="off"
+	else
+		# turn on action
+		state="on"
+	fi
+	show_state
+}
+
+update_state() {
+	state="off"
+	# if [[ "$(check state action)" != "" ]]; then
+		state="on"
+	# fi
+}
+
+show_state() {
+	if [[ \$state == "on" ]]; then
+		echo 
+	else
+		echo 
+	fi
+}
+
+trap "switch_state" USR1
+
+while true; do
+	if [[ \$cycle -ge \$((refresh / tick)) ]]; then
+		update_state
+		show_state
+		cycle=0
+	fi
+	cycle=\$((cycle + 1))
+	sleep \${tick}s
+	wait
+done

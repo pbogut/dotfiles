@@ -1,0 +1,50 @@
+os:
+  openCommand: 'nvru -c ":LazyGitToggle" -c ":edit {{filename}}"'
+notARepository: skip
+customCommands:
+  - key: 'C'
+    description: 'Commit changes with editor'
+    context: 'global'
+    command: 'env EDITOR=nvim git commit --verbose'
+    subprocess: true
+  - key: <c-l>
+    description: 'Pull fast-forward'
+    context: 'global'
+    command: 'git pullff'
+    subprocess: true
+  - key: <c-r>
+    description: 'Pull rebase'
+    context: 'global'
+    command: 'git pullrb'
+    subprocess: true
+  - key: 'q'
+    description: 'Go back to nvim'
+    context: 'global'
+    command: 'nvru -c ":LazyGitToggle"'
+  - key: 'e'
+    description: 'Edit file'
+    context: 'files'
+    command: 'nvru -c ":LazyGitToggle" -c ":edit {{ .SelectedFile.Name }}"'
+  - key: 'e'
+    description: 'Edit file'
+    context: 'staging'
+    command: 'nvru -c ":LazyGitToggle" -c ":edit {{ .SelectedFile.Name }}"'
+  - key: 'o'
+    description: 'Open file'
+    context: 'files'
+    command: 'nvru -c ":LazyGitToggle" -c ":edit {{ .SelectedFile.Name }}"'
+  - key: 'o'
+    description: 'Open file'
+    context: 'staging'
+    command: 'nvru -c ":LazyGitToggle" -c ":edit {{ .SelectedFile.Name }}"'
+  - key: 'p'
+    description: 'Git ap'
+    context: 'files'
+    command: 'git ap {{ .SelectedFile.Name }}'
+    subprocess: true
+
+# contexts: status, files, localBranches, remotes, remoteBranches,
+#           tags, commits, reflogCommits, subCommits, commitFiles,
+#           stash, normal, merging, patchBuilding, staging, menu,
+#           credentials, confirmation, search, commitMessage,
+#           submodules, suggestions, cmdLog

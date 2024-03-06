@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+	<!-- <update handle="styles"/> -->
+	<body>
+		<referenceContainer name="content">
+			<block class="[[magento2.module_namespace]]\Block\${1:BlockName}" name="${2:blockname}" as="${3:blockname}"
+			       cacheable="false" template="[[magento2.module_name]]::${3:module_name}/${2:blockname}.phtml">
+		</referenceContainer>
+	</body>
+</page>

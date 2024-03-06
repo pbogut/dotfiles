@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   remouse
+# author: author <author_contact>
+# date:   18/12/2023
+#=================================================
+cd /home/pbogut/Projects/pyenv/remouse || exit 1
+if [[ $1 == "wifi" ]]; then
+    ./bin/remarkable-mouse --evdev --address 192.168.1.111
+else
+    ./bin/remarkable-mouse --evdev
+fi

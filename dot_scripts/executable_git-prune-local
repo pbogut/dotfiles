@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   git-prune-local
+# author: Pawel Bogut <https://pbogut.me>
+# date:   20/07/2022
+#=================================================
+master="$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
+branches=$(git branch --merged "$master" | grep -v "^\*" | grep -v '^+')
+
+if [[ -n $branches ]]; then
+  echo "Branches merged with $master:"
+  echo "$branches"
+  echo "^ Branches above will be removed ^"
+  read -p "Continue? [y/n] " -r confirm
+
+  if [[ $confirm == "y" ]]; then
+    # shellcheck disable=SC2086
+    git branch -d $branches
+  fi
+fi

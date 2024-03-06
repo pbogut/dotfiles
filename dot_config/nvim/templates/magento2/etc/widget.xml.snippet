@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget.xsd">
+    <widget id="${1:[[magento2.module_key]]}_widget"
+            class="${2:[[magento2.namespace]]}\Block\Widget"
+            is_email_compatible="true"
+            placeholder_image="Magento_Catalog::images/category_widget_link.png">
+        <label translate="true">${3:[[magento2.module_name_str]]} Widget</label>
+        <description translate="true">${4:[[magento2.module_name_str]]}</description>
+        <parameters>
+            <parameter name="form" xsi:type="select" visible="true">
+                <label translate="true">Options</label>
+                <options>
+                    <option selected="true"
+                            name="default"
+                            value="Option1">
+                        <label translate="true">Option1</label>
+                    </option>
+                    <option name="option_2"
+                            value="Option2">
+                        <label translate="true">Option2</label>
+                    </option>
+                </options>
+            </parameter>
+        </parameters>
+    </widget>
+</widgets>

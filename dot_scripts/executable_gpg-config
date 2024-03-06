@@ -1,0 +1,38 @@
+#!/bin/bash
+key_store=~/.gpg-config/
+
+action=$1
+key=$2
+
+if [[ $action == "list" ]]; then
+    ls -1 "$key_store" | sed 's/\([^/]*\)\.gpg$/\1/'
+
+elif [[ $action == "get" ]]; then
+    gpg --quiet --for-your-eyes-only --no-tty --decrypt "$key_store/$key.gpg" 2> /dev/null
+    if [[ $? -gt 0 ]]; then
+        >&2 echo "Key '$key' does not exists."
+    fi
+
+elif [[ $action == "set" ]]; then
+    mkdir -p "$key_store"
+    echo "-- Type value and then press Ctrl-D --"
+    gpg --encrypt -o "$key_store/$key.gpg"
+    echo ""
+    echo "Value has been stored:"
+    $0 get $key
+    echo ""
+
+elif [[ $action == "init" ]]; then
+    gpg --full-gen-key
+    echo default-recipient-self >> "$HOME/.gnupg/gpg.conf"
+
+else
+    echo "Usage: ${0##*/} [list|get|set] [key]"
+    echo ""
+    echo "  actions:"
+    echo -e "    list\tlist all stored keys"
+    echo -e "    get\t\tget value for the key"
+    echo -e "    set\t\tset value for the key"
+    echo ""
+    echo -e "    key\t\trequired for get and set actions"
+fi

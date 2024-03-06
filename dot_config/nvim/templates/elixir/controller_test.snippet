@@ -1,0 +1,12 @@
+defmodule ${1:[[elixir.module_name]]} do
+	use ${2:[[elixir.base_module]]}.ConnCase, async: true
+
+	describe "${3|GET,POST|} ${4:/url/route}" do
+		test "${5:test description}", %{conn: conn} do
+			${6:conn = get(conn, Routes.${7:url_path}(conn, :${8:action}))
+			response = html_response(conn, 200)}
+
+			${9:assert false == true}$0
+		end
+	end
+end

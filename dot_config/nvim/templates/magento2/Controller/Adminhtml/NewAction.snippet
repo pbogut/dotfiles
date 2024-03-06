@@ -1,0 +1,35 @@
+<?php
+
+namespace [[php.namespace]];
+
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context as ActionContext;
+use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Backend\Model\View\Result\ForwardFactory as ResultForwardFactory;
+
+/**
+ * Class [[php.class]]
+ *
+ * @author ${1:[[author]]} <${2:[[author_contact]]}>
+ */
+class [[php.class]] extends Action implements HttpGetActionInterface
+{
+	const ADMIN_RESOURCE = '${3:[[magento2.module_namespace]]}::${4:[[magento2.resource_name]]}';
+
+	/** @var ResultForwardFactory */
+	protected $_resultForwardFactory;
+
+	public function __construct(
+		ActionContext \$context,
+		ResultForwardFactory \$resultForwardFactory
+	) {
+		\$this->_resultForwardFactory = \$resultForwardFactory;
+		parent::__construct(\$context);
+	}
+
+	public function execute()
+	{
+		\$resultForward = \$this->_resultForwardFactory->create();
+		return \$resultForward->forward('edit');$0
+	}
+}

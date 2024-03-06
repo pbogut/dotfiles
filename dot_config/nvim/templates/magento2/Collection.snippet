@@ -1,0 +1,18 @@
+<?php
+
+namespace ${1:[[magento2.namespace]]};
+
+use ${2:[[magento2.module_namespace]]}\Model\\${3:[[magento2.resource_name]]};
+use ${2:[[magento2.module_namespace]]}\Model\ResourceModel\\${3:[[magento2.resource_name]]} as ${3:[[magento2.resource_name]]}${4:Resource};
+
+class ${5:[[php.class]]} extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
+{
+	protected $_idFieldName = '${6:[[magento2.resource_key]]_id}';
+	protected $_eventPrefix = '${7:[[magento2.module_key]]}_${8:[[magento2.resource_key]]}_collection';
+	protected $_eventObject = '${9:[[magento2.resource_key]]_collection}';
+
+	protected function _construct()
+	{
+		\$this->_init(${3:[[magento2.resource_name]]}::class, ${3:[[magento2.resource_name]]}${4:Resource}::class);
+	}
+}

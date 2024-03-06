@@ -1,0 +1,8 @@
+#!/bin/bash
+#=================================================
+# name:   scan
+# author: Pawel Bogut <https://pbogut.me>
+# date:   07/04/2020
+#=================================================
+# yay -S imagescan imagescan-plugin-networkscan
+utsushi $@

@@ -1,0 +1,9 @@
+offlineimaprc.example
+msmtprc.example
+.local/share/chezmoi
+vim.toml
+stylua.toml
+selene.toml
+key.txt.age
+assets
+.config/chezmoi

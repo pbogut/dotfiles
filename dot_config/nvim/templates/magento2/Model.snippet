@@ -1,0 +1,36 @@
+<?php
+
+namespace [[php.namespace]];
+
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\DataObject\IdentityInterface;
+
+/**
+ * Class [[php.class]]
+ *
+ * @method ResourceModel\[[php.class]] getResource()
+ *
+ * @author ${1:[[author]]} <${2:[[author_contact]]}>
+ */
+class [[php.class]] extends AbstractModel implements IdentityInterface
+{
+	protected \$_cacheTag = '${3:[[magento2.module_key]]}_${4:[[magento2.snake_base_name]]}';
+
+	protected \$_eventPrefix = '${3:[[magento2.module_key]]}_${4:[[magento2.snake_base_name]]}';
+
+	protected function _construct()
+	{
+		\$this->_init(ResourceModel\\[[php.class]]::class);
+	}
+
+	public function getIdentities()
+	{
+		return [\$this->_cacheTag . '_' . \$this->getId()];
+	}
+
+	public function getDefaultValues()
+	{
+		\$values = [];
+		return \$values;
+	}
+}

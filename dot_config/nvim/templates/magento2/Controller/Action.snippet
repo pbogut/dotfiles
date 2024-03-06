@@ -1,0 +1,26 @@
+<?php
+
+namespace ${1:[[magento2.namespace]]};
+
+use Magento\Framework\App\Action\Action;
+use Magento\Framework\App\Action\Context as ActionContext;
+use Magento\Framework\App\Action\Http${2|Get,Post|}ActionInterface;
+
+/**
+ * Class ${3:[[php.class]]}
+ *
+ * @author ${4:[[author]]} <${5:[[author_contact]]}>
+ */
+class ${3:[[php.class]]} extends Action implements Http${2:Get}ActionInterface
+{
+    public function __construct(
+        ActionContext \$context
+    ) {
+        parent::__construct(\$context);
+    }
+
+    public function execute()
+    {
+        ${0://}
+    }
+}

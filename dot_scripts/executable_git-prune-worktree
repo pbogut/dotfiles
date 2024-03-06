@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   git-prune-worktree
+# author: Pawel Bogut <https://pbogut.me>
+# date:   18/08/2022
+#=================================================
+master="$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
+branches=$(git branch --merged "$master" | grep -v "^\*" | grep '^+' | sed 's/^+ /  /')
+params=""
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+}
+
+while test $# -gt 0; do
+  case "$1" in
+    --force)
+      params="$params --force"
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -n $branches ]]; then
+  echo "Worktrees merged with $master:"
+  echo "$branches"
+  echo "^ Branches above will be removed ^"
+  read -p "Continue? [y/n] " -r confirm
+
+  if [[ $confirm == "y" ]]; then
+    while read -r branch; do
+      # shellcheck disable=SC2086
+      git worktree remove $params "$branch"
+    done <<< "$branches"
+  fi
+fi

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   yt-quickupload
+# author: author <author_contact>
+# date:   22/07/2023
+#=================================================
+file="$1"
+title=$(basename "$file" | yad --form --field=Title:text)
+if [[ $title != "" ]]; then
+  youtube-upload --title "$title" --privacy=unlisted "$file"
+fi

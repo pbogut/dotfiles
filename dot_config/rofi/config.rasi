@@ -1,0 +1,72 @@
+configuration {
+  modi: "run,drun,ssh,window";
+  width: 100;
+  font: "InputMono Nerd Font 9";
+  location: 1;
+  padding: 3;
+  terminal: "urxvt -e zsh -ic";
+  case-sensitive: false;
+  separator-style: "solid";
+  hide-scrollbar: true;
+  color-normal: "#222222, #cccccc, #222222, #285577, #dddddd";
+  color-urgent: "#222222, #da4281, #222222, #285577, #da4281";
+  color-active: "#222222, #008ed4, #222222, #285577, #008ed4";
+  color-window: "#222222, #222222, #285577";
+  kb-clear-line: "Control+Alt+h";
+  kb-remove-word-back: "Control+w";
+  kb-row-up: "Control+k";
+  kb-row-down: "Control+j";
+  kb-remove-to-eol: "";
+  kb-accept-entry: "Control+m,Return,KP_Enter";
+}
+* {
+    selected-normal-foreground:  rgba ( 248, 248, 242, 100 % );
+    foreground:                  rgba ( 248, 248, 242, 100 % );
+    normal-foreground:           @foreground;
+    alternate-normal-background: rgba ( 39, 40, 34, 0 % );
+    red:                         rgba ( 220, 50, 47, 100 % );
+    selected-urgent-foreground:  rgba ( 248, 248, 242, 100 % );
+    blue:                        rgba ( 38, 139, 210, 100 % );
+    urgent-foreground:           rgba ( 249, 38, 114, 100 % );
+    alternate-urgent-background: rgba ( 39, 40, 34, 0 % );
+    active-foreground:           rgba ( 166, 226, 42, 100 % );
+    lightbg:                     rgba ( 238, 232, 213, 100 % );
+    selected-active-foreground:  rgba ( 166, 226, 42, 100 % );
+    alternate-active-background: rgba ( 39, 40, 34, 0 % );
+    background:                  rgba ( 39, 40, 34, 93 % );
+    bordercolor:                 rgba ( 0, 43, 54, 100 % );
+    alternate-normal-foreground: @foreground;
+    normal-background:           rgba ( 39, 40, 34, 0 % );
+    lightfg:                     rgba ( 88, 104, 117, 100 % );
+    selected-normal-background:  rgba ( 20, 20, 17, 100 % );
+    border-color:                @foreground;
+    spacing:                     2;
+    separatorcolor:              rgba ( 230, 219, 116, 100 % );
+    urgent-background:           rgba ( 39, 40, 34, 0 % );
+    selected-urgent-background:  rgba ( 249, 38, 114, 100 % );
+    alternate-urgent-foreground: @urgent-foreground;
+    background-color:            rgba ( 0, 0, 0, 0 % );
+    alternate-active-foreground: @active-foreground;
+    active-background:           rgba ( 39, 40, 34, 0 % );
+    selected-active-background:  rgba ( 20, 20, 17, 100 % );
+}
+inputbar {
+  text-color: #ccc;
+}
+prompt {
+  text-color: #ccc;
+}
+window {
+  text-color: #990000;
+  background-color: #222;
+  width: 100%;
+  border: 0;
+}
+listview {
+  border-color: #285577;
+  border: 1px solid 0px 0px;
+}
+
+element.selected.normal {
+    background-color: #285577;
+}

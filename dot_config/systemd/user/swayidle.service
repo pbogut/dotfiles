@@ -1,0 +1,15 @@
+[Unit]
+Description=Idle manager for Wayland
+Documentation=man:swayidle(1)
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/swayidle -w \
+          timeout 300 'swaylock -f -i /usr/share/i3-lock-session/locktile.png -t' \
+          timeout 360 'swaymsg "output * dpms off"' \
+          resume 'swaymsg "output * dpms on"' \
+          before-sleep 'swaylock -f -i /usr/share/i3-lock-session/locktile.png -t'
+
+[Install]
+WantedBy=sway-session.target

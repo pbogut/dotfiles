@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * Class [[php.class1]]
+ *
+ * @author ${1:[[author]]} <${2:[[author_contact]]}>
+ */
+class [[php.class]] extends Mage_Adminhtml_Controller_Action
+{
+	protected function _isAllowed()
+	{
+		return Mage::getSingleton('admin/session')->isAllowed('${3:[[magento.module_key]]}');
+	}
+
+	protected function _initAction()
+	{
+		\$this->loadLayout()
+			->_setActiveMenu('${4:[[magento.module_key]]}');
+
+		return \$this;
+	}
+
+	public function indexAction()
+	{$0
+	}
+}

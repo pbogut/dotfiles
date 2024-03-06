@@ -1,0 +1,46 @@
+window {
+/*   margin: 5px; */
+/*   border: 2px solid red; */
+  /* background-color: red; */
+  font-family: "InputMono Nerd Font";
+  background-color: #222;
+  /* background-color: transparent; */
+}
+
+#input {
+  /* margin: 5px; */
+  border: 0px solid #222;
+  border-radius: 0px;
+  background-color: #222;
+  border-bottom: 1px solid #285577;
+  color: #dfdfdf;
+}
+
+/* #inner-box { */
+/*   margin: 5px; */
+/*   border: 2px solid yellow; */
+/*   background-color: yellow; */
+/* } */
+
+/* #outer-box { */
+/*   margin: 5px; */
+/*   border: 2px solid green; */
+/*   background-color: green; */
+/* } */
+
+/* #item { */
+/*   background-color: red; */
+/* } */
+
+#scroll {
+  background-color: #222;
+  padding-top: 2px;
+}
+
+#text {
+  width: 100%;
+  color: #dfdfdf;
+}
+#entry:selected {
+  background-color: #285577;
+}

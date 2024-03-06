@@ -1,0 +1,161 @@
+#!/bin/bash
+#=================================================
+# name:   network-sync
+# author: Pawel Bogut <https://pbogut.me>
+# date:   22/05/2021
+#=================================================
+trickle=""
+action="help"
+quiet=""
+cron="no"
+debug=""
+
+while test $# -gt 0; do
+  case "$1" in
+  all)
+    action="inbox"
+    shift
+    ;;
+  inbox)
+    action="inbox"
+    shift
+    ;;
+  mail)
+    action="mail"
+    shift
+    ;;
+  calendar)
+    action="calendar"
+    shift
+    ;;
+  --trickle)
+    trickle="trickle -s -d 1024 -u 1024"
+    shift
+    ;;
+  --quiet)
+    quiet="yes"
+    shift
+    ;;
+  --debug)
+    debug="yes"
+    quiet="no"
+    shift
+    ;;
+  --cron)
+    quiet="yes"
+    cron="yes"
+    shift
+    ;;
+  enable)
+    action="enable"
+    shift
+    ;;
+  disable)
+    action="disable"
+    shift
+    ;;
+  status)
+    action="status"
+    shift
+    ;;
+  --help | *)
+    action="help"
+    break
+    ;;
+  esac
+done
+
+if [[ $action == "help" ]]; then
+  echo "Usage:"
+  echo "  network-sync action [--options]"
+  echo "  "
+  echo "Actions:"
+  echo -e "  enable    \tenable auto sync (only respected when run with --cron flag"
+  echo -e "  disable   \tdisable auto sync (as above)"
+  echo -e "  status    \tshow cron enable/disable status"
+  echo -e "  inbox     \tsync email inbox only"
+  echo -e "  mail      \tsync full email"
+  echo -e "  calendar  \tsync calendars"
+  echo -e "  "
+  echo -e "Options:"
+  echo -e "  --help    \tdisplay this help message"
+  echo -e "  --trickle \tlimit network bandwidth to 1MB/s"
+  echo -e "  --quiet   \tdo not show output"
+  echo -e "  --cron    \trun in cron mode (do not show output, respect enable/disable)"
+  echo -e "  --debug   \tshow debug output"
+  exit
+fi
+
+if [[ $debug == "yes" ]]; then
+  echo "---debug---"
+  echo "Parameters:"
+  echo "  trickle: $trickle"
+  echo "  action:  $action"
+  echo "  quiet:   $quiet"
+  echo "  cron:    $cron"
+fi
+
+run() {
+  if [[ $debug == "yes" ]]; then
+    echo "Running: $*"
+    echo "---"
+  fi
+
+  # shellcheck disable=2294 # this is the way
+  if ! eval "$@"; then
+    DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-"unix:path=/run/user/$(id -u)/bus"} \
+      dunstify -i error "Network sync error while running: $*"
+  fi
+}
+
+print_status() {
+  [[ -f ~/.netsync-enabled ]] && echo "AutoSync Enabled" || echo "AutoSync Disabled"
+}
+
+# enable / disable / status
+if [[ $action == "enable" ]]; then
+  run touch ~/.netsync-enabled >/dev/null 2>&1
+  print_status
+  exit
+fi
+if [[ $action == "disable" ]]; then
+  rm -fr touch ~/.netsync-enabled >/dev/null 2>&1
+  print_status
+  exit
+fi
+if [[ $action == "status" ]]; then
+  print_status
+  exit
+fi
+
+# check status
+if [[ ! -f ~/.netsync-enabled ]] && [[ $cron == "yes" ]]; then
+  if [[ $quiet != "yes" ]]; then
+    echo "Doing nothing, sync disabled"
+  fi
+  exit
+fi
+
+# sync inbox
+if [[ $action == "inbox" ]]; then
+  [[ $quiet == "yes" ]] && quiet="-u quiet"
+  run "OFFLINEIMAP_INBOX_ONLY=1 $trickle offlineimap $quiet"
+  exit
+fi
+
+# sync full email
+if [[ $action == "mail" ]] || [[ $action == "all" ]]; then
+  [[ $quiet == "yes" ]] && quiet="-u quiet"
+  run "$trickle offlineimap $quiet"
+  exit
+fi
+
+# sync calendars
+if [[ $action == "calendar" ]] || [[ $action == "all" ]]; then
+  if [[ $quiet == "yes" ]]; then
+    run "$trickle vdirsyncer sync > /dev/null 2>&1"
+  else
+    run "$trickle vdirsyncer sync 2>&1"
+  fi
+  exit
+fi
