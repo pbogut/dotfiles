@@ -5,7 +5,7 @@
 # date:   29/08/2017
 #=================================================
 _current_task() {
-  token=$(config toggl/api_token)
+  token=$(secret toggl/api_token)
   last_entry=$(curl -v -u $token:api_token -X GET 'https://www.toggl.com/api/v8/time_entries' 2> /dev/null | jq '.[-1]')
 
   if [[ $(echo $last_entry | jq '.duration') -lt 0 ]]; then

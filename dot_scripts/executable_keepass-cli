@@ -4,8 +4,8 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   17/05/2018
 #=================================================
-db=${KEEPASS_DB:-$(config keepass/db)}
-pass=$(config keepass/pass)
+db=${KEEPASS_DB:-$(secret keepass/db)}
+pass=$(secret keepass/pass)
 if [[ $# -gt 1 ]]; then
     for last; do true; done
 fi
@@ -25,7 +25,7 @@ if [[ $1 == 'new' ]]; then
     temp=$(mktemp)
     echo "Name: $2" >$temp
     echo "URL: $3" >>$temp
-    echo "UserName: $4$(gpg-config get acc-email-server)" >>$temp
+    echo "UserName: $4$(secret keepass/email_server)" >>$temp
     echo "Password: $(apg -m16 -n1 -MSNCL)" >>$temp
     nvim $temp
     name=$(grep '^Name: ' $temp | sed 's,^Name: ,,')

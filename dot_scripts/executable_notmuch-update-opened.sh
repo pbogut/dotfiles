@@ -6,8 +6,8 @@
 #=================================================
 last_sync=$HOME/.config/last_email_open_sync
 last_date=$(cat $last_sync)
-token=$(config email/open_tracking/token)
-api_url=$(config email/open_tracking/api_url)
+token=$(secret email/open_tracking/token)
+api_url=$(secret email/open_tracking/api_url)
 data=$(curl "$api_url/rest/hitlog" \
     --header "Auth-Token: $token" \
     --header "Accept: application/json" \

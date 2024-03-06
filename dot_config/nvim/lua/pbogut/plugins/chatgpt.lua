@@ -37,7 +37,7 @@ return {
   end,
   config = function()
     require('chatgpt').setup({
-      api_key_cmd = 'bash ' .. os.getenv('HOME') .. '/.scripts/gpg-config get chatgpt_api_key',
+      api_key_cmd = 'bash ' .. os.getenv('HOME') .. '/.scripts/secret chatgpt/api_key',
       chat = {
         keymaps = {
           cycle_modes = '<M-m>',

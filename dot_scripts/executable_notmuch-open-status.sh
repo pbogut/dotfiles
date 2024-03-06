@@ -26,8 +26,8 @@ if [[ $message_id == "--mutt-pipe" ]]; then
     header="$header+------------------------\n"
 fi
 
-token=$(config email/open_tracking/token)
-api_url=$(config email/open_tracking/api_url)
+token=$(secret email/open_tracking/token)
+api_url=$(secret email/open_tracking/api_url)
 data=$(curl "$api_url/rest/summary/$encoded_id" \
     --header "Auth-Token: $token" \
     --header "Accept: application/json" \

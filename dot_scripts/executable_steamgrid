@@ -36,4 +36,4 @@ else
   done
 fi
 
-/usr/bin/steamgrid --steamgriddb "$(config steam/steamgriddb/api_key)" $PARAMS
+/usr/bin/steamgrid --steamgriddb "$(secret steam/steamgriddb/api_key)" $PARAMS

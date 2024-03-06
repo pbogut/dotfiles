@@ -30,11 +30,11 @@ if [[ $1 == "--preview" ]]; then
   exit 1
 fi
 
-user=$(config "email/$from/user" "$from")
-pass=$(config "email/$from/pass")
-imap_url=$(config "email/$acc/imap/host")
-imap_port=$(config "email/$acc/imap/port" 993)
-tracking_base_url=$(config "email/open_tracking/api_url")
+user=$(secret "email/$from/user" "$from")
+pass=$(secret "email/$from/pass")
+imap_url=$(secret "email/$acc/imap/host")
+imap_port=$(secret "email/$acc/imap/port" 993)
+tracking_base_url=$(secret "email/open_tracking/api_url")
 
 if $ruby; then
   # shellcheck disable=2068,3057,2002
@@ -42,7 +42,7 @@ if $ruby; then
     mutt-pre-process.rb |
     mutt-put-on-imap.rb |
     mutt-add-tracking-pixel.rb |
-    msmtp -a "$acc" --passwordeval="config email/$from/pass" --user="$user" --from="$from" ${@:1}
+    msmtp -a "$acc" --passwordeval="secret email/$from/pass" --user="$user" --from="$from" ${@:1}
 else
   mail=$(enrichmail \
       "$tmp_file" \
@@ -56,7 +56,7 @@ else
 
   # shellcheck disable=2068,3057,2002
   msmtp -a "$acc" \
-    --passwordeval="config email/$from/pass" \
+    --passwordeval="secret email/$from/pass" \
     --user="$user" \
     --from="$from" ${@:1} \
     <<<"$mail"

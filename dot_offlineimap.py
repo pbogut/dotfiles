@@ -8,11 +8,11 @@ inbox_only = os.getenv('OFFLINEIMAP_INBOX_ONLY') == "1"
 lock_file = os.getenv('HOME') + "/offlineimap.lock"
 
 """
-Reads config from local storage
+Reads secret from local storage
 Used mostly for sensitive data like passwords or email address
 """
-def get_config(key):
-    value = subprocess.Popen("~/.scripts/gpg-config get %s" % key,
+def get_secret(key):
+    value = subprocess.Popen("~/.scripts/secret %s" % key,
                      shell=True, stdout=subprocess.PIPE).stdout.read()
     value = value.strip("\n".encode())
 
