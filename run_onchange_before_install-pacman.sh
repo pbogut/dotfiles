@@ -7,10 +7,12 @@
 echo "> Update pacman database..."
 sudo pacman -Sy
 
+export CARGO_NET_GIT_FETCH_WITH_CLI=true
+
 # if no paru installed then build it with cargo
 if ! paru --version; then
     echo "> Installing paru dependencies ..."
-    sudo pacman -S rustup gcc cmake pkgconf fakeroot
+    sudo pacman -S rustup gcc cmake pkgconf fakeroot git
     echo "> Installing paru ..."
     rustup toolchain install stable
     cargo install paru
@@ -35,6 +37,7 @@ paru -S \
     enca \
     fakeroot \
     gcc \
+    git \
     glow \
     gnome-keyring \
     go \
