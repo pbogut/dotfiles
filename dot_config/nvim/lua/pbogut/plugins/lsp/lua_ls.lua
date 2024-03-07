@@ -4,29 +4,19 @@ local util = require('lspconfig/util')
 local me = {}
 
 function me.setup(opts)
-  local libraries = {}
-  local globals = {}
-  if vim.fn.filereadable('vim.toml') == 1 then
-    libraries = vim.h.ls(vim.fn.stdpath('data') .. '/lazy')
-    globals = { 'vim' }
+  local root_dir = function(fname)
+    local cwd = vim.loop.cwd()
+    local root = util.root_pattern('.luarc.json', '.git')(fname)
+    return root or cwd
   end
 
   opts = vim.tbl_deep_extend('keep', opts, {
-    root_dir = function(fname)
-      local cwd = vim.loop.cwd()
-      local root = util.root_pattern('.git', 'init.lua')(fname)
-      -- prefer cwd if root is a descendant
-      return util.path.is_descendant(cwd, root) and cwd or root
-    end,
+    root_dir = root_dir,
     settings = {
       Lua = {
         workspace = {
           maxPreload = 2000,
           preloadFileSize = 1000,
-          library = libraries,
-        },
-        diagnostics = {
-          globals = globals,
         },
         hint = {
           enable = true,

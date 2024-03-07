@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   run_onchange_after_symlink-luarc.json.sh
+# author: pbogut <pbogut@pbogut.me>
+# date:   07/03/2024
+#=================================================
+ln -sf "{{ .home }}/.config/nvim/.luarc.json" "{{ .chezmoi.sourceDir }}/dot_config/nvim/.luarc.json"
