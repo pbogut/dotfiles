@@ -7,3 +7,4 @@ selene.toml
 key.txt.age
 assets
 .config/chezmoi
+.fonts/.uuid
