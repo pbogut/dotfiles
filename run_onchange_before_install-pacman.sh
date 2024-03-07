@@ -5,6 +5,7 @@
 # date:   06/03/2024
 #=================================================
 echo "> Update pacman database..."
+echo "# pacman -Sy"
 sudo pacman -Sy
 
 export CARGO_NET_GIT_FETCH_WITH_CLI=true
@@ -12,6 +13,7 @@ export CARGO_NET_GIT_FETCH_WITH_CLI=true
 # if no paru installed then build it with cargo
 if ! paru --version; then
     echo "> Installing paru dependencies ..."
+    echo "# sudo pacman -S rustup gcc cmake pkgconf fakeroot git"
     sudo pacman -S rustup gcc cmake pkgconf fakeroot git
     echo "> Installing paru ..."
     rustup toolchain install stable

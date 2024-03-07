@@ -8,5 +8,7 @@ if [[ -n "$(command -v zsh)" ]]; then
     if [[ "$SHELL" == "$(which zsh)" ]]; then
         exit 0
     fi
-    chsh "$(id -un)" -s "$(which zsh)"
+    echo "> Changing shell to zsh"
+    echo "# sudo chsh $(id -un) -s $(which zsh)"
+    sudo chsh "$(id -un)" -s "$(which zsh)"
 fi
