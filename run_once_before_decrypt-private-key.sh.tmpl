@@ -4,8 +4,8 @@
 # author: pbogut <pbogut@pbogut.me>
 # date:   06/03/2024
 #=================================================
-if [ ! -f "{{ .chezmoi.homeDir }}/.config/chezmoi/key.txt" ]; then
-    mkdir -p "{{ .chezmoi.homeDir }}/.config/chezmoi"
-    chezmoi age decrypt --output "{{ .chezmoi.homeDir }}/.config/chezmoi/key.txt" --passphrase "{{ .chezmoi.sourceDir }}/key.txt.age"
-    chmod 600 "{{ .chezmoi.homeDir }}/.config/chezmoi/key.txt"
+if [ ! -f "{{ .home }}/.config/chezmoi/key.txt" ]; then
+    mkdir -p "{{ .home }}/.config/chezmoi"
+    chezmoi age decrypt --output "{{ .home }}/.config/chezmoi/key.txt" --passphrase "{{ .chezmoi.sourceDir }}/key.txt.age"
+    chmod 600 "{{ .home }}/.config/chezmoi/key.txt"
 fi

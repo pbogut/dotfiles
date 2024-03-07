@@ -39,7 +39,7 @@ at now + 10 minutes <<< "nextcloud --background"
 # demonize nextcloud "nextcloud --background"
 
 # redeye {{"{{{"}} {{- if eq .chezmoi.hostname "redeye" }}
-rerun gamemode "{{ .chezmoi.homeDir }}/.scripts/sway/gamemode.sh --watch"
+rerun gamemode "{{ .home }}/.scripts/sway/gamemode.sh --watch"
 rerun kwalletd "kwalletd5"
 
 # I dont want to talk about it
