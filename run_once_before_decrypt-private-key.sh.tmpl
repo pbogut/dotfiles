@@ -6,6 +6,7 @@
 #=================================================
 if [ ! -f "{{ .home }}/.config/chezmoi/key.txt" ]; then
     mkdir -p "{{ .home }}/.config/chezmoi"
+    echo "$ chezmoi age decrypt --output {{ .home }}/.config/chezmoi/key.txt --passphrase {{ .chezmoi.sourceDir }}/key.txt.age"
     chezmoi age decrypt --output "{{ .home }}/.config/chezmoi/key.txt" --passphrase "{{ .chezmoi.sourceDir }}/key.txt.age"
     chmod 600 "{{ .home }}/.config/chezmoi/key.txt"
 fi
