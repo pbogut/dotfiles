@@ -6,3 +6,6 @@ encryption = "age"
 
 [secret]
   command = "{{ .chezmoi.homeDir }}/.scripts/secret"
+
+[data]
+  home = "{{ .chezmoi.homeDir }}"
