@@ -113,5 +113,7 @@ paru -S \
 
 if [[ $(hostname) == 'silverspoon' ]]; then
     paru -S \
+        --skipreview \
+        --needed \
         intel-media-driver
 fi
