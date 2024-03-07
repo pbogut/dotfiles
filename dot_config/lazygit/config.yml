@@ -185,8 +185,8 @@ keybinding:
         update: u
         bulkMenu: b
 os:
-    openCommand: '$TERMINAL -e nvim {{filename}}'
-    openLinkCommand: 'sh -c "xdg-open {{link}} >/dev/null 2>&1"'
+    open: '$TERMINAL -e nvim {{filename}}'
+    openLink: 'sh -c "xdg-open {{link}} >/dev/null 2>&1"'
 disableStartupPopups: false
 customCommands:
     - key: 'C'

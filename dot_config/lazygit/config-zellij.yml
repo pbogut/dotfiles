@@ -1,6 +1,6 @@
 os:
-  openCommand: tmux-vim --no-tab {{filename}}
-  openLinkCommand: 'sh -c "xdg-open {{link}} >/dev/null 2>&1"'
+  open: tmux-vim --no-tab {{filename}}
+  openLink: 'sh -c "xdg-open {{link}} >/dev/null 2>&1"'
 customCommands:
   - key: 'C'
     description: 'Commit changes with editor'
