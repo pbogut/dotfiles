@@ -1,3 +1,20 @@
+{{/* feature flags */}}
+{{- $personal := false -}}
+{{- $work_itdesk := false -}}
+{{- $work_assured := false -}}
+{{- if eq .chezmoi.username "pbogut" -}}
+{{-   if eq .chezmoi.hostname "redeye" -}}
+{{-     $personal = true -}}
+{{-     $work_assured = true -}}
+{{-   end -}}
+{{-   if eq .chezmoi.hostname "silverspoon" -}}
+{{-     $personal = true -}}
+{{-   end -}}
+{{- end -}}
+{{- if eq .chezmoi.username "itdesk" -}}
+{{-   $work_itdesk = true -}}
+{{- end -}}
+
 encryption = "age"
 
 [age]
@@ -9,3 +26,6 @@ encryption = "age"
 
 [data]
   home = "{{ .chezmoi.homeDir }}"
+  personal = {{ $personal }}
+  work_assured = {{ $work_assured }}
+  work_itdesk = {{ $work_itdesk }}
