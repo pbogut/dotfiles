@@ -83,20 +83,22 @@ return {
       local displayer = require('telescope.pickers.entry_display').create({
         items = { {} },
       })
+      local home = os.getenv('HOME')
       pickers
         .new({
-          prompt_title = 'Chez Moi',
+          prompt_title = 'Chezmoi',
 
           finder = finders.new_table({
             results = result,
             entry_maker = function(entry_text)
               local entry = {}
               entry.value = entry_text
-              entry.dst = entry_text
+              entry.rel = entry_text
+              entry.dst = home .. '/' .. entry_text
               entry.ordinal = entry_text
               entry.display = function(ent)
                 return displayer({
-                  { ent.dst },
+                  { ent.rel },
                 })
               end
               return entry
@@ -112,7 +114,7 @@ return {
                 return
               end
 
-              vim.fn.jobstart('chezmoi edit ' .. selection.dst, {
+              vim.fn.jobstart('chezmoi edit ' .. vim.fn.shellescape(selection.dst), {
                 env = {
                   CHEZMOI_NVIM = 'open',
                   EDITOR = 'chezmoi-nvim',
@@ -127,12 +129,7 @@ return {
                     group = augroup,
                     buffer = bufnr,
                     callback = function()
-                      vim.notify(
-                        'Applying changes to file ' .. selection.dst .. ' ...',
-                        vim.log.levels.INFO,
-                        { title = 'Chezmoi' }
-                      )
-                      vim.fn.jobstart('chezmoi edit --apply ' .. selection.dst, {
+                      vim.fn.jobstart('chezmoi edit --apply ' .. vim.fn.shellescape(selection.dst), {
                         env = {
                           CHEZMOI_NVIM_FILE = file,
                           CHEZMOI_NVIM = 'apply',
@@ -140,7 +137,7 @@ return {
                         },
                         on_exit = function()
                           vim.notify(
-                            'Changes for file ' .. selection.dst .. ' applied.',
+                            'Changes for ' .. selection.rel .. ' file has been applied.',
                             vim.log.levels.INFO,
                             { title = 'Chezmoi' }
                           )
