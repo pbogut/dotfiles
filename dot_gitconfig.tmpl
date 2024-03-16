@@ -154,7 +154,9 @@
     whitespace = red reverse
 [protocol "file"]
     allow = always
+# {{- if .personal }} {{"{{{"}} - personal
 [url "git@github.com:"]
     insteadOf = https://github.com/
 [url "git@gitlab.com:"]
     insteadOf = https://gitlab.com/
+# {{"}}}"}} - personal {{- end }}
