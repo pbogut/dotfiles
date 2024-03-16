@@ -3,13 +3,6 @@
     url = "https://github.com/pbogut/i-use-rust-btw.git"
     refreshPeriod = "168h"
 
-[".fonts"]
-    type = "archive"
-    url = "https://github.com/pbogut/dot-fonts/archive/master.tar.gz"
-    exact = true
-    stripComponents = 1
-    refreshPeriod = "168h"
-
 [".config/dircolors-solarized"]
     type = "archive"
     url = "https://github.com/seebi/dircolors-solarized/archive/master.tar.gz"

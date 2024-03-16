@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   run_once_after_get-fonts
+# author: author <author_contact>
+# date:   16/03/2024
+#=================================================
+mkdir -p {{ .home }}/.fonts
+if [[ ! -d {{ .home }}/.fonts/dot-fonts ]]; then
+  git clone https://github.com/pbogut/dot-fonts ~/.fonts/dot-fonts
+fi
