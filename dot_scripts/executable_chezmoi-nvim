@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   chezmoi-nvim
+# author: author <author_contact>
+# date:   16/03/2024
+#=================================================
+fname="$1"
+encrypted=false
+if [[ $fname =~ .*/chezmoi-encrypted.* ]]; then
+    encrypted=true
+fi
+
+if [[ $CHEZMOI_NVIM == "open" ]]; then
+    if $encrypted; then
+        temp_dir="$(mktemp -d)"
+        base_name=$(basename "$fname")
+        temp_fname="$temp_dir/$base_name"
+        cp "$fname" "$temp_fname"
+        echo "$temp_fname"
+    else
+        echo "$fname"
+    fi
+fi
+
+if [[ $CHEZMOI_NVIM == "apply" ]]; then
+    if $encrypted; then
+      cp "$CHEZMOI_NVIM_FILE" "$fname"
+    fi
+fi
