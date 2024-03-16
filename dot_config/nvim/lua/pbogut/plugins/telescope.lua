@@ -19,7 +19,7 @@ return {
     { '<space>gw', '<plug>(telescope-grep-string)' },
     { '<space>ft', '<plug>(ts-templates-list)' },
     { '<space>fs', '<plug>(ts-snippets-list)' },
-    { '<space>fc', '<plug>(ts-config-files)' },
+    { '<space>fc', '<plug>(ts-chezmoi-files)' },
     { '<space>fn', '<plug>(ts-config-files-nvim)' },
     { '<space>gf', '<plug>(ts-file-under-coursor)' },
   },
@@ -75,31 +75,89 @@ return {
         search_dirs = { 'lua/plugins/luasnip.lua', 'snippets', 'lua/plugins/luasnip' },
       })
     end)
-    k.set('n', '<plug>(ts-config-files)', function()
-      builtin().find_files({
-        cwd = os.getenv('DOTFILES') .. '/..',
-        no_ignore_parent = true,
-        search_dirs = { 'dotfiles', 'dotfiles/config/nvim/lua/config' },
-        attach_mappings = function(prompt_bufnr)
-          actions.select_default:replace(function()
-            local selection = action_state.get_selected_entry()
-            if selection == nil then
-              print('[telescope] Nothing currently selected')
-              return
-            end
-
-            actions.close(prompt_bufnr)
-            -- @TODO: open wezterm and then open file in that and switch
-            -- vim.cmd('silent !wezterm-project ' .. os.getenv('DOTFILES') .. ' "dotfiles"<cr>')
-            vim.fn.jobstart('wezterm-project ' .. os.getenv('DOTFILES') .. ' "dotfiles"')
-            -- k.set('n', '<space>fc', '<cmd>silent !wezterm-project ' .. os.getenv('DOTFILES') .. ' "dotfiles"<cr>')
-            print(selection[1])
-            -- vim.cmd('setfiletype ' .. selection[1])
-            -- WEZTERM_UNIX_SOCKET=/run/user/1000/wezterm/gui-sock-191506 wezterm cli list  --format json |jq -r '.[].title | select(test(":nvim:")) | sub(".*:nvim:"; "") | sub(":.*$"; "")'
-          end)
-          return true
-        end,
+    k.set('n', '<plug>(ts-chezmoi-files)', function()
+      local finders = require('telescope.finders')
+      local pickers = require('telescope.pickers')
+      local conf = require('telescope.config').values
+      local result = vim.fn.split(vim.fn.system('chezmoi managed -x externals,dirs'))
+      local displayer = require('telescope.pickers.entry_display').create({
+        items = { {} },
       })
+      pickers
+        .new({
+          prompt_title = 'Chez Moi',
+
+          finder = finders.new_table({
+            results = result,
+            entry_maker = function(entry_text)
+              local entry = {}
+              entry.value = entry_text
+              entry.dst = entry_text
+              entry.ordinal = entry_text
+              entry.display = function(ent)
+                return displayer({
+                  { ent.dst },
+                })
+              end
+              return entry
+            end,
+          }),
+          previewer = conf.grep_previewer({}),
+          sorter = conf.generic_sorter({}),
+          attach_mappings = function(prompt_bufnr)
+            actions.select_default:replace(function()
+              local selection = action_state.get_selected_entry()
+              if selection == nil then
+                print('[telescope] Nothing currently selected')
+                return
+              end
+
+              vim.fn.jobstart('chezmoi edit ' .. selection.dst, {
+                env = {
+                  CHEZMOI_NVIM = 'open',
+                  EDITOR = 'chezmoi-nvim',
+                },
+                on_stdout = function(_, out)
+                  local file = out[1]
+                  vim.cmd([[ echo " " ]])
+                  vim.cmd.edit(file)
+                  local bufnr = vim.fn.bufnr()
+                  local augroup = vim.api.nvim_create_augroup('x_chezmoi_' .. bufnr, { clear = true })
+                  vim.api.nvim_create_autocmd('BufWritePost', {
+                    group = augroup,
+                    buffer = bufnr,
+                    callback = function()
+                      vim.notify(
+                        'Applying changes to file ' .. selection.dst .. ' ...',
+                        vim.log.levels.INFO,
+                        { title = 'Chezmoi' }
+                      )
+                      vim.fn.jobstart('chezmoi edit --apply ' .. selection.dst, {
+                        env = {
+                          CHEZMOI_NVIM_FILE = file,
+                          CHEZMOI_NVIM = 'apply',
+                          EDITOR = 'chezmoi-nvim',
+                        },
+                        on_exit = function()
+                          vim.notify(
+                            'Changes for file ' .. selection.dst .. ' applied.',
+                            vim.log.levels.INFO,
+                            { title = 'Chezmoi' }
+                          )
+                        end,
+                      })
+                    end,
+                  })
+                end,
+                stdout_buffered = true,
+              })
+              actions.close(prompt_bufnr)
+              vim.notify('Opening chezmoi file...', vim.log.levels.INFO, { title = 'Chezmoi' })
+            end)
+            return true
+          end,
+        }, {})
+        :find()
     end)
     k.set('n', '<plug>(ts-config-files-nvim)', function()
       builtin().find_files({
