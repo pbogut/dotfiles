@@ -24,6 +24,7 @@ return {
       fugitive_inactive = require('pbogut.plugins.lualine.fugitive').filename,
       ripgrep = require('pbogut.plugins.lualine.ripgrep'),
       starship = require('pbogut.plugins.lualine.starship'),
+      chezmoi = require('pbogut.plugins.lualine.chezmoi'),
     }
 
     lualine.setup({
@@ -53,7 +54,7 @@ return {
       sections = {
         lualine_a = { { 'mode', fmt = s.mode_fmt }, s.ripgrep },
         lualine_b = { { s.diff_change, padding = 0 }, 'branch' },
-        lualine_c = { s.dapinfo, s.harpoon, s.filename },
+        lualine_c = { s.dapinfo, s.harpoon, s.chezmoi, s.filename },
         lualine_x = { s.starship },
         lualine_y = { s.fileinfo, s.location },
         lualine_z = { s.actions, s.diagnostics },

@@ -123,6 +123,7 @@ return {
                   local file = out[1]
                   vim.cmd([[ echo " " ]])
                   vim.cmd.edit(file)
+                  vim.b.chezmoi = true
                   local bufnr = vim.fn.bufnr()
                   local augroup = vim.api.nvim_create_augroup('x_chezmoi_' .. bufnr, { clear = true })
                   vim.api.nvim_create_autocmd('BufWritePost', {
