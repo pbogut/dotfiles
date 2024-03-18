@@ -32,6 +32,17 @@ return {
     end,
   },
   {
+    'markdown',
+    dir = local_dir('markdown'),
+    keys = {
+      { '<space>fn', '<cmd>Notes<cr>', desc = 'List notes' }
+    },
+    config = function()
+      require('markdown').setup()
+    end,
+    ft = 'markdown',
+  },
+  {
     'mdpdf',
     dir = local_dir('mdpdf'),
     config = function()

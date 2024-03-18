@@ -20,7 +20,6 @@ return {
     { '<space>ft', '<plug>(ts-templates-list)' },
     { '<space>fs', '<plug>(ts-snippets-list)' },
     { '<space>fc', '<plug>(ts-chezmoi-files)' },
-    { '<space>fn', '<plug>(ts-config-files-nvim)' },
     { '<space>gf', '<plug>(ts-file-under-coursor)' },
   },
   cmd = 'Telescope',
@@ -156,32 +155,6 @@ return {
           end,
         }, {})
         :find()
-    end)
-    k.set('n', '<plug>(ts-config-files-nvim)', function()
-      builtin().find_files({
-        cwd = os.getenv('DOTFILES') .. '/config',
-        no_ignore_parent = true,
-        search_dirs = { 'nvim', 'nvim/lua/config' },
-        attach_mappings = function(prompt_bufnr)
-          actions.select_default:replace(function()
-            local selection = action_state.get_selected_entry()
-            if selection == nil then
-              print('[telescope] Nothing currently selected')
-              return
-            end
-
-            actions.close(prompt_bufnr)
-            -- @TODO: open wezterm and then open file in that and switch
-            -- vim.cmd('silent !wezterm-project ' .. os.getenv('DOTFILES') .. '/config/nvim "nvim-config"<cr>')
-            vim.fn.jobstart('wezterm-project ' .. os.getenv('DOTFILES') .. '/config/nvim "nvim-config"')
-            -- k.set('n', '<space>fn', '<cmd>silent !wezterm-project ' .. os.getenv('DOTFILES') .. '/config/nvim "nvim-config"<cr>')
-            print(selection[1])
-            -- vim.cmd('setfiletype ' .. selection[1])
-            -- WEZTERM_UNIX_SOCKET=/run/user/1000/wezterm/gui-sock-191506 wezterm cli list  --format json |jq -r '.[].title | select(test(":nvim:")) | sub(".*:nvim:"; "") | sub(":.*$"; "")'
-          end)
-          return true
-        end,
-      })
     end)
     k.set('n', '<plug>(telescope-git-files)', function()
       builtin().git_status({
