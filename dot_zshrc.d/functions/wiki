@@ -5,7 +5,8 @@
 # date:   24/05/2017
 #=================================================
 wiki() {
-    cd ~/Wiki
+    mkdir -p "$HOME/Wiki"
+    cd "$HOME/Wiki" || exit
     nvim ./index.md
-    cd -
+    cd - || exit
 }
