@@ -355,13 +355,13 @@ bindsym $mod+Ctrl+h $exec swaymsg '[app_id="org.gnome.Hamster.GUI"] focus' || ha
 bindsym $mod+backspace $exec swaymsg '[app_id="org.gnome.Hamster.GUI"] focus' || hamster
 
 bindsym $mod+Ctrl+p $exec "~/.scripts/wezterm-list-projects"
+bindsym $mod+Ctrl+u $exec "~/.scripts/users.sh --switch"
 
 bindsym $mod+b $exec swaymsg '[app_id="org.qutebrowser.qutebrowser"] focus' || browser
 bindsym $mod+Ctrl+c workspace $wscode
 bindsym $mod+m focus output $display_left
 bindsym $mod+comma focus output $display_main
 bindsym $mod+period focus output $display_right
-bindsym $mod+Ctrl+u $exec "~/.scripts/browser-from-clip.sh"
 bindsym $mod+Ctrl+comma move workspace to output $display_main
 bindsym $mod+Ctrl+period move workspace to output $display_right
 bindsym $mod+Shift+m move to output $display_left; focus output $display_left
