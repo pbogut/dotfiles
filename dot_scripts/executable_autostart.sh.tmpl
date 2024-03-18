@@ -22,21 +22,20 @@ function rerun() {
   $2 >/dev/null 2>&1 &
 }
 
-# numlock
-numlockx on
-
 # daemons
-rerun copyq copyq
+# {{- if .personal }} {{"{{{"}} - personal
+demonize kdeconnect kdeconnect-indicator
 demonize nextcloud "nextcloud"
+at now + 10 minutes <<< "nextcloud --background"
+# {{"}}}"}} - personal {{- end }}
+
+rerun copyq copyq
 demonize wlsunset "wlsunset -l 50 -L 17"
 demonize nm-applet nm-applet
 demonize dunst dunst
 demonize udisksvm "udisksvm -a"
 demonize memwatch ~/.scripts/memwatch.sh
 demonize mailsgoweb ~/.scripts/mailsgoweb.sh
-demonize kdeconnect kdeconnect-indicator
-at now + 10 minutes <<< "nextcloud --background"
-# demonize nextcloud "nextcloud --background"
 
 # redeye {{"{{{"}} {{- if eq .chezmoi.hostname "redeye" }}
 rerun gamemode "{{ .home }}/.scripts/sway/gamemode.sh --watch"
