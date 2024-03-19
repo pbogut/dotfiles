@@ -12,7 +12,8 @@ fi
 
 if [[ $CHEZMOI_NVIM == "open" ]]; then
     if $encrypted; then
-        temp_dir="$(mktemp -d)"
+        temp_dir="$(mktemp -d)/chezmoi-encrypted"
+        mkdir -p "$temp_dir"
         base_name=$(basename "$fname")
         temp_fname="$temp_dir/$base_name"
         cp "$fname" "$temp_fname"

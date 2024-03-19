@@ -24,6 +24,17 @@ return {
     end,
   },
   {
+    'chezmoi',
+    dir = local_dir('chezmoi'),
+    keys = {
+      { '<space>fc', '<plug>(ts-chezmoi-files)', desc = 'Open chezmoi file' },
+    },
+    event = 'BufEnter',
+    config = function()
+      require('chezmoi')
+    end,
+  },
+  {
     'remotesync',
     dir = local_dir('remotesync'),
     cmd = { 'RemoteSync', 'RemotePush' },
