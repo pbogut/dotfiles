@@ -32,12 +32,16 @@ return {
     })
   end,
   config = function()
+    local sqlls_map = {}
     local function load_connections()
       local config = require('pbogut.config')
       for _, connection in pairs(config.get('dadbod.connections', {})) do
         local name = connection.name
         local uri = connection.uri
         vim.g[name] = uri
+        if connection.sqlLanguageServer then
+          sqlls_map[name] = connection.sqlLanguageServer
+        end
       end
     end
 
@@ -155,6 +159,14 @@ return {
               vim.schedule(function()
                 vim.fn['db#adapter#ssh#create_tunnel'](vim.b.db)
                 vim.o.filetype = vim.o.filetype -- make sure cmp loads dadbod
+
+                local name = selection[1]:gsub('^[a-z]%:', '')
+                if sqlls_map[name] then
+                  vim.lsp.buf.execute_command({
+                    command = 'switchDatabaseConnection',
+                    arguments = { sqlls_map[name] }
+                  })
+                end
               end)
             end)
             return true

@@ -12,7 +12,6 @@ return {
     'saadparwaiz1/cmp_luasnip',
     -- {'zbirenbaum/copilot-cmp', after = 'copilot.lua'},
     { 'pbogut/copilot-cmp', branch = 'single-line-suggestion', after = 'copilot.lua' },
-    'kristijanhusak/vim-dadbod-completion',
   },
   event = 'InsertEnter',
   config = function()
@@ -25,7 +24,6 @@ return {
       lsp = { name = 'nvim_lsp' },
       lua = { name = 'nvim_lua' },
       ts = { name = 'treesitter' },
-      db = { name = 'vim-dadbod-completion' },
       tn = { name = 'cmp_tabnine' },
       snip = { name = 'luasnip', keyword_length = 2 },
       path = { name = 'path' },
@@ -176,7 +174,6 @@ return {
             spell = '[Spell]',
             copilot = '[Copilot]',
             cody = '[Cody]',
-            ['vim-dadbod-completion'] = '[DB]',
           })[entry.source.name]
           return vim_item
         end,
@@ -189,7 +186,6 @@ return {
       callback = function()
         cmp.setup.buffer({
           sources = {
-            src.db,
             src.lsp,
             src.copilot,
             src.cody,

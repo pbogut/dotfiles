@@ -43,6 +43,7 @@ return {
       -- { name = 'phpactor', snippet_support = true },
       -- { name = 'pylsp' },
       -- { name = 'pyright' },
+      { name = 'sqlls' },
       { name = 'bashls' },
       { name = 'ccls' },
       { name = 'cssls', snippet_support = true },
