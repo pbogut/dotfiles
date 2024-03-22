@@ -42,8 +42,8 @@ rerun gamemode "{{ .home }}/.scripts/sway/gamemode.sh --watch"
 rerun kwalletd "kwalletd5"
 
 # I dont want to talk about it
-pactl set-default-sink alsa_output.pci-0000_07_00.1.hdmi-stereo-extra3
 optical=$(pactl list sinks | grep 'Name: alsa_output.pci-0000_07_00' | sed 's,.*Name: ,,')
+pactl set-default-sink "$optical"
 while :; do paplay --device="$optical" {{ .chezmoi.sourceDir }}/assets/silence.mp3; done &
 # redeye {{"}}}"}} {{- end }}
 
