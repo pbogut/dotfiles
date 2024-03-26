@@ -8,8 +8,8 @@
 # pacman -S slop maim tesseract- tesseract-data-eng
 #==================================================
 file="/tmp/ocr-$(date +'%s').png"
-maim -s $file && \
-tesseract $file - \
-| xsel -b -i
+slurp | grim -g - "$file" && \
+tesseract "$file" - \
+| wl-copy
 
 [[ $1 == "--vim" ]] && vim-anywhere.sh --clipboard
