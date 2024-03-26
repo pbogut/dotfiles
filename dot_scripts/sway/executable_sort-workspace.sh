@@ -170,6 +170,9 @@ case  "$wm_app_id" in
     move_and_swich "$ws_game"
     set_fullscreen
     ;;
+  "org.openscad.openscad")
+    move_and_swich "$ws_3d"
+    ;;
 esac
 case  "$wm_class" in
   "www.deezer.com__en Chromium")
