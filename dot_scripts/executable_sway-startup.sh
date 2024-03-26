@@ -9,3 +9,6 @@ if [ "$hostname" == "redeye" ]; then # pc
 
     xrandr --output DP-1 --primary
 fi
+
+killall waybar > /dev/null 2>&1
+waybar &

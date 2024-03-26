@@ -230,7 +230,6 @@ bindsym $mod+q mode "$mode_system"
 
 # fixes dbus issue for some reason (long gtk apps startup)
 exec systemctl --user import-environment
-exec $HOME/.scripts/waybar-launcher
 exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec swaybg -i "$(find ~/Pictures/wallpaper -type f | shuf -n 1)"
 exec_always $HOME/.scripts/sway-startup.sh

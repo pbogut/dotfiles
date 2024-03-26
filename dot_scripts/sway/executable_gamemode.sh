@@ -15,6 +15,8 @@ usage() {
   echo "  -w, --watch    start watcher for steam games"
 }
 
+trap "killall sway-prop" EXIT
+
 nvidia=false
 
 while test $# -gt 0; do

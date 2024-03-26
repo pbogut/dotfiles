@@ -24,6 +24,7 @@ function rerun() {
 
 # daemons
 # {{- if .personal }} {{"{{{"}} - personal
+rerun gamemode "{{ .home }}/.scripts/sway/gamemode.sh --watch"
 demonize kdeconnect kdeconnect-indicator
 demonize nextcloud "nextcloud"
 at now + 10 minutes <<< "nextcloud --background"
@@ -38,7 +39,6 @@ demonize memwatch ~/.scripts/memwatch.sh
 demonize mailsgoweb ~/.scripts/mailsgoweb.sh
 
 # redeye {{"{{{"}} {{- if eq .chezmoi.hostname "redeye" }}
-rerun gamemode "{{ .home }}/.scripts/sway/gamemode.sh --watch"
 rerun kwalletd "kwalletd5"
 
 # I dont want to talk about it
