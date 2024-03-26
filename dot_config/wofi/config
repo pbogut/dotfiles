@@ -2,6 +2,7 @@ key_backward=Ctrl-k
 key_forward=Ctrl-j
 key_right=Ctrl-l
 key_left=Ctrl-h
+key_expand=Ctrl-e
 width=100%
 yoffset=0
 layer=overlay
