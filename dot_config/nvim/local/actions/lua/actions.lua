@@ -144,32 +144,37 @@ function M.run_cmds(cmds, opts)
   end
 
   for i, cmd in ipairs(cmds) do
-    ---@diagnostic disable-next-line: redefined-local
-    local opts = {
-      command = cmd,
-      on_stdout = on_out,
-      on_stderr = on_out,
-      on_exit = function(j, res)
-        out(msg_run .. ' ' .. i + 1 .. '/' .. #cmds .. ' : ' .. cmds[i + 1])
-        vim.g._actions_status = i + 1 .. '/' .. #cmds
-        on_exit(j, res)
-        if jobs[i + 1] then
-          print_out({ '>> ' .. jobs[i + 1].command })
-          start_job(jobs[i + 1])
+    if cmd:sub(1, 1) == ':' then
+      cmd = cmd:sub(2)
+      vim.cmd(cmd)
+    else
+      ---@diagnostic disable-next-line: redefined-local
+      local opts = {
+        command = cmd,
+        on_stdout = on_out,
+        on_stderr = on_out,
+        on_exit = function(j, res)
+          out(msg_run .. ' ' .. i + 1 .. '/' .. #cmds .. ' : ' .. cmds[i + 1])
+          vim.g._actions_status = i + 1 .. '/' .. #cmds
+          on_exit(j, res)
+          if jobs[i + 1] then
+            print_out({ '>> ' .. jobs[i + 1].command })
+            start_job(jobs[i + 1])
+          end
+        end,
+      }
+
+      if i == #cmds then
+        opts.on_exit = function(j, res)
+          out(msg_run .. ' ' .. i .. '/' .. #cmds .. ' : DONE')
+          vim.g._actions_status = ''
+          print_out({ '--', 'press [q] for exit' })
+          on_done(j, res)
         end
-      end,
-    }
-
-    if i == #cmds then
-      opts.on_exit = function(j, res)
-        out(msg_run .. ' ' .. i .. '/' .. #cmds .. ' : DONE')
-        vim.g._actions_status = ''
-        print_out({ '--', 'press [q] for exit' })
-        on_done(j, res)
       end
-    end
 
-    jobs[#jobs + 1] = opts
+      jobs[#jobs + 1] = opts
+    end
   end
 
   if jobs[1] then
