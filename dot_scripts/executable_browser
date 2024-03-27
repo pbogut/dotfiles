@@ -88,7 +88,7 @@ if [[ $url =~ ^https://invidious\.pbogut\.me/watch\?v= ]]; then
 
   target="window"
   # shellcheck disable=2086
-  qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}"
+  qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}" &
   swaymsg '[app_id="^'"$desktop_name"'$"]' focus
   exit 0
 elif [[ $url =~ ^https://www\.youtube\.com/watch\?v= ]]; then
@@ -118,7 +118,7 @@ elif [[ $url =~ ^https://www\.youtube\.com/watch\?v= ]]; then
 
   target="window"
   # shellcheck disable=2086
-  qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}"
+  qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}" &
   swaymsg '[app_id="^'"$desktop_name"'$"]' focus
   exit 0
 elif [[ $url =~ ^https://open\.spotify\.com ]]; then
@@ -127,7 +127,7 @@ elif [[ $url =~ ^https://open\.spotify\.com ]]; then
   qbmode="$qbmode --qt-arg name qbmedia --desktop-file-name $desktop_name --basedir $HOME/.config/qutebrowser/media --config-py $HOME/.config/qutebrowser/config.py $proxypac"
   target="window"
   # shellcheck disable=2086
-  qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}"
+  qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}" &
   swaymsg '[app_id="^'"$desktop_name"'$"]' focus
   exit 0
 elif [[ $url =~ ^https://rumble\.com ]]; then
@@ -138,7 +138,7 @@ elif [[ $url =~ ^https://rumble\.com ]]; then
     desktop_name="org.qutebrowser.mediabrowser"
     qbmode="$qbmode --qt-arg name qbmedia --desktop-file-name $desktop_name --basedir $HOME/.config/qutebrowser/media --config-py $HOME/.config/qutebrowser/config.py $proxypac"
     # shellcheck disable=2086
-    qutebrowser $qbmode --target window "https://rumble.com/embed/$id" "${@//\[\[AMPERSAND\]\]/&}"
+    qutebrowser $qbmode --target window "https://rumble.com/embed/$id" "${@//\[\[AMPERSAND\]\]/&}" &
     swaymsg '[app_id="^'"$desktop_name"'$"]' focus
     exit 0
   fi
@@ -161,7 +161,7 @@ if [[ -n $qb_win ]]; then
   wmctrl -ia "$qb_win"
   if [[ -n $1 ]]; then
     # shellcheck disable=SC2086
-    qutebrowser $qbmode --target "$target" "$url" "${@//\[\[AMPERSAND\]\]/&}"
+    qutebrowser $qbmode --target "$target" "$url" "${@//\[\[AMPERSAND\]\]/&}" &
     swaymsg '[app_id="^'"$desktop_name"'$"]' focus
   fi
   exit 0
@@ -171,7 +171,7 @@ fi
 #   wmctrl -ia "$qb_alt"
 #   if [[ -n $1 ]]; then
 #     # shellcheck disable=SC2086
-#     qutebrowser $qbmode --target "$target" "$url" "${@//\[\[AMPERSAND\]\]/&}"
+#     qutebrowser $qbmode --target "$target" "$url" "${@//\[\[AMPERSAND\]\]/&}" &
 #     swaymsg '[app_id="^'"$desktop_name"'$"]' focus
 #   fi
 #   exit 0
@@ -188,6 +188,6 @@ else
   # DISPLAY=${DISPLAY:-:1} \
   NODE_PATH="$(npm root -g)" \
   QTWEBENGINE_REMOTE_DEBUGGING=${port:-9222} \
-    qutebrowser $proxypac $qbmode --target "$target" "${@//\[\[AMPERSAND\]\]/&}"
+    qutebrowser $proxypac $qbmode --target "$target" "${@//\[\[AMPERSAND\]\]/&}" &
   swaymsg '[app_id="^'"$desktop_name"'$"]' focus
 fi
