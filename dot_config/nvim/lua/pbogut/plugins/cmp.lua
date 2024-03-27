@@ -85,37 +85,7 @@ return {
           end
         end),
         ['<tab>'] = cmp.mapping(function(_fallback)
-          local entry = cmp.core.view:get_selected_entry()
-          if cmp.visible() and entry then
-            local item = entry:get_completion_item()
-            if
-              item.data
-              and type(item.data) == 'table'
-              and item.data.snippet
-              and item.data.snippet.kind == 'snipmate'
-            then
-              local placeholders_to_eval = function(lines)
-                local result = {}
-                for _, line in ipairs(lines) do
-                  result[#result + 1] = line:gsub('%[%[([%w%_%-%.]-)%]%]', [[`v:lua.projector.placeholder('%1')`]])
-                end
-                return result
-              end
-              for _, snippets in pairs(luasnip.snippets) do
-                for _, snippet in pairs(snippets) do
-                  if snippet.body then
-                    snippet.body = placeholders_to_eval(snippet.body)
-                  end
-                end
-              end
-              luasnip.expand_or_advance()
-            else
-              cmp.confirm({
-                behavior = cmp.ConfirmBehavior.Insert,
-                select = true,
-              })
-            end
-          elseif luasnip.expandable() then
+          if luasnip.expandable() then
             luasnip.expand()
           else
             -- fallback() -- this is broken for some reason

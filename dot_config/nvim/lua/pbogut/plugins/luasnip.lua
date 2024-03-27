@@ -50,6 +50,8 @@ return {
         else
           ls.change_choice(1)
         end
+      else
+       ls.expand()
       end
     end)
 
