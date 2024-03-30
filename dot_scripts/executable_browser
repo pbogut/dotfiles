@@ -130,6 +130,10 @@ elif [[ $url =~ ^https://open\.spotify\.com ]]; then
   qutebrowser $qbmode --target window "$url" "${@//\[\[AMPERSAND\]\]/&}" &
   swaymsg '[app_id="^'"$desktop_name"'$"]' focus
   exit 0
+elif [[ $url =~ ^https://.*\.zoom\.us ]]; then
+  shift
+  chromium "$url" "${@//\[\[AMPERSAND\]\]/&}" &
+  exit 0
 elif [[ $url =~ ^https://rumble\.com ]]; then
   shift
   mpv "$url" && exit 0
