@@ -26,8 +26,7 @@ function rerun() {
 # {{- if .personal }} {{"{{{"}} - personal
 rerun gamemode "{{ .home }}/.scripts/sway/gamemode.sh --watch"
 demonize kdeconnect kdeconnect-indicator
-demonize nextcloud "nextcloud"
-at now + 10 minutes <<< "nextcloud --background"
+demonize nextcloud "nextcloud --background"
 # {{"}}}"}} - personal {{- end }}
 
 rerun copyq copyq
