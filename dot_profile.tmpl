@@ -12,6 +12,7 @@ export GOPATH="$HOME/.gocode"
 export PROJECTS="$HOME/Projects"
 export DOTFILES="$PROJECTS/github.com/pbogut/dotfiles"
 export SCRIPTS="$HOME/.scripts"
+
 export PATH="$SCRIPTS:$PATH"
 
 export PATH="$HOME/.local/bin:$PATH"
@@ -23,13 +24,20 @@ export PATH="$HOME/.gem/ruby/3.0.0/bin:$PATH"
 export PATH="$HOME/.bin:$PATH"
 export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
 
-# export TERM=xterm-256color
-export TERMINAL="alacritty"
+# is it needed?
+export XDG_CURRENT_DESKTOP=sway
+
+export XKB_DEFAULT_LAYOUT=pl
+export XKB_DEFAULT_OPTIONS=grp:alt_shift_toggle
+
+export TERMINAL="wezterm"
 export EDITOR="nvim"
 export PAGER="less"
 export LESS="-RXe"
 
-export QT_QPA_PLATFORMTHEME=qt5ct
+export QT_QPA_PLATFORMTHEME=kde
+export QT_STYLE_OVERRIDE=adwaita-dark
+export FZF_DEFAULT_OPTS="--reverse --cycle --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview --bind=alt-j:preview-down,alt-k:preview-up --bind=ctrl-d:preview-half-page-down,ctrl-u:preview-half-page-up --bind=ctrl-w:backward-kill-word --height 40%"
 
 # place for my common python scripts
 export PYTHONPATH="$SCRIPTS/_python"
@@ -48,7 +56,9 @@ fi
 # redeye {{"{{{"}} {{- if eq .chezmoi.hostname "redeye" }}
 export MAKEFLAGS="-j 24"
 export PA_DEFAULT_SINK="Starship/Matisse"
+#{{- if ne .chezmoi.username "pbogut" }}
 export PULSE_SERVER="tcp:127.0.0.1:4713"
+#{{- end }}
 # redeye {{"}}}"}} {{- end }}
 
 # silverspoon {{"{{{"}} {{- if eq .chezmoi.hostname "silverspoon" }}
