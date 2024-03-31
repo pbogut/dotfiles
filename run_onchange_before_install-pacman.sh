@@ -25,6 +25,7 @@ echo "> Installing packages..."
 paru -S \
     --skipreview \
     --needed \
+    adwaita-dark \
     age \
     alacritty-sixel-git \
     apg \
