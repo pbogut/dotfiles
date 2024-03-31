@@ -43,6 +43,7 @@ rerun kwalletd "kwalletd5"
 # I dont want to talk about it
 optical=$(pactl list sinks | grep 'Name: alsa_output.pci-0000_07_00' | sed 's,.*Name: ,,')
 pactl set-default-sink "$optical"
+aoc-menu gamemode off &
 # redeye {{"}}}"}} {{- end }}
 
 # just local one, not versioned

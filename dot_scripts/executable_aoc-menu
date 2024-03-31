@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   aoc-menu
+# author: pbogut <pbogut@pbogut.me>
+# date:   31/03/2024
+#=================================================
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+}
+
+while test $# -gt 0; do
+  case "$1" in
+    gamemode)
+      # DC
+      shift
+      if [ -z "$1" ]; then
+        current=$(ddcutil getvcp DC | sed 's/.*(sl=\(0x..\))$/\1/')
+        case "$current" in
+          0x10)
+            echo "gamer3"
+            ;;
+          0x0f)
+            echo "gamer2"
+            ;;
+          0x0e)
+            echo "gamer1"
+            ;;
+          0x0d)
+            echo "racing"
+            ;;
+          0x0c)
+            echo "rts"
+            ;;
+          0x0b)
+            echo "fps"
+            ;;
+          0x00)
+            echo "off"
+            ;;
+        esac
+        exit 0
+      fi
+      new="$current"
+      case "$1" in
+        gamer3)
+        new="0x10"
+        ;;
+        gamer2)
+        new="0x0f"
+        ;;
+        gamer1)
+        new="0x0e"
+        ;;
+        racing)
+        new="0x0d"
+        ;;
+        rts)
+        new="0x0c"
+        ;;
+        fps)
+        new="0x0b"
+        ;;
+        off)
+        new="0x00"
+        ;;
+      esac
+      if [ "$new" != "$current" ]; then
+        ddcutil setvcp DC "$new"
+      fi
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
