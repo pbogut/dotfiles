@@ -1,4 +1,5 @@
 local chezmoi_telescope = require('chezmoi.telescope')
+local chezmoi_src = os.getenv('HOME') .. "/.local/share/chezmoi"
 
 vim.keymap.set('n', '<plug>(ts-chezmoi-files)', chezmoi_telescope.chezmoi_files)
 
@@ -7,10 +8,21 @@ local function trim_string(text)
   return text
 end
 
+vim.api.nvim_create_user_command('ChezmoiAdd', function(_)
+  local file = vim.fn.expand('%:p')
+  if file:sub(1, #chezmoi_src) == chezmoi_src then
+    local src = vim.fn.system('chezmoi target-path ' .. vim.fn.shellescape(file))
+    src = trim_string(src)
+    vim.cmd('rightbelow 20split enew')
+    vim.cmd('terminal chezmoi apply ' .. vim.fn.shellescape(src))
+    vim.cmd.startinsert()
+  end
+end, {})
+
 local augroup = vim.api.nvim_create_augroup('pb_chezmoi', { clear = true })
 vim.api.nvim_create_autocmd('BufEnter', {
   group = augroup,
-  pattern = os.getenv('HOME') .. '/.local/share/chezmoi/*,*/chezmoi-encrypted/*',
+  pattern = chezmoi_src .. '/*,*/chezmoi-encrypted/*',
   callback = function()
     if vim.b.chezmoi then
       return
