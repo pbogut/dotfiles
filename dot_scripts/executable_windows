@@ -1,0 +1,14 @@
+#!/bin/bash
+
+no=0
+ while read -r line; do
+  no=$((no+1))
+  if [[ $line =~ "Windows" ]]; then
+    sudo grub-reboot "$no"
+    sudo reboot
+    exit 0
+  fi
+done < <(grep '^menuentry' /boot/grub/grub.cfg)
+
+echo "No windows entry found"
+exit 1
