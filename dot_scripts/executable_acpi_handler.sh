@@ -61,6 +61,7 @@ case "$1" in
                 ;;
             open)
                 logger 'LID opened'
+                systemctl restart bluetooth
                 ;;
             *)
                 logger "ACPI action undefined: $3"
