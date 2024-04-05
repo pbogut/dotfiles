@@ -23,8 +23,7 @@ echo "$QUTE_URL" | sed -E 's,https?://(www\.)?(.*?)/.*?\?(.*$),\3,' | (
             # shellcheck disable=SC2001
             newurl=$(sed 's,?t=[0-9]*$,,' <<< "$newurl")
 
-            splash youtube
-            mpv "$newurl"
+            LAZY_OPEN="$newurl" mpv
             ;;
         youtube.com | youtu.be)
             newurl="$QUTE_URL"
@@ -35,12 +34,10 @@ echo "$QUTE_URL" | sed -E 's,https?://(www\.)?(.*?)/.*?\?(.*$),\3,' | (
             # shellcheck disable=SC2001
             newurl=$(sed 's,?t=[0-9]*$,,' <<< "$newurl")
 
-            splash youtube
-            mpv "$newurl"
+            LAZY_OPEN="$newurl" mpv
             ;;
         *)
-            splash youtube
-            mpv "$QUTE_URL"
+            LAZY_OPEN="$QUTE_URL" mpv
             ;;
     esac
 )
