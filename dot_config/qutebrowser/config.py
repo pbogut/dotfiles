@@ -76,10 +76,12 @@ c.input.insert_mode.auto_enter = True
 c.input.insert_mode.auto_leave = False
 
 # darkmode
-# c.colors.webpage.darkmode.enabled = True
-c.colors.webpage.preferred_color_scheme = 'dark'
 c.colors.webpage.bg = '#eee'
-
+c.colors.webpage.darkmode.enabled = True
+c.colors.webpage.darkmode.policy.images = "smart"
+c.colors.webpage.darkmode.threshold.background = 100
+c.colors.webpage.darkmode.threshold.foreground = 150
+c.colors.webpage.preferred_color_scheme = "dark"
 
 c.url.searchengines = {
     "DEFAULT": "https://search.brave.com/search?q={}",
