@@ -50,6 +50,8 @@ echo "$QUTE_URL" | sed -E 's,https?://(www\.)?(.*?)/.*?\?(.*$),\3,' | (read -r q
         domain="invidious.pbogut.me/"
         newurl="https://$domain$path"
         ;;
+      *)
+        newurl="$QUTE_URL"
     esac
 
     # newurl="https://$domain?q=$query"

@@ -220,7 +220,7 @@ config.bind('eu', 'edit-url')
 
 config.bind('ds', 'open -t https://dissenter.com/discussion/begin?url={url}')
 
-config.bind('gs', 'spawn --userscript ~/.scripts/qb-switch.sh')
+config.bind('gs', 'spawn --userscript url-switch')
 
 config.bind('gw', 'open -w')
 config.bind('gW', 'spawn browser-work {url}')
