@@ -64,12 +64,12 @@ return {
     end)
     k.set('n', '<plug>(ts-templates-list)', function()
       builtin().find_files({
-        cwd = os.getenv('DOTFILES') .. '/config/nvim/templates',
+        cwd = os.getenv('HOME') .. '/.config/nvim/templates',
       })
     end)
     k.set('n', '<plug>(ts-snippets-list)', function()
       builtin().find_files({
-        cwd = os.getenv('DOTFILES') .. '/config/nvim',
+        cwd = os.getenv('HOME') .. '/.config/nvim',
         search_dirs = { 'lua/plugins/luasnip.lua', 'snippets', 'lua/plugins/luasnip' },
       })
     end)
