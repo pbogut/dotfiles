@@ -42,3 +42,27 @@ snippet adapterfn "adapter function"
 		}
 		return \$this->adapter;
 	}
+snippet setup_add_product_attribute "add product attribute"
+	\$eavSetup->addAttribute(
+			\Magento\Catalog\Model\Product::ENTITY,
+			'${1:product_attibute_code}',
+			[
+					'type' => '${2|text,varchar,int,decimal,datetime|}',
+					'label' => 'List of Tabs to display',
+					'note' => 'One block_id per line, special tabs :trustpilot: :pricelist:',
+					'input' => '${3|text,textarea,select,multiselect,multiline,boolean,hidden,date,price,weight,gallery,image,media_image|}',
+					'global' => ScopedAttributeInterface::SCOPE_GLOBAL,
+					'visible' => true,
+					'required' => false,
+					'user_defined' => false,
+					'default' => '',
+					'searchable' => false,
+					'filterable' => false,
+					'comparable' => false,
+					'visible_on_front' => false,
+					'used_in_product_listing' => false,
+					'unique' => false,
+					'apply_to' => 'configurable',
+					'group' => 'Treatments',
+			]
+	);
