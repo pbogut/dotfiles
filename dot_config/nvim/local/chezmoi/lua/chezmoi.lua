@@ -1,11 +1,26 @@
 local chezmoi_telescope = require('chezmoi.telescope')
-local chezmoi_src = os.getenv('HOME') .. "/.local/share/chezmoi"
+local home_path = os.getenv('HOME')
+local chezmoi_src = home_path .. "/.local/share/chezmoi"
 
 vim.keymap.set('n', '<plug>(ts-chezmoi-files)', chezmoi_telescope.chezmoi_files)
 
 local function trim_string(text)
   text, _ = text:gsub('^%s*(.-)%s*$', '%1')
   return text
+end
+
+local function try_edit(source_path)
+  if source_path:len() > 0 and source_path:sub(1, #chezmoi_src) == chezmoi_src then
+    local bufnr = vim.fn.bufnr()
+    vim.cmd.edit(source_path)
+    -- remove original buffer, if it was changed it will error ¯\_(ツ)_/¯
+    vim.api.nvim_buf_delete(bufnr, {})
+    vim.notify(
+      'Opened chezmoi source version of the file.',
+      vim.log.levels.INFO,
+      { title = 'Chezmoi' }
+    )
+  end
 end
 
 vim.api.nvim_create_user_command('ChezmoiAdd', function(_)
@@ -19,7 +34,54 @@ vim.api.nvim_create_user_command('ChezmoiAdd', function(_)
   end
 end, {})
 
+local managed_files = {}
+-- collect all managed files and cache them in memory, seams to be better
+-- this way than running command every time file is open
+vim.fn.jobstart('chezmoi managed --exclude scripts,externals', {
+  on_stdout = function(_, data)
+    for _, line in pairs(data) do
+      managed_files[home_path .. '/' .. line] = true
+    end
+  end,
+  on_exit = function(_, code)
+    if code ~= 0 then
+      return
+    end
+    -- try current buffer after all managed files are collected
+    local file_path = vim.fn.expand('%:p')
+    if managed_files[file_path] then
+      local source_path = trim_string(vim.fn.system('chezmoi source-path ' .. vim.fn.shellescape(file_path)))
+      try_edit(source_path)
+    end
+  end
+})
+
 local augroup = vim.api.nvim_create_augroup('pb_chezmoi', { clear = true })
+vim.api.nvim_create_autocmd('BufEnter', {
+  group = augroup,
+  -- its kind of wide net, will have to optimise somehow
+  pattern = home_path .. '/*',
+  callback = function()
+    local file_path = vim.fn.expand('%:p')
+
+    -- if not managed nothing to do
+    if not managed_files[file_path] then
+      return
+    end
+
+    -- if already source file nothing to do
+    if file_path:sub(1, #chezmoi_src) == chezmoi_src then
+      return
+    end
+
+    vim.fn.jobstart('chezmoi source-path ' .. vim.fn.shellescape(file_path), {
+      on_stdout = function(_, data)
+        local source_path = data[1]
+        try_edit(source_path)
+      end,
+    })
+  end,
+})
 vim.api.nvim_create_autocmd('BufEnter', {
   group = augroup,
   pattern = chezmoi_src .. '/*,*/chezmoi-encrypted/*',
