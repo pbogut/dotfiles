@@ -342,6 +342,10 @@ return {
               template = 'magento2/registration.php',
               priority = 100,
             },
+            ['docker%-compose%.yml'] = {
+              template = 'magento2/docker-compose.yml',
+              priority = 1000,
+            },
             ['app/code/([^/]+/[^/]+)/(.*)%.php'] = {
               priority = 3000,
               alternate = function(_, opt)
