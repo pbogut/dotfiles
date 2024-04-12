@@ -80,7 +80,7 @@ end
 
 def type(text)
   if ENV['WAYLAND_DISPLAY']
-    Open3.capture3('wtype', '-m', 'ctrl', '-m', 'shift', '-m', 'alt', '--', text)
+    Open3.capture3('wtype', '-d', '10', '-m', 'ctrl', '-m', 'shift', '-m', 'alt', '--', text)
   else
     Open3.capture3('xdotool', 'type', '--clearmodifiers', text)
   end
@@ -282,14 +282,17 @@ if action == '--login'
   else
     Open3.capture3('sleep', '0.5s')
     if !autologin.empty?
-      parts = autologin.split("\n").join("\n\t\n").split("\n")
+      parts = autologin.split("\n").join("\n	\n").split("\n")
       parts.each do |part|
         type(part)
         Open3.capture3('sleep', '0.1s')
       end
     else
+      Open3.capture3('sleep', '0.5s')
       type(user)
-      type("\t")
+      Open3.capture3('sleep', '0.1s')
+      type('	')
+      Open3.capture3('sleep', '0.1s')
       type(pass)
     end
   end
@@ -304,7 +307,9 @@ if action == '--type-user-and-pass' || action.empty?
   else
     Open3.capture3('sleep', '0.5s')
     type(user)
-    type("\t")
+    Open3.capture3('sleep', '0.1s')
+    type('	')
+    Open3.capture3('sleep', '0.1s')
     type(pass)
   end
 end
