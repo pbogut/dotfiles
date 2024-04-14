@@ -1,4 +1,8 @@
 {{/* feature flags */}}
+{{- $archlinux := false -}}
+{{- if eq .chezmoi.osRelease.id "arch" -}}
+{{-   $archlinux = true -}}
+{{- end -}}
 {{- $personal := false -}}
 {{- $work_itdesk := false -}}
 {{- $work_assured := false -}}
@@ -14,6 +18,8 @@
 {{- if eq .chezmoi.username "itdesk" -}}
 {{-   $work_itdesk = true -}}
 {{- end -}}
+{{- $install_system_packages := promptBoolOnce . "install_system_packages" "Do you want to install packages" -}}
+{{- $install_rustup := promptBoolOnce . "install_rustup" "Do you want to install rustup" -}}
 
 encryption = "age"
 
@@ -26,6 +32,10 @@ encryption = "age"
 
 [data]
   home = "{{ .chezmoi.homeDir }}"
+  hostname = "{{ .chezmoi.hostname }}"
+  archlinux = {{ $archlinux }}
   personal = {{ $personal }}
   work_assured = {{ $work_assured }}
   work_itdesk = {{ $work_itdesk }}
+  install_system_packages = {{ $install_system_packages }}
+  install_rustup = {{ $install_rustup }}
