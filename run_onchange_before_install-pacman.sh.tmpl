@@ -4,7 +4,7 @@
 # author: pbogut <pbogut@pbogut.me>
 # date:   06/03/2024
 #=================================================
-# {{- if not .archlinux }} [[[ Not Archlinux
+# {{- if or (not .archlinux) (not .install_system_packages) }} [[[ Not Archlinux
 exit 0
 # Not archlinux ]]] {{- end }}
 echo "> Update pacman database..."
