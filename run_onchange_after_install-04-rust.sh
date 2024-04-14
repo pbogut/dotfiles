@@ -14,6 +14,8 @@ rustup component add rust-src --toolchain nightly
 rustup component add rust-src --toolchain stable
 rustup component add rustfmt --toolchain nightly
 rustup component add rustfmt --toolchain stable
+# {{ else }}
+RUSTC_WRAPPER=""
 # Install rustup ]]] {{- end }}
 
 cargo install --git https://github.com/pbogut/enrichmail.git
