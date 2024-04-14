@@ -92,3 +92,6 @@ paru = [
   "yt-dlp-git",
   "zenity",
 ]
+go = [
+  "github.com/pbogut/mails-go-web@latest"
+]
