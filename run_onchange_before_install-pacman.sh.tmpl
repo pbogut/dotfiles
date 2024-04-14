@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   run_once_before_install-packages
+# author: pbogut <pbogut@pbogut.me>
+# date:   06/03/2024
+#=================================================
+# {{- if not .archlinux }} [[[ Not Archlinux
+exit 0
+# Not archlinux ]]] {{- end }}
+echo "> Update pacman database..."
+echo "# pacman -Sy"
+sudo pacman -Sy
+
+export CARGO_NET_GIT_FETCH_WITH_CLI=true
+
+# if no paru installed then build it with cargo
+if ! paru --version; then
+    echo "> Installing paru dependencies ..."
+    echo "# sudo pacman -S rustup gcc cmake pkgconf fakeroot git"
+    sudo pacman -S rustup gcc cmake pkgconf fakeroot git
+    echo "> Installing paru ..."
+    rustup toolchain install stable
+    cargo install paru
+    "$HOME/.cargo/bin/paru" -S paru && cargo uninstall paru
+fi
+
+echo "> Installing packages..."
+paru -S \
+    --skipreview \
+    --needed \
+    {{ range .packages.paru -}} {{ . }} {{ end }}
+
+# {{- if eq .hostname "silverspoon" }} [[[ silverspoon
+paru -S \
+    --skipreview \
+    --needed \
+    {{ range .silverspoon.packages.paru -}} {{ . }} {{ end }}
+# silverspoon ]]] {{- end }}

@@ -1,0 +1,4 @@
+[silverspoon.packages]
+paru = [
+  "intel-media-driver",
+]
