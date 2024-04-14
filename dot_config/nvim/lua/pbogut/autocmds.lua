@@ -106,7 +106,11 @@ vim.api.nvim_create_autocmd({ 'VimEnter' }, {
   callback = function()
     local buf = vim.fn.expand('%')
     if buf == '' or vim.fn.isdirectory(buf) == 1 then
+
+    if vim.fn.exists(':Dirvish') == 2 then
       cmd('Dirvish')
+    elseif vim.fn.exists(':Oil') == 2 then
+      cmd('Oil')
     end
 
     local pid, WINCH = vim.fn.getpid(), vim.loop.constants.SIGWINCH
