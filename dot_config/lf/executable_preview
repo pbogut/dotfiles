@@ -1,8 +1,19 @@
 #!/bin/sh
 
 image() {
-    geometry="$(($2 - 2))x$3"
-    chafa "$1" -f sixel -s "$geometry" --animate false
+    if [ "$TERM_PROGRAM" = "WezTerm" ] && command -v kitty > /dev/null; then
+        file=$1
+        w=$2
+        h=$3
+        x=$4
+        y=$5
+
+        kitty +kitten icat --silent --stdin no --transfer-mode file --place "${w}x${h}@${x}x${y}" "$file" < /dev/null > /dev/tty
+        exit 1
+    else
+        chafa -f sixel -s "$2x$3" --animate off --polite on "$1"
+        exit 1
+    fi
 }
 
 batorcat() {
@@ -51,6 +62,11 @@ case "$(printf "%s\n" "$(readlink -f "$1")" | awk '{print tolower($0)}')" in
         ;;
     *.wav | *.mp3 | *.flac | *.m4a | *.wma | *.ape | *.ac3 | *.og[agx] | *.spx | *.opus | *.as[fx] | *.mka)
         exiftool "$1"
+        ;;
+    *_e_faktura_*.pdf)
+        [ ! -f "${CACHE}.jpg" ] &&
+            pdftoppm -jpeg -f 2 -singlefile "$1" "$CACHE"
+        image "${CACHE}.jpg" "$2" "$3" "$4" "$5"
         ;;
     *.pdf)
         [ ! -f "${CACHE}.jpg" ] &&

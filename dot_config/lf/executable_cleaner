@@ -1,4 +1,4 @@
 #!/bin/sh
-if [ -n "$FIFO_UEBERZUG" ]; then
-	printf '{"action": "remove", "identifier": "PREVIEW"}\n' > "$FIFO_UEBERZUG"
+if [ "$TERM_PROGRAM" = "WezTerm" ] && command -v kitty > /dev/null; then
+	kitty +kitten icat --clear --stdin no --silent --transfer-mode file < /dev/null > /dev/tty
 fi
