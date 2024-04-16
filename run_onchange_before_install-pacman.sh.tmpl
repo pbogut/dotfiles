@@ -4,9 +4,9 @@
 # author: pbogut <pbogut@pbogut.me>
 # date:   06/03/2024
 #=================================================
-# {{- if or (not .archlinux) (not .install_system_packages) }} [[[ Not Archlinux
+# {{- if or (not .archlinux) (not .install_system_packages) }} [[[ Do not install
 exit 0
-# Not archlinux ]]] {{- end }}
+# Do not install ]]] {{- end }}
 echo "> Update pacman database..."
 echo "# pacman -Sy"
 sudo pacman -Sy
@@ -20,7 +20,7 @@ if ! paru --version; then
     sudo pacman -S rustup gcc cmake pkgconf fakeroot git
     echo "> Installing paru ..."
     rustup toolchain install stable
-    cargo install paru
+    cargo install paru || cargo install --git https://github.com/Morganamilo/paru.git
     "$HOME/.cargo/bin/paru" -S paru && cargo uninstall paru
 fi
 
