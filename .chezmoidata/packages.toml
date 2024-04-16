@@ -89,7 +89,7 @@ paru = [
   "xob",
   "xtitle",
   "yarn",
-  "yt-dlp-git",
+  "yt-dlp",
   "zenity",
 ]
 go = [
