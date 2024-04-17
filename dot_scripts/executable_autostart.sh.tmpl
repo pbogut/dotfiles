@@ -37,14 +37,14 @@ demonize udisksvm "udisksvm -a"
 demonize memwatch ~/.scripts/memwatch.sh
 demonize mailsgoweb ~/.scripts/mailsgoweb.sh
 
-# redeye {{"{{{"}} {{- if eq .chezmoi.hostname "redeye" }}
+# {{- if eq .chezmoi.hostname "redeye" }} redeye [[[
 rerun kwalletd "kwalletd5"
 
 # I dont want to talk about it
-optical=$(pactl list sinks | grep 'Name: alsa_output.pci-0000_07_00' | sed 's,.*Name: ,,')
+optical=$(pactl list sinks | grep 'Name: alsa_output.pci-0000_05_00' | sed 's,.*Name: ,,')
 pactl set-default-sink "$optical"
 aoc-menu gamemode off &
-# redeye {{"}}}"}} {{- end }}
+# redeye ]]] {{- end }}
 
 # just local one, not versioned
 if [[ -f "$HOME/.autostart.local.sh" ]]; then
