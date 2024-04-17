@@ -8,7 +8,17 @@ key.txt.age
 assets
 .config/chezmoi
 .fonts/.uuid
-{{ if not .work_itdesk }}
-.config/Ferdium/recipes/clickup
-.config/Ferdium/recipes/office365-owa
+.config/Ferdium/recipes/*
+{{ if .personal }}
+!.config/Ferdium/recipes/discord
+!.config/Ferdium/recipes/slack
+!.config/Ferdium/recipes/whatsapp
+{{ end }}
+{{ if .work_assured }}
+!.config/Ferdium/recipes/chatwork
+!.config/Ferdium/recipes/trello
+{{ end }}
+{{ if .work_itdesk }}
+!.config/Ferdium/recipes/clickup
+!.config/Ferdium/recipes/office365-owa
 {{ end }}
