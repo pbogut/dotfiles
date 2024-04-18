@@ -4,7 +4,8 @@
 # author: Pawel Bogut <pbogut@pbogut.net>
 # date:   11/11/2017
 #=================================================
-stty -ixon
+# disable c-s and c-q (terminal flow)
+[[ $- == *i* ]] && stty -ixon
 export PROFILE_LOADED=true
 
 export GOPATH="$HOME/.gocode"

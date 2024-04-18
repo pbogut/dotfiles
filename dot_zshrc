@@ -9,7 +9,8 @@ setopt appendhistory autocd extendedglob nomatch ignoreeof interactivecomments \
 
 set -o shwordsplit
 unsetopt beep
-stty -ixon # disable c-s and c-q (terminal flow)
+# disable c-s and c-q (terminal flow)
+[[ $- == *i* ]] && stty -ixon
 #colors
 autoload -U colors && colors
 
