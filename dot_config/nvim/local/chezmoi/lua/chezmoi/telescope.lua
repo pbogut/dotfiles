@@ -1,12 +1,25 @@
 local M = {}
 
+local e = vim.fn.shellescape
+
+local function trim_string(text)
+  text, _ = text:gsub('^%s*(.-)%s*$', '%1')
+  return text
+end
+
 M.chezmoi_files = function()
   local actions = require('telescope.actions')
   local action_state = require('telescope.actions.state')
   local finders = require('telescope.finders')
   local pickers = require('telescope.pickers')
   local conf = require('telescope.config').values
+  local source_path = trim_string(vim.fn.system('chezmoi source-path'))
+  local hidden_files = vim.fn.split(vim.fn.system('find ' .. e(source_path) .. ' -type f  -iname ".*"'))
   local result = vim.fn.split(vim.fn.system('chezmoi managed -x externals,dirs'))
+  for _, file in pairs(hidden_files) do
+    result[#result+1] = file
+  end
+
   local displayer = require('telescope.pickers.entry_display').create({
     items = { {} },
   })
@@ -19,13 +32,19 @@ M.chezmoi_files = function()
         results = result,
         entry_maker = function(entry_text)
           local entry = {}
+          entry.chezmoi_cfg = false
           entry.value = entry_text
-          entry.rel = entry_text
+          entry.view = entry_text
+          if entry_text:sub(1, #source_path) == source_path then
+            entry.chezmoi_cfg = true
+            entry.view = '[src]/' .. entry_text:sub(#source_path + 2)
+            entry_text = entry_text:sub(#home + 2)
+          end
           entry.dst = home .. '/' .. entry_text
           entry.ordinal = entry_text
           entry.display = function(ent)
             return displayer({
-              { ent.rel },
+              { ent.view },
             })
           end
           return entry
@@ -41,7 +60,13 @@ M.chezmoi_files = function()
             return
           end
 
-          vim.fn.jobstart('chezmoi edit ' .. vim.fn.shellescape(selection.dst), {
+          actions.close(prompt_bufnr)
+
+          if selection.chezmoi_cfg then
+            vim.cmd.edit(selection.dst)
+            return
+          end
+          vim.fn.jobstart('chezmoi edit ' .. e(selection.dst), {
             env = {
               CHEZMOI_NVIM = 'open',
               EDITOR = 'chezmoi-nvim',
@@ -54,7 +79,6 @@ M.chezmoi_files = function()
             end,
             stdout_buffered = true,
           })
-          actions.close(prompt_bufnr)
           vim.notify('Opening chezmoi file...', vim.log.levels.INFO, { title = 'Chezmoi' })
         end)
         return true

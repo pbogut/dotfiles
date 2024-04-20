@@ -4,6 +4,8 @@ local chezmoi_src = home_path .. "/.local/share/chezmoi"
 
 vim.keymap.set('n', '<plug>(ts-chezmoi-files)', chezmoi_telescope.chezmoi_files)
 
+local e = vim.fn.shellescape
+
 local function trim_string(text)
   text, _ = text:gsub('^%s*(.-)%s*$', '%1')
   return text
@@ -25,11 +27,11 @@ end
 
 vim.api.nvim_create_user_command('ChezmoiAdd', function(_)
   local file = vim.fn.expand('%:p')
-  if file:sub(1, #chezmoi_src) == chezmoi_src then
-    local src = vim.fn.system('chezmoi target-path ' .. vim.fn.shellescape(file))
+  if file:sub(1, #chezmoi_src) == chezmoi_src and file:sub(1, #chezmoi_src + 2) ~= chezmoi_src .. '/.' then
+    local src = vim.fn.system('chezmoi target-path ' .. e(file))
     src = trim_string(src)
     vim.cmd('rightbelow 20split enew')
-    vim.cmd('terminal chezmoi apply ' .. vim.fn.shellescape(src))
+    vim.cmd('terminal chezmoi apply ' .. e(src))
     vim.cmd.startinsert()
   end
 end, {})
@@ -50,7 +52,7 @@ vim.fn.jobstart('chezmoi managed --exclude scripts,externals', {
     -- try current buffer after all managed files are collected
     local file_path = vim.fn.expand('%:p')
     if managed_files[file_path] then
-      local source_path = trim_string(vim.fn.system('chezmoi source-path ' .. vim.fn.shellescape(file_path)))
+      local source_path = trim_string(vim.fn.system('chezmoi source-path ' .. e(file_path)))
       try_edit(source_path)
     end
   end
@@ -74,7 +76,7 @@ vim.api.nvim_create_autocmd('BufEnter', {
       return
     end
 
-    vim.fn.jobstart('chezmoi source-path ' .. vim.fn.shellescape(file_path), {
+    vim.fn.jobstart('chezmoi source-path ' .. e(file_path), {
       on_stdout = function(_, data)
         local source_path = data[1]
         try_edit(source_path)
@@ -92,6 +94,13 @@ vim.api.nvim_create_autocmd('BufEnter', {
     vim.b.chezmoi = true
 
     local source_path = vim.fn.expand('%:p')
+    local file_name = vim.fn.expand('%:t')
+
+    if file_name:sub(1,1) == '.' then
+      -- ignore dot files in chezmoi source
+      vim.b.chezmoi = false
+      return
+    end
 
     vim.api.nvim_create_autocmd('BufWritePost', {
       group = augroup,
@@ -103,7 +112,7 @@ vim.api.nvim_create_autocmd('BufEnter', {
 
         if not vim.b.chezmoi_target_path then
           vim.b.chezmoi_target_path = trim_string(
-            vim.fn.system('chezmoi target-path ' .. vim.fn.shellescape(source_path))
+            vim.fn.system('chezmoi target-path ' .. e(source_path))
           )
         end
 
@@ -115,14 +124,14 @@ vim.api.nvim_create_autocmd('BufEnter', {
 
         local target_base_name = target_path:gsub('.*%/([^%/]*)$', '%1')
 
-        vim.fn.jobstart('chezmoi edit --apply ' .. vim.fn.shellescape(target_path), {
+        vim.fn.jobstart('chezmoi edit --apply ' .. e(target_path), {
           env = {
             CHEZMOI_NVIM_FILE = source_path,
             CHEZMOI_NVIM = 'apply',
             EDITOR = 'chezmoi-nvim',
           },
           on_exit = function(_, code)
-          if code ~= 213 then
+          if code == 213 then
               vim.notify(
                 'Nothing changed, file ' .. target_base_name .. ' has not been applied.',
                 vim.log.levels.INFO,
