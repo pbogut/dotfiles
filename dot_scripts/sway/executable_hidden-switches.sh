@@ -10,15 +10,18 @@ host="$(hostname)"
 
 light1="<big> </big> $("$dir/openhab-widget.sh" show Shelly_Office_Light1)  - Light 1"
 light2="<big> </big> $("$dir/openhab-widget.sh" show Shelly_Office_Light2)  - Light 2"
+light3="<big> </big> $("$dir/homeassistant-widget.sh" show switch.office_light_switch_2)  - Office LED Panel"
 
 [[ $host == "silverspoon" ]] && conservation="<big> </big> $("$dir/conservation.sh")  - Conservation Mode"
 
-options="$light1
+options="$light3
+$light1
 $light2
   Close"
 
 if [[ $host == "silverspoon" ]]; then
-  options="$light1
+  options="$light3
+$light1
 $light2
 $conservation
   Close"
@@ -30,6 +33,8 @@ if [[ $light1 == "$result" ]]; then
   "$dir/openhab-widget.sh" toggle Shelly_Office_Light1
 elif [[ $light2 == "$result" ]]; then
   "$dir/openhab-widget.sh" toggle Shelly_Office_Light2
+elif [[ $light3 == "$result" ]]; then
+  "$dir/homeassistant-widget.sh" toggle switch.office_light_switch_2
 fi
 
 if [[ $host == "silverspoon" ]]; then
