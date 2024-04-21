@@ -96,7 +96,7 @@ vim.api.nvim_create_autocmd('BufEnter', {
     local source_path = vim.fn.expand('%:p')
     local file_name = vim.fn.expand('%:t')
 
-    if file_name:sub(1,1) == '.' then
+    if file_name:sub(1,1) == '.' and source_path:sub(1, #chezmoi_src) == chezmoi_src then
       -- ignore dot files in chezmoi source
       vim.b.chezmoi = false
       return
@@ -131,13 +131,13 @@ vim.api.nvim_create_autocmd('BufEnter', {
             EDITOR = 'chezmoi-nvim',
           },
           on_exit = function(_, code)
-          if code == 213 then
-              vim.notify(
-                'Nothing changed, file ' .. target_base_name .. ' has not been applied.',
-                vim.log.levels.INFO,
-                { title = 'Chezmoi' }
-              )
-          elseif code ~= 0 then
+            if code == 213 then
+                vim.notify(
+                  'Nothing changed, file ' .. target_base_name .. ' has not been applied.',
+                  vim.log.levels.INFO,
+                  { title = 'Chezmoi' }
+                )
+            elseif code ~= 0 then
               vim.notify(
                 'Failed to apply changes for ' .. target_base_name .. ' file.',
                 vim.log.levels.ERROR,
