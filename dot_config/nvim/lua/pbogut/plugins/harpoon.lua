@@ -26,7 +26,7 @@ return {
       })
     end)
     k.set('n', '<plug>(harpoon-add-file)', function()
-      harpoon:list():append()
+      harpoon:list():add()
     end)
     k.set('n', '<plug>(harpoon-nav-1)', function()
       harpoon:list():select(1)
