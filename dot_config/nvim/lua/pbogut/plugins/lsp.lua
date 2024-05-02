@@ -384,7 +384,7 @@ return {
       pattern = '*.rs',
       callback = function()
         if #vim.lsp.buf_get_clients() > 0 then
-          b.lsp_formatting(0)
+          b.lsp_formatting(vim.fn.bufnr())
         end
       end,
     })
@@ -406,7 +406,7 @@ return {
 
           if file:sub(1, #cwd) == cwd and for_filetype then
             if #vim.lsp.buf_get_clients() > 0 then
-              b.lsp_formatting(0)
+              b.lsp_formatting(vim.fn.bufnr())
             else
               vim.cmd('normal! migg=G`i')
             end
