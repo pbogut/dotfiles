@@ -9,8 +9,11 @@ usage() {
   echo "Ussage: ${0##*/} [OPTIONS]"
   echo ""
   echo "Options:"
+  echo "  -d, --display  display number"
   echo "  -h, --help     display this help and exit"
 }
+
+display=0
 
 while test $# -gt 0; do
   case "$1" in
@@ -69,8 +72,18 @@ while test $# -gt 0; do
         ;;
       esac
       if [ "$new" != "$current" ]; then
-        ddcutil setvcp DC "$new"
+        if [ "$display" -eq 0 ]; then
+          ddcutil setvcp DC "$new"
+        else
+        echo ddcutil -d "$display" setvcp DC "$new"
+          ddcutil -d "$display" setvcp DC "$new"
+        fi
       fi
+      shift
+      ;;
+    --display|-d)
+      display="$2"
+      shift
       shift
       ;;
     --help|-h)
