@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 #=================================================
-# name:   terminal
-# author: Pawel Bogut <https://pbogut.me>
-# date:   14/06/2022
+# name:   terminal-float
+# author: author <author_contact>
+# date:   27/04/2024
 #=================================================
+if [[ "$1" == "-e" ]]; then
+  shift
+fi
+
 myargs=()
 title=""
 
@@ -24,4 +28,6 @@ if [[ -n $title ]]; then
   export WEZTERM_TITLE="$title"
 fi
 
-wezterm "${myargs[@]}"
+WEZTERM_FLOATING=true \
+  wezterm -e --class "org.wezterm.floating" \
+  "${myargs[@]}"

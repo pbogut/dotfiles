@@ -4,7 +4,6 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   01/03/2019
 #=================================================
-TERMINAL="alacritty"
 if [[ "$1" =~ ^mailto: ]]; then
     mailto_url="$1"
 
@@ -32,9 +31,10 @@ if [[ "$1" =~ ^mailto: ]]; then
 elif [[ -f "$1" ]]; then
     # $TERMINAL -t "EMAIL_MUTT" -e zsh -ic neomutt -a "$1" \
     cmd='neomutt -a "'"$1"'"'
-    $TERMINAL -e zsh -ic "$cmd" \
+    terminal -t "EMAIL_MUTT" -e zsh -ic "$cmd" \
         && pkill -SIGRTMIN+13 i3blocks
 else
-    $TERMINAL -t "EMAIL_MUTT" -e zsh -ic neomutt \
+    # $TERMINAL -t "EMAIL_MUTT" -e zsh -ic neomutt \
+    terminal -t "EMAIL_MUTT" -e zsh -ic neomutt \
         && pkill -SIGRTMIN+13 i3blocks
 fi

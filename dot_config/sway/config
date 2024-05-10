@@ -15,7 +15,8 @@ set $hype Mod4+Mod1+Ctrl+Shift
 
 set $sh exec sh -c
 set $exec exec
-set $term exec alacritty
+set $term exec terminal
+set $termfloat exec terminal-float
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
 font pango:monospace 8
@@ -298,7 +299,10 @@ for_window [title="SPLASH_SCREEN"] floating enable
 for_window [title="SPLASH_SCREEN"] fullscreen disable
 for_window [title="SPLASH_SCREEN"] title_format "<span alpha='1'>%title</span>"
 for_window [title="SPLASH_SCREEN"] border pixel 1
-for_window [title="FLOATING_WINDOW"] floating enable
+for_window [title="^FLOATING_WINDOW$"] floating enable
+for_window [app_id="^org.wezterm.floating$"] floating enable
+for_window [app_id="^org.wezterm.floating$"] resize set width 1200
+for_window [app_id="^org.wezterm.floating$"] resize set height 700
 for_window [class="^csgo_linux64"] floating disable
 for_window [instance="^Godot_Engine$"] floating enable
 for_window [instance="^Godot_Editor$"] floating enable
@@ -346,7 +350,7 @@ bindsym $mod+Ctrl+r $exec swaymsg '[app_id="com.gitlab.newsflash"] focus' || new
 
 bindsym $mod+Ctrl+m $exec swaymsg '[app_id="chrome-www.deezer.com__en_-Default"] focus' || chromium --app=https://www.deezer.com/en/
 bindsym $mod+Ctrl+s $exec "~/.scripts/sway/switch-or-launch.sh --scratchpad '^Volume Control$' 'pavucontrol'"
-bindsym $mod+Ctrl+k $term -t FLOATING_WINDOW -e zsh -ic "khal interactive"
+bindsym $mod+Ctrl+k $termfloat -e zsh -c "stty -ixon ; khal interactive"
 bindsym $mod+Ctrl+d $exec swaymsg '[app_id="discord"] focus' || discord.sh
 bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
 bindsym $mod+Ctrl+e $exec swaymsg '[title="^EMAIL_MUTT$"] focus' || email

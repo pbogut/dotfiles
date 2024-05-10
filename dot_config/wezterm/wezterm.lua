@@ -1,6 +1,7 @@
 -- Pull in the wezterm API
 local wezterm = require('wezterm')
 local act = wezterm.action
+local global_title = os.getenv('WEZTERM_TITLE')
 
 function os.capture(cmd, raw)
   local f = assert(io.popen(cmd, 'r'))
@@ -396,6 +397,9 @@ c.keys = {
 }
 
 wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
+  if global_title then
+    return global_title
+  end
   local title = tab.tab_title
 
   -- if the tab title is explicitly set, take that
@@ -494,6 +498,9 @@ local function get_pid()
 end
 
 wezterm.on('format-window-title', function(tab, pane, tabs, panes, config)
+  if global_title then
+    return global_title
+  end
   local zoomed = ''
   if tab.active_pane.is_zoomed then
     zoomed = '[Z] '
@@ -556,5 +563,29 @@ c.key_tables = {
   copy_mode = copy_mode_keys,
   search_mode = search_mode_keys,
 }
+
+if os.getenv('WEZTERM_FLOATING') then
+  c.enable_tab_bar = false
+  c.keys[#c.keys + 1] = {
+    key = 'j',
+    mods = 'ALT',
+    action = my_act.ActivateOrCreateTab(0),
+  }
+  c.keys[#c.keys + 1] = {
+    key = 'k',
+    mods = 'ALT',
+    action = my_act.ActivateOrCreateTab(0),
+  }
+  c.keys[#c.keys + 1] = {
+    key = 'l',
+    mods = 'ALT',
+    action = my_act.ActivateOrCreateTab(0),
+  }
+  c.keys[#c.keys + 1] = {
+    key = ';',
+    mods = 'ALT',
+    action = my_act.ActivateOrCreateTab(0),
+  }
+end
 
 return c

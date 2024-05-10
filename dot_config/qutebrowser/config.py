@@ -25,8 +25,8 @@ c.url.start_pages = ['https://monkeytype.com/']
 c.url.default_page = 'https://monkeytype.com/'
 
 c.fileselect.handler = "external"
-c.fileselect.single_file.command = ["alacritty", "-t", "QB_FILE_SELECTION", "-e", "lf", "-selection-path", "{}"]
-c.fileselect.multiple_files.command = ["alacritty", "-t", "QB_FILE_SELECTION", "-e", "lf", "-selection-path", "{}"]
+c.fileselect.single_file.command = ["terminal-float", "-t", "QB_FILE_SELECTION", "-e", "lf", "-selection-path", "{}"]
+c.fileselect.multiple_files.command = ["terminal-float", "-t", "QB_FILE_SELECTION", "-e", "lf", "-selection-path", "{}"]
 
 c.downloads.open_dispatcher = '/bin/bash -c "QB_DOWNLOAD_FILE=1 download-sort-and-open.sh \'{}\'"'
 c.editor.command = ["alacritty", "-t", "NVIM_FOR_QB", "-e", "nvim", "{}"]
