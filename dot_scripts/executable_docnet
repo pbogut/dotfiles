@@ -4,25 +4,31 @@
 # author: Pawel Bogut <pbogut@ukpos.com> <http://pbogut.me>
 # date:   18/05/2017
 #=================================================
-if [[ ! $(id -u) == 0 ]]; then
-  echo Must be run as a user, try: sudo $(basename $0)
-  exit 1
-fi
+# if [[ ! $(id -u) == 0 ]]; then
+#   echo Must be run as a user, try: sudo $(basename $0)
+#   exit 1
+# fi
 
 dnsip=$(ifconfig docker0 | awk '/inet /{print $2}')
 hosts="/etc/hosts"
 
 __clear() {
-  sed -i '/# managed by docnet$/d' $hosts
+  tmpfile=$(mktemp)
+  cat $hosts > "$tmpfile"
+  sed "/# managed by docnet $UID$/d" "$tmpfile" > $hosts
 }
 
 __disconnet() {
-  sed -i "/#$1# managed by docnet$/d" $hosts
+  tmpfile=$(mktemp)
+  cat $hosts > "$tmpfile"
+  sed "/#$1# managed by docnet $UID$/d" "$tmpfile" > $hosts
 }
 
 __remove() {
   if [[ -n $1 && -n $2 && -n $3 ]]; then
-    sed -i "/$1 $2 .*#$3# managed by docnet$/d" $hosts
+    tmpfile=$(mktemp)
+    cat $hosts > "$tmpfile"
+    sed "/$1 $2 .*#$3# managed by docnet $UID$/d" "$tmpfile" > $hosts
   fi
 }
 
@@ -32,7 +38,7 @@ __add() {
 
     padded="$(echo $1 $2 | awk '{x=$0;for(i=length;i<70;i++)x=x " ";}END{print x}')"
 
-    echo "$padded #$3# managed by docnet" | tee -a $hosts
+    echo "$padded #$3# managed by docnet $UID" | tee -a $hosts
   fi
 }
 

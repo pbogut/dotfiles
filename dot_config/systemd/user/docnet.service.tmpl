@@ -1,0 +1,11 @@
+[Unit]
+Description=Docker Network Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart={{ .home }}/.scripts/docnet
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
