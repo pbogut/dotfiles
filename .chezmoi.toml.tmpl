@@ -6,10 +6,12 @@
 {{- $personal := false -}}
 {{- $work_itdesk := false -}}
 {{- $work_assured := false -}}
+{{- $projects := "{{ .chemzmoi.homeDir }}/Projects" -}}
 {{- if eq .chezmoi.username "pbogut" -}}
 {{-   if eq .chezmoi.hostname "redeye" -}}
 {{-     $personal = true -}}
 {{-     $work_assured = true -}}
+{{-     $projects = "/storage/projects" -}}
 {{-   end -}}
 {{-   if eq .chezmoi.hostname "silverspoon" -}}
 {{-     $personal = true -}}
@@ -39,3 +41,4 @@ encryption = "age"
   work_itdesk = {{ $work_itdesk }}
   install_system_packages = {{ $install_system_packages }}
   install_rustup = {{ $install_rustup }}
+  projects = "{{ $projects }}"

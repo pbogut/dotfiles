@@ -33,8 +33,8 @@ fi
 
 
 if [[ $project != "" ]]; then
-    cd "$HOME/Projects/$project" || exit
-    touch -h "$HOME/Projects/$project"
-    wezterm-project "$PWD" "$(wezterm-status "$PWD" --title)"
+    cd "$PROJECTS/$project" || exit
+    touch -h "$PROJECTS/$project"
+    nohup wezterm-project "$PWD" "$(wezterm-status "$PWD" --title)" > /dev/null
     # disown
 fi

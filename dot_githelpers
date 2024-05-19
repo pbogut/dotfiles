@@ -74,7 +74,7 @@ git_clone_to_projects_gl() {
   fi
 
   if [[ "$2" == "" ]]; then
-    dest="$HOME/Projects/$(echo "$repo" |
+    dest="$PROJECTS/$(echo "$repo" |
       sed 's#[^@]*@##' |
       sed 's#^\(https\|http\)://##g' |
       sed 's#:#/#g' |
@@ -90,7 +90,7 @@ git_clone_to_projects_gl() {
     echo
     echo "usage: git cl <repo> [<dir>]"
     echo
-    echo "If no dir provided then ~/Projects/<git-host>/<repo-owner>/<repo-name> is used."
+    echo "If no dir provided then $PROJECTS/<git-host>/<repo-owner>/<repo-name> is used."
     echo
   fi
 }
@@ -115,7 +115,7 @@ git_clone_to_projects_bare() {
   fi
 
   if [[ "$2" == "" ]]; then
-    dest="$HOME/Projects/$(echo "$repo" |
+    dest="$PROJECTS/$(echo "$repo" |
       sed 's#[^@]*@##' |
       sed 's#^\(https\|http\)://##g' |
       sed 's#:#/#g' |
@@ -144,7 +144,7 @@ git_clone_to_projects_bare() {
     echo
     echo "usage: git br <repo> [<dir>]"
     echo
-    echo "If no dir provided then ~/Projects/<git-host>/<repo-owner>/<repo-name> is used."
+    echo "If no dir provided then $PROJECTS/<git-host>/<repo-owner>/<repo-name> is used."
     echo
   fi
 }
@@ -156,7 +156,7 @@ git_clone_to_projects() {
   fi
 
   if [[ "$2" == "" ]]; then
-    dest="$HOME/Projects/$(echo "$repo" |
+    dest="$PROJECTS/$(echo "$repo" |
       sed 's#[^@]*@##' |
       sed 's#^\(https\|http\)://##g' |
       sed 's#:#/#g' |
@@ -176,7 +176,7 @@ git_clone_to_projects() {
     echo
     echo "usage: git cl <repo> [<dir>]"
     echo
-    echo "If no dir provided then ~/Projects/<git-host>/<repo-owner>/<repo-name> is used."
+    echo "If no dir provided then $PROJECTS/<git-host>/<repo-owner>/<repo-name> is used."
     echo
   fi
 }

@@ -12,8 +12,8 @@ else
 fi
 
 if [[ ! $project == "" ]]; then
-    cd "$HOME/Projects/$project" || exit
-    touch -h "$HOME/Projects/$project"
+    cd "$PROJECTS/$project" || exit
+    touch -h "$PROJECTS/$project"
     if [[ $TERM == "dumb" ]]; then
         $TERMINAL -e tmux-vim
     else

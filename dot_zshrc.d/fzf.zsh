@@ -62,15 +62,15 @@ fclip() {
 cdp() {
     project=$(ls-project | fzf -q "$1")
     if [[ ! $project == "" ]]; then
-        cd "$HOME/Projects/$project"
-        touch -h "$HOME/Projects/$project"
+        cd "$PROJECTS/$project"
+        touch -h "$PROJECTS/$project"
     fi
 }
 
 pr() {
   project=$(ls-project | fzf -q "$1")
   if [[ ! $project == "" ]]; then
-      cd "$HOME/Projects/$project"
+      cd "$PROJECTS/$project"
       if [[ -f .git || -d .git ]]; then
           touch .git > /dev/null 2>&1
       else

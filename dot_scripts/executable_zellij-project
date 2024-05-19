@@ -83,8 +83,8 @@ if [[ $project != "" ]]; then
 
     zellij da --yes
 
-    cd "$HOME/Projects/$project" || exit
-    touch -h "$HOME/Projects/$project"
+    cd "$PROJECTS/$project" || exit
+    touch -h "$PROJECTS/$project"
 
 
     name=$(zellij-session-name)

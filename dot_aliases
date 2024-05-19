@@ -46,7 +46,7 @@ alias ccd="cd $(chezmoi source-path)"
 alias genpass="apg -m16 -n1 -MSNCL"
 
 alias greasemonkey="cd ~/Nextcloud/Sync/GreaseMonkey && vim"
-alias mpvscripts="cd ~/Projects/github.com/pbogut/dotfiles/config/mpv/scripts && vim"
+alias mpvscripts="cd $PROJECTS/github.com/pbogut/dotfiles/config/mpv/scripts && vim"
 
 alias apexshaders="cd /storage/SteamLibrary/steamapps/shadercache/1172470 && du -sh * && du -s *"
 alias flatup="flatpak update && flatpak remove --unused"

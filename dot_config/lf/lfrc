@@ -74,7 +74,7 @@ cmd go_project ${{
   clear
   project="$(ls-project | fzf)"
   if [[ ! $project == "" ]]; then
-    dest="$HOME/Projects/$project"
+    dest="$PROJECTS/$project"
     touch -h "$dest"
     lf -remote "send $id cd $dest"
   fi

@@ -116,10 +116,9 @@ if [[ $extended -eq 1 ]]; then
   case  "$wm_app_id" in
     "Alacritty"|"foot"|"org.wezfurlong.wezterm")
       case "$wm_title" in
-        *~/Projects/*|*$HOME/Projects/*)
+        *[*"  "*]*)
           project_name=${wm_title##*/}
           project_name=${project_name%% |t*} #filter tmux session out
-          # move_and_swich "$ws_code $project_name"
           move_and_swich "$ws_code"
           ;;
         *)

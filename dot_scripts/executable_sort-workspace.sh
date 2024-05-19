@@ -117,7 +117,7 @@ if [[ $extended -eq 1 ]]; then
       ;;
     "urxvt URxvt"|"Alacritty Alacritty"|"neovide neovide"|"foot foot")
       case "$wm_title" in
-        *~/Projects/*|*$HOME/Projects/*)
+        *~/Projects/*|*$HOME/Projects/*|$PROJECTS*)
           project_name=${wm_title##*/}
           project_name=${project_name%% |t*} #filter tmux session out
           move_and_swich "$ws_code"

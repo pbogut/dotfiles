@@ -11,7 +11,9 @@ vim.api.nvim_create_autocmd('BufEnter', {
     local host = fn.hostname()
 
     local base_dir = fn.system('base-dir'):gsub('\n', '')
-    local cwd = fn.substitute(base_dir, os.getenv('HOME'), '~', 'g')
+    local cwd = base_dir
+    cwd = fn.substitute(cwd, os.getenv('PROJECTS'), '~p', 'g')
+    cwd = fn.substitute(cwd, os.getenv('HOME'), '~', 'g')
 
     if os.getenv('SSH_CLIENT') or os.getenv('SSH_TTY') then
       o.titlestring = user .. '@' .. host .. ':nvim:' .. cwd
