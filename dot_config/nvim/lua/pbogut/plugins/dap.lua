@@ -90,7 +90,12 @@ return {
         },
       },
     },
-    configs = {
+    configurations = {
+      php = {
+        {
+          name = 'Local',
+        },
+      },
       lua = {
         {
           type = 'nvim_lua',
@@ -170,8 +175,8 @@ return {
     end
 
     -- add local config for lang
-    for lang, _ in pairs(opts.configs) do
-      for _, conf in pairs(opts.configs[lang]) do
+    for lang, _ in pairs(opts.configurations) do
+      for _, conf in pairs(opts.configurations[lang]) do
         load_config(lang, conf)
       end
     end
