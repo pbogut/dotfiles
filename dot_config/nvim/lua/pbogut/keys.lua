@@ -106,6 +106,10 @@ k.set('n', '<space>w', function()
     vim.notify("Can't save nofile buffer", vim.log.levels.ERROR)
     return
   end
+  if fn.expand('%:p'):match('^[a-z]+:') then
+    vim.cmd.write()
+    return
+  end
   fn.system('mkdir -p ' .. fn.expand('%:h'))
   local success, _ = pcall(cmd, 'w!')
   if not success then
