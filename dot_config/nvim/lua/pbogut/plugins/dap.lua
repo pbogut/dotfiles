@@ -3,7 +3,9 @@ local xdebug = {}
 return {
   'mfussenegger/nvim-dap',
   dependencies = {
-    { 'rcarriga/nvim-dap-ui', config = true },
+    { 'rcarriga/nvim-dap-ui', dependencies = {
+      { 'nvim-neotest/nvim-nio' },
+    }, config = true },
   },
   keys = {
     { '<space>dbc', '<plug>(dap-breakpoint-condition)' },
