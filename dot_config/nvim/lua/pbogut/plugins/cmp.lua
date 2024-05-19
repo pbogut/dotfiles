@@ -10,6 +10,7 @@ return {
     'ray-x/cmp-treesitter',
     'onsails/lspkind-nvim',
     'saadparwaiz1/cmp_luasnip',
+    'kristijanhusak/vim-dadbod-completion',
     -- {'zbirenbaum/copilot-cmp', after = 'copilot.lua'},
     { 'pbogut/copilot-cmp', branch = 'single-line-suggestion', after = 'copilot.lua' },
   },
@@ -32,6 +33,7 @@ return {
       copilot = { name = 'copilot' },
       cody = { name = 'cody' },
       emo = { name = 'emoji' },
+      dadbod = { name = 'vim-dadbod-completion' },
     }
 
     if has_copilot then
@@ -144,6 +146,7 @@ return {
             spell = '[Spell]',
             copilot = '[Copilot]',
             cody = '[Cody]',
+            dadbod = '[DB]',
           })[entry.source.name]
           return vim_item
         end,
@@ -151,6 +154,7 @@ return {
     })
     cmp.setup.filetype({ 'sql', 'mysql', 'plsql' }, {
       sources = {
+        src.dadbod,
         src.copilot,
         src.cody,
         src.ts,
