@@ -6,6 +6,7 @@ return {
     { 'rcarriga/nvim-dap-ui', dependencies = {
       { 'nvim-neotest/nvim-nio' },
     }, config = true },
+    { 'jbyuki/one-small-step-for-vimkind' },
   },
   keys = {
     { '<space>dbc', '<plug>(dap-breakpoint-condition)' },
@@ -24,8 +25,18 @@ return {
     { '<space>x', '<plug>(dap-xdebug-toggle)' },
     { '<space>k', '<plug>(dap-ui-hover)' },
   },
+  cmd = {
+    'DapNvimLuaServerStart',
+  },
   opts = {
     adapters = {
+      nvim_lua = function(callback, config)
+        callback({
+          type = 'server',
+          host = config.host or '127.0.0.1',
+          port = config.port or 8086,
+        })
+      end,
       php = {
         type = 'executable',
         command = mason_bin('php-debug-adapter'),
@@ -80,6 +91,13 @@ return {
       },
     },
     configs = {
+      lua = {
+        {
+          type = 'nvim_lua',
+          request = 'attach',
+          name = 'neovim lua',
+        },
+      },
       elixir = {
         {
           task = 'test',
@@ -141,7 +159,7 @@ return {
 
     local function load_config(lang, conf)
       dap.configurations[lang] = dap.configurations[lang] or {}
-      table.insert(dap.configurations[lang], vim.tbl_extend('keep', conf or {}, opts.adapters.defaults[lang]))
+      table.insert(dap.configurations[lang], vim.tbl_extend('keep', conf or {}, opts.adapters.defaults[lang] or {}))
     end
 
     -- get config from config plugin
@@ -151,21 +169,28 @@ return {
       end
     end
 
-    -- if no config for lang get it from local configs
+    -- add local config for lang
     for lang, _ in pairs(opts.configs) do
-      if not dap.configurations[lang] or #dap.configurations[lang] == 0 then
-        for _, conf in pairs(opts.configs[lang]) do
-          load_config(lang, conf)
-        end
+      for _, conf in pairs(opts.configs[lang]) do
+        load_config(lang, conf)
       end
     end
 
-    -- if still no config for lang get it from local defaults
+    -- if no config for lang get it from local defaults
     for lang, _ in pairs(opts.adapters.defaults) do
       if not dap.configurations[lang] or #dap.configurations[lang] == 0 then
         dap.configurations[lang] = { opts.adapters.defaults[lang] }
       end
     end
+
+    -- nvim_lua [[[
+    vim.api.nvim_create_user_command('DapNvimLuaServerStart', function()
+      require('osv').launch({ port = 8086 })
+    end, { desc = 'Starts server for debuging nvim lua' })
+    vim.api.nvim_create_user_command('DapNvimLuaServerStop', function()
+      require('osv').stop()
+    end, { desc = 'Stops server for debuging nvim lua' })
+    -- nvim_lua ]]]
 
     k.set('n', '<plug>(dap-breakpoint-condition)', function()
       dap.set_breakpoint(vim.fn.input('Breakpoint condition: '))
