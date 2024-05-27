@@ -6,7 +6,7 @@
 {{- $personal := false -}}
 {{- $work_itdesk := false -}}
 {{- $work_assured := false -}}
-{{- $projects := "{{ .chemzmoi.homeDir }}/Projects" -}}
+{{- $projects := (print .chezmoi.homeDir  "/Projects") -}}
 {{- if eq .chezmoi.username "pbogut" -}}
 {{-   if eq .chezmoi.hostname "redeye" -}}
 {{-     $personal = true -}}
