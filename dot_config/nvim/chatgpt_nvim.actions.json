@@ -1,4 +1,14 @@
 {
+  "generate_cli_command": {
+    "type": "chat",
+    "opts": {
+      "template": "{{input}}\nPlease, generate ready to use command from it, make it so its valid bash script, no markdown or any other formatting, any comment you add should start with hash and add explanation for the arguments used after command",
+      "strategy": "replace",
+      "params": {
+        "model": "gpt-3.5-turbo"
+      }
+    }
+  },
   "complete_code": {
     "type": "chat",
     "opts": {

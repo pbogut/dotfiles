@@ -19,6 +19,7 @@ return {
         'email_casual',
         'email_professional',
         'grammar_correction',
+        'generate_cli_command',
       }
       if #actions == 0 then
         vim.notify('No actions found.', vim.log.levels.INFO, { title = 'Actions' })
