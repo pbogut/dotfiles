@@ -50,6 +50,7 @@ paru = [
   "python-black",
   "python-isort",
   "python-pip",
+  "python-upnpclient",
   "qutebrowser",
   "ranger",
   "redshift",
