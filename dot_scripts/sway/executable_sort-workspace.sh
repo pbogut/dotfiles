@@ -172,6 +172,9 @@ case  "$wm_app_id" in
   "org.openscad.openscad")
     move_and_swich "$ws_3d"
     ;;
+  "ferdium")
+    move_and_swich "$ws_comm"
+    ;;
 esac
 case  "$wm_class" in
   "www.deezer.com__en Chromium")

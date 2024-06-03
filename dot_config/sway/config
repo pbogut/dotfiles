@@ -283,7 +283,7 @@ assign [title="^Dbeaver$"] $wsdb
 assign [title="^toggl$"] $ws_dash
 assign [title="^todoist$"] $ws_dash
 assign [title="^jira$"] $ws_dash
-assign [class="^Ferdium$"] $ws_comm
+assign [app_id="^ferdium$"] $ws_comm
 assign [class="^discord$"] $ws_comm
 assign [title="Freezer"] $wsmedia
 assign [instance="^Godot_Engine$"] $ws3d
@@ -343,7 +343,7 @@ bindsym $mod+x $exec "~/.scripts/sway/hidden-switches.sh"
 
 bindsym --release $mod+v $sh 'xdotool keyup Super && xdotool type "$(xsel)"'
 bindsym $mod+Ctrl+i $sh '~/.scripts/vim-anywhere.sh --selection'
-bindsym $mod+Ctrl+f $exec swaymsg '[class="^Ferdium$"] focus' || ferdium
+bindsym $mod+Ctrl+f $exec swaymsg '[app_id="^ferdium$"] focus' || ferdium
 bindsym $mod+Ctrl+b $exec "~/.scripts/dmenu-bluetooth"
 bindsym $mod+Ctrl+n $exec "~/.scripts/networkmanager_dmenu"
 bindsym $mod+Ctrl+r $exec swaymsg '[app_id="com.gitlab.newsflash"] focus' || newsflash
