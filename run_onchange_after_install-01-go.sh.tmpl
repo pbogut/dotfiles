@@ -7,3 +7,13 @@
 {{ range .packages.go -}}
 go install {{ . }}
 {{ end }}
+
+# Install custom go-passbolt-cli build that supports totp
+mkdir -p "$HOME/.gocode/custom"
+cd "$HOME/.gocode/custom"
+git clone https://github.com/pbogut/go-passbolt -b return-otp-for-resource
+git clone https://github.com/pbogut/go-passbolt-cli -b return-otp-for-resource
+cd go-passbolt-cli
+go mod edit -replace=github.com/passbolt/go-passbolt@v0.7.0=../go-passbolt
+go build
+go install

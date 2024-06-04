@@ -177,17 +177,16 @@ config.bind(
     'spawn --userscript ~/.scripts/keepass.rb --add', mode='insert')
 config.bind(
     '<ctrl-l>',
-    'spawn --userscript ~/.scripts/keepass.rb --login',
-    mode='insert')
+    'spawn --userscript passbolt --login', mode='insert')
 config.bind(
     '<ctrl-u>',
-    'spawn --userscript ~/.scripts/keepass.rb --type-user', mode='insert')
+    'spawn --userscript passbolt --user', mode='insert')
 config.bind(
     '<ctrl-y>',
-    'spawn --userscript ~/.scripts/keepass.rb --type-pass', mode='insert')
+    'spawn --userscript passbolt --pass', mode='insert')
 config.bind(
     '<ctrl-o>',
-    'spawn --userscript ~/.scripts/keepass.rb --type-otpauth', mode='insert')
+    'spawn --userscript passbolt --totp', mode='insert')
 
 config.bind(
     '<ctrl-w>',
