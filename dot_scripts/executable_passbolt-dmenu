@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   passbolt-dmenu
+# author: pbogut <pbogut@pbogut.me>
+# date:   10/06/2024
+#=================================================
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+  echo "      --login    type in user and password"
+  echo "      --user     type in user"
+  echo "      --pass     type in password"
+  echo "      --totp     type in totp code"
+}
+
+__dmenu() {
+  if [[ -n "$WAYLAND_DISPLAY" ]]; then
+    wofi --cache-file /dev/null --dmenu --prompt "$1"
+  else
+    rofi -dmenu -p "$1"
+  fi
+}
+__list_raw() {
+ go-passbolt-cli list resources -c ID -c Name -c Username -c URI | tail -n+2 | head -n-1
+}
+__list_raw_has_totp() {
+  has_totp_type=$(secret passbolt/resource_types/has_totp)
+  go-passbolt-cli list resource --filter "ResourceTypeID == '$has_totp_type'" -c ID -c Name -c Username -c URI | tail -n+2 | head -n-1
+}
+__list() {
+  dir="$HOME/.config/passbolt"
+  mkdir -p "$dir"
+  if [[ -f "$dir/resources.txt" ]]; then
+    cat "$dir/resources.txt"
+    __list_raw > "$dir/resources.txt" &
+  else
+    __list_raw | tee -a "$dir/resources.txt"
+  fi
+}
+__list_has_totp() {
+  dir="$HOME/.config/passbolt"
+  mkdir -p "$dir"
+  if [[ -f "$dir/resources-totp.txt" ]]; then
+    cat "$dir/resources-totp.txt"
+    __list_raw_has_totp > "$dir/resources-totp.txt" &
+  else
+    __list_raw_has_totp | tee "$dir/resources-totp.txt"
+  fi
+}
+__select_id() {
+  __list | __dmenu "$1" | awk '{print $1}'
+}
+__select_id_has_totp() {
+    __list_has_totp | __dmenu "$1" | awk '{print $1}'
+}
+
+__type() {
+  if [[ -n "$WAYLAND_DISPLAY" ]]; then
+    wtype -d 10 -m ctrl -m shift -m alt -- "$1"
+  else
+    xdotool type --clearmodifiers "$1"
+  fi
+}
+
+__get_resource() {
+  go-passbolt-cli get resource -j --id "$1"
+}
+__qb_login() {
+  resource="$1"
+  user=$(echo "$resource" | jq -r .username)
+  pass=$(echo "$resource" | jq -r .password)
+  desc=$(echo "$resource" | jq -r .description)
+  login_instruction=$(echo -e "$desc" | grep '^LOGIN:')
+  if [[ $login_instruction == "" ]]; then
+      __type "$user"
+      __type "<tab>"
+      __type "$pass"
+  else
+    echo "$login_instruction"
+    echo "$login_instruction" \
+    | sed 's,^LOGIN:,,' \
+    | sed "s,:,\n,g" \
+    | while read -r line; do
+      if [[ $line == "<pass>" ]]; then
+        __type "$pass";
+      elif [[ $line == "<user>" ]]; then
+        __type "$user";
+      else
+        __type "$line";
+      fi
+    done
+  fi
+}
+
+if test $# -eq 0; then
+  action="$(echo -e "login\nuser\npass\ntotp" | __dmenu)"
+  if [[ -n "$action" ]]; then
+    $0 "--$action"
+  fi
+  exit 0
+fi
+while test $# -gt 0; do
+  case "$1" in
+    --login)
+      id=$(__select_id "Login")
+      if [[ $id == "" ]]; then
+        exit 0
+      fi
+      resource=$(__get_resource "$id")
+      __qb_login "$resource"
+      exit 0
+      ;;
+    --user)
+      id=$(__select_id "User")
+      if [[ $id == "" ]]; then
+        exit 1
+      fi
+      user=$(__get_resource "$id" | jq -r .username)
+      __type "$user"
+      exit 0
+      ;;
+    --pass)
+      id=$(__select_id "Pass")
+      if [[ $id == "" ]]; then
+        exit 1
+      fi
+      pass=$(__get_resource "$id" | jq -r .password)
+      __type "$pass"
+      exit 0
+      ;;
+    --totp)
+      id=$(__select_id_has_totp "TOTP")
+      if [[ $id == "" ]]; then
+        exit 1
+      fi
+      totp=$(__get_resource "$id" | jq -r .totp)
+      __type "$totp"
+      exit 0
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
