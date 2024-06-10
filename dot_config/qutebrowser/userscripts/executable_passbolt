@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #=================================================
-# name:   executable_passbolt
-# author: author <author_contact>
+# name:   passbolt
+# author: pbogut <pbogut@pbogut.me>
 # date:   03/06/2024
 #=================================================
 usage() {
@@ -15,11 +15,15 @@ usage() {
   echo "      --totp     type in totp code"
 }
 
-__wofi() {
-  wofi --cache-file /dev/null --dmenu "$@"
+__dmenu() {
+  if [[ -n "$WAYLAND_DISPLAY" ]]; then
+    wofi --cache-file /dev/null --dmenu --search "$1"
+  else
+    rofi -dmenu -p -filter "$1"
+  fi
 }
 __list_raw() {
- go-passbolt-cli list resources -c ID -c Name -c Username -c URI | tail -n+2 | head -n-1
+  go-passbolt-cli list resources -c ID -c Name -c Username -c URI | tail -n+2 | head -n-1
 }
 __list_raw_has_totp() {
   has_totp_type=$(secret passbolt/resource_types/has_totp)
@@ -46,17 +50,18 @@ __list_has_totp() {
   fi
 }
 __select_id() {
-  __list | __wofi | awk '{print $1}'
+  __list | __dmenu | awk '{print $1}'
 }
 __url() {
-  # shellcheck disable=SC2001
-  echo "$QUTE_URL" | sed 's,^[a-z]*://\([^/]*\).*,\1,'
+  echo "$QUTE_URL" |
+    sed 's,^[a-z]*://\([^/]*\).*,\1,' | # remove scheme
+    sed -E 's,^(accounts|dash|dashboard|online|app|login|panel|auth|system)\.,,' # remove common prefixes
 }
 __select_id_with_search() {
-    __list | __wofi --search "$(__url)" | awk '{print $1}'
+    __list | __dmenu "$(__url)" | awk '{print $1}'
 }
 __select_id_with_search_has_totp() {
-    __list_has_totp | __wofi --search "$(__url)" | awk '{print $1}'
+    __list_has_totp | __dmenu "$(__url)" | awk '{print $1}'
 }
 __qb_type() {
   echo "fake-key $1" >> "$QUTE_FIFO"
