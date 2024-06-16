@@ -14,6 +14,18 @@ if [[ $CHEZMOI_NVIM == "open" ]]; then
     if $encrypted; then
         temp_dir="$(mktemp -d)/chezmoi-encrypted"
         mkdir -p "$temp_dir"
+        if [[ $fname =~ .*\.lua ]]; then
+            echo \
+            '{
+              "diagnostics.globals": ["vim"],
+              "workspace.library": [
+                "'"$HOME"'/.config/nvim/lua/",
+                "'"$HOME"'/.local/share/nvim/lazy/"
+              ]
+            }' >> "$temp_dir/.luarc.json"
+            ln -s "$HOME/.local/share/chezmoi/stylua.toml" "$temp_dir/"
+            ln -s "$HOME/.local/share/chezmoi/selene.toml" "$temp_dir/"
+        fi
         base_name=$(basename "$fname")
         temp_fname="$temp_dir/$base_name"
         cp "$fname" "$temp_fname"
