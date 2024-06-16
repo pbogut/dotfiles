@@ -56,6 +56,9 @@ k.set('n', '<c-w>s', '<cmd>rightbelow split<cr>')
 k.set('n', '<c-w>V', '<cmd>vsplit<cr>')
 k.set('n', '<c-w>S', '<cmd>split<cr>')
 k.set('n', '<c-w>O', '<cmd>tabonly<cr>')
+-- resize split
+k.set('n', '<m-,>', '<c-w>5<')
+k.set('n', '<m-.>', '<c-w>5>')
 -- search helpers
 k.set('n', '<esc>', '<cmd>set nohls<cr>', { silent = true })
 k.set('n', '*', ':set hls<cr>*')
