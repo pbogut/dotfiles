@@ -2,8 +2,8 @@ return {
   'MattesGroeger/vim-bookmarks',
   event = 'BufReadPre',
   keys = {
-    { 'mm', '<cmd>BookmarToggle<cr>' },
-    { 'mi', '<cmd>BookmarAnnotate<cr>' },
+    { 'mm', '<cmd>BookmarkToggle<cr>' },
+    { 'mi', '<cmd>BookmarkAnnotate<cr>' },
     { '<space>fM', '<plug>(bookmarks-list)' },
   },
   init = function()
