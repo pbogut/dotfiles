@@ -10,7 +10,7 @@ _list() {
         echo ":quick-new"
 }
 
-selection=$(_list | tac | rofi -dmenu)
+selection=$(_list | tac | wofi --cache-file /dev/null --dmenu)
 # shellcheck disable=2001
 id=$(echo "$selection" | sed 's/\[.\][[:space:]]*\([[:digit:]]*\).*/\1/g')
 
@@ -26,7 +26,7 @@ if [[ $selection == ":quick-new" ]]; then
                 dunstify "$result"
         fi
 elif [[ $selection == ":new" ]]; then
-        $TERMINAL -t FLOATING_WINDOW -e zsh -ic "todo new"
+        terminal-float -e zsh -ic "todo new"
 elif [[ -n $id ]]; then
-        $TERMINAL -t FLOATING_WINDOW -e zsh -ic "todo edit $id"
+        terminal-float -e zsh -ic "todo edit $id"
 fi
