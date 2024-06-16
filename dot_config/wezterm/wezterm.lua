@@ -310,7 +310,7 @@ c.keys = {
     action = wezterm.action.QuickSelectArgs({
       label = 'open url',
       patterns = {
-        'https?://[^"\\s]+',
+        'https?://[^"\\s↩]+',
       },
       action = wezterm.action_callback(function(window, pane)
         local url = window:get_selection_text_for_pane(pane)
