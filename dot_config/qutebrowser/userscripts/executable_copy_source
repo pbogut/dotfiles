@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   copy_source
+# author: pbogut <pbogut@pbogut.me>
+# date:   13/06/2024
+#=================================================
+cat "$QUTE_HTML" | wl-copy
+echo "jseval 'Page source copied to clipboard'" >> $QUTE_FIFO;

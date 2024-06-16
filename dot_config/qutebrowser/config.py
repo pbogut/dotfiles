@@ -211,10 +211,7 @@ config.bind('b', 'spawn --userscript nextcloud --open-bookmark')
 config.bind('B', 'spawn --userscript nextcloud --open-bookmark --new-tab')
 config.bind(',ic', 'spawn --userscript nextcloud --import-cookbook')
 
-config.bind('yh', 'spawn --userscript ~/.scripts/qb-copy-html.sh -b')
-config.bind('ys', 'spawn --userscript ~/.scripts/qb-copy-text.sh -b')
-config.bind('yH', 'spawn --userscript ~/.scripts/qb-copy-html.sh -p')
-config.bind('yS', 'spawn --userscript ~/.scripts/qb-copy-text.sh -p')
+config.bind('yh', 'spawn --userscript copy_source')
 config.bind('eu', 'edit-url')
 
 config.bind('ds', 'open -t https://dissenter.com/discussion/begin?url={url}')
