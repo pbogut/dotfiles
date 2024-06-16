@@ -4,6 +4,7 @@ return {
   'mfussenegger/nvim-dap',
   dependencies = {
     { 'rcarriga/nvim-dap-ui', dependencies = {
+      { 'thehamsta/nvim-dap-virtual-text' },
       { 'nvim-neotest/nvim-nio' },
     }, config = true },
     { 'jbyuki/one-small-step-for-vimkind' },
@@ -91,6 +92,16 @@ return {
       },
     },
     configurations = {
+      javascript = {
+        {
+          name = 'Chromium',
+          port = 9222,
+        },
+        {
+          name = 'qbwork',
+          port = 9224,
+        },
+      },
       php = {
         {
           name = 'Local',
