@@ -10,7 +10,8 @@ my_hdr X-Mutt: markdown
 set query_command="khard email --parsable '%s'"
 macro index,pager \cv "<pipe-message>urlview<return>" "url view"
 macro index,pager \ci "<pipe-message>~/.scripts/mail-to-web.sh<return>" "html view in browser"
-macro index,pager \ca "<pipe-message>khard add-email<return>" "add the sender address to khard"
+macro index,pager \cf "<pipe-message>khard add-email<return>" "add the sender address to khard"
+macro index,pager \ca "<pipe-message>~/.scripts/mutt-archive-similar --from<return><sync-mailbox>" "archive all from sender"
 
 macro index,pager \cs "<pipe-message>~/.scripts/notmuch-open-status.sh --mutt-pipe<return>" "check open status"
 

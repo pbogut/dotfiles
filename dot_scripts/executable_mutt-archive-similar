@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   mutt-archive-similar
+# author: Pawel Bogut <pbogut@pbogut.me
+# date:   29/05/2024
+#=================================================
+clear
+email=$(exail -f /dev/stdin --from-email)
+echo "Archive all emails from $email"?
+notmuch search from:$email and tag:inbox
+response=$(echo -e "yes\nno" | fzf)
+if [[ "$response" == "yes" ]]; then
+    notmuch tag -inbox +archive -unread -- from:$email and tag:inbox
+fi
