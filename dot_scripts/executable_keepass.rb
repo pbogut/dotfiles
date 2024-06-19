@@ -149,7 +149,7 @@ entries.each do |entry|
   name = entry.xpath('./String/Key[text()="Title"]/../Value').text
   url = entry.xpath('./String/Key[text()="URL"]/../Value').text
   user = entry.xpath('./String/Key[text()="UserName"]/../Value').text
-  otpauth = entry.xpath('./String/Key[text()="otpauth"]/../Value').text
+  otpauth = entry.xpath('./String/Key[text()="otp"]/../Value').text
   notes = entry.xpath('./String/Key[text()="Notes"]/../Value').text
   otp = ' 2FA' if otpauth.length.positive?
   cat = "#{cat}/" if cat
@@ -226,7 +226,7 @@ entry = indexes[index]
 name = entry.xpath('./String/Key[text()="Title"]/../Value').text
 user = entry.xpath('./String/Key[text()="UserName"]/../Value').text
 pass = entry.xpath('./String/Key[text()="Password"]/../Value').text
-otpurl = entry.xpath('./String/Key[text()="otpauth"]/../Value').text
+otpurl = entry.xpath('./String/Key[text()="otp"]/../Value').text
 otpauth = get_otp(otpurl) unless otpurl.empty?
 autologin = entry.xpath('./String/Key[text()="autologin"]/../Value').text
 

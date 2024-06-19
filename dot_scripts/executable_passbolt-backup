@@ -1,0 +1,2 @@
+#!/bin/bash
+go-passbolt-cli export keepass -f "$(secret keepass/db)" -p "$(secret keepass/pass)"
