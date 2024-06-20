@@ -324,6 +324,11 @@ c.keys = {
     mods = 'LEADER',
     action = wezterm.action.EmitEvent('x-scrollback-nvim'),
   },
+  {
+    key = 'E',
+    mods = 'LEADER',
+    action = wezterm.action.EmitEvent('x-scrollback-nvim-long'),
+  },
 
   -- Create a new workspace with a random name and switch to it
   { key = 'i', mods = 'CTRL|SHIFT', action = act.SwitchToWorkspace },
@@ -524,8 +529,12 @@ wezterm.on('update-right-status', function(window, _)
   window:set_right_status(status_text)
 end)
 
-wezterm.on('x-scrollback-nvim', function(window, pane)
-  local scrollback = pane:get_lines_as_text()
+wezterm.on('x-scrollback-nvim-long', function(window, pane)
+  wezterm.emit('x-scrollback-nvim', window, pane, 5000)
+end)
+
+wezterm.on('x-scrollback-nvim', function(window, pane, length)
+  local scrollback = pane:get_lines_as_text(length)
   local name = os.tmpname()
   local f = io.open(name, 'w+')
   if not f then
