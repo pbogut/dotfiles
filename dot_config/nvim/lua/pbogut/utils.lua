@@ -144,7 +144,7 @@ function u.combine(tabs)
 end
 
 -- merges tables recursively, if both values
--- are lists (see tbl_islist) then it merges
+-- are lists (see islist) then it merges
 -- data from both tables into one (not replacing one with other)
 -- for tables it is creating new ones (not passing refrence)
 -- so changes should not affect input values
@@ -156,7 +156,7 @@ end
 function u.merge_tables(val1, val2, append)
   append = append or false
   local fresh_one = {}
-  if type(val1) == 'table' and type(val2) == 'table' and vim.tbl_islist(val1) and vim.tbl_islist(val2) then
+  if type(val1) == 'table' and type(val2) == 'table' and vim.islist(val1) and vim.islist(val2) then
     local uniqueness = {}
     local t1 = val2
     local t2 = val1

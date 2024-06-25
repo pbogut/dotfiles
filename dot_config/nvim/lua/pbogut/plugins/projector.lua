@@ -747,6 +747,14 @@ return {
             end,
           },
         },
+        ['docker-compose.yml'] = {
+          priority = 4000,
+          luasnip = {
+            paths = {
+              vim.fn.stdpath('config') .. '/snippets/docker-compose',
+            },
+          },
+        },
         -- match anything
         ['*'] = {
           priority = 5000,

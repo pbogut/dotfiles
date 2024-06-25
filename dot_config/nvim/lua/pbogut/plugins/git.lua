@@ -20,6 +20,7 @@ return {
     },
     keys = {
       { '<space>hh', '<plug>(gitsigns-toggle-linehl)' },
+      { '<space>hi', '<plug>(gitsigns-hunk-inline)' },
       { '<space>hr', '<plug>(gitsigns-refresh)' },
       { '<space>hd', '<plug>(gitsigns-preview-hunk)' },
       { '<space>hR', '<plug>(gitsigns-reset-hunk)' },
@@ -34,6 +35,7 @@ return {
     config = function(_, opts)
       local k = vim.keymap
       k.set('n', '<plug>(gitsigns-toggle-linehl)', '<cmd>Gitsigns toggle_linehl<cr>')
+      k.set('n', '<plug>(gitsigns-hunk-inline)', '<cmd>Gitsigns preview_hunk_inline<cr>')
       k.set('n', '<plug>(gitsigns-refresh)', '<cmd>Gitsigns refresh<cr>')
       k.set('n', '<plug>(gitsigns-preview-hunk)', '<cmd>Gitsigns preview_hunk<cr>')
       k.set('n', '<plug>(gitsigns-reset-hunk)', '<cmd>Gitsigns reset_hunk<cr>')

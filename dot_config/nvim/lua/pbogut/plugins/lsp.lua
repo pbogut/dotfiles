@@ -87,17 +87,16 @@ return {
         { 'n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>', b.no_lsp_bind },
         { 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', false },
         { 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', false },
-        -- { 'n', '<c-k>', b.signature_action, b.no_lsp_bind },
-        -- { 'i', '<c-k>', b.signature_action, b.no_lsp_bind },
+        { 'n', '<c-k>', b.signature_action, b.no_lsp_bind },
+        { 'i', '<c-k>', b.signature_action, b.no_lsp_bind },
         {
           { 'n', 'i' },
-          '<c-k>',
+          '<m-i>',
           function()
-            vim.lsp.inlay_hint.enable(0, vim.lsp.inlay_hint.is_enabled(0))
+            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
           end,
           b.no_lsp_bind,
         },
-
         { 'n', 'gd', b.maybe_telescope('definition'), false },
         { 'n', '<space>ld', b.maybe_telescope('definition'), b.no_lsp_bind },
         { 'n', '<space>lD', '<cmd>lua vim.lsp.buf.declaration()<cr>', b.no_lsp_bind },
