@@ -8,12 +8,15 @@ usage() {
   echo "Ussage: ${0##*/} [OPTIONS]"
   echo ""
   echo "Options:"
-  echo "  -h, --help     display this help and exit"
-  echo "      --login    type in user and password"
-  echo "      --user     type in user"
-  echo "      --pass     type in password"
-  echo "      --totp     type in totp code"
+  echo "  -h, --help              display this help and exit"
+  echo "      --login             type in user and password"
+  echo "      --user              type in user"
+  echo "      --pass              type in password"
+  echo "      --totp              type in totp code"
+  echo "      --refresh-cache     type in totp code"
 }
+
+dir="$HOME/.config/passbolt"
 
 __dmenu() {
   if [[ -n "$WAYLAND_DISPLAY" ]]; then
@@ -29,14 +32,20 @@ __list_raw_has_totp() {
   has_totp_type=$(secret passbolt/resource_types/has_totp)
   go-passbolt-cli list resource --filter "ResourceTypeID == '$has_totp_type'" -c ID -c Name -c Username -c URI | tail -n+2 | head -n-1
 }
+__refresh_cache() {
+  __list_raw > "$dir/resources-tmp.txt"
+  mv "$dir/resources-tmp.txt" "$dir/resources.txt"
+  __list_raw_has_totp > "$dir/resources-totp-tmp.txt" &
+  mv "$dir/resources-totp-tmp.txt" "$dir/resources-totp.txt"
+}
 __list() {
-  dir="$HOME/.config/passbolt"
   mkdir -p "$dir"
   if [[ -f "$dir/resources.txt" ]]; then
     cat "$dir/resources.txt"
-    __list_raw > "$dir/resources.txt" &
+    at now <<< "${BASH_SOURCE[0]} --refresh-cache &"
   else
-    __list_raw | tee -a "$dir/resources.txt"
+    __list_raw | tee -a "$dir/resources-tmp.txt"
+    mv "$dir/resources-tmp.txt" "$dir/resources.txt"
   fi
 }
 __list_has_totp() {
@@ -45,8 +54,10 @@ __list_has_totp() {
   if [[ -f "$dir/resources-totp.txt" ]]; then
     cat "$dir/resources-totp.txt"
     __list_raw_has_totp > "$dir/resources-totp.txt" &
+    at now <<< "${BASH_SOURCE[0]} --refresh-cache &"
   else
-    __list_raw_has_totp | tee "$dir/resources-totp.txt"
+    __list_raw_has_totp | tee "$dir/resources-totp-tmp.txt"
+    mv "$dir/resources-totp-tmp.txt" "$dir/resources-totp.txt"
   fi
 }
 __select_id() {
@@ -97,7 +108,7 @@ __qb_login() {
 if test $# -eq 0; then
   action="$(echo -e "login\nuser\npass\ntotp" | __dmenu)"
   if [[ -n "$action" ]]; then
-    $0 "--$action"
+    "${BASH_SOURCE[0]}" "--$action"
   fi
   exit 0
 fi
@@ -137,6 +148,10 @@ while test $# -gt 0; do
       fi
       totp=$(__get_resource "$id" | jq -r .totp)
       __type "$totp"
+      exit 0
+      ;;
+    --refresh-cache)
+      __refresh_cache
       exit 0
       ;;
     --help|-h)

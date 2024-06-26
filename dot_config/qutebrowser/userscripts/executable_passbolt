@@ -8,12 +8,16 @@ usage() {
   echo "Ussage: ${0##*/} [OPTIONS]"
   echo ""
   echo "Options:"
-  echo "  -h, --help     display this help and exit"
-  echo "      --login    type in user and password"
-  echo "      --user     type in user"
-  echo "      --pass     type in password"
-  echo "      --totp     type in totp code"
+  echo "  -h, --help              display this help and exit"
+  echo "      --login             type in user and password"
+  echo "      --user              type in user"
+  echo "      --pass              type in password"
+  echo "      --totp              type in totp code"
+  echo "      --create            create entry"
+  echo "      --refresh-cache     type in totp code"
 }
+
+dir="$HOME/.config/passbolt"
 
 __dmenu() {
   if [[ -n "$WAYLAND_DISPLAY" ]]; then
@@ -22,6 +26,47 @@ __dmenu() {
     rofi -dmenu -p -filter "$1"
   fi
 }
+__remove_url_prefix() {
+    sed -E 's,^(accounts|dash|dashboard|online|app|login|panel|auth|system)\.,,' # remove common prefixes
+}
+__remove_url_suffix() {
+    sed -E 's,\.(co\.uk|com\.net|com\...|..|...)$,,' # remove common suffixes
+}
+__create_entry() {
+  file=$(mktemp -t passbolt.XXXXXX)
+  domain=$(echo "$QUTE_URL" | awk -F'[/:]' '{print $4}')
+  url=$(echo "$QUTE_URL" | awk -F'[/:]' '{print $1 "://" $4}')
+  name=$(echo "$domain" | __remove_url_prefix | __remove_url_suffix)
+  {
+    echo "Name: ${name^}"
+    echo "URL: $url"
+    echo "Username: $(genmail "$name")"
+    echo "Password: $(genpass)"
+  } >> "$file"
+  terminal-float nvim "$file"
+  while read -r line; do
+    if [[ $line == "Name: "* ]]; then
+      name=${line##Name: }
+    elif [[ $line == "URL: "* ]]; then
+      uri=${line##URL: }
+    elif [[ $line == "Username: "* ]]; then
+      username=${line##Username: }
+    elif [[ $line == "Password: "* ]]; then
+      password=${line##Password: }
+    fi
+  done < "$file"
+  if [[ -z "$name" ]] || [[ -z "$uri" ]] || [[ -z "$username" ]] || [[ -z "$password" ]]; then
+    echo "Invalid input"
+    exit 1
+  fi
+  go-passbolt-cli create resource \
+    --name "$name" \
+    --uri "$uri" \
+    --username "$username" \
+    --password "$password"
+
+  at now <<< "${BASH_SOURCE[0]} --refresh-cache &"
+}
 __list_raw() {
   go-passbolt-cli list resources -c ID -c Name -c Username -c URI | tail -n+2 | head -n-1
 }
@@ -29,14 +74,20 @@ __list_raw_has_totp() {
   has_totp_type=$(secret passbolt/resource_types/has_totp)
   go-passbolt-cli list resource --filter "ResourceTypeID == '$has_totp_type'" -c ID -c Name -c Username -c URI | tail -n+2 | head -n-1
 }
+__refresh_cache() {
+  __list_raw > "$dir/resources-tmp.txt"
+  mv "$dir/resources-tmp.txt" "$dir/resources.txt"
+  __list_raw_has_totp > "$dir/resources-totp-tmp.txt" &
+  mv "$dir/resources-totp-tmp.txt" "$dir/resources-totp.txt"
+}
 __list() {
-  dir="$HOME/.config/passbolt"
   mkdir -p "$dir"
   if [[ -f "$dir/resources.txt" ]]; then
     cat "$dir/resources.txt"
-    __list_raw > "$dir/resources.txt" &
+    at now <<< "${BASH_SOURCE[0]} --refresh-cache &"
   else
-    __list_raw | tee -a "$dir/resources.txt"
+    __list_raw | tee -a "$dir/resources-tmp.txt"
+    mv "$dir/resources-tmp.txt" "$dir/resources.txt"
   fi
 }
 __list_has_totp() {
@@ -44,9 +95,10 @@ __list_has_totp() {
   mkdir -p "$dir"
   if [[ -f "$dir/resources-totp.txt" ]]; then
     cat "$dir/resources-totp.txt"
-    __list_raw_has_totp > "$dir/resources-totp.txt" &
+    at now <<< "${BASH_SOURCE[0]} --refresh-cache &"
   else
-    __list_raw_has_totp | tee "$dir/resources-totp.txt"
+    __list_raw_has_totp | tee "$dir/resources-totp-tmp.txt"
+    mv "$dir/resources-totp-tmp.txt" "$dir/resources-totp.txt"
   fi
 }
 __select_id() {
@@ -55,7 +107,7 @@ __select_id() {
 __url() {
   echo "$QUTE_URL" |
     sed 's,^[a-z]*://\([^/]*\).*,\1,' | # remove scheme
-    sed -E 's,^(accounts|dash|dashboard|online|app|login|panel|auth|system)\.,,' # remove common prefixes
+    __remove_url_prefix
 }
 __select_id_with_search() {
     __list | __dmenu "$(__url)" | awk '{print $1}'
@@ -136,6 +188,14 @@ while test $# -gt 0; do
       fi
       totp=$(__get_resource "$id" | jq -r .totp)
       __qb_type "$totp"
+      exit 0
+      ;;
+    --create)
+      __create_entry
+      exit 0
+      ;;
+    --refresh-cache)
+      __refresh_cache
       exit 0
       ;;
     --help|-h)

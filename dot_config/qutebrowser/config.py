@@ -174,7 +174,7 @@ config.bind('gc', 'spawn google-chrome-stable {url:pretty}')
 
 config.bind(
     '<ctrl-i>',
-    'spawn --userscript ~/.scripts/keepass.rb --add', mode='insert')
+    'spawn --userscript passbolt --create', mode='insert')
 config.bind(
     '<ctrl-l>',
     'spawn --userscript passbolt --login', mode='insert')
