@@ -10,7 +10,7 @@ local yank_file_name = function(mode)
     if mode == 'relative' and fullpath:sub(1, #cwd) == cwd then
       path = fullpath:sub(#cwd + 2)
     end
-    vim.fn.setreg('"', path)
+    vim.fn.setreg('+', path)
     print('Yanked: ' .. path)
   end
 end
