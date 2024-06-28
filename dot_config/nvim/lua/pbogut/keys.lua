@@ -175,7 +175,7 @@ end)
 -- end)
 
 k.set('n', 'goT', function()
-  local path = fn.expand('%:p:h')
+  local path = fn.expand('%:p:h'):gsub('^oil://', '')
   if os.getenv('TMUX') then
     return require('pbogut.tmuxctl').toggle_pane('bottom' .. path, { height = 15, dir = path })
   end
