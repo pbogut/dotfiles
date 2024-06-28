@@ -16,6 +16,8 @@ return {
     local trouble = require('trouble')
     local k = vim.keymap
 
+    trouble.setup()
+
     k.set('n', '<plug>(trouble-diagnostic-document)', '<cmd>TroubleToggle document_diagnostics<cr>')
     k.set('n', '<plug>(trouble-diagnostic-workspace)', '<cmd>TroubleToggle workspace_diagnostics<cr>')
     k.set('n', '<plug>(trouble-quickfix)', '<cmd>TroubleToggle quickfix<cr>')
