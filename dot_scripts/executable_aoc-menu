@@ -8,6 +8,9 @@
 usage() {
   echo "Ussage: ${0##*/} [OPTIONS]"
   echo ""
+  echo "Commands:"
+  echo "  gamemode [MODE]"
+  echo "    Modes: gamer3, gamer2, gamer1, rts, fps, off"
   echo "Options:"
   echo "  -d, --display  display number"
   echo "  -h, --help     display this help and exit"
