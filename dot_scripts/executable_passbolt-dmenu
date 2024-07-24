@@ -68,10 +68,14 @@ __select_id_has_totp() {
 }
 
 __type() {
+  input="$1"
   if [[ -n "$WAYLAND_DISPLAY" ]]; then
-    wtype -d 10 -m ctrl -m shift -m alt -- "$1"
+    if [[ $input == "<tab>" ]]; then
+      input="	"
+    fi
+    wtype -d 10 -m ctrl -m shift -m alt -- "$input"
   else
-    xdotool type --clearmodifiers "$1"
+    xdotool type --clearmodifiers "$input"
   fi
 }
 
