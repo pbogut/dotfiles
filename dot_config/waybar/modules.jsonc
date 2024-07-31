@@ -260,6 +260,12 @@
         "escape": false,
         "on-click": "$HOME/.scripts/sway/hidden-switches.sh"
     },
+    "custom/hubstaff": {
+        "interval": 60,
+        "signal": 19,
+        "exec": "$HOME/.scripts/waybar/hubstaff.sh",
+        "on-click": "hubstaff toggle"
+    },
     "custom/media": {
         "format": "{icon} {}",
         "return-type": "json",
