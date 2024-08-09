@@ -31,13 +31,13 @@ return {
       },
     })
 
-    vim.keymap.set({ 'i', 's' }, '<c-n>', function()
+    vim.keymap.set({ 'i', 's' }, '<c-j>', function()
       if ls.jumpable(1) then
         ls.jump(1)
       end
     end)
 
-    vim.keymap.set({ 'i', 's' }, '<c-p>', function()
+    vim.keymap.set({ 'i', 's' }, '<c-k>', function()
       if ls.jumpable(-1) then
         ls.jump(-1)
       end

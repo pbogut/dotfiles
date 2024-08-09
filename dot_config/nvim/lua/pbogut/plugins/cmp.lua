@@ -48,27 +48,8 @@ return {
       },
       preselect = cmp.PreselectMode.None,
       mapping = cmp.mapping.preset.insert({
-        -- this is annoying as fuck, but cmp is retarded, why the fuck you force
-        -- yorself on my keybindings you fucking cunt ?
-        ['<c-n>'] = cmp.mapping(function()
-          if luasnip.jumpable(1) then
-            luasnip.jump(1)
-          else
-            -- emmet binding
-            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<c-e>n', true, false, true), 'm', false)
-          end
-        end),
-        ['<c-p>'] = cmp.mapping(function()
-          if luasnip.jumpable(-1) then
-            luasnip.jump(-1)
-          else
-            -- emmet binding
-            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<c-e>N', true, false, true), 'm', false)
-          end
-        end),
-        -- rant over
-        ['<c-j>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-        ['<c-k>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+        ['<c-n>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+        ['<c-p>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
         ['<c-u>'] = cmp.mapping.scroll_docs(-4),
         ['<c-d>'] = cmp.mapping.scroll_docs(4),
         ['<c-e>'] = cmp.config.disable,

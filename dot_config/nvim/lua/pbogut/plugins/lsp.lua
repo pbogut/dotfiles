@@ -87,8 +87,8 @@ return {
         { 'n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>', b.no_lsp_bind },
         { 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', false },
         { 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', false },
-        { 'n', '<c-k>', b.signature_action, b.no_lsp_bind },
-        { 'i', '<c-k>', b.signature_action, b.no_lsp_bind },
+        { 'n', '<c-k>', b.snippet_jump_back_or_signature_action, b.snippet_jump_back_or_signature_action },
+        { 'i', '<c-k>', b.snippet_jump_back_or_signature_action, b.snippet_jump_back_or_signature_action },
         {
           { 'n', 'i' },
           '<m-i>',
@@ -185,6 +185,26 @@ return {
       end,
     })
 
+    b.snippet_jump_back_or_signature_action = function()
+      local has_lspsign, lspsign = pcall(require, 'lsp_signature')
+      local has_luasnip, luasnip = pcall(require, 'luasnip')
+      local done = false
+      if not done and has_luasnip then
+        if luasnip.jumpable(-1) then
+          luasnip.jump(-1)
+          done = true
+        end
+      end
+      if not done and has_lspsign then
+        lspsign.toggle_float_win()
+        done = true
+      end
+      if not done then
+        vim.lsp.buf.signature_help()
+        done = true
+      end
+    end
+
     b.maybe_telescope = function(name)
       return function()
         if vim.fn.exists(':Telescope') then
@@ -240,7 +260,7 @@ return {
           floating_window_above_cur_line = true,
           hint_enable = false,
           handler_opts = { border = 'none' },
-          toggle_key = '<c-k>',
+          toggle_key = '<plug>(lsp_signature_toggle_key)',
         })
       end
 
