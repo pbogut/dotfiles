@@ -9,6 +9,7 @@ usage() {
   echo ""
   echo "Options:"
   echo "  -h, --help              display this help and exit"
+  echo "      --open              open selected entry url"
   echo "      --login             type in user and password"
   echo "      --user              type in user"
   echo "      --pass              type in password"
@@ -121,6 +122,11 @@ __qb_type() {
 __get_resource() {
   go-passbolt-cli get resource -j --id "$1"
 }
+__qb_open() {
+  resource="$1"
+  uri=$(echo "$resource" | jq -r .uri)
+  echo "open $uri" >> "$QUTE_FIFO"
+}
 __qb_login() {
   resource="$1"
   user=$(echo "$resource" | jq -r .username)
@@ -154,6 +160,16 @@ if test $# -eq 0; then
 fi
 while test $# -gt 0; do
   case "$1" in
+    --open)
+      id=$(__select_id)
+      if [[ $id == "" ]]; then
+        exit 0
+      fi
+      uri="$(__list | grep "^$id" | cut -d'|' -f4)"
+      echo "open $uri" >> "$QUTE_FIFO"
+      #__qb_open "$resource"
+      exit 0
+      ;;
     --login)
       id=$(__select_id_with_search)
       if [[ $id == "" ]]; then

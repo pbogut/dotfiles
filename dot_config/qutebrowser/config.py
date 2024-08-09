@@ -173,6 +173,12 @@ config.bind('<Ctrl-t>', 'spawn --userscript tabswidth --toggle', mode='insert')
 config.bind('gc', 'spawn google-chrome-stable {url:pretty}')
 
 config.bind(
+    '<ctrl-b>',
+    'spawn --userscript passbolt --open', mode='insert')
+config.bind(
+    '<ctrl-b>',
+    'spawn --userscript passbolt --open', mode='normal')
+config.bind(
     '<ctrl-i>',
     'spawn --userscript passbolt --create', mode='insert')
 config.bind(
