@@ -40,6 +40,9 @@ return {
   config = function()
     require('chatgpt').setup({
       api_key_cmd = 'bash ' .. os.getenv('HOME') .. '/.scripts/secret chatgpt/api_key',
+      openai_params = {
+        model = 'gpt-4o-mini',
+      },
       chat = {
         keymaps = {
           cycle_modes = '<M-m>',
