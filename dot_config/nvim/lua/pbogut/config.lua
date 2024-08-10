@@ -1,7 +1,14 @@
+---@class ProjectConfigOpts
+---@field path string path of the project
+---@field helper ProjectConfigHelper
+---@field get_all boolean
+
 local u = require('pbogut.utils')
 local fn = vim.fn
 
 local c = {}
+
+---@class ProjectConfigHelper
 local h = {}
 
 function h.starts_with(str, start)
@@ -10,6 +17,20 @@ end
 
 function h.contains(str, pattern)
   return str:find(pattern, nil, true) ~= nil
+end
+
+function h.exists(path)
+  return vim.fn.filereadable(path) == 1
+end
+
+function h.contains_any(str, patterns)
+  for _, pattern in pairs(patterns) do
+    if str:find(pattern, nil, true) ~= nil then
+      return true
+    end
+  end
+
+  return false
 end
 
 local modules = {}
@@ -52,8 +73,21 @@ function c.load_for_cwd()
   end
   local cwd = vim.fn.getcwd()
   for _, module in pairs(modules) do
-    if module.should_apply(cwd, h) then
-      config = u.merge_tables(module.get_config(cwd), config)
+    if module.should_apply then
+      if module.should_apply(cwd, h) then
+        config = u.merge_tables(module.get_config(cwd), config)
+      end
+    elseif module.get_config then
+      local mod_configs = module.get_config({ path = cwd, helper = h })
+      if vim.islist(mod_configs) then
+        for _, mod_config in pairs(mod_configs) do
+          if type(mod_config) == 'table' then
+            config = u.merge_tables(mod_config, config)
+          end
+        end
+      elseif type(mod_configs) == 'table' then
+        config = u.merge_tables(mod_configs, config)
+      end
     end
   end
 end
