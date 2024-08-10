@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'nicwest/vim-http',
   cmd = { 'Http', 'HttpShowCurl', 'HttpShowRequest', 'HttpClean', 'HttpAuth' },
   keys = {

@@ -1,12 +1,14 @@
 ---@type LazyPluginSpec[]
 return {
   {
+    enabled = true,
     'rhysd/git-messenger.vim',
     keys = {
       { '<space>gm', '<plug>(git-messenger)', desc = 'Show git message' },
     },
   },
   {
+    enabled = true,
     'lewis6991/gitsigns.nvim',
     opts = {
       trouble = true,

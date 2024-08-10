@@ -1,4 +1,5 @@
 return {
+  enabled = true,
   'glacambre/firenvim',
 
   -- Lazy load firenvim

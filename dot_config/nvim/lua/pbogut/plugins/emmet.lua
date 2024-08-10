@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'mattn/emmet-vim',
   keys = {
     { '<c-e>,', '<plug>(emmet-expand-abbr)', mode = { 'n', 'v', 'i' } },

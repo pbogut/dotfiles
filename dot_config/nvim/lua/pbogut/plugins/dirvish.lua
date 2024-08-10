@@ -1,7 +1,7 @@
 ---@type LazyPluginSpec
 return {
-  'justinmk/vim-dirvish',
   enabled = false,
+  'justinmk/vim-dirvish',
   dependencies = { 'kristijanhusak/vim-dirvish-git' },
   keys = {
     { '<bs>', '<cmd>Dirvish %:p:h<cr>', desc = 'Dirvish' },

@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'ntpeters/vim-better-whitespace',
   event = { 'InsertEnter', 'BufReadPre' },
   config = function()

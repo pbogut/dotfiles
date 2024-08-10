@@ -3,6 +3,7 @@
 -- could youse treesitter for params as well
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'danymat/neogen',
   config = true,
   cmd = { 'Neogen' },

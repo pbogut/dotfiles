@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'wansmer/treesj',
   keys = {
     { 'gS', '<cmd>TSJSplit<cr>', silent = true },

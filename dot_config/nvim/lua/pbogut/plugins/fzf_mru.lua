@@ -1,5 +1,6 @@
 return {
   {
+    enabled = true,
     'pbogut/fzf-mru.vim',
     keys = {
       { '<space>fm', '<cmd>FZFMruTelescope<cr>', desc = 'MRU files' },

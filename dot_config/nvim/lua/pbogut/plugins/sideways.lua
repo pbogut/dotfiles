@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'AndrewRadev/sideways.vim',
   keys = {
     { 'ga<', '<cmd>SidewaysLeft<cr>' },

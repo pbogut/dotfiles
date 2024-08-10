@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'folke/trouble.nvim',
   keys = {
     { '<space>ed', '<plug>(trouble-diagnostic-document)' },

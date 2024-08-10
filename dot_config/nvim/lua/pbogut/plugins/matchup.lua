@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'andymass/vim-matchup',
   event = { 'BufWritePre', 'BufReadPre' },
   init = function()

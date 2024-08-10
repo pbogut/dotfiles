@@ -18,6 +18,7 @@ end
 ---@type LazyPluginSpec[]
 return {
   {
+    enabled = true,
     'stevearc/oil.nvim',
     keys = {
       { '<bs>', '<cmd>Oil<cr>', desc = 'Oil' },
@@ -36,6 +37,7 @@ return {
     config = true,
   },
   {
+    enabled = true,
     'refractalize/oil-git-status.nvim',
     dependencies = { 'stevearc/oil.nvim' },
     config = true,

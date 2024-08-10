@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'vim-scripts/cmdalias.vim',
   event = 'CmdlineEnter',
   config = function()

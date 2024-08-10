@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'stevearc/profile.nvim',
   keys = { { '<f1>', '<plug>(profile-toggle)' } },
   config = function()

@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'kylechui/nvim-surround',
   opts = {
     keymaps = {

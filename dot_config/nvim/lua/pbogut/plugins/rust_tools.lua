@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'simrat39/rust-tools.nvim',
   ft = { 'rust' },
   config = function()

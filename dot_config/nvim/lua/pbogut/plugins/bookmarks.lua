@@ -1,4 +1,5 @@
 return {
+  enabled = true,
   'MattesGroeger/vim-bookmarks',
   event = 'BufReadPre',
   keys = {

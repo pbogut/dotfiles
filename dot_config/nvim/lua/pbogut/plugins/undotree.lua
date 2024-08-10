@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'mbbill/undotree',
   cmd = {
     'UndotreeToggle',

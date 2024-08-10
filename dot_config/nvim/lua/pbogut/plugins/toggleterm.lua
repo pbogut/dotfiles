@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'akinsho/toggleterm.nvim',
   keys = {
     { '<space>lg', '<cmd>LazyGitToggle<cr>', desc = 'LazyGitToggle' },

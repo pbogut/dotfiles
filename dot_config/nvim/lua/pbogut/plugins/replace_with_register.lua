@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'vim-scripts/ReplaceWithRegister',
   keys = {
     { 'cp', '<plug>ReplaceWithRegisterOperator', remap = true },

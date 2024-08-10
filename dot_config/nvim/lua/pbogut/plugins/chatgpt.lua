@@ -1,4 +1,5 @@
 return {
+  enabled = true,
   'jackmort/chatgpt.nvim',
   dependencies = {
     'muniftanjim/nui.nvim',

@@ -1,4 +1,5 @@
 return {
+  enabled = true,
   'projector',
   dir = vim.fn.stdpath('config') .. '/local/projector',
   config = function()

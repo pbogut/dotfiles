@@ -1,6 +1,7 @@
 ---@type LazyPluginSpec[]
 return {
   {
+    enabled = true,
     'nvim-treesitter/nvim-treesitter-context',
     event = { 'BufWritePre', 'BufReadPre', 'FileType' },
     opts = {
@@ -28,6 +29,7 @@ return {
     cond = true,
   },
   {
+    enabled = true,
     'nvim-treesitter/nvim-treesitter',
     event = { 'BufWritePre', 'BufReadPre', 'FileType' },
     build = function()
@@ -38,7 +40,15 @@ return {
       -- ensure_installed = 'all', -- very slow (>20% of start time), dont use it
       highlight = {
         enable = true,
-        -- disable = { 'markdown' },
+        disable = function(lang, bufnr)
+            -- Disable for large files
+            local lines_limit = 10000
+            if lang == 'markdown' then
+              -- Markdown sucks
+              lines_limit = 1000
+            end
+            return vim.api.nvim_buf_line_count(bufnr) > lines_limit
+        end,
       },
       matchup = {
         enable = true,
@@ -81,6 +91,7 @@ return {
     cond = true,
   },
   {
+    enabled = true,
     'nvim-treesitter/playground',
     cmd = { 'TSCaptureUnderCursor', 'TSPlaygroundToggle' },
   },

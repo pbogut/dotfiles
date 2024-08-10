@@ -1,4 +1,5 @@
 return {
+  enabled = true,
   'hrsh7th/nvim-cmp',
   dependencies = {
     { 'tzachar/cmp-tabnine', build = './install.sh', after = 'nvim-cmp' },

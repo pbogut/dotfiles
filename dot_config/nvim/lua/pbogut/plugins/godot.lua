@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'lommix/godot.nvim',
   cmd = {
     'GodotDebug',

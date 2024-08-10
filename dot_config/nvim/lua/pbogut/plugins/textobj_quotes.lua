@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'beloglazov/vim-textobj-quotes',
   dependencies = 'kana/vim-textobj-user',
   keys = {

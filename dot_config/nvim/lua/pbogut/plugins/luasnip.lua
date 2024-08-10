@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'l3mon4d3/luasnip',
   dependencies = {
     'honza/vim-snippets',
@@ -63,7 +64,7 @@ return {
     -- clean up default snippets, dont care about them
     ls.cleanup()
 
-    -- load per project snippets {{{
+    -- load per project snippets
     local projector = require('projector')
     local paths = projector.get_config('luasnip.paths', {})
 

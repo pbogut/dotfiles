@@ -1,4 +1,5 @@
 return {
+  enabled = true,
   'zbirenbaum/copilot.lua',
   event = 'InsertEnter',
   cmd = { 'Copilot' },

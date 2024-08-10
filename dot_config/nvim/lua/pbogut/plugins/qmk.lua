@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'codethread/qmk.nvim',
   ft = { 'devicetree' },
   event = { 'BufEnter keymap.c' },

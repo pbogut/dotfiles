@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'moll/vim-bbye',
   keys = {
     { '<c-w>d', '<cmd>silent! Bdelete<cr>' },

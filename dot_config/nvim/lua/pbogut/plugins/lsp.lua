@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'neovim/nvim-lspconfig',
   event = 'BufReadPre',
   dependencies = {

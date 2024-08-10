@@ -1,4 +1,5 @@
 return {
+  enabled = true,
   'andrewradev/switch.vim',
   keys = {
     { 'gs', '<plug>(Switch)', desc = 'Switch' },

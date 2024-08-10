@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'gpanders/nvim-parinfer',
   ft = {
     'clojure',

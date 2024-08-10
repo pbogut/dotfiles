@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'numtostr/comment.nvim',
   dependencies = { 'joosepalviste/nvim-ts-context-commentstring' },
   keys = {

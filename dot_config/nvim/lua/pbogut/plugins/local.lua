@@ -5,6 +5,7 @@ end
 ---@type LazyPluginSpec[]
 return {
   {
+    enabled = true,
     'paranoic-backup',
     dir = local_dir('paranoic-backup'),
     event = 'BufWritePre',
@@ -13,6 +14,7 @@ return {
     end,
   },
   {
+    enabled = true,
     'actions',
     dir = local_dir('actions'),
     config = function()
@@ -24,6 +26,7 @@ return {
     end,
   },
   {
+    enabled = true,
     'chezmoi',
     dir = local_dir('chezmoi'),
     keys = {
@@ -35,6 +38,7 @@ return {
     end,
   },
   {
+    enabled = true,
     'remotesync',
     dir = local_dir('remotesync'),
     cmd = { 'RemoteSync', 'RemotePush' },
@@ -43,6 +47,7 @@ return {
     end,
   },
   {
+    enabled = true,
     'markdown',
     dir = local_dir('markdown'),
     keys = {
@@ -54,6 +59,7 @@ return {
     ft = 'markdown',
   },
   {
+    enabled = true,
     'mdpdf',
     dir = local_dir('mdpdf'),
     config = function()
@@ -62,6 +68,7 @@ return {
     ft = 'markdown',
   },
   {
+    enabled = true,
     'ripgrep',
     dir = local_dir('ripgrep'),
     keys = {
@@ -74,6 +81,7 @@ return {
     -- dependencies = 'telescope.nvim',
   },
   {
+    enabled = true,
     'echo_notify',
     dir = local_dir('echo_notify'),
     opts = {
@@ -98,6 +106,7 @@ return {
     lazy = true,
   },
   {
+    enabled = true,
     'openscad',
     dir = local_dir('openscad'),
     config = function()
@@ -106,6 +115,7 @@ return {
     ft = 'openscad',
   },
   {
+    enabled = true,
     'todoman',
     dir = local_dir('todoman'),
     config = function()

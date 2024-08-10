@@ -1,6 +1,7 @@
 local k = vim.keymap
 
 return {
+  enabled = true,
   'tpope/vim-dadbod',
   dependencies = { 'pbogut/vim-dadbod-ssh' },
   keys = {

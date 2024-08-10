@@ -1,11 +1,13 @@
 ---@type LazyPluginSpec[]
 return {
   {
+    enabled = true,
     'williamboman/mason.nvim',
     cmd = 'Mason',
     config = true,
   },
   {
+    enabled = true,
     'whoissethdaniel/mason-tool-installer.nvim',
     cmd = { 'MasonToolsInstall', 'MasonToolsUpdate' },
     opts = {

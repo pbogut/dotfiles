@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'vim-test/vim-test',
   keys = {
     { '<space>tn', '<plug>(test-nearest)', desc = 'Test nearest' },

@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'nvim-lualine/lualine.nvim',
   config = function()
     local lualine = require('lualine')

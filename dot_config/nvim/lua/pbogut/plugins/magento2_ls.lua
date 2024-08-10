@@ -1,5 +1,6 @@
 ---@type LazyPluginSpec
 return {
+  enabled = true,
   'pbogut/magento2-ls',
   branch = 'develop',
   ft = { 'xml', 'javascript' },
