@@ -4,4 +4,4 @@
 # author: author <author_contact>
 # date:   08/11/2022
 #=================================================
-chromium --app="$(secret passbolt/url)"
+chromium --app="$(secret passbolt/url)" --profile-directory=Default
