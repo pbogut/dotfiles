@@ -1,4 +1,3 @@
-local u = require("utils")
 local k = vim.keymap
 local dap = require("dap")
 local defaults = {}

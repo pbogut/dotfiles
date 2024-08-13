@@ -12,6 +12,7 @@ return {
     'onsails/lspkind-nvim',
     'saadparwaiz1/cmp_luasnip',
     'kristijanhusak/vim-dadbod-completion',
+    'luckasRanarison/tailwind-tools.nvim',
     -- {'zbirenbaum/copilot-cmp', after = 'copilot.lua'},
     { 'pbogut/copilot-cmp', branch = 'single-line-suggestion', after = 'copilot.lua' },
   },
@@ -97,7 +98,12 @@ return {
       },
       formatting = {
         format = function(entry, vim_item)
-          -- fancy icons and a name of kind
+          if vim.g.tailwind_tools_loaded then
+            vim_item = require('tailwind-tools.cmp').lspkind_format(entry, vim_item)
+            if vim_item.kind == 'Color' then
+              vim_item.kind = '󰝤'
+            end
+          end
           local kind = lspkind.presets.default[vim_item.kind]
           if not kind then
             kind = vim_item.kind
