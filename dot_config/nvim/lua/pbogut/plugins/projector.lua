@@ -765,6 +765,11 @@ return {
             },
           },
           patterns = {
+            -- daily notes
+            ['%/daily%_notes%/(.*)%-(.*)%-(.*)%.md'] = {
+              priority = 1000,
+              template = 'markdown/daily-note',
+            },
             ['.*%.php'] = {
               template = 'file.php',
               priority = 5000,

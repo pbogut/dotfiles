@@ -51,8 +51,9 @@ return {
     'markdown',
     dir = local_dir('markdown'),
     keys = {
-      { '<space>fn', '<cmd>Notes<cr>', desc = 'List notes' }
+      { '<space>fn', '<cmd>Notes<cr>', desc = 'List notes' },
     },
+    cmd = { 'Notes', 'Today' },
     config = function()
       require('markdown').setup()
     end,

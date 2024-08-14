@@ -14,6 +14,10 @@ p.current_date = function()
   return os.date('%d/%m/%Y')
 end
 
+p.current_date_text = function()
+  return os.date('%B %d, %Y (%A)')
+end
+
 p.snake_name = function()
   return h.snakecase(p.base_name())
 end

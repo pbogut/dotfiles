@@ -50,3 +50,7 @@ alias mpvscripts="cd $PROJECTS/github.com/pbogut/dotfiles/config/mpv/scripts && 
 
 alias apexshaders="cd /storage/SteamLibrary/steamapps/shadercache/1172470 && du -sh * && du -s *"
 alias flatup="flatpak update && flatpak remove --unused"
+
+alias note="nvim +Today"
+alias notes="nvim +'Notes daily_notes'"
+

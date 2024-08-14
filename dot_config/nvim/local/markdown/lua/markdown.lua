@@ -76,13 +76,13 @@ M.setup = function()
     M.follow()
   end, {})
 
-  command('Notes', function()
+  command('Notes', function(opt)
     local builtin = require('telescope.builtin')
     builtin.find_files({
-      cwd = os.getenv('HOME') .. '/Wiki',
+      cwd = os.getenv('HOME') .. '/Wiki/' .. opt.args,
       no_ignore_parent = true,
     })
-  end, {})
+  end, { nargs = '?' })
 
   command('Today', function()
     vim.cmd.edit('~/Wiki/daily_notes/' .. os.date('%Y-%m-%d') .. '.md')
