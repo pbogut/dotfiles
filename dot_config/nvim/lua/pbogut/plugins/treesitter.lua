@@ -44,8 +44,8 @@ return {
             -- Disable for large files
             local lines_limit = 10000
             if lang == 'markdown' then
-              -- Markdown sucks
-              lines_limit = 1000
+              -- Fuck this piece of shit pile of crap
+              return true
             end
             return vim.api.nvim_buf_line_count(bufnr) > lines_limit
         end,
