@@ -302,11 +302,15 @@ return {
     })
 
     local icons = require('pbogut.settings.icons')
-    u.signs({
-      DiagnosticSignError = { text = icons.error, texthl = 'DiagnosticSignError' },
-      DiagnosticSignWarn = { text = icons.warning, texthl = 'DiagnosticSignWarn' },
-      DiagnosticSignInfo = { text = icons.info, texthl = 'DiagnosticSignInfo' },
-      DiagnosticSignHint = { text = icons.hint, texthl = 'DiagnosticSignHint' },
+    vim.diagnostic.config({
+      signs = {
+        text = {
+          [vim.diagnostic.severity.ERROR] = icons.error,
+          [vim.diagnostic.severity.WARN] = icons.warning,
+          [vim.diagnostic.severity.INFO] = icons.info,
+          [vim.diagnostic.severity.HINT] = icons.hint,
+        },
+      },
     })
 
     for _, server in ipairs(servers) do
