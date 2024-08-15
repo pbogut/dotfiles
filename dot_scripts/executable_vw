@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   bw - bitwarden cli wrapper
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   15/08/2024
+#=================================================
+BW_SESSION="$(secret vaultwarden/session)" /usr/bin/bw "$@"
