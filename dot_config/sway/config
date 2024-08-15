@@ -311,6 +311,10 @@ for_window [class="^Toggl Desktop$"] move scratchpad; scratchpad show
 for_window [app_id="com.nextcloud.desktopclient.nextcloud"] floating enable
 for_window [app_id="chrome-didegimhafipceonhjepacocaffmoppf-Default"] floating enable
 
+# laptop mirror
+workspace "mirror" output HDMI-A-1
+assign [app_id="at.yrlf.wl_mirror"] "mirror"
+for_window [app_id="at.yrlf.wl_mirror"] floating enable fullscreen enable
 
 # Media Keys
 bindsym XF86MonBrightnessUp $exec "/usr/bin/kill -SIGRTMIN+1 $(pgrep -f 'bash .*/polybar/backlight.sh')"
