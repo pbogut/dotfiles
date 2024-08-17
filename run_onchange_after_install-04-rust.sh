@@ -20,6 +20,7 @@ RUSTC_WRAPPER=""
 
 cargo install --git https://github.com/pbogut/enrichmail.git
 cargo install --git https://github.com/pbogut/cargo-workspace.git
+cargo install --git https://github.com/pbogut/rbw.git --branch add-uris-to-list
 
 cargo install \
     mprocs \

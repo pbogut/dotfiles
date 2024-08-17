@@ -174,25 +174,25 @@ config.bind('gc', 'spawn google-chrome-stable {url:pretty}')
 
 config.bind(
     '<ctrl-b>',
-    'spawn --userscript passbolt --open', mode='insert')
+    'spawn --userscript vaultwarden --open', mode='insert')
 config.bind(
     '<ctrl-b>',
-    'spawn --userscript passbolt --open', mode='normal')
+    'spawn --userscript vaultwarden --open', mode='normal')
 config.bind(
     '<ctrl-i>',
-    'spawn --userscript passbolt --create', mode='insert')
+    'spawn --userscript vaultwarden --create', mode='insert')
 config.bind(
     '<ctrl-l>',
-    'spawn --userscript passbolt --login', mode='insert')
+    'spawn --userscript vaultwarden --login', mode='insert')
 config.bind(
     '<ctrl-u>',
-    'spawn --userscript passbolt --user', mode='insert')
+    'spawn --userscript vaultwarden --user', mode='insert')
 config.bind(
     '<ctrl-y>',
-    'spawn --userscript passbolt --pass', mode='insert')
+    'spawn --userscript vaultwarden --pass', mode='insert')
 config.bind(
     '<ctrl-o>',
-    'spawn --userscript passbolt --totp', mode='insert')
+    'spawn --userscript vaultwarden --totp', mode='insert')
 
 config.bind(
     '<ctrl-w>',

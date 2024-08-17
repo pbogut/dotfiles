@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   vaultwarden-dmenu
+# author: pbogut <pbogut@pbogut.me>
+# date:   16/08/2024
+#=================================================
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help              display this help and exit"
+  echo "      --login             type in user and password"
+  echo "      --user              type in user"
+  echo "      --pass              type in password"
+  echo "      --totp              type in totp code"
+  echo "      --refresh-cache     type in totp code"
+}
+
+dir="$HOME/.config/vaultwarden"
+
+__unlock() {
+  if ! unlocked > /dev/null 2>&1; then
+    rbw unlock
+  fi
+}
+__dmenu() {
+  if [[ -n "$WAYLAND_DISPLAY" ]]; then
+    wofi --cache-file /dev/null --dmenu --prompt "$1"
+  else
+    rofi -dmenu -p "$1"
+  fi
+}
+__list_id_has_code() {
+  rbw list --fields id | while read -r id; do
+    code="$(rbw get -f code "$id")";
+    if [[ $code != "" ]]; then
+      echo "$id";
+    fi;
+  done
+}
+__list_raw_has_totp() {
+  __list | grep -f <(__list_id_has_code)
+}
+__refresh_cache() {
+  temp_file=$(mktemp)
+  __list_raw_has_totp > "$temp_file"
+  mv "$temp_file" "$dir/resources-totp.txt"
+  rbw sync
+}
+__list() {
+  rbw list --fields id,name,user,uris  | column -s $'\t' -t -o' | '
+}
+__list_has_totp() {
+  mkdir -p "$dir"
+  if [[ -f "$dir/resources-totp.txt" ]]; then
+    cat "$dir/resources-totp.txt"
+  else
+    __list_raw_has_totp
+  fi
+  at now <<< "${BASH_SOURCE[0]} --refresh-cache &"
+}
+__select_id() {
+  __list | __dmenu "$1" | awk '{print $1}'
+}
+__select_id_has_totp() {
+    __list_has_totp | __dmenu "$1" | awk '{print $1}'
+}
+
+__type() {
+  input="$1"
+  if [[ -n "$WAYLAND_DISPLAY" ]]; then
+    if [[ $input == "<tab>" ]]; then
+      input="	"
+    fi
+    wtype -d 10 -m ctrl -m shift -m alt -- "$input"
+  else
+    xdotool type --clearmodifiers "$input"
+  fi
+}
+
+__qb_login() {
+  id="$1"
+  user=$(rbw get -f user "$id")
+  pass=$(rbw get -f password "$id")
+  login_instruction=$(rbw get --field LOGIN "$id")
+  if [[ $login_instruction == "" ]]; then
+      __type "$user"
+      __type "<tab>"
+      __type "$pass"
+  else
+    echo "$login_instruction"
+    echo "$login_instruction" \
+    | sed 's,^LOGIN:,,' \
+    | sed "s,:,\n,g" \
+    | while read -r line; do
+      if [[ $line == "<pass>" ]]; then
+        __type "$pass";
+      elif [[ $line == "<user>" ]]; then
+        __type "$user";
+      else
+        __type "$line";
+      fi
+    done
+  fi
+}
+
+if test $# -eq 0; then
+  action="$(echo -e "login\nuser\npass\ntotp" | __dmenu)"
+  if [[ -n "$action" ]]; then
+    "${BASH_SOURCE[0]}" "--$action"
+  fi
+  exit 0
+fi
+while test $# -gt 0; do
+  case "$1" in
+    --login)
+      __unlock
+      id=$(__select_id "Login")
+      if [[ $id == "" ]]; then
+        exit 0
+      fi
+      __qb_login "$id"
+      exit 0
+      ;;
+    --user)
+      __unlock
+      id=$(__select_id "User")
+      if [[ $id == "" ]]; then
+        exit 1
+      fi
+      user=$(rbw get -f user "$id")
+      __type "$user"
+      exit 0
+      ;;
+    --pass)
+      __unlock
+      id=$(__select_id "Pass")
+      if [[ $id == "" ]]; then
+        exit 1
+      fi
+      pass=$(rbw get -f password "$id")
+      __type "$pass"
+      exit 0
+      ;;
+    --totp)
+      __unlock
+      id=$(__select_id_has_totp "TOTP")
+      if [[ $id == "" ]]; then
+        exit 1
+      fi
+      totp=$(rbw get -f code "$id")
+      __type "$totp"
+      exit 0
+      ;;
+    --refresh-cache)
+      __unlock
+      __refresh_cache
+      exit 0
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done

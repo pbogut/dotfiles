@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-#=================================================
-# name:   vw - bitwarden cli wrapper
-# author: Pawel Bogut <pbogut@pbogut.me>
-# date:   15/08/2024
-#=================================================
-BW_SESSION="$(secret vaultwarden/session/"$(hostname)")" /usr/bin/bw "$@"

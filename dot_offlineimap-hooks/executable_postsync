@@ -67,15 +67,17 @@ notmuch search --output=threads tag:new | while read -r thread; do
     done
 done
 # tag github messages
-notmuch search --output=files from:notifications@github.com and tag:new | while read f; do
+notmuch search --output=files from:notifications@github.com and tag:new | while read -r f; do
     # shellcheck disable=2002
     tag=$(cat "$f" | grep '^To: ' | sed 's/^To: \([^ ]*\).*/\1/g' | sed 's/^"\(.*\)"$/\1/')
     id=$(enrichmail --get-message-id "$f")
-    notmuch tag +"github/$tag" +github -- id:"$id"
+    if [[ "$tag" != "" ]]; then
+        notmuch tag +"github/$tag" +github -- id:"$id"
+    fi
 done
 
 # tag gitlab messages
-notmuch search --output=files from:gitlab@mg.gitlab.com and tag:new | while read f; do
+notmuch search --output=files from:gitlab@mg.gitlab.com and tag:new | while read -r f; do
     # shellcheck disable=2002
     tag=$(cat "$f" | grep '^X-GitLab-Project-Path: ' | sed 's/^X-GitLab-Project-Path: \([^ ]*\).*/\1/g')
     id=$(enrichmail --get-message-id "$f")
