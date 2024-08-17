@@ -177,6 +177,9 @@ case  "$wm_app_id" in
     ;;
 esac
 case  "$wm_class" in
+  "freetube FreeTube")
+    move_and_swich "$ws_media"
+    ;;
   "www.deezer.com__en Chromium")
     set_floating 1600px 900px
     ;;

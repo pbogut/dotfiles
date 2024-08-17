@@ -228,6 +228,7 @@ config.bind('gw', 'open -w')
 config.bind('gW', 'spawn browser-work {url}')
 
 config.bind(',m', 'spawn --userscript mpv')
+config.bind(',ft', 'spawn freetube {url}')
 config.bind(',ch', 'spawn chromium {url}')
 
 config.bind('sje', 'set content.javascript.enabled true')

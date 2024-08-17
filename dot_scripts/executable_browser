@@ -74,7 +74,8 @@ if [[ $url =~ ^https://invidious\.pbogut\.me/watch\?v= ]]; then
   if $use_mpv; then
     start=$(date '+%s')
     mpv_url=${mpv_url//invidious.pbogut.me/www.youtube.com}
-    LAZY_OPEN="$mpv_url" mpv &
+    # LAZY_OPEN="$mpv_url" mpv &
+    freetube "$mpv_url" &
     if ! "$@"; then
       end=$(date '+%s')
       if [[ $((end-start)) -lt 10 ]]; then
@@ -104,7 +105,8 @@ elif [[ $url =~ ^https://www\.youtube\.com/watch\?v= ]]; then
   if $use_mpv; then
     start=$(date '+%s')
     mpv_url=${mpv_url//invidious.pbogut.me/www.youtube.com}
-    LAZY_OPEN="$mpv_url" mpv &
+    # LAZY_OPEN="$mpv_url" mpv &
+    freetube "$mpv_url" &
     if ! "$@"; then
       end=$(date '+%s')
       if [[ $((end-start)) -lt 10 ]]; then
