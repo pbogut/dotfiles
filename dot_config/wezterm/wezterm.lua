@@ -376,8 +376,23 @@ c.keys = {
   -- tabs
   {
     key = 'c',
-    mods = 'CTRL|ALT',
+    mods = 'LEADER',
     action = act.SpawnTab('CurrentPaneDomain'),
+  },
+  {
+    key = 'n',
+    mods = 'LEADER',
+    action = act.ActivateTabRelative(1),
+  },
+  {
+    key = 'p',
+    mods = 'LEADER',
+    action = act.ActivateTabRelative(-1),
+  },
+  {
+    key = 'q',
+    mods = 'LEADER',
+    action = act.CloseCurrentTab { confirm = true },
   },
   {
     key = 'j',
