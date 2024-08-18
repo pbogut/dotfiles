@@ -15,21 +15,13 @@ usage() {
   echo "      --pass              type in password"
   echo "      --totp              type in totp code"
   echo "      --create            create entry"
-  echo "      --refresh-cache     type in totp code"
 }
 
-dir="$HOME/.config/passbolt"
-
-__unlock() {
-  if ! unlocked > /dev/null 2>&1; then
-    rbw unlock
-  fi
-}
 __dmenu() {
   if [[ -n "$WAYLAND_DISPLAY" ]]; then
-    wofi --cache-file /dev/null --dmenu --search "$1"
+    wofi --cache-file /dev/null --insensitive --dmenu --prompt "Open URL"
   else
-    rofi -dmenu -p -filter "$1"
+    rofi -dmenu -p
   fi
 }
 __remove_url_prefix() {
@@ -39,81 +31,29 @@ __remove_url_suffix() {
     sed -E 's,\.(co\.uk|com\.net|com\...|..|...)$,,' # remove common suffixes
 }
 __create_entry() {
-  file=$(mktemp -t vaultwarden.XXXXXX)
   domain=$(echo "$QUTE_URL" | awk -F'[/:]' '{print $4}')
   url=$(echo "$QUTE_URL" | awk -F'[/:]' '{print $1 "://" $4}')
   name=$(echo "$domain" | __remove_url_prefix | __remove_url_suffix)
-  {
-    echo "Name: ${name^}"
-    echo "URL: $url"
-    echo "Username: $(genmail "$name")"
-    echo "Password: $(genpass)"
-  } >> "$file"
-  terminal-float nvim "$file"
-  while read -r line; do
-    if [[ $line == "Name: "* ]]; then
-      name=${line##Name: }
-    elif [[ $line == "URL: "* ]]; then
-      uri=${line##URL: }
-    elif [[ $line == "Username: "* ]]; then
-      username=${line##Username: }
-    elif [[ $line == "Password: "* ]]; then
-      password=${line##Password: }
-    fi
-  done < "$file"
-  if [[ -z "$name" ]] || [[ -z "$uri" ]] || [[ -z "$username" ]] || [[ -z "$password" ]]; then
-    echo "Invalid input"
-    exit 1
-  fi
-  env EDITOR=tee rbw add "$name" "$username" --uri "$uri" <<< "$password"
-
-  at now <<< "${BASH_SOURCE[0]} --refresh-cache &"
+  vaultwarden-dmenu --create "$url" "$name"
 }
-__list_id_has_code() {
-  rbw list --fields id | while read -r id; do
-    code="$(rbw get -f code "$id")";
-    if [[ $code != "" ]]; then
-      echo "$id";
-    fi;
+__list_urls() {
+  rbw list --fields name,uris | while read -r line; do
+    name=${line%%$'\t'*}
+    uris=${line#*$'\t'}
+    while read -r uri; do
+      if [[ $uri != "" ]] && [[ $name != "" ]]; then
+        echo "$name|$uri"
+      fi
+    done <<< "${uris// ; /\n}"
   done
-}
-__list_raw_has_totp() {
-  __list | grep -f <(__list_id_has_code)
-}
-__refresh_cache() {
-  temp_file=$(mktemp)
-  __list_raw_has_totp > "$temp_file"
-  mv "$temp_file" "$dir/resources-totp.txt"
-  rbw sync
-}
-__list() {
-  rbw list --fields id,name,user,uris  | column -s $'\t' -t -o' | '
-}
-__list_has_totp() {
-  mkdir -p "$dir"
-  if [[ -f "$dir/resources-totp.txt" ]]; then
-    cat "$dir/resources-totp.txt"
-  else
-    __list_raw_has_totp
-  fi
-  at now <<< "${BASH_SOURCE[0]} --refresh-cache &"
-}
-__select_id() {
-  __list | __dmenu | awk '{print $1}'
 }
 __url() {
   echo "$QUTE_URL" |
     sed 's,^[a-z]*://\([^/]*\).*,\1,' | # remove scheme
     __remove_url_prefix
 }
-__select_id_with_search() {
-    __list | __dmenu "$(__url)" | awk '{print $1}'
-}
-__select_id_with_search_has_totp() {
-    __list_has_totp | __dmenu "$(__url)" | awk '{print $1}'
-}
 __qb_type() {
-  echo "fake-key $1" >> "$QUTE_FIFO"
+  echo "fake-key ${1// /<space>}" >> "$QUTE_FIFO"
 }
 __qb_open() {
   resource="$1"
@@ -121,18 +61,11 @@ __qb_open() {
   echo "open $uri" >> "$QUTE_FIFO"
 }
 __qb_login() {
-  id="$1"
-  user=$(rbw get -f user "$id")
-  pass=$(rbw get -f password "$id")
-  login_instruction=$(rbw get --field LOGIN "$id")
-  if [[ $login_instruction == "" ]]; then
-      __qb_type "$user"
-      __qb_type "<tab>"
-      __qb_type "$pass"
-  else
-    echo "$login_instruction"
-    echo "$login_instruction" \
-    | sed 's,^LOGIN:,,' \
+  resource="$1"
+  user=$(jq -r '.user' <<< "$resource")
+  pass=$(jq -r '.pass' <<< "$resource")
+  login_instruction=$(jq -r '.login_instruction' <<< "$resource")
+  echo "$login_instruction" \
     | sed "s,:,\n,g" \
     | while read -r line; do
       if [[ $line == "<pass>" ]]; then
@@ -143,7 +76,6 @@ __qb_login() {
         __qb_type "$line";
       fi
     done
-  fi
 }
 
 if test $# -eq 0; then
@@ -153,63 +85,50 @@ fi
 while test $# -gt 0; do
   case "$1" in
     --open)
-      __unlock
-      id=$(__select_id)
-      if [[ $id == "" ]]; then
+      url=$(__list_urls | column -s'|' -t -o ' | ' | __dmenu | cut -d'|' -f2)
+      if [[ $url == "" ]]; then
         exit 0
       fi
-      uri="$(__list | grep "^$id" | cut -d'|' -f4)"
-      echo "open $uri" >> "$QUTE_FIFO"
-      #__qb_open "$resource"
+      echo "open $url" >> "$QUTE_FIFO"
       exit 0
       ;;
     --login)
-      __unlock
-      id=$(__select_id_with_search)
-      if [[ $id == "" ]]; then
-        exit 0
+      resource=$(vaultwarden-dmenu --json "$(__url)")
+      if [[ $resource == "" ]]; then
+        exit 1
       fi
-      __qb_login "$id"
+      __qb_login "$resource"
       exit 0
       ;;
     --user)
-      __unlock
-      id=$(__select_id_with_search)
-      if [[ $id == "" ]]; then
+      resource=$(vaultwarden-dmenu --json "$(__url)")
+      if [[ $resource == "" ]]; then
         exit 1
       fi
-      user=$(rbw get -f user "$id")
+      user=$(jq -r '.user' <<< "$resource")
       __qb_type "$user"
       exit 0
       ;;
     --pass)
-      __unlock
-      id=$(__select_id_with_search)
-      if [[ $id == "" ]]; then
+      resource=$(vaultwarden-dmenu --json "$(__url)")
+      if [[ $resource == "" ]]; then
         exit 1
       fi
-      pass=$(rbw get -f password "$id")
+      pass=$(jq -r '.pass' <<< "$resource")
       __qb_type "$pass"
       exit 0
       ;;
     --totp)
-      __unlock
-      id=$(__select_id_with_search_has_totp)
-      if [[ $id == "" ]]; then
+      resource=$(vaultwarden-dmenu --json "$(__url)")
+      if [[ $resource == "" ]]; then
         exit 1
       fi
-      totp=$(rbw get -f code "$id")
+      totp=$(jq -r '.totp' <<< "$resource")
       __qb_type "$totp"
       exit 0
       ;;
     --create)
-      __unlock
       __create_entry
-      exit 0
-      ;;
-    --refresh-cache)
-      __unlock
-      __refresh_cache
       exit 0
       ;;
     --help|-h)

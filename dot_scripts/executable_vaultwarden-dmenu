@@ -8,15 +8,18 @@ usage() {
   echo "Ussage: ${0##*/} [OPTIONS]"
   echo ""
   echo "Options:"
-  echo "  -h, --help              display this help and exit"
-  echo "      --login             type in user and password"
-  echo "      --user              type in user"
-  echo "      --pass              type in password"
-  echo "      --totp              type in totp code"
-  echo "      --refresh-cache     type in totp code"
+  echo "  -h, --help                    display this help and exit"
+  echo "      --login [query]           type in user and password"
+  echo "      --user [query]            type in user"
+  echo "      --pass [query]            type in password"
+  echo "      --totp [query]            type in totp code"
+  echo "      --create [uri] [name]     type in totp code"
+  echo "      --refresh-cache           type in totp code"
+  echo "      --json                    output details as a json"
 }
 
 dir="$HOME/.config/vaultwarden"
+query=""
 
 __unlock() {
   if ! unlocked > /dev/null 2>&1; then
@@ -25,7 +28,7 @@ __unlock() {
 }
 __dmenu() {
   if [[ -n "$WAYLAND_DISPLAY" ]]; then
-    wofi --cache-file /dev/null --dmenu --prompt "$1"
+    wofi --cache-file /dev/null --dmenu --insensitive --prompt "$1" --search "$query"
   else
     rofi -dmenu -p "$1"
   fi
@@ -78,7 +81,55 @@ __type() {
   fi
 }
 
-__qb_login() {
+__json() {
+  id="$1"
+  user=$(rbw get -f user "$id")
+  pass=$(rbw get -f password "$id")
+  totp=$(rbw get -f code "$id")
+  login_instruction=$(rbw get --field LOGIN "$id")
+  if [[ $login_instruction == "" ]]; then
+      login_instruction="<user>:<tab>:<pass>"
+  fi
+  jq -n \
+    --arg user "$user" \
+    --arg pass "$pass" \
+    --arg totp "$totp" \
+    --arg login_instruction "$login_instruction" \
+    '{user: $user, pass: $pass, login_instruction: $login_instruction, totp: $totp}'
+}
+__create_entry() {
+  file=$(mktemp -t vaultwarden.XXXXXX)
+  url=$1
+  name=$2
+  {
+    echo "Name: $name"
+    echo "URL: $url"
+    echo "Username: $(genmail "$name")"
+    echo "Password: $(genpass)"
+  } >> "$file"
+  terminal-float nvim "$file"
+  while read -r line; do
+    if [[ $line == "Name: "* ]]; then
+      name=${line##Name: }
+    elif [[ $line == "URL: "* ]]; then
+      uri=${line##URL: }
+    elif [[ $line == "Username: "* ]]; then
+      username=${line##Username: }
+    elif [[ $line == "Password: "* ]]; then
+      password=${line##Password: }
+    fi
+  done < "$file"
+  if [[ -z "$name" ]] || [[ -z "$uri" ]] || [[ -z "$username" ]] || [[ -z "$password" ]]; then
+    echo "Invalid input"
+    exit 1
+  else
+    env EDITOR=tee rbw add "$name" "$username" --uri "$uri" <<< "$password"
+  fi
+
+  at now <<< "${BASH_SOURCE[0]} --refresh-cache &"
+}
+
+__login() {
   id="$1"
   user=$(rbw get -f user "$id")
   pass=$(rbw get -f password "$id")
@@ -111,19 +162,32 @@ if test $# -eq 0; then
   fi
   exit 0
 fi
+
 while test $# -gt 0; do
   case "$1" in
-    --login)
+    --json)
       __unlock
+      query="$2"
       id=$(__select_id "Login")
       if [[ $id == "" ]]; then
         exit 0
       fi
-      __qb_login "$id"
+      __json "$id"
+      exit 0
+      ;;
+    --login)
+      __unlock
+      query="$2"
+      id=$(__select_id "Login")
+      if [[ $id == "" ]]; then
+        exit 0
+      fi
+      __login "$id"
       exit 0
       ;;
     --user)
       __unlock
+      query="$2"
       id=$(__select_id "User")
       if [[ $id == "" ]]; then
         exit 1
@@ -134,6 +198,7 @@ while test $# -gt 0; do
       ;;
     --pass)
       __unlock
+      query="$2"
       id=$(__select_id "Pass")
       if [[ $id == "" ]]; then
         exit 1
@@ -144,12 +209,17 @@ while test $# -gt 0; do
       ;;
     --totp)
       __unlock
+      query="$2"
       id=$(__select_id_has_totp "TOTP")
       if [[ $id == "" ]]; then
         exit 1
       fi
       totp=$(rbw get -f code "$id")
       __type "$totp"
+      exit 0
+      ;;
+    --create)
+      __create_entry "$2" "$3"
       exit 0
       ;;
     --refresh-cache)
@@ -162,7 +232,6 @@ while test $# -gt 0; do
       exit 0
       ;;
     *)
-      usage
       exit 1
       ;;
   esac
