@@ -15,9 +15,13 @@ M.chezmoi_files = function()
   local conf = require('telescope.config').values
   local source_path = trim_string(vim.fn.system('chezmoi source-path'))
   local hidden_files = vim.fn.split(vim.fn.system('find ' .. e(source_path) .. ' -type f  -iname ".*"'))
-  local result = vim.fn.split(vim.fn.system('chezmoi managed -x externals,dirs'))
+  local encrypted_files = vim.fn.split(vim.fn.system('chezmoi managed -i encrypted'))
+  local result = vim.fn.split(vim.fn.system('chezmoi managed -x externals,dirs,encrypted'))
   for _, file in pairs(hidden_files) do
-    result[#result+1] = file
+    result[#result + 1] = file
+  end
+  for _, file in pairs(encrypted_files) do
+    result[#result + 1] = '[enc]' .. file
   end
 
   local displayer = require('telescope.pickers.entry_display').create({
@@ -33,15 +37,18 @@ M.chezmoi_files = function()
         entry_maker = function(entry_text)
           local entry = {}
           entry.chezmoi_cfg = false
-          entry.value = entry_text
           entry.view = entry_text
+          if entry_text:sub(1, 5) == '[enc]' then
+            entry_text = entry_text:sub(6)
+            entry.view = entry_text .. ' [encrypted ]'
+          end
           if entry_text:sub(1, #source_path) == source_path then
             entry.chezmoi_cfg = true
             entry.view = '[src]/' .. entry_text:sub(#source_path + 2)
             entry_text = entry_text:sub(#home + 2)
           end
-          entry.dst = home .. '/' .. entry_text
-          entry.ordinal = entry_text
+          entry.value = home .. '/' .. entry_text
+          entry.ordinal = entry_text .. ' ' .. entry.view
           entry.display = function(ent)
             return displayer({
               { ent.view },
@@ -63,10 +70,10 @@ M.chezmoi_files = function()
           actions.close(prompt_bufnr)
 
           if selection.chezmoi_cfg then
-            vim.cmd.edit(selection.dst)
+            vim.cmd.edit(selection.value)
             return
           end
-          vim.fn.jobstart('chezmoi edit ' .. e(selection.dst), {
+          vim.fn.jobstart('chezmoi edit ' .. e(selection.value), {
             env = {
               CHEZMOI_NVIM = 'open',
               EDITOR = 'chezmoi-nvim',
@@ -75,7 +82,7 @@ M.chezmoi_files = function()
               local file = out[1]
               vim.cmd([[ echo " " ]])
               vim.cmd.edit(file)
-              vim.b.chezmoi_target_path = selection.dst
+              vim.b.chezmoi_target_path = selection.value
             end,
             stdout_buffered = true,
           })
