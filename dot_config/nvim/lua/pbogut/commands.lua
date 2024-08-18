@@ -62,3 +62,11 @@ command('OpenFile', function(opt)
   cmd(tabcount .. 'tabnew')
   cmd.edit(opt.args)
 end, { nargs = 1 })
+
+command('ProfileStart', function(opt)
+  vim.cmd([[
+    profile start profile.log
+    profile func *
+    profile file *
+  ]])
+end, { nargs = '*' })
