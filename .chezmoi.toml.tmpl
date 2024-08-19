@@ -7,13 +7,10 @@
 {{- $work := false -}}
 {{- $projects := (print .chezmoi.homeDir  "/Projects") -}}
 {{- if eq .chezmoi.username "pbogut" -}}
+{{-   $personal = true -}}
+{{-   $work = true -}}
 {{-   if eq .chezmoi.hostname "redeye" -}}
-{{-     $personal = true -}}
-{{-     $work = true -}}
 {{-     $projects = "/storage/projects" -}}
-{{-   end -}}
-{{-   if eq .chezmoi.hostname "silverspoon" -}}
-{{-     $personal = true -}}
 {{-   end -}}
 {{- end -}}
 {{- if eq .chezmoi.username "work" -}}
