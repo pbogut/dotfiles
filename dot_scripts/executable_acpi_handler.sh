@@ -8,6 +8,20 @@
 # action=/home/pbogut/.scripts/acpi_handler.sh %e
 # # file content end   #
 #
+# Also, for power management see: /etc/systemd/logind.conf
+
+__power_connected() {
+    if upower -i /org/freedesktop/UPower/devices/battery_BAT1 | grep state | grep discharging > /dev/null; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+__lid_closed() {
+    grep closed /proc/acpi/button/lid/LID0/state > /dev/null
+}
+
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 run="sudo -u pbogut "
 logger "EVENT: 1:$1< 2:$2< 3:$3< 4:$4< 5:$5< 6:$6<"
@@ -37,6 +51,9 @@ case "$1" in
             00000000)
                 logger 'AC unpluged'
                 $run $dir/battery-save on
+                if __lid_closed; then
+                    systemctl hibernate
+                fi
                 ;;
             00000001)
                 logger 'AC pluged'
@@ -58,6 +75,9 @@ case "$1" in
         case "$3" in
             close)
                 logger 'LID closed'
+                if ! __power_connected; then
+                    systemctl hibernate
+                fi
                 ;;
             open)
                 logger 'LID opened'
