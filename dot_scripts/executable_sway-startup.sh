@@ -8,6 +8,12 @@ if [ "$hostname" == "redeye" ]; then # pc
 
     xrandr --output DP-1 --primary
 fi
+if [ "$hostname" == "silverspoon" ]; then # pc
+    # disable laptop screen when docked
+    if swaymsg -t get_outputs | jq -r '.[].name' | grep '^DP-1$' > /dev/null; then
+        sway output eDP-1 disable
+    fi
+fi
 
 killall waybar > /dev/null 2>&1
 waybar &
