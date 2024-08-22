@@ -1,3 +1,4 @@
+{{- if eq .chezmoi.hostname "redeye" -}}
 [
     {
         // "layer": "top",
@@ -5,6 +6,8 @@
         "name": "redeye1",
         "output": [
             "DP-1",
+            t
+
         ],
         "include": [
             "~/.config/waybar/modules.jsonc",
@@ -75,13 +78,18 @@
             "tray",
             "custom/switches"
         ],
-    },
+    }
+]
+{{- end }}
+{{- if eq .chezmoi.hostname "silverspoon" -}}
+[
     {
         // "layer": "top",
         // "position": "bottom",
         "name": "silverspoon",
         "output": [
-            "eDP-1"
+            "eDP-1",
+            "DP-1"
         ],
         "include": [
             "~/.config/waybar/modules.jsonc",
@@ -111,5 +119,6 @@
             "tray",
             "custom/switches"
         ],
-    },
+    }
 ]
+{{- end }}
