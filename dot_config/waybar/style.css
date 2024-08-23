@@ -1,12 +1,15 @@
 * {
     font-family: "InputMono Nerd Font";
 }
-window#waybar.redeye1,
-window#waybar.redeye2 {
-    font-family: "InputMono Nerd Font";
+window#waybar {
     font-size: 11px;
 }
-window#waybar.silverspoon {
+window#waybar.silverspoon.DP-1,
+window#waybar.redeye1,
+window#waybar.redeye2 {
+    font-size: 11px;
+}
+window#waybar.silverspoon.eDP-1 {
     font-size: 14px;
 }
     /* --background: #222; */
