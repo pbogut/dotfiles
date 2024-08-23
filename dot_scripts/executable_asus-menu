@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   asus-menu
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   21/08/2024
+#=================================================
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Commands:"
+  echo "  source [SOURCE]"
+  echo "    Sources: vga, dvi, hdmi"
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+}
+
+sn=F3LMTF099275
+
+if [ $# -eq 0 ]; then
+  usage
+  exit 1
+fi
+
+while test $# -gt 0; do
+  case "$1" in
+    source)
+      # 60
+      opt=60
+      shift
+      current=$(ddcutil getvcp "$opt" --sn $sn | sed 's/.*(sl=\(0x..\))$/\1/')
+      if [ -z "$1" ]; then
+        case "$current" in
+          0x01)
+            echo "vga"
+            ;;
+          0x03)
+            echo "dvi"
+            ;;
+          0x11)
+            echo "hdmi"
+            ;;
+        esac
+        exit 0
+      else
+        new=""
+        case "$1" in
+          vga)
+          new="0x01"
+          ;;
+          dvi)
+          new="0x03"
+          ;;
+          hdmi)
+          new="0x11"
+          ;;
+        esac
+        if [[ -n "$new" && "$new" != "$current" ]]; then
+          ddcutil setvcp "$opt" "$new" --sn $sn
+        fi
+      fi
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
