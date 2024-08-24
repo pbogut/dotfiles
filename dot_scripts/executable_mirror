@@ -4,4 +4,5 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   15/08/2024
 #=================================================
+killall wl-mirror
 wl-mirror eDP-1
