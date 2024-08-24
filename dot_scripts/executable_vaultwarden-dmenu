@@ -23,7 +23,9 @@ query=""
 
 __unlock() {
   if ! unlocked > /dev/null 2>&1; then
-    rbw unlock
+    if ! rbw unlock; then
+      exit 1
+    fi
   fi
 }
 __dmenu() {
