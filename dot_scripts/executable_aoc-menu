@@ -12,19 +12,23 @@ usage() {
   echo "  gamemode [MODE]"
   echo "    Modes: gamer3, gamer2, gamer1, rts, fps, off"
   echo "Options:"
-  echo "  -d, --display  display number"
   echo "  -h, --help     display this help and exit"
 }
 
-display=0
+sn="ATNM91A027807"
+
+if [ $# -eq 0 ]; then
+  usage
+  exit 1
+fi
 
 while test $# -gt 0; do
   case "$1" in
     gamemode)
       # DC
       shift
+      current=$(ddcutil getvcp DC --sn "$sn" | sed 's/.*(sl=\(0x..\))$/\1/')
       if [ -z "$1" ]; then
-        current=$(ddcutil getvcp DC | sed 's/.*(sl=\(0x..\))$/\1/')
         case "$current" in
           0x10)
             echo "gamer3"
@@ -75,18 +79,8 @@ while test $# -gt 0; do
         ;;
       esac
       if [ "$new" != "$current" ]; then
-        if [ "$display" -eq 0 ]; then
-          ddcutil setvcp DC "$new"
-        else
-        echo ddcutil -d "$display" setvcp DC "$new"
-          ddcutil -d "$display" setvcp DC "$new"
-        fi
+          ddcutil setvcp DC "$new" --sn "$sn"
       fi
-      shift
-      ;;
-    --display|-d)
-      display="$2"
-      shift
       shift
       ;;
     --help|-h)
