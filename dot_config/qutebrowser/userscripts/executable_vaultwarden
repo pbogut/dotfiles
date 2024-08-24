@@ -17,6 +17,13 @@ usage() {
   echo "      --create            create entry"
 }
 
+__unlock() {
+  if ! unlocked > /dev/null 2>&1; then
+    if ! rbw unlock; then
+       exit 1
+    fi
+  fi
+}
 __dmenu() {
   if [[ -n "$WAYLAND_DISPLAY" ]]; then
     wofi --cache-file /dev/null --insensitive --dmenu --prompt "Open URL"
@@ -40,11 +47,16 @@ __list_urls() {
   rbw list --fields name,uris | while read -r line; do
     name=${line%%$'\t'*}
     uris=${line#*$'\t'}
-    while read -r uri; do
+    if [[ ! "$line" =~ $'\t' ]]; then
+      # no uri
+      continue
+    fi
+    IFS=' ; ' read -r -a auris <<< "$uris"
+    for uri in "${auris[@]}"; do
       if [[ $uri != "" ]] && [[ $name != "" ]]; then
         echo "$name|$uri"
       fi
-    done <<< "${uris// ; /\n}"
+    done
   done
 }
 __url() {
@@ -85,7 +97,8 @@ fi
 while test $# -gt 0; do
   case "$1" in
     --open)
-      url=$(__list_urls | column -s'|' -t -o ' | ' | __dmenu | cut -d'|' -f2)
+      __unlock
+      url=$(__list_urls | column -s'|' -t -o ' | ' | sort | uniq | __dmenu | cut -d'|' -f2)
       if [[ $url == "" ]]; then
         exit 0
       fi
