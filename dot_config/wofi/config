@@ -1,5 +1,6 @@
-key_backward=Ctrl-k
-key_forward=Ctrl-j
+key_backward=Ctrl-p
+key_forward=Ctrl-n
+key_submit=Ctrl-y
 key_right=Ctrl-l
 key_left=Ctrl-h
 key_expand=Ctrl-e
