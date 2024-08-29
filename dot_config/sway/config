@@ -82,6 +82,7 @@ bindsym $mod+Shift+colon $exec "~/.scripts/i3-dmenu-start-at-new-workspace.sh"
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
 bindsym $mod+d exec "dunstctl context"
+bindsym $mod+Shift+d exec "dunstctl close"
 
 # change focus
 set $focus exec sway-focus
