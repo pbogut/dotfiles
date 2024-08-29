@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   hbomax
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   05/07/2024
+#=================================================
+chromium --app=https://play.max.com/ --profile-directory=Default
