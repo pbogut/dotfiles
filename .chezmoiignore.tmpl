@@ -20,3 +20,9 @@ assets
 !.config/Ferdium/recipes/clickup
 !.config/Ferdium/recipes/office365-owa
 {{ end }}
+{{ if not ( eq .chezmoi.hostname "silverspoon" ) }}
+.config/wireplumber/wireplumber.conf.d/*_silverspoon_*
+{{ end }}
+{{ if not ( eq .chezmoi.hostname "redeye" ) }}
+.config/wireplumber/wireplumber.conf.d/*_redeye_*
+{{ end }}
