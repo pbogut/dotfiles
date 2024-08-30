@@ -64,7 +64,7 @@ __start_terminal() {
 
 if $project; then
   cd "$cwd" >/dev/null || exit 1
-  __start_terminal "$TERMINAL" -e env TERM=xterm-256color tmux-project
+  TERM="linux" terminal -e wezterm-list-projects
   cd - >/dev/null || exit 1
   exit 0
 fi
