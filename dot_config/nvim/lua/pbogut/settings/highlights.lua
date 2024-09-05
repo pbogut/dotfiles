@@ -3,6 +3,8 @@ local u = require('pbogut.utils')
 local function highlights()
   local c = require('pbogut.settings.colors')
   u.highlights({
+    NonAscii = { gui = "undercurl", guisp="red", guibg = c.ad_dark2 },
+
     Folded = { term = 'NONE', cterm = 'NONE', gui = 'NONE' },
     VertSplit = { guibg = '#073642', guifg = 'fg' },
     WinSeparator = { guibg = 'none', guifg = 'fg' },

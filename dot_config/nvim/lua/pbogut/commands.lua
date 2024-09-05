@@ -63,6 +63,13 @@ command('OpenFile', function(opt)
   cmd.edit(opt.args)
 end, { nargs = 1 })
 
+command('NonAscii', function()
+  vim.api.nvim_feedkeys('/[^\\x00-\\x7F]\n', 'n', true)
+  vim.cmd([[
+    syntax match NonAscii "[^\x00-\x7F]" containedin=ALL
+  ]])
+end, {})
+
 command('ProfileStart', function(opt)
   vim.cmd([[
     profile start profile.log
