@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   chromium-start
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   17/08/2024
+#=================================================
+chromium --profile-directory=Default
