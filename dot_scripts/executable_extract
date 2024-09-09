@@ -4,7 +4,7 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   12/04/2018
 #=================================================
-if [[ $1 != 'x' ]] && [[ $1 != "r" ]] && [[ $1 != "u" ]]; then
+if [[ $1 != 'x' ]] && [[ $1 != "r" ]] && [[ $1 != "u" ]] && [[ $1 != "lf" ]]; then
     echo Extract files from archive
     echo
     echo Ussage:
@@ -12,13 +12,13 @@ if [[ $1 != 'x' ]] && [[ $1 != "r" ]] && [[ $1 != "u" ]]; then
     echo
     echo actions:
     echo "    x - extract in place to new directory"
-    echo "    u - extract in place to new directory with _ before"
+    echo "    u - extract in place to new directory with _ prefix"
     echo "    r - extract in place to new directory and open in ranger"
+    echo "    lf - extract in place to new directory and open in lf"
     exit 1
 fi
 for var in "${@:2}"; do
     file=$var
-    ext=${file##*.}
     name=${file%.*}
 
     if [[ $1 == 'u' ]]; then
@@ -26,8 +26,11 @@ for var in "${@:2}"; do
     fi
 
     mkdir -p "$name"
-    aunpack -X "$name" $file
+    aunpack -X "$name" "$file"
     if [[ $1 == 'r' ]]; then
-        ranger $name
+        ranger "$name"
+    fi
+    if [[ $1 == 'lf' ]]; then
+        terminal -e lf "$name"
     fi
 done
