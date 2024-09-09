@@ -72,7 +72,7 @@ __prune_worktree() {
     if [[ $confirm == "y" ]]; then
       while read -r branch; do
         # shellcheck disable=SC2086
-        git worktree remove $tree_params "$branch"
+        git wt remove "../$branch" < /dev/tty
         result_code=$?
         if [[ $result_code -eq 255 ]] && $use_sudo; then
           echo ">> Branch removed but catalog could not be removed, using sudo!"
