@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   img2invoice
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   10/09/2024
+#=================================================
+
+image=false
+width_mm=78
+output=false
+open=false
+convert=false
+
+usage() {
+  echo "Ussage: ${0##*/} <IMAGE> [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+  echo "  -w, --width    image width in mm (default 78 [petrol station invoice])"
+  echo "  -o, --output   output pdf (default tmp file)"
+  echo "  -c, --convert  convert in place to pdf"
+  echo "  -x, --open     open generated pdf"
+}
+
+while test $# -gt 0; do
+  case "$1" in
+    --open|-x)
+      open=true
+      shift
+      ;;
+    --width|-w)
+      width_mm=$2
+      shift
+      shift
+      ;;
+    --output|-o)
+      output=$2
+      shift
+      shift
+      ;;
+    --convert|-c)
+      convert=true
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      if $image; then
+        usage
+        exit 1
+      else
+        image=$1
+        shift
+      fi
+      ;;
+  esac
+done
+
+
+if ! $output; then
+  output="$(mktemp -d)/out.pdf"
+
+  if $convert; then
+    name="${image%.*}"
+    output="$name.pdf"
+  fi
+fi
+
+size="$( calc "$width_mm" '*' 12.5 )"
+
+magick "$image" -density 300 -resize "$size"x -gravity East -background white -extent 2551x3295 "$output"
+echo "$output"
+if $open; then
+  evince "$output"
+fi
