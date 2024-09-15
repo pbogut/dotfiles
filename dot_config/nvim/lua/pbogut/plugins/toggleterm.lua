@@ -22,6 +22,9 @@ return {
     local lazygit = Terminal:new({
       cmd = lg_cmd,
       direction = 'float',
+      on_open = function(_)
+        vim.cmd.normal('0')
+      end,
       float_opts = {
         width = function(_)
           return vim.o.columns
@@ -39,6 +42,7 @@ return {
       direction = 'float',
       on_open = function(term)
         vim.keymap.set({ 't', 'n', 'i' }, 'q', '<cmd>BaconToggle<cr>', { buffer = term.bufnr })
+        vim.cmd.normal('0')
       end,
       float_opts = {
         width = function(_)
