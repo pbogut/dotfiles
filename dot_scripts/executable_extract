@@ -17,6 +17,7 @@ if [[ $1 != 'x' ]] && [[ $1 != "r" ]] && [[ $1 != "u" ]] && [[ $1 != "lf" ]]; th
     echo "    lf - extract in place to new directory and open in lf"
     exit 1
 fi
+
 for var in "${@:2}"; do
     file=$var
     name=${file%.*}
@@ -31,6 +32,10 @@ for var in "${@:2}"; do
         ranger "$name"
     fi
     if [[ $1 == 'lf' ]]; then
-        terminal -e lf "$name"
+        if [[ -z "$lf" ]] || [[ -z "$id" ]]; then
+            terminal -e lf "$name"
+        else
+            lf -remote "send $id cd '$name'"
+        fi
     fi
 done
