@@ -70,6 +70,39 @@ command('NonAscii', function()
   ]])
 end, {})
 
+command('Print', function(opts)
+  fn.jobstart('mktemp -d', {
+    on_stdout = function(_, out)
+      local dir = out[1]
+      if dir and dir:len() > 0 then
+        local file = dir .. '/print.html'
+        local listchars = vim.o.listchars
+
+        if not opts.bang then
+          vim.o.listchars = ''
+        end
+        local content = require('tohtml').tohtml(nil, {font='InputMono Nerd Font Mono'})
+        if not opts.bang then
+          vim.o.listchars = listchars
+        end
+        local f = io.open(file, 'a')
+        if f == nil then
+          return
+        end
+        for _, line in ipairs(content) do
+          f:write(line)
+          f:write('\n')
+        end
+        f:write('<script>print();setTimeout(function() { close() }, 1000)</script>')
+        f:write('<style>* { font-size: 14px } pre { white-space: wrap }</style>')
+        f:close()
+
+        fn.jobstart({'chromium', '--profile-directory=Default', '--app=file://' .. file})
+      end
+    end
+  })
+end, {bang = true})
+
 command('ProfileStart', function(opt)
   vim.cmd([[
     profile start profile.log
