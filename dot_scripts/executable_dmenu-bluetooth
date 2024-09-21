@@ -314,7 +314,7 @@ show_menu() {
         discoverable=$(discoverable_on)
 
         # Options passed to dmenu
-        options="$devices\n$divider\n$power\n$scan\n$pairable\n$discoverable\n${pad}Exit"
+        options="$devices\n$divider\n$power\n$scan\n$pairable\n$discoverable\n${pad}Manager\n${pad}Exit"
     else
         power="${pad}Power: off"
         options="$power\n${pad}Exit"
@@ -339,6 +339,9 @@ show_menu() {
             ;;
         "$pairable")
             toggle_pairable
+            ;;
+        "${pad}Manager")
+            swaymsg '[app_id="blueman-manager"] focus' || blueman-manager
             ;;
         *)
             chosen=$(sed -E 's,.* (.*) .*,\1,' <<< "$chosen")
