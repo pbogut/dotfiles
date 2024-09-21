@@ -131,7 +131,7 @@
         "on-click-right": "systemctl --user restart pipewire.service"
     },
     "custom/shadowplay": {
-        "format": "<span color=\"#bd2c40\">{icon} {}</span>",
+        "format": "<span color=\"#bd2c40\">{icon} {0}</span>",
         "interval": 360,
         "signal": 15,
         "exec": "pgrep wl-screenrec -a | sed 's,.* -o \\([^ ]*\\).*,\\1,'",
@@ -140,7 +140,7 @@
         },
     },
     "custom/notmuch": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
         "interval": 60,
         "signal": 25,
         "exec": "c() { u=\"$(notmuch count -- tag:unread and tag:inbox)\"; i=\"$(notmuch count --  tag:inbox)\"; if [[ $u != \"0\" ]]; then echo $u/$i; else echo \"\"; fi }; c",
@@ -150,7 +150,7 @@
         },
     },
     "custom/memory_left": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
         "interval": 30,
         "exec": "free -h | grep 'Mem' | awk '{print $7 \" (\"$4\")\"}'",
         "format-icons": {
@@ -158,7 +158,7 @@
         },
     },
     "custom/date": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
         "interval": 60,
         "exec": "date +'%Y-%m-%d (%a)'",
         "format-icons": {
@@ -167,7 +167,7 @@
         "on-click": "$TERMINAL -t FLOATING_WINDOW -e khal interactive"
     },
     "custom/time": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
         "interval": 1,
         "exec": "env TZ='Europe/Warsaw' date +'%H:%M:%S'",
         "format-icons": {
@@ -175,7 +175,7 @@
         },
     },
     "custom/time_uk": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "interval": 60,
         "exec": "env TZ='Europe/London' date +'%H:%M'",
         "format-icons": {
@@ -183,7 +183,7 @@
         },
     },
     "custom/gamemode": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
         "interval": 3600,
         "signal": 17,
         "exec": "$HOME/.scripts/waybar/gaming.sh",
@@ -193,7 +193,7 @@
         "on-click-right": "$HOME/.scripts/waybar/gaming.sh --toggle; pkill -RTMIN+17 -x waybar"
     },
     "custom/dualsense": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "interval": 600,
         "signal": 18,
         "exec": "$HOME/.scripts/waybar/dualsense.sh",
@@ -203,7 +203,7 @@
         "on-click": "pkill -RTMIN+18 -x waybar"
     },
     "custom/logipro": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "interval": 600,
         "signal": 16,
         "exec": "$HOME/.scripts/waybar/logipro.sh",
@@ -213,7 +213,7 @@
         "on-click": "pkill -RTMIN+16 -x waybar"
     },
     "custom/bt_kyria": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "interval": 600,
         "signal": 15,
         "exec": "$HOME/.scripts/waybar/bt_battery.sh F3:1C:1A:A4:D1:61",
@@ -223,7 +223,7 @@
         "on-click": "pkill -RTMIN+15 -x waybar"
     },
     "custom/bt_dactyl": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "interval": 600,
         "signal": 14,
         "exec": "$HOME/.scripts/waybar/bt_battery.sh F2:8A:E4:9E:DC:8C",
@@ -233,7 +233,7 @@
         "on-click": "pkill -RTMIN+14 -x waybar"
     },
     "custom/bt_xbox": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "interval": 600,
         "signal": 13,
         "exec": "$HOME/.scripts/waybar/bt_battery.sh 40:8E:2C:16:B7:E5 100",
@@ -267,7 +267,7 @@
         "on-click": "hubstaff toggle"
     },
     "custom/media": {
-        "format": "{icon} {}",
+        "format": "{icon} {0}",
         "return-type": "json",
         "max-length": 40,
         "format-icons": {
