@@ -293,6 +293,7 @@ assign [instance="^Godot_Editor$"] $ws3d
 for_window [title="^.*$"] $exec ~/.scripts/sway/sort-workspace.sh
 
 for_window [app_id="yad"] floating enable
+for_window [class="scrcpy"] floating enable; move scratchpad
 for_window [class="explorer.exe"] floating enable
 for_window [class="krusader"] floating disable
 for_window [class="^feh$"] fullscreen enable
