@@ -356,7 +356,7 @@ return {
               end,
             },
             ['.*%.php'] = {
-              template = 'php/Class',
+              template = 'magento2/Class',
               priority = 4500,
             },
             ['.*/web/templates?/.*/[^/]*%.html$'] = {
