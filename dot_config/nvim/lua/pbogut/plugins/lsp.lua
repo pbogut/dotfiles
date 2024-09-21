@@ -66,7 +66,7 @@ return {
       { name = 'solargraph' },
       { name = 'tailwindcss', snippet_support = true },
       { name = 'templ' },
-      { name = 'tsserver' },
+      { name = 'ts_ls' },
       { name = 'vimls' },
       { name = 'vuels' },
     }
