@@ -266,6 +266,16 @@
         "exec": "$HOME/.scripts/waybar/hubstaff.sh",
         "on-click": "hubstaff toggle"
     },
+    "custom/vrp10": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
+        "interval": 3600,
+        "signal": 20,
+        "exec": "$HOME/.scripts/waybar/vrp10.sh",
+        "format-icons": {
+            "default": "󱡏"
+        },
+        "on-click": "$HOME/.scripts/waybar/vrp10.sh --toggle; pkill -RTMIN+20 -x waybar"
+    },
     "custom/media": {
         "format": "{icon} {0}",
         "return-type": "json",
