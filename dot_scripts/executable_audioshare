@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   audioshare
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   19/09/2024
+#=================================================
+audioshare=$(pactl list sinks | grep 'Name: Audio Share Sink' | sed 's,.*Name: ,,')
+pactl set-default-sink "$audioshare"
+while read -r input_id; do
+  pactl move-sink-input "$input_id" "$audioshare"
+done <<< "$(pactl list short sink-inputs | awk '{print $1}')"
+
+killall as-cmd
+as-cmd -b "$(ip addr | grep 192 | awk '{print $2}' | sed 's,/.*$,,')"
+
