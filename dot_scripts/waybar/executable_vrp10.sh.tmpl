@@ -20,16 +20,24 @@ buds=$(pactl list sinks | grep 'Name: alsa_output\..*VR_P10_Dongle' | sed 's,.*N
 
 current=$(pactl get-default-sink)
 
+__switch_sink() {
+  sink="$1"
+  pactl set-default-sink "$sink"
+  while read -r input_id; do
+    pactl move-sink-input "$input_id" "$sink"
+  done <<< "$(pactl list short sink-inputs | awk '{print $1}')"
+}
+
 if [[ $current == $speaker ]]; then
   if $toggle; then
-    pactl set-default-sink "$buds"
+    __switch_sink "$buds"
     echo " "
   else
     echo " "
   fi
 else
   if $toggle; then
-    pactl set-default-sink "$speaker"
+    __switch_sink "$speaker"
     echo " "
   else
     echo " "
