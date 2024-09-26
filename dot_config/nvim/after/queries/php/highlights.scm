@@ -5,8 +5,3 @@
 (namespace_use_declaration
   (namespace_use_clause
     (qualified_name (name) @type)))
-(namespace_use_declaration
-  (namespace_use_clause
-    (qualified_name
-      (namespace_name_as_prefix
-        (namespace_name (name) @type)))))
