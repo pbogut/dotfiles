@@ -263,7 +263,7 @@ hide_edge_borders --i3 both
 workspace_layout stacking
 
 set $display_laptop eDP-1
-set $display_right DP-2
+set $display_right HDMI-A-1
 set $display_main DP-1
 
 # assign workspace to display
