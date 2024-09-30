@@ -71,37 +71,36 @@ command('NonAscii', function()
 end, {})
 
 command('Print', function(opts)
-  fn.jobstart('mktemp -d', {
-    on_stdout = function(_, out)
-      local dir = out[1]
-      if dir and dir:len() > 0 then
-        local file = dir .. '/print.html'
-        local listchars = vim.o.listchars
 
-        if not opts.bang then
-          vim.o.listchars = ''
-        end
-        local content = require('tohtml').tohtml(nil, {font='InputMono Nerd Font Mono'})
-        if not opts.bang then
-          vim.o.listchars = listchars
-        end
-        local f = io.open(file, 'a')
-        if f == nil then
-          return
-        end
-        for _, line in ipairs(content) do
-          f:write(line)
-          f:write('\n')
-        end
-        f:write('<script>print();setTimeout(function() { close() }, 1000)</script>')
-        f:write('<style>* { font-size: 14px } pre { white-space: wrap }</style>')
-        f:close()
+  local outfile = opts.args ~= '' and opts.args or vim.fn.tempname() .. '.html'
+  local html = require('tohtml').tohtml(0, { range = { opts.line1, opts.line2 } })
 
-        fn.jobstart({'chromium', '--profile-directory=Default', '--app=file://' .. file})
-      end
+  if not opts.bang then
+    html[#html+1] = '<style>.NonText {display: none}</style>'
+  end
+
+  html[#html+1] = '<style>* { font-size: 14px } pre { white-space: wrap }</style>'
+  html[#html+1] = '<script>print();setTimeout(function() { close() }, 1000)</script>'
+
+  -- insert new lines in pre blocks so we can use wrap
+  local i = 1
+  local insert = false;
+  while i <= #html do
+    if html[i]:sub(html[i]:len() - 6) == '</pre>' then
+      insert = false
     end
-  })
-end, {bang = true})
+    if insert then
+      html[i] = html[i] .. '<br>'
+    end
+    if html[i]:sub(1,4) == '<pre' then
+      insert = true
+    end
+    i = i + 1
+  end
+
+  vim.fn.writefile(html, outfile)
+  fn.jobstart({'chromium', '--profile-directory=Default', '--app=file://' .. outfile})
+end, {bang = true, range = '%', nargs = '?'})
 
 command('ProfileStart', function(opt)
   vim.cmd([[
