@@ -156,10 +156,10 @@ case  "$wm_app_id" in
   "org.qutebrowser.mediabrowser")
     move_and_swich "$ws_media"
     ;;
-  "org.qutebrowser.workbrowser")
+  "firefox-work"|"org.qutebrowser.workbrowser")
     move_and_swich "$ws_qbwork"
     ;;
-  "org.qutebrowser.qutebrowser")
+  "firefox-personal"|"org.qutebrowser.qutebrowser")
     move_and_swich "$ws_browser"
     ;;
   "mpv")
