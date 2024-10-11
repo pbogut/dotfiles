@@ -312,6 +312,8 @@ for_window [class="^Netsoft-com.netsoft.hubstaff$"] move scratchpad; scratchpad 
 for_window [class="^Toggl Desktop$"] move scratchpad; scratchpad show
 for_window [app_id="com.nextcloud.desktopclient.nextcloud"] floating enable
 for_window [app_id="chrome-didegimhafipceonhjepacocaffmoppf-Default"] floating enable
+for_window [app_id="^firefox" title="^Picture-in-Picture$"] floating enable; sticky on
+for_window [title="^Picture in picture$"] floating enable; sticky on
 
 # laptop mirror
 workspace "mirror" output HDMI-A-1
