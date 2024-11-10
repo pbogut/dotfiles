@@ -34,7 +34,7 @@ c.tab_bar_at_bottom = true
 c.tab_max_width = 16
 c.use_fancy_tab_bar = false
 
-c.font = wezterm.font('InputMono Nerd Font Mono')
+c.font = wezterm.font('JetBrainsMono Nerd Font Mono')
 c.font_size = 12
 c.colors = {
   -- The default text color
@@ -392,7 +392,7 @@ c.keys = {
   {
     key = 'q',
     mods = 'LEADER',
-    action = act.CloseCurrentTab { confirm = true },
+    action = act.CloseCurrentTab({ confirm = true }),
   },
   {
     key = 'j',
