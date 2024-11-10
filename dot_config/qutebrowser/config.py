@@ -54,7 +54,8 @@ c.content.blocking.hosts.lists = [
     "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts",
     "https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt",
     "https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt",
-    "http://storage.pbogut.me/cda.txt"]
+    "https://storage.pbogut.me/host-block.txt",
+    "https://storage.pbogut.me/cda.txt"]
 c.content.blocking.adblock.lists = [
     "https://easylist.to/easylist/easylist.txt",
     "https://easylist.to/easylist/easyprivacy.txt",
@@ -230,6 +231,7 @@ config.bind('gW', 'spawn browser-work {url}')
 config.bind(',m', 'spawn --userscript mpv')
 config.bind(',ft', 'spawn freetube {url}')
 config.bind(',ch', 'spawn chromium-personal {url}')
+config.bind(',ff', 'spawn firefox-personal {url}')
 
 config.bind('sje', 'set content.javascript.enabled true')
 config.bind('sjd', 'set content.javascript.enabled false')
