@@ -107,7 +107,7 @@ elif [[ $action == "watch" ]]; then
       match=$id
     fi
     case "$match" in
-      steam_app_*|gamescope|csgo_linux64|cs2|steamwebhelper.exe|steam.exe)
+      "GeForce NOW"|steam_app_*|gamescope|csgo_linux64|cs2|steamwebhelper.exe|steam.exe)
         if [[ $was_on -eq 0 ]]; then
           was_on=1
           $0 --start
