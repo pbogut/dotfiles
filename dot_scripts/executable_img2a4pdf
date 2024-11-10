@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   img2pdf
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   10/09/2024
+#=================================================
+
+image=false
+width_mm=78
+output=false
+open=false
+convert=false
+gravity=center
+rotate="0"
+
+usage() {
+  echo "Ussage: ${0##*/} <IMAGE> [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+  echo "  -w, --width    image width in mm (default 78 [petrol station invoice])"
+  echo "  -o, --output   output pdf (default tmp file)"
+  echo "  -c, --convert  convert in place to pdf"
+  echo "  -l, --left     align to left"
+  echo "  -r, --right    align to right"
+  echo "  --landscape,   rotate 90 degree"
+  echo "  -x, --open     open generated pdf"
+}
+
+while test $# -gt 0; do
+  case "$1" in
+    --landscape)
+      rotate="90"
+      shift
+      ;;
+    --open|-x)
+      open=true
+      shift
+      ;;
+    --width|-w)
+      width_mm=$2
+      shift
+      shift
+      ;;
+    --output|-o)
+      output=$2
+      shift
+      shift
+      ;;
+    --convert|-c)
+      convert=true
+      shift
+      ;;
+    --left|-l)
+      gravity=West
+      shift
+      ;;
+    --right|-r)
+      gravity=East
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      if $image; then
+        usage
+        exit 1
+      else
+        image=$1
+        shift
+      fi
+      ;;
+  esac
+done
+
+
+if ! $output; then
+  output="$(mktemp -d)/out.pdf"
+
+  if $convert; then
+    name="${image%.*}"
+    output="$name.pdf"
+  fi
+fi
+
+extent="2480x3508" # A4 210mm x 297mm
+# 2480 / 210mm ~ 11.81
+size="$( calc "$width_mm" '*' 11.81 )"
+
+# magick "$image" -density 300 -resize "$size"x -gravity "$gravity" -background white -rotate "$rotate" -extent 6420x9082 "$output"
+magick "$image" -units PixelsPerInch -density 300x300 -resize "$size"x -gravity "$gravity" -background white -rotate "$rotate" -extent "$extent" "$output"
+echo "$output"
+if $open; then
+  evince "$output"
+fi
