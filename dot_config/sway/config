@@ -58,8 +58,8 @@ bindsym $mod+Shift+q kill
 set $wofi_cmd wofi --dmenu -p run --cache-file $HOME/.cache/wofi-command -M fuzzy
 set $cmd_list bash -ic "compgen -c" | sort | uniq | grep -v -E '^(\[\[|\]\]|\[|\]|[!\.:{}])'
 
-bindsym $mod+colon $exec "wofi --show drun"
-bindsym $mod+semicolon $exec "wofi --show run"
+bindsym $mod+colon $exec fuzzel
+bindsym $mod+semicolon $exec fuzzel-run
 #bindsym $mod+semicolon exec $cmd_list | $wofi_cmd
 
 # named workspaces

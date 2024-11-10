@@ -26,7 +26,8 @@ __unlock() {
 }
 __dmenu() {
   if [[ -n "$WAYLAND_DISPLAY" ]]; then
-    wofi --cache-file /dev/null --insensitive --dmenu --prompt "Open URL"
+    # wofi --cache-file /dev/null --insensitive --dmenu --prompt "Open URL"
+    fuzzel --cache /dev/null --dmenu --prompt "Open URL: "
   else
     rofi -dmenu -p
   fi

@@ -16,6 +16,7 @@ usage() {
   echo "      --create [uri] [name]     type in totp code"
   echo "      --refresh-cache           type in totp code"
   echo "      --json                    output details as a json"
+  echo "      --unlock                  unlock with pin"
 }
 
 dir="$HOME/.config/vaultwarden"
@@ -30,7 +31,8 @@ __unlock() {
 }
 __dmenu() {
   if [[ -n "$WAYLAND_DISPLAY" ]]; then
-    wofi --cache-file /dev/null --dmenu --insensitive --prompt "$1" --search "$query"
+    # wofi --cache-file /dev/null --dmenu --insensitive --prompt "$1" --search "$query"
+    fuzzel --cache /dev/null --dmenu --prompt "$1: " --search "$query"
   else
     rofi -dmenu -p "$1"
   fi
@@ -167,6 +169,10 @@ fi
 
 while test $# -gt 0; do
   case "$1" in
+    --unlock)
+      __unlock
+      exit 0
+      ;;
     --json)
       __unlock
       query="$2"

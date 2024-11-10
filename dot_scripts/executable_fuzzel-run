@@ -1,0 +1,5 @@
+#!/bin/zsh
+print -rC1 -- ${(ko)commands}  |
+  grep -v '^.$' |
+  fuzzel --dmenu --prompt "Run: " --cache $HOME/.cache/fuzzel/fuzzel-run |
+  sh
