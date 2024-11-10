@@ -3,7 +3,7 @@ local me = {}
 
 function me.setup(opts)
   opts = vim.tbl_deep_extend('keep', opts, {
-    cmd = { 'elixir-ls' },
+    cmd = { mason_bin('lexical') },
   })
   lspconfig.elixirls.setup(opts)
 end

@@ -125,6 +125,8 @@ function me.setup(opts)
 
   opts = vim.tbl_deep_extend('keep', opts, {
     init_options = { documentFormatting = true, codeAction = true },
+    filetypes = { 'css', 'gdscript', 'handlebars', 'javascript', 'json',
+    'less', 'lua', 'markdown', 'php', 'python', 'sass', 'scss', 'sh', 'typescript' },
     settings = {
       rootMarkers = { '.git/' },
       languages = {
