@@ -7,6 +7,7 @@ set filesep "\n"  # default already
 
 set previewer ~/.config/lf/preview
 set cleaner ~/.config/lf/cleaner
+set sixel true
 
 # $f:  lf_current_file
 # $fs: lf_marked_files

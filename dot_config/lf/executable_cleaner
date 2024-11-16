@@ -1,4 +1,4 @@
 #!/bin/sh
-if [ "$TERM_PROGRAM" = "WezTerm" ] && command -v kitty > /dev/null; then
-	kitty +kitten icat --clear --stdin no --silent --transfer-mode file < /dev/null > /dev/tty
-fi
+# if [ "$TERM_PROGRAM" = "WezTerm" ] && command -v kitty > /dev/null; then
+#    kitty +kitten icat --clear --stdin no --silent --transfer-mode file < /dev/null > /dev/tty
+# fi

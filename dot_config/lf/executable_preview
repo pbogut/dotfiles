@@ -1,26 +1,21 @@
 #!/bin/sh
 
 image() {
-    if [ "$TERM_PROGRAM" = "WezTerm" ] && command -v kitty > /dev/null; then
-        file=$1
-        w=$2
-        h=$3
-        x=$4
-        y=$5
-
-        kitty +kitten icat --silent --stdin no --transfer-mode file --place "${w}x${h}@${x}x${y}" "$file" < /dev/null > /dev/tty
-        exit 1
-    else
-        chafa -f sixel -s "$2x$3" --animate off --polite on "$1"
-        exit 1
-    fi
+    file=$1
+    w=$2
+    h=$3
+    # x=$4
+    # y=$5
+    # kitty +kitten icat --silent --stdin no --transfer-mode file --place "${w}x${h}@${x}x${y}" "$1" </dev/null >/dev/tty
+    # wezterm imgcat "$file" --width "$w" --height "$h" --position "$x,$y" < /dev/null > /dev/tty
+    chafa -f sixel -s "${w}x${h}" --animate off --polite on "$file"
+    exit 1
 }
 
 batorcat() {
     file="$1"
-    shift
-    if command -v bat > /dev/null 2>&1; then
-        bat --color=always --style=plain --pager=never "$file" "$@"
+    if command -v bat > /dev/null; then
+        bat --force-colorization --wrap auto --style=plain,header "$file" "$@"
     else
         cat "$file"
     fi
@@ -63,16 +58,21 @@ case "$(printf "%s\n" "$(readlink -f "$1")" | awk '{print tolower($0)}')" in
     *.wav | *.mp3 | *.flac | *.m4a | *.wma | *.ape | *.ac3 | *.og[agx] | *.spx | *.opus | *.as[fx] | *.mka)
         exiftool "$1"
         ;;
-    *_e_faktura_*.pdf)
-        [ ! -f "${CACHE}.jpg" ] &&
-            pdftoppm -jpeg -f 2 -singlefile "$1" "$CACHE"
-        image "${CACHE}.jpg" "$2" "$3" "$4" "$5"
-        ;;
     *.pdf)
-        [ ! -f "${CACHE}.jpg" ] &&
-            pdftoppm -jpeg -f 1 -singlefile "$1" "$CACHE"
-        image "${CACHE}.jpg" "$2" "$3" "$4" "$5"
+        # [ ! -f "${CACHE}.txt" ] &&
+        pdftotext -layout "$1" "${CACHE}.txt"
+        batorcat "${CACHE}.txt" "$2"
         ;;
+    # *_e_faktura_*.pdf)
+    #     [ ! -f "${CACHE}.jpg" ] &&
+    #         pdftoppm -jpeg -f 2 -singlefile "$1" "$CACHE"
+    #     image "${CACHE}.jpg" "$2" "$3" "$4" "$5"
+    #     ;;
+    # *.pdf)
+    #     [ ! -f "${CACHE}.jpg" ] &&
+    #         pdftoppm -jpeg -f 1 -singlefile "$1" "$CACHE"
+    #     image "${CACHE}.jpg" "$2" "$3" "$4" "$5"
+    #     ;;
     *.epub)
         [ ! -f "$CACHE" ] &&
             epub-thumbnailer "$1" "$CACHE" 1024
