@@ -18,11 +18,7 @@ usage() {
 }
 
 __unlock() {
-  if ! unlocked > /dev/null 2>&1; then
-    if ! rbw unlock; then
-       exit 1
-    fi
-  fi
+  vaultwarden-dmenu --unlock
 }
 __dmenu() {
   if [[ -n "$WAYLAND_DISPLAY" ]]; then
