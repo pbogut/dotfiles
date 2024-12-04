@@ -93,7 +93,9 @@ local ripgrep = function(opt)
     dirs = { dir }
     query = query:gsub('(.-) ([^%s]+%/)$', '%1')
   elseif query:match('%s%%$') then
-    dirs = { vim.fn.expand('%') }
+    local path = vim.fn.expand('%')
+    path = path:gsub('^[a-z]+://', '')
+    dirs = { path }
     query = query:gsub('(.-) %%$', '%1')
   end
 
