@@ -1,6 +1,6 @@
 ---@type LazyPluginSpec
 return {
-  enabled = true,
+  enabled = false,
   'kylechui/nvim-surround',
   opts = {
     keymaps = {
@@ -23,7 +23,7 @@ return {
     { 'ds', '<plug>(nvim-surround-delete)', desc = 'Delete surround' },
     { 'cs', '<plug>(nvim-surround-change)', desc = 'Change surround' },
     { 'cs', '<plug>(nvim-surround-change)', desc = 'Change surround' },
-    { 's', '<plug>(nvim-surround-visual)', desc = 'Change surround', mode = { 'v' } },
+    { 's', '<plug>(nvkm-surround-visual)', desc = 'Change surround', mode = { 'v' } },
   },
   config = true,
 }
