@@ -101,7 +101,7 @@ ws_term="2:  term"
 ws_comm="3: / comm"
 ws_code="4:  code"
 ws_media="5:  media"
-ws_qbwork="6:  qbwork"
+ws_work="6:  work"
 ws_db=" db"
 ws_dash="9:  dash"
 ws_rss=" rss"
@@ -156,10 +156,10 @@ case  "$wm_app_id" in
   "org.qutebrowser.mediabrowser")
     move_and_swich "$ws_media"
     ;;
-  "firefox-work"|"org.qutebrowser.workbrowser")
-    move_and_swich "$ws_qbwork"
+  "chromium-work"|"firefox-work"|"org.qutebrowser.workbrowser")
+    move_and_swich "$ws_work"
     ;;
-  "firefox-personal"|"org.qutebrowser.qutebrowser")
+  "chromium-personal"|"firefox-personal"|"org.qutebrowser.qutebrowser")
     move_and_swich "$ws_browser"
     ;;
   "mpv")
@@ -198,6 +198,7 @@ case  "$wm_class" in
   "obs obs"|\
   "chiaki Chiaki"|\
   "gamescope gamescope"|\
+  "geforce now GeForce NOW"|\
   "csgo_linux64 csgo_linux64"|"cs2 cs2"|steam_app*|steam_proton*)
     move_and_swich "$ws_game"
     unset_floating

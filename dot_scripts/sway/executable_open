@@ -44,7 +44,7 @@ if [[ $app = "select" ]] && [[ $(/usr/bin/rifle -l "$1" | wc -l) -gt 1 ]]; then
     sed 's/\([0-9]*\).*/\1/' |
     (
       read -r choice
-      [[ $choice != "" ]] && $TERMINAL -e /usr/bin/rifle "${files[@]}" -p "$choice"
+      [[ $choice != "" ]] && /usr/bin/rifle "${files[@]}" -p "$choice"
     )
 else
   /usr/bin/rifle "${files[@]}" -p "$app"
