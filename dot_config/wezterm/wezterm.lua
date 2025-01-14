@@ -29,6 +29,13 @@ c.window_padding = {
   bottom = 0,
 }
 
+c.ssh_backend = 'Ssh2'
+c.ssh_domains = {
+  {
+    name = "silverspoon",
+    remote_address = "silverspoon"
+  }
+}
 c.enable_tab_bar = true
 c.tab_bar_at_bottom = true
 c.tab_max_width = 16

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   wezterm-project
+# author: author <author_contact>
+# date:   02/01/2024
+#=================================================
+tab_json=$(wezterm cli list --format json | jq '.[] | select(.title | test(":nvim:"))')
+win_id=$(wezterm cli list --format json | jq '.[] | select(.pane_id == '$WEZTERM_PANE') | .window_id')
+echo $win_id
+nvim_id=$(echo "$tab_json" | jq  '. | select(.window_id == '$win_id') | .title' | sed 's,^.*:nvim:\(.*\):.*$,\1,')
+read -r nvim_id _ <<< "$nvim_id"
+
+if [[ $nvim_id != "" ]]; then
+  pane_id=$(echo "$tab_json" | jq  '. | select(.window_id == '$win_id') | .pane_id')
+  read -r pane_id _ <<< "$pane_id"
+  nvru --server-id "$nvim_id" "$@"
+  wezterm cli activate-pane --pane-id "$pane_id"
+else
+  wezterm cli spawn --cwd "$PWD" nvim "$@"
+fi
