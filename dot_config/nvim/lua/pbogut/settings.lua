@@ -32,6 +32,7 @@ o.tabstop = 2
 o.shiftwidth = 2
 o.expandtab = true
 o.scrolloff = 8
+o.sidescrolloff = 24
 o.number = true
 o.wrap = false
 o.relativenumber = true
