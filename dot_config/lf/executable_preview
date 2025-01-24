@@ -58,21 +58,21 @@ case "$(printf "%s\n" "$(readlink -f "$1")" | awk '{print tolower($0)}')" in
     *.wav | *.mp3 | *.flac | *.m4a | *.wma | *.ape | *.ac3 | *.og[agx] | *.spx | *.opus | *.as[fx] | *.mka)
         exiftool "$1"
         ;;
-    *.pdf)
-        # [ ! -f "${CACHE}.txt" ] &&
-        pdftotext -layout "$1" "${CACHE}.txt"
-        batorcat "${CACHE}.txt" "$2"
-        ;;
-    # *_e_faktura_*.pdf)
-    #     [ ! -f "${CACHE}.jpg" ] &&
-    #         pdftoppm -jpeg -f 2 -singlefile "$1" "$CACHE"
-    #     image "${CACHE}.jpg" "$2" "$3" "$4" "$5"
-    #     ;;
     # *.pdf)
-    #     [ ! -f "${CACHE}.jpg" ] &&
-    #         pdftoppm -jpeg -f 1 -singlefile "$1" "$CACHE"
-    #     image "${CACHE}.jpg" "$2" "$3" "$4" "$5"
+    #     # [ ! -f "${CACHE}.txt" ] &&
+    #     pdftotext -layout "$1" "${CACHE}.txt"
+    #     batorcat "${CACHE}.txt" "$2"
     #     ;;
+    *_e_faktura_*.pdf)
+        [ ! -f "${CACHE}.jpg" ] &&
+            pdftoppm -jpeg -f 2 -singlefile "$1" "$CACHE"
+        image "${CACHE}.jpg" "$2" "$3" "$4" "$5"
+        ;;
+    *.pdf)
+        [ ! -f "${CACHE}.jpg" ] &&
+            pdftoppm -jpeg -f 1 -singlefile "$1" "$CACHE"
+        image "${CACHE}.jpg" "$2" "$3" "$4" "$5"
+        ;;
     *.epub)
         [ ! -f "$CACHE" ] &&
             epub-thumbnailer "$1" "$CACHE" 1024
