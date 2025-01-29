@@ -12,7 +12,7 @@ return {
   opts = {
     comment_strings = {
       asm = '//%s',
-      heex = { '<%# %s #%>', '<%# %s #%>' },
+      heex = { '<%!-- %s --%>', '<%!-- %s --%>' },
       devicetree = { '// %s', '/* %s */' },
       swayconfig = '# %s',
       openscad = '// %s',

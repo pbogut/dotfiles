@@ -7,13 +7,15 @@ function me.setup(opts)
       tailwindCSS = {
         experimental = {
           classRegex = {
-            [[class:\s\"([^']+)\"]],
-            [[cls:\s\"([^']+)\"]]
+            [[class:\s\"([^"]+)\"]],
+            [[cls:\s\"([^"]+)\"]],
+            [[[a-z]+_class=\"([^"]+)\"]],
           }
         },
         includeLanguages = {
-          eelixir = 'html-eex',
+          plaintext = "html",
           elixir = 'phoenix-heex',
+          eelixir = 'html-eex',
           heex = 'phoenix-heex',
           surface = 'phoenix-heex',
           svelte = 'html',

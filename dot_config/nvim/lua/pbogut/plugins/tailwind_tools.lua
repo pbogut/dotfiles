@@ -13,13 +13,18 @@ return {
     'php',
     'eelixir',
     'elixir',
+    'heex',
     'handlebars',
     'templ',
     'template',
   },
-  opts = {}, -- your configuration
+  opts = {
+    server = {
+      override = false, -- I use my own config @see plugins/lsp/tailwindcss.lua
+    }
+  }, -- your configuration
   config = function(opts)
-    require('tailwind-tools').setup(opts)
+    require('tailwind-tools').setup(opts.opts)
     vim.g.tailwind_tools_loaded = true
     local augroup = vim.api.nvim_create_augroup('x_tailwind_tools', { clear = true })
     local command = vim.api.nvim_create_user_command
