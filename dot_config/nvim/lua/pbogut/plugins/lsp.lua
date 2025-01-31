@@ -110,7 +110,7 @@ return {
 
         { 'n', '<space>rn', b.lsp_rename, b.no_lsp_bind, { silent = false } },
         { 'n', '<space>el', '<cmd>lua vim.diagnostic.open_float(0, {scope = "line"})<cr>', b.no_lsp_bind },
-        { 'n', '<space>ee', '<cmd>Trouble document_diagnostics<cr>', b.no_lsp_bind },
+        { 'n', '<space>ee', '<cmd>Trouble diagnostics<cr>', b.no_lsp_bind },
         { 'n', '<space>eo', '<cmd>DiagnosticsBufferToggle<cr>', b.no_lsp_bind },
         { 'n', '<space>af', b.lsp_formatting, 'migg=G`i' },
         { 'v', '<space>af', b.lsp_formatting, b.no_lsp_bind },

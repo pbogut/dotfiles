@@ -34,7 +34,7 @@ return {
 
     k.set('n', '<plug>(trouble-prev-quickfix)', function()
       if trouble.is_open() then
-        trouble.previous({ skip_groups = true, jump = true })
+        trouble.prev({ skip_groups = true, jump = true })
       else
         pcall(vim.cmd.cprevious)
       end
@@ -50,7 +50,7 @@ return {
 
     k.set('n', '<plug>(trouble-prev-loclist)', function()
       if trouble.is_open() then
-        trouble.previous({ skip_groups = true, jump = true })
+        trouble.prev({ skip_groups = true, jump = true })
       else
         pcall(vim.cmd.lprevious)
       end
