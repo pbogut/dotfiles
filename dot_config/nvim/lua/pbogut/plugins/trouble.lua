@@ -5,8 +5,6 @@ return {
   keys = {
     { '<space>ed', '<plug>(trouble-diagnostic-document)' },
     { '<space>ew', '<plug>(trouble-diagnostic-workspace)' },
-    { '<space>lq', '<plug>(trouble-quickfix)' },
-    { '<space>ll', '<plug>(trouble-loclist)' },
     { ']q', '<plug>(trouble-next-quickfix)' },
     { '[q', '<plug>(trouble-prev-quickfix)' },
     { ']l', '<plug>(trouble-next-loclist)' },

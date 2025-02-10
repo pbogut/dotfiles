@@ -15,6 +15,12 @@ k.set('n', '<c-c>', function()
   end
 end)
 
+k.set('n', '<space>lq', '<cmd>copen<cr>')
+k.set('n', '<space>ll', '<cmd>lopen<cr>')
+k.set('n', ']q', '<cmd>cnext<cr>')
+k.set('n', '[q', '<cmd>cprev<cr>')
+k.set('n', ']l', '<cmd>lnext<cr>')
+k.set('n', '[l', '<cmd>lprev<cr>')
 k.set('i', '<c-cr>', '<esc>O', { remap = true })
 k.set('n', '<space>fn', '<cmd>silent !wezterm-project ' .. os.getenv('DOTFILES') .. '/config/nvim "nvim-config"<cr>')
 k.set('n', '<space>fc', '<cmd>silent !wezterm-project ' .. os.getenv('DOTFILES') .. ' "dotfiles"<cr>')

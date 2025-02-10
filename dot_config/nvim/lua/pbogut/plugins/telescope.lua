@@ -170,10 +170,10 @@ return {
 
               if #picker:get_multi_selection() > 0 then
                 actions.send_selected_to_qflist(id)
-                vim.cmd.Trouble('quickfix')
+                vim.cmd.copen()
               else
                 actions.send_to_qflist(id)
-                vim.cmd.Trouble('quickfix')
+                vim.cmd.copen()
               end
             end,
             ['<c-l>'] = actions.complete_tag,
