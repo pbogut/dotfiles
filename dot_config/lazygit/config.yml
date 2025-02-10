@@ -1,12 +1,14 @@
 gui:
     scrollHeight: 2
+    showBranchCommitHash: false
     scrollPastBottom: true
-    screenMode: half
+    screenMode: normal
     mouseEvents: true
     skipDiscardChangeWarning: false
     skipStashWarning: true
     sidePanelWidth: 0.3333
-    expandFocusedSidePanel: false
+    expandFocusedSidePanel: true
+    expandedSidePanelWeight: 4
     mainPanelSplitMode: flexible
     theme:
         lightTheme: false
