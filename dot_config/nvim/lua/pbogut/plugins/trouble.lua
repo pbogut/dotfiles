@@ -3,8 +3,7 @@ return {
   enabled = true,
   'folke/trouble.nvim',
   keys = {
-    { '<space>ed', '<plug>(trouble-diagnostic-document)' },
-    { '<space>ew', '<plug>(trouble-diagnostic-workspace)' },
+    { '<space>ee', '<plug>(trouble-diagnostic)' },
     { ']q', '<plug>(trouble-next-quickfix)' },
     { '[q', '<plug>(trouble-prev-quickfix)' },
     { ']l', '<plug>(trouble-next-loclist)' },
@@ -17,8 +16,7 @@ return {
 
     trouble.setup()
 
-    k.set('n', '<plug>(trouble-diagnostic-document)', '<cmd>TroubleToggle document_diagnostics<cr>')
-    k.set('n', '<plug>(trouble-diagnostic-workspace)', '<cmd>TroubleToggle workspace_diagnostics<cr>')
+    k.set('n', '<plug>(trouble-diagnostic)', '<cmd>TroubleToggle document<cr>')
     k.set('n', '<plug>(trouble-quickfix)', '<cmd>TroubleToggle quickfix<cr>')
     k.set('n', '<plug>(trouble-loclist)', '<cmd>TroubleToggle loclist<cr>')
 
