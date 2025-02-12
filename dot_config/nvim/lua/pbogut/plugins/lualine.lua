@@ -26,6 +26,7 @@ return {
       ripgrep = require('pbogut.plugins.lualine.ripgrep'),
       starship = require('pbogut.plugins.lualine.starship'),
       chezmoi = require('pbogut.plugins.lualine.chezmoi'),
+      context = require('pbogut.plugins.lualine.context'),
     }
 
     lualine.setup({
@@ -62,14 +63,14 @@ return {
       },
       winbar = {
         lualine_a = { s.fugitive },
-        lualine_c = { s.navic },
+        lualine_c = { s.context, s.navic },
         lualine_x = { s.dadbod },
         lualine_y = { s.diff_mode },
         lualine_z = {},
       },
       inactive_winbar = {
         lualine_a = { s.fugitive_inactive },
-        lualine_b = {},
+        lualine_b = { s.context },
         lualine_c = {},
         lualine_x = { s.dadbod },
         lualine_y = { s.diff_mode_inactive },

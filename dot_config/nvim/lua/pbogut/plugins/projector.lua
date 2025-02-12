@@ -150,8 +150,9 @@ return {
                 end
               end, { nargs = '*', bang = true })
 
+              local group = vim.api.nvim_create_augroup('x_magento2', { clear = true })
               vim.api.nvim_create_autocmd('FileType', {
-                group = vim.api.nvim_create_augroup('x_magento2', { clear = true }),
+                group = group,
                 pattern = 'xml',
                 callback = function()
                   -- let to use gf on FQN in xml files (at least for local modules)
@@ -159,6 +160,38 @@ return {
                   bo.includeexpr = [[substitute(v:fname,'\\','/','g')]]
                   bo.path = o.path .. [[,app/code;]]
                   o.isfname = '@,48-57,/,.,-,_,+,,,#,$,%,~,=,\\'
+                end,
+              })
+              vim.api.nvim_create_autocmd('BufRead', {
+                group = group,
+                pattern = '*.phtml,*.html,*.php',
+                callback = function()
+                  local abbrev = {
+                    ['assuredpharmacy'] = 'ap',
+                    ['menspharmacy'] = 'mp',
+                    ['jaykom'] = 'jk',
+                    ['rakdesign'] = 'rd',
+                    ['version1'] = 'v1',
+                    ['version2'] = 'v2',
+                    ['version3'] = 'v3',
+                  }
+                  local do_abbrev = function(text)
+                    if abbrev[text] then
+                      return abbrev[text]
+                    end
+                    return text
+                  end
+                  local cwd = vim.fn.getcwd()
+                  local full_path = vim.fn.expand('%:p')
+                  local local_path = full_path:sub(#cwd + 2)
+                  local prefix_path = full_path:sub(1, #cwd)
+
+                  if cwd == prefix_path then
+                    local parts = vim.split(local_path, '/')
+                    if parts[1] == 'app' and parts[2] == 'design' then
+                      vim.b._x_context = do_abbrev(parts[4]) .. '/' .. do_abbrev(parts[5])
+                    end
+                  end
                 end,
               })
             end,
