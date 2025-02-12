@@ -301,6 +301,7 @@ for_window [app_id="com.nextcloud.desktopclient.nextcloud"] floating enable
 for_window [app_id="chrome-didegimhafipceonhjepacocaffmoppf-Default"] floating enable
 for_window [app_id="^firefox" title="^Picture-in-Picture$"] floating enable; sticky on
 for_window [title="^Picture in picture$"] floating enable; sticky on
+for_window [title="^Picture-in-Picture"] floating enable; sticky on
 for_window [app_id="nngceckbapebfimnlniiiahkandclblb"] floating enable;
 
 # laptop mirror
