@@ -153,12 +153,22 @@ end
 function _G.ripgrep_in_dir_complete(text)
   local result = {}
 
-  local dirs = vim.fn.globpath('.', '**/')
-
   local lead = text:gsub('.*%s', '')
   local query = text:sub(1, text:len() - lead:len())
 
-  for name, _ in dirs:gmatch('.-\n') do
+  local prefix, suffix = lead:match('(.*)%/([^%/]-)')
+  local path = '.'
+  local pattern = '*/'
+  if prefix then
+    path = prefix
+  end
+  if suffix then
+    pattern = suffix .. '*/'
+  end
+
+  local dirs = vim.fn.globpath(path, pattern)
+
+  for name, _ in dirs:gmatch('[^\r\n]+') do
     name, _ = name:gsub('^%.%/(.-)\n$', '%1')
     if name:sub(1, lead:len()) == lead then
       table.insert(result, query .. name)
