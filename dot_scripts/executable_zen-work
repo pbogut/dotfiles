@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   zen-work
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   11/02/2025
+#=================================================
+zen-browser --name zen-work -p Work "$@"

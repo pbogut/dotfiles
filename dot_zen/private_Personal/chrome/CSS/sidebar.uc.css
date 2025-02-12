@@ -1,0 +1,18 @@
+/* ==UserScript==
+// @name           Sidebar styles
+// @description
+// ==/UserScript==
+*/
+
+/* see src/desktop/engine/browser/base/content/navigator-toolbox.inc.xhtml */
+#tabbrowser-tabs #tabs-newtab-button {
+  display: none !important;
+}
+#tabbrowser-tabs #zen-current-workspace-indicator {
+  /* display: none !important; */
+  order: 2
+}
+
+#tabbrowser-tabs #zen-browser-tabs-wrapper {
+  order: 1;
+}
