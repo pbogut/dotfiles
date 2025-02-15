@@ -1,0 +1,13 @@
+/* hide vivalid button */
+#header {
+  display: none;
+}
+.tabbar-wrapper .workspace-anchor {
+  order: 3;
+}
+#tabs-tabbar-container .separator {
+  display: none;
+}
+#tabs-tabbar-container {
+  padding-top: 2px !important;
+}
