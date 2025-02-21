@@ -2,6 +2,9 @@
 #header {
   display: none;
 }
+.toolbar-large .window-buttongroup {
+    display: none !important;
+}
 .tabbar-wrapper .workspace-anchor {
   order: 3;
 }
@@ -10,4 +13,32 @@
 }
 #tabs-tabbar-container {
   padding-top: 2px !important;
+}
+/* style sidebar */
+#browser:not(.transparent-tabbar) #tabs-tabbar-container {
+  background-color: #1d1e21;
+}
+.tabs-right .button-toolbar.workspace-popup.tabbar-workspace-button {
+  background-color: #1d1e21;
+}
+:not(.ui-transparent-tabs).color-behind-tabs-on .tab {
+  background-color: #1d1e21;
+}
+body .tabbar-wrapper {
+  border-left: 1px solid #333;
+}
+/* show extention icons on sidebar when address bar is hidden */
+.address-top-off #tabs-tabbar-container {
+  padding-top: 30px !important;
+}
+.toolbar-large {
+    padding-right: 10px !important;
+}
+.address-top-off.tabs-right .toolbar-large {
+    flex-direction: row-reverse;
+}
+.address-top-off.tabs-right .toolbar-extensions {
+    display: flex !important;
+    position: absolute;
+    top: 15px;
 }
