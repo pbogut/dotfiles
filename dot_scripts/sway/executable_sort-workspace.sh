@@ -156,10 +156,10 @@ case  "$wm_app_id" in
   "org.qutebrowser.mediabrowser")
     move_and_swich "$ws_media"
     ;;
-  "chromium-work"|"firefox-work"|"org.qutebrowser.workbrowser")
+  "vivaldi-work"|"zen-work"|"chromium-work"|"firefox-work"|"org.qutebrowser.workbrowser")
     move_and_swich "$ws_work"
     ;;
-  "chromium-personal"|"firefox-personal"|"org.qutebrowser.qutebrowser")
+  "vivaldi-personal"|"zen-personal"|"chromium-personal"|"firefox-personal"|"org.qutebrowser.qutebrowser")
     move_and_swich "$ws_browser"
     ;;
   "mpv")
