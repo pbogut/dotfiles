@@ -61,21 +61,21 @@ url="$1"
 target="tab"
 
 # open youtube links in mpv
-use_mpv=true
+use_app=true
+app_cmd="firefox-personal"
 if [[ $url =~ ^https://invidious\.pbogut\.me/watch\?v= ]]; then
   desktop_name="org.qutebrowser.mediabrowser"
   qbmode="$qbmode --qt-arg name qbmedia --desktop-file-name $desktop_name --basedir $HOME/.config/qutebrowser/media --config-py $HOME/.config/qutebrowser/config.py $proxypac"
   shift
 
-  mpv_url=${url//invidious.pbogut.me/www.youtube.com}
+  app_url=${url//invidious.pbogut.me/www.youtube.com}
   url=${url//watch\?v=/embed/}
   url=${url/&/?}
 
-  if $use_mpv; then
+  if $use_app; then
     start=$(date '+%s')
-    mpv_url=${mpv_url//invidious.pbogut.me/www.youtube.com}
-    # LAZY_OPEN="$mpv_url" mpv &
-    freetube "$mpv_url" &
+    app_url=${app_url//invidious.pbogut.me/www.youtube.com}
+    LAZY_OPEN="$app_url" "$app_cmd" "$app_url" &
     if ! "$@"; then
       end=$(date '+%s')
       if [[ $((end-start)) -lt 10 ]]; then
@@ -97,16 +97,15 @@ elif [[ $url =~ ^https://www\.youtube\.com/watch\?v= ]]; then
   qbmode="$qbmode --qt-arg name qbmedia --desktop-file-name $desktop_name --basedir $HOME/.config/qutebrowser/media --config-py $HOME/.config/qutebrowser/config.py $proxypac"
   shift
 
-  mpv_url="$url"
+  app_url="$url"
   url=${url//www.youtube.com/invidious.pbogut.me}
   url=${url//watch\?v=/embed/}
   url=${url/&/?}
 
-  if $use_mpv; then
+  if $use_app; then
     start=$(date '+%s')
-    mpv_url=${mpv_url//invidious.pbogut.me/www.youtube.com}
-    # LAZY_OPEN="$mpv_url" mpv &
-    freetube "$mpv_url" &
+    app_url=${app_url//invidious.pbogut.me/www.youtube.com}
+    LAZY_OPEN="$app_url" "$app_cmd" "$app_url" &
     if ! "$@"; then
       end=$(date '+%s')
       if [[ $((end-start)) -lt 10 ]]; then
