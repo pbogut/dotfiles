@@ -97,6 +97,11 @@ return {
       },
       zmk = {
         ['&myt'] = '',
+        ['&to_kp '] = '',
+        ['&tb_bt BT_LAP'] = 'B>lap',
+        ['&tb_bt BT_WIN'] = 'B>win',
+        ['&tb_bt BT_LIN'] = 'B>lin',
+        ['&tb_bt'] = 'B>bt>',
         ['&tl_tabtild PROG 0'] = 'PROG TAB ~',
         ['&tl_bslhmin PROG 0'] = 'PROG BSLH -',
         ['&tl_bslhund PROG 0'] = 'PROG BSLH _',
