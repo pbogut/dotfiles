@@ -54,6 +54,7 @@ map <c-o> %$HOME/.scripts/sway/open $fx
 map o open
 map O openall
 
+map u umount
 map K mkdir
 map T trash
 map D trash
