@@ -185,6 +185,9 @@ k.set('n', 'goT', function()
   if os.getenv('TMUX') then
     return require('pbogut.tmuxctl').toggle_pane('bottom' .. path, { height = 15, dir = path })
   end
+  if os.getenv('WEZTERM_UNIX_SOCKET') then
+    return require('pbogut.wezterm').split_pane({ cwd = path })
+  end
   cmd('belowright 15split')
   cmd.enew()
   fn.termopen('cd ' .. path .. ' && zsh')
@@ -193,6 +196,9 @@ end)
 k.set('n', 'got', function()
   if os.getenv('TMUX') then
     return require('pbogut.tmuxctl').toggle_pane('bottom', { height = 15 })
+  end
+  if os.getenv('WEZTERM_UNIX_SOCKET') then
+    return require('pbogut.wezterm').split_pane()
   end
   cmd('belowright 15split')
   cmd.enew()
