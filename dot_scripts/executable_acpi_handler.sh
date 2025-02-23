@@ -22,6 +22,15 @@ __lid_closed() {
     grep closed /proc/acpi/button/lid/LID0/state > /dev/null
 }
 
+__update_monitor() {
+    swaylock="$(ls /run/user/1000/sway-ipc.1000.*.sock)"
+    if SWAYSOCK="$swaylock" swaymsg -t get_outputs | jq -r '.[].name' | grep '^DP-1$' > /dev/null; then
+        SWAYSOCK="$swaylock" sway output eDP-1 disable
+    else
+        SWAYSOCK="$swaylock" sway output eDP-1 enable
+    fi
+}
+
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 run="sudo -u pbogut "
 logger "EVENT: 1:$1< 2:$2< 3:$3< 4:$4< 5:$5< 6:$6<"
@@ -50,14 +59,16 @@ case "$1" in
         case "$4" in
             00000000)
                 logger 'AC unpluged'
-                $run $dir/battery-save on
+                $run "$dir/battery-save" on
+                __update_monitor
                 if __lid_closed; then
                     systemctl hibernate
                 fi
                 ;;
             00000001)
                 logger 'AC pluged'
-                $run $dir/battery-save off
+                $run "$dir/battery-save" off
+                __update_monitor
                 ;;
         esac
         ;;
@@ -81,7 +92,8 @@ case "$1" in
                 ;;
             open)
                 logger 'LID opened'
-                systemctl restart bluetooth
+                # systemctl restart bluetooth
+                rfkill unblock all
                 ;;
             *)
                 logger "ACPI action undefined: $3"
