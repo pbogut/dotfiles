@@ -92,6 +92,8 @@ vim.api.nvim_create_autocmd('FileType', {
   pattern = 'markdown',
   callback = function()
     cmd('setlocal spell spelllang=en_gb')
+    vim.keymap.set('n', ']o', [[<cmd>silent s/\[ \]/[x]/<cr>]])
+    vim.keymap.set('n', '[o', [[<cmd>silent s/\[.\]/[ ]/<cr>]])
   end,
 })
 vim.api.nvim_create_autocmd('TextYankPost', {
