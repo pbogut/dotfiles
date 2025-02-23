@@ -20,7 +20,8 @@ $light2
   Close"
 
 if [[ $host == "silverspoon" ]]; then
-  options="$light3
+  options="BT Restart
+$light3
 $light1
 $light2
 $conservation
@@ -29,6 +30,11 @@ fi
 
 result=$(echo "$options" | wofi --cache-file /dev/null --dmenu -i --width 300 --xoffset 1620 -m)
 
+if [[ "BT Restart" == "$result" ]]; then
+  sudo systemctl restart bluetooth
+  rfkill unblock all
+  blueman-manager &
+fi
 if [[ $light1 == "$result" ]]; then
   "$dir/openhab-widget.sh" toggle Shelly_Office_Light1
 elif [[ $light2 == "$result" ]]; then
