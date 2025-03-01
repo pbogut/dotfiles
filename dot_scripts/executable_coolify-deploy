@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   coolify-deploy
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   01/03/2025
+#=================================================
+api_key=$(secret coolify/api_key)
+deploy_url=$(secret "coolify/deploy_urls/$1")
+
+if [[ -z "$api_key" ]]; then
+    echo "No api key found"
+    exit 1
+fi
+
+if [[ -z "$deploy_url" ]]; then
+    echo "No deploy url found"
+    exit 1
+fi
+
+
+curl -H "Authorization: Bearer $api_key" "$deploy_url"
