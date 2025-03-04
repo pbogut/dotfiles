@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   chromium-start
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   17/08/2024
+#=================================================
+url="https://www.youtube.com/feed/history?feature=app_shortcuts"
+
+if [[ $1 =~ ^https://www.youtube.com ]]; then
+    url="$1"
+fi
+if [[ $1 =~ ^https://invidious.pbogut.me ]]; then
+  url=${1//invidious.pbogut.me/www.youtube.com}
+fi
+
+echo "$@" >> /tmp/vivyou
+echo "$url" >> /tmp/vivyou
+
+vivaldi \
+    --enable-features=UseOzonePlatform \
+    --ozone-platform=wayland \
+    --class=vivaldi-personal \
+    --profile-directory=Default \
+    --app-id=agimnkijcaahngcdmfeangaknmldooml \
+    "--app-launch-url-for-shortcuts-menu-item=$url"
+    "$@"
+
