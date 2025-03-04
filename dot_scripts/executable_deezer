@@ -4,4 +4,5 @@
 # author: author <author_contact>
 # date:   08/11/2022
 #=================================================
+swaymsg '[app_id="chrome-www.deezer.com__en_-Default"] focus' ||
 chromium --app=https://www.deezer.com/en/ --profile-directory=Default
