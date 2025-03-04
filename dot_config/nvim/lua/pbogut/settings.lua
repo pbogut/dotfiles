@@ -10,7 +10,8 @@ local o = vim.opt
 vim.g.matchparen_timeout = 2
 vim.g.matchparen_insert_timeout = 2
 
-vim.cmd.filetype({ args = { 'plugin', 'indent', 'off' } })
+vim.cmd.filetype({ args = { 'plugin', 'on' } })
+vim.cmd.filetype({ args = { 'indent', 'off' } })
 vim.cmd.colorscheme('solarized')
 
 o.fillchars = { fold = ' ', vert = '│' }

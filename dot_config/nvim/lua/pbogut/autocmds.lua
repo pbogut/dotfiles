@@ -87,15 +87,6 @@ vim.api.nvim_create_autocmd('FileType', {
     bo.iskeyword = '@,48-57,_,192-255' -- remove $ from keyword list, whiy tist there in js anyway?
   end,
 })
-vim.api.nvim_create_autocmd('FileType', {
-  group = augroup,
-  pattern = 'markdown',
-  callback = function()
-    cmd('setlocal spell spelllang=en_gb')
-    vim.keymap.set('n', ']o', [[<cmd>silent s/\[ \]/[x]/<cr>]])
-    vim.keymap.set('n', '[o', [[<cmd>silent s/\[.\]/[ ]/<cr>]])
-  end,
-})
 vim.api.nvim_create_autocmd('TextYankPost', {
   group = augroup,
   pattern = '*',
@@ -119,7 +110,7 @@ vim.api.nvim_create_autocmd({ 'VimEnter' }, {
     vim.defer_fn(function()
       vim.loop.kill(pid, WINCH)
     end, 20)
-  end
+  end,
 })
 vim.api.nvim_create_autocmd('InsertEnter', {
   group = augroup,
