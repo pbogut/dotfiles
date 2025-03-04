@@ -58,6 +58,7 @@ return {
         'vim-language-server',
         'vint',
         'vls',
+        'zls',
       },
       auto_update = false,
       run_on_start = false,

@@ -69,6 +69,7 @@ return {
       { name = 'ts_ls' },
       { name = 'vimls' },
       -- { name = 'vuels' },
+      { name = 'zls' },
     }
 
     local navic_ext = {
