@@ -69,10 +69,12 @@ done
 # tag github messages
 notmuch search --output=files from:notifications@github.com and tag:new | while read -r f; do
     # shellcheck disable=2002
-    tag=$(cat "$f" | grep '^To: ' | sed 's/^To: \([^ ]*\).*/\1/g' | sed 's/^"\(.*\)"$/\1/')
-    id=$(enrichmail --get-message-id "$f")
-    if [[ "$tag" != "" ]]; then
-        notmuch tag +"github/$tag" +github -- id:"$id"
+    tag=$(cat "$f" | grep '^To:.*@github.com' | sed 's/^To: \([^ ]*\).*/\1/g' | sed 's/^"\(.*\)"$/\1/')
+    if [[ $tag != "" ]]; then
+        id=$(enrichmail --get-message-id "$f")
+        if [[ $id != "" ]]; then
+            notmuch tag +"github/$tag" +github -- id:"$id"
+        fi
     fi
 done
 
@@ -80,8 +82,12 @@ done
 notmuch search --output=files from:gitlab@mg.gitlab.com and tag:new | while read -r f; do
     # shellcheck disable=2002
     tag=$(cat "$f" | grep '^X-GitLab-Project-Path: ' | sed 's/^X-GitLab-Project-Path: \([^ ]*\).*/\1/g')
-    id=$(enrichmail --get-message-id "$f")
-    notmuch tag +"gitlab/$tag" +gitlab -- id:"$id"
+    if [[ $tag != "" ]]; then
+        id=$(enrichmail --get-message-id "$f")
+        if [[ $id != "" ]]; then
+            notmuch tag +"gitlab/$tag" +gitlab -- id:"$id"
+        fi
+    fi
 done
 
 # notmuch tag -inbox -- "(tag:work and tag:inbox) and not tag:unread"
