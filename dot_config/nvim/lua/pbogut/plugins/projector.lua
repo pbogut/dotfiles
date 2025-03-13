@@ -819,6 +819,10 @@ return {
               template = 'docker-compose.yml',
               priority = 5000,
             },
+            ['main%.go'] = {
+              template = 'go/main.go',
+              priority = 5000,
+            },
             ['phpmd%.xml'] = {
               template = 'phpmd.xml',
               priority = 5000,
