@@ -16,7 +16,7 @@ if [[ -z $TMUX ]]; then
 fi
 selection=""
 if [[ $TERM == "dumb" || $TERM == 'linux' ]]; then
-  selection=$(ls -r "$dest" | wofi --dmenu --cache-file /dev/null)
+  selection=$(ls -r "$dest" | fuzzel --dmenu -p "screenshot" --cache /dev/null)
 else
   selection=$(ls -r "$dest" | fzf --height="100%" --preview="chafa $sixel -s '${width}x${height}' $dest/{}")
 fi
