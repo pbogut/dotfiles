@@ -39,9 +39,9 @@ alias kill=/usr/bin/kill
 
 alias lg="lazygit"
 
-alias clg="cd $(chezmoi source-path) && lazygit"
-alias cvi="cd $(chezmoi source-path) && nvim"
-alias ccd="cd $(chezmoi source-path)"
+alias clg="cd ~/.local/share/chezmoi && lazygit"
+alias cvi="cd ~/.local/share/chezmoi && nvim"
+alias ccd="cd ~/.local/share/chezmoi"
 
 alias genpass="apg -m16 -n1 -MSNCL"
 
