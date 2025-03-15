@@ -9,9 +9,6 @@ return {
   },
   init = function() end,
   config = function()
-    -- disable lsp poll watcher
-    require('pbogut.plugins.lsp.fswatch')
-
     local command = vim.api.nvim_create_user_command
     local u = require('pbogut.utils')
     local k = vim.keymap
