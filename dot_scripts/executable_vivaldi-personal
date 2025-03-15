@@ -5,4 +5,10 @@
 # date:   17/08/2024
 #=================================================
 swaymsg '[app_id="vivaldi-personal"] focus'
-vivaldi --enable-features=UseOzonePlatform --ozone-platform=wayland --class=vivaldi-personal --profile-directory=Default "$@"
+vivaldi \
+    --enable-features=UseOzonePlatform \
+    --ozone-platform=wayland \
+    --class=vivaldi-personal \
+    --profile-directory=Default \
+    "$@"
+
