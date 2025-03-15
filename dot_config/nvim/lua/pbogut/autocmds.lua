@@ -14,20 +14,6 @@ vim.api.nvim_create_autocmd('TermOpen', {
     wo.cursorcolumn = false
   end,
 })
-vim.api.nvim_create_autocmd('BufEnter', {
-  group = augroup,
-  pattern = 'crontab.*',
-  callback = function()
-    bo.commentstring = '# %s'
-  end,
-})
-vim.api.nvim_create_autocmd('FileType', {
-  group = augroup,
-  pattern = 'zsh',
-  callback = function()
-    bo.commentstring = '# %s'
-  end,
-})
 vim.api.nvim_create_autocmd('FileType', {
   group = augroup,
   pattern = 'html,css,scss,xml,java,elixir,eelixir,c,php,php.phtml,sql,blade,elm',
@@ -40,23 +26,6 @@ vim.api.nvim_create_autocmd('FileType', {
   pattern = 'sh,vue,javascript,vim,lua,yaml,yaml.docker-compose,ruby',
   callback = function()
     u.set_indent(2)
-  end,
-})
-vim.api.nvim_create_autocmd('FileType', {
-  group = augroup,
-  pattern = 'NeogitCommitMessage',
-  callback = function()
-    cmd('setlocal spell spelllang=en_gb')
-  end,
-})
-vim.api.nvim_create_autocmd('FileType', {
-  group = augroup,
-  pattern = 'mail',
-  callback = function()
-    cmd('setlocal spell spelllang=en_gb')
-    vim.bo.textwidth = 72
-    vim.fn.execute('normal gg')
-    vim.fn.search('^$')
   end,
 })
 vim.api.nvim_create_autocmd('FileType', {
@@ -122,14 +91,5 @@ vim.api.nvim_create_autocmd('InsertLeave', {
   group = augroup,
   callback = function()
     vim.wo.wrap = vim.wo.wrap
-  end,
-})
-vim.api.nvim_create_autocmd('FileType', {
-  group = augroup,
-  pattern = 'zellijdump',
-  callback = function()
-    vim.o.signcolumn = 'no'
-    vim.o.number = false
-    vim.o.relativenumber = false
   end,
 })

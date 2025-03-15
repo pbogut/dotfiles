@@ -12,12 +12,13 @@ return {
   opts = {
     comment_strings = {
       asm = '//%s',
-      heex = { '<%!-- %s --%>', '<%!-- %s --%>' },
+      crontab = '# %s',
       devicetree = { '// %s', '/* %s */' },
-      swayconfig = '# %s',
-      openscad = '// %s',
+      heex = { '<%!-- %s --%>', '<%!-- %s --%>' },
       kdl = '// %s',
+      openscad = '// %s',
       query = '; %s',
+      swayconfig = '# %s',
     },
   },
   config = function(_, opts)
