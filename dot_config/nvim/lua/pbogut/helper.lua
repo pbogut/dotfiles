@@ -10,6 +10,34 @@ end
 -- vim global helper functions
 vim.h = {}
 
+function vim.h.deep_get(t, k)
+  local last_value = nil
+  for _, i in ipairs(vim.split(k, '.', true)) do
+    if t[i] == nil then
+      return nil
+    end
+    t = t[i]
+    last_value = t
+  end
+  return last_value
+end
+
+function vim.h.deep_set(t, k, v)
+  local last_table = nil
+  local last_index = nil
+  for _, i in ipairs(vim.split(k, '.', true)) do
+    if t[i] == nil then
+      t[i] = {}
+    end
+    last_table = t
+    last_index = i
+    t = t[i]
+  end
+  if last_table and last_index then
+    last_table[last_index] = v
+  end
+end
+
 function vim.h.send_esc()
   local esc = vim.api.nvim_replace_termcodes('<esc>', true, false, true)
   vim.api.nvim_feedkeys(esc, 'nx', false)
