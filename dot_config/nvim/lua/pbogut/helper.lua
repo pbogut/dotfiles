@@ -1,4 +1,7 @@
-function _G.write_to_file(file, text)
+-- vim global helper functions
+vim.h = {}
+
+function vim.h.write_to_file(file, text)
   local f = io.open(file, 'w')
   if f == nil then
     return
@@ -7,8 +10,15 @@ function _G.write_to_file(file, text)
   f:close()
 end
 
--- vim global helper functions
-vim.h = {}
+function vim.h.read_file(path)
+  local file = io.open(path, 'rb') -- r read mode and b binary mode
+  if not file then
+    return nil
+  end
+  local content = file:read('*a') -- *a or *all reads the whole file
+  file:close()
+  return content
+end
 
 function vim.h.deep_get(t, k)
   local last_value = nil

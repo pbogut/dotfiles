@@ -11,7 +11,7 @@ store="/tmp/nvim_godot/$session_name"
 mkdir -p "$(dirname "$store")"
 
 _start_nvim_godot() {
-  nvim -c "lua write_to_file('$store', vim.v.servername)"
+  nvim -c "lua vim.h.write_to_file('$store', vim.v.servername)"
 }
 
 if [[ -f "$store" ]]; then

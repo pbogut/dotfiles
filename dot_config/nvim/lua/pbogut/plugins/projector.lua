@@ -746,13 +746,13 @@ return {
                 on_stdout = function(_, out)
                   local hash = out[1]
                   local file = '/tmp/nvim_godot/' .. hash
-                  write_to_file(file, vim.v.servername)
+                  vim.h.write_to_file(file, vim.v.servername)
                 end,
               })
-              vim.fn.jobstart({ 'wezterm', 'cli', 'list', '--format', 'json'}, {
+              vim.fn.jobstart({ 'wezterm', 'cli', 'list', '--format', 'json' }, {
                 stdout_buffered = true,
                 on_stdout = function(_, out)
-                  local data = vim.fn.json_decode(table.concat(out, ""))
+                  local data = vim.fn.json_decode(table.concat(out, ''))
                   local window_id = 0
                   local pane_id = os.getenv('WEZTERM_PANE')
                   local has_godot = false
@@ -770,7 +770,18 @@ return {
                     end
                   end
                   if not has_godot then
-                    vim.fn.jobstart({ 'wezterm', 'cli', 'spawn', '--cwd', vim.fn.getcwd(), 'rtx', 'x', '--', 'godot', 'project.godot' }, {
+                    vim.fn.jobstart({
+                      'wezterm',
+                      'cli',
+                      'spawn',
+                      '--cwd',
+                      vim.fn.getcwd(),
+                      'rtx',
+                      'x',
+                      '--',
+                      'godot',
+                      'project.godot',
+                    }, {
                       on_exit = function()
                         vim.fn.jobstart({ 'wezterm', 'cli', 'activate-pane', '--pane-id', pane_id })
                       end,
