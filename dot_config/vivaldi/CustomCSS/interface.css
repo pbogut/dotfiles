@@ -42,3 +42,13 @@ body .tabbar-wrapper {
     position: absolute;
     top: 15px;
 }
+/* hide panel */
+#main #panels #switch {
+  display: none;
+}
+#main #panels-container {
+  margin-left: -41px;
+}
+#main #panels-container.switcher {
+  margin-left: 0px;
+}
