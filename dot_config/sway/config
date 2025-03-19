@@ -40,6 +40,7 @@ output * adaptive_sync on
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
+focus_on_window_activation focus
 
 # popups
 popup_during_fullscreen leave_fullscreen
