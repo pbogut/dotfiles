@@ -9,7 +9,6 @@ prop="$(sway-prop)"
 wm_title=$(echo "$prop" | jq '.title' -r)
 wm_class=$(echo "$prop" | jq '.instance + " " + .class' -r)
 wm_app_id=$(echo "$prop" | jq '.app_id' -r)
-echo "$@"
 
 usage() {
   echo "Ussage: ${0##*/} [OPTIONS]"
@@ -153,13 +152,37 @@ case  "$wm_app_id" in
   "com.gitlab.newsflash"|"io.gitlab.news_flash.NewsFlash")
     move_and_swich "$ws_rss"
     ;;
+  "vivaldi-"*)
+    case "$wm_title" in
+      "Bitwarden - Vivaldi")
+        sleep 0.1s
+        set_floating 400px 800px
+        ;;
+      "Developer Tools - Vivaldi"*|"DevTools - "*|"DevToolsApp"|"DevTools")
+        swaymsg "move right; resize set width 680px"
+        ;;
+      *)
+        case  "$wm_app_id" in
+          "vivaldi-agimnkijcaahngcdmfeangaknmldooml-Default")
+            move_and_swich "$ws_media"
+            ;;
+          "vivaldi-work")
+            move_and_swich "$ws_work"
+            ;;
+          "vivaldi-personal")
+            move_and_swich "$ws_browser"
+            ;;
+        esac
+        ;;
+    esac
+    ;;
   "org.qutebrowser.mediabrowser")
     move_and_swich "$ws_media"
     ;;
-  "vivaldi-work"|"zen-work"|"chromium-work"|"firefox-work"|"org.qutebrowser.workbrowser")
+  "zen-work"|"chromium-work"|"firefox-work"|"org.qutebrowser.workbrowser")
     move_and_swich "$ws_work"
     ;;
-  "vivaldi-personal"|"zen-personal"|"chromium-personal"|"firefox-personal"|"org.qutebrowser.qutebrowser")
+  "zen-personal"|"chromium-personal"|"firefox-personal"|"org.qutebrowser.qutebrowser")
     move_and_swich "$ws_browser"
     ;;
   "mpv")
