@@ -4,11 +4,18 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   17/08/2024
 #=================================================
-swaymsg '[app_id="vivaldi-personal"] focus'
-vivaldi \
-    --enable-features=UseOzonePlatform \
-    --ozone-platform=wayland \
-    --class=vivaldi-personal \
-    --profile-directory=Default \
-    "$@"
+__vivaldi() {
+    vivaldi \
+        --enable-features=UseOzonePlatform \
+        --ozone-platform=wayland \
+        --class=vivaldi-personal \
+        --profile-directory=Default \
+        "$@"
+}
 
+if [[ $# -eq 0 ]]; then
+    swaymsg '[app_id="vivaldi-personal"] focus' || __vivaldi
+else
+    swaymsg '[app_id="vivaldi-personal"] focus'
+    __vivaldi "$@"
+fi
