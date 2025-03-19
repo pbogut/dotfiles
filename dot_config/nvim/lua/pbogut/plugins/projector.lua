@@ -413,7 +413,7 @@ return {
             function()
               vim.api.nvim_create_autocmd('FileType', {
                 group = vim.api.nvim_create_augroup('x_laravel', { clear = true }),
-                pattern = 'php',
+                pattern = 'php,blade',
                 callback = function()
                   -- copied from polyglot/blade so it works in controllers as well
                   bo.suffixesadd = '.blade.php,.php'
