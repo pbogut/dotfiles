@@ -411,14 +411,35 @@ return {
           priority = 100,
           project_init = {
             function()
+              local group = vim.api.nvim_create_augroup('x_laravel', { clear = true })
               vim.api.nvim_create_autocmd('FileType', {
-                group = vim.api.nvim_create_augroup('x_laravel', { clear = true }),
+                group = group,
                 pattern = 'php,blade',
                 callback = function()
                   -- copied from polyglot/blade so it works in controllers as well
                   bo.suffixesadd = '.blade.php,.php'
                   bo.includeexpr = [[substitute(v:fname,'\.','/','g')]]
                   bo.path = o.path .. [[,resources/views;]]
+                end,
+              })
+              vim.api.nvim_create_autocmd('FileType', {
+                group = group,
+                pattern = 'blade',
+                callback = function()
+                  local rg_loaded, rg = pcall(require, 'ripgrep')
+                  if (rg_loaded) then
+                    vim.keymap.set('n', 'grt', function ()
+                      local path = vim.fn.expand('%:p')
+                      local cwd = vim.fn.getcwd()
+                      if path:sub(1, #cwd) == cwd then
+                        path = path:sub(#cwd + 2)
+                        path = path:gsub('%.blade%.php$', '')
+                        path = path:gsub('^resources%/views%/', '')
+                        path = path:gsub('%/', '.')
+                        rg.ripgrep({ args = path, regex = false })
+                      end
+                    end, { silent = true })
+                  end
                 end,
               })
             end,
