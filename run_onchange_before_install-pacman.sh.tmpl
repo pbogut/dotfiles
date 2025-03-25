@@ -35,11 +35,13 @@ for package in $should_install; do
     fi
 done
 
-echo "To install: $to_install"
-paru -S \
-    --skipreview \
-    --needed \
-    $to_install
+if [[ $to_install != "" ]]; then
+    echo "To install: $to_install"
+    paru -S \
+        --skipreview \
+        --needed \
+        $to_install
+fi
 
 # {{- if eq .hostname "silverspoon" }} [[[ silverspoon
 should_install="{{ range .silverspoon.packages.paru -}}{{ . }} {{ end }}"
@@ -52,9 +54,11 @@ for package in $should_install; do
     fi
 done
 
-echo "To install: $to_install"
-paru -S \
-    --skipreview \
-    --needed \
-    $to_install
+if [[ $to_install != "" ]]; then
+    echo "To install: $to_install"
+    paru -S \
+        --skipreview \
+        --needed \
+        $to_install
+fi
 # silverspoon ]]] {{- end }}
