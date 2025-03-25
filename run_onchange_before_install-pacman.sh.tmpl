@@ -24,15 +24,37 @@ if ! paru --version; then
     "$HOME/.cargo/bin/paru" -S paru && cargo uninstall paru
 fi
 
-echo "> Installing packages..."
+installed=$(pacman -Q | awk '{print $1}')
+should_install="{{ range .packages.paru -}}{{ . }} {{ end }}"
+to_install=""
+
+# Loop through the packages to install and check if they are already installed
+for package in $should_install; do
+    if ! echo "$installed" | grep -q "^$package$"; then
+        to_install="$to_install $package"
+    fi
+done
+
+echo "To install: $to_install"
 paru -S \
     --skipreview \
     --needed \
-    {{ range .packages.paru -}} {{ . }} {{ end }}
+    $to_install
 
 # {{- if eq .hostname "silverspoon" }} [[[ silverspoon
+should_install="{{ range .silverspoon.packages.paru -}}{{ . }} {{ end }}"
+to_install=""
+
+# Loop through the packages to install and check if they are already installed
+for package in $should_install; do
+    if ! echo "$installed" | grep -q "^$package$"; then
+        to_install="$to_install $package"
+    fi
+done
+
+echo "To install: $to_install"
 paru -S \
     --skipreview \
     --needed \
-    {{ range .silverspoon.packages.paru -}} {{ . }} {{ end }}
+    $to_install
 # silverspoon ]]] {{- end }}
