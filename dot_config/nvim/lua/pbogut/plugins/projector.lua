@@ -12,7 +12,8 @@ return {
     local o = vim.o
     local l = {}
 
-    command('Skel', 'lua require"projector".template_command(<q-args>)', {
+    command('Skel', require('projector').template_command, {
+      bang = true,
       nargs = '?',
       complete = 'customlist,v:lua.projector.temp_completion',
     })

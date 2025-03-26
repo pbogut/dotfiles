@@ -140,9 +140,12 @@ function M.template_list(lead)
   return result
 end
 
-function M.template_command(args)
-  if args and args:len() > 0 then
-    M.file_template(args)
+function M.template_command(opt)
+  if opt.bang then
+    vim.cmd('normal! ggdG')
+  end
+  if opt.args and opt.args:len() > 0 then
+    M.file_template(opt.args)
   else
     M.do_template()
   end
