@@ -41,7 +41,7 @@ paru = [
   "noto-fonts-emoji",
   "npm",
   "numlockx",
-  "pandoc",
+  "pandoc-bin",
   "paru",
   "pipewire",
   "pkgconf",
