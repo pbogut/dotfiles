@@ -7,9 +7,10 @@
 cmd=$1
 package="go"
 while [[ $package != "" ]]; do
-  missing=$($cmd 2>&1| grep 'libHS' | sed -E 's,.*: libHS([^0-9]+).*,\1,')
-  package=$(echo $missing | sed -E 's,(.*?)-$,haskell-\1,')
+  missing=$($cmd 2>&1| grep 'libHS' | sed -E 's,.*: libHS(.*)-[0-9]+[0-9\-\.]+.*$,\1,')
+  package="haskell-${missing,,}"
+  echo "$package"
   if [[ $package != "" ]]; then
-    yay -S $package
+    paru -S "$package"
   fi
 done
