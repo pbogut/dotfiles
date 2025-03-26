@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   netflix
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   05/07/2024
+#=================================================
+chromium --app=https://tv.apple.com/ --profile-directory=Default
