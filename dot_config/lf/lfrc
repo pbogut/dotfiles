@@ -7,6 +7,7 @@ set filesep "\n"  # default already
 
 set previewer ~/.config/lf/preview
 set cleaner ~/.config/lf/cleaner
+set scrolloff 5
 set sixel true
 
 # $f:  lf_current_file
@@ -35,6 +36,11 @@ cmd umount %{{
   #lf -remote "send $id reload"
 }}
 
+cmd clear_unselect :{{
+  clear
+  unselect
+}}
+
 cmd extract %{{
   dest=${f%.*}
   dest=${dest// /_}
@@ -46,8 +52,27 @@ cmd extract %{{
   lf -remote "send $id select $dest"
 }}
 
+cmd rename_and_select :{{
+  rename $1
+  reload
+  select $1
+}}
+
+cmd paste_and_select %{{
+    load=$(cat ~/.local/share/lf/files)
+    first_file=$(echo "$load" | sed -n '2p')
+    name=$(basename "$first_file")
+    lf -remote "send $id paste"
+    lf -remote "send $id select $name"
+}}
+
 cmd open $set -f; rifle -p 0 $f
 cmd openall $set -f; rifle -p 0 $fx
+
+map r rename_and_select
+map p paste_and_select
+
+map c clear_unselect
 
 map x extract
 map <c-o> %$HOME/.scripts/sway/open $fx
