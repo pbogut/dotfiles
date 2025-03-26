@@ -6,7 +6,7 @@
 #=================================================
 
 while :; do
-    #killall -9 xboxdrv
+    killall -9 xboxdrv
 
     SCUF=$(ls /dev/input/by-id/*Scuf*event-joystick 2> /dev/null)
     if [ -z "$SCUF" ]; then
