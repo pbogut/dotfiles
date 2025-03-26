@@ -402,6 +402,11 @@ c.keys = {
     action = act.CloseCurrentTab({ confirm = true }),
   },
   {
+    key = 'v', -- as for neo(v)im
+    mods = 'ALT',
+    action = my_act.ActivateOrCreateTab(0),
+  },
+  {
     key = 'j',
     mods = 'ALT',
     action = my_act.ActivateOrCreateTab(0),
@@ -420,6 +425,11 @@ c.keys = {
     key = ';',
     mods = 'ALT',
     action = my_act.ActivateOrCreateTab(3),
+  },
+  {
+    key = 's', -- as for sql
+    mods = 'ALT',
+    action = my_act.ActivateOrCreateTab(4),
   },
 }
 
