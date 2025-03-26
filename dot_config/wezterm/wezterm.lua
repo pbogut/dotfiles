@@ -32,8 +32,8 @@ c.window_padding = {
 c.ssh_backend = 'Ssh2'
 c.ssh_domains = {
   {
-    name = "silverspoon",
-    remote_address = "silverspoon"
+    name = "silverspoon.local",
+    remote_address = "silverspoon.local",
   }
 }
 c.enable_tab_bar = true
