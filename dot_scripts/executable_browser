@@ -11,7 +11,6 @@ url="$1"
 
 if [[ $url =~ ^https://invidious\.pbogut\.me/watch\?v= ]]; then
   shift
-  app_url=${url//invidious.pbogut.me/www.youtube.com}
   vivaldi-youtube "$url" "${@//\[\[AMPERSAND\]\]/&}" &
   exit 0
 elif [[ $url =~ ^https://www\.youtube\.com/watch\?v= ]]; then
@@ -26,6 +25,12 @@ elif [[ $url =~ ^https://rumble\.com ]]; then
   vivaldi-work "$@" &
 elif [[ $url =~ ^https://gitlab\.com ]]; then
   vivaldi-work "$@" &
+elif [[ $url =~ ^https://local\.* ]]; then
+  vivaldi-work "$@" &
+elif [[ $url =~ ^https?://*\.local ]]; then
+  vivaldi-work "$@" &
 else
   vivaldi-personal "$@" &
 fi
+
+exit 0;
