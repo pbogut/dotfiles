@@ -63,7 +63,7 @@ set $wsterm    2:  term
 set $ws_comm   3: / comm
 set $wscode    4:  code
 set $wsmedia   5:  media
-set $wsqbwork  6:  qbwork
+set $wswork  6:  work
 set $wsdb       db
 set $ws_dash   9:  dash
 set $wsrss      rss
@@ -142,7 +142,7 @@ bindsym $mod+2 workspace --no-auto-back-and-forth $wsterm
 bindsym $mod+3 workspace --no-auto-back-and-forth $ws_comm
 bindsym $mod+4 workspace --no-auto-back-and-forth $wscode
 bindsym $mod+5 workspace --no-auto-back-and-forth $wsmedia
-bindsym $mod+6 workspace --no-auto-back-and-forth $wsqbwork
+bindsym $mod+6 workspace --no-auto-back-and-forth $wswork
 bindsym $mod+7 workspace --no-auto-back-and-forth $wsgame
 bindsym $mod+8 workspace --no-auto-back-and-forth $wssteam
 bindsym $mod+9 workspace --no-auto-back-and-forth $ws_dash
@@ -261,7 +261,7 @@ workspace "$ws_dash" output $display_right
 workspace "$wsmedia" output $display_left
 workspace "$wsgame" output $display_main
 workspace "$wssteam" output $display_right
-workspace "$wsqbwork" output $display_right
+workspace "$wswork" output $display_right
 workspace "$ws3d" output $display_right
 workspace "$wscode" output $display_main
 
