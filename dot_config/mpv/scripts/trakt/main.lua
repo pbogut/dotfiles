@@ -9,9 +9,20 @@ elseif os.getenv('HOME') then
   auth_file = os.getenv('HOME') .. '/.config/mpv_trakt.json'
 end
 
+local function get_config(key)
+  local handle = io.popen("secret " .. key)
+  if handle == nil then
+    return nil
+  end
+  local result = handle:read("*a")
+  handle:close()
+
+  return result:gsub('\n$', '')
+end
+
 local opts = {
-  client_id = os.getenv('TRAKT_CLIENT_ID') or '',
-  client_secret = os.getenv('TRAKT_CLIENT_SECRET') or '',
+  client_id = get_config('trakt/client_id') or '',
+  client_secret = get_config('trakt/client_secret') or '',
   disable_output = false,
   auto_stop = true,
   auto_stop_threshold = 99,
