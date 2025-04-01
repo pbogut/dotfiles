@@ -11,11 +11,11 @@ url="$1"
 
 if [[ $url =~ ^https://invidious\.pbogut\.me/watch\?v= ]]; then
   shift
-  vivaldi-youtube "$url" "${@//\[\[AMPERSAND\]\]/&}" &
+  youtube "$url" "${@//\[\[AMPERSAND\]\]/&}" &
   exit 0
 elif [[ $url =~ ^https://www\.youtube\.com/watch\?v= ]]; then
   shift
-  vivaldi-youtube "$url" "${@//\[\[AMPERSAND\]\]/&}" &
+  youtube "$url" "${@//\[\[AMPERSAND\]\]/&}" &
   exit 0
 elif [[ $url =~ ^https://open\.spotify\.com ]]; then
   vivaldi-personal "$@" &

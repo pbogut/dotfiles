@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   chromium-start
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   17/08/2024
+#=================================================
+url="https://www.youtube.com/feed/history?feature=app_shortcuts"
+
+if [[ $1 =~ ^https://www.youtube.com ]]; then
+    url="$1"
+fi
+if [[ $1 =~ ^https://invidious.pbogut.me ]]; then
+  url=${1//invidious.pbogut.me/www.youtube.com}
+fi
+
+brave \
+    --enable-features=UseOzonePlatform \
+    --ozone-platform=wayland \
+    --class=youtube \
+    --profile-directory=Default \
+    --app="$url" \
+    "$@"
+

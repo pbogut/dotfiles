@@ -149,6 +149,9 @@ case  "$wm_app_id" in
     # set_floating 1600px 900px
     move_and_swich "$ws_media"
     ;;
+  *"-www.youtube.com_"*)
+    move_and_swich "$ws_media"
+    ;;
   "com.gitlab.newsflash"|"io.gitlab.news_flash.NewsFlash")
     move_and_swich "$ws_rss"
     ;;
@@ -200,6 +203,9 @@ case  "$wm_app_id" in
     ;;
 esac
 case  "$wm_class" in
+  "www.youtube.com__"*)
+    move_and_swich "$ws_media"
+    ;;
   "freetube FreeTube")
     move_and_swich "$ws_media"
     ;;
