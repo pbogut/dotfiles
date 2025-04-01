@@ -60,7 +60,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = augroup,
   pattern = '*',
   callback = function()
-    require('vim.highlight').on_yank({ timeout = 50, higroup = 'Search' })
+    require('vim.hl').on_yank({ timeout = 50, higroup = 'Search' })
   end,
 })
 vim.api.nvim_create_autocmd({ 'VimEnter' }, {
