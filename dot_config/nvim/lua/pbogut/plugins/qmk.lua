@@ -16,6 +16,13 @@ return {
         '_ _ _ _ x x',
         '_ _ _ _ x x',
       },
+      boardsource5x12 = {
+        'x x x x x x x x x x x x',
+        'x x x x x x x x x x x x',
+        'x x x x x x x x x x x x',
+        'x x x x x x x x x x x x',
+        'x x x x x x x x x x x x',
+      },
       dactyl_gaming = {
         'x x x x x x',
         'x x x x x x',
@@ -227,6 +234,11 @@ return {
           variant = 'zmk',
           layout = layouts.dactyl_gaming_bt,
         },
+        {
+          pattern = 'boardsource5x12.keymap',
+          variant = 'zmk',
+          layout = layouts.boardsource5x12,
+        },
       }
       for _, config in ipairs(configs) do
         local fname = vim.fn.expand('%:p')
@@ -248,7 +260,7 @@ return {
     local augroup = vim.api.nvim_create_augroup('x_qmk', { clear = true })
     vim.api.nvim_create_autocmd('BufEnter', {
       group = augroup,
-      pattern = 'keymap.c,kyria.keymap,dactyl_gaming.keymap',
+      pattern = 'keymap.c,kyria.keymap,dactyl_gaming.keymap,boardsource5x12.keymap',
       callback = function()
         local opts = get_setup_opts()
         if opts then
