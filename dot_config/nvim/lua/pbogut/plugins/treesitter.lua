@@ -6,7 +6,7 @@ return {
     event = { 'BufWritePre', 'BufReadPre', 'FileType' },
     opts = {
       enable = true,
-      max_lines = 5,
+      max_lines = 10,
       trim_scope = 'outer',
       patterns = {
         default = {
