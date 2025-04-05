@@ -133,8 +133,8 @@ virtual-mailboxes \
     "   ├ Leisure"        "notmuch://?query=tag:newsletter and tag:leisure"                                                \
     "   ├ Job"            "notmuch://?query=tag:newsletter and tag:jobs"                                                   \
     "   ├ Food"           "notmuch://?query=tag:newsletter and tag:food"                                                   \
-    "   ├ Locals"         "notmuch://?query=tag:newsletter and tag:locals"                                                 \
     "   └ Politics"       "notmuch://?query=tag:newsletter and tag:politics"                                               \
+    "   └ Other"          "notmuch://?query=tag:newsletter and not tag:tech and not tag:gaming and not tag:jobs and not tag:food and not tag:leisure not tag:politics" \
     "Everything"          "notmuch://?query=not tag:spam"                                                                  \
     " ├  Last 3 months"  "notmuch://?query=date:`date --date="3 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
     " ├  Last 6 months"  "notmuch://?query=date:`date --date="6 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
