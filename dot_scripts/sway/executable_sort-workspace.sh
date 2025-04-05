@@ -109,6 +109,22 @@ ws_steam="8:  steam"
 ws_game="7:  gaming"
 ws_3d=" 3d"
 
+workspaces=(
+  "$ws_browser"
+  "$ws_term"
+  "$ws_comm"
+  "$ws_code"
+  "$ws_media"
+  "$ws_work"
+  "$ws_db"
+  "$ws_dash"
+  "$ws_rss"
+  "$ws_vm"
+  "$ws_steam"
+  "$ws_game"
+  "$ws_3d"
+)
+
 
 if [[ $extended -eq 1 ]]; then
   found=1
@@ -136,6 +152,15 @@ case  "$wm_app_id" in
       case "$wm_title" in
         *"  "*)
           move_and_swich "$ws_code"
+          ;;
+        *)
+          current_ws=$(get_current_ws)
+          for ws in "${workspaces[@]}"; do
+            if [[ "$current_ws" == "$ws" ]]; then
+              move_and_swich "$ws_term"
+            fi
+          done
+          exit 0
           ;;
       esac
     ;;
