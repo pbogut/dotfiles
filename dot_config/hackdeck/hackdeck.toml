@@ -57,6 +57,14 @@ button_press="<|toggle\n"
 execute="~/.scripts/hackdeck/laptop_screen.sh"
 
 [[buttons]]
+row=2
+column=1
+icon_text="󱧣"
+color="#000000"
+button_press="<|TOGGLE\n"
+execute="~/.scripts/hackdeck/hamqtt.sh tasmota_31A3A8 Power1"
+
+[[buttons]]
 row=0
 column=3
 color="#000000"
