@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   dji-sync
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   09/04/2025
+#=================================================
+
+hostname=$(hostname)
+
+echo "Dji Video Sync Tool"
+
+if [[ "$hostname" == "redeye" ]]; then
+  if ping silverspoon.local -W 1 -c 1 > /dev/null 2>&1; then
+    echo "> Syncing from silverspoon..."
+    rsync -av silverspoon.local:Videos/ ~/Videos/
+  else
+    echo "> Silverspoon not reachable, skipping sync"
+  fi
+
+  echo "> Done"
+  exit 0
+fi
+
+if [[ "$hostname" == "silverspoon" ]]; then
+  sdcard=false
+  mkdir -p "$HOME/Videos/Dji"
+  if [[ -d /run/media/pbogut/disk/DCIM/100MEDIA ]]; then
+    sdcard=true
+    echo "> Mount point exists, syncing..."
+    if rsync -av "/run/media/pbogut/disk/DCIM/100MEDIA/" "$HOME/Videos/Dji/"; then
+      echo "> Sync completed successfully"
+      echo "> Deleting files from the source..."
+      rm /run/media/pbogut/disk/DCIM/100MEDIA/*
+      echo "> Unmounting card..."
+      umount /run/media/pbogut/disk
+      echo "> Done"
+    fi
+  else
+    echo "> SDa Card not mounted, skipping"
+  fi
+
+  if ping redeye.local -W 1 -c 1 > /dev/null 2>&1; then
+    echo "> Syncing to redeye..."
+    rsync -av "$HOME/Videos/Dji/" "redeye.local:Videos/Dji/"
+  else
+    echo "> Redeye not reachable, skipping sync"
+  fi
+
+  if [[ -d /run/media/pbogut/disk/DCIM/100MEDIA ]]; then
+    echo "> Done, but SD card is still mounted"
+  else
+    if $sdcard; then
+      echo "> Done, SD card can be removed"
+    else
+      echo "> Done"
+    fi
+  fi
+
+  exit 0
+fi
