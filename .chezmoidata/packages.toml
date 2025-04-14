@@ -98,4 +98,5 @@ paru = [
 go = [
   "github.com/pbogut/go-serve@latest",
   "github.com/pbogut/mails-go-web@latest",
+  "github.com/porjo/youtubeuploader@latest",
 ]
