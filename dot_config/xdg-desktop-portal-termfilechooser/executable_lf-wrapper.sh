@@ -40,7 +40,7 @@ quote_string() {
 	echo "'${input//\'/\'\\\'\'}'"
 }
 
-TERMCMD="$HOME/.scripts/terminal -t $(quote_string "$TITLE") -e"
+TERMCMD="$HOME/.scripts/terminal-float -t $(quote_string "$TITLE") -e"
 termcmd="${TERMCMD:-/usr/bin/kitty --title $(quote_string "$TITLE")}"
 
 cleanup() {
