@@ -435,7 +435,18 @@ c.keys = {
 
 wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
   if global_title then
-    return global_title
+    local fg_color = c.colors.tab_bar.active_tab.fg_color
+    local bg_color = c.colors.tab_bar.active_tab.bg_color
+    local background = c.colors.tab_bar.background
+    local after_sep = '█'
+    return {
+      { Background = { Color = bg_color } },
+      { Foreground = { Color = fg_color } },
+      { Text = ' ' .. global_title },
+      { Background = { Color = background } },
+      { Foreground = { Color = bg_color } },
+      { Text = after_sep },
+    }
   end
   local title = tab.tab_title
 
@@ -558,6 +569,9 @@ end)
 
 wezterm.on('update-right-status', function(window, _)
   local status_text = os.getenv('WEZTERM_PROJECT') or '' -- get_status(cwd_uri, 'title')
+  if status_text:len() > 0 then
+    status_text = ' ' .. status_text .. ' '
+  end
   window:set_right_status(status_text)
 end)
 
@@ -606,7 +620,10 @@ c.key_tables = {
 }
 
 if os.getenv('WEZTERM_FLOATING') then
-  c.enable_tab_bar = false
+  c.enable_tab_bar = true
+  c.show_new_tab_button_in_tab_bar = false
+  c.tab_bar_at_bottom = false
+  c.tab_max_width = 255
   c.keys[#c.keys + 1] = {
     key = 'j',
     mods = 'ALT',

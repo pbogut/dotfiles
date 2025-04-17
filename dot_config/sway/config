@@ -349,7 +349,7 @@ bindsym $mod+Ctrl+r $exec swaymsg '[app_id="com.gitlab.newsflash"] focus' || new
 
 bindsym $mod+Ctrl+m $exec swaymsg '[app_id="chrome-www.deezer.com__en_-Default"] focus' || chromium --app=https://www.deezer.com/en/
 bindsym $mod+Ctrl+s $exec "~/.scripts/sway/switch-or-launch.sh --scratchpad '^Volume Control$' 'pavucontrol'"
-bindsym $mod+Ctrl+k $termfloat -e zsh -c "stty -ixon ; khal interactive"
+bindsym $mod+Ctrl+k $termfloat -t 'Khal' -e zsh -c "stty -ixon ; khal interactive"
 bindsym $mod+Ctrl+d $exec swaymsg '[app_id="discord"] focus' || discord.sh
 bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
 bindsym $mod+Ctrl+e $exec swaymsg '[title="^EMAIL_MUTT$"] focus' || email
