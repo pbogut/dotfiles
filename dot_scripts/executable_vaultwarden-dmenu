@@ -23,10 +23,13 @@ dir="$HOME/.config/vaultwarden"
 query=""
 
 __unlock() {
-  if ! unlocked > /dev/null 2>&1; then
-    if ! rbw unlock; then
-      exit 1
+  if ! rbw unlock; then
+    if [[ $TERM == "dumb" || $TERM == "linux" ]]; then
+      terminal-float -t 'Unlock:' rbw unlock
+    else
+      rbw unlock
     fi
+    exit 1
   fi
 }
 __dmenu() {
