@@ -29,8 +29,6 @@ if [[ "$hostname" == "silverspoon" ]]; then
     echo "> Mount point exists, syncing..."
     if rsync -av "/run/media/pbogut/disk/DCIM/100MEDIA/" "$HOME/Videos/Dji/"; then
       echo "> Sync completed successfully"
-      echo "> Deleting files from the source..."
-      rm /run/media/pbogut/disk/DCIM/100MEDIA/*
       echo "> Unmounting card..."
       umount /run/media/pbogut/disk
       echo "> Done"
