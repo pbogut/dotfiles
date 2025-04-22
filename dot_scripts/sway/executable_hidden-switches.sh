@@ -40,7 +40,7 @@ if [[ $light1 == "$result" ]]; then
 elif [[ $light2 == "$result" ]]; then
   "$dir/openhab-widget.sh" toggle Shelly_Office_Light2
 elif [[ $light3 == "$result" ]]; then
-  "$dir/homeassistant-widget.sh" toggle switch.office_light_switch_2
+  "$dir/homeassistant-widget.sh" toggle switch.littlebox_light
 fi
 
 if [[ $host == "silverspoon" ]]; then
