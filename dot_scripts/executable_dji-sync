@@ -11,8 +11,8 @@ echo "Dji Video Sync Tool"
 
 if [[ "$hostname" == "redeye" ]]; then
   if ping silverspoon.local -W 1 -c 1 > /dev/null 2>&1; then
-    echo "> Syncing from silverspoon..."
-    rsync -av silverspoon.local:Videos/ ~/Videos/
+    echo "> Running dji-sync on silverspoon..."
+    ssh silverspoon.local -t "dji-sync"
   else
     echo "> Silverspoon not reachable, skipping sync"
   fi
