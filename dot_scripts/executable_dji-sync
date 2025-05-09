@@ -23,8 +23,21 @@ fi
 
 if [[ "$hostname" == "silverspoon" ]]; then
   sdcard=false
-  mkdir -p "$HOME/Videos/Dji"
-  if [[ -d /run/media/pbogut/disk/DCIM/100MEDIA ]]; then
+  # DJI N3 SD Card
+
+  if [[ -f /run/media/pbogut/SD_Card/MISC/dji_finfo.db ]] && [[ -d /run/media/pbogut/SD_Card/DCIM/100MEDIA/ ]]; then
+    mkdir -p "$HOME/Videos/DjiGoggles"
+    sdcard=true
+    echo "> Mount point exists, syncing..."
+    if rsync -av "/run/media/pbogut/SD_Card/DCIM/100MEDIA/" "$HOME/Videos/DjiGoggles/"; then
+      echo "> Sync completed successfully"
+      echo "> Unmounting card..."
+      umount /run/media/pbogut/SD_Card
+      echo "> Done"
+    fi
+  # DJI Mini 4K SD Card
+  elif [[ -d /run/media/pbogut/disk/DCIM/100MEDIA ]]; then
+    mkdir -p "$HOME/Videos/Dji"
     sdcard=true
     echo "> Mount point exists, syncing..."
     if rsync -av "/run/media/pbogut/disk/DCIM/100MEDIA/" "$HOME/Videos/Dji/"; then
@@ -40,18 +53,15 @@ if [[ "$hostname" == "silverspoon" ]]; then
   if ping redeye.local -W 1 -c 1 > /dev/null 2>&1; then
     echo "> Syncing to redeye..."
     rsync -av "$HOME/Videos/Dji/" "redeye.local:Videos/Dji/"
+    rsync -av "$HOME/Videos/DjiGoggles/" "redeye.local:Videos/DjiGoggles/"
   else
     echo "> Redeye not reachable, skipping sync"
   fi
 
-  if [[ -d /run/media/pbogut/disk/DCIM/100MEDIA ]]; then
-    echo "> Done, but SD card is still mounted"
+  if $sdcard; then
+    echo "> Done, SD card can be removed"
   else
-    if $sdcard; then
-      echo "> Done, SD card can be removed"
-    else
-      echo "> Done"
-    fi
+    echo "> Done"
   fi
 
   exit 0
