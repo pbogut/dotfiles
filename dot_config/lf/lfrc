@@ -10,6 +10,9 @@ set cleaner ~/.config/lf/cleaner
 set scrolloff 5
 set sixel true
 
+set sortby time
+set reverse
+
 # $f:  lf_current_file
 # $fs: lf_marked_files
 # $fx: lf_current_marked_files
@@ -111,6 +114,7 @@ map gw cd ~/Work
 map gd cd ~/Documents
 map gD cd ~/Downloads
 map gn cd ~/Nextcloud
+map gv cd ~/Videos
 map gp go_project
 map gm go_media
 map gf go_faktury
