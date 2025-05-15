@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 import subprocess
+import re
 
 import guessit
 import six
@@ -72,6 +73,18 @@ if auth_file is None:
 if not args.client_id or not args.client_secret:
     print("Client id and secret are required")
     exit(1)
+
+
+def make_slug(title):
+    # Convert to lowercase
+    title = title.lower()
+    # Remove non-alphanumeric characters
+    title = re.sub(r'[^a-z0-9\s-]', '', title)
+    # Replace spaces and hyphens with a single hyphen
+    title = re.sub(r'[\s-]+', '-', title)
+    # Strip leading and trailing hyphens
+    title = title.strip('-')
+    return title
 
 
 def on_token_refreshed(_, authorization):
@@ -196,6 +209,12 @@ if result["type"] == "episode":
     response = Trakt["scrobble"][action](show=show,
                                          episode=episode,
                                          progress=progress)
+    if response is None:
+        show["ids"] = {}
+        show["ids"]["slug"] = make_slug(show.title)
+        response = Trakt["scrobble"][action](show=show,
+                                             episode=episode,
+                                             progress=progress)
     print("Response received:", end=" ")
     print(response, end="")
 
