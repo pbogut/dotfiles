@@ -9,19 +9,21 @@ export PATH="$PATH:/home/$USER/.scripts"
 
 url="$1"
 
-if [[ $url =~ ^https://invidious\.pbogut\.me/watch\?v= ]]; then
+if [[ "$1" == '--work' ]]; then
+  shift
+  vivaldi-work "$@" &
+elif [[ $url =~ ^https://invidious\.pbogut\.me/watch\?v= ]]; then
   shift
   youtube "$url" "${@//\[\[AMPERSAND\]\]/&}" &
-  exit 0
 elif [[ $url =~ ^https://www\.youtube\.com/watch\?v= ]]; then
   shift
   youtube "$url" "${@//\[\[AMPERSAND\]\]/&}" &
-  exit 0
 elif [[ $url =~ ^https://open\.spotify\.com ]]; then
   vivaldi-personal "$@" &
 elif [[ $url =~ ^https://.*\.zoom\.us ]]; then
-  vivaldi-work "$@" &
-elif [[ $url =~ ^https://rumble\.com ]]; then
+  shift
+  chromium --app="$url" --profile-directory=Default "$@" &
+elif [[ $url =~ ^https://.*\.richpanel\.com ]]; then
   vivaldi-work "$@" &
 elif [[ $url =~ ^https://gitlab\.com ]]; then
   vivaldi-work "$@" &
