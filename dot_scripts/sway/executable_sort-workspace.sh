@@ -250,10 +250,12 @@ case  "$wm_class" in
     move_and_swich "$ws_steam"
     ;;
   "obs obs"|\
+  "Liftoff.x86_64 Liftoff.x86_64"|\
   "chiaki Chiaki"|\
+  "csgo_linux64 csgo_linux64"|"cs2 cs2"|\
   "gamescope gamescope"|\
   "geforce now GeForce NOW"|\
-  "csgo_linux64 csgo_linux64"|"cs2 cs2"|steam_app*|steam_proton*)
+  "steam_app"*|"steam_proton"*)
     move_and_swich "$ws_game"
     unset_floating
     set_fullscreen
