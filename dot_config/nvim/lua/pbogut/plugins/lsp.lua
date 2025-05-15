@@ -51,7 +51,7 @@ return {
       { name = 'gdscript' },
       { name = 'gopls' },
       { name = 'html', snippet_support = true, rename = false, format = { templ = false } },
-      { name = 'htmx', snippet_support = true },
+      -- { name = 'htmx', snippet_support = true },
       { name = 'intelephense', snippet_support = true },
       { name = 'jedi_language_server' },
       { name = 'jsonls', snippet_support = true },
