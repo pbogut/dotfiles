@@ -25,7 +25,7 @@ mosquitto_sub -h "$host" \
         else
             icon="󱧣"
         fi
-        echo '{"label": "'"$state"'", "label_size": 30, "icon_text": "'"$icon"'"}'
+        echo '{"label": "'"$state"'", "label_size": 40, "icon_text": "'"$icon"'"}'
     done &
 
 mosquitto_pub -h "$host" -t "cmnd/$device/$set_action" -u "$user" -P "$pass" -m "STATUS"
