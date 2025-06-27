@@ -4,14 +4,13 @@ local g = vim.g
 local bo = vim.bo
 local wo = vim.wo
 local fn = vim.fn
-local cmd = vim.cmd
 
 -- dont mess with me!
 g.no_plugin_maps = 1
 
 k.set('n', '<c-c>', function()
   if fn.confirm('Do you really want to quit with error?', 'Yes\nNo', 'No') == 1 then
-    cmd.cquit()
+    vim.cmd.cquit()
   end
 end)
 
@@ -87,7 +86,7 @@ k.set('n', '<space><space>', function()
     if not term:match([[^\<%$]]) then
       term, _ = term:gsub([[^\<]], [[\<%$\=\zs]])
     end
-    cmd('let @/="' .. vim.fn.escape(term, [["\]]) .. '"')
+    vim.cmd('let @/="' .. vim.fn.escape(term, [["\]]) .. '"')
     vim.o.hls = true
   end, 1)
 end, { desc = 'Highlight word under cursor' })
@@ -98,7 +97,7 @@ k.set('n', '<c-q>', function()
   if os.getenv('TMUX') then
     os.execute('tmux detach')
   else
-    cmd.quit()
+    vim.cmd.quit()
   end
 end)
 -- terminal - normal mode
@@ -124,12 +123,14 @@ k.set('n', '<space>w', function()
     return
   end
   fn.system('mkdir -p ' .. fn.expand('%:h'))
-  local success, _ = pcall(cmd, 'w!')
+  local success, _ = pcall(vim.cmd, 'w!')
   if not success then
-    cmd.SudaWrite()
+    vim.cmd.SudaWrite()
   end
 end)
 k.set('n', '<space>r', '') --prevent replace when using <space>r*
+vim.keymap.set('n', '<space>rl', "<cmd>.lua<cr><cmd>echo 'Line run as lua'<cr>")
+vim.keymap.set('v', '<space>rl', ":lua<cr><cmd>echo 'Selection run as lua'<cr>")
 -- tmux
 k.set('n', '<c-q>', function()
   if os.getenv('TMUX') then
@@ -148,10 +149,10 @@ k.set('n', '<space>ti', function()
   if os.getenv('TMUX') then
     return require('pbogut.tmuxctl').show_pane('bottom', { height = 15, focus = true })
   end
-  cmd('belowright 15split')
-  cmd.enew()
+  vim.cmd('belowright 15split')
+  vim.cmd.enew()
   fn.termopen('cd ' .. fn.getcwd() .. ' && zsh')
-  cmd.startinsert()
+  vim.cmd.startinsert()
 end)
 k.set('n', '<space>to', function()
   local panes_count = vim.fn.system('tmux list-panes -F "#{pane_id}" | wc -l'):sub(1, -2)
@@ -192,10 +193,10 @@ k.set('n', 'goT', function()
   if os.getenv('WEZTERM_UNIX_SOCKET') then
     return require('pbogut.wezterm').split_pane({ cwd = path })
   end
-  cmd('belowright 15split')
-  cmd.enew()
+  vim.cmd('belowright 15split')
+  vim.cmd.enew()
   fn.termopen('cd ' .. path .. ' && zsh')
-  cmd.startinsert()
+  vim.cmd.startinsert()
 end)
 k.set('n', 'got', function()
   if os.getenv('TMUX') then
@@ -204,10 +205,10 @@ k.set('n', 'got', function()
   if os.getenv('WEZTERM_UNIX_SOCKET') then
     return require('pbogut.wezterm').split_pane()
   end
-  cmd('belowright 15split')
-  cmd.enew()
+  vim.cmd('belowright 15split')
+  vim.cmd.enew()
   fn.termopen('cd ' .. fn.getcwd() .. ' && zsh')
-  cmd.startinsert()
+  vim.cmd.startinsert()
 end)
 -- toggle spell dictionaires
 k.set('n', '<space>ss', function()
