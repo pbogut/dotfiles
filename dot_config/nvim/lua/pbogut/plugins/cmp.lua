@@ -33,6 +33,7 @@ return {
       tag = { name = 'tags', max_item_count = 15 },
       buf = { name = 'buffer' },
       copilot = { name = 'copilot' },
+      supermaven = { name = 'supermaven' },
       cody = { name = 'cody' },
       emo = { name = 'emoji' },
       dadbod = { name = 'vim-dadbod-completion' },
@@ -49,6 +50,9 @@ return {
         end,
       },
       preselect = cmp.PreselectMode.None,
+      experimental = {
+        ghost_text = true,
+      },
       mapping = cmp.mapping.preset.insert({
         ['<c-n>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
         ['<c-p>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
@@ -80,6 +84,7 @@ return {
       }),
       sources = {
         src.lsp,
+        src.supermaven,
         src.copilot,
         src.cody,
         src.ts,
@@ -117,6 +122,9 @@ return {
           if kind == 'TabNine' then
             kind = ''
           end
+          if kind == 'Supermaven' then
+            kind = ''
+          end
           vim_item.kind = kind
 
           -- set a name for each source
@@ -133,6 +141,7 @@ return {
             tags = '[Tag]',
             spell = '[Spell]',
             copilot = '[Copilot]',
+            supermaven = '[SMV]',
             cody = '[Cody]',
             dadbod = '[DB]',
           })[entry.source.name]
@@ -143,6 +152,7 @@ return {
     cmp.setup.filetype({ 'sql', 'mysql', 'plsql' }, {
       sources = {
         src.dadbod,
+        src.supermaven,
         src.copilot,
         src.cody,
         src.ts,
@@ -157,6 +167,7 @@ return {
       sources = {
         src.lua,
         src.lsp,
+        src.supermaven,
         src.copilot,
         src.cody,
         src.ts,
