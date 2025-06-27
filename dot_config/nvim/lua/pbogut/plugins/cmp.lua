@@ -13,12 +13,57 @@ return {
     'saadparwaiz1/cmp_luasnip',
     'kristijanhusak/vim-dadbod-completion',
     'luckasRanarison/tailwind-tools.nvim',
-    -- {'zbirenbaum/copilot-cmp', after = 'copilot.lua'},
-    { 'pbogut/copilot-cmp', branch = 'single-line-suggestion', after = 'copilot.lua' },
+    { 'zbirenbaum/copilot-cmp', after = 'copilot.lua' },
   },
   event = 'InsertEnter',
   config = function()
     local cmp = require('cmp')
+
+    -- Accept one line suggestion hack {{{
+    cmp.confirm_line = cmp.sync(function(option, callback)
+      option = option or {}
+      option.select = option.select or false
+      option.behavior = option.behavior or cmp.get_config().confirmation.default_behavior or cmp.ConfirmBehavior.Insert
+      callback = callback or function() end
+
+      if cmp.core.view:visible() then
+        local e = cmp.core.view:get_selected_entry()
+        if not e and option.select then
+          e = cmp.core.view:get_first_entry()
+        end
+        if e then
+          if e.completion_item.textEdit and e.completion_item.textEdit.newText then
+            e.completion_item.textEdit.newText = vim.split(e.completion_item.textEdit.newText, '\n')[1]
+          end
+          cmp.core:confirm(e, {
+            behavior = option.behavior,
+          }, function()
+            callback()
+            cmp.core:complete(cmp.core:get_context({ reason = cmp.ContextReason.TriggerOnly }))
+          end)
+          return true
+        end
+      elseif vim.fn.pumvisible() == 1 then
+        local index = vim.fn.complete_info({ 'selected' }).selected
+        if index == -1 and option.select then
+          index = 0
+        end
+        if index ~= -1 then
+          vim.api.nvim_select_popupmenu_item(index, true, true, {})
+          return true
+        end
+      end
+      return false
+    end)
+    cmp.mapping.confirm_line = function(option)
+      return function(fallback)
+        if not require('cmp').confirm_line(option) then
+          fallback()
+        end
+      end
+    end
+    -- Accept one line suggestion hack }}}
+
     local luasnip = require('luasnip')
     local lspkind = require('lspkind')
     local has_copilot, copilot_cmp = pcall(require, 'copilot_cmp')
@@ -60,6 +105,10 @@ return {
         ['<c-d>'] = cmp.mapping.scroll_docs(4),
         ['<c-e>'] = cmp.config.disable,
         ['<c-space>'] = cmp.mapping.complete(),
+        ['<c-l>'] = cmp.mapping.confirm_line({
+          behavior = cmp.ConfirmBehavior.Insert,
+          select = true,
+        }),
         ['<c-y>'] = cmp.mapping.confirm({
           behavior = cmp.ConfirmBehavior.Insert,
           select = true,
