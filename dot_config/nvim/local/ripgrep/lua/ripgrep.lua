@@ -77,7 +77,6 @@ end
 local ripgrep = function(opt)
   local query = opt.args
   local vimgrep_arguments = conf.vimgrep_arguments
-  dump(vimgrep_arguments)
   if query == '' then
     query = last_query
   else
