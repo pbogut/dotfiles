@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   dji-sync
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   09/04/2025
+#=================================================
+
+echo "Drone Video Sync Tool"
+
+local_path="$(jq -r '.local_path' ~/.config/drone-sync.json -c)"
+date="$(date +%Y-%m-%d_%s)"
+
+while read -r source; do
+  test="$(echo "$source" | jq -r '.test')"
+  name="$(echo "$source" | jq -r '.name')"
+  src="$(echo "$source" | jq -r '.src')"
+  dst="$(echo "$source" | jq -r '.dst')"
+  remove="$(echo "$source" | jq -r '.remove')"
+
+  echo -n "🔎 Looking for $name..."
+  if found=$(ls /run/media/pbogut/*/"$test" 2>/dev/null); then
+    source_dir="$(dirname "$found")"
+    source="$source_dir/$src"
+    dest="$local_path/$dst"
+    if [[ $remove != "null" ]]; then
+      dest="$dest/$date"
+    fi
+
+    echo " ✔️"
+    mkdir -p "$dest"
+
+    echo ".  starting syncing"
+    if rsync -av "$source" "$dest"; then
+      echo ".  sync completed successfully"
+      if [[ $remove != "null" ]]; then
+        while read -r pattern; do
+          echo ".  removing $pattern"
+          # shellcheck disable=SC2046
+          rm $(eval "echo '$source_dir'/$pattern") 2>/dev/null
+        done < <(jq -r '.[]' <<<"$remove")
+      fi
+      echo ".  unmounting $name..."
+      umount "$source_dir"
+      echo ".  done"
+    else
+      echo ".  sync failed for $name"
+    fi
+  elif found=$(ssh silverspoon.local -t "echo /run/media/pbogut/*/'$test'" </dev/null 2>/dev/null | head -n1) && [[ $found =~ ^/ ]]; then
+    source_dir="$(dirname "$found")"
+    source="$source_dir/$src"
+    dest="$local_path/$dst"
+    if [[ $remove != "null" ]]; then
+      dest="$dest/$date"
+    fi
+
+    echo " ✔️🕸️"
+    mkdir -p "$dest"
+
+    echo ".  starting syncing"
+    if rsync -av "silverspoon.local:$source" "$dest"; then
+      echo ".  sync completed successfully"
+      if [[ $remove != "null" ]]; then
+        while read -r pattern; do
+          echo ".  removing $pattern"
+          # shellcheck disable=SC2046
+          ssh silverspoon.local -t "rm '$source_dir'/$pattern" 2>/dev/null
+        done < <(jq -r '.[]' <<<"$remove")
+      fi
+      echo ".  unmounting $name..."
+      ssh silverspoon.local -n -t "umount '$source_dir'" </dev/null 2>/dev/null
+      echo ".  done"
+    else
+      echo ".  sync failed for $name"
+    fi
+  else
+    echo " ✖️"
+  fi
+done < <(jq '.sources[]' ~/.config/drone-sync.json -c)

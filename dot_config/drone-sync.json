@@ -1,0 +1,67 @@
+{
+  "local_path": "/home/pbogut/Videos/FPV",
+  "sources": [
+    {
+      "name": "Dji Neo",
+      "test": "dji_neo",
+      "src": "DCIM/",
+      "dst": "DjiNeo/",
+      "remove": [
+        "DCIM/*/*.MP4",
+        "DCIM/*/*.SRT"
+      ]
+    },
+    {
+      "name": "QAV-S 2 Joshua-ish with Dji O4",
+      "test": "djio4_qavs2",
+      "src": "DCIM/",
+      "dst": "DjiO4_QAVS2/",
+      "remove": [
+        "DCIM/*/*.MP4",
+        "DCIM/*/*.SRT"
+      ]
+    },
+    {
+      "name": "Meteor 75",
+      "test": "djio4_meteor75",
+      "src": "DCIM/",
+      "dst": "DjiO4_Meteor75/",
+      "remove": [
+        "DCIM/*/*.MP4",
+        "DCIM/*/*.SRT"
+      ]
+    },
+    {
+      "name": "Dji Mini 4K",
+      "test": "dji_mini_4k",
+      "src": "DCIM/100MEDIA/",
+      "dst": "DjiMini4K/",
+      "remove": null
+    },
+    {
+      "name": "DJI Goggles N3",
+      "test": "dji_goggles_n3",
+      "src": "DCIM/100MEDIA/",
+      "dst": "DjiGogglesN3/",
+      "remove": null
+    },
+    {
+      "name": "Skyzone Cobra X",
+      "test": "skyzone_cobra_x",
+      "src": "DCIM/",
+      "dst": "CobraX/",
+      "remove": [
+        "DCIM/*.mov"
+      ]
+    },
+    {
+      "name": "BetaFPV VR03",
+      "test": "betafpv_vr03",
+      "src": "DCIM/100DSCIM/",
+      "dst": "BetaFPV_VR03/",
+      "remove": [
+        "DCIM/100DSCIM/*.AVI"
+      ]
+    }
+  ]
+}
