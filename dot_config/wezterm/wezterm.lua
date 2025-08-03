@@ -431,6 +431,11 @@ c.keys = {
     mods = 'ALT',
     action = my_act.ActivateOrCreateTab(4),
   },
+  {
+    key = 'a', -- as for api
+    mods = 'ALT',
+    action = my_act.ActivateOrCreateTab(5),
+  },
 }
 
 wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
