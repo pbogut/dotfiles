@@ -1,7 +1,7 @@
 ---@type LazyPluginSpec[]
 return {
   {
-    enabled = true,
+    enabled = false,
     'zbirenbaum/copilot.lua',
     event = 'InsertEnter',
     cmd = { 'Copilot' },
