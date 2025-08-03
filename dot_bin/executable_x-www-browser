@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   x-www-browser
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   27/07/2025
+#
+# Stupid xdg-open wrapper for shit that doesn't support it.
+# Why its trying to open every fucking file in firefox is beyound me
+# but here is the solution, tell the fucker to use gio, solved.
+#=================================================
+gio open "$@"
