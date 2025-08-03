@@ -1,10 +1,10 @@
 ---@type LazyPluginSpec
 return {
-  enabled = true,
+  enabled = false,
   'nicwest/vim-http',
   cmd = { 'Http', 'HttpShowCurl', 'HttpShowRequest', 'HttpClean', 'HttpAuth' },
   keys = {
-    { '<space>H', '<cmd>Http<cr>', desc = 'Run Http' },
+    -- { '<space>H', '<cmd>Http<cr>', desc = 'Run Http' },
   },
   init = function()
     vim.g.vim_http_split_vertically = 1
