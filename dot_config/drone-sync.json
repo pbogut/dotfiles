@@ -22,6 +22,16 @@
       ]
     },
     {
+      "name": "Volador CX3.5 with Dji O4",
+      "test": "djio4_volador_cx35",
+      "src": "DCIM/",
+      "dst": "DjiO4_VoladorCX35/",
+      "remove": [
+        "DCIM/*/*.MP4",
+        "DCIM/*/*.SRT"
+      ]
+    },
+    {
       "name": "Meteor 75",
       "test": "djio4_meteor75",
       "src": "DCIM/",
