@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   edgetx-configurator
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   03/08/2025
+#=================================================
+chromium --app=https://buddy.edgetx.org --profile-directory=Default

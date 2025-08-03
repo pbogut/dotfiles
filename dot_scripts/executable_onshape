@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   onshape
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   22/07/2025
+#=================================================
+chromium --app=https://cad.onshape.com --profile-directory=Default

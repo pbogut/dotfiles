@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   betaflight-configurator-web
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   03/08/2025
+#=================================================
+chromium --app=https://app.betaflight.com --profile-directory=Default

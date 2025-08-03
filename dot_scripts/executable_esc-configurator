@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   esc-configurator
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   03/08/2025
+#=================================================
+chromium --app=https://esc-configurator.com --profile-directory=Default
