@@ -37,6 +37,7 @@ demonize udisksvm "udisksvm -a"
 demonize memwatch ~/.scripts/memwatch.sh
 demonize mailsgoweb ~/.scripts/mailsgoweb.sh
 demonize go-serve -dir ~/.scripts/tempermonkey/ -port 6255
+demonize kdeconnect-file-watch kdeconnect-file-watch
 
 # {{- if eq .chezmoi.hostname "redeye" }} redeye [[[
 rerun kwalletd "kwalletd5"
