@@ -66,3 +66,5 @@ export PULSE_SERVER="tcp:127.0.0.1:4713"
 export MAKEFLAGS="-j 8"
 export PA_DEFAULT_SINK="Speaker"
 # silverspoon {{"}}}"}} {{- end }}
+
+export $(gnome-keyring-daemon --start --components=pkcs11\,secrets\,ssh)
