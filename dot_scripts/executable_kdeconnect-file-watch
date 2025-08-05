@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   kdeconnect-file-watch
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   28/07/2025
+#=================================================
+dbus-monitor --session 'interface=org.kde.kdeconnect.device.share' |
+    grep 'file://' --line-buffered |
+    sed -u -E 's,\s+string "file://(.*)"$,\1,' |
+    while read -r file; do
+      terminal-float lf "$file"
+    done

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   kdeconnect-send-to-phone
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   04/08/2025
+#=================================================
+kdeconnect-cli  --share "$@" --device=65fb1aa4_e132_49b7_9e28_c12b5bd2510c
