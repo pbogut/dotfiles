@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   disk-cleanup
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   10/08/2025
+#=================================================
+# clean up old files from disk
+trash-empty 90 -f
+
+echo "Removing old downloads (90days+)"
+find /home/pbogut/Downloads/ -type f -mtime +90 -delete
+find /home/pbogut/Downloads/ -type d -empty -delete
+
+echo "Removing old cache (90days+)"
+find /home/pbogut/.cache/paru/ -type f -mtime +90 -delete
+find /home/pbogut/.cache/paru/ -type d -empty -delete
+
+echo "Removing electron cache (too big, really)"
+rm -fr /home/pbogut/.cache/paru/clone/electron* > /dev/null 2>&1
+
+if [[ -d /home/pbogut/.cache/yay ]]; then
+    echo "Removing yay cache"
+    rm -fr /home/pbogut/.cache/yay > /dev/null 2>&1
+fi
+if [[ -d /home/pbogut/.cache/yarn ]]; then
+    echo "Removing yarn cache"
+    rm -fr /home/pbogut/.cache/yarn > /dev/null 2>&1
+fi
+
+if [[ $UID -eq 0 ]]; then
+    echo "Cleaning up pacman cache"
+    find /var/cache/pacman/ -type f -mtime +14 -delete
+    yes | pacman -Sc
+else
+    echo "Not root, skipping root cleanup"
+fi
+
+echo "Removing unused electron versions"
+paru -Ss electron |
+    grep Installed |
+    awk '{print $1}' |
+    grep electron |
+    cut -d"/" -f 2 |
+    while read -r version; do
+      yes | paru -R "$version" 2>/dev/null;
+    done
