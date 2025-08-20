@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=OrcaSlicer
+Exec=/usr/bin/orca-slicer %U
+Icon=OrcaSlicer
+Type=Application
+Categories=Utility;
+MimeType=x-scheme-handler/orcaslicer;model/3mf;model/stl;application/vnd.ms-3mfdocument;application/prs.wavefront-obj;application/x-amf;

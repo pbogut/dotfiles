@@ -23,7 +23,11 @@ echo "done"
 echo -en "> $(
     if [[ -n "$(command -v gio)" ]]; then
         gio mime inode/directory lf.desktop
+        gio mime model/stl OrcaSlicer.desktop
+        gio mime application/vnd.ms-3mfdocument OrcaSlicer.desktop
     elif [[ -n $(command -v gvfs-mime) ]]; then
         gvfs-mime --set inode/directory lf.desktop
+        gvfs-mime --set model/stl OrcaSlicer.desktop
+        gvfs-mime --set application/vnd.ms-3mfdocument OrcaSlicer.desktop
     fi
 )" && echo " ... done"
