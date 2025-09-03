@@ -287,5 +287,12 @@
         "escape": true,
         "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
         // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
+    },
+    "custom/power": {
+        "format": "<span color=\"#e60053\">{icon}</span> ",
+        "format-icons": {
+            "default": "⏻"
+        },
+        "on-click": "swaynag -t warning -m 'Power Menu Options' -b 'Shutdown'  'shutdown -h now' -b 'Restart' 'shutdown -r now' -b 'Logout' 'swaymsg exit' -b 'Hibernate' 'hibernate' --background=#005566 --button-background=#009999 --button-border=#002b33 --border-bottom=#002b33",
     }
 }
