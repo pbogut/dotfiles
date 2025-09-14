@@ -52,13 +52,13 @@ return function()
   end
 
   vim.api.nvim_set_hl(0, 'sl_diagnostics', {
-    fg = c.base3,
-    bg = bg,
+    bg = c.base3,
+    fg = bg,
     bold = false,
   })
   vim.api.nvim_set_hl(0, 'lualine_transitional_sl_diagnostics_to_lualine_b_normal', {
-    fg = bg,
-    bg = c.base01,
+    bg = bg,
+    fg = c.base01,
   })
 
   return '%#sl_diagnostics#' .. result
