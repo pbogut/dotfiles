@@ -31,6 +31,7 @@ paru = [
   "libwireplumber",
   "lldb",
   "maim",
+  "mise",
   "mpv",
   "mpv-mpris",
   "neomutt",

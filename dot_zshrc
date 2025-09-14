@@ -145,8 +145,7 @@ if [ -f $HOME/.$hostname.zsh ]; then
   source $HOME/.$hostname.zsh
 fi
 
-eval "$(rtx activate zsh 2>/dev/null)"
-alias asdf="rtx"
+eval "$(mise activate zsh 2>/dev/null)"
 
 alias luamake=/home/pbogut/.gitpac/sumneko/lua-language-server/3rd/luamake/luamake
 
