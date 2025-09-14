@@ -89,6 +89,13 @@ map D trash
 map R reload
 map S $zsh
 
+map <c-f> go_file
+
+cmd go_file %{{
+  dest=$(ls -Art | tail -n 1)
+  lf -remote "send $id select $dest"
+}}
+
 cmd go_media %{{
   dest="/run/media/$USER"
   lf -remote "send $id cd $dest"
