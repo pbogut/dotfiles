@@ -85,3 +85,11 @@ column=4
 icon_color="#a238ff"
 icon_text=""
 button_press="deezer &"
+
+[[buttons]]
+row=1
+column=3
+icon_color="#fff"
+icon_text=""
+execute="~/.scripts/hackdeck/weather.zsh"
+button_press="browser https://pogoda.interia.pl"
