@@ -47,7 +47,7 @@ return {
       { name = 'cssls', snippet_support = true },
       { name = 'dockerls' },
       { name = 'efm' },
-      { name = 'elixirls', snippet_support = true },
+      { name = 'expert', snippet_support = true },
       { name = 'gdscript' },
       { name = 'gopls' },
       { name = 'html', snippet_support = true, rename = false, format = { templ = false } },
@@ -312,22 +312,22 @@ return {
     })
 
     for _, server in ipairs(servers) do
-      local server_config = lspconfig[server.name]
-      local opts = { on_attach = on_attach }
+      local opts = {}
+      local has_config, my_config = pcall(require, 'pbogut.plugins.lsp.' .. server.name)
+      if has_config then
+        opts = my_config
+      end
+      opts.on_attach = on_attach
       if server.snippet_support then
         opts.capabilities = capabilities
       end
-      local has_config, my_config = pcall(require, 'pbogut.plugins.lsp.' .. server.name)
-      if has_config then
-        my_config.setup(opts)
-      else
-        server_config.setup(opts)
-      end
+      vim.lsp.config(server.name, opts)
+      vim.lsp.enable(server.name)
     end
 
     local function get_active_client_map()
       local client_list = {}
-      for _, client in ipairs(vim.lsp.buf_get_clients()) do
+      for _, client in ipairs(vim.lsp.get_clients()) do
         local root_dir = client.config.root_dir
         local filetypes = client.config.filetypes
         local client_id = client.id

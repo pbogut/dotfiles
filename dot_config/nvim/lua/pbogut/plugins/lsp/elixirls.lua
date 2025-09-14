@@ -1,11 +1,5 @@
-local lspconfig = require('lspconfig')
-local me = {}
+local opts = {
+  cmd = { 'elixir-ls' },
+}
 
-function me.setup(opts)
-  opts = vim.tbl_deep_extend('keep', opts, {
-    cmd = { 'elixir-ls' },
-  })
-  lspconfig.elixirls.setup(opts)
-end
-
-return me
+return opts

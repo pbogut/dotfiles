@@ -1,15 +1,9 @@
-local lspconfig = require('lspconfig')
-local me = {}
+local opts = {
+  filetypes = {
+    'javascript',
+    'javascriptreact',
+    'javascript.jsx',
+  },
+}
 
-function me.setup(opts)
-  opts = vim.tbl_deep_extend('keep', opts, {
-    filetypes = {
-      'javascript',
-      'javascriptreact',
-      'javascript.jsx',
-    },
-  })
-  lspconfig.denols.setup(opts)
-end
-
-return me
+return opts
