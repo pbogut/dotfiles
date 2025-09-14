@@ -175,6 +175,10 @@ return {
     config = function(_, opts)
       ---@type any
       local dap = require('dap')
+      local has_dapui, dapui = pcall(require, 'dapui')
+      if has_dapui then
+        dapui.setup()
+      end
       local cfg = require('pbogut.config')
       local u = require('pbogut.utils')
       local k = vim.keymap
@@ -246,9 +250,13 @@ return {
         xdebug.toggle()
       end)
       k.set('n', '<plug>(dap-ui-hover)', function()
-        local has_dapui, dapui = pcall(require, 'dapui')
         if has_dapui then
           dapui.eval()
+          -- move into eval window
+          dapui.eval()
+          vim.opt_local.sidescrolloff = 0
+          vim.opt_local.scrolloff = 0
+          vim.cmd.normal('0')
         else
           vim.notify('dap-ui is not installed', vim.log.levels.WARN, { title = 'dap' })
         end
