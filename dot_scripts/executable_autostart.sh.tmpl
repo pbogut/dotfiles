@@ -4,8 +4,6 @@ host_name=$(hostname -s)
 script=$(readlink -f "$0")
 scriptpath=$(dirname "$script")
 
-killall sway-prop -9
-
 function demonize() {
   pid="/tmp/__$(id -un)__$1.pid"
   # if no pid file or no process
