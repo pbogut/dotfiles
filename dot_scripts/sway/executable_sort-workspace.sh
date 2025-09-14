@@ -148,6 +148,12 @@ if [[ $extended -eq 1 ]]; then
   [[ $found -eq 1 ]] && exit 0
 fi
 case  "$wm_app_id" in
+  "com.discordapp.Discord")
+    move_and_swich "$ws_comm"
+    ;;
+  "org.wezterm.floating")
+    swaymsg "resize set width 1200px; resize set height 700px"
+    ;;
   "Alacritty"|"foot"|"org.wezfurlong.wezterm")
       case "$wm_title" in
         *"  "*)
