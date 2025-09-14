@@ -76,6 +76,7 @@ return {
 
     local keymap_overrides = {
       qmk = {
+        ['CMBACD'] = 'A+C+D',
         ['M_H'] = 'h bs',
         ['M_D'] = 'd del',
         ['M_CTL_QUOTE'] = "ctl '",
