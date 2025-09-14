@@ -1,3 +1,4 @@
+---@type LazyPluginSpec
 return {
   enabled = true,
   'jackmort/chatgpt.nvim',
