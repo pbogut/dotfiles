@@ -27,6 +27,10 @@ return {
       { 'yaf', yank_file_name('relative') },
     },
     opts = {
+      keymaps = {
+        ["`"] = false,
+        ["~"] = false,
+      },
       win_options = {
         signcolumn = 'yes:2',
       },
