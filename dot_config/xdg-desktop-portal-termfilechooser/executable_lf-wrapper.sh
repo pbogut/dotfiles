@@ -20,6 +20,9 @@
 # one path per line.
 # If nothing is printed, then the operation is assumed to have been canceled.
 
+# shellcheck disable=SC2046
+# fix colors
+eval $(dircolors ~/.config/dircolors-solarized/dircolors.256dark)
 multiple="$1"
 directory="$2"
 save="$3"
