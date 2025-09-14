@@ -1,5 +1,5 @@
 /* hide vivalid button */
-#header {
+#browser.linux #header {
   display: none;
 }
 .toolbar-large .window-buttongroup {
