@@ -53,6 +53,13 @@ function vim.h.send_esc()
   vim.api.nvim_feedkeys(esc, 'nx', false)
 end
 
+function vim.h.read_exec(command)
+  local handle = io.popen(command)
+  local result = handle:read("*a"):gsub("\n$", "")
+  handle:close()
+  return result
+end
+
 function vim.h.ls(directory)
   local i, t = 0, {}
   local pfile = io.popen('find "' .. directory .. '" -mindepth 1 -maxdepth 1 -type d')
