@@ -11,7 +11,7 @@ lfrun -last-dir-path "$tmpfile" "$file"
 filename=$(basename "$file")
 destination=$(cat "$tmpfile")
 should_move=$((echo "move";  echo "move and open"; echo "do nothing";) |
-    wofi --dmenu -p "Move file $filename to $destination?")
+    fuzzel --dmenu -p "Move file $filename to $destination?")
 
 if [[ $should_move == "do nothing" ]]; then
     exit 0

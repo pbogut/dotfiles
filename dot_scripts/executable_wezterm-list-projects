@@ -26,7 +26,7 @@ done
 
 project=false
 if [[ $TERM == "dumb" || $TERM == "linux" ]]; then
-    project=$(ls-project | wofi --dmenu -q "$1" --cache-file /dev/null)
+    project=$(ls-project | fuzzel --dmenu --search "$1" --cache /dev/null)
 else
     project=$(ls-project | fzf -q "$1" --height=100%)
 fi

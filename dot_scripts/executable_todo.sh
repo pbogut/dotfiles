@@ -10,7 +10,7 @@ _list() {
         echo ":quick-new"
 }
 
-selection=$(_list | tac | wofi --cache-file /dev/null --dmenu)
+selection=$(_list | tac | fuzzel --cache /dev/null --dmenu)
 # shellcheck disable=2001
 id=$(echo "$selection" | sed 's/\[.\][[:space:]]*\([[:digit:]]*\).*/\1/g')
 
