@@ -74,7 +74,7 @@ M.setup = function()
       on_exit = function(_, code)
         if code == 0 then
           vim.notify('File exported, opening slicer', vim.log.levels.INFO)
-          vim.fn.jobstart({'prusa-slicer', dst_file})
+          vim.fn.jobstart({'orca-slicer', dst_file})
         else
           vim.notify('Error occured during export. Exit code: ' .. code, vim.log.levels.ERROR)
         end
