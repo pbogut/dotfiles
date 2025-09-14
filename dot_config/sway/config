@@ -285,6 +285,7 @@ for_window [class="scrcpy"] floating enable; move scratchpad
 for_window [class="explorer.exe"] floating enable
 for_window [class="krusader"] floating disable
 for_window [class="^feh$"] fullscreen enable
+for_window [title="SCREENSAVER"] fullscreen enable
 for_window [title="SPLASH_SCREEN"] floating enable
 for_window [title="SPLASH_SCREEN"] fullscreen disable
 for_window [title="SPLASH_SCREEN"] title_format "<span alpha='1'>%title</span>"
