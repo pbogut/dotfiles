@@ -97,6 +97,7 @@ paru = [
   "zenity",
 ]
 go = [
+  "github.com/pbogut/audio-share-pc-client/audio-share-go-client@latest",
   "github.com/pbogut/go-serve@latest",
   "github.com/pbogut/mails-go-web@latest",
   "github.com/porjo/youtubeuploader@latest",
