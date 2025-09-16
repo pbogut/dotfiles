@@ -624,7 +624,7 @@ c.key_tables = {
   search_mode = search_mode_keys,
 }
 
-if os.getenv('WEZTERM_FLOATING') then
+if os.getenv('WEZTERM_FLOATING') or os.getenv('WEZTERM_SINGLE') then
   c.enable_tab_bar = true
   c.show_new_tab_button_in_tab_bar = false
   c.tab_bar_at_bottom = false
