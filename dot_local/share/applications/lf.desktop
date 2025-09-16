@@ -2,6 +2,6 @@
 Version=1.0
 Type=Application
 Name=lf
-Exec=alacritty -e lf %f
+Exec=lf-term %f
 Categories=System;FileTools;FileManager;Utility;
 MimeType=inode/directory;

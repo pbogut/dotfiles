@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   lf-term
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   13/09/2025
+#=================================================
+# shellcheck disable=SC2046
+eval $(dircolors ~/.config/dircolors-solarized/dircolors.256dark)
+WEZTERM_TITLE="File browser" WEZTERM_SINGLE="1" terminal-float -e lf "$@"
