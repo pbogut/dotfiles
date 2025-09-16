@@ -2,6 +2,12 @@
 #browser.linux #header {
   display: none;
 }
+button.ToolbarButton-Button[name="WorkspaceButton"][title="Personal"] {
+   border-bottom: 1px solid #186010 !important;
+}
+button.ToolbarButton-Button[name="WorkspaceButton"]:not([title="Workspaces"]):not([title="Personal"]) {
+   border-bottom: 1px solid #bd0016 !important;
+}
 .toolbar-large .window-buttongroup {
     display: none !important;
 }
