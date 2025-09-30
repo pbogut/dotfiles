@@ -24,5 +24,5 @@
 
 [".config/mpv/scripts/mpvDLNA"]
     type = "git-repo"
-    url = "https://github.com/chachmu/mpvDLNA.git"
+    url = "https://github.com/pbogut/mpvDLNA.git"
     refreshPeriod = "168h"
