@@ -180,7 +180,7 @@ case  "$wm_app_id" in
     # set_floating 1600px 900px
     move_and_swich "$ws_media"
     ;;
-  *"-www.youtube.com_"*)
+  *"-www.youtube.com_"*|*"-rumble.com_"*)
     move_and_swich "$ws_media"
     ;;
   "com.gitlab.newsflash"|"io.gitlab.news_flash.NewsFlash")
