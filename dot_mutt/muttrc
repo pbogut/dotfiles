@@ -129,19 +129,19 @@ virtual-mailboxes \
     " Payments"          "notmuch://?query=tag:payment"                                                                   \
     " Subscriptions"     "notmuch://?query=tag:newsletter"                                                                \
     "   ├ Tech"           "notmuch://?query=tag:newsletter and tag:tech"                                                   \
-    "   ├ Gaming"         "notmuch://?query=tag:newsletter and tag:gaming"                                                 \
+    "   ├ Gaming"         "notmuch://?query=tag:newsletter and tag:gaming"                                                 \
     "   ├ Leisure"        "notmuch://?query=tag:newsletter and tag:leisure"                                                \
     "   ├ Job"            "notmuch://?query=tag:newsletter and tag:jobs"                                                   \
     "   ├ Food"           "notmuch://?query=tag:newsletter and tag:food"                                                   \
-    "   └ Politics"       "notmuch://?query=tag:newsletter and tag:politics"                                               \
+    "   ├ Politics"       "notmuch://?query=tag:newsletter and tag:politics"                                               \
     "   └ Other"          "notmuch://?query=tag:newsletter and not tag:tech and not tag:gaming and not tag:jobs and not tag:food and not tag:leisure not tag:politics" \
-    "Everything"          "notmuch://?query=not tag:spam"                                                                  \
-    " ├  Last 3 months"  "notmuch://?query=date:`date --date="3 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
-    " ├  Last 6 months"  "notmuch://?query=date:`date --date="6 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
-    " ├  Last year"      "notmuch://?query=date:`date --date="12 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"             \
-    " ├  Flagged"        "notmuch://?query=tag:flagged and not tag:spam and not tag:sendmail"                                                  \
-    " ├  trash"          "notmuch://?query=tag:trash and not tag:spam and not tag:sendmail"                                                    \
-    " └ ﯍ spam"           "notmuch://?query=tag:spam and not tag:sendmail" \
+    "  Everything"          "notmuch://?query=not tag:spam"                                                                  \
+    "   ├  Last 3 months"  "notmuch://?query=date:`date --date="3 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
+    "   ├  Last 6 months"  "notmuch://?query=date:`date --date="6 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
+    "   ├  Last year"      "notmuch://?query=date:`date --date="12 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"             \
+    "   ├  Flagged"        "notmuch://?query=tag:flagged and not tag:spam and not tag:sendmail"                                                  \
+    "   ├  trash"          "notmuch://?query=tag:trash and not tag:spam and not tag:sendmail"                                                    \
+    "   └ ﯍ spam"           "notmuch://?query=tag:spam and not tag:sendmail" \
     "Sendmail"            "notmuch://?query=tag:sendmail and NOT tag:archive" \
     " └ all"              "notmuch://?query=tag:sendmail"
 
