@@ -293,6 +293,6 @@
         "format-icons": {
             "default": "⏻"
         },
-        "on-click": "swaynag -t warning -m 'Power Menu Options' -b 'Shutdown'  'shutdown -h now' -b 'Restart' 'shutdown -r now' -b 'Logout' 'swaymsg exit' -b 'Hibernate' 'hibernate' -b 'Suspend' 'systemctl suspend' --background=#005566 --button-background=#009999 --button-border=#002b33 --border-bottom=#002b33",
+        "on-click": "swaynag -t warning -m 'Power Menu Options' -z 'Shutdown'  'shutdown -h now' -z 'Restart' 'shutdown -r now' -z 'Logout' 'swaymsg exit' -z 'Hibernate' 'hibernate' -z 'Suspend' 'systemctl suspend' --background=#005566 --button-background=#009999 --button-border=#002b33 --border-bottom=#002b33",
     }
 }
