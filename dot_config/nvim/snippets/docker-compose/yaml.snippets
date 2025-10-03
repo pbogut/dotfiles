@@ -2,7 +2,6 @@ snippet postgres "PostgerSQL service"
 	${2:db}:
 		image: postgres
 		hostname: db.${1:app_name}.local
-		restart: always
 		environment:
 			POSTGRES_PASSWORD: postgres
 snippet mail "Mailhog service"
