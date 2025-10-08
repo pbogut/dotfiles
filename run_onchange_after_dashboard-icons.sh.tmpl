@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   run_onchange_after_symlink-icons
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   08/10/2025
+#=================================================
+{{- $lastUpdate := (print .home "/.icons/dashboard.git.last-update") }}
+# Last update: {{ include $lastUpdate }}
+if [[ ! -d "{{ .home }}/.icons/dashboard.git" ]]; then
+  git clone "https://github.com/homarr-labs/dashboard-icons.git" "{{ .home }}/.icons/dashboard.git"
+else
+  if [[ "{{ include $lastUpdate -}}" -ne $(date "+%Y-%m") ]]; then
+      git -C "{{ .home }}/.icons/dashboard.git" pull
+      date "+%Y-%m" > "{{ .home }}/.icons/dashboard.git.last-update"
+  fi
+fi
+icons="$HOME/Icons/"
+ln -sf "$HOME/.icons/dashboard.git/svg/"*.svg "$icons"
+{{ range $mainIcon, $aliases := .icons }}
+    {{ range $aliases }}
+    ln -sf "$icons/{{ $mainIcon }}.svg" "$icons/{{ . }}.svg"
+    {{ end }}
+{{ end }}

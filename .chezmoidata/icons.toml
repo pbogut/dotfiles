@@ -1,0 +1,24 @@
+[icons]
+chromium = ["chromium-work", "chromium-personal"]
+firefox = ["firefox-work", "firefox-personal"]
+godot=["nvim-godot"]
+libreoffice-light=["libreoffice"]
+prime-video=["primevideo"]
+prusa-research=["prusa-slicer"]
+rust-dark=[
+  "rustc",
+  "rustup",
+  "rustdoc",
+  "rust-analyzer",
+  "rustfmt",
+  "rust-gdb",
+  "rust-lldb"
+]
+vaultwarden-light=["vaultwarden-dmenu"]
+vivaldi = [
+  "vivaldi-work",
+  "vivaldi-personal",
+  "browser-work",
+  "browser-personal"
+]
+windows-retro-light = ["windows"]
