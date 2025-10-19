@@ -6,4 +6,4 @@
 #=================================================
 # shellcheck disable=SC2046
 eval $(dircolors ~/.config/dircolors-solarized/dircolors.256dark)
-WEZTERM_TITLE="File browser" WEZTERM_SINGLE="1" terminal-float -e lf "$@"
+terminal-float --title "File browser" -e lf "$@"
