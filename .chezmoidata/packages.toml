@@ -21,6 +21,9 @@ paru = [
   "go",
   "grim",
   "gtk3-print-backends",
+  "hyprland",
+  "hyprlock",
+  "hyprpaper",
   "i2c-tools",
   "imagemagick",
   "inetutils",
@@ -73,7 +76,7 @@ paru = [
   "unclutter",
   "w3m",
   "waybar",
-  "wezterm",
+  "wezterm-git",
   "wget",
   "which",
   "wireplumber",
@@ -99,6 +102,7 @@ paru = [
 go = [
   "github.com/pbogut/audio-share-pc-client/audio-share-go-client@latest",
   "github.com/pbogut/go-serve@latest",
+  "github.com/pbogut/hyprnotify@latest",
   "github.com/pbogut/mails-go-web@latest",
   "github.com/porjo/youtubeuploader@latest",
 ]

@@ -4,30 +4,4 @@
 # author: author <author_contact>
 # date:   27/04/2024
 #=================================================
-if [[ "$1" == "-e" ]]; then
-  shift
-fi
-
-myargs=()
-title=""
-
-while test $# -gt 0; do
-  case "$1" in
-    --title|-t)
-      title="$2"
-      shift;shift
-      ;;
-    *)
-      myargs+=("$1")
-      shift
-      ;;
-  esac
-done
-
-if [[ -n $title ]]; then
-  export WEZTERM_TITLE="$title"
-fi
-
-WEZTERM_FLOATING=true \
-  wezterm -e --class "org.wezterm.floating" \
-  "${myargs[@]}"
+terminal --float "$@"

@@ -6,18 +6,27 @@
 #=================================================
 __vivaldi() {
     vivaldi \
-        --enable-features=UseOzonePlatform \
-        --ozone-platform=wayland \
         --user-data-dir="$HOME/.config/vivaldi/Work/" \
         --class=vivaldi-work \
         --profile-directory=Work \
         "$@"
 }
 
-if [[ $# -eq 0 ]]; then
+if [[ $# -eq 0 ]] && [[ $XDG_SESSION_DESKTOP == "Hyprland" ]]; then
+    ok=$(hyprctl dispatch "focuswindow class:vivaldi-work")
+    if [[ $ok != "ok" ]]; then
+      __vivaldi
+    fi
+elif [[ $# -eq 0 ]] && [[ $XDG_SESSION_DESKTOP = "sway" ]]; then
     swaymsg '[app_id="vivaldi-work"] focus' || __vivaldi
-else
+elif [[ $XDG_SESSION_DESKTOP == "Hyprland" ]]; then
+    ok=$(hyprctl dispatch "focuswindow class:vivaldi-work")
+    if [[ $ok != "ok" ]]; then
+      __vivaldi "$@"
+    fi
+elif [[ $XDG_SESSION_DESKTOP == "sway" ]]; then
     swaymsg '[app_id="vivaldi-work"] focus'
     __vivaldi "$@"
+else
+    __vivaldi "$@"
 fi
-

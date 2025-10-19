@@ -1,0 +1,14 @@
+#!/bin/bash
+hyprctl dispatch "togglefloating"
+json=$(hyprctl activewindow -j)
+floating=$(echo "$json" | jq '.floating')
+# left=$(echo $json | jq '.at[0]')
+monitor="$(echo "$json" | jq '.monitor')"
+left=350
+if [[ $monitor -eq 1 ]]; then
+    left=2250
+fi
+if [[ $floating == "true" ]]; then
+    hyprctl dispatch "resizeactive exact 1200 700"
+    hyprctl dispatch "moveactive exact $left 200"
+fi

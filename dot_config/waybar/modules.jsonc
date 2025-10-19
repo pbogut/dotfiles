@@ -1,4 +1,19 @@
 {
+    "hyprland/workspaces": {
+        "sort-by": "id",
+    },
+    "hyprland/window": {
+        "separate-outputs": true,
+    },
+    "hyprland/windowcount": {
+        "format": "[{0}]",
+    },
+    "custom/fullscreen": {
+        "format": "<big>{icon}</big>",
+        "format-icons": {
+            "default": "󰁌"
+        }
+    },
     "keyboard-state": {
         "numlock": true,
         "capslock": true,
@@ -160,11 +175,11 @@
     "custom/date": {
         "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
         "interval": 60,
-        "exec": "date +'%Y-%m-%d (%a)'",
+        "exec": "date +'%a, %b %e'",
         "format-icons": {
             "default": ""
         },
-        "on-click": "$TERMINAL -t FLOATING_WINDOW -e khal interactive"
+        "on-click": "terminal-float -e khal interactive"
     },
     "custom/time": {
         "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
@@ -294,5 +309,5 @@
             "default": "⏻"
         },
         "on-click": "swaynag -t warning -m 'Power Menu Options' -z 'Shutdown'  'shutdown -h now' -z 'Restart' 'shutdown -r now' -z 'Logout' 'swaymsg exit' -z 'Hibernate' 'hibernate' -z 'Suspend' 'systemctl suspend' --background=#005566 --button-background=#009999 --button-border=#002b33 --border-bottom=#002b33",
-    }
+    },
 }

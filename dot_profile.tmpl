@@ -26,9 +26,6 @@ export PATH="$HOME/.gem/ruby/3.0.0/bin:$PATH"
 export PATH="$HOME/.bin:$PATH"
 export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
 
-# is it needed?
-export XDG_CURRENT_DESKTOP=sway
-
 export XKB_DEFAULT_LAYOUT=pl
 export XKB_DEFAULT_OPTIONS=grp:alt_shift_toggle
 
@@ -37,8 +34,7 @@ export EDITOR="nvim"
 export PAGER="less"
 export LESS="-RXe"
 
-export QT_QPA_PLATFORMTHEME=kde
-export QT_STYLE_OVERRIDE=adwaita-dark
+export QT_QPA_PLATFORMTHEME=gtk3
 export FZF_DEFAULT_OPTS="--reverse --cycle --bind=ctrl-e:preview-down,ctrl-y:preview-up,ctrl-s:toggle-preview --bind=alt-j:preview-down,alt-k:preview-up --bind=ctrl-d:preview-half-page-down,ctrl-u:preview-half-page-up --bind=ctrl-w:backward-kill-word --height 40%"
 
 # place for my common python scripts
@@ -68,4 +64,4 @@ export MAKEFLAGS="-j 8"
 export PA_DEFAULT_SINK="Speaker"
 # silverspoon {{"}}}"}} {{- end }}
 
-export $(gnome-keyring-daemon --start --components=pkcs11\,secrets\,ssh)
+export $(gnome-keyring-daemon --start --components=pkcs11\,secrets\,ssh 2>/dev/null)

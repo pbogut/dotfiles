@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   hypr-windows
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   19/10/2025
+#=================================================
+address=$(hyprctl -j clients |
+    jq -r '.[] | "\(.address)\t\(.title)"' |
+    fuzzel --dmenu --with-nth=2 --accept-nth=1)
+
+if [[ -n $address ]]; then
+  hyprctl dispatch focuswindow address:"$address"
+fi

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   hypr-run-or-focus
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   18/10/2025
+#=================================================
+class=$1
+shift
+
+result=$(hyprctl dispatch "focuswindow class:${class}")
+if [[ $result != "ok" ]]; then
+  exec "$@"
+fi

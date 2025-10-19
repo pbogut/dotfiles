@@ -1,0 +1,8 @@
+#!/bin/bash
+json=$(hyprctl activewindow -j)
+floating=$(echo "$json" | jq '.floating')
+if [[ $floating == "true" ]]; then
+    hyprctl dispatch "focuswindow tiled"
+else
+    hyprctl dispatch "focuswindow floating"
+fi

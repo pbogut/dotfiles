@@ -2,6 +2,7 @@
 #super awesome capslock key
 script=$(readlink -f "$0")
 scriptpath=$(dirname "$script")
+compositor=$XDG_SESSION_DESKTOP
 
 function demonize() {
   pid="/tmp/__$(id -un)__$1.pid"
@@ -29,11 +30,9 @@ demonize nextcloud "nextcloud --background"
 rerun copyq copyq
 demonize wlsunset "wlsunset -l 50 -L 17"
 demonize nm-applet nm-applet
-demonize dunst dunst
 demonize udisksvm "udisksvm -a"
 demonize memwatch ~/.scripts/memwatch.sh
 demonize mailsgoweb ~/.scripts/mailsgoweb.sh
-demonize go-serve -dir ~/.scripts/tempermonkey/ -port 6255
 demonize kdeconnect-file-watch kdeconnect-file-watch
 
 # {{- if eq .chezmoi.hostname "redeye" }} redeye [[[
@@ -45,6 +44,15 @@ pactl set-default-sink "$optical"
 (sleep 2s; aoc-menu gamemode off) &
 (sleep 7s; aoc-menu gamemode off) &
 # redeye ]]] {{- end }}
+
+
+if [[ "$compositor" == "sway" ]]; then
+  demonize dunst dunst
+fi
+if [[ "$compositor" == "Hyprland" ]]; then
+  # demonize hypernotify hyprnotify
+  demonize dunst "unst -config $HOME/.config/dunst/hypr.dunstrc"
+fi
 
 # just local one, not versioned
 if [[ -f "$HOME/.autostart.local.sh" ]]; then

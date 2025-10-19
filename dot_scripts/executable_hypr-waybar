@@ -1,0 +1,8 @@
+#!/bin/bash
+(while :; do
+  inotifywait -e close_write /home/pbogut/.config/waybar/*
+  killall waybar -USR2
+done) &
+waybar \
+  --config "$HOME/.config/waybar/hypr.config" \
+  --style "$HOME/.config/waybar/hypr.style.css"
