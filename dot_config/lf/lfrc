@@ -93,7 +93,7 @@ map <c-f> go_file
 
 cmd go_file %{{
   dest=$(ls -Art | tail -n 1)
-  lf -remote "send $id select $dest"
+  lf -remote "send $id select '$dest'"
 }}
 
 cmd go_media %{{
