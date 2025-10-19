@@ -1,5 +1,6 @@
 #!/bin/zsh
-print -rC1 -- ${(ko)commands}  |
+print -rC1 -- ${(ko)commands} |
   grep -v '^.$' |
+  sed -E "s;(.*);\1\x00icon\x1f$ICONS/\1.svg;" |
   fuzzel --dmenu --prompt "Run: " --cache $HOME/.cache/fuzzel/fuzzel-run |
   sh

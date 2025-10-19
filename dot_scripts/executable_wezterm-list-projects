@@ -26,7 +26,7 @@ done
 
 project=false
 if [[ $TERM == "dumb" || $TERM == "linux" ]]; then
-    project=$(ls-project | fuzzel --dmenu --no-sort --search "$1" --cache /dev/null)
+    project=$(ls-project | sed -E "s;(.*);\1\x00icon\x1f$ICONS/git.svg;" | fuzzel --dmenu --no-sort --search "$1" --cache /dev/null)
 else
     project=$(ls-project | fzf -q "$1" --height=100%)
 fi
