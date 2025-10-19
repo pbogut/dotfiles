@@ -12,7 +12,7 @@ if [[ "$1" =~ ^mailto: ]]; then
 
     #Get Recipient and strip it off
     recipient=$(echo "$mail_data" | cut -d? -f1 -)
-    mail_data=$(echo "$mail_data" | /bin/sed -s s/^$recipient//)
+    mail_data=$(echo "$mail_data" | /bin/sed -s s/^"$recipient"//)
 
     #Get Subject, BCC and CC
     subject=$(echo "$mail_data" |
@@ -26,15 +26,12 @@ if [[ "$1" =~ ^mailto: ]]; then
     cmd='neomutt "'"$recipient"'" -b "'"$bcc"'" -c "'"$cc"'" -s "'"$subject"'"'
     # $TERMINAL -t "EMAIL_MUTT" -e zsh -ic "$cmd" \
     # echo $cmd
-    $TERMINAL -e zsh -ic "$cmd" \
-        && pkill -SIGRTMIN+13 i3blocks
+    terminal -e zsh -ic "$cmd"
 elif [[ -f "$1" ]]; then
     # $TERMINAL -t "EMAIL_MUTT" -e zsh -ic neomutt -a "$1" \
     cmd='neomutt -a "'"$1"'"'
-    terminal -t "EMAIL_MUTT" -e zsh -ic "$cmd" \
-        && pkill -SIGRTMIN+13 i3blocks
+    terminal -t "Mutt - Emails" -e zsh -ic "$cmd"
 else
     # $TERMINAL -t "EMAIL_MUTT" -e zsh -ic neomutt \
-    terminal -t "EMAIL_MUTT" -e zsh -ic neomutt \
-        && pkill -SIGRTMIN+13 i3blocks
+    terminal -t "Mutt - Emails" -e zsh -ic neomutt
 fi
