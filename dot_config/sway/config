@@ -231,7 +231,6 @@ exec systemctl --user import-environment
 exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec swaybg -i "$(find ~/Pictures/wallpaper -type f | shuf -n 1)"
 exec_always $HOME/.scripts/sway-startup.sh
-exec $HOME/.scripts/autostart.sh
 
 set $WOBSOCK $XDG_RUNTIME_DIR/wob.sock
 exec rm -f $WOBSOCK && mkfifo $WOBSOCK && tail -f $WOBSOCK | wob
