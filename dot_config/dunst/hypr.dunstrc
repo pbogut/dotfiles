@@ -54,6 +54,9 @@
 
     background = "#22222290"
 
+    # bar color
+    highlight = "#d3d3d3cc"
+
     # Define a color for the separator.
     # possible values are:
     #  * auto: dunst tries to find a color fitting to the background;
