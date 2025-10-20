@@ -3,7 +3,7 @@
     font-feature-settings: '"zero", "tnum", "ss01", "ss02", "ss03", "cv01"';
     /* animation-timing-function: steps(12); */
     /* animation-duration: 0.3s; */
-    /* transition: all 0.3s cubic-bezier(0.79, 0.33, 0.14, 0.53); */
+    transition: padding 0.3s, opacity 0.3s, border-color 0.3s;
 }
 window#waybar {
     font-size: 11px;
@@ -140,6 +140,7 @@ button:hover {
 #mode,
 #idle_inhibitor,
 #scratchpad,
+#custom-battery-conservation,
 #window,
 #submap,
 #mpd {
@@ -150,49 +151,40 @@ button:hover {
     background-color: #222;
     margin: 0 5px;
 }
-
 #workspaces {
     padding: 0;
 }
-
 window#waybar.empty #window,
 window#waybar:not(.fullscreen) #custom-fullscreen,
 window#waybar:not(.fullscreen) #windowcount {
     opacity: 0;
-    padding: 0;
 }
 window#waybar.fullscreen #window {
     color: #33ccff;
     padding: 0 50px;
-}
-window#waybar.fullscreen #custom-fullscreen {
-    padding: 0 5px 0 0;
+    border: 1px solid #33ccff;
 }
 window#waybar #custom-fullscreen,
 window#waybar #windowcount {
     color: #33ccff;
     background-color: #222;
 }
-
-window#waybar.fullscreen #custom-fullscreen {
+window#waybar #custom-fullscreen {
     margin-left: 5px;
-    padding-left: 10px;
+    padding: 0 5px 0 10px;
     border-left: 1px solid #33ccff;
     border-top: 1px solid #33ccff;
     border-bottom: 1px solid #33ccff;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
 }
-window#waybar.fullscreen #windowcount {
-    padding-right: 10px;
+window#waybar #windowcount {
+    padding: 0 10px 0 0;
     border-right: 1px solid #33ccff;
     border-top: 1px solid #33ccff;
     border-bottom: 1px solid #33ccff;
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
-}
-window#waybar.fullscreen #window {
-    border: 1px solid #33ccff;
 }
 
 #window,
@@ -399,5 +391,5 @@ label:focus {
 }
 
 #scratchpad.empty {
-	background-color: transparent;
+    background-color: transparent;
 }

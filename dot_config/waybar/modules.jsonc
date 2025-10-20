@@ -99,8 +99,9 @@
     },
     "backlight": {
         // "device": "acpi_video1",
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {percent}%",
-        "format-icons": ["", "", "", "", "", "", "", "", ""]
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {percent}%",
+        "format-icons": ["", "", "", "", "", "", "", "", ""],
+        "tooltip": false,
     },
     "battery": {
         "states": {
@@ -108,10 +109,10 @@
             "warning": 15,
             "critical": 10
         },
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {capacity}%",
-        "format-charging": "<span color=\"#2e9ef4\"> {icon}</span> {capacity}%",
-        "format-plugged": "<span color=\"#2e9ef4\"> {icon}</span> {capacity}%",
-        "format-alt": "<span color=\"#2e9ef4\">{icon}</span> {time}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span>    {capacity}%",
+        "format-charging": "<span color=\"#2e9ef4\"> {icon}</span>    {capacity}%",
+        "format-plugged": "<span color=\"#2e9ef4\"> {icon}</span>    {capacity}%",
+        "format-alt": "<span color=\"#2e9ef4\">{icon}</span>    {time}",
         // "format-good": "", // An empty format will hide the module
         // "format-full": "",
         "format-icons": ["", "", "", "", ""]
@@ -130,7 +131,7 @@
     },
     "pulseaudio": {
         // "scroll-step": 1, // %, can be a float
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {volume}% {format_source}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {volume}% {format_source}",
         "format-bluetooth": "{volume}% {icon} {format_source}",
         "format-bluetooth-muted": " {icon} {format_source}",
         "format-muted": " {format_source}",
@@ -305,6 +306,16 @@
         "escape": true,
         "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
         // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
+    },
+    "custom/battery-conservation": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
+        "format-icons": {
+            "default": ""
+        },
+        "signal": 12,
+        "on-click": "$HOME/.scripts/sway/conservation.sh toggle; pkill -RTMIN+12 -x waybar",
+        "exec": "$HOME/.scripts/waybar/conservation.sh",
+
     },
     "custom/power": {
         "format": "<span color=\"#e60053\">{icon}</span> ",

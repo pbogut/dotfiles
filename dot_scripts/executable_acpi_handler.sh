@@ -24,10 +24,22 @@ __lid_closed() {
 
 __update_monitor() {
     swaylock="$(ls /run/user/1000/sway-ipc.1000.*.sock)"
-    if SWAYSOCK="$swaylock" swaymsg -t get_outputs | jq -r '.[].name' | grep '^DP-1$' > /dev/null; then
-        SWAYSOCK="$swaylock" sway output eDP-1 disable
-    else
-        SWAYSOCK="$swaylock" sway output eDP-1 enable
+    if [[ -n "$swaylock" ]]; then
+        export SWAYSOCK="$swaylock"
+        if swaymsg -t get_outputs | jq -r '.[].name' | grep '^DP-1$' > /dev/null; then
+            sway output eDP-1 disable
+        else
+            sway output eDP-1 enable
+        fi
+    fi
+    hyprlock="$(ls /run/user/1000/hypr/*/hyprland.lock)"
+    if [[ -n "$hyprlock" ]]; then
+        export HYPRLAND_INSTANCE_SIGNATURE="$(basename "$(dirname "$hyprlock")")"
+        if hyprctl monitors all -j  | jq -r '.[].name' | grep '^DP-1$' > /dev/null; then
+            hyprctl keyword monitor eDP-1,disable
+        else
+            hyprctl keyword monitor eDP-1,preferred,auto,1
+        fi
     fi
 }
 
@@ -60,7 +72,7 @@ case "$1" in
             00000000)
                 logger 'AC unpluged'
                 $run "$dir/battery-save" on
-                __update_monitor
+                sleep 3 && __update_monitor
                 if __lid_closed; then
                     systemctl hibernate
                 fi
@@ -68,7 +80,7 @@ case "$1" in
             00000001)
                 logger 'AC pluged'
                 $run "$dir/battery-save" off
-                __update_monitor
+                sleep 3 && __update_monitor
                 ;;
         esac
         ;;

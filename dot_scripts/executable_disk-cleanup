@@ -18,6 +18,8 @@ find /home/pbogut/.cache/paru/ -type d -empty -delete
 echo "Removing electron cache (too big, really)"
 rm -fr /home/pbogut/.cache/paru/clone/electron* > /dev/null 2>&1
 
+rm /home/pbogut/.local/state/nvim/lsp.log
+
 if [[ -d /home/pbogut/.cache/yay ]]; then
     echo "Removing yay cache"
     rm -fr /home/pbogut/.cache/yay > /dev/null 2>&1
