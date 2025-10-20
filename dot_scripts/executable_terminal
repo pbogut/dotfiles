@@ -9,9 +9,20 @@ title=""
 class=""
 floating=false
 
+only_cmd_left=false
+
 while test $# -gt 0; do
+    if $only_cmd_left; then
+        myargs+=("$1")
+        shift
+        continue
+    fi
     case "$1" in
         -e)
+          shift
+          ;;
+        --)
+          only_cmd_left=true
           shift
           ;;
         --float | -f)
