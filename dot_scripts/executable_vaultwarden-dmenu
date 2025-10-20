@@ -35,7 +35,7 @@ __unlock() {
 __dmenu() {
   if [[ -n "$WAYLAND_DISPLAY" ]]; then
     # wofi --cache-file /dev/null --dmenu --insensitive --prompt "$1" --search "$query"
-    fuzzel --cache /dev/null --dmenu --prompt "$1: " --search "$query"
+    fuzzel --cache /dev/null --dmenu --prompt "$1: " --search "$query" --accept-nth=1 --with-nth=2
   else
     rofi -dmenu -p "$1"
   fi
@@ -58,7 +58,10 @@ __refresh_cache() {
   rbw sync
 }
 __list() {
-  rbw list --fields id,name,user,uris  | column -s $'\t' -t -o' | '
+  rbw list --fields id,name,user,uris |
+  awk 'BEGIN{OFS=FS="\t"} {$2=substr($2,1,40)}1' | # Trim length of name
+  column -s $'\t' -t -o' | ' | # Convert tabs to pipe separetor
+  sed 's/ | /\t/' # Convert first pipe to tab
 }
 __list_has_totp() {
   mkdir -p "$dir"
@@ -163,7 +166,8 @@ __login() {
 }
 
 if test $# -eq 0; then
-  action="$(echo -e "login\nuser\npass\ntotp" | __dmenu)"
+  action="$(echo -e "login\tLogin (user and password)\nuser\tUser\npass\tPassword\ntotp\tTOTP Code" | __dmenu)"
+  echo ">>$action<<"
   if [[ -n "$action" ]]; then
     "${BASH_SOURCE[0]}" "--$action"
   fi
