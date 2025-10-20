@@ -4,14 +4,21 @@ json=$(hyprctl activewindow -j)
 floating=$(echo "$json" | jq '.floating')
 # left=$(echo $json | jq '.at[0]')
 monitor="$(echo "$json" | jq '.monitor')"
-screen_w=1920
-width=1200
-height=700
-left=$(( (screen_w - width) / 2 ))
-if [[ $monitor -eq 1 ]]; then
-    left=$(( left + screen_w ))
-fi
+monitor_json=$(hyprctl monitors all -j | jq "map(select(.id == $monitor))[0]")
+scale=$(echo "$monitor_json" | jq -r '.scale')
+screen_w=$(echo "$monitor_json" | jq -r '.width')
+screen_h=$(echo "$monitor_json" | jq -r '.height')
+screen_w=$(echo "$screen_w" "$scale" | awk '{print int($1 / $2)}')
+screen_h=$(echo "$screen_h" "$scale" | awk '{print int($1 / $2)}')
+offset_x=$(echo "$monitor_json" | jq -r '.x')
+offset_y=$(echo "$monitor_json" | jq -r '.y')
+width=$(echo "$screen_w" 0.65 | awk '{print int($1 * $2)}')
+height=$(echo "$screen_h" 0.65 | awk '{print int($1 * $2)}')
+
+left=$(( ((screen_w - width) / 2) + offset_x ))
+top=$(( ((screen_h - height) / 2) + offset_y ))
+
 if [[ $floating == "true" ]]; then
     hyprctl dispatch "resizeactive exact $width $height"
-    hyprctl dispatch "moveactive exact $left 200"
+    hyprctl dispatch "moveactive exact $left $top"
 fi
