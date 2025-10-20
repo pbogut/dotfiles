@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #=================================================
 # name:   run_onchange_after_symlink-icons
+
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   08/10/2025
 #=================================================
@@ -14,8 +15,9 @@ else
       date "+%Y-%m" > "{{ .home }}/.icons/dashboard.git.last-update"
   fi
 fi
-icons="$HOME/Icons/"
-ln -sf "$HOME/.icons/dashboard.git/svg/"*.svg "$icons"
+icons="$HOME/Icons"
+mkdir -p "$icons"
+ln -sf "$HOME/.icons/dashboard.git/svg/"*.svg "$icons/"
 {{ range $mainIcon, $aliases := .icons }}
     {{ range $aliases }}
     ln -sf "$icons/{{ $mainIcon }}.svg" "$icons/{{ . }}.svg"
