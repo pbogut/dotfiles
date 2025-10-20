@@ -4,11 +4,11 @@
         // "layer": "top",
         // "position": "bottom",
         "name": "redeye1",
-        "margin": "10 10 5 10",
         "output": [
             "DP-1",
         ],
         "include": [
+            "~/.config/waybar/hypr.common.jsonc",
             "~/.config/waybar/modules.jsonc",
         ],
         "modules-left": [
@@ -22,7 +22,7 @@
         ],
         "modules-right": [
             "idle_inhibitor",
-            "custom/memory_left",
+            "memory",
             "cpu",
             "backlight",
             "custom/vrp10",
@@ -41,12 +41,12 @@
         // "layer": "top",
         // "position": "bottom",
         "name": "redeye2",
-        "margin": "10 10 5 10",
         "output": [
             "DP-2",
             "HDMI-A-1",
         ],
         "include": [
+            "~/.config/waybar/hypr.common.jsonc",
             "~/.config/waybar/modules.jsonc",
         ],
         "modules-left": [
@@ -61,7 +61,7 @@
         "modules-right": [
             "idle_inhibitor",
             "custom/shadowplay",
-            "custom/memory_left",
+            "memory",
             "cpu",
             "backlight",
             "custom/vrp10",
@@ -87,12 +87,12 @@
         // "layer": "top",
         // "position": "bottom",
         "name": "silverspoon",
-        "margin": "10 10 5 10",
         "output": [
             "eDP-1",
             "DP-1"
         ],
         "include": [
+            "~/.config/waybar/hypr.common.jsonc",
             "~/.config/waybar/modules.jsonc",
         ],
         "modules-left": [
@@ -106,7 +106,7 @@
         ],
         "modules-right": [
             "idle_inhibitor",
-            "custom/memory_left",
+            "memory",
             "cpu",
             "backlight",
             "custom/vrp10",

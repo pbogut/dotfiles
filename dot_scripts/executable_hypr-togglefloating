@@ -4,11 +4,14 @@ json=$(hyprctl activewindow -j)
 floating=$(echo "$json" | jq '.floating')
 # left=$(echo $json | jq '.at[0]')
 monitor="$(echo "$json" | jq '.monitor')"
-left=350
+screen_w=1920
+width=1200
+height=700
+left=$(( (screen_w - width) / 2 ))
 if [[ $monitor -eq 1 ]]; then
-    left=2250
+    left=$(( left + screen_w ))
 fi
 if [[ $floating == "true" ]]; then
-    hyprctl dispatch "resizeactive exact 1200 700"
+    hyprctl dispatch "resizeactive exact $width $height"
     hyprctl dispatch "moveactive exact $left 200"
 fi

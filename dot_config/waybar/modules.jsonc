@@ -84,7 +84,10 @@
         "tooltip": false
     },
     "memory": {
-        "format": "{}% "
+        "format": "<span color=\"#2e9ef4\">{icon}</span>  {percentage}%",
+        "format-icons": {
+            "default": ""
+        },
     },
     "temperature": {
         // "thermal-zone": 2,

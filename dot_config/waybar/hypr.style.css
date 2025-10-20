@@ -81,7 +81,7 @@ button:hover {
 #workspaces button {
     border-radius: 100%;
     padding: 0 5px;
-    background-color: transparent;
+    background-color: #222;
     color: #ffffff;
     border: 1px solid #595959;
     margin: 0 2px;
@@ -163,6 +163,7 @@ window#waybar:not(.fullscreen) #windowcount {
 }
 window#waybar.fullscreen #window {
     color: #33ccff;
+    padding: 0 50px;
 }
 window#waybar.fullscreen #custom-fullscreen {
     padding: 0 5px 0 0;

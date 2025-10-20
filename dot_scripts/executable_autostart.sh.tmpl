@@ -51,7 +51,7 @@ if [[ "$compositor" == "sway" ]]; then
 fi
 if [[ "$compositor" == "Hyprland" ]]; then
   # demonize hypernotify hyprnotify
-  demonize dunst "unst -config $HOME/.config/dunst/hypr.dunstrc"
+  demonize dunst "dunst -config $HOME/.config/dunst/hypr.dunstrc"
 fi
 
 # just local one, not versioned
