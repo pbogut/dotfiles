@@ -42,7 +42,7 @@ __get_main_branch() {
 
 __prune_local() {
   main_branch="$1"
-  branches=$(git branch --merged "$main_branch" | grep -v "^\*" | grep -v '^+')
+  branches=$(git branch --merged "origin/$main_branch" | grep -v "^\*" | grep -v '^+')
 
   if [[ -n $branches ]]; then
     echo "Branches merged with $main_branch:"
@@ -61,7 +61,7 @@ __prune_local() {
 
 __prune_worktree() {
   main_branch="$1"
-  branches=$(git branch --merged "$main_branch" | grep -v "^\*" | grep '^+' | sed 's/^+ /  /')
+  branches=$(git branch --merged "origin/$main_branch" | grep -v "^\*" | grep '^+' | sed 's/^+ /  /')
 
   if [[ -n $branches ]]; then
     echo "Worktrees merged with $main_branch:"
@@ -72,6 +72,9 @@ __prune_worktree() {
     if [[ $confirm == "y" ]]; then
       while read -r branch; do
         # shellcheck disable=SC2086
+        echo "-----------------------------------"
+        echo "| Removing worktree: $branch"
+        echo "-----"
         git wt remove "../$branch" < /dev/tty
         result_code=$?
         if [[ $result_code -eq 255 ]] && $use_sudo; then
