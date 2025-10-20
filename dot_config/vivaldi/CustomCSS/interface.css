@@ -19,6 +19,7 @@ button.ToolbarButton-Button[name="WorkspaceButton"]:not([title="Workspaces"]):no
 }
 #tabs-tabbar-container {
   padding-top: 2px !important;
+  width: 360px !important;
 }
 /* style sidebar */
 #browser:not(.transparent-tabbar) #tabs-tabbar-container {
@@ -36,6 +37,9 @@ body .tabbar-wrapper {
 /* show extention icons on sidebar when address bar is hidden */
 .address-top-off #tabs-tabbar-container {
   padding-top: 30px !important;
+}
+.address-top-off .UrlBar-AddressField {
+  margin-top: 20px !important;;
 }
 .toolbar-large {
     padding-right: 10px !important;
