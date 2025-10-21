@@ -27,6 +27,7 @@ return {
       starship = require('pbogut.plugins.lualine.starship'),
       chezmoi = require('pbogut.plugins.lualine.chezmoi'),
       context = require('pbogut.plugins.lualine.context'),
+      lsp_progress = require('pbogut.plugins.lualine.lsp_progress'),
     }
 
     lualine.setup({
@@ -56,7 +57,7 @@ return {
       sections = {
         lualine_a = { { 'mode', fmt = s.mode_fmt }, s.ripgrep },
         lualine_b = { { s.diff_change, padding = 0 }, 'branch' },
-        lualine_c = { s.dapinfo, s.harpoon, s.chezmoi, s.filename },
+        lualine_c = { s.dapinfo, s.harpoon, s.chezmoi, s.filename, s.lsp_progress },
         lualine_x = { s.starship },
         lualine_y = { s.fileinfo, s.location },
         lualine_z = { s.actions, s.diagnostics },
