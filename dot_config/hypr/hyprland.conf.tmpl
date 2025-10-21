@@ -15,9 +15,6 @@
 # Create your files separately and then link them to this file like this:
 # source = ~/.config/hypr/myColors.conf
 
-# Chezmoi
-# {{ $ws := .hyprland.workspaces }}
-
 ################
 ### MONITORS ###
 ################
@@ -175,17 +172,17 @@ animations {
 # workspace = name:browser
 # windowrule = workspace name:browser, class:^(vivaldi-personal)$
 
-workspace = {{ $ws.web }},monitor:DP-1
-workspace = {{ $ws.code }},monitor:DP-1
-workspace = {{ $ws.chat }},monitor:HDMI-A-1
-workspace = {{ $ws.media }},monitor:HDMI-A-1
-workspace = {{ $ws.work }},monitor:HDMI-A-1
+workspace = name:web,monitor:DP-1
+workspace = name:code,monitor:DP-1
+workspace = name:chat,monitor:HDMI-A-1
+workspace = name:media,monitor:HDMI-A-1
+workspace = name:work,monitor:HDMI-A-1
 
-windowrule = workspace {{ $ws.web }}, class:^(vivaldi-personal)$
-windowrule = workspace {{ $ws.code }}, class:^(Alacritty.project)$
-windowrule = workspace {{ $ws.chat }}, class:^(ferdium)$
-windowrule = workspace {{ $ws.media }}, class:^(brave-www.youtube.com__).*$
-windowrule = workspace {{ $ws.work }}, class:^(vivaldi-work)$
+windowrule = workspace name:web, class:^(vivaldi-personal)$
+windowrule = workspace name:code, class:^(Alacritty.project)$
+windowrule = workspace name:chat, class:^(ferdium)$
+windowrule = workspace name:media, class:^(brave-www.youtube.com__).*$
+windowrule = workspace name:work, class:^(vivaldi-work)$
 
 windowrule = syncfullscreen 0, class:^(brave-).*$
 windowrule = syncfullscreen 0, class:^(vivaldi-).*$
@@ -315,24 +312,24 @@ bind = $mainMod CTRL, J, swapactiveworkspaces, 0 1
 
 # Switch workspaces with mainMod + [0-9]
 
-bind = $mainMod, 1, workspace, {{ $ws.web }}
-bind = $mainMod, 2, workspace, {{ $ws.term }}
-bind = $mainMod, 3, workspace, {{ $ws.chat }}
-bind = $mainMod, 4, workspace, {{ $ws.code }}
-bind = $mainMod, 5, workspace, {{ $ws.media }}
-bind = $mainMod, 6, workspace, {{ $ws.work }}
+bind = $mainMod, 1, workspace, name:web
+bind = $mainMod, 2, workspace, name:term
+bind = $mainMod, 3, workspace, name:chat
+bind = $mainMod, 4, workspace, name:code
+bind = $mainMod, 5, workspace, name:media
+bind = $mainMod, 6, workspace, name:work
 bind = $mainMod, 7, workspace, 7
 bind = $mainMod, 8, workspace, 8
 bind = $mainMod, 9, workspace, 9
 bind = $mainMod, 0, workspace, 10
 
 # Move active window to a workspace with mainMod + SHIFT + [0-9]
-bind = $mainMod SHIFT, 1, movetoworkspace, {{ $ws.web }}
-bind = $mainMod SHIFT, 2, movetoworkspace, {{ $ws.term }}
-bind = $mainMod SHIFT, 3, movetoworkspace, {{ $ws.chat }}
-bind = $mainMod SHIFT, 4, movetoworkspace, {{ $ws.code }}
-bind = $mainMod SHIFT, 5, movetoworkspace, {{ $ws.media }}
-bind = $mainMod SHIFT, 6, movetoworkspace, {{ $ws.work }}
+bind = $mainMod SHIFT, 1, movetoworkspace, name:web
+bind = $mainMod SHIFT, 2, movetoworkspace, name:term
+bind = $mainMod SHIFT, 3, movetoworkspace, name:chat
+bind = $mainMod SHIFT, 4, movetoworkspace, name:code
+bind = $mainMod SHIFT, 5, movetoworkspace, name:media
+bind = $mainMod SHIFT, 6, movetoworkspace, name:work
 bind = $mainMod SHIFT, 7, movetoworkspace, 7
 bind = $mainMod SHIFT, 8, movetoworkspace, 8
 bind = $mainMod SHIFT, 9, movetoworkspace, 9

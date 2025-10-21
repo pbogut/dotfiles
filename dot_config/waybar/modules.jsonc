@@ -1,6 +1,15 @@
 {
     "hyprland/workspaces": {
         "sort-by": "id",
+        "format": "{icon}",
+        "format-icons": {
+            "web": "",
+            "term": "",
+            "code": "",
+            "chat": "",
+            "media": "",
+            "work": "",
+        }
     },
     "hyprland/window": {
         "separate-outputs": true,
