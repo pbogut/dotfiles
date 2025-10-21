@@ -91,5 +91,5 @@ row=1
 column=3
 icon_color="#fff"
 icon_text=""
-execute="~/.scripts/hackdeck/weather.zsh"
+execute="~/.scripts/hackdeck/weather.zsh 24308"
 button_press="browser https://pogoda.interia.pl"
