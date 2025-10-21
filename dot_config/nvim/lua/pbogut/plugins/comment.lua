@@ -12,6 +12,8 @@ return {
   opts = {
     comment_strings = {
       asm = '//%s',
+      php_only = { '//%s', '/* %s */' },
+      blade = { '{{-- %s --}}', '{{-- %s --}}' },
       crontab = '# %s',
       devicetree = { '// %s', '/* %s */' },
       heex = { '<%!-- %s --%>', '<%!-- %s --%>' },
