@@ -27,7 +27,7 @@ vim.filetype.add({
     ['.*%.toml%.tmpl'] = 'toml',
     ['.*%.json%.tmpl'] = 'json',
     ['.*%/dot_profile%.tmpl'] = 'sh',
-    ['.*%/waybar%/config%.tmpl'] = 'jsonc',
+    ['.*%/waybar%/.*config%.tmpl'] = 'jsonc',
     ['.*%.sh%.tmpl'] = 'sh',
     ['.*%.conf%.tmpl'] = 'conf',
     ['.*%.desktop%.tmpl'] = 'desktop',

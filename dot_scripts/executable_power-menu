@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   power-menu
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   21/10/2025
+#=================================================
+actions=(
+    "󰒲 Suspend : suspend"
+    "󰤄 Hibernate : hibernate"
+    "󰍃 Logout : logout"
+    "󰜉 Restart : restart"
+    "⏻ Shutdown : shutdown"
+    "  :  "
+    " Backup and Shutdown : backup"
+)
+
+max_len=0
+height=0
+for elems in "${actions[@]}"; do
+    elem=${elems%% : *}
+    len=${#elem}
+    height=$(( height + 1 ))
+    if [[ $len -gt $max_len ]]; then
+      max_len=$len
+    fi
+done
+selected=$(
+  for elems in "${actions[@]}"; do
+      elem=${elems%% : *}
+      action=${elems##* : }
+      echo -e "$elem\t$action"
+  done | fuzzel \
+      --dmenu \
+      --cache /dev/null \
+      --width "$(( max_len + 1 ))" \
+      --lines "$height" \
+      --anchor top-right \
+      --x-margin=8 \
+      --y-margin=8 \
+      --accept-nth=2 --with-nth=1
+)
+
+case $selected in
+    "suspend")
+        systemctl suspend
+        ;;
+    "hibernate")
+        systemctl hibernate
+        ;;
+    "logout")
+        hyprctl dispatch exit
+        ;;
+    "restart")
+        systemctl reboot
+        ;;
+    "shutdown")
+        systemctl poweroff
+        ;;
+    "backup")
+        backintime backup &
+        sleep 5s
+        backintime shutdown
+        ;;
+esac
