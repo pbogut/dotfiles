@@ -86,8 +86,8 @@ env = HYPRCURSOR_SIZE,24
 
 # https://wiki.hypr.land/Configuring/Variables/#general
 general {
-    gaps_in = 5
-    gaps_out = 10
+    gaps_in = 4
+    gaps_out = 8
 
     border_size = 2
 
@@ -256,13 +256,14 @@ $mainMod = SUPER # Sets "Windows" key as main modifier
 # Actions
 bind = $mainMod SHIFT, Q, killactive,
 bind = $mainMod, F, fullscreen,
+bind = $mainMod SHIFT, F, fullscreenstate, 0 2
 bind = $mainMod, Z, fullscreen, 1 #fulscreen with waybar showing z for zoom
 bind = $mainMod, M, fullscreen, 1 #maximize
 bind = $mainMod, E, exec, $fileManager
 bind = $mainMod, SPACE, exec, hypr-togglefloating
-bind = $mainMod SHIFT, SPACE, exec, hypr-togglefloatingfocus
+bind = $mainMod, TAB, exec, hypr-togglefloatingfocus
 bind = $mainMod, R, exec, $menu
-bind = $mainMod SUPER, TAB, workspace, previous
+# bind = $mainMod SUPER, TAB, workspace, previous
 bind = $mainMod, S, togglesplit, # dwindle
 bind = $mainMod, Y, exec, hypr-pip
 

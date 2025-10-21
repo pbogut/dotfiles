@@ -1,3 +1,5 @@
 {
-  "margin": "10 10 0 10",
+  // should match hyprland 4 8 gaps_in gaps_out
+  // difference because of the shadows and staff
+  "margin": "7 3 0 6",
 }
