@@ -46,10 +46,6 @@ open_by_title() {
   # shellcheck disable=SC2001
   id=$(sed 's/.*:nvim:\([0-9]*\):.*/\1/g' <<<"$1")
   pid=/run/user/$UID/nvim.$id.0
-  open=":OpenFile"
-  if [[ $no_tab -eq 1 ]]; then
-    open=":edit"
-  fi
   for fn in "${files[@]}"; do
     file="$(readlink -f "$fn" || echo "$fn")"
     nvim --server "$pid" --remote "$file"
@@ -66,7 +62,9 @@ if [[ -n $TMUX ]]; then
   tmux new-session -d -s "$name" nvim -p -- "${files[@]}"
   tmux switch-client -t "$name:nvim" || tmux switch-client -t "$name"
   title=$(cut -f1 --complement --delimiter='|' <<< "$(tmux display-message -p "#T")")
-  open_by_title "$title" 2>/dev/null
+  if [[ -n "${files[*]}" ]]; then
+    open_by_title "$title" 2>/dev/null
+  fi
   exit 0
 fi
 
