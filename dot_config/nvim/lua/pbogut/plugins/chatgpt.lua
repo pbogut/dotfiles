@@ -1,6 +1,6 @@
 ---@type LazyPluginSpec
 return {
-  enabled = true,
+  enabled = false,
   'jackmort/chatgpt.nvim',
   dependencies = {
     'muniftanjim/nui.nvim',

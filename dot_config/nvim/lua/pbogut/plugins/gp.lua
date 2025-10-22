@@ -2,7 +2,9 @@
 return {
   enabled = true,
   'robitx/gp.nvim',
-  keys = {},
+  keys = {
+    { '<space>gp', '<cmd>GpChatFinder<cr>' },
+  },
   cmd = {
     'GpAgent',
     'GpAppend',
@@ -49,6 +51,28 @@ return {
       },
     }
     require('gp').setup(conf)
-    -- Setup shortcuts here (see Usage > Shortcuts in the Documentation/Readme)
+
+    local command = vim.api.nvim_create_user_command
+
+    command('GpChatFinder', function()
+      require("telescope.builtin").live_grep({
+        attach_mappings = function(bufnr, map)
+          map('i', '<C-n>', function()
+            require("telescope.actions").close(bufnr)
+            vim.cmd.GpChatNew()
+          end)
+          return true
+        end,
+        prompt_title = "Search AI Chats (<C-n> to start new)",
+        cwd = require("gp").config.chat_dir,
+        default_text = "topic: ",
+        vimgrep_arguments = {
+          "rg",
+          "--column",
+          "--smart-case",
+          "--sortr=modified",
+        },
+      })
+    end, {})
   end,
 }
