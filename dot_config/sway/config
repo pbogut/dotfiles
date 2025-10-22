@@ -374,7 +374,6 @@ bindsym $mod+slash $exec "~/.scripts/quickbrowser.sh"
 # full screen (image magick required)
 bindsym Print $exec swaymsg -t get_tree | jq -r '.. | select(.focused?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | grim -g - ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png
 bindsym $mod+Print $exec "grim ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
-# area (maim and slop required)
 bindsym Shift+Print $exec "slurp | grim -g - ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png"
 
 bindsym Ctrl+Print $exec "~/.scripts/sway/shadowplay.sh --screen-shot"
