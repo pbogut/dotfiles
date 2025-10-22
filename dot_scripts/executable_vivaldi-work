@@ -20,10 +20,8 @@ if [[ $# -eq 0 ]] && [[ $XDG_SESSION_DESKTOP == "Hyprland" ]]; then
 elif [[ $# -eq 0 ]] && [[ $XDG_SESSION_DESKTOP = "sway" ]]; then
     swaymsg '[app_id="vivaldi-work"] focus' || __vivaldi
 elif [[ $XDG_SESSION_DESKTOP == "Hyprland" ]]; then
-    ok=$(hyprctl dispatch "focuswindow class:vivaldi-work")
-    if [[ $ok != "ok" ]]; then
-      __vivaldi "$@"
-    fi
+    hyprctl -q dispatch "focuswindow class:vivaldi-work"
+    __vivaldi "$@"
 elif [[ $XDG_SESSION_DESKTOP == "sway" ]]; then
     swaymsg '[app_id="vivaldi-work"] focus'
     __vivaldi "$@"
