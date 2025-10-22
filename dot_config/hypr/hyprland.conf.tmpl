@@ -45,7 +45,8 @@ $fileManager = lf-term
 # exec-once = nm-applet &
 # exec-once = waybar & hyprpaper & firefox
 exec-once = hypr-waybar
-exec-once = sleep 1; hyprlock
+exec-once = hypridle
+exec-once = loginctl lock-session
 
 
 #############################
@@ -98,7 +99,7 @@ general {
     # Please see https://wiki.hypr.land/Configuring/Tearing/ before you turn this on
     allow_tearing = false
 
-    layout = dwindle
+    layout = master
 }
 
 # https://wiki.hypr.land/Configuring/Variables/#decoration
@@ -189,13 +190,15 @@ windowrule = syncfullscreen 0, class:^(vivaldi-).*$
 
 # See https://wiki.hypr.land/Configuring/Dwindle-Layout/ for more
 dwindle {
+    force_split = 2
     pseudotile = true # Master switch for pseudotiling. Enabling is bound to mainMod + P in the keybinds section below
     preserve_split = true # You probably want this
 }
 
 # See https://wiki.hypr.land/Configuring/Master-Layout/ for more
 master {
-    new_status = master
+    new_status = slave
+    mfact = 0.65
 }
 
 # https://wiki.hypr.land/Configuring/Variables/#misc
@@ -240,6 +243,7 @@ device {
 binds {
     allow_pin_fullscreen=true
     allow_workspace_cycles = true
+    scroll_event_delay = 0
 }
 
 ###################
@@ -262,6 +266,8 @@ bind = $mainMod, TAB, exec, hypr-togglefloatingfocus
 bind = $mainMod, R, exec, $menu
 # bind = $mainMod SUPER, TAB, workspace, previous
 bind = $mainMod, S, togglesplit, # dwindle
+bind = $mainMod, S, layoutmsg, swapwithmaster master
+bind = $mainMod, V, exec, hypr-togglemfact
 bind = $mainMod, Y, exec, hypr-pip
 
 # Apps
@@ -279,6 +285,12 @@ bind = $mainMod CTRL, F, exec, $(hyprctl dispatch "focuswindow class:ferdium") =
 bind = Shift, Print, exec, hyprctl keyword decoration:rounding 0; hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"' | grim -g - ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png; hyprctl keyword decoration:rounding 10; notify-send "Screenshot saved" "Active window" -u low
 bind = , Print, exec, slurp | grim -g - ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png; notify-send "Screenshot saved" "Selection" -u low
 bind = $mainMod, Print, exec, grim ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png; notify-send "Screenshot saved" "Full screen" -u low
+
+# Zoom
+bind = $mainMod, mouse_down, exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 1.2}')
+bind = $mainMod, mouse_up, exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 0.8}')
+bind = $mainMod, mouse:274, exec, hyprctl -q keyword cursor:zoom_factor 1
+bind = $mainMod SHIFT, mouse:273, exec, hyprpicker -a
 
 bind = $mainMod, D, exec, dunstctl context
 bind = $mainMod SHIFT, D, exec, dunstctl close
@@ -339,10 +351,6 @@ bind = $mainMod SHIFT, 0, movetoworkspace, 10
 bind = $mainMod, G, togglespecialworkspace, magic
 bind = $mainMod SHIFT, G, movetoworkspace, special:magic
 
-# Scroll through existing workspaces with mainMod + scroll
-bind = $mainMod, mouse_down, workspace, e+1
-bind = $mainMod, mouse_up, workspace, e-1
-
 # Move/resize windows with mainMod + LMB/RMB and dragging
 bindm = $mainMod, mouse:272, movewindow
 bindm = $mainMod, mouse:273, resizewindow
@@ -368,7 +376,7 @@ bindl = , XF86AudioPrev, exec, playerctl previous
 $power = System: (l) lock, (e) exit, (r) reboot, (Shift+s) shutdown, (b) backup and shutdown, (Esc) cancel
 bind = $mainMod, Q, submap, $power
 submap = $power
-bind = , L, exec, hyprlock
+bind = , L, exec, loginctl lock-session
 bind = , L, submap, reset
 bind = , E, exit
 bind = , E, submap, reset
@@ -406,6 +414,7 @@ windowrule = float,class:^(Alacritty.floating)$
 windowrule = size 1200 700,class:^(Alacritty.floating)$
 windowrule = float,class:^(org.wezterm.floating)$
 windowrule = size 1200 700,class:^(org.wezterm.floating)$
+windowrule = float,class:^(com.nextcloud.desktopclient.nextcloud)$
 
 windowrule = float,title:^Bitwarden - Vivaldi$
 

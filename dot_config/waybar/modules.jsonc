@@ -1,4 +1,24 @@
 {
+    "network": {
+        "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+        "format": "{icon}",
+        "format-wifi": "<span color=\"#2e9ef4\">{icon}</span>",
+        "format-ethernet": "<span color=\"#2e9ef4\">󰀂</span>",
+        "format-disconnected": "<span color=\"#e60053\">󰤮</span>",
+        "tooltip-format-wifi": "{essid} ({frequency} GHz)\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+        "tooltip-format-ethernet": "⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+        "tooltip-format-disconnected": "Disconnected",
+        "interval": 3,
+        "spacing": 1,
+        "on-click": "networkmanager_dmenu"
+    },
+    "bluetooth": {
+      "format": "<span color=\"#2e9ef499\"></span>",
+      "format-disabled": "", // "<span color=\"#e60053\">󰂲</span>",
+      "format-connected": "<span color=\"#2e9ef4\"></span>",
+      "tooltip-format": "Devices connected: {num_connections}",
+      "on-click": "dmenu-bluetooth" // "blueberry"
+    },
     "hyprland/workspaces": {
         "sort-by": "id",
         "format": "{icon}",
@@ -128,15 +148,6 @@
     },
     "battery#bat2": {
         "bat": "BAT2"
-    },
-    "network": {
-        // "interface": "wlp2*", // (Optional) To force the use of this interface
-        "format-wifi": "{essid} ({signalStrength}%) ",
-        "format-ethernet": "{ipaddr}/{cidr} ",
-        "tooltip-format": "{ifname} via {gwaddr} ",
-        "format-linked": "{ifname} (No IP) ",
-        "format-disconnected": "Disconnected ⚠",
-        "format-alt": "{ifname}: {ipaddr}/{cidr}"
     },
     "pulseaudio": {
         // "scroll-step": 1, // %, can be a float
@@ -333,5 +344,12 @@
         },
         "on-click": "power-menu",
     },
+    "custom/nextcloud": {
+        "format": "<span color=\"#2e9ef4\">{icon}</span>",
+        "format-icons": {
+            "default": "󰘿"
+        },
+        "on-click": "nextcloud",
+    }
 }
 

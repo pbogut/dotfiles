@@ -96,6 +96,17 @@ label {
 
 label {
     monitor =
+    text = {{ .hostname }}
+    font_size = 25
+    font_family = $font
+
+    position = -30, 30
+    halign = right
+    valign = bottom
+}
+
+label {
+    monitor =
     text = $LAYOUT[pl,en]
     font_size = 24
     onclick = hyprctl switchxkblayout all next

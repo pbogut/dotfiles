@@ -110,6 +110,7 @@ button:hover {
     padding:0 10px;
 }
 #custom-power,
+#custom-nextcloud,
 #custom-vrp10,
 #custom-bt_kyria,
 #custom-bt_dactyl,
@@ -130,6 +131,7 @@ button:hover {
 #temperature,
 #backlight,
 #network,
+#bluetooth,
 #pulseaudio,
 #wireplumber,
 #custom-media,
