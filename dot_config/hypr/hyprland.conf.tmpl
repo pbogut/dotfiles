@@ -20,7 +20,7 @@
 ################
 
 # See https://wiki.hypr.land/Configuring/Monitors/
-monitor=,preferred,auto,auto
+monitor=,preferred,auto,1
 
 
 ###################
@@ -373,7 +373,7 @@ bindl = , XF86AudioPrev, exec, playerctl previous
 ### SUBMAPS / MENUS ###
 #######################
 
-$power = System: (l) lock, (e) exit, (r) reboot, (Shift+s) shutdown, (b) backup and shutdown, (Esc) cancel
+$power = System: (l) lock, (e) exit, (r) reboot, (s) suspend, (Shift+s) shutdown, (b) backup and shutdown, (Esc) cancel
 bind = $mainMod, Q, submap, $power
 submap = $power
 bind = , L, exec, loginctl lock-session
@@ -382,6 +382,8 @@ bind = , E, exit
 bind = , E, submap, reset
 bind = , R, exec, reboot
 bind = , R, submap, reset
+bind = , S, exec, systemctl suspend
+bind = , S, submap, reset
 bind = SHIFT, S, exec, poweroff
 bind = SHIFT, S, submap, reset
 bind = , B, exec, backintime backup & sleep 5s; backintime shutdown

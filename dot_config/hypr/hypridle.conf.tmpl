@@ -6,12 +6,37 @@ general {
 }
 
 listener {
-    timeout = 1800 # 30 minutes, we testing
-    on-timeout = systemctl suspend
+    timeout = 300 # 5min.
+    on-timeout = loginctl lock-session
+}
+
+# silverspoon {{"{{{"}} {{- if eq .chezmoi.hostname "silverspoon" }}
+listener {
+    timeout = 90 # 1.5min.
+    on-timeout = brightnessctl -s set 50         # set monitor backlight to minimum, avoid 0 on OLED monitor.
+    on-resume = brightnessctl -r                 # monitor backlight restore.
 }
 
 listener {
     timeout = 150 # 2.5min.
-    on-timeout = brightnessctl -s set 10         # set monitor backlight to minimum, avoid 0 on OLED monitor.
+    on-timeout = brightnessctl set 10         # set monitor backlight to minimum, avoid 0 on OLED monitor.
     on-resume = brightnessctl -r                 # monitor backlight restore.
 }
+
+listener {
+    timeout = 330 # 5.5min.
+    on-timeout = hyprctl dispatch dpms off
+    on-resume = hyprctl dispatch dpms on && brightnessctl -r
+}
+
+listener {
+    timeout = 900 # 15 minutes, we testing
+    on-timeout = systemctl suspend
+}
+# silverspoon {{"}}}"}} {{- end }}
+# redeye {{"{{{"}} {{- if eq .chezmoi.hostname "redeye" }}
+listener {
+    timeout = 3600 # 1h
+    on-timeout = systemctl suspend
+}
+# redeye {{"}}}"}} {{- end }}
