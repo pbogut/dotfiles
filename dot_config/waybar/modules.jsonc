@@ -109,11 +109,14 @@
         "format-alt": "{:%Y-%m-%d}"
     },
     "cpu": {
-        "format": "<span color=\"#2e9ef4\"></span>  {usage}%",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {usage}%",
+        "format-icons": {
+            "default": ""
+        },
         "tooltip": false
     },
     "memory": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {percentage}%",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {percentage}%",
         "format-icons": {
             "default": ""
         },
@@ -128,7 +131,7 @@
     },
     "backlight": {
         // "device": "acpi_video1",
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {percent}%",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {percent}%",
         "format-icons": ["", "", "", "", "", "", "", "", ""],
         "tooltip": false,
     },
@@ -138,10 +141,10 @@
             "warning": 15,
             "critical": 10
         },
-        "format": "<span color=\"#2e9ef4\">{icon}</span>    {capacity}%",
-        "format-charging": "<span color=\"#2e9ef4\"> {icon}</span>    {capacity}%",
-        "format-plugged": "<span color=\"#2e9ef4\"> {icon}</span>    {capacity}%",
-        "format-alt": "<span color=\"#2e9ef4\">{icon}</span>    {time}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {capacity}%",
+        "format-charging": "<span color=\"#2e9ef4\"> {icon}</span> {capacity}%",
+        "format-plugged": "<span color=\"#2e9ef4\"> {icon}</span> {capacity}%",
+        "format-alt": "<span color=\"#2e9ef4\">{icon}</span> {time}",
         // "format-good": "", // An empty format will hide the module
         // "format-full": "",
         "format-icons": ["", "", "", "", ""]
@@ -151,7 +154,7 @@
     },
     "pulseaudio": {
         // "scroll-step": 1, // %, can be a float
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {volume}% {format_source}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {volume}% {format_source}",
         "format-bluetooth": "{volume}% {icon} {format_source}",
         "format-bluetooth-muted": " {icon} {format_source}",
         "format-muted": " {format_source}",
@@ -179,7 +182,7 @@
         },
     },
     "custom/notmuch": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "interval": 60,
         "signal": 25,
         "exec": "c() { u=\"$(notmuch count -- tag:unread and tag:inbox)\"; i=\"$(notmuch count --  tag:inbox)\"; if [[ $u != \"0\" ]]; then echo $u/$i; else echo \"\"; fi }; c",
@@ -189,7 +192,7 @@
         },
     },
     "custom/memory_left": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "interval": 30,
         "exec": "free -h | grep 'Mem' | awk '{print $7 \" (\"$4\")\"}'",
         "format-icons": {
@@ -197,7 +200,7 @@
         },
     },
     "custom/date": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "interval": 60,
         "exec": "date +'%a, %b %e'",
         "format-icons": {
@@ -206,7 +209,7 @@
         "on-click": "terminal-float -e khal interactive"
     },
     "custom/time": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "interval": 1,
         "exec": "env TZ='Europe/Warsaw' date +'%H:%M:%S'",
         "format-icons": {
@@ -222,7 +225,7 @@
         },
     },
     "custom/gamemode": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "interval": 3600,
         "signal": 17,
         "exec": "$HOME/.scripts/waybar/gaming.sh",
@@ -306,7 +309,7 @@
         "on-click": "hubstaff toggle"
     },
     "custom/vrp10": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "interval": 3600,
         "signal": 20,
         "exec": "$HOME/.scripts/waybar/vrp10.sh",
@@ -328,7 +331,7 @@
         // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
     },
     "custom/battery-conservation": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>  {0}",
+        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
         "format-icons": {
             "default": ""
         },

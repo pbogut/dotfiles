@@ -1,9 +1,9 @@
 * {
-    font-family: 'Symbols Nerd Font';
+    font-family: 'JetBrainsMono Nerd Font Propo';
     font-feature-settings: '"zero", "tnum", "ss01", "ss02", "ss03", "cv01"';
     /* animation-timing-function: steps(12); */
     /* animation-duration: 0.3s; */
-    transition: padding 0.3s, opacity 0.3s, border-color 0.3s;
+    transition: padding 0.3s, opacity 0.3s, border-color 0.3s cubic-bezier(0.19, 1, 0.22, 1);
 }
 window#waybar {
     font-size: 11px;

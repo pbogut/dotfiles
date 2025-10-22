@@ -31,15 +31,15 @@ __switch_sink() {
 if [[ $current == $speaker ]]; then
   if $toggle; then
     __switch_sink "$buds"
-    echo " "
+    echo ""
   else
-    echo " "
+    echo ""
   fi
 else
   if $toggle; then
     __switch_sink "$speaker"
-    echo " "
+    echo ""
   else
-    echo " "
+    echo ""
   fi
 fi
