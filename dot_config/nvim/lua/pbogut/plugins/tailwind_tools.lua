@@ -65,6 +65,9 @@ return {
       group = augroup,
       pattern = '*',
       callback = function()
+        if #vim.lsp.get_clients({bufnr = 0, name = "tailwindcss"}) == 0 then
+          return
+        end
         if vim.b.tailwind_tools_sort_on_save == nil then
           if vim.g.tailwind_tools_sort_on_save == true then
             vim.cmd.TailwindSortSync()
