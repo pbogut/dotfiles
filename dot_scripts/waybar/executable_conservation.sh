@@ -10,11 +10,11 @@ toggle() {
     if [[ "$state" == "on" ]]; then
         sudo ideapad-cm disable
         state="off"
-	notify-send -i battery "Battery conservation" "Battery conservation mode is now <b>disabled</b>"
+        notify-send -i battery "Battery conservation" "Battery conservation mode is now <b>disabled</b>"
     else
         sudo ideapad-cm enable
         state="on"
-	notify-send -i battery-full "Battery conservation" "Battery conservation mode is now <b>enabled</b>"
+        notify-send -i battery-full "Battery conservation" "Battery conservation mode is now <b>enabled</b>"
     fi
     # update_state
     show_state
