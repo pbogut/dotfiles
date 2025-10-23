@@ -21,6 +21,7 @@ __menu() {
         " 󰜉 Restart : restart"
         "  :  "
         #{{- if eq .hostname "redeye" }}
+        " 󰨡 Windows : windows"
         "  Backup and Shutdown : backup"
         #{{- end }}
     )
@@ -86,6 +87,9 @@ case $selected in
         ;;
     "vrp10")
         ~/.scripts/waybar/vrp10.sh toggle
+        ;;
+    "windows")
+        systemctl reboot -i --boot-loader-entry=windows.conf
         ;;
     "backup")
         backintime backup &
