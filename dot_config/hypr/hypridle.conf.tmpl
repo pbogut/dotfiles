@@ -13,14 +13,14 @@ listener {
 # silverspoon {{"{{{"}} {{- if eq .chezmoi.hostname "silverspoon" }}
 listener {
     timeout = 90 # 1.5min.
-    on-timeout = brightnessctl -s set 50         # set monitor backlight to minimum, avoid 0 on OLED monitor.
-    on-resume = brightnessctl -r                 # monitor backlight restore.
+    on-timeout = brightnessctl -s set 50%
+    on-resume = brightnessctl -r
 }
 
 listener {
     timeout = 150 # 2.5min.
-    on-timeout = brightnessctl set 10         # set monitor backlight to minimum, avoid 0 on OLED monitor.
-    on-resume = brightnessctl -r                 # monitor backlight restore.
+    on-timeout = brightnessctl set 10%
+    on-resume = brightnessctl -r
 }
 
 listener {
