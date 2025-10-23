@@ -1,25 +1,27 @@
 #!/usr/bin/env bash
 #=================================================
-# name:   power-menu
+# name:   powermenu
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   21/10/2025
 #=================================================
 
 __menu() {
     actions=(
-        "󰌾 Lock : lock"
-        "󰒲 Suspend : suspend"
+        " 󱡏 VR P10               $(~/.scripts/waybar/vrp10.sh) : vrp10"
         #{{- if eq .hostname "silverspoon" }}
-        "󰤄 Hibernate : hibernate"
+        " 󰌪 Battery conservation $(~/.scripts/waybar/conservation.sh) : conservation"
         #{{- end }}
-        "󰍃 Logout : logout"
-        "󰜉 Restart : restart"
         "  :  "
+        " 󰌾 Lock : lock"
+        " 󰒲 Suspend : suspend"
         #{{- if eq .hostname "silverspoon" }}
-        "$(__conservation_status) Battery conservation : conservation"
+        " 󰤄 Hibernate : hibernate"
         #{{- end }}
+        " 󰍃 Logout : logout"
+        " 󰜉 Restart : restart"
+        "  :  "
         #{{- if eq .hostname "redeye" }}
-        " Backup and Shutdown : backup"
+        "  Backup and Shutdown : backup"
         #{{- end }}
     )
 
@@ -81,6 +83,9 @@ case $selected in
         ;;
     "conservation")
         ~/.scripts/waybar/conservation.sh toggle
+        ;;
+    "vrp10")
+        ~/.scripts/waybar/vrp10.sh toggle
         ;;
     "backup")
         backintime backup &

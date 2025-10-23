@@ -344,7 +344,7 @@
         "format-icons": {
             "default": "⏻"
         },
-        "on-click": "power-menu",
+        "on-click": "$HOME/.scripts/waybar/powermenu",
     },
     "custom/nextcloud": {
         "format": "<span color=\"#2e9ef4\">{icon}</span>",
