@@ -1,4 +1,4 @@
-alias time="\time -f 'Execution time: %es'"
+alias time="\time -f '\nExecution time: %es'"
 alias gp="nvim -c ':GpChatFinder'"
 alias tvi=tmux-vim
 alias tv=tmux-vim
@@ -6,6 +6,7 @@ alias vit=tmux-vim
 alias vip="tmux new-session nvim '+Telescope tmux-projects ls_projects'"
 alias vim=nvim
 alias tmux="TERM=xterm-256color /usr/bin/tmux"
+alias ssh="TERM=xterm-256color ssh"
 
 alias composer="composer-smart.sh"
 
