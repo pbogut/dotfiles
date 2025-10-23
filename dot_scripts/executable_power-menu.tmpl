@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   power-menu
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   21/10/2025
+#=================================================
+
+__menu() {
+    actions=(
+        "󰌾 Lock : lock"
+        "󰒲 Suspend : suspend"
+        #{{- if eq .hostname "silverspoon" }}
+        "󰤄 Hibernate : hibernate"
+        #{{- end }}
+        "󰍃 Logout : logout"
+        "󰜉 Restart : restart"
+        "  :  "
+        #{{- if eq .hostname "silverspoon" }}
+        "$(__conservation_status) Battery conservation : conservation"
+        #{{- end }}
+        #{{- if eq .hostname "redeye" }}
+        " Backup and Shutdown : backup"
+        #{{- end }}
+    )
+
+    max_len=0
+    height=0
+    for elems in "${actions[@]}"; do
+        elem=${elems%% : *}
+        len=${#elem}
+        height=$(( height + 1 ))
+        if [[ $len -gt $max_len ]]; then
+          max_len=$len
+        fi
+    done
+
+    for elems in "${actions[@]}"; do
+        elem=${elems%% : *}
+        action=${elems##* : }
+        echo -e "$elem\t$action"
+    done | fuzzel \
+        --dmenu \
+        --cache /dev/null \
+        --width "$(( max_len + 1 ))" \
+        --lines "$height" \
+        --anchor top-right \
+        --x-margin=8 \
+        --y-margin=8 \
+        --accept-nth=2 --with-nth=1
+}
+
+
+__conservation_status() {
+    if [[ "$(ideapad-cm status)" =~ enabled ]]; then
+        echo -n "󰌪"
+    else
+        echo -n "󱋙"
+    fi
+}
+
+selected=$(__menu)
+
+case $selected in
+    "lock")
+        loginctl lock-session
+        ;;
+    "suspend")
+        systemctl suspend
+        ;;
+    "hibernate")
+        systemctl hibernate
+        ;;
+    "logout")
+        hyprctl dispatch exit
+        ;;
+    "restart")
+        systemctl reboot
+        ;;
+    "shutdown")
+        systemctl poweroff
+        ;;
+    "conservation")
+        ~/.scripts/waybar/conservation.sh toggle
+        ;;
+    "backup")
+        backintime backup &
+        sleep 5s
+        backintime shutdown
+        ;;
+esac
