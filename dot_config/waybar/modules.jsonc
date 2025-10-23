@@ -130,7 +130,6 @@
         "format-icons": ["", "", ""]
     },
     "backlight": {
-        // "device": "acpi_video1",
         "format": "<span color=\"#2e9ef4\">{icon}</span> {percent}%",
         "format-icons": ["", "", "", "", "", "", "", "", ""],
         "tooltip": false,
