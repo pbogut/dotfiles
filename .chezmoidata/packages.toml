@@ -26,6 +26,7 @@ paru = [
   "hyprlock",
   "hyprpaper",
   "hyprpicker",
+  "hyprpolkitagent",
   "i2c-tools",
   "imagemagick",
   "inetutils",

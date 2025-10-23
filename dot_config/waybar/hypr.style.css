@@ -150,8 +150,8 @@ button:hover {
     border: 1px solid #595959;
     border-radius: 10px;
     background-color: #222;
-    margin: 0 5px;
-    box-shadow: 0px 0px 5px 0px rgba(26, 26, 26, 0.9);
+    margin: 0 3px;
+    box-shadow: 0px 0px 2px 0px rgba(26, 26, 26, 0.9);
     margin-top:1px;
     margin-bottom: 1px;
 }
@@ -191,8 +191,8 @@ window#waybar #windowcount {
     border-bottom-right-radius: 10px;
 }
 
-#workspaces {
-    box-shadow: 0px 0px 5px 0px rgba(26, 26, 26, 0.9);
+#workspaces button {
+    box-shadow: 0px 0px 2px 0px rgba(26, 26, 26, 0.9);
     margin-top:1px;
     margin-bottom: 1px;
 }

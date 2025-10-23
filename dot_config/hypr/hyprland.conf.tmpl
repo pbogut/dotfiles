@@ -50,7 +50,8 @@ $fileManager = lf-term
 # exec-once = waybar & hyprpaper & firefox
 exec-once = hypr-waybar
 exec-once = hypridle
-exec-once = loginctl lock-session
+exec-once = hyprlock # start locked
+exec-once = systemctl --user start hyprpolkitagent
 
 
 #############################
@@ -88,8 +89,8 @@ env = HYPRCURSOR_SIZE,24
 
 # https://wiki.hypr.land/Configuring/Variables/#general
 general {
-    gaps_in = 4
-    gaps_out = 8
+    gaps_in = 3
+    gaps_out = 5
 
     border_size = 2
 
@@ -210,6 +211,7 @@ misc {
     new_window_takes_over_fullscreen = 2 # exit fullscrieen when new window is opened
     force_default_wallpaper = -1 # Set to 0 or 1 to disable the anime mascot wallpapers
     disable_hyprland_logo = false # If true disables the random hyprland logo / anime girl background. :(
+    focus_on_activate = true
 }
 
 
