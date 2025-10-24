@@ -4,21 +4,32 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   21/10/2025
 #=================================================
-mkdir /tmp/ws-mfact-toggle -p
-workspace=$(hyprctl activeworkspace -j | jq .name -r)
-touch "/tmp/ws-mfact-toggle/$workspace"
-current="$(cat "/tmp/ws-mfact-toggle/$workspace")"
-
-new=0.80 # default is 0.65, so first use should be 0.80
-if [[ $current == "0.5" ]]; then
-  new=0.65;
-fi
-if [[ $current == "0.65" ]]; then
-  new=0.80;
-fi
-if [[ $current == "0.80" ]]; then
-  new=0.5;
+workspace_id=$(hyprctl activeworkspace -j | jq .id -r)
+clients=$(hyprctl clients -j | jq "map(select(.workspace.id == $workspace_id))" -r)
+max_size=$(echo "$clients" | jq "map(select(.floating == false)) | map(.size[0]) | max" -r)
+min_size=$(echo "$clients" | jq "map(select(.floating == false)) | map(.size[0]) | min" -r)
+max_x=$(echo "$clients" | jq "map(select(.floating == false)) | map(select(.size[0] == $max_size)) | map(.at[0]) | min" -r)
+min_x=$(echo "$clients" | jq "map(select(.floating == false)) | map(select(.size[0] == $min_size)) | map(.at[0]) | min" -r)
+if [[ $max_x -gt $min_x ]]; then
+  factor=$(awk '{printf "%0.f", ($2 / ($1 + $2) * 100)}' <<< "$max_size $min_size")
+else
+  factor=$(awk '{printf "%0.f", ($1 / ($1 + $2) * 100)}' <<< "$max_size $min_size")
 fi
 
-hyprctl -q dispatch layoutmsg mfact exact "$new"
-echo "$new" > "/tmp/ws-mfact-toggle/$workspace"
+next=$1
+
+while test $# -gt 0; do
+  breakpoint=$(awk '{printf "%0.f", $1 * 100}' <<< "$1")
+  echo "$breakpoint"
+    echo -n "$factor -ge $breakpoint"
+  if [[ $factor -ge $breakpoint ]]; then
+    echo " yes"
+    shift
+  else
+    echo " no"
+    next=$1
+    break
+  fi
+done
+
+hyprctl -q dispatch layoutmsg mfact exact "$next"
