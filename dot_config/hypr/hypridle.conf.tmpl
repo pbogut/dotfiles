@@ -25,18 +25,19 @@ listener {
 
 listener {
     timeout = 330 # 5.5min.
-    on-timeout = hyprctl dispatch dpms off
+    on-timeout = systemd-ac-power || hyprctl dispatch dpms off
     on-resume = hyprctl dispatch dpms on && brightnessctl -r
 }
 
 listener {
     timeout = 900 # 15 minutes, we testing
-    on-timeout = systemctl suspend
+    on-timeout = systemd-ac-power || systemctl suspend
+    on-resume = hyprctl dispatch dpms on && brightnessctl -r
 }
 # silverspoon {{"}}}"}} {{- end }}
-# redeye {{"{{{"}} {{- if eq .chezmoi.hostname "redeye" }}
+
 listener {
     timeout = 3600 # 1h
     on-timeout = systemctl suspend
+    on-resume = hyprctl dispatch dpms on && brightnessctl -r
 }
-# redeye {{"}}}"}} {{- end }}
