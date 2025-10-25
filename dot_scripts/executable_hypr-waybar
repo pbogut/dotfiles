@@ -3,6 +3,17 @@
   inotifywait -e close_write /home/pbogut/.config/waybar/*
   killall waybar -USR2
 done) &
+loop_pid=$!
+
 waybar \
   --config "$HOME/.config/waybar/hypr.config" \
-  --style "$HOME/.config/waybar/hypr.style.css"
+  --style "$HOME/.config/waybar/hypr.style.css" &
+waybar_pid=$!
+
+cleanup() {
+  kill $loop_pid
+  kill $waybar_pid
+}
+
+trap cleanup SIGTERM SIGINT
+while :; do sleep 1; done
