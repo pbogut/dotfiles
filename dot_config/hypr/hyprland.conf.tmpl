@@ -20,11 +20,15 @@
 ################
 
 # See https://wiki.hypr.land/Configuring/Monitors/
-monitor=,preferred,auto,1
+monitor=, preferred, auto, 1
 #{{- if eq .hostname "silverspoon" }}
 # Mirror laptop screen to external monitors
-monitor=DP-1,preferred,auto,1,mirror,eDP-1 # ugreen hub
-monitor=HDMI-A-1,preferred,auto,1,mirror,eDP-1 # direct hdmi
+monitor=DP-1, preferred, auto, 1, mirror, eDP-1 # ugreen hub
+monitor=HDMI-A-1, preferred, auto, 1, mirror, eDP-1 # direct hdmi
+#{{- end }}
+#{{- if eq .hostname "redeye" }}
+monitor=DP-1, 1920x1080@144.00, 0x0, 1
+monitor=HDMI-A-1, 1920x1080@60,1920x0, 1
 #{{- end }}
 
 ###################
