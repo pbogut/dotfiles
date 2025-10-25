@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   systray-dmenu
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   24/10/2025
+#=================================================
+width=40
+output=$(systray-cli | sort)
+history=()
+highlight=""
+while [[ $output != "" ]]; do
+    selection=$(fuzzel --select="$highlight" --prompt "Systray App: " --dmenu --width "$width" --with-nth="{2..}" --cache /dev/null <<< "$output")
+    exit_code=$?
+
+    if [[ $exit_code -eq 2 ]]; then # esc pressed
+        if [[ ${#history[@]} -ge 2 ]]; then
+            highlight="$(cut -f2 <<< "${history[-1]}")"
+            unset 'history[-1]'
+            selection="${history[-1]}"
+            output=$(systray-cli "$(cut -f1 <<< "$selection")")
+            continue
+        fi
+    fi
+
+    if [[ $selection == "" ]]; then
+      exit 0
+    fi
+
+    output=$(systray-cli "$(cut -f1 <<< "$selection")")
+    if [[ $output == "" ]]; then
+        exit 0
+    fi
+    history+=("$selection")
+    echo "${history[@]}"
+done

@@ -290,6 +290,7 @@ bind = $mainMod, Return, exec, $terminal
 bind = $mainMod, B, exec, hypr-focusorexec vivaldi-personal browser
 bind = $mainMod CTRL, K, exec, terminal-float -t "khal" -e khal interactive
 bind = $mainMod CTRL, F, exec, $(hyprctl dispatch "focuswindow class:ferdium") == "ok" || ferdium
+bind = $mainMod, T, exec, systray-dmenu
 
 # Screeenshots
 bind = Shift, Print, exec, hyprctl keyword decoration:rounding 0; hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"' | grim -g - ~/Pictures/screenshots/screenshot_from_$(date +%Y-%m-%d_%H-%M-%S).png; hyprctl keyword decoration:rounding 10; notify-send "Screenshot saved" "Active window" -u low
