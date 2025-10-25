@@ -14,7 +14,12 @@ M.chezmoi_files = function()
   local pickers = require('telescope.pickers')
   local conf = require('telescope.config').values
   local source_path = trim_string(vim.fn.system('chezmoi source-path'))
-  local hidden_files = vim.fn.split(vim.fn.system('find ' .. e(source_path) .. ' -type f  -iname ".*"'))
+  local chezmoidata = source_path .. '/.chezmoidata'
+  local hidden_find = { 'find ' .. e(source_path) .. ' -type f  -iname ".*"' }
+  if vim.uv.fs_stat(chezmoidata) then
+    hidden_find[#hidden_find + 1] = 'find ' .. e(chezmoidata)
+  end
+  local hidden_files = vim.fn.split(vim.fn.system(table.concat(hidden_find, ';')))
   local encrypted_files = vim.fn.split(vim.fn.system('chezmoi managed -i encrypted'))
   local result = vim.fn.split(vim.fn.system('chezmoi managed -x externals,dirs,encrypted'))
   for _, file in pairs(hidden_files) do
