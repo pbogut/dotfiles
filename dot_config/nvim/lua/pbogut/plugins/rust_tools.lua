@@ -12,6 +12,9 @@ return {
     local liblldb_path = extension_path .. '/lldb/lib/liblldb.so'
 
     local opts = {
+      server = {
+        on_attach = require('pbogut.plugins.lsp.config').on_attach,
+      },
       dap = {
         adapter = require('rust-tools.dap').get_codelldb_adapter(codelldb_path, liblldb_path),
       },
