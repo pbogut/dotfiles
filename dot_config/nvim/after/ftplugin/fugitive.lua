@@ -4,7 +4,7 @@ end
 
 local cols = vim.o.columns
 local size = cols / 2
-size = math.min(size, 80)
+size = math.min(math.floor(size), 80)
 vim.cmd('silent! wincmd H')
 vim.api.nvim_win_set_width(0, size)
 vim.b.resized = true
@@ -17,7 +17,7 @@ vim.api.nvim_create_autocmd('BufEnter', {
     if vim.b.resized then
       cols = vim.o.columns
       size = cols / 2
-      size = math.min(size, 80)
+      size = math.min(math.floor(size), 80)
       vim.cmd('silent! wincmd H')
       vim.api.nvim_win_set_width(0, size)
     end
