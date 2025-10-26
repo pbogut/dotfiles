@@ -375,6 +375,7 @@ bindm = $mainMod, mouse:273, resizewindow
 bindel = ,XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+; level="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print ($2 * 100)}')"; dunstify -r 999999999 "Volume: $level%" --hints="int:value:$level" -i audio-volume-high
 bindel = ,XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-; level="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print ($2 * 100)}')"; dunstify -r 999999999 "Volume: $level%" --hints="int:value:$level" -i audio-volume-high
 bindel = ,XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+bindel = SHIFT, XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
 bindel = ,XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
 bindel = ,XF86MonBrightnessUp, exec, brightnessctl -e1 -n2 set 5%+; level="$(brightnessctl -l -c backlight | grep Current | sed 's,.*(\(.*\)%)$,\1,')"; dunstify -r 999999998  "Brightness: ${level}%" --hints="int:value:$level" -i display
 bindel = ,XF86MonBrightnessDown, exec, brightnessctl -e1 -n2 set 5%-; level="$(brightnessctl -l -c backlight | grep Current | sed 's,.*(\(.*\)%)$,\1,')"; dunstify -r 999999998  "Brightness: ${level}%" --hints="int:value:$level" -i display
