@@ -390,10 +390,10 @@ bindl = , XF86AudioPrev, exec, playerctl previous
 ### SUBMAPS / MENUS ###
 #######################
 
-$power = System: (l) lock, (e) exit, (r) reboot, (s) suspend, (Shift+s) shutdown, (b) backup and shutdown, (Esc) cancel
+$power = System: (l) lock, (e) exit, (r) reboot, (s) suspend, (p) poweroff, (b) backup and shutdown, (Esc) cancel
 bind = $mainMod, Q, submap, $power
 submap = $power
-bind = , L, exec, loginctl lock-session
+bind = , L, exec, hyprlock
 bind = , L, submap, reset
 bind = , E, exit
 bind = , E, submap, reset
@@ -401,8 +401,8 @@ bind = , R, exec, reboot
 bind = , R, submap, reset
 bind = , S, exec, systemctl suspend
 bind = , S, submap, reset
-bind = SHIFT, S, exec, poweroff
-bind = SHIFT, S, submap, reset
+bind = , P, exec, poweroff
+bind = , P, submap, reset
 bind = , B, exec, backintime backup & sleep 5s; backintime shutdown
 bind = , B, submap, reset
 bind = , escape, submap, reset
