@@ -74,6 +74,7 @@ paru = [
   "starship",
   "sway",
   "swayidle",
+  "syncthing",
   "tmux",
   "udevil",
   "udisksvm",
