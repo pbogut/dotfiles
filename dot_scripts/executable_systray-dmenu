@@ -8,8 +8,9 @@ width=40
 output=$(systray-cli | sort)
 history=()
 highlight=""
+placeholder=""
 while [[ $output != "" ]]; do
-    selection=$(fuzzel --select="$highlight" --prompt "Systray App: " --dmenu --width "$width" --with-nth="{2..}" --cache /dev/null <<< "$output")
+    selection=$(fuzzel --placeholder="$placeholder" --select="$highlight" --prompt "Systray: " --dmenu --width "$width" --with-nth="{2..}" --cache /dev/null <<< "$output")
     exit_code=$?
 
     if [[ $exit_code -eq 2 ]]; then # esc pressed
@@ -17,6 +18,7 @@ while [[ $output != "" ]]; do
             highlight="$(cut -f2 <<< "${history[-1]}")"
             unset 'history[-1]'
             selection="${history[-1]}"
+            placeholder=" $(cut -f2 <<< "$selection")"
             output=$(systray-cli "$(cut -f1 <<< "$selection")")
             continue
         fi
@@ -25,7 +27,7 @@ while [[ $output != "" ]]; do
     if [[ $selection == "" ]]; then
       exit 0
     fi
-
+    placeholder=" $(cut -f2 <<< "$selection")"
     output=$(systray-cli "$(cut -f1 <<< "$selection")")
     if [[ $output == "" ]]; then
         exit 0
