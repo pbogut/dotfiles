@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   run_once_after_default_theme
+# author: author <author_contact>
+# date:   16/03/2024
+#=================================================
+if [[ ! -d $HOME/.config/themes/current ]]; then
+  ln -sfn "$HOME/.config/themes/i3-solar" "$HOME/.config/themes/current"
+fi

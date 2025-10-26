@@ -55,7 +55,7 @@ end
 
 function vim.h.read_exec(command)
   local handle = io.popen(command)
-  local result = handle:read("*a"):gsub("\n$", "")
+  local result = handle:read('*a'):gsub('\n$', '')
   handle:close()
   return result
 end
@@ -72,6 +72,42 @@ function vim.h.ls(directory)
   end
   pfile:close()
   return t
+end
+
+local theme_name = nil
+
+function vim.h.get_themed(type)
+  local default_theme = 'solarized'
+  local theme = vim.h.theme_name()
+  local ok, result = pcall(require, 'pbogut.settings.themes.' .. theme .. '.' .. type)
+  if not ok then
+    vim.notify('Module ' .. type .. ' not fuind in theme ' .. theme)
+    ok, result = pcall(require, 'pbogut.settings.themes.' .. default_theme .. '.' .. type)
+    if not ok then
+      vim.notify('Module ' .. type .. ' not fuind in theme ' .. default_theme)
+      return {}
+    end
+  end
+  return result
+end
+
+function vim.h.theme_name()
+  if theme_name then
+    return theme_name
+  end
+  theme_name = 'solarized'
+  local theme_path = os.getenv('HOME') .. '/.config/themes/current/neovim.lua'
+  if vim.uv.fs_stat(theme_path) then
+    theme_config = loadfile(theme_path)
+    config = theme_config()
+    colorscheme = ''
+    for _, v in pairs(config) do
+      if v.opts and v.opts.colorscheme then
+        theme_name = v.opts.colorscheme
+      end
+    end
+  end
+  return theme_name
 end
 
 function _G.mason_bin(file)

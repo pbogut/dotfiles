@@ -1,9 +1,22 @@
+@define-color foreground #ffffff;
+@define-color background #222222;
+@define-color activeborder #4c7899;
+@define-color activebackground #34424D;
+@define-color border #595959;
+@define-color fullscreen #33ccff;
+
+@import "../themes/current/waybar.css";
+
 * {
     font-family: 'JetBrainsMono Nerd Font Propo';
     font-feature-settings: '"zero", "tnum", "ss01", "ss02", "ss03", "cv01"';
     /* animation-timing-function: steps(12); */
     /* animation-duration: 0.3s; */
     transition: padding 0.3s, opacity 0.3s, border-color 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+window#waybar * {
+    color: @foreground;
 }
 window#waybar {
     font-size: 11px;
@@ -18,22 +31,10 @@ window#waybar.redeye2 {
 window#waybar.silverspoon.eDP-1 {
     font-size: 14px;
 }
-    /* --background: #222; */
-    /* --background-alt: #444; */
-    /* --inactive-bg: #5f676a; */
-    /* --foreground: #dfdfdf; */
-    /* --foreground-alt: #777; */
-    /* --icon: #2e9ef4; */
-    /* --charging: #2e9ef4; */
-    /* --discharging: #2e9ef4; */
-    /* --primary: #ffb52a; */
-    /* --secondary: #e60053; */
-    /* --alert: #bd2c40; */
-    /* --warning: #bdbd40; */
 
 window#waybar {
     /* background-color: rgba(43, 48, 59, 0.5); */
-    /* background-color: #222; */
+    /* background-color: @background; */
     background-color: transparent;
     /* border-bottom: 3px solid rgba(100, 114, 125, 0.5); */
     color: #dfdfdf;
@@ -44,15 +45,6 @@ window#waybar {
 window#waybar.hidden {
     opacity: 0.2;
 }
-
-/*
-window#waybar.empty {
-    background-color: transparent;
-}
-window#waybar.solo {
-    background-color: #FFFFFF;
-}
-*/
 
 window#waybar.termite {
     background-color: #3F3F3F;
@@ -79,10 +71,9 @@ button:hover {
 
 #workspaces button {
     border-radius: 100%;
-    padding: 0 5px;
-    background-color: #222;
-    color: #ffffff;
-    border: 1px solid #595959;
+    padding: 0 5px 0 5px;
+    background-color: @background;
+    border: 1px solid @border;
     margin: 0 2px;
 }
 
@@ -92,8 +83,8 @@ button:hover {
 }
 
 #workspaces button.active {
-    background-color: #64727D;
-    border: 1px solid #33ccff;
+    background-color: @activebackground;
+    border: 1px solid @activeborder;
     /* box-shadow: inset 0 -3px #ffffff; */
 }
 
@@ -102,11 +93,11 @@ button:hover {
 }
 
 #mode {
-    background-color: #64727D;
+    background-color: @background;
     border-bottom: 3px solid #ffffff;
 }
 #submap {
-    background-color: #64727D;
+    background-color: @background;
     padding:0 10px;
 }
 #custom-power,
@@ -123,6 +114,7 @@ button:hover {
 #custom-date,
 #custom-time,
 #custom-time_uk,
+#custom-screnrecord,
 #clock,
 #battery,
 #cpu,
@@ -137,7 +129,7 @@ button:hover {
 #custom-media,
 #custom-hubstaff,
 #custom-weather,
-#tray,
+#tray-expander,
 #mode,
 #idle_inhibitor,
 #scratchpad,
@@ -146,10 +138,9 @@ button:hover {
 #submap,
 #mpd {
     padding: 0 10px;
-    color: #ffffff;
-    border: 1px solid #595959;
+    border: 1px solid @border;
     border-radius: 10px;
-    background-color: #222;
+    background-color: @background;
     margin: 0 3px;
     box-shadow: 0px 0px 2px 0px rgba(26, 26, 26, 0.9);
     margin-top:1px;
@@ -164,29 +155,29 @@ window#waybar:not(.fullscreen) #windowcount {
     opacity: 0;
 }
 window#waybar.fullscreen #window {
-    color: #33ccff;
+    color: @fullscreen;
     padding: 0 50px;
-    border: 1px solid #33ccff;
+    border: 1px solid @fullscreen;
 }
 window#waybar #custom-fullscreen,
 window#waybar #windowcount {
-    color: #33ccff;
-    background-color: #222;
+    color: @fullscreen;
+    background-color: @background;
 }
 window#waybar #custom-fullscreen {
     margin-left: 5px;
     padding: 0 5px 0 10px;
-    border-left: 1px solid #33ccff;
-    border-top: 1px solid #33ccff;
-    border-bottom: 1px solid #33ccff;
+    border-left: 1px solid @fullscreen;
+    border-top: 1px solid @fullscreen;
+    border-bottom: 1px solid @fullscreen;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
 }
 window#waybar #windowcount {
     padding: 0 10px 0 0;
-    border-right: 1px solid #33ccff;
-    border-top: 1px solid #33ccff;
-    border-bottom: 1px solid #33ccff;
+    border-right: 1px solid @fullscreen;
+    border-top: 1px solid @fullscreen;
+    border-bottom: 1px solid @fullscreen;
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
 }
@@ -210,17 +201,13 @@ window#waybar #windowcount {
     margin-right: 0;
 }
 
-/* #clock { */
-/*     background-color: #64727D; */
-/* } */
-
 /* #battery { */
 /*     background-color: #ffffff; */
 /*     color: #000000; */
 /* } */
 
 /* #battery.charging, #battery.plugged { */
-/*     color: #ffffff; */
+/*     color: @foreground; */
 /*     background-color: #26A65B; */
 /* } */
 

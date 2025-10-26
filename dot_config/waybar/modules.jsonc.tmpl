@@ -1,10 +1,18 @@
+{{- $iconNormal := env "WAYBAR_ICON_COLOR" -}}
+{{- $iconImportant := env "WAYBAR_IMPORTANT_COLOR" -}}
+{{- if eq $iconImportant "" }}
+{{- $iconImportant = "#e60053" -}}
+{{- end -}}
+{{- if eq $iconNormal "" }}
+{{- $iconNormal = "#2e9ef4" -}}
+{{- end -}}
 {
     "network": {
         "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
         "format": "{icon}",
-        "format-wifi": "<span color=\"#2e9ef4\">{icon}</span>",
-        "format-ethernet": "<span color=\"#2e9ef4\">󰀂</span>",
-        "format-disconnected": "<span color=\"#e60053\">󰤮</span>",
+        "format-wifi": "<span color=\"{{ $iconNormal }}\">{icon}</span>",
+        "format-ethernet": "<span color=\"{{ $iconNormal }}\">󰀂</span>",
+        "format-disconnected": "<span color=\"{{ $iconImportant }}\">󰤮</span>",
         "tooltip-format-wifi": "{essid} ({frequency} GHz)\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
         "tooltip-format-ethernet": "⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
         "tooltip-format-disconnected": "Disconnected",
@@ -13,9 +21,9 @@
         "on-click": "networkmanager_dmenu"
     },
     "bluetooth": {
-      "format": "<span color=\"#2e9ef499\"></span>",
-      "format-disabled": "", // "<span color=\"#e60053\">󰂲</span>",
-      "format-connected": "<span color=\"#2e9ef4\"></span>",
+      "format": "<span color=\"{{ $iconNormal }}99\"></span>",
+      "format-disabled": "", // "<span color=\"{{ $iconImportant }}\">󰂲</span>",
+      "format-connected": "<span color=\"{{ $iconNormal }}\"></span>",
       "tooltip-format": "Devices connected: {num_connections}",
       "on-click": "dmenu-bluetooth" // "blueberry"
     },
@@ -109,14 +117,14 @@
         "format-alt": "{:%Y-%m-%d}"
     },
     "cpu": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {usage}%",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {usage}%",
         "format-icons": {
             "default": ""
         },
         "tooltip": false
     },
     "memory": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {percentage}%",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {percentage}%",
         "format-icons": {
             "default": ""
         },
@@ -130,7 +138,7 @@
         "format-icons": ["", "", ""]
     },
     "backlight": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {percent}%",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {percent}%",
         "format-icons": ["", "", "", "", "", "", "", "", ""],
         "tooltip": false,
     },
@@ -140,10 +148,10 @@
             "warning": 15,
             "critical": 10
         },
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {capacity}%",
-        "format-charging": "<span color=\"#2e9ef4\"> {icon}</span> {capacity}%",
-        "format-plugged": "<span color=\"#2e9ef4\"> {icon}</span> {capacity}%",
-        "format-alt": "<span color=\"#2e9ef4\">{icon}</span> {time}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {capacity}%",
+        "format-charging": "<span color=\"{{ $iconNormal }}\"> {icon}</span> {capacity}%",
+        "format-plugged": "<span color=\"{{ $iconNormal }}\"> {icon}</span> {capacity}%",
+        "format-alt": "<span color=\"{{ $iconNormal }}\">{icon}</span> {time}",
         // "format-good": "", // An empty format will hide the module
         // "format-full": "",
         "format-icons": ["", "", "", "", ""]
@@ -152,24 +160,44 @@
         "bat": "BAT2"
     },
     "pulseaudio": {
-        // "scroll-step": 1, // %, can be a float
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {volume}% {format_source}",
-        "format-bluetooth": "{volume}% {icon} {format_source}",
-        "format-bluetooth-muted": " {icon} {format_source}",
-        "format-muted": " {format_source}",
-        "format-source": "<span color=\"#2e9ef4\"></span> {volume}%",
-        "format-source-muted": "",
+        "scroll-step": 1, // %, can be a float
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {volume}% {format_source}",
+        "format-bluetooth": "<span color=\"{{ $iconNormal }}\"> {icon}</span> {volume}% {format_source}",
+        "format-bluetooth-muted": "<span color=\"{{ $iconImportant }}\">󰂲 {icon}</span> {format_source}",
+        "format-muted": "<span color=\"{{ $iconImportant }}\">󰖁</span> {format_source}",
+        "format-source": "<span color=\"{{ $iconNormal }}\"></span> {volume}%",
+        "format-source-muted": "<span color=\"{{ $iconImportant }}\"></span>",
         "format-icons": {
-            "headphone": "",
-            "hands-free": "",
-            "headset": "",
-            "phone": "",
-            "portable": "",
+            "headphone": "󰋋",
+            "hands-free": "󰋎",
+            "headset": "󰋎",
+            "phone": "",
+            "portable": "",
             "car": "",
             "default": ["", "", ""]
         },
         "on-click": "pavucontrol",
         "on-click-right": "systemctl --user restart pipewire.service"
+    },
+    "group/tray-expander": {
+      "orientation": "inherit",
+      "drawer": {
+        "transition-duration": 600,
+        "children-class": "tray-group-item"
+      },
+      "modules": ["custom/expand-icon", "custom/expand-spacer", "tray"]
+    },
+    "custom/expand-icon": {
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}{0}</span>",
+        "format-icons": {
+            "default": ""
+        },
+    },
+    "custom/expand-spacer": {
+        "format": "<span color=\"{{ $iconNormal }}\">  </span>",
+        "format-icons": {
+            "default": ""
+        },
     },
     "custom/shadowplay": {
         "format": "<span color=\"#bd2c40\">{icon} {0}</span>",
@@ -180,8 +208,16 @@
             "default": "雷"
         },
     },
+    "custom/screnrecord": {
+        "format": "<span color=\"#bd2c40\">{icon} Rec</span>",
+        "signal": 21,
+        "exec": "pgrep -f wf-record",
+        "format-icons": {
+            "default": "󰑋"
+        },
+    },
     "custom/notmuch": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 60,
         "signal": 25,
         "exec": "c() { u=\"$(notmuch count -- tag:unread and tag:inbox)\"; i=\"$(notmuch count --  tag:inbox)\"; if [[ $u != \"0\" ]]; then echo $u/$i; else echo \"\"; fi }; c",
@@ -191,7 +227,7 @@
         },
     },
     "custom/memory_left": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 30,
         "exec": "free -h | grep 'Mem' | awk '{print $7 \" (\"$4\")\"}'",
         "format-icons": {
@@ -199,7 +235,7 @@
         },
     },
     "custom/date": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 60,
         "exec": "date +'%a, %b %e'",
         "format-icons": {
@@ -208,7 +244,7 @@
         "on-click": "terminal-float -e khal interactive"
     },
     "custom/time": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 1,
         "exec": "env TZ='Europe/Warsaw' date +'%H:%M:%S'",
         "format-icons": {
@@ -216,7 +252,7 @@
         },
     },
     "custom/time_uk": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 60,
         "exec": "env TZ='Europe/London' date +'%H:%M'",
         "format-icons": {
@@ -224,7 +260,7 @@
         },
     },
     "custom/gamemode": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 3600,
         "signal": 17,
         "exec": "$HOME/.scripts/waybar/gaming.sh",
@@ -234,7 +270,7 @@
         "on-click-right": "$HOME/.scripts/waybar/gaming.sh --toggle; pkill -RTMIN+17 -x waybar"
     },
     "custom/dualsense": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 600,
         "signal": 18,
         "exec": "$HOME/.scripts/waybar/dualsense.sh",
@@ -244,7 +280,7 @@
         "on-click": "pkill -RTMIN+18 -x waybar"
     },
     "custom/logipro": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 600,
         "signal": 16,
         "exec": "$HOME/.scripts/waybar/logipro.sh",
@@ -254,7 +290,7 @@
         "on-click": "pkill -RTMIN+16 -x waybar"
     },
     "custom/bt_kyria": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 600,
         "signal": 15,
         "exec": "$HOME/.scripts/waybar/bt_battery.sh F3:1C:1A:A4:D1:61",
@@ -264,7 +300,7 @@
         "on-click": "pkill -RTMIN+15 -x waybar"
     },
     "custom/bt_dactyl": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 600,
         "signal": 14,
         "exec": "$HOME/.scripts/waybar/bt_battery.sh F2:8A:E4:9E:DC:8C",
@@ -274,7 +310,7 @@
         "on-click": "pkill -RTMIN+14 -x waybar"
     },
     "custom/bt_xbox": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 600,
         "signal": 13,
         "exec": "$HOME/.scripts/waybar/bt_battery.sh 40:8E:2C:16:B7:E5 100",
@@ -294,7 +330,7 @@
         "on-click": "browser https://pogoda.interia.pl"
     },
     "custom/switches": {
-        "format": "<span color=\"#e60053\"></span>  ",
+        "format": "<span color=\"{{ $iconImportant }}\"></span>  ",
         "format-icons": {
             "default": ""
         },
@@ -308,7 +344,7 @@
         "on-click": "hubstaff toggle"
     },
     "custom/vrp10": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 3600,
         "signal": 20,
         "exec": "$HOME/.scripts/waybar/vrp10.sh",
@@ -330,7 +366,7 @@
         // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
     },
     "custom/battery-conservation": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span> {0}",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "format-icons": {
             "default": ""
         },
@@ -340,18 +376,18 @@
 
     },
     "custom/power": {
-        "format": "<span color=\"#e60053\">{icon}</span>",
+        "format": "<span color=\"{{ $iconImportant }}\">{icon}</span>",
         "format-icons": {
             "default": "⏻"
         },
         "on-click": "$HOME/.scripts/waybar/powermenu",
     },
     "custom/nextcloud": {
-        "format": "<span color=\"#2e9ef4\">{icon}</span>",
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span>",
         "format-icons": {
             "default": "󰘿"
         },
         "on-click": "nextcloud",
-    }
+    },
 }
 

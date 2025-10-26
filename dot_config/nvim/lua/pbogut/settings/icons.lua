@@ -1,8 +1,8 @@
 return {
   -- lint
-  error = '',
+  error = '󰃤',
   warning = '',
-  info = 'כֿ',
+  info = '󰙎',
   hint = '',
   -- diff
   added = '',

@@ -1,5 +1,5 @@
 local i = require('pbogut.settings.icons')
-local c = require('pbogut.settings.colors')
+local c = vim.h.get_themed('lualine').diagnostics
 
 return function()
   local no_lsp = true
@@ -36,29 +36,29 @@ return function()
 
   local result = vim.fn.join(parts, '  ')
 
-  local bg = c.base01
+  local bg = c.base
   if diagnostics.errors > 0 then
-    bg = c.red
+    bg = c.error
   elseif diagnostics.warnings > 0 then
-    bg = c.orange
+    bg = c.warning
   elseif #parts > 0 then
-    bg = c.yellow
+    bg = c.hint
   elseif no_lsp then
-    bg = c.blue
+    bg = c.neutral
     result = ''
   else
-    bg = c.green
+    bg = c.success
     result = ''
   end
 
   vim.api.nvim_set_hl(0, 'sl_diagnostics', {
-    bg = c.base3,
+    bg = c.foreground,
     fg = bg,
     bold = false,
   })
   vim.api.nvim_set_hl(0, 'lualine_transitional_sl_diagnostics_to_lualine_b_normal', {
     bg = bg,
-    fg = c.base01,
+    fg = c.base,
   })
 
   return '%#sl_diagnostics#' .. result

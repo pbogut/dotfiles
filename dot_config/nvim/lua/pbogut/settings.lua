@@ -12,7 +12,7 @@ vim.g.matchparen_insert_timeout = 2
 
 vim.cmd.filetype({ args = { 'plugin', 'on' } })
 vim.cmd.filetype({ args = { 'indent', 'off' } })
-vim.cmd.colorscheme('solarized')
+vim.cmd.colorscheme(vim.h.theme_name())
 
 o.fillchars = { fold = ' ', vert = '│' }
 o.shortmess:append('c')
