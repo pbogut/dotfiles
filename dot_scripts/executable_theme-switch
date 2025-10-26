@@ -21,4 +21,5 @@ if [[ -n $theme ]]; then
   hyprctl -q reload
   touch ~/.config/alacritty/alacritty.toml
   tmux source-file ~/.config/tmux/tmux.conf 2>/dev/null
+  dunstctl reload
 fi
