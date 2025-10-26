@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [[ $1 == "run" ]]; then
+  sleep 0.5s
+  cmatrix -s
+  exit 0
+fi
+
+if [[ $1 == "stop" ]]; then
+  pkill -f "alacritty --class Screensaver"
+  exit 0
+fi
+
+# Exit early if we don't have the cmatrix
+if ! command -v cmatrix &>/dev/null; then
+  exit 1
+fi
+
+# Exit early if screensave is already running
+pgrep -f "alacritty --class Screensaver" && exit 0
+
+focused=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true).name')
+
+for m in $(hyprctl monitors -j | jq -r '.[] | .name'); do
+  hyprctl -q dispatch focusmonitor $m
+
+  # FIXME: Find a way to make this generic where we it can work for kitty + ghostty
+  hyprctl -q dispatch exec -- \
+    alacritty --class Screensaver \
+    --config-file ~/.config/alacritty/screensaver.toml \
+    -e screensaver run
+done
+
+hyprctl -q dispatch focusmonitor "$focused"
