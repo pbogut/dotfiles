@@ -3,3 +3,4 @@ _python
 __pycache__
 *.pyi
 .luarc.json
+.st*
