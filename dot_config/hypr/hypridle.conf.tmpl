@@ -5,14 +5,25 @@ general {
     ignore_systemd_inhibit = false
 }
 
+# redeye [[[ {{- if eq .chezmoi.hostname "redeye" }}
 listener {
-    timeout = 300 # 5min.
-    on-timeout = loginctl lock-session
+    timeout = 150 # 2.5min.
+    on-timeout = screensaver # WARNING: This will reset idle timer
 }
 
-# silverspoon {{"{{{"}} {{- if eq .chezmoi.hostname "silverspoon" }}
 listener {
-    timeout = 90 # 1.5min.
+    timeout = 900 # 15min. (+screensaver time)
+    on-timeout = screensaver exit && loginctl lock-session
+}
+# redeye ]]] {{- end }}
+
+# silverspoon [[[ {{- if eq .chezmoi.hostname "silverspoon" }}
+listener {
+    timeout = 85 # 1.5min.
+    on-timeout = systemd-ac-power && screensaver # WARNING: This will reset idle timer
+}
+listener {
+    timeout = 100 # 1.5min (+screensaver time, maybe)
     on-timeout = brightnessctl -s set 50%
     on-resume = brightnessctl -r
 }
@@ -24,8 +35,14 @@ listener {
 }
 
 listener {
-    timeout = 330 # 5.5min.
+    timeout = 300 # 5min.
     on-timeout = systemd-ac-power || hyprctl dispatch dpms off
+    on-resume = hyprctl dispatch dpms on && brightnessctl -r
+}
+
+listener {
+    timeout = 310 # 5min.
+    on-timeout = screensaver exit && loginctl lock-session
     on-resume = hyprctl dispatch dpms on && brightnessctl -r
 }
 
@@ -34,7 +51,7 @@ listener {
     on-timeout = systemd-ac-power || systemctl suspend
     on-resume = hyprctl dispatch dpms on && brightnessctl -r
 }
-# silverspoon {{"}}}"}} {{- end }}
+# silverspoon ]]] {{- end }}
 
 listener {
     timeout = 3600 # 1h

@@ -1,30 +1,118 @@
 #!/bin/bash
 
-if [[ $1 == "run" ]]; then
-  sleep 0.5s
-  cmatrix -s
-  exit 0
-fi
+art="
+                .^!?YPGB##&&&&&##BG5Y?!~:.
+             :!YG#@@@@@@@@@@@@@@@@@@@@@@@@&BG5J7!^:..
+         .~JB&@@&&&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&&#BGP55YYYJJJJ?????777!~~^:.
+       .~??7~^:...::^!?YG#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&&#G5J!^.
+        .                .~Y#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#PJ~.
+                            .~Y#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#P7.
+                               .!5&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&5~
+                                  .!P&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@B?.
+             ..::^^^^^^:..           .!YB&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&#&@@@@@@@@@#J.
+       :~?YPB#&&@@@@@@@&&#BGPYJ7!~:..    .~?YPB#&&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@Y^...^5@@@@@@@@@&J.
+  .^75#@@@@@@@@@@@@@@@@@@@@@@@@@@@@&#BGP5YJ???JY5G&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@G      .&@@@@@@@@@@#?.
+.~?JJ?7!!!!!7?J5GB&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@5~::^7G@@@@@@@@@@@@@#7
+                  :~?P&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&@@@@@@@@@@@@@@@##&B~
+                      .!5#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#7~:~GY
+                         .!5#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#YG@5
+                            .~YB@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:
+                                ^7JPB#&&@@&&#BPP5P&@@@@@@@@@@@@@@@@@@@@@@@@@@@&&@@@@@@@@@@@@@@@@@@@@@@@@@@@@#.
+                                      ..::^~7JPB&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#Y?J5B&@@@@@@@@@@@@@@@@@@@@@@@!
+        :.                          .^~?YG#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&P?~^~!J5G#&@@@@@@@@@@@@@@B~
+        ^7Y55J?!!~^^^:^^^^~~!7?JYPGB&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&G5?!~^^~!!7??JJJ??7!~.
+           ^7P#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&##BBBBBBBB###&&@@@@@&&#BGP5YJ?!^
+               ^?P#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&B5J!~^:..         ...:::^^^~~~~~^^:..
+                  .^?P#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@BP?~.
+                      .^75G&@@@@@@@@@@@@@@@@@@@@@@@@@#GY!:
+                           .^7J5G#&@@@@@@@@@@@@&#GY7^.
+                                 ..^~!!7???7!~^."
 
-if [[ $1 == "stop" ]]; then
-  pkill -f "alacritty --class Screensaver"
-  exit 0
-fi
+screensaver_in_focus() {
+  hyprctl activewindow -j | jq -e '.class == "Screensaver"' >/dev/null 2>&1
+}
 
-# Exit early if we don't have the cmatrix
-if ! command -v cmatrix &>/dev/null; then
+exit_screensaver() {
+  hyprctl -q keyword cursor:invisible false
+  pkill -x tte 2>/dev/null
+  pkill -f "alacritty --class Screensaver" 2>/dev/null
+  exit 0
+}
+
+# Exit early if we don't have the tte show
+if ! command -v tte &>/dev/null; then
   exit 1
+fi
+
+if [[ $1 == "exit" ]]; then
+  exit_screensaver
+fi
+
+if [[ $1 == "run" ]]; then
+  trap exit_screensaver SIGINT SIGTERM SIGHUP SIGQUIT
+
+  hyprctl -q keyword cursor:invisible true &>/dev/null
+
+  while true; do
+
+    effects=(
+      burn
+      highlight
+      expand
+      # matrix
+      middleout
+      overflow
+      rain
+      randomsequence
+      scattered
+      slice
+      slide
+      spotlights
+      spray
+      sweep
+      unstable
+      wipe)
+
+    # shellcheck disable=SC2207
+    effects=( $(shuf -e "${effects[@]}") )
+
+    for effect in "${effects[@]}"; do
+      sleep 0.1
+      tte -i <(echo "$art") \
+        --frame-rate 240 --canvas-width 0 --canvas-height $(($(tput lines) - 2)) --anchor-canvas c --anchor-text c \
+        "$effect" &
+
+      while pgrep -x tte >/dev/null; do
+        if read -r -n 1 -t 3 || ! screensaver_in_focus; then
+          exit_screensaver
+        fi
+      done
+
+    done
+
+
+    # effect=$(tte 2>&1 | grep -oP '{\K[^}]+' | tr ',' ' ' | tr ' ' '\n' | sed -n '/^beams$/,$p' | sort -u | shuf -n1)
+    # # effect="matrix"
+    # tte -i <(echo "$art") \
+    #   --frame-rate 240 --canvas-width 0 --canvas-height $(($(tput lines) - 2)) --anchor-canvas c --anchor-text c \
+    #   "$effect" &
+
+  done
 fi
 
 # Exit early if screensave is already running
 pgrep -f "alacritty --class Screensaver" && exit 0
 
+# Allow screensaver to be turned off but also force started
+if [[ -f ~/.local/state/omarchy/toggles/screensaver-off ]] && [[ $1 != "force" ]]; then
+  exit 1
+fi
+
 focused=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true).name')
 
 for m in $(hyprctl monitors -j | jq -r '.[] | .name'); do
-  hyprctl -q dispatch focusmonitor $m
+  hyprctl -q dispatch focusmonitor "$m"
 
-  # FIXME: Find a way to make this generic where we it can work for kitty + ghostty
   hyprctl -q dispatch exec -- \
     alacritty --class Screensaver \
     --config-file ~/.config/alacritty/screensaver.toml \
