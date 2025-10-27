@@ -5,7 +5,7 @@
 # date:   09/09/2023
 #=================================================
 toggle=false
-if [[ $1 == '--toggle' ]]; then
+if [[ $1 == 'toggle' ]]; then
   toggle=true
 fi
 
@@ -28,7 +28,7 @@ __switch_sink() {
   done <<< "$(pactl list short sink-inputs | awk '{print $1}')"
 }
 
-if [[ $current == $speaker ]]; then
+if [[ $current == "$speaker" ]]; then
   if $toggle; then
     __switch_sink "$buds"
     echo ""
