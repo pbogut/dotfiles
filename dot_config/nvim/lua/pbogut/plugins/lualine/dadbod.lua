@@ -1,5 +1,3 @@
-local c = require('pbogut.settings.colors')
-
 local function get_selected_db()
   local b = vim.b
   if not b.db then
@@ -44,17 +42,17 @@ return function()
     result = '%#sl_dadbod# (' .. db .. ')'
   end
 
-  local fg = c.base3
+  local fg = vim.c.base3
   local bold = false
 
   if db:match('_prod$') then
-    fg = c.orange
+    fg = vim.c.orange
     bold = true
   end
 
   vim.api.nvim_set_hl(0, 'sl_dadbod', {
     fg = fg,
-    bg = c.base02,
+    bg = vim.c.base02,
     bold = bold,
   })
 

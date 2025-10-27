@@ -1,8 +1,6 @@
-local c = require('pbogut.settings.colors')
-
 vim.api.nvim_set_hl(0, 'sl_dap', {
-  fg = c.orange,
-  bg = c.base02,
+  fg = vim.c.orange,
+  bg = vim.c.base02,
 })
 
 return function()

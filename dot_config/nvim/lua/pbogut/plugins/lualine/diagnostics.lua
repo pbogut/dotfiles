@@ -1,5 +1,5 @@
 local i = require('pbogut.settings.icons')
-local c = vim.h.get_themed('lualine').diagnostics
+local c = vim.theme.lualine.diagnostics
 
 return function()
   local no_lsp = true

@@ -76,19 +76,26 @@ end
 
 local theme_name = nil
 
-function vim.h.get_themed(type)
-  local default_theme = 'solarized'
-  local theme = vim.h.theme_name()
-  local ok, result = pcall(require, 'pbogut.settings.themes.' .. theme .. '.' .. type)
-  if not ok then
-    vim.notify('Module ' .. type .. ' not fuind in theme ' .. theme)
-    ok, result = pcall(require, 'pbogut.settings.themes.' .. default_theme .. '.' .. type)
-    if not ok then
-      vim.notify('Module ' .. type .. ' not fuind in theme ' .. default_theme)
-      return {}
-    end
+function vim.h.colorscheme()
+  vim.cmd.colorscheme(vim.h.theme_name())
+  vim.h.load_theme_plugins(vim.h.theme_name())
+end
+
+function vim.h.load_theme_plugins(theme_name)
+  vim.theme = {}
+  local files = vim.fs.find(function(name, path)
+    return name:match('.*%.lua$')
+  end, {
+    limit = math.huge,
+    type = 'file',
+    path = vim.fn.stdpath('config') .. '/colors/' .. theme_name,
+  })
+
+  for _, file in ipairs(files) do
+    local name = vim.fs.basename(file):gsub('%.lua$', '')
+    local ok, config = pcall(loadfile(file))
+    vim.theme[name] = config
   end
-  return result
 end
 
 function vim.h.theme_name()

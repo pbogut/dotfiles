@@ -1,9 +1,7 @@
-local c = require('pbogut.settings.colors')
-
 return function()
   vim.api.nvim_set_hl(0, 'sl_context', {
-    fg = c.base3,
-    bg = c.base02,
+    fg = vim.c.base3,
+    bg = vim.c.base02,
     bold = true,
   })
 

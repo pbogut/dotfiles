@@ -15,8 +15,6 @@ return {
     local has_lspstatus, lspstatus = pcall(require, 'lsp-status')
     local has_lsp_signature, lsp_signature = pcall(require, 'lsp_signature')
 
-    local c = require('pbogut.settings.colors')
-
     local b = {}
 
     vim.diagnostic.config({
@@ -45,18 +43,18 @@ return {
     end
 
     u.highlights({
-      DiagnosticFloatingInfo = { guibg = c.ad_info, guifg = c.base02 },
-      DiagnosticFloatingHint = { guibg = c.ad_hint, guifg = c.base02 },
-      DiagnosticFloatingError = { guibg = c.red, guifg = c.base02 },
-      DiagnosticFloatingWarning = { guibg = c.magenta, guifg = c.base02 },
-      DiagnosticSignError = { guibg = c.sign_col_bg, guifg = c.red },
-      DiagnosticSignWarn = { guibg = c.sign_col_bg, guifg = c.magenta },
-      DiagnosticSignInfo = { guibg = c.sign_col_bg, guifg = c.ad_info },
-      DiagnosticSignHint = { guibg = c.sign_col_bg, guifg = c.ad_hint },
-      DiagnosticVirtualTextError = { guifg = c.red },
-      DiagnosticVirtualTextWarning = { guifg = c.magenta },
-      DiagnosticVirtualTextInfo = { guifg = c.ad_info },
-      DiagnosticVirtualTextHint = { guifg = c.ad_hint },
+      DiagnosticFloatingInfo = { guibg = vim.c.ad_info, guifg = vim.c.base02 },
+      DiagnosticFloatingHint = { guibg = vim.c.ad_hint, guifg = vim.c.base02 },
+      DiagnosticFloatingError = { guibg = vim.c.red, guifg = vim.c.base02 },
+      DiagnosticFloatingWarning = { guibg = vim.c.magenta, guifg = vim.c.base02 },
+      DiagnosticSignError = { guibg = vim.c.sign_col_bg, guifg = vim.c.red },
+      DiagnosticSignWarn = { guibg = vim.c.sign_col_bg, guifg = vim.c.magenta },
+      DiagnosticSignInfo = { guibg = vim.c.sign_col_bg, guifg = vim.c.ad_info },
+      DiagnosticSignHint = { guibg = vim.c.sign_col_bg, guifg = vim.c.ad_hint },
+      DiagnosticVirtualTextError = { guifg = vim.c.red },
+      DiagnosticVirtualTextWarning = { guifg = vim.c.magenta },
+      DiagnosticVirtualTextInfo = { guifg = vim.c.ad_info },
+      DiagnosticVirtualTextHint = { guifg = vim.c.ad_hint },
       LspSignatureActiveParameter = { link = 'Search' },
     })
 

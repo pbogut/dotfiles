@@ -4,7 +4,6 @@ return {
   'nvim-lualine/lualine.nvim',
   config = function()
     local lualine = require('lualine')
-    local c = require('pbogut.settings.colors')
 
     -- custom sections
     local s = {
@@ -33,7 +32,7 @@ return {
     lualine.setup({
       options = {
         icons_enabled = true,
-        theme = vim.h.get_themed('lualine').theme,
+        theme = vim.theme.lualine.theme,
         component_separators = { left = '', right = '' },
         section_separators = { left = '', right = '' },
         disabled_filetypes = {},

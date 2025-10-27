@@ -1,9 +1,9 @@
+vim.cmd.colorscheme(vim.h.theme_name())
+
 require('pbogut.settings.indents')
 require('pbogut.settings.title')
 require('pbogut.settings.terminal')
 require('pbogut.settings.icons')
-require('pbogut.settings.colors')
-require('pbogut.settings.highlights')
 
 local o = vim.opt
 
@@ -12,7 +12,6 @@ vim.g.matchparen_insert_timeout = 2
 
 vim.cmd.filetype({ args = { 'plugin', 'on' } })
 vim.cmd.filetype({ args = { 'indent', 'off' } })
-vim.cmd.colorscheme(vim.h.theme_name())
 
 o.fillchars = { fold = ' ', vert = '│' }
 o.shortmess:append('c')

@@ -1,11 +1,10 @@
-local colors = require('pbogut.settings.colors')
 vim.api.nvim_set_hl(0, 'lualine_chezmoi_icon', {
-  bg = colors.green,
-  fg = colors.green,
+  bg = vim.c.green,
+  fg = vim.c.green,
 })
 vim.api.nvim_set_hl(0, 'lualine_chezmoi_actual_icon', {
-  fg = colors.green,
-  bg = colors.base02,
+  fg = vim.c.green,
+  bg = vim.c.base02,
 })
 
 return function()

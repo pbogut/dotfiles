@@ -1,5 +1,3 @@
-local c = require('pbogut.settings.colors')
-
 local function change()
   if vim.fn.exists('*sy#repo#get_stats') == 1 then
     local diff_add = vim.fn['sy#repo#get_stats']()[1]
@@ -29,8 +27,8 @@ local function mode_green()
 end
 
 vim.api.nvim_set_hl(0, 'sl_diffmode', {
-  bg = c.green,
-  fg = c.base3,
+  bg = vim.c.green,
+  fg = vim.c.base3,
   bold = true,
 })
 

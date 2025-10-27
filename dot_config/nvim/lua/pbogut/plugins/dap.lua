@@ -262,15 +262,14 @@ return {
         end
       end)
 
-      local colors = require('pbogut.settings.colors')
       local i = require('pbogut.settings.icons')
 
       u.highlights({
         DapBreakpoint = { link = 'DiagnosticSignError' },
         DapBreakpointCondition = { link = 'DiagnosticSignWarn' },
-        DapBreakpointRejected = { guifg = colors.orange, guibg = colors.base02 },
+        DapBreakpointRejected = { guifg = vim.c.orange, guibg = vim.c.base02 },
         DapLogPoint = { link = 'DiagnosticSignInfo' },
-        DapStopped = { guifg = '#719e07', guibg = colors.base02 },
+        DapStopped = { guifg = '#719e07', guibg = vim.c.base02 },
       })
 
       u.signs({
