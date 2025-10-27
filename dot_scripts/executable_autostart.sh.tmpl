@@ -34,25 +34,15 @@ demonize udisksvm "udisksvm -a"
 demonize memwatch ~/.scripts/memwatch.sh
 demonize mailsgoweb ~/.scripts/mailsgoweb.sh
 demonize kdeconnect-file-watch kdeconnect-file-watch
+demonize dunst dunst
 
 # {{- if eq .chezmoi.hostname "redeye" }} redeye [[[
-rerun kwalletd "kwalletd5"
-
 # I dont want to talk about it
 optical=$(pactl list sinks | grep 'Name: alsa_output.pci-0000_05_00' | sed 's,.*Name: ,,')
 pactl set-default-sink "$optical"
 (sleep 2s; aoc-menu gamemode off) &
 (sleep 7s; aoc-menu gamemode off) &
 # redeye ]]] {{- end }}
-
-
-if [[ "$compositor" == "sway" ]]; then
-  demonize dunst dunst
-fi
-if [[ "$compositor" == "Hyprland" ]]; then
-  # demonize hypernotify hyprnotify
-  demonize dunst "dunst -config $HOME/.config/dunst/hypr.dunstrc"
-fi
 
 # just local one, not versioned
 if [[ -f "$HOME/.autostart.local.sh" ]]; then
