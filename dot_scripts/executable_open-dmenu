@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   open-dmenu
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   28/10/2025
+#=================================================
+usage() {
+    echo "Ussage: ${0##*/} [OPTIONS] <FILE(s)>"
+    echo ""
+    echo "Options:"
+    echo "  -h, --help     display this help and exit"
+    echo "  -a, --app      app to open file with"
+}
+
+app="select"
+files=()
+
+if [[ -z $1 ]]; then
+    usage
+    exit 1
+fi
+
+while test $# -gt 0; do
+    case "$1" in
+        --help | -h)
+            usage
+            exit 0
+            ;;
+        --app | -a)
+            app=$2
+            shift
+            shift
+            ;;
+        *)
+            files+=("$1")
+            shift
+            ;;
+    esac
+done
+
+if [[ $app = "select" ]] && [[ $(/usr/bin/rifle -l "$1" | wc -l) -gt 1 ]]; then
+    ext=$(tr '[:upper:]' '[:lower:]' <<< "${files[0]##*.}")
+    mkdir -p "$HOME/.cache/fuzzel/open"
+    choice=$(/usr/bin/rifle -l "${files[@]}" | sed 's/:/ \t/g' | sed -E 's/(^[0-9]*) \t/\1\t/g' |
+        fuzzel --dmenu -p "App: " --cache "$HOME/.cache/fuzzel/open/$ext" \
+            --with-nth="{4..}" --accept-nth=1)
+    [[ $choice != "" ]] && /usr/bin/rifle "${files[@]}" -p "$choice"
+else
+    /usr/bin/rifle "${files[@]}" -p "$app"
+fi

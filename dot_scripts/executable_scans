@@ -63,7 +63,7 @@ def do_search(query)
   return if selected_file.chop.empty?
 
   puts selected_file
-  Open3.capture3("~/.scripts/sway/open #{selected_file}")
+  Open3.capture3("~/.scripts/open-dmenu #{selected_file}")
 end
 
 def do_process()

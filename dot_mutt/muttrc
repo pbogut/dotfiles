@@ -98,8 +98,8 @@ macro compose H ':set sendmail="msmtp.sh --preview"<enter><send-message>:set sen
 macro index,pager \cr '<shell-escape>echo -n "Checking for new emails... " && offlineimap-reload.sh <enter>'
 
 # open attachments with rifle
-macro attach \co '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>$HOME/.scripts/sway/open /tmp/.mutt-tmp/* <enter>'
-macro compose \co '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>$HOME/.scripts/sway/open /tmp/.mutt-tmp/* <enter>'
+macro attach \co '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>open-dmenu /tmp/.mutt-tmp/* <enter>'
+macro compose \co '<shell-escape>rm -rf /tmp/.mutt-tmp/;mkdir /tmp/.mutt-tmp<enter><save-entry><kill-line>/tmp/.mutt-tmp/<enter>y<enter><shell-escape>open-dmenu /tmp/.mutt-tmp/* <enter>'
 # status format with current account info
 set status_format="-%r-`secret email/default/from`: %f [Msgs:%?M?%M/?%m%?n? New:%n?%?o? Old:%o?%?d? Del:%d?%?F? Flag:%F?%?t? Tag:%t?%?p? Post:%p?%?b? Inc:%b?%?l? %l?]---(%s/%S)-%>-(%P)---"
 

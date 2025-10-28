@@ -8,7 +8,7 @@ file="$1"
 dir="$(cd "$(dirname "$file")" && pwd)"
 
 open_file() {
-    $HOME/.scripts/sway/open "$1"
+    open-dmenu "$1"
 }
 
 sort_file() {

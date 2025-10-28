@@ -18,7 +18,7 @@ alias m="ncmpcpp"
 alias s="spt"
 alias i="ssh-weechat"
 alias e="mutt"
-alias o="$HOME/.scripts/sway/open"
+alias o="open-dmenu"
 
 
 alias ls="ls --color=auto"

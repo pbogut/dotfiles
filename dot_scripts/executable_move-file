@@ -36,6 +36,6 @@ if [[ $should_move == "move" ]]; then
     handle_qb
 elif [[ $should_move == "move and open" ]]; then
     mv "$file" "$destination/$filename"
-    "$HOME/.scripts/sway/open" "$destination/$filename"
+    open-dmenu "$destination/$filename"
     handle_qb
 fi
