@@ -306,8 +306,8 @@ assign [app_id="at.yrlf.wl_mirror"] "mirror"
 for_window [app_id="at.yrlf.wl_mirror"] floating enable fullscreen enable
 
 # Media Keys
-bindsym XF86MonBrightnessUp $exec "/usr/bin/kill -SIGRTMIN+1 $(pgrep -f 'bash .*/polybar/backlight.sh')"
-bindsym XF86MonBrightnessDown $exec "/usr/bin/kill -SIGRTMIN+2 $(pgrep -f 'bash .*/polybar/backlight.sh')"
+bindsym XF86MonBrightnessUp $exec "brightnessctl -e1 -n2 set 5%+"
+bindsym XF86MonBrightnessDown $exec "brightnessctl -e1 -n2 set 5%-"
 bindsym Shift+XF86AudioRaiseVolume $exec "~/.scripts/volume.sh up 'Arctis Pro'"
 bindsym Shift+XF86AudioLowerVolume $exec "~/.scripts/volume.sh down 'Arctis Pro'"
 bindsym XF86AudioRaiseVolume $exec "~/.scripts/volume.sh up ', Default$'"

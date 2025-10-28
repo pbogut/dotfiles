@@ -735,15 +735,6 @@ return {
             },
           },
         },
-        -- polybar scripts
-        ['.polybar'] = {
-          priority = 100,
-          patterns = {
-            ['*.zsh'] = {
-              skeleton = 'polybar/script',
-            },
-          },
-        },
         -- phpcs
         ['phpcs.xml'] = {
           priority = 1000,
