@@ -6,8 +6,10 @@ local cmd = vim.cmd
 u.highlights({
   ClTestAdDark1 = { guifg = vim.c.ad_dark1 },
   ClTestAdDark2 = { guifg = vim.c.ad_dark2 },
+
   ClTestAdInfo = { guifg = vim.c.ad_info },
   ClTestAdHint = { guifg = vim.c.ad_hint },
+  ClTestAdInlay = { guifg = vim.c.ad_inlay },
 
   ClTestBase03 = { guifg = vim.c.base03 },
   ClTestBase02 = { guifg = vim.c.base02 },
@@ -41,6 +43,7 @@ u.highlights({
   ClTestAltBlue = { guifg = vim.c.alt_blue },
   ClTestAltCyan = { guifg = vim.c.alt_cyan },
   ClTestAltGreen = { guifg = vim.c.alt_green },
+
 })
 
 cmd.TSBufDisable('highlight')
@@ -48,6 +51,7 @@ fn.matchadd('ClTestAdDark1', 'ClTestAdDark1\\>')
 fn.matchadd('ClTestAdDark2', 'ClTestAdDark2\\>')
 fn.matchadd('ClTestAdInfo', 'ClTestAdInfo\\>')
 fn.matchadd('ClTestAdHint', 'ClTestAdHint\\>')
+fn.matchadd('ClTestAdInlay', 'ClTestAdInlay\\>')
 fn.matchadd('ClTestBase03', 'ClTestBase03\\>')
 fn.matchadd('ClTestBase02', 'ClTestBase02\\>')
 fn.matchadd('ClTestBase01', 'ClTestBase01\\>')

@@ -9,7 +9,7 @@ local colors = {
 
   ad_info = '#a68f46',
   ad_hint = '#9eab7d',
-  ad_inlay = '#305677',
+  ad_inlay = '#815642',
 
   base03 = '#1a1b26',
   base02 = '#32344a',
@@ -277,7 +277,7 @@ local groups = {
   VertSplit = { guibg = c.base02, guifg = 'fg' },
   WinSeparator = { guibg = 'none', guifg = 'fg' },
   NonText = { gui = 'none', guifg = c.ad_inlay },
-  SpecialKey = { gui = 'none', guifg = c.ad_inlay },
+  SpecialKey = { gui = 'none', guifg = c.base00 },
   Whitespace = { gui = 'none', guifg = c.ad_inlay },
 
   MyTodo = { gui = 'bold', guifg = c.magenta },
