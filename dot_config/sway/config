@@ -46,9 +46,7 @@ focus_on_window_activation focus
 popup_during_fullscreen leave_fullscreen
 
 # start a terminal
-bindsym $mod+Return $exec "~/.scripts/i3-term-in-current-dir.sh"
-bindsym $mod+Ctrl+Return $exec "~/.scripts/i3-term-in-current-dir.sh --project"
-bindsym $mod+Shift+Return $exec "~/.scripts/i3-term-in-current-dir.sh --force-new"
+bindsym $mod+Return $exec "~/.scripts/terminal"
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -73,10 +71,6 @@ set $wsgame    7:  gaming
 set $wsdocs    7:  docs
 set $ws3d       3d
 
-bindsym $mod+Shift+colon $exec "~/.scripts/i3-dmenu-start-at-new-workspace.sh"
-# There also is the (new) i3-dmenu-desktop which only displays applications
-# shipping a .desktop file. It is a wrapper around dmenu, so you need that
-# installed.
 bindsym $mod+d exec "dunstctl context"
 bindsym $mod+Shift+d exec "dunstctl close"
 
@@ -207,7 +201,6 @@ mode "$mode_resize" {
 bindsym $mod+r mode "$mode_resize"
 
 # screen lock with delay after, so suspend / hibernate with locked screen
-# set $Locker ~/.scripts/i3-lock.sh && sleep 1
 set $Locker swaylock -t --image /usr/share/i3-lock-session/locktile.png
 set $mode_system System (l) lock, (w) switch, (e) logout, (r) reboot, (Shift+s) shutdown, (b) backup and shutdown, (Esc) cancel
 mode "$mode_system" {
@@ -337,8 +330,6 @@ bindsym $mod+Shift+P $exec "sway-workspace --prev --same-output --move"
 bindsym $mod+c $exec "sway-workspace --new --start-idx 10"
 bindsym $mod+Shift+C $exec "sway-workspace --new --move --start-idx 10"
 bindsym $mod+Shift+X $exec "sway-workspace --new --send --start-idx 10"
-bindsym $mod+w $exec "~/.scripts/i3-dmenu-workspaces.sh"
-bindsym $mod+Shift+W $exec "~/.scripts/i3-dmenu-workspaces.sh --move"
 bindsym $mod+Ctrl+w $exec "~/.scripts/sway/sort-workspace.sh --extended"
 bindsym $mod+x $exec "~/.scripts/sway/hidden-switches.sh"
 

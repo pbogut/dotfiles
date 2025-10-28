@@ -17,12 +17,8 @@ usage() {
   echo "  -h, --help     display this help and exit"
 }
 
-move_top() {
-  i3move --inside-distance 2 up
-}
-
 focus_toggle() {
-  i3-msg focus mode_toggle
+  swaymsg focus mode_toggle
 }
 
 move() {
@@ -283,7 +279,6 @@ case  "$wm_class" in
   "yad Yad")
     case "$wm_title" in
       "keepass show")
-         move_top
          focus_toggle
         ;;
       *)

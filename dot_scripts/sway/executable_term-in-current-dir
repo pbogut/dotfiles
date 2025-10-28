@@ -17,10 +17,6 @@ usage() {
 while test $# -gt 0; do
 
   case "$1" in
-    --new-workspace)
-      i3-create-empty-workspace.py
-      shift
-      ;;
     --tmux)
       tmux=true
       shift
