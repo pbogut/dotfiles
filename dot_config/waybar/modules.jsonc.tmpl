@@ -382,12 +382,14 @@
         },
         "on-click": "$HOME/.scripts/waybar/powermenu",
     },
-    "custom/nextcloud": {
-        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span>",
+    "custom/media_sync": {
+        "interval": 5,
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "format-icons": {
-            "default": "󰘿"
+            "default": "󱊞"
         },
-        "on-click": "nextcloud",
+        "exec": "$HOME/.scripts/waybar/media_sync.sh",
+        "on-click": "sync",
     },
 }
 
