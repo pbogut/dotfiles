@@ -3,6 +3,7 @@ general {
     before_sleep_cmd = hyprlock
     ignore_dbus_inhibit = false
     ignore_systemd_inhibit = false
+    inhibit_sleep = 3 # wait until screen is locked
 }
 
 # redeye [[[ {{- if eq .chezmoi.hostname "redeye" }}
