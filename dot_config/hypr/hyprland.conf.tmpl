@@ -188,12 +188,14 @@ animations {
 workspace = name:web,monitor:DP-1
 workspace = name:code,monitor:DP-1
 workspace = name:chat,monitor:HDMI-A-1
+workspace = name:zoom,monitor:DP-1
 workspace = name:media,monitor:HDMI-A-1
 workspace = name:work,monitor:HDMI-A-1
 
 windowrule = workspace name:web, class:^(vivaldi-personal)$
 windowrule = workspace name:code, class:^(Alacritty.project)$
 windowrule = workspace name:chat, class:^(ferdium)$
+windowrule = workspace name:zoom, class:^(zoom)$
 windowrule = workspace name:media, class:^(brave-www.youtube.com__).*$
 windowrule = workspace name:work, class:^(vivaldi-work)$
 
@@ -429,12 +431,17 @@ submap = reset
 ##############################
 ### WINDOWS AND WORKSPACES ###
 ##############################
+windowrule = pin, class:^(zoom)$,title:^(as_toolbar)$
+windowrule = pin, class:^(zoom)$,title:^(zoom_linux_float_video_window)$
+windowrule = pin, class:^(zoom)$,title:^(zoom_linux_float_video_window)$
+windowrule = noblur,class:^(zoom)$
 
 # See https://wiki.hypr.land/Configuring/Window-Rules/ for more
 # See https://wiki.hypr.land/Configuring/Workspace-Rules/ for workspace rules
 
 # Example windowrule
 # windowrule = float,class:^(kitty)$,title:^(kitty)$
+windowrule = float,class:^(hyprland-share-picker)$
 windowrule = float,class:^(Alacritty.floating)$
 windowrule = size 1200 700,class:^(Alacritty.floating)$
 windowrule = float,class:^(org.wezterm.floating)$
