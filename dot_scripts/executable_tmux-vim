@@ -59,7 +59,7 @@ open_by_title() {
 }
 
 if [[ -n $TMUX ]]; then
-  tmux new-session -d -s "$name" nvim -p -- "${files[@]}"
+  tmux new-session -e PROJECT="$name" -d -s "$name" nvim -p -- "${files[@]}"
   tmux switch-client -t "$name:nvim" || tmux switch-client -t "$name"
   title=$(cut -f1 --complement --delimiter='|' <<< "$(tmux display-message -p "#T")")
   if [[ -n "${files[*]}" ]]; then
@@ -70,7 +70,7 @@ fi
 
 session=$(tmux ls -F "#{session_name}|#{pane_title}" 2>/dev/null | grep "^$name")
 if [[ -z $session ]]; then
-  if ! tmux new-session -s "$name" nvim -p -- "${files[@]}"; then
+  if ! tmux new-session -e PROJECT="$name" -s "$name" nvim -p -- "${files[@]}"; then
     tmux attach-session -t "$name" || tmux switch-client -t "$name"
   fi
 elif [[ -z "${files[*]}" ]]; then

@@ -1,0 +1,18 @@
+#!/bin/bash
+number=$1
+if ! tmux select-window -t ":$number"; then
+  if [[ -n $PROJECT ]]; then
+    case "$number" in
+      1) tmux new-window -a -t ":$number" 'nvim' ;;
+      4) tmux new-window -a -t ":$number" 'make dev; read' ;;
+      5) tmux new-window -a -t ":$number" 'zsh -ic "draft sql"' ;;
+      6) tmux new-window -a -t ":$number" 'rest' ;;
+      7) tmux new-window -a -t ":$number" 'lazygit' ;;
+      8) tmux new-window -a -t ":$number" 'lazydocker' ;;
+      9) tmux new-window -a -t ":$number" 'opencode' ;;
+      *) tmux new-window -a -t ":$number" ;;
+    esac
+  else
+    tmux new-window -a -t ":$number"
+  fi
+fi
