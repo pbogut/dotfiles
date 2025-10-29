@@ -9,13 +9,9 @@ if [[ $1 == 'toggle' ]]; then
   toggle=true
 fi
 
-# {{- if eq .chezmoi.hostname "redeye" }} redeye [[[
-speaker=$(pactl list sinks | grep 'Name: alsa_output.pci-0000_05_00' | sed 's,.*Name: ,,')
-buds=$(pactl list sinks | grep 'Name: alsa_output\..*VR_P10_Dongle' | sed 's,.*Name: ,,')
-# redeye ]]] {{- end }}
 # {{- if eq .chezmoi.hostname "silverspoon" }} silverspoon [[[
 speaker=$(pactl list sinks | grep 'Name: alsa_output\..*\.HiFi__Speaker' | sed 's,.*Name: ,,')
-buds=$(pactl list sinks | grep 'Name: alsa_output\..*VR_P10_Dongle' | sed 's,.*Name: ,,')
+audioshare=$(pactl list sinks | grep 'Name: Audio Share Sink' | sed 's,.*Name: ,,')
 # silverspoon ]]] {{- end }}
 
 current=$(pactl get-default-sink)
@@ -28,7 +24,7 @@ __switch_sink() {
   done <<< "$(pactl list short sink-inputs | awk '{print $1}')"
 }
 
-if [[ $current == "$buds" ]]; then
+if [[ $current == "$audioshare" ]]; then
   if $toggle; then
     __switch_sink "$speaker"
     echo ""
@@ -37,7 +33,7 @@ if [[ $current == "$buds" ]]; then
   fi
 else
   if $toggle; then
-    __switch_sink "$buds"
+    __switch_sink "$audioshare"
     echo ""
   else
     echo ""

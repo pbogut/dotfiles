@@ -102,7 +102,6 @@ button:hover {
 }
 #custom-power,
 #custom-nextcloud,
-#custom-vrp10,
 #custom-bt_kyria,
 #custom-bt_dactyl,
 #custom-bt_xbox,
@@ -125,12 +124,12 @@ button:hover {
 #backlight,
 #network,
 #bluetooth,
-#pulseaudio,
 #wireplumber,
 #custom-media,
 #custom-hubstaff,
 #custom-weather,
 #tray-expander,
+#audio,
 #mode,
 #idle_inhibitor,
 #scratchpad,
@@ -146,6 +145,11 @@ button:hover {
     box-shadow: 0px 0px 2px 0px rgba(26, 26, 26, 0.9);
     margin-top:1px;
     margin-bottom: 1px;
+}
+.audio-group-item #custom-vrp10,
+.audio-group-item #custom-audioshare-client,
+.audio-group-item #custom-audioshare {
+    margin-left: 10px;
 }
 #workspaces {
     padding: 0;

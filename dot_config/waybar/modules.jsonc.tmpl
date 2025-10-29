@@ -159,6 +159,20 @@
     "battery#bat2": {
         "bat": "BAT2"
     },
+    "group/audio": {
+      "orientation": "inherit",
+      "drawer": {
+        "transition-duration": 600,
+        "children-class": "audio-group-item",
+        "click-to-reveal": false,
+      },
+      "modules": [
+          "pulseaudio",
+          "custom/vrp10",
+          {{ if eq .chezmoi.hostname "redeye" }}"custom/audioshare-client",{{ end }}
+          {{ if eq .chezmoi.hostname "silverspoon" }}"custom/audioshare",{{ end }}
+      ]
+    },
     "pulseaudio": {
         "scroll-step": 1, // %, can be a float
         "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {volume}% {format_source}",
@@ -343,6 +357,26 @@
         "exec": "$HOME/.scripts/waybar/hubstaff.sh",
         "on-click": "hubstaff toggle"
     },
+    "custom/audioshare-client": {
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
+        "interval": 3600,
+        "signal": 20,
+        "exec": "$HOME/.scripts/waybar/audioshare-client.sh",
+        "format-icons": {
+            "default": "󱀞"
+        },
+        "on-click": "$HOME/.scripts/waybar/audioshare-client.sh toggle; pkill -RTMIN+20 -x waybar"
+    },
+    "custom/audioshare": {
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
+        "interval": 3600,
+        "signal": 20,
+        "exec": "$HOME/.scripts/waybar/audioshare.sh",
+        "format-icons": {
+            "default": "󱀞"
+        },
+        "on-click": "$HOME/.scripts/waybar/audioshare.sh toggle; pkill -RTMIN+20 -x waybar"
+    },
     "custom/vrp10": {
         "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 3600,
@@ -351,7 +385,7 @@
         "format-icons": {
             "default": "󱡏"
         },
-        "on-click": "$HOME/.scripts/waybar/vrp10.sh --toggle; pkill -RTMIN+20 -x waybar"
+        "on-click": "$HOME/.scripts/waybar/vrp10.sh toggle; pkill -RTMIN+20 -x waybar"
     },
     "custom/media": {
         "format": "{icon} {0}",
@@ -392,4 +426,3 @@
         "on-click": "sync",
     },
 }
-

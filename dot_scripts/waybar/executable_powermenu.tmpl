@@ -7,7 +7,6 @@
 
 __menu() {
     actions=(
-        " 󱡏 VR P10               $(~/.scripts/waybar/vrp10.sh) : vrp10"
         #{{- if eq .hostname "silverspoon" }}
         " 󰌪 Battery conservation $(~/.scripts/waybar/conservation.sh) : conservation"
         #{{- end }}
@@ -84,9 +83,6 @@ case $selected in
         ;;
     "conservation")
         ~/.scripts/waybar/conservation.sh toggle
-        ;;
-    "vrp10")
-        ~/.scripts/waybar/vrp10.sh toggle
         ;;
     "windows")
         systemctl reboot -i --boot-loader-entry=windows.conf
