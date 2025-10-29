@@ -5,7 +5,7 @@
 # date:   10/01/2018
 #=================================================
 refresh_waybar() {
-    for _ in {1..10}; do
+    for _ in {1..3}; do
         sleep 0.5
         pkill -RTMIN+21 -x waybar
     done
@@ -20,6 +20,7 @@ fi
 mkdir -p "$HOME/Videos/screenrecords"
 # wl-screenrec --geometry "$(slurp)" -f "$filename"
 (
+    refresh_waybar &
     filename="$HOME/Videos/screenrecords/screenrecord_from_$(date +%Y-%m-%d_%H-%M-%S).mp4"
     wf-recorder -a -g "$(slurp)" -f "$filename"
     echo ""
@@ -27,6 +28,4 @@ mkdir -p "$HOME/Videos/screenrecords"
     echo "$result"
     notify-send "Screen recording" "$result" -i camera-video
     lf-term "$filename"
-) &
-
-refresh_waybar
+)
