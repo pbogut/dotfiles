@@ -432,6 +432,10 @@ submap = reset
 ##############################
 ### WINDOWS AND WORKSPACES ###
 ##############################
+windowrule = noscreenshare, title:^(khal)$
+windowrule = noscreenshare, class:^(ferdium)$
+windowrule = noscreenshare, title:^(Mutt - Emails)$
+windowrule = noscreenshare, class:^(org.kde.kdeconnect.sms)$
 windowrule = pin, class:^(zoom)$,title:^(as_toolbar)$
 windowrule = pin, class:^(zoom)$,title:^(zoom_linux_float_video_window)$
 windowrule = pin, class:^(zoom)$,title:^(zoom_linux_float_video_window)$
@@ -448,6 +452,7 @@ windowrule = size 1200 700,class:^(Alacritty.floating)$
 windowrule = float,class:^(org.wezterm.floating)$
 windowrule = size 1200 700,class:^(org.wezterm.floating)$
 windowrule = float,class:^(com.nextcloud.desktopclient.nextcloud)$
+windowrule = float,class:^(org.kde.kdeconnect.sms)$
 
 windowrule = float,title:^Bitwarden - Vivaldi$
 
