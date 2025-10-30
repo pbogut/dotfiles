@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   wiremix-term
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   30/10/2025
+#=================================================
+terminal-float -- wiremix --tab output
