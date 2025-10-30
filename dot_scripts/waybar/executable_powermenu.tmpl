@@ -4,13 +4,12 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   21/10/2025
 #=================================================
-
 __menu() {
     actions=(
         #{{- if eq .hostname "silverspoon" }}
         " 󰌪 Battery conservation $(~/.scripts/waybar/conservation.sh) : conservation"
-        #{{- end }}
         "  :  "
+        #{{- end }}
         " 󰌾 Lock : lock"
         " 󰒲 Suspend : suspend"
         #{{- if eq .hostname "silverspoon" }}
@@ -18,8 +17,8 @@ __menu() {
         #{{- end }}
         " 󰍃 Logout : logout"
         " 󰜉 Restart : restart"
-        "  :  "
         #{{- if eq .hostname "redeye" }}
+        "  :  "
         " 󰨡 Windows : windows"
         "  Backup and Shutdown : backup"
         #{{- end }}
@@ -46,8 +45,8 @@ __menu() {
         --width "$(( max_len + 1 ))" \
         --lines "$height" \
         --anchor top-right \
-        --x-margin=8 \
-        --y-margin=8 \
+        --x-margin=6 \
+        --y-margin=6 \
         --accept-nth=2 --with-nth=1
 }
 
