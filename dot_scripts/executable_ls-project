@@ -35,8 +35,6 @@ done
         -maxdepth 5 -mindepth 2 \
         -iregex '.*(\.git|\.bare)$' |
         sed -E 's,/(\.git|\.bare)$,,'
-    echo "$DOTFILES"
-    echo "$DOTFILES/config/nvim"
 ) |
     sort |
     uniq |
