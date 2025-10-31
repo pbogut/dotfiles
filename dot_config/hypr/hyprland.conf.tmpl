@@ -197,6 +197,7 @@ windowrule = workspace name:web, class:^(vivaldi-personal)$
 windowrule = workspace name:code, class:^(Alacritty.project)$
 windowrule = workspace name:chat, class:^(ferdium)$
 windowrule = workspace name:zoom, class:^(zoom)$
+windowrule = workspace name:zoom, class:^(chrome-[a-zA-Z0-9]+.zoom.us__.*)$
 windowrule = workspace name:media, class:^(brave-www.youtube.com__).*$
 windowrule = workspace name:work, class:^(vivaldi-work)$
 
@@ -274,10 +275,9 @@ $mainMod = SUPER # Sets "Windows" key as main modifier
 # Example binds, see https://wiki.hypr.land/Configuring/Binds/ for more
 # Actions
 bind = $mainMod SHIFT, Q, killactive,
-bind = $mainMod, F, fullscreen,
-bind = $mainMod SHIFT, F, fullscreenstate, 0 2
-bind = $mainMod, Z, fullscreen, 1 #fulscreen with waybar showing z for zoom
-bind = $mainMod, M, fullscreen, 1 #maximize
+bind = $mainMod, F, fullscreen, 1
+bind = $mainMod SHIFT, F, fullscreen,
+bind = $mainMod, Z, fullscreenstate, 0 2 # fake fullscreen
 bind = $mainMod, E, exec, $fileManager
 bind = $mainMod, SPACE, exec, hypr-togglefloating
 bind = $mainMod, TAB, exec, hypr-togglefloatingfocus
