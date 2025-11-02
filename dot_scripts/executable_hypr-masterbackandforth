@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 #=================================================
-# name:   hypr-backandforth
+# name:   hypr-masterbackandforth
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   27/10/2025
 #
 # based on script by adamnejm <adamnejm@gmail.com>
 #=================================================
+hyprctl -q "dispatch layoutmsg focusmaster master"
+
 active_workspace="$(hyprctl activewindow -j | jq -r ".workspace.id")"
 if [ "$active_workspace" = "null" ]; then exit; fi
 previous_client="$(hyprctl clients -j | jq -r '[.[] | select(.workspace.id == '"$active_workspace"')] | sort_by(.focusHistoryID) | nth(1) | .address')"
 if [ "$previous_client" = "null" ]; then exit; fi
 
-hyprctl --batch \
+hyprctl -q --batch \
   "dispatch focuswindow address:$previous_client; dispatch layoutmsg swapwithmaster ignoremaster"
