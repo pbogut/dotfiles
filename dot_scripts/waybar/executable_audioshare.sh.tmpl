@@ -33,9 +33,13 @@ if [[ $current == "$audioshare" ]]; then
   fi
 else
   if $toggle; then
+    if ! pgrep -x as-cmd > /dev/null; then
+      as-cmd -b "$(ip addr | grep 192 | awk '{print $2}' | sed 's,/.*$,,')" &
+    fi
     __switch_sink "$audioshare"
     echo ""
   else
+    killall as-cmd >/dev/null 2>&1
     echo ""
   fi
 fi
