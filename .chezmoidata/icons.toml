@@ -21,4 +21,6 @@ vivaldi = [
   "browser-work",
   "browser-personal"
 ]
+discord = ["equibop"]
+google-messages = ["kdeconnect-sms"]
 windows-retro-light = ["windows"]
