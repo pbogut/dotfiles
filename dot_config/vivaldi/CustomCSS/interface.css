@@ -2,6 +2,9 @@
 #browser.linux #header {
   display: none;
 }
+#main > .inner {
+  background-color: #1a1b26;
+}
 #browser.win.address-top-off.tabs-off #header {
   display: none;
 }
@@ -33,20 +36,26 @@ button.ToolbarButton-Button[name="WorkspaceButton"]:not([title="Workspaces"]):no
 #tabs-tabbar-container .separator {
   display: none;
 }
+#tabs-container .tab.active {
+  background-color: #444b6a !important;
+}
 #tabs-tabbar-container {
   padding-top: 2px !important;
   width: 360px !important;
   max-width: 25vw !important;
+  background-color: #1a1b26 !important;
 }
 /* style sidebar */
 #browser:not(.transparent-tabbar) #tabs-tabbar-container {
-  background-color: #1d1e21;
+  /* background-color: #1d1e21; */
+  background-color: #161722;
 }
 .tabs-right .button-toolbar.workspace-popup.tabbar-workspace-button {
-  background-color: #1d1e21;
+  background-color: #161722;
 }
 :not(.ui-transparent-tabs).color-behind-tabs-on .tab {
-  background-color: #1d1e21;
+  /* background-color: #1d1e21; */
+  background-color: #161722;
 }
 body .tabbar-wrapper {
   border-left: 1px solid #333;
