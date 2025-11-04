@@ -18,11 +18,9 @@ rustup component add rustfmt --toolchain stable
 RUSTC_WRAPPER=""
 # Install rustup ]]] {{- end }}
 
-cargo install --git https://github.com/pbogut/enrichmail.git
-cargo install --git https://github.com/pbogut/cargo-workspace.git
-cargo install --git https://github.com/pbogut/rbw.git --branch add-uris-to-list
-
-cargo install \
-    mprocs \
-    rtx-cli \
-    bacon
+# {{ range .packages.cargo_git }}
+cargo install --git {{ . }}
+# {{ end }}
+# {{ range .packages.cargo }}
+cargo install {{ . }}
+# {{ end }}

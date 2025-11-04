@@ -116,3 +116,14 @@ go = [
   "github.com/porjo/youtubeuploader@latest",
   "github.com/pbogut/systray-cli@latest",
 ]
+cargo = [
+  "bacon",
+  "lsp-ai",
+  "mprocs",
+  "rtx-cli",
+]
+cargo_git = [
+  "https://github.com/pbogut/enrichmail.git",
+  "https://github.com/pbogut/cargo-workspace.git",
+  "https://github.com/pbogut/rbw.git --branch add-uris-to-list",
+]
