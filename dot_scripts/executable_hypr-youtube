@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   hypr-youtube
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   04/11/2025
+#=================================================
+is_active=false
+window=$(hyprctl activewindow -j | jq -r 'select(.class | startswith("brave-www.youtube.com__"))')
+if [[ -n $window ]]; then
+  is_active=true
+fi
+if ! $is_active; then
+  hypr-focusorexec "^brave-www.youtube.com__.*$" youtube
+  exit 0
+fi
+
+if [[ $1 == "reset" ]]; then
+  if [[ $(jq -r '.floating' <<< "$window") == "true" ]]; then
+    hyprctl dispatch "togglefloating"
+  fi
+  hyprctl dispatch "movetoworkspace name:media"
+  exit 0
+fi
+
+if [[ $(jq -r '.floating' <<< "$window") == "true" ]]; then
+  hyprctl dispatch "togglefloating"
+  hyprctl dispatch "fullscreen 1"
+else
+  hypr-pip
+fi
