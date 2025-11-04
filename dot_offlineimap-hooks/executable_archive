@@ -41,14 +41,6 @@ notmuch search --output files $search and folder:/^$account/ and not folder:/\.a
         mv "$origdir/$filename" "$archdir/$filename" > /dev/null 2>&1
     done
 
-find $HOME/Maildir -iname '*.archive' -type d | while read source; do
-    dest=/storage/nextcloud/Maildir.archive${source##$HOME/Maildir}
-    destdir=$(dirname $dest)
-    mkdir -p $destdir
-    mv $source $dest
-    ln -s $dest $source
-done
-
 if [[ $account == "gmail" ]]; then
   gmaildaysago=$(expr $daysago + 3)
   gmailtodate=$(date --date="$gmaildaysago days ago" '+%Y/%m/%d')
