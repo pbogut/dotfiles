@@ -78,7 +78,7 @@ map p paste_and_select
 map c clear_unselect
 
 map x extract
-map <c-o> open-dmenu $fx
+map <c-o> %open-dmenu $fx
 map o open
 map O openall
 
