@@ -35,11 +35,6 @@ mods = "Alt"
 enabled = true
 
 [[keyboard.bindings]]
-chars = "\u001B[13;5u"
-key = "Return"
-mods = "Control"
-
-[[keyboard.bindings]]
 action = "ToggleViMode"
 key = "Escape"
 mode = "~Vi"
