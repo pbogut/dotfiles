@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   hypr-cyclespecial
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   04/11/2025
+#=================================================
+workspace_name=$(
+  hyprctl workspaces -j |
+  jq -r 'map(select(.name | startswith("special:"))) | sort_by(.id) | .[].name' |
+  cut -d: -f2 |
+  fuzzel --dmenu)
+if [[ -n $workspace_name ]]; then
+  hyprctl dispatch "togglespecialworkspace $workspace_name"
+fi

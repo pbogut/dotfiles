@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   hypr-cyclespecial
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   04/11/2025
+#=================================================
+workspace_name=$(hyprctl activewindow -j | jq -r '.workspace.name')
+if [[ $workspace_name =~ ^special: ]]; then
+  hyprctl dispatch "togglespecialworkspace ${workspace_name##*special:}"
+else
+  hyprctl dispatch "togglespecialworkspace magic"
+fi
