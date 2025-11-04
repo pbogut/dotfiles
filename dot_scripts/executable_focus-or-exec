@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   focus-or-exec
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   04/11/2025
+#=================================================
+class=$1
+shift
+
+if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
+    hypr-focusorexec "$class" "$@"
+fi
+if [[ $XDG_CURRENT_DESKTOP == "sway" ]]; then
+    swaymsg '[app_id="'"$class"'"] focus' ||
+        swaymsg '[class="'"$class"'"] focus' ||
+        exec "$@"
+fi

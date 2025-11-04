@@ -4,5 +4,5 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   22/07/2025
 #=================================================
-swaymsg '[app_id="chrome-192.168.1.112__-Default"] focus' ||
+focus-or-exec "chrome-192.168.1.112__.*" \
     chromium --app=http://192.168.1.112:81 --profile-directory=Default

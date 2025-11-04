@@ -4,27 +4,8 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   17/08/2024
 #=================================================
-__vivaldi() {
-    vivaldi \
+focus-or-exec "vivaldi-work" vivaldi \
         --user-data-dir="$HOME/.config/vivaldi/Work/" \
         --class=vivaldi-work \
         --profile-directory=Work \
         "$@"
-}
-
-if [[ $# -eq 0 ]] && [[ $XDG_SESSION_DESKTOP == "Hyprland" ]]; then
-    ok=$(hyprctl dispatch "focuswindow class:vivaldi-work")
-    if [[ $ok != "ok" ]]; then
-      __vivaldi
-    fi
-elif [[ $# -eq 0 ]] && [[ $XDG_SESSION_DESKTOP = "sway" ]]; then
-    swaymsg '[app_id="vivaldi-work"] focus' || __vivaldi
-elif [[ $XDG_SESSION_DESKTOP == "Hyprland" ]]; then
-    hyprctl -q dispatch "focuswindow class:vivaldi-work"
-    __vivaldi "$@"
-elif [[ $XDG_SESSION_DESKTOP == "sway" ]]; then
-    swaymsg '[app_id="vivaldi-work"] focus'
-    __vivaldi "$@"
-else
-    __vivaldi "$@"
-fi

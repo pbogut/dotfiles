@@ -4,18 +4,10 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   17/08/2024
 #=================================================
-__vivaldi() {
+focus-or-exec "vivaldi-personal" \
     vivaldi \
         --enable-features=UseOzonePlatform \
         --ozone-platform=wayland \
         --class=vivaldi-personal \
         --profile-directory=Default \
         "$@"
-}
-
-if [[ $# -eq 0 ]]; then
-    swaymsg '[app_id="vivaldi-personal"] focus' || __vivaldi
-else
-    swaymsg '[app_id="vivaldi-personal"] focus'
-    __vivaldi "$@"
-fi

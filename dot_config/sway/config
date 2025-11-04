@@ -335,17 +335,17 @@ bindsym $mod+x $exec "~/.scripts/sway/hidden-switches.sh"
 
 bindsym --release $mod+v $sh 'xdotool keyup Super && xdotool type "$(xsel)"'
 bindsym $mod+Ctrl+i $sh '~/.scripts/vim-anywhere.sh --selection'
-bindsym $mod+Ctrl+f $exec swaymsg '[app_id="^ferdium$"] focus' || ferdium
+bindsym $mod+Ctrl+f $exec "~/.scripts/focus-or-exec" "^ferdium$" ferdium
 bindsym $mod+Ctrl+b $exec "~/.scripts/dmenu-bluetooth"
 bindsym $mod+Ctrl+n $exec "~/.scripts/networkmanager_dmenu"
-bindsym $mod+Ctrl+r $exec swaymsg '[app_id="com.gitlab.newsflash"] focus' || newsflash
+bindsym $mod+Ctrl+r $exec "~/.scripts/focus-or-exec" "^io.gitlab.news_flash.NewsFlash$" newsflash
 
-bindsym $mod+Ctrl+m $exec swaymsg '[app_id="chrome-www.deezer.com__en_-Default"] focus' || chromium --app=https://www.deezer.com/en/
+bindsym $mod+Ctrl+m $exec "~/.scripts/focus-or-exec" "chrome-www.deezer.com__.*" chromium --app=https://www.deezer.com/en/
 bindsym $mod+Ctrl+s $exec "~/.scripts/sway/switch-or-launch.sh --scratchpad '^Volume Control$' 'pavucontrol'"
 bindsym $mod+Ctrl+k $termfloat -t 'Khal' -e zsh -c "stty -ixon ; khal interactive"
-bindsym $mod+Ctrl+d $exec swaymsg '[app_id="discord"] focus' || discord.sh
+bindsym $mod+Ctrl+d $exec "~/.scripts/focus-or-exec" "^com.discordapp.Discord$" discord.sh
 bindsym $mod+Ctrl+t $exec "~/.scripts/todo.sh"
-bindsym $mod+Ctrl+e $exec swaymsg '[title="^EMAIL_MUTT$"] focus' || email
+bindsym $mod+Ctrl+e $exec "~/.scripts/focus-or-exec" "^EMAIL_MUTT$" email
 bindsym $mod+Ctrl+l move workspace to output $display_right
 bindsym $mod+Ctrl+h move workspace to output $display_main
 bindsym $mod+backspace move workspace to output $display_main
@@ -353,7 +353,7 @@ bindsym $mod+backspace move workspace to output $display_main
 bindsym $mod+Ctrl+p $exec "~/.scripts/wezterm-list-projects"
 bindsym $mod+Ctrl+u $exec "~/.scripts/users.sh --switch"
 
-bindsym $mod+b $exec swaymsg '[app_id="org.qutebrowser.qutebrowser"] focus' || browser
+bindsym $mod+b $exec "~/.scripts/focus-or-exec" "^org.qutebrowser.qutebrowser$" browser
 bindsym $mod+Ctrl+c workspace $wscode
 bindsym $mod+m focus output $display_left
 bindsym $mod+comma focus output $display_main

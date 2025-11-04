@@ -36,7 +36,7 @@ column=1
 color="#000000"
 icon_text=""
 button_press="""
-swaymsg '[app_id="^ferdium$"] focus' || ferdium
+focus-or-exec '^ferdium$' ferdium
 """
 
 [[buttons]]

@@ -341,7 +341,7 @@ show_menu() {
             toggle_pairable
             ;;
         "${pad}Manager")
-            swaymsg '[app_id="blueman-manager"] focus' || blueman-manager
+            focus-or-exec 'blueman-manager' blueman-manager
             ;;
         *)
             chosen=$(sed -E 's,.* (.*) .*,\1,' <<< "$chosen")
