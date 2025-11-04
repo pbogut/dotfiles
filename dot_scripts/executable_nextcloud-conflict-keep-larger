@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+find -name '* (conflicted copy*).*' | while read -r remotename; do
+    if [[ "$remotename" =~ \(conflicted\ copy ]]; then
+        localname=$(sed -E 's;(.*?) \(conflicted copy.*\)\.(.*?)$;\1.\2;' <<< "$remotename")
+        remote_size=$(du "$remotename" | cut -f1)
+        local_size=$(du "$localname" | cut -f1)
+        # echo "$remotename $remote_size  == $localname $local_size"
+        if [[ $remote_size -gt $local_size ]]; then
+            # echo "keeping $remotename"
+            rm "$localname"
+            mv "$remotename" "$localname"
+        else
+            # echo "keeping $localname"
+            rm "$remotename"
+        fi
+    fi
+done
+# ls | while read -r remotename; do
+#     if [[ "$remotename" =~ \(conflicted\ copy ]]; then
+#         localname=$(sed -E 's;(.*?) \(conflicted copy.*\)\.(.*?)$;\1.\2;' <<< "$remotename")
+#         remote_size=$(du "$remotename" | cut -f1)
+#         local_size=$(du "$localname" | cut -f1)
+#         echo "$remotename $remote_size  == $localname $local_size"
+#         if [[ $remote_size -gt $local_size ]]; then
+#             echo "keeping $remotename"
+#             # rm "$localname"
+#             # mv "$remotename" "$localname"
+#         else
+#             echo "keeping $localname"
+#             # rm "$remotename"
+#         fi
+#     fi
+# done
