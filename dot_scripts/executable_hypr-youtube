@@ -4,27 +4,57 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   04/11/2025
 #=================================================
-is_active=false
-window=$(hyprctl activewindow -j | jq -r 'select(.class | startswith("brave-www.youtube.com__"))')
-if [[ -n $window ]]; then
-  is_active=true
+youtube=$(hyprctl clients -j | jq 'map(select(.class | startswith("brave-www.youtube.com__"))) | first')
+
+if [[ $youtube == "null" ]]; then
+    youtube
+    exit 0
 fi
-if ! $is_active; then
-  hypr-focusorexec "^brave-www.youtube.com__.*$" youtube
-  exit 0
-fi
+
+yt_address=$(jq -r '.address' <<< "$youtube")
 
 if [[ $1 == "reset" ]]; then
-  if [[ $(jq -r '.floating' <<< "$window") == "true" ]]; then
-    hyprctl dispatch "togglefloating"
-  fi
-  hyprctl dispatch "movetoworkspace name:media"
-  exit 0
+    hyprctl dispatch "movetoworkspace name:media,address:$yt_address"
+    hyprctl dispatch "focuswindow address:$yt_address"
+    if [[ $(jq -r '.floating' <<< "$youtube") == "true" ]]; then
+        hyprctl dispatch "togglefloating"
+    fi
+    exit 0
 fi
 
-if [[ $(jq -r '.floating' <<< "$window") == "true" ]]; then
-  hyprctl dispatch "togglefloating"
-  hyprctl dispatch "fullscreen 1"
+monitor=$(jq -r '.monitor' <<< "$youtube")
+active_workspace=$(hyprctl monitors -j | jq --argjson mid "$monitor" -r 'map(select(.id == $mid)) | first | .activeWorkspace.name')
+yt_workspace=$(jq -r '.workspace.name' <<< "$youtube")
+
+if [[ $yt_workspace != "$active_workspace" ]]; then
+    hyprctl dispatch "movetoworkspacesilent name:$active_workspace,address:$yt_address"
 else
-  hypr-pip
+    if [[ $1 == "toggle" ]]; then
+        hyprctl dispatch "focuswindow address:$yt_address"
+        floating=$(echo "$youtube" | jq '.floating')
+        monitor="$(echo "$youtube" | jq '.monitor')"
+        monitor_json=$(hyprctl monitors all -j | jq "map(select(.id == $monitor))[0]")
+        screen_w=$(echo "$monitor_json" | jq -r '.width')
+        screen_h=$(echo "$monitor_json" | jq -r '.height')
+        offset_x=$(echo "$monitor_json" | jq -r '.x')
+        offset_y=$(echo "$monitor_json" | jq -r '.y')
+        scale=$(echo "$monitor_json" | jq -r '.scale')
+        screen_w=$(echo "$screen_w" "$scale" | awk '{print int($1 / $2)}')
+        screen_h=$(echo "$screen_h" "$scale" | awk '{print int($1 / $2)}')
+        width=$(echo "$screen_w" 0.33 | awk '{print int($1 * $2)}')
+        height=$(echo "$screen_h" 0.33 | awk '{print int($1 * $2)}')
+
+        gap=10
+        top=$((((screen_h - height) / 2) + offset_y))
+        left=$(((screen_w + offset_x) - width - gap))
+
+        if [[ $floating == "true" ]]; then
+            hyprctl dispatch "fullscreen 1"
+        else
+            hyprctl dispatch "togglefloating"
+            hyprctl dispatch "resizeactive exact $width $height"
+            hyprctl dispatch "moveactive exact $left $top"
+        fi
+        exit 0
+    fi
 fi

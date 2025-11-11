@@ -203,7 +203,6 @@ windowrule = workspace name:code, class:^(Alacritty.project)$
 windowrule = workspace name:chat, class:^(ferdium)$
 windowrule = workspace name:zoom, class:^(zoom)$
 windowrule = workspace name:zoom, class:^(chrome-[a-zA-Z0-9]+.zoom.us__.*)$
-windowrule = workspace name:media, class:^(brave-www.youtube.com__).*$
 windowrule = workspace name:work, class:^(vivaldi-work)$
 
 windowrule = syncfullscreen 0, class:^(brave-).*$
@@ -299,7 +298,8 @@ bind = $mainMod, bracketleft, layoutmsg, cycleprev
 
 bind = $mainMod, V, exec, hypr-togglemfact 0.5 0.65 0.75
 bind = $mainMod, Y, exec, hypr-youtube
-bind = $mainMod SHIFT, Y, exec, hypr-youtube reset
+bind = $mainMod CTRL, Y, exec, hypr-youtube reset
+bind = $mainMod SHIFT, Y, exec, hypr-youtube toggle
 
 # Apps
 bind = $mainMod, semicolon, exec, fuzzel-run
@@ -439,6 +439,7 @@ submap = reset
 ##############################
 ### WINDOWS AND WORKSPACES ###
 ##############################
+windowrule = workspace name:media, class:^(brave-www.youtube.com__).*$
 windowrule = workspace special:discord, class:^(com.discordapp.Discord)$
 windowrule = workspace special:discord, class:^(equibop)$
 windowrule = workspace special:deezer, class:^(chrome-www\.deezer\.com__.*)$
