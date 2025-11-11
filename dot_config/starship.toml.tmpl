@@ -1,7 +1,7 @@
 add_newline = false
 # right_format = "$time"
 format = """
-${custom.time}$status$cmd_duration$all$shell
+${custom.time}$status$cmd_duration$all${custom.lf}${custom.yazi}$shell
 $username$hostname${custom.local_host}${custom.remote_host}$directory$git_branch$git_status$git_state$custom_time
 $character\
 """
@@ -75,8 +75,21 @@ command = 'date +"%H:%M:%S"'
 style = 'green'
 when = "true"
 
+[custom.yazi]
+symbol = 'ya'
+format = '[$symbol\[$output\]]($style) '
+command = 'echo $YAZI_LEVEL'
+style = 'bold purple'
+when = "[[ -n $YAZI_LEVEL ]]"
+
+[custom.lf]
+symbol = 'lf'
+format = '[$symbol\[$output\]]($style) '
+command = 'echo $LF_LEVEL'
+style = 'bold blue'
+when = "[[ -n $LF_LEVEL ]]"
+
 [custom.elixir]
-# symbol = '💧 '
 symbol = ' '
 format = '[$symbol(v$output )]($style)'
 command = "elixir --short-version 2>/dev/null || (elixir --version | grep '^Elixir' | awk '{print $2}')"
