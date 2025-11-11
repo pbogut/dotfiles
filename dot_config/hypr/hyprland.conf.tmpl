@@ -330,9 +330,17 @@ bind = $mainMod, C, workspace, emptym
 bind = $mainMod SHIFT, N, movetoworkspace, m+1
 bind = $mainMod SHIFT, P, movetoworkspace, m-1
 bind = $mainMod SHIFT, C, movetoworkspace, emptym
+
+#{{ if eq .hostname "redeye" }}
+bind = $mainMod CTRL, L, movecurrentworkspacetomonitor, HDMI-A-1
+bind = $mainMod CTRL, H, movecurrentworkspacetomonitor, DP-1
+bind = $mainMod , BACKSPACE, movecurrentworkspacetomonitor, DP-1
+#{{ else }}
 bind = $mainMod CTRL, L, movecurrentworkspacetomonitor, 1
 bind = $mainMod CTRL, H, movecurrentworkspacetomonitor, 0
 bind = $mainMod , BACKSPACE, movecurrentworkspacetomonitor, 0
+#{{ end }}
+
 bind = $mainMod CTRL, J, swapactiveworkspaces, 0 1
 
 # Switch workspaces with mainMod + [0-9]
