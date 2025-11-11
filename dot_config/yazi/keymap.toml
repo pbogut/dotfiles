@@ -1,0 +1,17 @@
+[mgr]
+prepend_keymap = [
+  { on = ["g", "s"], run = "cd ~/Pictures/screenshots/", desc = "Screenshots" },
+  { on = ["u"], run = 'shell -- sh -c umount "$0"', desc = "Umount" },
+  { on = ["<c-o>"], run = 'shell -- open-dmenu "$@" || exit 0', desc = "Open with rifle" },
+  { on = ["<c-f>"], run = 'shell -- ls -Art --ignore=".*" -p | grep -v "/$" | tail -n 1 | xargs -I {} ya emit reveal --str "$PWD/{}"', desc = "Highlight last modified file" },
+  { on = ["g", "f"], run = "plugin go-to-invoices", desc = "Go to invoices" },
+  { on = ["g", "m"], run = "plugin go-to-media", desc = "Go to media" },
+  { on = ["g", "p"], run = "shell --block -- ls-project | fzf | xargs -I {} ya emit cd --str '~/Projects/{}'", desc = "Go to project" },
+  { on = ["g", "D"], run = "cd ~/Documents", desc = "Go to documents" },
+  { on = ["g", "o"], run = "cd ~/Documents", desc = "Go to documents" },
+  { on = ["g", "w"], run = "cd ~/Work", desc = "Go to work (hehe)" },
+  { on = ["g", "n"], run = "cd ~/Nextcloud", desc = "Go to nextcloud" },
+  { on = ["g", "v"], run = "cd ~/Videos", desc = "Go to videos" },
+  { on = ["S"], run = 'shell --block "$SHELL"', desc = "Go to videos" },
+  { on = ["S"], run = 'shell --block "$SHELL"', desc = "Go to videos" },
+]

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   lf-term
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   13/09/2025
+#=================================================
+terminal-float --title "File browser" -e yazi "$@"
