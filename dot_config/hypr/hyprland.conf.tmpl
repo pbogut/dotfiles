@@ -191,25 +191,6 @@ animations {
 # workspace = name:browser
 # windowrule = workspace name:browser, class:^(vivaldi-personal)$
 
-workspace = name:web,monitor:DP-1
-workspace = name:code,monitor:DP-1
-workspace = name:chat,monitor:HDMI-A-1
-workspace = name:zoom,monitor:DP-1
-workspace = name:media,monitor:HDMI-A-1
-workspace = name:work,monitor:HDMI-A-1
-
-windowrule = workspace name:web, class:^(vivaldi-personal)$
-windowrule = workspace name:code, class:^(Alacritty.project)$
-windowrule = workspace name:chat, class:^(ferdium)$
-windowrule = workspace name:zoom, class:^(zoom)$
-windowrule = workspace name:zoom, class:^(chrome-[a-zA-Z0-9]+.zoom.us__.*)$
-windowrule = workspace name:work, class:^(vivaldi-work)$
-
-windowrule = syncfullscreen 0, class:^(brave-).*$
-windowrule = syncfullscreen 0, class:^(vivaldi-).*$
-
-windowrule = fullscreen, class:Screensaver
-
 # See https://wiki.hypr.land/Configuring/Dwindle-Layout/ for more
 dwindle {
     force_split = 2
@@ -439,11 +420,33 @@ submap = reset
 ##############################
 ### WINDOWS AND WORKSPACES ###
 ##############################
+#{{ if eq .hostname "redeye" }}
+workspace = name:web,monitor:DP-1
+workspace = name:code,monitor:DP-1
+workspace = name:chat,monitor:HDMI-A-1
+workspace = name:zoom,monitor:DP-1
+workspace = name:media,monitor:HDMI-A-1
+workspace = name:work,monitor:HDMI-A-1
+#{{ end }}
+
+windowrule = workspace name:web, class:^(vivaldi-personal)$
+windowrule = workspace name:code, class:^(Alacritty.project)$
+windowrule = workspace name:chat, class:^(ferdium)$
+windowrule = workspace name:zoom, class:^(zoom)$
+windowrule = workspace name:zoom, class:^(chrome-[a-zA-Z0-9]+.zoom.us__.*)$
 windowrule = workspace name:media, class:^(brave-www.youtube.com__).*$
+windowrule = workspace name:work, class:^(vivaldi-work)$
+
 windowrule = workspace special:discord, class:^(com.discordapp.Discord)$
 windowrule = workspace special:discord, class:^(equibop)$
 windowrule = workspace special:deezer, class:^(chrome-www\.deezer\.com__.*)$
 windowrule = workspace special:email, class:^(Alacritty.mutt)$
+
+windowrule = syncfullscreen 0, class:^(brave-).*$
+windowrule = syncfullscreen 0, class:^(vivaldi-).*$
+
+windowrule = fullscreen, class:Screensaver
+
 windowrule = noscreenshare, title:^(khal)$
 windowrule = noscreenshare, class:^(ferdium)$
 windowrule = noscreenshare, class:^(Alacritty.mutt)$
@@ -457,16 +460,23 @@ windowrule = noblur,class:^(zoom)$
 # See https://wiki.hypr.land/Configuring/Workspace-Rules/ for workspace rules
 
 # Example windowrule
-# windowrule = float,class:^(kitty)$,title:^(kitty)$
+windowrule = float,class:^(localsend)$
+windowrule = size 400 700,class:^(localsend)$
+
 windowrule = float,class:^(hyprland-share-picker)$
-windowrule = float,class:^(Alacritty.floating)$
-windowrule = size 1200 700,class:^(Alacritty.floating)$
-windowrule = float,class:^(org.wezterm.floating)$
-windowrule = size 1200 700,class:^(org.wezterm.floating)$
-windowrule = float,class:^(com.nextcloud.desktopclient.nextcloud)$
+
 windowrule = float,class:^(org.kde.kdeconnect.sms)$
+windowrule = move 29% 42, resize exect 300,class:^(org.kde.kdeconnect.sms)$
+windowrule = size 800 200,class:^(org.kde.kdeconnect.sms)$
 
 windowrule = float,title:^Bitwarden - Vivaldi$
+
+windowrule = tag +floating, class:^(Alacritty.floating)$
+windowrule = tag +floating, class:^(com.mitchellh.ghostty.floating)$
+windowrule = tag +floating, class:^(org.wezterm.floating)$
+windowrule = tag +floating, class:^(com.nextcloud.desktopclient.nextcloud)$
+windowrule = float, tag:floating
+windowrule = size 1200 700, tag:floating
 
 # Ignore maximize requests from apps. You'll probably like this.
 windowrule = suppressevent maximize, class:.*
