@@ -26,12 +26,13 @@ if [[ "$1" =~ ^mailto: ]]; then
     cmd='neomutt "'"$recipient"'" -b "'"$bcc"'" -c "'"$cc"'" -s "'"$subject"'"'
     # $TERMINAL -t "EMAIL_MUTT" -e zsh -ic "$cmd" \
     # echo $cmd
-    terminal -e zsh -ic "$cmd"
+    terminal --class "mutt" -e zsh -ic "$cmd"
 elif [[ -f "$1" ]]; then
     # $TERMINAL -t "EMAIL_MUTT" -e zsh -ic neomutt -a "$1" \
     cmd='neomutt -a "'"$1"'"'
-    terminal -t "Mutt - Emails" -e zsh -ic "$cmd"
+    terminal --class "mutt" -t "Mutt - Emails" -e zsh -ic "$cmd"
 else
     # $TERMINAL -t "EMAIL_MUTT" -e zsh -ic neomutt \
-    terminal -t "Mutt - Emails" -e zsh -ic neomutt
+    focus-or-exec "^.*\.mutt$" \
+        terminal --class "mutt" -t "Mutt - Emails" -e zsh -ic neomutt
 fi

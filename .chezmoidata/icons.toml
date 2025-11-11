@@ -24,3 +24,4 @@ vivaldi = [
 discord = ["equibop"]
 google-messages = ["kdeconnect-sms"]
 windows-retro-light = ["windows"]
+zohomail = ["email"]
