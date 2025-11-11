@@ -91,6 +91,7 @@ paru = [
   "wireplumber",
   "wkhtmltopdf-static",
   "wl-clipboard",
+  "wlsunset",
   "wmctrl",
   "wob",
   "wofi",
