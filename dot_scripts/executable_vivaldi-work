@@ -4,8 +4,18 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   17/08/2024
 #=================================================
-focus-or-exec "vivaldi-work" vivaldi \
+if [[ -z "$*" ]]; then
+    focus-or-exec "vivaldi-work" vivaldi \
         --user-data-dir="$HOME/.config/vivaldi/Work/" \
+        --ozone-platform=wayland \
         --class=vivaldi-work \
         --profile-directory=Work \
         "$@"
+else
+    vivaldi \
+        --user-data-dir="$HOME/.config/vivaldi/Work/" \
+        --ozone-platform=wayland \
+        --class=vivaldi-work \
+        --profile-directory=Work \
+        "$@"
+fi

@@ -4,10 +4,19 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   17/08/2024
 #=================================================
-focus-or-exec "vivaldi-personal" \
+if [[ -z "$*" ]]; then
+    focus-or-exec "vivaldi-personal" \
+        vivaldi \
+        --enable-features=UseOzonePlatform \
+        --ozone-platform=wayland \
+        --class=vivaldi-personal \
+        --profile-directory=Default \
+        "$@"
+else
     vivaldi \
         --enable-features=UseOzonePlatform \
         --ozone-platform=wayland \
         --class=vivaldi-personal \
         --profile-directory=Default \
         "$@"
+fi
