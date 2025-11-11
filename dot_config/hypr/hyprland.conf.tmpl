@@ -124,6 +124,8 @@ decoration {
     active_opacity = 1.0
     inactive_opacity = 1.0
 
+    dim_special = 0.3
+
     shadow {
         enabled = true
         range = 4
@@ -133,6 +135,7 @@ decoration {
 
     # https://wiki.hypr.land/Configuring/Variables/#blur
     blur {
+        special = true
         enabled = true
         size = 3
         passes = 1
@@ -194,8 +197,6 @@ workspace = name:chat,monitor:HDMI-A-1
 workspace = name:zoom,monitor:DP-1
 workspace = name:media,monitor:HDMI-A-1
 workspace = name:work,monitor:HDMI-A-1
-workspace = special:discord,monitor:HDMI-A-1
-workspace = special:deezer,monitor:HDMI-A-1
 
 windowrule = workspace name:web, class:^(vivaldi-personal)$
 windowrule = workspace name:code, class:^(Alacritty.project)$
@@ -204,9 +205,6 @@ windowrule = workspace name:zoom, class:^(zoom)$
 windowrule = workspace name:zoom, class:^(chrome-[a-zA-Z0-9]+.zoom.us__.*)$
 windowrule = workspace name:media, class:^(brave-www.youtube.com__).*$
 windowrule = workspace name:work, class:^(vivaldi-work)$
-windowrule = workspace special:discord, class:^(com.discordapp.Discord)$
-windowrule = workspace special:discord, class:^(equibop)$
-windowrule = workspace special:deezer, class:^(chrome-www\.deezer\.com__.*)$
 
 windowrule = syncfullscreen 0, class:^(brave-).*$
 windowrule = syncfullscreen 0, class:^(vivaldi-).*$
@@ -270,6 +268,7 @@ binds {
     allow_pin_fullscreen=true
     allow_workspace_cycles = true
     scroll_event_delay = 0
+    hide_special_on_workspace_change = true
 }
 
 ###################
@@ -380,7 +379,7 @@ bind = $mainMod SHIFT, 8, movetoworkspace, 8
 bind = $mainMod SHIFT, 9, movetoworkspace, 9
 bind = $mainMod SHIFT, 0, movetoworkspace, 10
 
-bind = $mainMod, G, exec, hypr-togglespecial
+bind = $mainMod, G, exec, hypr-cyclespecial
 bind = $mainMod CTRL, G, exec, hypr-listspecial
 bind = $mainMod SHIFT, G, movetoworkspace, special:magic
 
@@ -440,6 +439,9 @@ submap = reset
 ##############################
 ### WINDOWS AND WORKSPACES ###
 ##############################
+windowrule = workspace special:discord, class:^(com.discordapp.Discord)$
+windowrule = workspace special:discord, class:^(equibop)$
+windowrule = workspace special:deezer, class:^(chrome-www\.deezer\.com__.*)$
 windowrule = workspace special:email, class:^(Alacritty.mutt)$
 windowrule = noscreenshare, title:^(khal)$
 windowrule = noscreenshare, class:^(ferdium)$

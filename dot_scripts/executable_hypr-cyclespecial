@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   hypr-special
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   09/11/2025
+#=================================================
+workspace_name=$(hyprctl activewindow -j | jq -r '.workspace.name')
+is_special_open=false
+if [[ $workspace_name =~ ^special: ]]; then
+  is_special_open=true
+  workspace_name=${workspace_name##*special:}
+fi
+special_workspaces=$(
+    hyprctl workspaces -j |
+    jq -r 'map(select(.name | startswith("special:"))) | sort_by(.id) | .[].name' |
+    cut -d: -f2)
+
+total_workspaces=$(wc -l <<< "$special_workspaces")
+
+if ! $is_special_open; then
+  if [[ $total_workspaces -eq 0 ]]; then
+    hyprctl -q dispatch "togglespecialworkspace magic"
+  else
+    hyprctl -q dispatch "togglespecialworkspace $(head -n1 <<< "$special_workspaces")"
+  fi
+  exit 0
+fi
+
+if $is_special_open && [[ $total_workspaces -lt 2 ]]; then
+  hyprctl -q dispatch "togglespecialworkspace $workspace_name"
+  exit 0
+fi
+
+next_workspace_name=$(sed "0,/$workspace_name/d" <<< "$special_workspaces" | head -n1)
+if [[ $next_workspace_name != "" ]]; then
+  hyprctl -q dispatch "togglespecialworkspace $next_workspace_name"
+  exit 0
+else
+  hyprctl -q dispatch "togglespecialworkspace $workspace_name"
+  exit 0
+fi
