@@ -428,8 +428,8 @@ return {
                 pattern = 'blade',
                 callback = function()
                   local rg_loaded, rg = pcall(require, 'ripgrep')
-                  if (rg_loaded) then
-                    vim.keymap.set('n', 'grt', function ()
+                  if rg_loaded then
+                    vim.keymap.set('n', 'grt', function()
                       local path = vim.fn.expand('%:p')
                       local cwd = vim.fn.getcwd()
                       if path:sub(1, #cwd) == cwd then
