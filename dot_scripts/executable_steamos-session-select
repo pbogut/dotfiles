@@ -1,0 +1,4 @@
+#!/bin/bash
+# This is run by Steam when you go to menu > paower > switch to desktop
+steam -shutdown
+sudo chvt 1

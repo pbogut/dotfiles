@@ -14,6 +14,7 @@ rust-dark=[
   "rust-gdb",
   "rust-lldb"
 ]
+steam = ["steamos"]
 vaultwarden-light=["vaultwarden-dmenu"]
 vivaldi = [
   "vivaldi-work",
