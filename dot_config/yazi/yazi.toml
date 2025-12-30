@@ -1,0 +1,30 @@
+[opener]
+open = [
+  { run = 'rifle "$1"', desc = "Open", for = "linux" },
+]
+extract = [
+  { run = 'rifle "$1"', desc = "Extract", for = "linux" },
+]
+
+[open]
+rules = [
+  # Folder
+  { url = "*/", use = [ "edit", "open", "reveal" ] },
+  # Text
+  { mime = "text/*", use = [ "edit", "reveal" ] },
+  # Image
+  { mime = "image/*", use = [ "open", "reveal" ] },
+  # Media
+  { mime = "{audio,video}/*", use = [ "play", "reveal" ] },
+  # Archive
+  { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", use = [ "extract" ] },
+  # JSON
+  { mime = "application/{json,ndjson}", use = [ "edit", "reveal" ] },
+  { mime = "*/javascript", use = [ "edit", "reveal" ] },
+  # Empty file
+  { mime = "inode/empty", use = [ "edit", "reveal" ] },
+  # Virtual file system
+  { mime = "vfs/{absent,stale}", use = "download" },
+  # Fallback
+  { url = "*", use = [ "open", "reveal" ] },
+]
