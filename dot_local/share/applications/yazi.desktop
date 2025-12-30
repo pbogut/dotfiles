@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=yazi
+Exec=yazi-term %f
+Categories=System;FileTools;FileManager;Utility;
+MimeType=inode/directory;
