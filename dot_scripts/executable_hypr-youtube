@@ -25,13 +25,18 @@ fi
 monitor=$(jq -r '.monitor' <<< "$youtube")
 active_workspace=$(hyprctl monitors -j | jq --argjson mid "$monitor" -r 'map(select(.id == $mid)) | first | .activeWorkspace.name')
 yt_workspace=$(jq -r '.workspace.name' <<< "$youtube")
+current_workspace=$(hyprctl activeworkspace -j | jq -r '.name')
+
+echo $current_workspace
 
 if [[ $yt_workspace != "$active_workspace" ]]; then
     hyprctl dispatch "movetoworkspacesilent name:$active_workspace,address:$yt_address"
 else
     if [[ $1 == "toggle" ]]; then
+        current_window_address=$(hyprctl activewindow -j | jq -r '.address')
         hyprctl dispatch "focuswindow address:$yt_address"
         floating=$(echo "$youtube" | jq '.floating')
+        fullscreen=$(echo "$youtube" | jq '.fullscreen != 0')
         monitor="$(echo "$youtube" | jq '.monitor')"
         monitor_json=$(hyprctl monitors all -j | jq "map(select(.id == $monitor))[0]")
         screen_w=$(echo "$monitor_json" | jq -r '.width')
@@ -44,7 +49,7 @@ else
         width=$(echo "$screen_w" 0.33 | awk '{print int($1 * $2)}')
         height=$(echo "$screen_h" 0.33 | awk '{print int($1 * $2)}')
 
-        gap=10
+        gap=5
         top=$((((screen_h - height) / 2) + offset_y))
         left=$(((screen_w + offset_x) - width - gap))
 
@@ -55,6 +60,15 @@ else
             hyprctl dispatch "resizeactive exact $width $height"
             hyprctl dispatch "moveactive exact $left $top"
         fi
+
+        if  [[ "$current_workspace" != "$yt_workspace" ]]; then
+            hyprctl dispatch "focuswindow address:$current_window_address"
+        else
+            if [[ $fullscreen == "true" ]]; then
+                hyprctl dispatch "focuswindow tiled"
+            fi
+        fi
+
         exit 0
     fi
 fi

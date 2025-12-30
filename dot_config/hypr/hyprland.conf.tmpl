@@ -278,9 +278,9 @@ bind = $mainMod, bracketright, layoutmsg, cyclenext
 bind = $mainMod, bracketleft, layoutmsg, cycleprev
 
 bind = $mainMod, V, exec, hypr-togglemfact 0.5 0.65 0.75
-bind = $mainMod, Y, exec, hypr-youtube
+# bind = $mainMod, Y, exec, hypr-youtube
 bind = $mainMod CTRL, Y, exec, hypr-youtube reset
-bind = $mainMod SHIFT, Y, exec, hypr-youtube toggle
+bind = $mainMod, Y, exec, hypr-youtube toggle
 
 # Apps
 bind = $mainMod, semicolon, exec, fuzzel-run
@@ -293,6 +293,7 @@ bind = $mainMod, B, exec, hypr-focusorexec vivaldi-personal browser
 bind = $mainMod CTRL, K, exec, terminal-float -t "khal" -e khal interactive
 bind = $mainMod CTRL, F, exec, $(hyprctl dispatch "focuswindow class:ferdium") == "ok" || ferdium
 bind = $mainMod, T, exec, systray-dmenu
+bind = $mainMod, Q, exec, quick-menu
 
 # Screeenshots
 bind = Shift, Print, exec, screenshot fullscreen
@@ -396,7 +397,7 @@ bindl = , XF86AudioPrev, exec, playerctl previous
 #######################
 
 $power = System: (l) lock, (e) exit, (r) reboot, (s) suspend, (p) poweroff, (b) backup and shutdown, (Esc) cancel
-bind = $mainMod, Q, submap, $power
+bind = $mainMod CTRL, Q, submap, $power
 submap = $power
 bind = , L, exec, hyprlock
 bind = , L, submap, reset
@@ -441,8 +442,11 @@ windowrule = workspace name:web, class:^(vivaldi-personal)$
 windowrule = workspace name:code, class:^(Alacritty.project)$
 windowrule = workspace name:chat, class:^(ferdium)$
 windowrule = workspace name:zoom, class:^(zoom)$
-windowrule = workspace name:zoom, class:^(chrome-[a-zA-Z0-9]+.zoom.us__.*)$
+windowrule = workspace name:zoom, class:^(chrome-[a-zA-Z0-9]+\.zoom.us__.*)$
+windowrule = workspace name:zoom, class:^(chrome-teams\.microsoft\.com__.*)$
+
 windowrule = workspace name:media, class:^(brave-www.youtube.com__).*$
+windowrule = workspace name:media, class:^(youtube)$
 windowrule = workspace name:work, class:^(vivaldi-work)$
 
 windowrule = workspace special:discord, class:^(com.discordapp.Discord)$
@@ -452,6 +456,7 @@ windowrule = workspace special:email, class:^(Alacritty.mutt)$
 
 windowrule = syncfullscreen 0, class:^(brave-).*$
 windowrule = syncfullscreen 0, class:^(vivaldi-).*$
+windowrule = syncfullscreen 0, class:^(youtube)$
 
 windowrule = fullscreen, class:Screensaver
 
@@ -459,6 +464,8 @@ windowrule = noscreenshare, title:^(khal)$
 windowrule = noscreenshare, class:^(ferdium)$
 windowrule = noscreenshare, class:^(Alacritty.mutt)$
 windowrule = noscreenshare, class:^(org.kde.kdeconnect.sms)$
+windowrule = noscreenshare, class:^(brave-www\.youtube\.com__).*$
+windowrule = noscreenshare, class:^(youtube)$
 windowrule = pin, class:^(zoom)$,title:^(as_toolbar)$
 windowrule = pin, class:^(zoom)$,title:^(zoom_linux_float_video_window)$
 windowrule = pin, class:^(zoom)$,title:^(zoom_linux_float_video_window)$
@@ -473,9 +480,10 @@ windowrule = size 400 700,class:^(localsend)$
 
 windowrule = float,class:^(hyprland-share-picker)$
 
-windowrule = float,class:^(org.kde.kdeconnect.sms)$
-windowrule = move 29% 42, resize exect 300,class:^(org.kde.kdeconnect.sms)$
-windowrule = size 800 200,class:^(org.kde.kdeconnect.sms)$
+windowrule = float, class:^(org.kde.kdeconnect.sms)$
+# windowrule = move 29% 40, resize exact 300,class:^(org.kde.kdeconnect.sms)$
+windowrule = move 29% 40, size exact 300,class:^(org.kde.kdeconnect.sms)$
+#windowrule = size 800 200,class:^(org.kde.kdeconnect.sms)$
 
 windowrule = float, title:^Bitwarden - Vivaldi$
 windowrule = float, class:^(chrome\-[a-z]+\-Default)$ # extention popups
