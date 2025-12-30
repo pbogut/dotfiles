@@ -28,7 +28,7 @@ fi
 multiple="$1"
 directory="$2"
 save="$3"
-path="$4"
+file_path="$4"
 out="$5"
 cmd="/usr/bin/yazi"
 # "wezterm start --always-new-process" if you use wezterm
@@ -53,7 +53,7 @@ cleanup() {
     /usr/bin/rm "$tmpfile" || :
   fi
   if [ "$save" = "1" ] && [ ! -s "$out" ]; then
-    /usr/bin/rm "$path" || :
+    /usr/bin/rm "$file_path" || :
   fi
 }
 
@@ -82,20 +82,20 @@ Notes:
 	 only choose this placeholder file otherwise the save operation aborted.
 2) If you quit yazi without opening a file, this file
    will be removed and the save operation aborted.
-' >"$path"
-  set -- --chooser-file="$(quote_string "$tmpfile")" "$(quote_string "$path")"
+' >"$file_path"
+  set -- --chooser-file="$(quote_string "$tmpfile")" "$(quote_string "$file_path")"
 elif [ "$directory" = "1" ]; then
   # upload files from a directory
   # Use this if you want to select folder by 'quit' function in yazi.
-  set -- --cwd-file="$(quote_string "$out")" "$(quote_string "$path")"
+  set -- --cwd-file="$(quote_string "$out")" "$(quote_string "$file_path")"
   # NOTE: Use this if you want to select folder by enter a.k.a yazi keybind for 'open' funtion ('run = "open") .
   # set -- --chooser-file="$out" "$path"
 elif [ "$multiple" = "1" ]; then
   # upload multiple files
-  set -- --chooser-file="$(quote_string "$out")" "$(quote_string "$path")"
+  set -- --chooser-file="$(quote_string "$out")" "$(quote_string "$file_path")"
 else
   # upload only 1 file
-  set -- --chooser-file="$(quote_string "$out")" "$(quote_string "$path")"
+  set -- --chooser-file="$(quote_string "$out")" "$(quote_string "$file_path")"
 fi
 
 eval "$termcmd -- $cmd $@"
@@ -106,6 +106,9 @@ if [ "$save" = "1" ] && [ -s "$tmpfile" ]; then
   # Check if selected file is placeholder file
   if [ -f "$selected_file" ] && /usr/bin/grep -qi "^xdg-desktop-portal-termfilechooser saving files tutorial" "$selected_file"; then
     /usr/bin/echo "$selected_file" >"$out"
-    path="$selected_file"
+    file_path="$selected_file"
+    if [ "$save" = "1" ]; then
+      at now <<< "$termcmd -- $cmd $selected_file"
+    fi
   fi
 fi
