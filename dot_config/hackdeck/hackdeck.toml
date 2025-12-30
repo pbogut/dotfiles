@@ -10,6 +10,46 @@ shell_command="sh"
 shell_arguments=["-c"]
 
 [[buttons]]
+row=1
+column=1
+icon_text="󰍹"
+icon_color="#aaa"
+color="#000000"
+button_press="~/rgb.sh 50"
+
+[[buttons]]
+row=1
+column=2
+icon_text="󱄄"
+icon_color="#ffffff"
+color="#000000"
+button_press="~/rgb.sh 100"
+
+[[buttons]]
+row=2
+column=1
+icon_text="󰑊"
+icon_color="#555"
+color="#000000"
+button_press="<|SAVE\n"
+execute="~/.scripts/hackdeck/screenrecorder.sh --status"
+
+[[buttons]]
+row=2
+column=2
+color="#000000"
+icon_color="#00cfe6"
+icon_text=""
+button_release="sudo chvt 1; asus-menu source dvi"
+
+[[buttons]]
+row=2
+column=3
+color="#1b2839"
+icon_text=""
+button_release="sudo chvt 2; asus-menu source hdmi"
+
+[[buttons]]
 row=2
 column=4
 color="#000000"
@@ -57,8 +97,8 @@ button_press="<|toggle\n"
 execute="~/.scripts/hackdeck/laptop_screen.sh"
 
 [[buttons]]
-row=2
-column=1
+row=0
+column=2
 icon_text="󱧣"
 color="#000000"
 button_press="<|TOGGLE\n"
