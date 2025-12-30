@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   nvim-term
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   08/11/2025
+#=================================================
+terminal-float -e nvim "$@"
