@@ -56,3 +56,4 @@ alias flatup="flatpak update && flatpak remove --unused"
 alias note="nvim +Today"
 alias notes="nvim +'Notes daily_notes'"
 
+alias paru-update="cargo install --git https://github.com/Morganamilo/paru.git"
