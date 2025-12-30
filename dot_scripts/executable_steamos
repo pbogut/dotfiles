@@ -19,9 +19,34 @@ else
     printf "[%s] [Info] Continuing without the '--mangoapp' flag.\n" "$0"
 fi
 
-gamescope -O DP-1 --xwayland-count 2 \
-    $MANGOAPP_FLAG \
-    -e -- systemd-inhibit -- steam -gamepadui -steamos3 > /tmp/steam.log 2>&1
+screenrecorder() {
+    while :; do
+        sleep 5s;
+        gpu-screen-recorder \
+            -a "default_output|alsa_input.usb-SteelSeries_Arctis_Pro_Wireless-00.mono-fallback|alsa_input.usb-Telink_VR_P10_Dongle-00.mono-fallback" \
+            -a "default_output" \
+            -a "alsa_input.usb-SteelSeries_Arctis_Pro_Wireless-00.mono-fallback" \
+            -a "alsa_input.usb-Telink_VR_P10_Dongle-00.mono-fallback" \
+            -w DP-1 \
+            -c mp4 \
+            -o "$HOME/Videos/ShadowPlay" \
+            -r 900
+    done
+}
 
+screenrecorder &
+
+gamescope -O DP-1 \
+    $MANGOAPP_FLAG \
+    -e \
+    --sdr-gamut-wideness 1.0 \
+    --xwayland-count 2 \
+    --adaptive-sync \
+    -- \
+    systemd-inhibit \
+    -- \
+    steam -gamepadui -steamos3 > /tmp/steam.log 2>&1
+
+sleep 5s;
 sudo chvt 1
 sudo systemctl stop getty@tty2.service
