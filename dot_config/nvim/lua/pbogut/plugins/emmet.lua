@@ -3,6 +3,7 @@ return {
   enabled = true,
   'mattn/emmet-vim',
   keys = {
+    { '<c-e><c-e>', '<plug>(emmet-expand-abbr)', mode = { 'n', 'v', 'i' } },
     { '<c-e>,', '<plug>(emmet-expand-abbr)', mode = { 'n', 'v', 'i' } },
   },
   init = function()
