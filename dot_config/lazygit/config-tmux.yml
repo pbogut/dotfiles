@@ -1,22 +1,8 @@
 os:
   open: tmux-vim --no-tab {{filename}}
   openLink: xdg-open {{link}} >/dev/null 2>&1
+
 customCommands:
-  - key: 'C'
-    description: 'Commit changes with editor'
-    context: 'global'
-    command: 'tmux new-window env EDITOR="nvim" git commit --verbose'
-    subprocess: true
-  - key: <c-l>
-    description: 'Pull fast-forward'
-    context: 'global'
-    command: 'git pullff'
-    subprocess: true
-  - key: <c-r>
-    description: 'Pull rebase'
-    context: 'global'
-    command: 'git pullrb'
-    subprocess: true
   - key: 'q'
     description: 'Go back to nvim'
     context: 'global'
@@ -25,11 +11,14 @@ customCommands:
     description: 'Edit file'
     context: 'files'
     command: tmux-vim --no-tab {{filename}}
-  - key: 'p'
-    description: 'Git ap'
+  - key: 'o'
+    description: 'Open file'
     context: 'files'
-    command: 'git ap {{ .SelectedFile.Name }}'
-    subprocess: true
+    command: 'tmux-vim --no-tab {{ .SelectedFile.Name }}'
+  - key: 'o'
+    description: 'Open file'
+    context: 'staging'
+    command: 'tmux-vim --no-tab {{ .SelectedFile.Name }}'
 
 # contexts: status, files, localBranches, remotes, remoteBranches,
 #           tags, commits, reflogCommits, subCommits, commitFiles,
