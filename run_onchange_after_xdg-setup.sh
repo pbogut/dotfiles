@@ -16,9 +16,12 @@ echo -en "> Set email script as default mailto handler (xdg-mime) ... "
 xdg-mime default email.desktop 'x-scheme-handler/mailto'
 echo "done"
 
-echo -en "> Set lf as default manager (xdg-mime) ... "
-xdg-mime default lf.desktop 'inode/directory'
+echo -en "> Set yazi as default manager (xdg-mime) ... "
+xdg-mime default yazi.desktop 'inode/directory'
 echo "done"
+
+xdg-mime default feh.desktop 'image/svg+xml'
+xdg-mime default feh.desktop 'image/*'
 
 echo -en "> $(
     if [[ -n "$(command -v gio)" ]]; then
