@@ -56,7 +56,7 @@ __connect() {
         fi
 
         ip=$(echo $inspect | jq '.[0].NetworkSettings.IPAddress' -r)
-        if [[ $ip == "" ]]; then
+        if [[ $ip == "" ]] || [[ $ip == "null" ]]; then
           ip=$(echo $inspect |jq '.[0].NetworkSettings.Networks | map(.IPAddress) | first' -r)
         fi
         __add $ip $url $hash
