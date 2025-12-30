@@ -4,17 +4,18 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   12/04/2018
 #=================================================
-if [[ $1 != 'x' ]] && [[ $1 != "r" ]] && [[ $1 != "u" ]] && [[ $1 != "lf" ]]; then
+if [[ $1 != 'x' ]] && [[ $1 != "r" ]] && [[ $1 != "u" ]] && [[ $1 != "lf" ]] && [[ $1 != "yazi" ]]; then
     echo Extract files from archive
     echo
     echo Ussage:
     echo "    extract <action> file1 [file2...]"
     echo
     echo actions:
-    echo "    x - extract in place to new directory"
-    echo "    u - extract in place to new directory with _ prefix"
-    echo "    r - extract in place to new directory and open in ranger"
-    echo "    lf - extract in place to new directory and open in lf"
+    echo "    x    - extract in place to new directory"
+    echo "    u    - extract in place to new directory with _ prefix"
+    echo "    r    - extract in place to new directory and open in ranger"
+    echo "    lf   - extract in place to new directory and open in lf"
+    echo "    yazi - extract in place to new directory and open in yazi"
     exit 1
 fi
 
@@ -36,6 +37,13 @@ for var in "${@:2}"; do
             terminal -e lf "$name"
         else
             lf -remote "send $id cd '$name'"
+        fi
+    fi
+    if [[ $1 == 'yazi' ]]; then
+        if [[ -z "$YAZI_ID" ]]; then
+            terminal -e yazi "$name"
+        else
+            ya emit cd "$name"
         fi
     fi
 done
