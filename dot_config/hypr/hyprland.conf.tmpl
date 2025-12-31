@@ -78,9 +78,10 @@ env = HYPRCURSOR_SIZE,24
 # Please note permission changes here require a Hyprland restart and are not applied on-the-fly
 # for security reasons
 
-# ecosystem {
+ecosystem {
+    no_donation_nag = true
 #   enforce_permissions = 1
-# }
+}
 
 # permission = /usr/(bin|local/bin)/grim, screencopy, allow
 # permission = /usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland, screencopy, allow
@@ -206,7 +207,7 @@ master {
 
 # https://wiki.hypr.land/Configuring/Variables/#misc
 misc {
-    new_window_takes_over_fullscreen = 2 # exit fullscrieen when new window is opened
+    on_focus_under_fullscreen = 2 # exit fullscrieen when new window is opened
     force_default_wallpaper = -1 # Set to 0 or 1 to disable the anime mascot wallpapers
     disable_hyprland_logo = false # If true disables the random hyprland logo / anime girl background. :(
     focus_on_activate = true
@@ -429,6 +430,7 @@ submap = reset
 ##############################
 ### WINDOWS AND WORKSPACES ###
 ##############################
+# See https://wiki.hypr.land/Configuring/Workspace-Rules/ for workspace rules
 #{{ if eq .hostname "redeye" }}
 workspace = name:web,monitor:DP-1
 workspace = name:code,monitor:DP-1
@@ -438,65 +440,215 @@ workspace = name:media,monitor:HDMI-A-1
 workspace = name:work,monitor:HDMI-A-1
 #{{ end }}
 
-windowrule = workspace name:web, class:^(vivaldi-personal)$
-windowrule = workspace name:code, class:^(Alacritty.project)$
-windowrule = workspace name:chat, class:^(ferdium)$
-windowrule = workspace name:zoom, class:^(zoom)$
-windowrule = workspace name:zoom, class:^(chrome-[a-zA-Z0-9]+\.zoom.us__.*)$
-windowrule = workspace name:zoom, class:^(chrome-teams\.microsoft\.com__.*)$
-
-windowrule = workspace name:media, class:^(brave-www.youtube.com__).*$
-windowrule = workspace name:media, class:^(youtube)$
-windowrule = workspace name:work, class:^(vivaldi-work)$
-
-windowrule = workspace special:discord, class:^(com.discordapp.Discord)$
-windowrule = workspace special:discord, class:^(equibop)$
-windowrule = workspace special:deezer, class:^(chrome-www\.deezer\.com__.*)$
-windowrule = workspace special:email, class:^(Alacritty.mutt)$
-
-windowrule = syncfullscreen 0, class:^(brave-).*$
-windowrule = syncfullscreen 0, class:^(vivaldi-).*$
-windowrule = syncfullscreen 0, class:^(youtube)$
-
-windowrule = fullscreen, class:Screensaver
-
-windowrule = noscreenshare, title:^(khal)$
-windowrule = noscreenshare, class:^(ferdium)$
-windowrule = noscreenshare, class:^(Alacritty.mutt)$
-windowrule = noscreenshare, class:^(org.kde.kdeconnect.sms)$
-windowrule = noscreenshare, class:^(brave-www\.youtube\.com__).*$
-windowrule = noscreenshare, class:^(youtube)$
-windowrule = pin, class:^(zoom)$,title:^(as_toolbar)$
-windowrule = pin, class:^(zoom)$,title:^(zoom_linux_float_video_window)$
-windowrule = pin, class:^(zoom)$,title:^(zoom_linux_float_video_window)$
-windowrule = noblur,class:^(zoom)$
-
 # See https://wiki.hypr.land/Configuring/Window-Rules/ for more
-# See https://wiki.hypr.land/Configuring/Workspace-Rules/ for workspace rules
+windowrule {
+  name = vivaldi-personal
+  workspace = name:web
+  match:class = ^(vivaldi-personal)$
+}
 
-# Example windowrule
-windowrule = float,class:^(localsend)$
-windowrule = size 400 700,class:^(localsend)$
+windowrule {
+  name = alacritty-project
+  workspace = name:code
+  match:class = ^(Alacritty.project)$
+}
 
-windowrule = float,class:^(hyprland-share-picker)$
+windowrule {
+  name = windowrule-3
+  workspace = name:chat
+  no_screen_share = on
+  match:class = ^(ferdium)$
+}
 
-windowrule = float, class:^(org.kde.kdeconnect.sms)$
-# windowrule = move 29% 40, resize exact 300,class:^(org.kde.kdeconnect.sms)$
-windowrule = move 29% 40, size exact 300,class:^(org.kde.kdeconnect.sms)$
-#windowrule = size 800 200,class:^(org.kde.kdeconnect.sms)$
+windowrule {
+  name = zoom
+  workspace = name:zoom
+  no_blur = on
+  match:class = ^(zoom)$
+}
 
-windowrule = float, title:^Bitwarden - Vivaldi$
-windowrule = float, class:^(chrome\-[a-z]+\-Default)$ # extention popups
+windowrule {
+  name = zoom-in-chrome
+  workspace = name:zoom
+  match:class = ^(chrome-[a-zA-Z0-9]+\.zoom.us__.*)$
+}
 
-windowrule = tag +floating, class:^(Alacritty.floating)$
-windowrule = tag +floating, class:^(com.mitchellh.ghostty.floating)$
-windowrule = tag +floating, class:^(org.wezterm.floating)$
-windowrule = tag +floating, class:^(com.nextcloud.desktopclient.nextcloud)$
-windowrule = float, tag:floating
-windowrule = size 1200 700, tag:floating
+windowrule {
+  name = teams
+  workspace = name:zoom
+  match:class = ^(chrome-teams\.microsoft\.com__.*)$
+}
+
+windowrule {
+  name = youtube-in-brave
+  workspace = name:media
+  match:class = ^(brave-www.youtube.com__).*$
+}
+
+windowrule {
+  name = youtube
+  workspace = name:media
+  sync_fullscreen = 0
+  no_screen_share = on
+  match:class = ^(youtube)$
+}
+
+windowrule {
+  name = vivaldi-work
+  workspace = name:work
+  match:class = ^(vivaldi-work)$
+}
+
+windowrule {
+  name = discord
+  workspace = special:discord
+  match:class = ^(com.discordapp.Discord)$
+}
+
+windowrule {
+  name = equibop
+  workspace = special:discord
+  match:class = ^(equibop)$
+}
+
+windowrule {
+  name = deezer
+  workspace = special:deezer
+  match:class = ^(chrome-www\.deezer\.com__.*)$
+}
+
+windowrule {
+  name = mutt-no-screen-share
+  workspace = special:email
+  no_screen_share = on
+  match:class = ^(Alacritty.mutt)$
+}
+
+windowrule {
+  name = brave-ignore-fullscreen
+  sync_fullscreen = 0
+  match:class = ^(brave-).*$
+}
+
+windowrule {
+  name = vivaldi-ignore-fullscreen
+  sync_fullscreen = 0
+  match:class = ^(vivaldi-).*$
+}
+
+windowrule {
+  name = screensaver
+  fullscreen = on
+  match:class = Screensaver
+}
+
+windowrule {
+  name = khal-no-screen-share
+  no_screen_share = on
+  match:title = ^(khal)$
+}
+
+windowrule {
+  name = sms-floating-window
+  no_screen_share = on
+  float = on
+  move = ((monitor_w*0.29)) (40)
+  size = exact 300
+  match:class = ^(org.kde.kdeconnect.sms)$
+}
+
+windowrule {
+  name = youtube-no-screen-share
+  no_screen_share = on
+  match:class = ^(brave-www\.youtube\.com__).*$
+}
+
+windowrule {
+  name = zoom-floating-toolbar
+  pin = on
+  match:class = ^(zoom)$
+  match:title = ^(as_toolbar)$
+}
+
+windowrule {
+  name = zoom-floating-video-window
+  pin = on
+  match:class = ^(zoom)$
+  match:title = ^(zoom_linux_float_video_window)$
+}
+
+windowrule {
+  name = localsend-floating
+  float = on
+  size = 400 700
+  match:class = ^(localsend)$
+}
+
+windowrule {
+  name = hyprland-share-picker
+  float = on
+  match:class = ^(hyprland-share-picker)$
+}
+
+windowrule {
+  name = bitwarden-vivaldi-extension
+  float = on
+  match:title = ^Bitwarden - Vivaldi$
+}
+
+windowrule {
+  name = chrome-extention-popups
+  float = on
+  match:class = ^(chrome\-[a-z]+\-Default)$ # extention popups
+}
+
+
+windowrule {
+  name = alacritty-floating
+  tag = +floating
+  match:class = ^(Alacritty.floating)$
+}
+
+windowrule {
+  name = ghostty-floating
+  tag = +floating
+  match:class = ^(com.mitchellh.ghostty.floating)$
+}
+
+windowrule {
+  name = wezterm-floating
+  tag = +floating
+  match:class = ^(org.wezterm.floating)$
+}
+
+windowrule {
+  name = nextcloud-floating
+  tag = +floating
+  match:class = ^(com.nextcloud.desktopclient.nextcloud)$
+}
+
+windowrule {
+  name = floating-windows
+  float = on
+  size = 1200 700
+  match:tag = floating
+}
 
 # Ignore maximize requests from apps. You'll probably like this.
-windowrule = suppressevent maximize, class:.*
+windowrule {
+  name = maximize-ignore
+  suppress_event = maximize
+  match:class = .*
+}
 
 # Fix some dragging issues with XWayland
-windowrule = nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0
+windowrule {
+  name = xwayland-fix
+  no_focus = on
+  match:class = ^$
+  match:title = ^$
+  match:xwayland = 1
+  match:float = 1
+  match:fullscreen = 0
+  match:pin = 0
+}
