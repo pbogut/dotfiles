@@ -118,7 +118,7 @@ virtual-mailboxes \
     "   └ 🟍 Pined"        "notmuch://?query=tag:pin"                                                                       \
     " Unread"            "notmuch://?query=tag:unread and NOT tag:spam"                                                   \
     " Sent"              "notmuch://?query=tag:sent and date:`date --date="90 days ago" '+%Y-%m-%d'`.. and NOT tag:spam"  \
-    "   └ all"            "notmuch://?query=tag:sent"                                                                      \
+    "   └ all sent"       "notmuch://?query=tag:sent"                                                                      \
     " Projects / Issues" "notmuch://?query=(tag:github or tag:gitlab) and date:`date --date="90 days ago" '+%Y-%m-%d'`.." \
     "   └ all"            "notmuch://?query=(tag:github or tag:gitlab)"                                                    \
     " Bookkeeping"       "notmuch://?query=tag:bookkeeping and date:`date --date="365 days ago" '+%Y-%m-%d'`.."           \
@@ -136,19 +136,19 @@ virtual-mailboxes \
     "   ├ Politics"       "notmuch://?query=tag:newsletter and tag:politics"                                               \
     "   └ Other"          "notmuch://?query=tag:newsletter and not tag:tech and not tag:gaming and not tag:jobs and not tag:food and not tag:leisure not tag:politics" \
     "  Everything"          "notmuch://?query=not tag:spam"                                                                  \
-    "   ├  Last 3 months"  "notmuch://?query=date:`date --date="3 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
-    "   ├  Last 6 months"  "notmuch://?query=date:`date --date="6 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
-    "   ├  Last year"      "notmuch://?query=date:`date --date="12 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"             \
-    "   ├  Flagged"        "notmuch://?query=tag:flagged and not tag:spam and not tag:sendmail"                                                  \
-    "   ├  trash"          "notmuch://?query=tag:trash and not tag:spam and not tag:sendmail"                                                    \
-    "   └ ﯍ spam"           "notmuch://?query=tag:spam and not tag:sendmail" \
+    "   ├  Last 3 months"  "notmuch://?query=date:`date --date="3 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
+    "   ├  Last 6 months"  "notmuch://?query=date:`date --date="6 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"              \
+    "   ├  Last year"      "notmuch://?query=date:`date --date="12 months ago" '+%Y-%m-%d'`.. and not tag:spam and not tag:sendmail"             \
+    "   ├  Flagged"        "notmuch://?query=tag:flagged and not tag:spam and not tag:sendmail"                                                  \
+    "   ├  trash"          "notmuch://?query=tag:trash and not tag:spam and not tag:sendmail"                                                    \
+    "   └ ﯍ spam"           "notmuch://?query=tag:spam and not tag:sendmail" \
     "Sendmail"            "notmuch://?query=tag:sendmail and NOT tag:archive" \
     " └ all"              "notmuch://?query=tag:sendmail"
 
 # quick jump between boxes
 macro index gi "<change-vfolder>  Inbox<enter>" "Go to Inbox"
 macro index gu "<change-vfolder>  Unread<enter>" "Go to Unread"
-macro index ga "<change-vfolder>  ├  Last 3 months<enter>" "Go to Archive"
+macro index ga "<change-vfolder>    ├  Last 3 months<enter>" "Go to Archive"
 macro index gs "<change-vfolder>  Sent<enter>" "Go to Sent Mail"
 macro index gS "<change-vfolder>  ↳ all sent<enter>" "Go to Sent Mail"
 macro index gd "<change-vfolder> Drafts<enter>" "Go to Drafts"
