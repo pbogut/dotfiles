@@ -1,0 +1,24 @@
+[data-testid="view-switcher-button-board"] {
+  color: #333 !important;
+}
+
+.js-checklist-copy-source {
+  color: #ccc;
+  background-color: #333;
+}
+
+.known-service-link {
+  background-color: #444;
+}
+
+.js-desc-editor .akEditor {
+  background-color: #444;
+}
+
+[data-testid="ak-editor-main-toolbar"] {
+  background-color: #444 !important;
+}
+
+[data-testid="ak-editor-main-toolbar"] button {
+  color: #ccc !important;
+}
