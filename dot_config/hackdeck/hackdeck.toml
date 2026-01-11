@@ -83,10 +83,12 @@ focus-or-exec '^ferdium$' ferdium
 row=1
 column=0
 color="#000000"
-icon_text=""
-execute="~/.scripts/hackdeck/hubstaff.sh"
-interval=60
-button_press="~/.scripts/hackdeck/hubstaff.sh toggle"
+icon_text="󰍽"
+icon_size=150
+icon_margin=80
+execute="~/.scripts/hackdeck/razer-naga-v2-hyperspeed.sh"
+interval=600
+button_press="~/.scripts/hackdeck/razer-naga-v2-hyperspeed.sh"
 
 [[buttons]]
 row=2
