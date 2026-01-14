@@ -5,6 +5,9 @@
 #main > .inner {
   background-color: #1a1b26;
 }
+#browser.linux.address-top-off.tabs-right .toolbar-extensions {
+  margin-top: -15px;
+}
 #browser.win.address-top-off.tabs-off #header {
   display: none;
 }
@@ -16,10 +19,7 @@
     max-width: calc(25vw - 10px) !important;
 }
 #browser.win.address-top-off.tabs-right .toolbar-extensions {
-  margin-top: 60px;
-}
-#browser.win.address-top-off.tabs-right #tabs-tabbar-container {
-  padding-top: 60px !important;
+  margin-top: 15px;
 }
 button.ToolbarButton-Button[name="WorkspaceButton"][title="Personal"] {
    border-bottom: 1px solid #186010 !important;
