@@ -71,20 +71,19 @@ command('NonAscii', function()
 end, {})
 
 command('Print', function(opts)
-
   local outfile = opts.args ~= '' and opts.args or vim.fn.tempname() .. '.html'
   local html = require('tohtml').tohtml(0, { range = { opts.line1, opts.line2 } })
 
   if not opts.bang then
-    html[#html+1] = '<style>.NonText {display: none}</style>'
+    html[#html + 1] = '<style>.NonText {display: none}</style>'
   end
 
-  html[#html+1] = '<style>* { font-size: 14px } pre { white-space: wrap }</style>'
-  html[#html+1] = '<script>print();setTimeout(function() { close() }, 1000)</script>'
+  html[#html + 1] = '<style>* { font-size: 14px; color: black; } pre { white-space: wrap }</style>'
+  html[#html + 1] = '<script>print();setTimeout(function() { close() }, 1000)</script>'
 
   -- insert new lines in pre blocks so we can use wrap
   local i = 1
-  local insert = false;
+  local insert = false
   while i <= #html do
     if html[i]:sub(html[i]:len() - 6) == '</pre>' then
       insert = false
@@ -92,15 +91,15 @@ command('Print', function(opts)
     if insert then
       html[i] = html[i] .. '<br>'
     end
-    if html[i]:sub(1,4) == '<pre' then
+    if html[i]:sub(1, 4) == '<pre' then
       insert = true
     end
     i = i + 1
   end
 
   vim.fn.writefile(html, outfile)
-  fn.jobstart({'chromium', '--profile-directory=Default', '--app=file://' .. outfile})
-end, {bang = true, range = '%', nargs = '?'})
+  fn.jobstart({ 'chromium', '--profile-directory=Default', '--app=file://' .. outfile })
+end, { bang = true, range = '%', nargs = '?' })
 
 command('ProfileStart', function(opt)
   vim.cmd([[
