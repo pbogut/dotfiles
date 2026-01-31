@@ -95,6 +95,7 @@ button:hover {
     border-bottom: 3px solid #ffffff;
 }
 
+#custom-razer_naga_v2_hyperspeed,
 #custom-power,
 #custom-vrp10,
 #custom-bt_kyria,
@@ -334,5 +335,5 @@ label:focus {
 }
 
 #scratchpad.empty {
-	background-color: transparent;
+    background-color: transparent;
 }

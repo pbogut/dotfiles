@@ -302,6 +302,17 @@
         },
         "on-click": "pkill -RTMIN+18 -x waybar"
     },
+    "custom/razer-naga-v2-hyperspeed": {
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
+        "interval": 600,
+        "signal": 18,
+        "exec": "$HOME/.scripts/waybar/razer-naga-v2-hyperspeed.sh",
+        "format-icons": {
+            "default": "󰍽"
+        },
+        "on-click": "pkill -RTMIN+18 -x waybar"
+    },
+
     "custom/logipro": {
         "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 600,
