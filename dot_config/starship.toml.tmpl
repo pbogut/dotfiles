@@ -1,8 +1,8 @@
 add_newline = false
 # right_format = "$time"
 format = """
-${custom.time}$status$cmd_duration$all${custom.lf}${custom.yazi}$shell
-$username$hostname${custom.local_host}${custom.remote_host}$directory$git_branch$git_status$git_state$custom_time
+$time$status$cmd_duration$all${custom.lf}${custom.yazi}$shell
+$username$hostname${custom.local_host}${custom.remote_host}$directory$git_branch$git_status$git_state
 $character\
 """
 
@@ -21,15 +21,23 @@ error_symbol = '[λ](bold red)'
 success_symbol = '[λ](bold red)'
 
 [hostname]
-disabled = true
+disabled = false
 ssh_only = false
-format= '[$hostname]($style)[\]](bold red) '
-style = 'gray'
+format= '[$ssh_symbol]($style)[\]](bold red) '
+ssh_symbol = '[@](bold red)[$hostname](bold yellow)'
+style = 'bold yellow'
 
 [username]
 show_always = true
-format= '[\[](bold red)[$user]($style)[@](bold red)'
+format= '[\[](bold red)[$user]($style)'
 style_user = 'gray'
+
+[time]
+disabled = false
+format = '[\[$time\]]($style) '
+time_format = '%T'
+utc_time_offset = 'local'
+style = 'green'
 
 [shell]
 format = '[$indicator]($style) '
@@ -58,22 +66,18 @@ format = '[$symbol$branch(:$remote_branch)]($style) '
 style = 'blue'
 
 [custom.local_host]
+disabled = true
 format = '[$output]($style)[\]](bold red) '
-command = 'hostname'
+# command = 'hostname'
 style = 'gray'
 when = 'test -z "$SSH_TTY"'
 
 [custom.remote_host]
+disabled = true
 format = '[$output]($style)[\]](bold red) '
 command = 'hostname'
 style = 'bold yellow'
 when = 'test -n "$SSH_TTY"'
-
-[custom.time]
-format = '[\[$symbol$output\]]($style) '
-command = 'date +"%H:%M:%S"'
-style = 'green'
-when = "true"
 
 [custom.yazi]
 symbol = 'ya'
@@ -105,6 +109,7 @@ style = 'bold blue'
 # symbol = ' '
 
 [custom.docker]
+disabled = false
 # symbol = '🐳 '
 symbol = '󰡨 '
 
