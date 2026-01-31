@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   netflix
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   21/01/2025
+#=================================================
+chromium --app=http://oldbox.local:8096 --profile-directory=Default
