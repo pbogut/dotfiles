@@ -13,14 +13,9 @@ echo "$@" >> /tmp/tmux-vim.log
 declare -a files
 declare -a args
 has_args=0
-no_tab=0
 
 while test $# -gt 0; do
   case "$1" in
-    --no-tab)
-      no_tab=1
-      shift
-      ;;
     --)
       shift
       ;;
@@ -60,7 +55,9 @@ open_by_title() {
 
 if [[ -n $TMUX ]]; then
   tmux new-session -e PROJECT="$name" -d -s "$name" nvim -p -- "${files[@]}"
-  tmux switch-client -t "$name:nvim" || tmux switch-client -t "$name"
+  if tmux list-windows | grep '^1: nvim'; then
+    tmux switch-client -t "$name:1" || tmux switch-client -t "$name"
+  fi
   title=$(cut -f1 --complement --delimiter='|' <<< "$(tmux display-message -p "#T")")
   if [[ -n "${files[*]}" ]]; then
     open_by_title "$title" 2>/dev/null
