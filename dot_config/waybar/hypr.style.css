@@ -149,6 +149,9 @@ button:hover {
 }
 .audio-group-item #custom-vrp10,
 .audio-group-item #custom-audioshare-client,
+.audio-group-item #custom-audio-loopback,
+.audio-group-item #custom-easyeffects-in,
+.audio-group-item #custom-easyeffects-out,
 .audio-group-item #custom-audioshare {
     margin-left: 10px;
 }

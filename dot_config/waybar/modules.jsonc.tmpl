@@ -179,6 +179,9 @@
           "pulseaudio",
           "custom/vrp10",
           {{ if eq .chezmoi.hostname "redeye" }}"custom/audioshare-client",{{ end }}
+          {{ if eq .chezmoi.hostname "redeye" }}"custom/audio-loopback",{{ end }}
+          {{ if eq .chezmoi.hostname "redeye" }}"custom/easyeffects-in",{{ end }}
+          {{ if eq .chezmoi.hostname "redeye" }}"custom/easyeffects-out",{{ end }}
           {{ if eq .chezmoi.hostname "silverspoon" }}"custom/audioshare",{{ end }}
       ]
     },
@@ -386,6 +389,36 @@
             "default": "󱀞"
         },
         "on-click": "$HOME/.scripts/waybar/audioshare-client.sh toggle; pkill -RTMIN+20 -x waybar"
+    },
+    "custom/audio-loopback": {
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
+        "interval": 3600,
+        "signal": 22,
+        "exec": "$HOME/.scripts/waybar/loopback.sh",
+        "format-icons": {
+            "default": ""
+        },
+        "on-click": "$HOME/.scripts/waybar/loopback.sh toggle; pkill -RTMIN+22 -x waybar"
+    },
+    "custom/easyeffects-in": {
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
+        "interval": 3600,
+        "signal": 23,
+        "exec": "$HOME/.scripts/waybar/easyeffects.sh --type output",
+        "format-icons": {
+            "default": "󱄠"
+        },
+        "on-click": "$HOME/.scripts/waybar/easyeffects.sh --type output toggle; pkill -RTMIN+23 -x waybar"
+    },
+    "custom/easyeffects-out": {
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
+        "interval": 3600,
+        "signal": 23,
+        "exec": "$HOME/.scripts/waybar/easyeffects.sh --type input",
+        "format-icons": {
+            "default": ""
+        },
+        "on-click": "$HOME/.scripts/waybar/easyeffects.sh --type input toggle; pkill -RTMIN+23 -x waybar"
     },
     "custom/audioshare": {
         "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
