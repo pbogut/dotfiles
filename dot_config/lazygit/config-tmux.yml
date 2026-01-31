@@ -1,24 +1,24 @@
 os:
-  open: tmux-vim --no-tab {{filename}}
+  open: tmux-vim {{filename}}
   openLink: xdg-open {{link}} >/dev/null 2>&1
 
 customCommands:
   - key: 'q'
     description: 'Go back to nvim'
     context: 'global'
-    command: 'tmux switch-client -t "$(tmux display-message -p "#S"):nvim"'
+    command: 'tmux last-window'
   - key: 'e'
     description: 'Edit file'
     context: 'files'
-    command: tmux-vim --no-tab {{filename}}
+    command: tmux-vim {{filename}}
   - key: 'o'
     description: 'Open file'
     context: 'files'
-    command: 'tmux-vim --no-tab {{ .SelectedFile.Name }}'
+    command: 'tmux-vim {{ .SelectedFile.Name }}'
   - key: 'o'
     description: 'Open file'
     context: 'staging'
-    command: 'tmux-vim --no-tab {{ .SelectedFile.Name }}'
+    command: 'tmux-vim {{ .SelectedFile.Name }}'
 
 # contexts: status, files, localBranches, remotes, remoteBranches,
 #           tags, commits, reflogCommits, subCommits, commitFiles,
