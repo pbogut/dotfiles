@@ -21,7 +21,7 @@ if ! $is_special_open; then
   if [[ $total_workspaces -eq 0 ]]; then
     hyprctl -q dispatch "togglespecialworkspace magic"
   else
-    hyprctl -q dispatch "togglespecialworkspace $(head -n1 <<< "$special_workspaces")"
+    hyprctl -q dispatch "togglespecialworkspace $(head -n1 <<< "${special_workspaces:-magic}")"
   fi
   exit 0
 fi
