@@ -552,8 +552,8 @@ windowrule {
   name = sms-floating-window
   no_screen_share = on
   float = on
-  move = ((monitor_w*0.29)) (40)
-  size = exact 300
+  move = ((monitor_w*0.25)) 40
+  size = ((monitor_w*0.5)) 200
   match:class = ^(org.kde.kdeconnect.sms)$
 }
 
@@ -580,6 +580,7 @@ windowrule {
 windowrule {
   name = localsend-floating
   float = on
+  center = on
   size = 400 700
   match:class = ^(localsend)$
 }
@@ -587,21 +588,24 @@ windowrule {
 windowrule {
   name = hyprland-share-picker
   float = on
+  center = on
   match:class = ^(hyprland-share-picker)$
 }
 
 windowrule {
   name = bitwarden-vivaldi-extension
   float = on
+  center = on
   match:title = ^Bitwarden - Vivaldi$
 }
 
 windowrule {
   name = chrome-extention-popups
   float = on
+  center = on
+  size = 400 700
   match:class = ^(chrome\-[a-z]+\-Default)$ # extention popups
 }
-
 
 windowrule {
   name = alacritty-floating
@@ -630,6 +634,7 @@ windowrule {
 windowrule {
   name = floating-windows
   float = on
+  center = on
   size = 1200 700
   match:tag = floating
 }
