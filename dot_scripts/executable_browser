@@ -23,6 +23,9 @@ elif [[ $url =~ ^https://open\.spotify\.com ]]; then
 elif [[ $url =~ ^https://.*\.zoom\.us ]]; then
   shift
   chromium --app="$url" --profile-directory=Default "$@" &
+elif [[ $url =~ ^https://meet\.google\.com ]]; then
+  shift
+  chromium --app="$url" --profile-directory=Default "$@" &
 elif [[ $url =~ ^https://teams\.microsoft\.com ]]; then
   shift
   chromium --app="$url" --profile-directory=Default "$@" &
