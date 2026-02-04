@@ -37,9 +37,11 @@ return {
 
     vim.g['test#custom_strategies'] = {
       tmuxctl = function(cmd)
+        cmd = 'mise x -- ' .. cmd
         require('pbogut.tmuxctl').send_to_pane('vim_test', cmd, { open = true, focus = false })
       end,
       tmuxctl_hidden = function(cmd)
+        cmd = 'mise x -- ' .. cmd
         require('pbogut.tmuxctl').send_to_pane('vim_test', cmd, { open = false, focus = false })
       end,
     }
