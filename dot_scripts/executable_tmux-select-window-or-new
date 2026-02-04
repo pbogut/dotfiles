@@ -6,10 +6,10 @@ if ! tmux select-window -t ":$number"; then
       1) tmux new-window -a -t ":$number" 'nvim' ;;
       4) tmux new-window -a -t ":$number" 'zsh -ic "make dev"' ;;
       5) tmux new-window -a -t ":$number" 'zsh -ic "draft sql"' ;;
-      6) tmux new-window -a -t ":$number" 'rest' ;;
+      6) tmux new-window -a -t ":$number" 'zsh -ic "rest"' ;;
       7) tmux new-window -a -t ":$number" 'lazygit --use-config-file="/home/pbogut/.config/lazygit/config.yml,/home/pbogut/.config/lazygit/config-tmux.yml"' ;;
       8) tmux new-window -a -t ":$number" 'lazydocker' ;;
-      9) tmux new-window -a -t ":$number" 'opencode' ;;
+      9) tmux new-window -a -t ":$number" 'zsh -ic "opencode"' ;;
       *) tmux new-window -a -t ":$number" ;;
     esac
   else
