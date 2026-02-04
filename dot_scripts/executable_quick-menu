@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   quick-menu
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   31/10/2025
+#=================================================
+cat ~/.config/quick-menu.list | while read -r line; do
+  cmd=$(echo "$line" | cut -f1)
+  label=$(echo "$line" | cut -f2)
+
+  echo -e "$cmd\t$label\x00icon\x1f${ICONS}/$cmd.svg"
+done |
+fuzzel --dmenu --prompt="Quick Menu: " \
+--with-nth=2 --accept-nth=1 \
+--cache /dev/null | xargs sh -c
