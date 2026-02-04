@@ -71,3 +71,8 @@ action = "PasteSelection"
 key = "V"
 mode = "~Vi"
 mods = "Alt|Control"
+
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001b[13;2u"

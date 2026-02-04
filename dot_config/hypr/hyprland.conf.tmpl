@@ -355,7 +355,7 @@ bind = $mainMod, 5, workspace, name:media
 bind = $mainMod, 6, workspace, name:work
 bind = $mainMod, 7, workspace, 7
 bind = $mainMod, 8, workspace, 8
-bind = $mainMod, 9, workspace, 9
+bind = $mainMod, 9, workspace, name:steam
 bind = $mainMod, 0, workspace, 10
 
 # Move active window to a workspace with mainMod + SHIFT + [0-9]
@@ -656,4 +656,22 @@ windowrule {
   match:float = 1
   match:fullscreen = 0
   match:pin = 0
+}
+
+# Steam and games
+windowrule {
+  name = steam-games
+  match:class = ^(steam_app_.*|cs2|gamescope)$
+  float = off
+  fullscreen = on
+  workspace = special:game
+  monitor = DP-1
+}
+
+windowrule {
+  name = steam
+  match:class = ^steam$
+  move = 0 0
+  float = off
+  workspace = name:steam
 }
