@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   steam-game
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   03/02/2026
+#=================================================
+gamescope -w 1920 -h 1080 -W 1920 -H 1080 --force-grab-cursor -- "$@"
