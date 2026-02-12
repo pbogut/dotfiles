@@ -5,10 +5,30 @@
 # date:   26/04/2023
 #=================================================
 project=false
+
+open_sessions() {
+    tmux list-sessions -F '#{session_path}' |
+    awk '{if ($1 != ENVIRON["PWD"]) print $0}' |
+    sed 's,^'"$PROJECTS/"',,g' |
+    sed 's,^\(.*\)$,󰄽TMUX󰄾\t\1,'
+}
+
+list_projects() {
+    (
+        open_sessions;
+        ls-project -f |
+        awk '{if ($1 != ENVIRON["PWD"]) print $0}' |
+        sed 's,^'"$PROJECTS/"',,g' |
+        sed 's,^\(.*\)$, \t\1,'
+    ) |
+    grep -v "^$PWD$" |
+    awk '!seen[$2]++'
+}
+
 if [[ $TERM == "dumb" ]]; then
-    project=$(ls-project | sed -E "s;(.*);\1\x00icon\x1f$ICONS/git.svg;" | fuzzel --dmenu --no-sort --search "$1" --cache /dev/null)
+    project=$(list_projects | sed -E "s;(.*);\1\x00icon\x1f$ICONS/git.svg;" | fuzzel --accept-nth=2 --dmenu --no-sort --search "$1" --cache /dev/null)
 else
-    project=$(ls-project | fzf -q "$1" --height=100%)
+    project=$(list_projects | fzf -q "$1" --height=100% | awk '{print $2}')
 fi
 
 if [[ ! $project == "" ]]; then

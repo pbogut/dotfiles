@@ -8,13 +8,14 @@ usage() {
     echo "Ussage: ${0##*/} [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  -h, --help     display this help and exit"
+    echo "  -h, --help          display this help and exit"
+    echo "  -f, --full-path     display full path"
 }
 
 full_path=0
 while test $# -gt 0; do
     case "$1" in
-        --full-path | -fp)
+        --full-path | -f)
             full_path=1
             shift
             ;;
@@ -43,4 +44,6 @@ done
     sed -E 's,[0-9]+\s,,' |
     if [[ $full_path -eq 0 ]]; then
         sed 's,^'"$PROJECTS/"',,g'
+    else
+        cat
     fi

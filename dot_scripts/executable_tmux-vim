@@ -55,6 +55,7 @@ open_by_title() {
 
 if [[ -n $TMUX ]]; then
   tmux new-session -e PROJECT="$name" -d -s "$name" nvim -p -- "${files[@]}"
+  tmux switch-client -t "$name"
   if tmux list-windows | grep '^1: nvim'; then
     tmux switch-client -t "$name:1" || tmux switch-client -t "$name"
   fi
