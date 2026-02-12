@@ -267,9 +267,9 @@ return {
       u.highlights({
         DapBreakpoint = { link = 'DiagnosticSignError' },
         DapBreakpointCondition = { link = 'DiagnosticSignWarn' },
-        DapBreakpointRejected = { guifg = vim.c.orange, guibg = vim.c.base02 },
+        DapBreakpointRejected = { guifg = vim.c.orange, guibg = vim.c.ad_dark1 },
         DapLogPoint = { link = 'DiagnosticSignInfo' },
-        DapStopped = { guifg = '#719e07', guibg = vim.c.base02 },
+        DapStopped = { guifg = '#719e07', guibg = vim.c.ad_dark1 },
       })
 
       u.signs({

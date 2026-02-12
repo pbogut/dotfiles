@@ -11,9 +11,9 @@ return {
   changed = '',
   renamed = '',
 
-  breakpoint = '',
+  breakpoint = '',
   breakpoint_condition = '',
-  breakpoint_rejected = '',
+  breakpoint_rejected = '',  -- it says rejected but its really visited, so tick makes more sense
   breakpoint_info = '',
   breakpoint_current = '',
 }
