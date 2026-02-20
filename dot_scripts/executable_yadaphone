@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   zoom
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   29/10/2025
+#=================================================
+url="${1:-https://www.yadaphone.com/phone}"
+chromium --app="$url" --profile-directory=Default
