@@ -11,15 +11,16 @@
 #browser.win.address-top-off.tabs-off #header {
   display: none;
 }
+#browser.win #tabs-container {
+    margin-top: 35px;
+}
 #browser.win.address-top-off.tabs-right #header {
     position: absolute;
     top: 0;
     right: 0;
     width: 350px;
     max-width: calc(25vw - 10px) !important;
-}
-#browser.win.address-top-off.tabs-right .toolbar-extensions {
-  margin-top: 15px;
+    min-width: 200px;
 }
 button.ToolbarButton-Button[name="WorkspaceButton"][title="Personal"] {
    border-bottom: 1px solid #186010 !important;
@@ -43,6 +44,7 @@ button.ToolbarButton-Button[name="WorkspaceButton"]:not([title="Workspaces"]):no
   padding-top: 2px !important;
   width: 360px !important;
   max-width: 25vw !important;
+  min-width: 200px;
   background-color: #1a1b26 !important;
 }
 /* style sidebar */
@@ -73,8 +75,17 @@ body .tabbar-wrapper {
 .address-top-off.tabs-right .toolbar-large {
     flex-direction: row-reverse;
 }
+.win.address-top-off.tabs-right .toolbar-extensions {
+    margin-top: 15px;
+    left: auto;
+    width: 350px;
+    max-width: calc(25vw - 10px) !important;
+    min-width: 200px;
+    overflow-x: auto;
+}
 .address-top-off.tabs-right .toolbar-extensions {
     display: flex !important;
+    justify-content: flex-end;
     position: absolute;
     top: 15px;
 }
