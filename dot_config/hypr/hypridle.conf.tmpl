@@ -16,13 +16,13 @@ listener {
 # silverspoon [[[ {{- if eq .chezmoi.hostname "silverspoon" }}
 listener {
     timeout = 90 # 1.5min (+screensaver time, maybe)
-    on-timeout = brightnessctl -s set 50%
+    on-timeout = systemd-ac-power || brightnessctl -s set 50%
     on-resume = brightnessctl -r
 }
 
 listener {
     timeout = 150 # 2.5min.
-    on-timeout = brightnessctl set 10%
+    on-timeout = systemd-ac-power || brightnessctl set 10%
     on-resume = brightnessctl -r
 }
 
