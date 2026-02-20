@@ -21,10 +21,5 @@ else
   selection=$(ls -r "$dest" | fzf --height="100%" --preview="chafa $sixel -s '${width}x${height}' $dest/{}")
 fi
 if [[ -n $selection ]]; then
-    satty --filename "${dest}${selection}" \
-      --output-filename "${dest}${selection%%.*}-satty.png" \
-      --early-exit \
-      --actions-on-enter save-to-clipboard \
-      --save-after-copy \
-      --copy-command 'wl-copy'
+    gimp "${dest}${selection}"
 fi
