@@ -51,8 +51,9 @@ truncate_to_repo = false
 truncation_symbol = "…/"
 
 [directory.substitutions]
-'assuredpharmacy' = 'ap'
-'pbogut' = 'pb'
+#{{ range $full, $short := .dir_aliases }}
+'{{ $full }}' = '{{ $short }}'
+#{{ end }}
 '{{ .projects }}' = '~p'
 
 [git_status]
