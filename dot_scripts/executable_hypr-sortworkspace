@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   hypr-sortworkspace
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   20/02/2026
+#=================================================
+json=$(hyprctl activewindow -j)
+class=$(echo "$json" | jq -r '.class')
+title=$(echo "$json" | jq -r '.title')
+current_ws=$(echo "$json" | jq -r '.workspace.name')
+
+move_and_swich() {
+  new_ws="$1"
+  if [[ "$current_ws" != "$new_ws" ]]; then
+    hyprctl dispatch movetoworkspace "name:$new_ws"
+  fi
+}
+
+
+case  "$class" in
+  "Alacritty.project")
+  move_and_swich "code"
+  ;;
+  "vivaldi-work")
+  move_and_swich "work"
+  ;;
+  "vivaldi-personal")
+  move_and_swich "web"
+  ;;
+  steam|cs2|gamescope|steam_app_*)
+  move_and_swich "steam"
+  ;;
+  "com.discordapp.Discord")
+  move_and_swich "discord"
+  ;;
+  zoom|chrome-*.zoom.us__-*)
+  move_and_swich "zoom"
+  ;;
+  brave-www.youtube.com__*|chrome-www.youtube.com__*)
+  move_and_swich "media"
+  ;;
+esac
