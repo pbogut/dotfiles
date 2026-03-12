@@ -53,8 +53,7 @@ host=$(hostname)
 
 if [[ $action == "start" ]]; then
   notify-send "GameMode started"
-  killall picom
-  pkill -USR1 '^redshift$'
+  wlsunset.sh off
 
   # lock mouse to game screen
   at now <<< "DISPLAY=$DISPLAY ~/.scripts/mousescreenlock.sh" > /dev/null 2>&1
@@ -73,12 +72,9 @@ if [[ $action == "start" ]]; then
 elif [[ $action == "end" ]]; then
   notify-send "GameMode stopped"
   if [[ $host == "redeye" ]]; then
-    picom -b --xrender-sync-fence
     dualsensectl power-off
-  elif [[ $host == "silverspoon" ]]; then
-    picom -b --inactive-dim 0 -i 1
   fi
-  pkill -USR1 '^redshift$'
+  wlsunset.sh on
 
   # stop mouselock
   # shellcheck disable=SC2046

@@ -60,7 +60,7 @@ trap cleanup SIGTERM
 
 if [[ $action == "start" ]]; then
   notify-send "GameMode started"
-  killall wlsunset
+  wlsunset.sh off
 
   # lock mouse on game screen
   #notify-send -t 2500 -u low "Lock mouse on screen"
@@ -81,7 +81,7 @@ if [[ $action == "start" ]]; then
   done
 elif [[ $action == "end" ]]; then
   notify-send "GameMode stopped"
-  at now <<< "wlsunset -l 50 -L 17" > /dev/null 2>&1
+  wlsunset.sh on
 
   # release mouse from game screen
   swaymsg 'seat * hide_cursor when-typing enable'

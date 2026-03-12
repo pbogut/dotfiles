@@ -29,12 +29,12 @@ demonize syncthing syncthing
 # {{"}}}"}} - personal {{- end }}
 
 rerun copyq copyq
-demonize wlsunset "wlsunset -l 50 -L 17"
 demonize udisksvm "udisksvm -a"
 demonize memwatch ~/.scripts/memwatch.sh
 demonize mailsgoweb ~/.scripts/mailsgoweb.sh
 demonize kdeconnect-file-watch kdeconnect-file-watch
 demonize dunst dunst
+wlsunset.sh on
 
 # {{- if eq .chezmoi.hostname "redeye" }} redeye [[[
 # I dont want to talk about it
