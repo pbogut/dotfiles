@@ -8,23 +8,27 @@
             "DP-1",
         ],
         "include": [
+            "~/.config/waybar/hypr.common.jsonc",
             "~/.config/waybar/modules.jsonc",
         ],
         "modules-left": [
-            "sway/workspaces",
-            "sway/mode",
-            "sway/scratchpad"
+            "hyprland/workspaces",
+            "custom/screnrecord",
+            "custom/fullscreen",
+            "hyprland/windowcount",
+            "hyprland/submap",
         ],
         "modules-center": [
-            "sway/window"
+            "hyprland/window",
         ],
         "modules-right": [
-            "idle_inhibitor",
-            "custom/memory_left",
-            "cpu",
-            "backlight",
-            "custom/vrp10",
-            "pulseaudio",
+            // "idle_inhibitor",
+            // "memory",
+            // "cpu",
+            // "custom/vrp10",
+            "custom/razer-naga-v2-hyperspeed",
+            "custom/media_sync",
+            "group/audio",
             "custom/weather",
             "custom/date",
             "custom/time",
@@ -33,9 +37,6 @@
             "battery",
             "battery#bat2",
             "custom/notmuch",
-            "custom/gamemode",
-            "custom/power",
-            "custom/switches"
         ],
     },
     {
@@ -47,24 +48,26 @@
             "HDMI-A-1",
         ],
         "include": [
+            "~/.config/waybar/hypr.common.jsonc",
             "~/.config/waybar/modules.jsonc",
         ],
         "modules-left": [
-            "sway/workspaces",
-            "sway/mode",
-            "sway/scratchpad"
+            "hyprland/workspaces",
+            "custom/screnrecord",
+            "custom/fullscreen",
+            "hyprland/windowcount",
+            "hyprland/submap",
         ],
         "modules-center": [
-            "sway/window"
+            "hyprland/window",
         ],
         "modules-right": [
-            "idle_inhibitor",
+            // "idle_inhibitor",
             "custom/shadowplay",
-            "custom/memory_left",
-            "cpu",
-            "backlight",
-            "custom/vrp10",
-            "pulseaudio",
+            // "memory",
+            // "cpu",
+            // "custom/vrp10",
+            "group/audio",
             "custom/weather",
             "custom/date",
             "custom/time",
@@ -75,10 +78,10 @@
             "custom/bt_dactyl",
             "custom/bt_xbox",
             "custom/notmuch",
-            "custom/gamemode",
-            "custom/hubstaff",
-            "tray",
-            "custom/switches"
+            "bluetooth",
+            "network",
+            "group/tray-expander",
+            "custom/power",
         ],
     }
 ]
@@ -94,34 +97,39 @@
             "DP-1"
         ],
         "include": [
+            "~/.config/waybar/hypr.common.jsonc",
             "~/.config/waybar/modules.jsonc",
         ],
         "modules-left": [
-            "sway/workspaces",
-            "sway/mode",
-            "sway/scratchpad"
+            "hyprland/workspaces",
+            "custom/screnrecord",
+            "custom/fullscreen",
+            "hyprland/windowcount",
+            "hyprland/submap",
         ],
         "modules-center": [
-            "sway/window"
+            "hyprland/window"
         ],
         "modules-right": [
-            "idle_inhibitor",
-            "custom/memory_left",
-            "cpu",
+            // "idle_inhibitor",
+            // "memory",
+            // "cpu",
             "backlight",
-            "custom/vrp10",
-            "pulseaudio",
+            // "custom/vrp10",
+            "group/audio",
             "custom/weather",
             "custom/date",
             "custom/time",
             "custom/time_uk",
+            // "custom/battery-conservation",
             "battery",
             "battery#bat2",
             "custom/notmuch",
-            "custom/gamemode",
-            "tray",
+            // "tray",
+            "bluetooth",
+            "network",
+            "group/tray-expander",
             "custom/power",
-            "custom/switches"
         ],
     }
 ]

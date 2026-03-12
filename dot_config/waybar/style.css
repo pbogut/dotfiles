@@ -1,33 +1,41 @@
+@define-color foreground #ffffff;
+@define-color background #222222;
+@define-color activeborder #4c7899;
+@define-color activebackground #34424D;
+@define-color border #595959;
+@define-color fullscreen #33ccff;
+
+@import "../themes/current/waybar.css";
+
 * {
-    font-family: "InputMono Nerd Font";
+    font-family: 'JetBrainsMono Nerd Font Propo';
+    font-feature-settings: '"zero", "tnum", "ss01", "ss02", "ss03", "cv01"';
+    /* animation-timing-function: steps(12); */
+    /* animation-duration: 0.3s; */
+    transition: padding 0.3s, opacity 0.3s, border-color 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+window#waybar * {
+    color: @foreground;
 }
 window#waybar {
     font-size: 11px;
+    border-radius: 10px;
+    border: none;
 }
 window#waybar.silverspoon.DP-1,
 window#waybar.redeye1,
 window#waybar.redeye2 {
-    font-size: 11px;
+    font-size: 12px;
 }
 window#waybar.silverspoon.eDP-1 {
     font-size: 14px;
 }
-    /* --background: #222; */
-    /* --background-alt: #444; */
-    /* --inactive-bg: #5f676a; */
-    /* --foreground: #dfdfdf; */
-    /* --foreground-alt: #777; */
-    /* --icon: #2e9ef4; */
-    /* --charging: #2e9ef4; */
-    /* --discharging: #2e9ef4; */
-    /* --primary: #ffb52a; */
-    /* --secondary: #e60053; */
-    /* --alert: #bd2c40; */
-    /* --warning: #bdbd40; */
 
 window#waybar {
     /* background-color: rgba(43, 48, 59, 0.5); */
-    background-color: #222;
+    /* background-color: @background; */
+    background-color: transparent;
     /* border-bottom: 3px solid rgba(100, 114, 125, 0.5); */
     color: #dfdfdf;
     transition-property: background-color;
@@ -37,15 +45,6 @@ window#waybar {
 window#waybar.hidden {
     opacity: 0.2;
 }
-
-/*
-window#waybar.empty {
-    background-color: transparent;
-}
-window#waybar.solo {
-    background-color: #FFFFFF;
-}
-*/
 
 window#waybar.termite {
     background-color: #3F3F3F;
@@ -58,7 +57,7 @@ window#waybar.chromium {
 
 button {
     /* Use box-shadow instead of border so the text isn't offset */
-    box-shadow: inset 0 -3px transparent;
+    /* box-shadow: inset 0 -3px transparent; */
     /* Avoid rounded borders under each button name */
     border: none;
     border-radius: 0;
@@ -67,23 +66,26 @@ button {
 /* https://github.com/Alexays/Waybar/wiki/FAQ#the-workspace-buttons-have-a-strange-hover-effect */
 button:hover {
     background: inherit;
-    box-shadow: inset 0 -3px #ffffff;
+    /* box-shadow: inset 0 -3px #ffffff; */
 }
 
 #workspaces button {
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0 5px;
-    background-color: transparent;
-    color: #ffffff;
+    border-radius: 100%;
+    padding: 0 5px 0 5px;
+    background-color: @background;
+    border: 1px solid @border;
+    margin: 0 2px;
 }
 
 #workspaces button:hover {
     background: rgba(0, 0, 0, 0.2);
+    border: 1px solid #00ff99;
 }
 
-#workspaces button.focused {
-    background-color: #64727D;
-    box-shadow: inset 0 -3px #ffffff;
+#workspaces button.active {
+    background-color: @activebackground;
+    border: 1px solid @activeborder;
+    /* box-shadow: inset 0 -3px #ffffff; */
 }
 
 #workspaces button.urgent {
@@ -91,13 +93,16 @@ button:hover {
 }
 
 #mode {
-    background-color: #64727D;
+    background-color: @background;
     border-bottom: 3px solid #ffffff;
 }
-
-#custom-razer_naga_v2_hyperspeed,
+#submap {
+    background-color: @background;
+    padding:0 10px;
+}
+#custom-razer-naga-v2-hyperspeed,
 #custom-power,
-#custom-vrp10,
+#custom-nextcloud,
 #custom-bt_kyria,
 #custom-bt_dactyl,
 #custom-bt_xbox,
@@ -109,6 +114,8 @@ button:hover {
 #custom-date,
 #custom-time,
 #custom-time_uk,
+#custom-screnrecord,
+#custom-media_sync,
 #clock,
 #battery,
 #cpu,
@@ -117,23 +124,77 @@ button:hover {
 #temperature,
 #backlight,
 #network,
-#pulseaudio,
+#bluetooth,
 #wireplumber,
 #custom-media,
 #custom-hubstaff,
 #custom-weather,
-#tray,
+#tray-expander,
+#audio,
 #mode,
 #idle_inhibitor,
 #scratchpad,
+#custom-battery-conservation,
+#window,
+#submap,
 #mpd {
     padding: 0 10px;
-    color: #ffffff;
+    border: 1px solid @border;
+    border-radius: 10px;
+    background-color: @background;
+    margin: 0 3px;
+    box-shadow: 0px 0px 2px 0px rgba(26, 26, 26, 0.9);
+    margin-top:1px;
+    margin-bottom: 1px;
+}
+.audio-group-item #custom-vrp10,
+.audio-group-item #custom-audioshare-client,
+.audio-group-item #custom-audio-loopback,
+.audio-group-item #custom-easyeffects-in,
+.audio-group-item #custom-easyeffects-out,
+.audio-group-item #custom-audioshare {
+    margin-left: 10px;
+}
+#workspaces {
+    padding: 0;
+}
+window#waybar.empty #window,
+window#waybar:not(.fullscreen) #custom-fullscreen,
+window#waybar:not(.fullscreen) #windowcount {
+    opacity: 0;
+}
+window#waybar.fullscreen #window {
+    color: @fullscreen;
+    padding: 0 50px;
+    border: 1px solid @fullscreen;
+}
+window#waybar #custom-fullscreen,
+window#waybar #windowcount {
+    color: @fullscreen;
+    background-color: @background;
+}
+window#waybar #custom-fullscreen {
+    margin-left: 5px;
+    padding: 0 5px 0 10px;
+    border-left: 1px solid @fullscreen;
+    border-top: 1px solid @fullscreen;
+    border-bottom: 1px solid @fullscreen;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+window#waybar #windowcount {
+    padding: 0 10px 0 0;
+    border-right: 1px solid @fullscreen;
+    border-top: 1px solid @fullscreen;
+    border-bottom: 1px solid @fullscreen;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
 }
 
-#window,
-#workspaces {
-    margin: 0 4px;
+#workspaces button {
+    box-shadow: 0px 0px 2px 0px rgba(26, 26, 26, 0.9);
+    margin-top:1px;
+    margin-bottom: 1px;
 }
 
 /* #window { */
@@ -149,17 +210,13 @@ button:hover {
     margin-right: 0;
 }
 
-/* #clock { */
-/*     background-color: #64727D; */
-/* } */
-
 /* #battery { */
 /*     background-color: #ffffff; */
 /*     color: #000000; */
 /* } */
 
 /* #battery.charging, #battery.plugged { */
-/*     color: #ffffff; */
+/*     color: @foreground; */
 /*     background-color: #26A65B; */
 /* } */
 

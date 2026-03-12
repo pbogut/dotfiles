@@ -58,11 +58,11 @@ $fileManager = yazi-term
 # exec-once = $terminal
 # exec-once = nm-applet &
 # exec-once = waybar & hyprpaper & firefox
-exec-once = hypr-waybar
 exec-once = hypridle
 exec-once = hyprlock # start locked
 exec-once = systemctl --user start hyprpolkitagent
 exec-once = swaybg -i "$(find ~/Pictures/wallpaper -type f | shuf -n 1)"
+exec-once = uwsm-app -- waybar
 exec-once = hyprctl setcursor polar 10
 
 
