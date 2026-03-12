@@ -9,7 +9,7 @@ usage() {
   echo "Ussage: ${0##*/} [OPTIONS]"
   echo ""
   echo "Actions:"
-  echo "  add <branch>"
+  echo "  add <branch> [source_branch?]"
   echo "  list"
   echo "  checkout <branch>"
   echo "  remove <branch>"
@@ -30,6 +30,7 @@ upstream="origin"
 candidates=false
 
 worktree=""
+source_branch=""
 
 while test $# -gt 0; do
   case "$1" in
@@ -38,6 +39,9 @@ while test $# -gt 0; do
     shift
     worktree="$1"
     shift
+    if [[ -n $1 ]]; then
+      source_branch="$1"
+    fi
     ;;
   changes)
     action=changes
@@ -183,6 +187,7 @@ fi
 
 if [[ $action == "checkout" ]]; then
   bare_path=$(__wt_base_dir)
+  echo git worktree add "$bare_path/$worktree" "$worktree"
   if ! git worktree add "$bare_path/$worktree" "$worktree"; then
     exit $?
   fi
@@ -190,13 +195,21 @@ if [[ $action == "checkout" ]]; then
   git branch --set-upstream-to="$upstream"/"$worktree"
 fi
 
-if [[ $action == "add" ]]; then
+if [[ $action == "add" ]] && [[ -z $source_branch ]]; then
   bare_path=$(__wt_base_dir)
   if ! git worktree add "$bare_path/$worktree"; then
     exit $?
   fi
   cd "$bare_path/$worktree" || exit 1
-  git branch --set-upstream-to="$upstream"/"$worktree"
+fi
+
+if [[ $action == "add" ]] && [[ -n $source_branch ]]; then
+  bare_path=$(__wt_base_dir)
+  if ! git worktree add  -b "$worktree" "$bare_path/$worktree" "$upstream/$source_branch"; then
+    exit $?
+  fi
+  cd "$bare_path/$worktree" || exit 1
+  git branch --unset-upstream
 fi
 
 if [[ $action == "changes" ]]; then
@@ -253,12 +266,16 @@ if [[ $action == "remove" ]] && [[ -n $worktree ]]; then
       read -r ans
       if [[ $ans == "y" ]]; then
         if ! git worktree remove --force "$worktree"; then
-          echo "Failed to remove directory: $worktree"
-          echo "Remove directory with sudo? [y/N]"
-          read -r ans
-          if [[ $ans == "y" ]]; then
-            sudo rm -rf "$worktree"
-            err=$?
+          echo "Git worktree remove --force failed to remove directory: $worktree"
+          echo "attempting to remove directory with rm -fr"
+          if ! rm -fr "$worktree"; then
+            echo "Failed to remove directory: $worktree"
+            echo "Remove directory with sudo? [y/N]"
+            read -r ans
+            if [[ $ans == "y" ]]; then
+              sudo rm -rf "$worktree"
+              err=$?
+            fi
           fi
         fi
       fi

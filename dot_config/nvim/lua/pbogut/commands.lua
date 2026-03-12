@@ -108,3 +108,14 @@ command('ProfileStart', function(opt)
     profile file *
   ]])
 end, { nargs = '*' })
+
+command('GitNewDatedWorktree', function(opt)
+  local main_branch = vim.h.read_exec([[cat ../.bare/HEAD | sed 's,ref: .*/,,']])
+  local name = vim.h.read_exec([[ date +%Y-%m-%d ]]) .. '-' .. opt.args
+
+  vim.h.read_exec('git wt add ' .. name .. ' ' .. main_branch .. ' >/dev/null 2>&1')
+  print('New worktree created ' .. name)
+  if os.getenv('TMUX') then
+    vim.h.read_exec('cd ' .. vim.fn.getcwd() .. '/../' .. name .. ' && tmux-vim')
+  end
+end, { nargs = 1 })
