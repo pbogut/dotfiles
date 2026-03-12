@@ -11,10 +11,18 @@ draft() {
     mkdir -p archive
     find ./ -maxdepth 1 -type f -mtime +90 -exec mv {} archive/ \;
 
+    __draft_list_files() {
+        echo "new"
+        find ./ -maxdepth 1 -type f | sort -rh
+        find ./ -mindepth 2 -maxdepth 2 -type f | sort -rh
+    }
+
     select="new"
     if [[ $1 == "" ]]; then
-        select="$( (echo "new"; find ./ -maxdepth 2 -type f) | fzf --preview="bat --color=always --decorations=never {}")"
-
+        select="$(
+            __draft_list_files |
+            fzf --no-sort --preview="bat --color=always --decorations=never {}"
+        )"
     fi
 
     file=""
