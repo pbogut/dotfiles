@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   time-is-between
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   04/03/2026
+#=================================================
+currenttime=$(date +%H:%M)
+start_time="$1"
+end_time="$2"
+if [[ "$currenttime" > "$start_time" ]] || [[ "$currenttime" < "$end_time" ]]; then
+    exit 0
+else
+    exit 1
+fi

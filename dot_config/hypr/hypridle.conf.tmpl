@@ -56,3 +56,15 @@ listener {
     on-timeout = systemctl suspend
     on-resume = hyprctl dispatch dpms on && brightnessctl -r
 }
+
+# Night suspend
+# 15, 20, 25 .... 55 min
+# This way we always suspend after 15 - 20 mins during night time
+{{ $timeouts := list "915" "1215" "1515" "1815" "2115" "2415" "2715" "3015" "3315" }}
+{{ range $timeouts }}
+listener {
+    timeout = {{ . }}
+    on-timeout = time-is-between "22:00" "06:00" && systemctl suspend
+    on-resume = hyprctl dispatch dpms on && brightnessctl -r
+}
+{{ end }}
