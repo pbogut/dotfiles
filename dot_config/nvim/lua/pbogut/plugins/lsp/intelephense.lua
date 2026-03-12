@@ -1,5 +1,4 @@
 local config = require('pbogut.config')
-local fake_home = os.getenv('HOME') .. '/.config'
 local opts = {
   on_init = function(client)
     local project_path = client.workspace_folders[1].name
@@ -17,11 +16,6 @@ local opts = {
     end
     return true
   end,
-  cmd = {
-    'sh',
-    '-c',
-    'HOME=' .. fake_home .. ' intelephense --stdio',
-  },
   filetypes = { 'php', 'blade', 'html' },
   settings = {
     intelephense = {
