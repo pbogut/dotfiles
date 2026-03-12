@@ -11,5 +11,9 @@ XDG_TEMPLATES_DIR="$HOME/Templates/"
 XDG_PUBLICSHARE_DIR="$HOME/Share/"
 XDG_DOCUMENTS_DIR="$HOME/Documents/"
 XDG_MUSIC_DIR="$HOME/Music/"
+{{- if eq .chezmoi.hostname "redeye" }}
+XDG_PICTURES_DIR="/storage/pictures/"
+{{- else }}
 XDG_PICTURES_DIR="$HOME/Pictures/"
+{{- end }}
 XDG_VIDEOS_DIR="$HOME/Videos/"
