@@ -5,6 +5,7 @@
 # date:   17/08/2024
 #=================================================
 url="https://www.youtube.com/feed/history?feature=app_shortcuts"
+browser="brave"
 
 if [[ $1 =~ ^https://www.youtube.com ]]; then
     url="$1"
@@ -13,7 +14,7 @@ if [[ $1 =~ ^https://invidious.pbogut.me ]]; then
   url=${1//invidious.pbogut.me/www.youtube.com}
 fi
 
-brave \
+"$browser" \
     --class=youtube \
     --profile-directory=Default \
     --app="$url" \

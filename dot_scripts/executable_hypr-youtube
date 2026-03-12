@@ -4,7 +4,7 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   04/11/2025
 #=================================================
-youtube=$(hyprctl clients -j | jq 'map(select(.class | startswith("brave-www.youtube.com__"))) | first')
+youtube=$(hyprctl clients -j | jq 'map(select(.class | contains("-www.youtube.com__"))) | first')
 
 if [[ $youtube == "null" ]]; then
     youtube
