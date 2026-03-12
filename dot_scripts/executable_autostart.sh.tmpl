@@ -1,9 +1,4 @@
 #!/bin/bash
-#super awesome capslock key
-script=$(readlink -f "$0")
-scriptpath=$(dirname "$script")
-compositor=$XDG_SESSION_DESKTOP
-
 function demonize() {
   pid="/tmp/__$(id -un)__$1.pid"
   # if no pid file or no process
