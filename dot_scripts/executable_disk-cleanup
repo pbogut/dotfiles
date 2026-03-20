@@ -12,13 +12,11 @@ find /home/pbogut/Downloads/ -type f -mtime +90 -delete
 find /home/pbogut/Downloads/ -type d -empty -delete
 
 echo "Removing old cache (90days+)"
-find /home/pbogut/.cache/paru/ -type f -mtime +90 -delete
-find /home/pbogut/.cache/paru/ -type d -empty -delete
+find /home/pbogut/.cache/paru/ -mindepth 2 -maxdepth 2 -type d -mtime +90 -exec rm -fr {} \;
+find /home/pbogut/.cache/paru/ -mindepth 2 -maxdepth 2 -type d -empty -delete
 
 echo "Removing electron cache (too big, really)"
 rm -fr /home/pbogut/.cache/paru/clone/electron* > /dev/null 2>&1
-
-rm /home/pbogut/.local/state/nvim/lsp.log
 
 if [[ -d /home/pbogut/.cache/yay ]]; then
     echo "Removing yay cache"
@@ -31,7 +29,7 @@ fi
 
 if [[ $UID -eq 0 ]]; then
     echo "Cleaning up pacman cache"
-    find /var/cache/pacman/ -type f -mtime +14 -delete
+    find /var/cache/pacman/ -type f -mtime +30 -delete
     yes | pacman -Sc
 else
     echo "Not root, skipping root cleanup"
@@ -39,7 +37,7 @@ fi
 
 echo "Removing unused electron versions"
 paru -Ss electron |
-    grep Installed |
+    grep installed |
     awk '{print $1}' |
     grep electron |
     cut -d"/" -f 2 |
