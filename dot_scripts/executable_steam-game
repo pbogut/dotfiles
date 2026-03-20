@@ -4,4 +4,47 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   03/02/2026
 #=================================================
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+  echo "  --nods4        ignore my DS4 controller, avoiding double input with steaminput"
+}
+
+while test $# -gt 0; do
+  case "$1" in
+    --nods4)
+      export SDL_GAMECONTROLLER_IGNORE_DEVICES="0x054c/0x09cc"
+      shift
+    ;;
+    --mouse-input|--mouse-input=*)
+      if [[ $1 =~ --[a-z\-]+= ]]; then
+        preset="${1//--mouse-input=/}"
+        shift
+      else
+        preset="$2"
+        shift; shift
+      fi
+      input-remapper-control --device "Razer Razer Naga V2 HyperSpeed" --command start --preset "$preset"
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      if [[ "$1" =~ ^- ]]; then
+        echo "Unknown option: ${1}" >&2
+        exit 1
+      fi
+      break
+      ;;
+  esac
+done
+echo gamescope -w 1920 -h 1080 -W 1920 -H 1080 --force-grab-cursor -- "$@" >> /tmp/stm
 gamescope -w 1920 -h 1080 -W 1920 -H 1080 --force-grab-cursor -- "$@"
+input-remapper-control --device "Razer Razer Naga V2 HyperSpeed" --command stop
