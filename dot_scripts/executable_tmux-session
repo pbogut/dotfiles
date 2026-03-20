@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   tmux-kill-current-session
+# author: Pawel Bogut <pbogut@assuredpharmacy.co.uk>
+# date:   30/10/2025
+#=================================================
+if [[ -z $TMUX ]]; then
+  exit 1
+fi
+
+usage() {
+  echo "Ussage: ${0##*/} <next|prev|last> [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     display this help and exit"
+}
+
+__tmux_list_sessions() {
+  tmux list-sessions -F '#S' | grep -v '^_hidden$'
+}
+
+while test $# -gt 0; do
+  case "$1" in
+    prev|previous)
+      current_session=$(tmux display-message -p '#S')
+      list_sessions=$(__tmux_list_sessions)
+
+      prev_session=$(
+        (echo "$list_sessions"; echo "$list_sessions") |
+        awk -v current="$current_session" '$0 == current {f++} f<2' |
+        tail -n1
+      )
+
+      tmux switch-client -t "$prev_session"
+      exit 0
+    ;;
+    next)
+      current_session=$(tmux display-message -p '#S')
+      list_sessions=$(__tmux_list_sessions)
+
+      next_session=$(
+        (echo "$list_sessions"; echo "$list_sessions") |
+        awk -v current="$current_session" '$0 == current {f=1; next} f' |
+        head -n1
+      )
+      tmux switch-client -t "$next_session"
+      exit 0
+    ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
