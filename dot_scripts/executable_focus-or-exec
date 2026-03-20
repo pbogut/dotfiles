@@ -7,10 +7,19 @@
 class=$1
 shift
 
-if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
+if [[ $XDG_CURRENT_DESKTOP == "niri" ]]; then
+    window_id=$(niri msg -j windows | jq --arg class "$class" '.[] | select(.app_id == $class) | .id' | head -n1)
+    if [[ -z $window_id ]]; then
+        window_id=$(niri msg -j windows | jq --arg class "$class" '.[] | select(.app_id | test($class)) | .id' | head -n1)
+    fi
+    if [[ -n $window_id ]]; then
+        niri msg action focus-window --id "$window_id"
+    else
+        exec "$@"
+    fi
+elif [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
     hypr-focusorexec "$class" "$@"
-fi
-if [[ $XDG_CURRENT_DESKTOP == "sway" ]]; then
+elif [[ $XDG_CURRENT_DESKTOP == "sway" ]]; then
     swaymsg '[app_id="'"$class"'"] focus' ||
         swaymsg '[class="'"$class"'"] focus' ||
         exec "$@"

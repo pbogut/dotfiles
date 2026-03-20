@@ -1,0 +1,1 @@
+export TERMINAL=alacritty

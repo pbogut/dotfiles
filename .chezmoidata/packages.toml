@@ -45,6 +45,7 @@ paru = [
   "neomutt",
   "neovim",
   "network-manager-applet",
+  "niri",
   "notmuch",
   "notmuch-runtime",
   "noto-fonts-emoji",

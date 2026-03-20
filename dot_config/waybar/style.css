@@ -82,6 +82,9 @@ button:hover {
     border: 1px solid #00ff99;
 }
 
+#workspaces button.empty {
+    opacity: 0.5;
+}
 #workspaces button.active {
     background-color: @activebackground;
     border: 1px solid @activeborder;
