@@ -37,3 +37,5 @@ encryption = "age"
   install_system_packages = {{ $install_system_packages }}
   install_rustup = {{ $install_rustup }}
   projects = "{{ $projects }}"
+
+{{ join .chezmoi.sourceDir "dot_config/encrypted_secret_data.toml.age" | include | decrypt }}

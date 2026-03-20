@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   tmux-project
+# author: author <author_contact>
+# date:   26/04/2023
+#=================================================
+project=false
+
+open_sessions() {
+    tmux list-sessions -F '#{session_path}' |
+    awk '{if ($2 != ENVIRON["PWD"]) print $0}' |
+    sed 's,^'"$PROJECTS/"',,g' |
+    sed 's,^\(.*\)$, \1,'
+}
+
+list_projects() {
+    ls-project -f |
+    awk '{if ($1 != ENVIRON["PWD"]) print $0}' |
+    sed 's,^'"$PROJECTS/"',,g' |
+    sed 's,^\(.*\)$,  \1,'
+}
+
+all_projects() {
+    (open_sessions; list_projects) |
+    compact_project |
+    awk '!seen[$2]++'
+}
+
+compact_project() {
+#{{ range $full, $short := .dir_aliases }}
+    sed 's,{{ $full }}/,{{ $short }}󰿟,' |
+#{{ end }}
+    cat
+}
+
+expand_project() {
+#{{ range $full, $short := .dir_aliases }}
+    sed 's,{{ $short }}󰿟,{{ $full }}/,' |
+#{{ end }}
+    cat
+}
+
+select_project() {
+    sed 's,..\(.*\)$,\1,' | expand_project
+}
+
+if [[ $TERM == "dumb" ]]; then
+    project=$(all_projects | sed -E "s;(.*);\1\x00icon\x1f$ICONS/git.svg;" | fuzzel --dmenu --no-sort --search "$1" --cache /dev/null | select_project)
+else
+    project=$(all_projects | fzf -q "$1" --height=100% | select_project)
+fi
+
+if [[ ! $project == "" ]]; then
+    cd "$PROJECTS/$project" || exit
+    touch -h "$PROJECTS/$project"
+    if [[ $TERM == "dumb" ]]; then
+        terminal -c project -e tmux-vim
+    else
+        tmux-vim
+    fi
+fi
