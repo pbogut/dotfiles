@@ -61,7 +61,11 @@ if [[ $TERMINAL == "alacritty" ]]; then
     if [[ -n $title ]]; then
         preargs+=("--title" "$title")
     fi
-    alacritty "${preargs[@]}" -e "${myargs[@]}"
+    if [[ -z "${myargs[*]}" ]]; then
+        alacritty "${preargs[@]}"
+    else
+        alacritty "${preargs[@]}" -e "${myargs[@]}"
+    fi
 elif [[ $TERMINAL == "wezterm" ]]; then
     preargs=()
     if $floating; then
