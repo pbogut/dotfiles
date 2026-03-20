@@ -45,6 +45,8 @@ monitor=HDMI-A-1, 1920x1080@60,1920x0, 1
 
 # Set programs that you use
 $terminal = alacritty
+$run_apps = fuzzel
+$run_cmds = fuzzel-run
 $fileManager = yazi-term
 
 
@@ -290,9 +292,9 @@ bind = $mainMod CTRL, Y, exec, hypr-youtube reset
 bind = $mainMod, Y, exec, hypr-youtube toggle
 
 # Apps
-bind = $mainMod, semicolon, exec, fuzzel-run
-bind = $mainMod SHIFT, semicolon, exec, fuzzel
-bind = $mainMod, apostrophe, exec, ~/.scripts/sway/copyq.sh
+bind = $mainMod, semicolon, exec, $run_cmds
+bind = $mainMod SHIFT, semicolon, exec, $run_apps
+bind = $mainMod, apostrophe, exec, copyq-dmenu
 bind = $mainMod, W, exec, hypr-windows
 bind = $mainMod CTRL, P, exec, tmux-project
 bind = $mainMod, Return, exec, $terminal

@@ -358,7 +358,7 @@ bindsym $mod+Ctrl+c workspace $wscode
 bindsym $mod+m focus output $display_left
 bindsym $mod+comma focus output $display_main
 bindsym $mod+period focus output $display_right
-bindsym $mod+apostrophe $exec "~/.scripts/sway/copyq.sh"
+bindsym $mod+apostrophe $exec "~/.scripts/copyq-dmenu"
 # browser shortcut
 bindsym $mod+slash $exec "~/.scripts/quickbrowser.sh"
 # screen shots
