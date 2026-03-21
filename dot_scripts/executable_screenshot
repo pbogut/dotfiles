@@ -22,19 +22,28 @@ get_rectangles() {
   fi
 }
 
+wayfreeze_pid=false
+wayfreeze_stop() {
+  cat /dev/stdin
+  kill $wayfreeze_pid >/dev/null 2>&1
+}
+wayfreeze_start() {
+  if [[ $wayfreeze_pid != false ]]; then
+    wayfreeze_stop
+  fi
+  wayfreeze & wayfreeze_pid=$!
+}
 # Select based on mode
 case "$MODE" in
   region)
-    wayfreeze & PID=$!
+    wayfreeze_start
     sleep .1
     SELECTION=$(slurp 2>/dev/null)
-    kill $PID 2>/dev/null
     ;;
   windows)
-    wayfreeze & PID=$!
+    wayfreeze_start
     sleep .1
     SELECTION=$(get_rectangles | slurp -r 2>/dev/null)
-    kill $PID 2>/dev/null
     ;;
   fullscreen)
     if [[ $XDG_CURRENT_DESKTOP == "niri" ]]; then
@@ -46,10 +55,9 @@ case "$MODE" in
     ;;
   smart|*)
     RECTS=$(get_rectangles)
-    wayfreeze & PID=$!
+    wayfreeze_start
     sleep .1
     SELECTION=$(echo "$RECTS" | slurp 2>/dev/null)
-    kill $PID 2>/dev/null
 
     # If the selction area is L * W < 20, we'll assume you were trying to select whichever
     # window or output it was inside of to prevent accidental 2px snapshots
@@ -77,7 +85,10 @@ case "$MODE" in
     ;;
 esac
 
-[ -z "$SELECTION" ] && exit 0
+if [ -z "$SELECTION" ]; then
+  wayfreeze_stop
+  exit 0
+fi
 
 if [[ $MODE == "windows" ]]; then
   if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
@@ -89,6 +100,7 @@ if [[ $MODE == "windows" ]]; then
 fi
 if [[ $PROCESSING == "slurp" ]]; then
 grim -g "$SELECTION" - |
+  wayfreeze_stop |
   satty --filename - \
     --output-filename "$OUTPUT_DIR/screenshot_from_$(date +'%Y-%m-%d_%H-%M-%S').png" \
     --early-exit \
@@ -96,5 +108,5 @@ grim -g "$SELECTION" - |
     --save-after-copy \
     --copy-command 'wl-copy'
 else
-  grim -g "$SELECTION" - | wl-copy
+  grim -g "$SELECTION" - | wayfreeze_stop | wl-copy
 fi
