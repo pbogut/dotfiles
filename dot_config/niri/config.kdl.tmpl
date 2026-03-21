@@ -280,7 +280,7 @@ layout {
 // See the binds section below for more spawn examples.
 
 // Startup
-spawn-sh-at-startup "swaybg -i $(find ~/Pictures/wallpaper -type f | shuf -n 1)"
+spawn-at-startup "niri-wallpaper"
 spawn-at-startup "waybar"
 spawn-at-startup "niri-start-maximized"
 spawn-at-startup "hypridle"
@@ -455,6 +455,10 @@ window-rule {
     // - Flatpak Firefox (app-id is "org.mozilla.firefox")
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
     open-floating true
+}
+layer-rule {
+    match namespace="^overview-wallpaper$"
+    place-within-backdrop true
 }
 
 // Example: block out two password managers from screen capture.

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   niri-wallpaper
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   21/03/2026
+#=================================================
+image=$(find "$HOME/Pictures/wallpaper" -type f | shuf -n 1)
+blur_image="$HOME/Pictures/wallpaper/blur/$(basename "$image")"
+if [[ ! -f "blur/$image" ]]; then
+  mkdir -p "$(dirname "$blur_image")"
+  convert "$image" -blur 0x10 "$blur_image"
+fi
+pkill -f swaybg
+swaybg -i "$blur_image" -n overview-wallpaper &
+swaybg -i "$image" &
