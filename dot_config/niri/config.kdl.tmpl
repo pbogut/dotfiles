@@ -352,7 +352,9 @@ window-rule {
     match app-id=r#"^org\.wezfurlong\.wezterm$"#
     default-column-width { proportion 0.5; }
 }
-
+window-rule {
+    open-focused true
+}
 window-rule {
     match app-id="Alacritty"
     default-column-width { proportion 0.5; }
