@@ -1,6 +1,7 @@
 -- disable builtin plugins
 vim.g.loaded_python3_provider = true
 vim.g.loaded_netrwPlugin = true
+vim.o.nomodeline = true
 
 vim.loader.enable()
 -- common helper
