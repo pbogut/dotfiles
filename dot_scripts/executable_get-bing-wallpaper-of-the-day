@@ -63,8 +63,11 @@ fi
 
 # set as wallpaper using feh
 # DISPLAY=${DISPLAY-:0} feh --bg-fill $saveDir$picName
-at now <<< "swaybg -i '$saveDir$picName'"
-
+# at now <<< "swaybg -i '$saveDir$picName'"
+# at now <<< "niri-wallpaper latest"
+# if [[ $XDG_CURRENT_DESKTOP == "niri" ]]; then
+    # niri-wallpaper "$saveDir$picName"
+# fi
 
 # Remove pictures older than 30 days
 #find $saveDir -atime 30 -delete
