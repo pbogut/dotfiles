@@ -90,7 +90,9 @@ button:hover {
     border: 1px solid @activeborder;
     /* box-shadow: inset 0 -3px #ffffff; */
 }
-
+#workspaces button.empty.active {
+    opacity: 1;
+}
 #workspaces button.urgent {
     background-color: #eb4d4b;
 }
