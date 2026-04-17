@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-#=================================================
-# name:   steam-game
-# author: Pawel Bogut <pbogut@pbogut.me>
-# date:   11/03/2026
-#=================================================
-firejail --noprofile --net=eno1 steam

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   steam-game
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   11/03/2026
+#=================================================
+display=:1
+network="eth1"
+# {{- if eq .chezmoi.hostname "redeye" }} redeye [[[
+network="eno1"
+# redeye ]]] {{- end }}
+# {{- if eq .chezmoi.hostname "silverspoon" }} silverspoon [[[
+network="wlan0"
+# silverspoon ]]] {{- end }}
+xwayland-satellite $display &
+firejail --noprofile --net=$network env DISPLAY=$display steam
+pkill -fx "xwayland-satellite $display"
