@@ -4,7 +4,19 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   21/03/2026
 #=================================================
-image=$(find "$HOME/Pictures/wallpaper" -type f | shuf -n 1)
+mode=${1:-random}
+case "$mode" in
+  random)
+    image=$(find "$HOME/Pictures/wallpaper" -maxdepth 1 -iname "*.jpg" -type f | shuf -n 1)
+    ;;
+  latest)
+    image=$(ls -t "$HOME/Pictures/wallpaper/"*.jpg | head -n 1)
+    ;;
+  *)
+    image="$1"
+    ;;
+esac
+
 blur_image="$HOME/Pictures/wallpaper/blur/$(basename "$image")"
 if [[ ! -f "blur/$image" ]]; then
   mkdir -p "$(dirname "$blur_image")"
