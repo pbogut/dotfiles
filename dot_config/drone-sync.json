@@ -42,6 +42,16 @@
       ]
     },
     {
+      "name": "Pavo Pico II",
+      "test": "djio4_pico2",
+      "src": "DCIM/",
+      "dst": "DjiO4_Pico2/",
+      "remove": [
+        "DCIM/*/*.MP4",
+        "DCIM/*/*.SRT"
+      ]
+    },
+    {
       "name": "Dji Mini 4K",
       "test": "dji_mini_4k",
       "src": "DCIM/100MEDIA/",
