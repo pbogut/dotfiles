@@ -9,6 +9,7 @@ echo "Drone Video Sync Tool"
 
 local_path="$(jq -r '.local_path' ~/.config/drone-sync.json -c)"
 date="$(date +%Y-%m-%d_%s)"
+remote=false
 
 while read -r source; do
   test="$(echo "$source" | jq -r '.test')"
@@ -45,30 +46,32 @@ while read -r source; do
     else
       echo ".  sync failed for $name"
     fi
-  elif found=$(ssh silverspoon.local -t "echo /run/media/pbogut/*/'$test'" </dev/null 2>/dev/null | head -n1) && [[ $found =~ ^/ ]]; then
-    source_dir="$(dirname "$found")"
-    source="$source_dir/$src"
-    dest="$local_path/$dst"
-    if [[ $remove != "null" ]]; then
-      dest="$dest/$date"
-    fi
-
-    echo " ✔️🕸️"
-    mkdir -p "$dest"
-
-    echo ".  starting syncing"
-    if rsync -av "silverspoon.local:$source" "$dest"; then
-      echo ".  sync completed successfully"
+  elif $remote; then
+    if found=$(ssh silverspoon.local -t "echo /run/media/pbogut/*/'$test'" </dev/null 2>/dev/null | head -n1) && [[ $found =~ ^/ ]]; then
+      source_dir="$(dirname "$found")"
+      source="$source_dir/$src"
+      dest="$local_path/$dst"
       if [[ $remove != "null" ]]; then
-        while read -r pattern; do
-          echo ".  removing $pattern"
-          # shellcheck disable=SC2046
-          ssh silverspoon.local -t "rm '$source_dir'/$pattern" 2>/dev/null
-        done < <(jq -r '.[]' <<<"$remove")
+        dest="$dest/$date"
       fi
-      echo ".  unmounting $name..."
-      ssh silverspoon.local -n -t "umount '$source_dir'" </dev/null 2>/dev/null
-      echo ".  done"
+
+      echo " ✔️🕸️"
+      mkdir -p "$dest"
+
+      echo ".  starting syncing"
+      if rsync -av "silverspoon.local:$source" "$dest"; then
+        echo ".  sync completed successfully"
+        if [[ $remove != "null" ]]; then
+          while read -r pattern; do
+            echo ".  removing $pattern"
+            # shellcheck disable=SC2046
+            ssh silverspoon.local -t "rm '$source_dir'/$pattern" 2>/dev/null
+          done < <(jq -r '.[]' <<<"$remove")
+        fi
+        echo ".  unmounting $name..."
+        ssh silverspoon.local -n -t "umount '$source_dir'" </dev/null 2>/dev/null
+        echo ".  done"
+      fi
     else
       echo ".  sync failed for $name"
     fi
