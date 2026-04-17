@@ -176,6 +176,7 @@ return {
         local config = require('pbogut.config')
         if config.get('lsp.autoformat_on_save.enabled') then
           local file_types = config.get('lsp.autoformat_on_save.file_types', {})
+          file_types["make"] = false
           local file = vim.fn.expand('%:p')
           local cwd = vim.fn.getcwd()
           local ft = vim.bo.filetype
