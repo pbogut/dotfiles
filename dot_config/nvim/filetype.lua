@@ -31,5 +31,6 @@ vim.filetype.add({
     ['.*%.sh%.tmpl'] = 'sh',
     ['.*%.conf%.tmpl'] = 'conf',
     ['.*%.desktop%.tmpl'] = 'desktop',
+    ['.*%.kdl%.tmpl'] = 'kdl',
   },
 })
