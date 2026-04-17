@@ -35,6 +35,36 @@ else
     echo "Not root, skipping root cleanup"
 fi
 
+echo "Removing containers closed over a year ago"
+cutoff="$(date -d '1 year ago' --iso-8601=seconds)"
+docker ps -a --filter "status=exited" --format '{{.ID}} {{.Names}}' |
+while read -r id name; do
+  finished="$(docker inspect -f '{{.State.FinishedAt}}' "$id")"
+  # skip containers that never ran
+  if [[ "$finished" != "0001-01-01T00:00:00Z" && "$finished" < "$cutoff" ]]; then
+    printf "%s %s last_finished=%s\n" "$id" "$name" "$finished"
+    docker container rm -f "$id"
+  fi
+done
+echo "Removing unused docker images"
+docker image prune -af
+echo "Remove dangling unused anonymous volumes"
+for v in $(docker volume ls -qf dangling=true); do
+  # heuristic: anonymous volumes often look like 64 hex chars
+  if [[ "$v" =~ ^[0-9a-f]{64}$ ]]; then
+    kind="anonymous(looks like hash)"
+    docker volume rm "$v"
+  fi
+done
+echo "List of named volumes for review, if you dont need them, remove manually"
+for v in $(docker volume ls -qf dangling=true); do
+  # heuristic: anonymous volumes often look like 64 hex chars
+  if [[ ! "$v" =~ ^[0-9a-f]{64}$ ]]; then
+    kind="named"
+    echo "$v [$kind]"
+  fi
+done
+
 echo "Removing unused electron versions"
 paru -Ss electron |
     grep installed |
