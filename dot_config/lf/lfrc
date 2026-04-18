@@ -8,7 +8,6 @@ set filesep "\n"  # default already
 set previewer ~/.config/lf/preview
 set cleaner ~/.config/lf/cleaner
 set scrolloff 5
-set sixel true
 
 set sortby time
 set reverse
