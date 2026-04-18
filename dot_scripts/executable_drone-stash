@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   drone-stash
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   09/04/2025
+#=================================================
+
+echo "Drone Video Sync Tool - Stash"
+
+local_path="$(jq -r '.local_path' ~/.config/drone-sync.json -c)"
+stash_path="$(jq -r '.stash_path' ~/.config/drone-sync.json -c)"
+
+find "$local_path" -type d | fzf --preview 'tree -a {}' | while read -r dir; do
+  dest="$stash_path/${dir#"$local_path"/}"
+  rsync -av "$dir/" "$dest/" --remove-source-files
+  find "$dir" -type d -delete
+done

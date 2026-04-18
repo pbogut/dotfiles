@@ -1,5 +1,6 @@
 {
   "local_path": "/home/pbogut/Videos/FPV",
+  "stash_path": "/storage2/videos/FPV",
   "sources": [
     {
       "name": "Dji Neo",
