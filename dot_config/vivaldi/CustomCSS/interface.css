@@ -11,6 +11,9 @@
 #browser.win.address-top-off.tabs-off #header {
   display: none;
 }
+#browser.tabs-off .tabbar-wrapper {
+  display: none;
+}
 #browser.win #tabs-container {
     margin-top: 35px;
 }
