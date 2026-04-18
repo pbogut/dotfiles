@@ -6,7 +6,7 @@
 
 (loop
   (directive_start) @open.foreach
-  ((loop_operator) @mid.foreach.1)?
+  ((directive) @mid.foreach.1)?
   (directive_end) @close.foreach) @scope.foreach
 
 (conditional

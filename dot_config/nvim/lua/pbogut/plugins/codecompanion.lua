@@ -1,6 +1,6 @@
 ---@type LazyPluginSpec
 return {
-  enabled = true,
+  enabled = false,
   'olimorris/codecompanion.nvim',
   config = true,
   opts = {

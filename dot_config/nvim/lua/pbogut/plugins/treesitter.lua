@@ -31,42 +31,29 @@ return {
   {
     enabled = true,
     'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
     event = { 'BufWritePre', 'BufReadPre', 'FileType' },
     build = function()
       vim.cmd.TSUpdate()
       vim.cmd.TSInstallMy()
     end,
-    opts = {
-      -- ensure_installed = 'all', -- very slow (>20% of start time), dont use it
-      highlight = {
-        enable = true,
-        disable = function(lang, bufnr)
-          -- Disable for large files
-          local lines_limit = 10000
-          if lang == 'markdown' then
-            -- Fuck this piece of shit pile of crap
-            return true
-          end
-          return vim.api.nvim_buf_line_count(bufnr) > lines_limit
-        end,
-      },
-      matchup = {
-        enable = true,
-      },
-      indent = {
-        enable = true,
-      },
-      incremental_selection = {
-        enable = true,
-        keymaps = {
-          init_selection = '<cr>',
-          scope_incremental = '<c-cr>',
-          node_incremental = '<cr>',
-          node_decremental = '<bs>',
-        },
-      },
-    },
     init = function()
+      local no_highlight = { 'markdown' }
+      local no_indent = { 'blade' }
+
+      -- enable highlighting for all buffers
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern =  '*' ,
+        callback = function()
+          if not no_indent[vim.bo.filetype] then
+            local ok, err = pcall(vim.treesitter.start)
+            if ok and not no_highlight[vim.bo.filetype] then
+              vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+            end
+          end
+        end,
+      })
+
       local command = vim.api.nvim_create_user_command
       command('TSInstallMy', function()
         vim.cmd.TSInstall({
@@ -127,7 +114,7 @@ return {
             'jsdoc',
             'json',
             'json5',
-            'jsonc',
+            -- 'jsonc',
             'just',
             'kconfig',
             'kdl',
@@ -150,7 +137,7 @@ return {
             'nix',
             'ocaml',
             'odin',
-            'org',
+            -- 'org',
             'pascal',
             'passwd',
             'pem',
@@ -163,7 +150,7 @@ return {
             'query',
             'readline',
             'regex',
-            'robots',
+            -- 'robots',
             'rst',
             'ruby',
             'rust',
@@ -197,39 +184,13 @@ return {
         })
       end, {})
     end,
-    config = function(_, opts)
-      local parser_config = require('nvim-treesitter.parsers').get_parser_configs()
-
-      ---@diagnostic disable-next-line: inject-field
-      parser_config.blade = {
-        install_info = {
-          url = 'https://github.com/EmranMR/tree-sitter-blade',
-          files = { 'src/parser.c' },
-          branch = 'main',
-        },
-        filetype = 'blade',
-      }
-
-      for ft, lang in pairs({
-        dotenv = 'bash',
-      }) do
-        vim.treesitter.language.register(lang, ft)
-      end
-
-      ---@diagnostic disable-next-line: missing-fields
-      require('nvim-treesitter.configs').setup(opts)
-    end,
+    -- config = function(_, opts)
+    --   for ft, lang in pairs({
+    --     dotenv = 'bash',
+    --   }) do
+    --     vim.treesitter.language.register(lang, ft)
+    --   end
+    -- end,
     cond = true,
-  },
-  {
-    enabled = true,
-    'nvim-treesitter/playground',
-    cmd = {
-      'TSInstallMy',
-      'TSInstall',
-      'TSUninstall',
-      'TSCaptureUnderCursor',
-      'TSPlaygroundToggle',
-    },
   },
 }

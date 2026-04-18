@@ -18,7 +18,11 @@ return {
       update_events = 'TextChanged,TextChangedI',
       store_selection_keys = '<tab>',
       ft_func = function()
-        local fts = from_cursor()
+        -- fail safe if there is no treesitter parser for the current filetype
+        local has_ts, fts = pcall(from_cursor)
+        if not has_ts then
+          fts = {}
+        end
 
         fts[#fts + 1] = vim.bo.filetype
         fts[#fts + 1] = vim.fn.expand('%:e')
