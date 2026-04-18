@@ -105,6 +105,7 @@ input {
     // automatically.
     position x=1280 y=0
 }
+// {{ if eq .hostname "redeye" }}
 output "HDMI-A-1" {
     mode "1920x1080@60.000"
     scale 1
@@ -117,7 +118,19 @@ output "DP-1" {
     scale 1
     transform "normal"
     position x=0 y=0
+    variable-refresh-rate on-demand=true
 }
+// {{ end }}
+// {{ if eq .hostname "silverspoon" }}
+output "eDP-1" {
+    scale 1.25
+    transform "normal"
+    position x=0 y=0
+}
+output "DP-1" {
+    off
+}
+// {{ end }}
 
 // Settings that influence how windows are positioned and sized.
 // Find more information on the wiki:
@@ -126,6 +139,8 @@ layout {
     // Set gaps around windows in logical pixels.
     gaps 10
 
+    // Set transparent workspace background color.
+    background-color "#00000035"
     // When to center a column when changing focus, options are:
     // - "never", default behavior, focusing an off-screen column will keep at the left
     //   or right edge of the screen.
@@ -210,8 +225,11 @@ layout {
         on
 
         width 2
-        active-color "#7fc8ff"
-        inactive-color "#505050"
+
+        // active-color "#bb9af7"
+        inactive-color "#595050aa"
+
+        // inactive-gradient from="#60162aee" to="#310301ee" angle=45
 
         // Color of the border around windows that request your attention.
         urgent-color "#9b0000"
@@ -219,9 +237,10 @@ layout {
         // Gradients can use a few different interpolation color spaces.
         // For example, this is a pastel rainbow gradient via in="oklch longer hue".
         //
-        // active-gradient from="#e5989b" to="#ffb4a2" angle=45 relative-to="workspace-view" in="oklch longer hue"
+        active-gradient from="#ad8ee6ee" to="#bb9af7ee" angle=45
 
         // inactive-gradient from="#505050" to="#808080" angle=45 relative-to="workspace-view"
+        // active-gradient from="#bb9af7ee" to="#ad8ee6ee" angle=45 relative-to="workspace-view"
     }
 
     // You can enable drop shadows for windows.
@@ -280,11 +299,19 @@ layout {
 // See the binds section below for more spawn examples.
 
 // Startup
-spawn-at-startup "niri-wallpaper"
+spawn-at-startup "niri-wallpaper" "latest"
 spawn-at-startup "waybar"
-spawn-at-startup "niri-start-maximized"
 spawn-at-startup "hypridle"
 spawn-at-startup "hyprlock"
+
+environment {
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+}
+
+// cursor {
+//   xcursor-theme "polar"
+//   xcursor-size 20
+// }
 
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
 // spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"
@@ -331,6 +358,9 @@ workspace "game" {
 }
 workspace "chat" {
   open-on-output "HDMI-A-1"
+  layout {
+      center-focused-column "always"
+  }
 }
 workspace "work" {
   open-on-output "HDMI-A-1"
@@ -356,7 +386,7 @@ window-rule {
     open-focused true
 }
 window-rule {
-    match app-id="Alacritty"
+    match app-id=r#"^Alacritty$"#
     default-column-width { proportion 0.5; }
 }
 window-rule {
@@ -365,14 +395,16 @@ window-rule {
     open-on-workspace "code"
 }
 window-rule {
-    match title="Steam"
-    match app-id="steam"
+    match app-id="steam" title="Steam"
     default-column-width { proportion 0.8; }
     open-on-workspace "game"
 }
 window-rule {
-    match title="Friend List"
-    match app-id="steam"
+    match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#
+    default-floating-position x=10 y=10 relative-to="bottom-right"
+}
+window-rule {
+    match app-id="steam" title="Friends List"
     default-column-width { proportion 0.2; }
     open-on-workspace "game"
 }
@@ -381,6 +413,7 @@ window-rule {
     default-column-width { proportion 1.0; }
     open-fullscreen true
     open-on-workspace "game"
+    variable-refresh-rate true
 }
 window-rule {
     match app-id="vivaldi-personal"
@@ -394,8 +427,8 @@ window-rule {
 }
 window-rule {
     match app-id="Alacritty.project"
-    default-column-width { proportion 0.9; }
     open-on-workspace "code"
+    default-column-width { proportion 0.9; }
 }
 window-rule {
     match title="Event Tester"
@@ -407,23 +440,17 @@ window-rule {
 }
 window-rule {
     match app-id="WebCord"
-    open-on-workspace "chat"
-}
-window-rule {
     match app-id="ferdium"
-    open-on-workspace "chat"
-}
-window-rule {
     match app-id="Alacritty.mutt"
+    match app-id=r#"^(.*\-meet\.google\.com__).*$"#
+    match app-id=r#"^(.*\-[a-z0-9]+\.zoom\.us__).*$"#
     open-on-workspace "chat"
 }
 window-rule {
     match title="Bitwarden - Vivaldi"
-    open-floating true
-}
-window-rule {
     match app-id=r#"^(chrome\-[a-z]+\-Default)$"#
     open-floating true
+    block-out-from "screen-capture"
 }
 window-rule {
     match app-id="org.kde.kdeconnect.sms"
@@ -462,6 +489,15 @@ window-rule {
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
     open-floating true
 }
+window-rule {
+    match is-window-cast-target=true
+
+    border {
+        active-gradient from="#f38ba8ee" to="#cc241dee" angle=45
+        inactive-gradient from="#60162aee" to="#310301ee" angle=45
+    }
+}
+
 layer-rule {
     match namespace="^overview-wallpaper$"
     place-within-backdrop true
@@ -514,6 +550,7 @@ binds {
     Mod+apostrophe hotkey-overlay-title="CopyQ" { spawn "copyq-dmenu"; }
     Mod+Ctrl+K hotkey-overlay-title="Calendar" { spawn-sh "terminal-float -t 'khal' -e khal interactive"; }
     Mod+E hotkey-overlay-title="File browser" { spawn "lf-term"; }
+    Mod+Shift+MouseMiddle hotkey-overlay-title="Color picker" { spawn "hyprpicker" "-a"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
     // Note: the entire command goes as a single argument. It's passed verbatim to `sh -c`.
@@ -524,9 +561,10 @@ binds {
     // The allow-when-locked=true property makes them work even when the session is locked.
     // Using spawn-sh allows to pass multiple arguments together with the command.
     // "-l 1.0" limits the volume to 100%.
-    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+ -l 1.0"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05+ -l 1.0"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05-"; }
     XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
+    Shift+XF86AudioMute  allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
     XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
 
     // Example media keys mapping using playerctl.
@@ -603,9 +641,8 @@ binds {
 
     Mod+Comma     { focus-monitor-left; }
     Mod+Period    { focus-monitor-right; }
-    Mod+Backspace { move-workspace-to-monitor-left; }
-    Mod+Ctrl+H    { move-workspace-to-monitor-left; }
-    Mod+Ctrl+L    { move-workspace-to-monitor-right; }
+    Mod+Ctrl+Comma    { move-workspace-to-monitor-left; }
+    Mod+Ctrl+Period    { move-workspace-to-monitor-right; }
 
     Mod+Page_Down      { focus-workspace-down; }
     Mod+Page_Up        { focus-workspace-up; }
@@ -700,6 +737,9 @@ binds {
     // Mod+Comma  { consume-window-into-column; }
     // Expel the bottom window from the focused column to the right.
     // Mod+Period { expel-window-from-column; }
+    Mod+Backspace  { consume-or-expel-window-left; }
+    Mod+Ctrl+H  { consume-or-expel-window-left; }
+    Mod+Ctrl+L  { consume-or-expel-window-right; }
 
     Mod+V { switch-preset-column-width; }
     // Cycling through the presets in reverse order is also possible.
@@ -707,7 +747,7 @@ binds {
     Mod+Shift+R { switch-preset-window-height; }
     Mod+Ctrl+R { reset-window-height; }
     Mod+F { maximize-column; }
-    // Mod+F { toggle-windowed-fullscreen; }
+    Mod+Ctrl+Shift+F { toggle-windowed-fullscreen; }
     Mod+Shift+F { fullscreen-window; }
 
     // Expand the focused column to space not taken up by other fully visible columns.
@@ -735,13 +775,13 @@ binds {
     Mod+Shift+Equal { set-window-height "+10%"; }
 
     // Move the focused window between the floating and the tiling layout.
-    Mod+Space       { toggle-window-floating; }
-    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+    Mod+Space { toggle-window-floating; }
+    Mod+Tab   { switch-focus-between-floating-and-tiling; }
 
     // Toggle tabbed column display mode.
     // Windows in this column will appear as vertical tabs,
     // rather than stacked on top of each other.
-    Mod+W { toggle-column-tabbed-display; }
+    // Mod+W { toggle-column-tabbed-display; }
 
     // Actions to switch layouts.
     // Note: if you uncomment these, make sure you do NOT have
