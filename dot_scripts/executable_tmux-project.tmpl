@@ -43,17 +43,56 @@ expand_project() {
 select_project() {
     sed 's,..\(.*\)$,\1,' | expand_project
 }
+__fuzzel_exit() {
+    cat /tmp/fuzzel.exit || echo 0
+}
+
+__fuzzel() {
+    fuzzel --dmenu --no-sort --search "$1" --cache /dev/null
+    echo $? > /tmp/fuzzel.exit
+}
 
 if [[ $TERM == "dumb" ]]; then
-    project=$(all_projects | sed -E "s;(.*);\1\x00icon\x1f$ICONS/git.svg;" | fuzzel --dmenu --no-sort --search "$1" --cache /dev/null | select_project)
+    project=$(all_projects | sed -E "s;(.*);\1\x00icon\x1f$ICONS/git.svg;" | __fuzzel "$1" | select_project)
 else
     project=$(all_projects | fzf -q "$1" --height=100% | select_project)
 fi
+
+__find_project_path() {
+    start="$PROJECTS/$1"
+    while [[ -d "$start" ]]; do
+        if [[ -d "$start/.bare" ]]; then
+            echo "$start"
+            break
+        else
+            start=$(dirname "$start")
+        fi
+    done
+}
 
 if [[ ! $project == "" ]]; then
     cd "$PROJECTS/$project" || exit
     touch -h "$PROJECTS/$project"
     if [[ $TERM == "dumb" ]]; then
+        if [[ $(__fuzzel_exit) -ge 10 ]]; then
+            project_base_path=$(__find_project_path "$project")
+            echo "Project base path: $project_base_path"
+            project_base_name=${project_base_path##${PROJECTS}/}
+
+            name="$(zenity --entry \
+              --title="New dated worktree" \
+              --text="$project_base_name\n\nNew branch name:" \
+              --entry-text="" \
+              --ok-label="Create" \
+              --cancel-label="Cancel")"
+
+            if [[ -z $name ]]; then
+                exit 1
+            fi
+
+            cd "$project_base_path" || exit 1
+            cd "$(git new-dated-worktree "$name" | tail -n 1)" || exit 1
+        fi
         terminal -c project -e tmux-vim
     else
         tmux-vim
