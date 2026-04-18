@@ -23,6 +23,8 @@ echo "done"
 xdg-mime default feh.desktop 'image/svg+xml'
 xdg-mime default feh.desktop 'image/*'
 
+xdg-mime default mpv.desktop 'video/mp4'
+
 echo -en "> $(
     if [[ -n "$(command -v gio)" ]]; then
         gio mime inode/directory lf.desktop
