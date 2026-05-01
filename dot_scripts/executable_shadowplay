@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   shadowplay
+# author: Pawel Bogut <https://pbogut.me>
+# date:   01/05/2026
+# desc:   shadow play script - records gameplay
+#         in background and saves clips on demand
+#=================================================
+
+record_minutes=300
+record_fps=60
+terminate="$TMPDIR/shadowplay.terminate"
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help              display this help and exit"
+  echo "  --fullscreen {monitor}  start recording whole monitor"
+  echo "  --save                  save replay to file"
+  echo "  --kill                  kill screen recording"
+}
+
+action=""
+while test $# -gt 0; do
+  case "$1" in
+  --kill)
+    action="kill"
+    shift
+    ;;
+  --save | -s)
+    action="save"
+    shift
+    ;;
+  --fullscreen | -f)
+    action="fullscreen"
+    shift
+    screen="$1"
+    shift
+    ;;
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+  esac
+done
+
+if [[ -z $action ]]; then
+  usage
+  exit 1
+fi
+
+if [[ $action == "kill" ]]; then
+  pkill -TERM -f gpu-screen-recorder
+  touch "$terminate"
+fi
+
+if [[ $action == "save" ]]; then
+  if pkill -USR1 -f gpu-screen-recorder; then
+    notify-send -u low "Saving replay..."
+  else
+    notify-send -u critical "No screen recording running"
+  fi
+fi
+
+if [[ $action == "fullscreen" ]]; then
+  if [[ -z $screen ]]; then
+    usage
+    exit 1
+  fi
+  rm "$terminate" > /dev/null 2>&1 || true
+  pkill -TERM -f gpu-screen-recorder
+  count=0
+  while :; do
+    count=$(( count + 1 ))
+    notify-send -u low "Start Shadowing $screen"
+
+    path="$HOME/Videos/ShadowPlay"
+
+    mkdir -p "$path"
+
+      gpu-screen-recorder -w "$screen" \
+        -c mp4 -f $record_fps \
+        -a "$(pactl get-default-sink).monitor" \
+        -r $record_minutes \
+        -o "$path" | while read -r line; do
+      if [[ $line == "$path"* ]]; then
+        notify-send -u low "Saved replay to $line"
+      fi
+    done
+
+    if [[ -f "$terminate" ]]; then
+      rm "$terminate"
+      exit 0
+    fi
+    if [[ $count -gt 100 ]] ;then
+      exit 1
+    fi
+  done
+fi
