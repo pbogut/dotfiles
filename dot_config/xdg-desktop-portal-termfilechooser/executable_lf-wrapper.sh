@@ -22,7 +22,7 @@
 
 # shellcheck disable=SC2046
 # fix colors
-eval $(dircolors ~/.config/dircolors-solarized/dircolors.256dark)
+eval $(dircolors ~/.config/dircolors-solarized/dircolors.ansi-dark)
 multiple="$1"
 directory="$2"
 save="$3"

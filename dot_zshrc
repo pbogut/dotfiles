@@ -113,11 +113,13 @@ autoload -z edit-command-line
 zle -N edit-command-line
 bindkey "^V" edit-command-line
 
-eval `dircolors ~/.config/dircolors-solarized/dircolors.256dark`
+#eval `dircolors ~/.config/dircolors-solarized/dircolors.256dark`
+eval `dircolors ~/.config/dircolors-solarized/dircolors.ansi-dark`
 
 abbrev-alias --init
 abbrev-alias -g G='|rg'
 abbrev-alias -g dc='docker-compose'
+abbrev-alias -g NN='2>&1 | nvim -'
 
 # shortcuts
 source ~/.aliases
