@@ -167,7 +167,7 @@ return {
     vim.cmd([[
       function! s:db_export(file, ...) abort
         let dir = trim(system('mktemp -d'))
-        exec ('!~/.scripts/db-output-conv/conv.php ' . shellescape(expand('%')) . ' ' . shellescape(l:dir . '/db.csv') . ' | unoconv -d spreadsheet -o ' . shellescape(a:file) . ' ' . shellescape(l:dir . '/db.csv'))
+        exec ('!db-to-csv ' . shellescape(expand('%')) . ' ' . shellescape(a:file))
       endfunction
 
       function! s:db_report(cmd, bang, line1, line2) abort

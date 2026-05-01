@@ -120,11 +120,12 @@ paru = [
 ]
 go = [
   "github.com/pbogut/audio-share-pc-client/audio-share-go-client@latest",
+  "github.com/pbogut/db-to-csv@latest",
   "github.com/pbogut/go-serve@latest",
   "github.com/pbogut/hyprnotify@latest",
   "github.com/pbogut/mails-go-web@latest",
-  "github.com/porjo/youtubeuploader@latest",
   "github.com/pbogut/systray-cli@latest",
+  "github.com/porjo/youtubeuploader@latest",
 ]
 cargo = [
   "bacon",
