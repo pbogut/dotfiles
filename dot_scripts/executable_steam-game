@@ -11,13 +11,29 @@ usage() {
   echo "  -h, --help     display this help and exit"
   echo "  --nods4        ignore my DS4 controller, avoiding double input with steaminput"
 }
-
+params=()
+w=1920
+h=1080
 while test $# -gt 0; do
   case "$1" in
     --nods4)
       export SDL_GAMECONTROLLER_IGNORE_DEVICES="0x054c/0x09cc"
       shift
     ;;
+    --potato)
+      w=1280
+      h=720
+      shift
+      ;;
+    --boxer)
+      export PROTON_ENABLE_HIDRAW="0x1209/0x4f54"
+      shift
+    ;;
+    --wayland)
+      export PROTON_ENABLE_WAYLAND=1
+      params+=("--expose-wayland")
+      shift
+      ;;
     --mouse-input|--mouse-input=*)
       if [[ $1 =~ --[a-z\-]+= ]]; then
         preset="${1//--mouse-input=/}"
@@ -45,6 +61,7 @@ while test $# -gt 0; do
       ;;
   esac
 done
-echo gamescope -w 1920 -h 1080 -W 1920 -H 1080 --force-grab-cursor -- "$@" >> /tmp/stm
-gamescope -w 1920 -h 1080 -W 1920 -H 1080 --force-grab-cursor -- "$@"
+export LD_PRELOAD="" # fix stutter timebomb in cs2
+#shellcheck disable=SC2068
+gamescope ${params[@]} --fullscreen -w $w -h $h -W 1920 -H 1080 --force-grab-cursor -- "$@"
 input-remapper-control --device "Razer Razer Naga V2 HyperSpeed" --command stop
