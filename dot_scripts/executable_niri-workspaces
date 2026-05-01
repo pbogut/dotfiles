@@ -46,12 +46,12 @@ niri-prop -l | while read -r line; do
   # win_id=$(jq -r '.window_id' <<< "$line")
 
   case "$app_id" in
-    "Alacritty")
-    current_ws=$(niri msg -j workspaces | jq --argjson names "$noterm_workspaces" -r '.[] | select(.is_focused == true) | select(.name != null) | select(.name as $name | $names | index($name)) | .name')
-    if [[ $current_ws != "" ]]; then
-      niri-named-workspace move term
-    fi
-    ;;
+    # "Alacritty")
+    # current_ws=$(niri msg -j workspaces | jq --argjson names "$noterm_workspaces" -r '.[] | select(.is_focused == true) | select(.name != null) | select(.name as $name | $names | index($name)) | .name')
+    # if [[ $current_ws != "" ]]; then
+    #   niri-named-workspace move term
+    # fi
+    # ;;
     "steam")
       niri-named-workspace move game -o DP-1
     ;;
