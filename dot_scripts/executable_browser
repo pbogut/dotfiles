@@ -33,6 +33,8 @@ elif [[ $url =~ ^https://.*\.richpanel\.com ]]; then
   vivaldi-work "$@" &
 elif [[ $url =~ ^https://gitlab\.com ]]; then
   vivaldi-work "$@" &
+elif [[ $url =~ ^https://pms\.* ]]; then
+  vivaldi-work "$@" &
 elif [[ $url =~ ^https://local\.* ]]; then
   vivaldi-work "$@" &
 elif [[ $url =~ ^https?://*\.local ]]; then
