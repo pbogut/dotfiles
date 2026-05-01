@@ -1,0 +1,8 @@
+#!/bin/sh
+# {{- if eq .chezmoi.hostname "redeye" }} redeye [[[
+shadowplay --fullscreen DP-1 &
+# ]]] {{- end }}
+exec /usr/lib/steam/steam "$@"
+# {{- if eq .chezmoi.hostname "redeye" }} redeye [[[
+shadowplay --kill
+# ]]] {{- end }}
