@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+if [[ -f ./Makefile ]]; then
+  make dev
+fi
+read -r -p "Press enter to exit"
+exit 0
