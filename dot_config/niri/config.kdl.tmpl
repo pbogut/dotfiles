@@ -456,10 +456,16 @@ window-rule {
 }
 window-rule {
     match app-id="org.kde.kdeconnect.sms"
+    match app-id="org.kde.kdeconnect.daemon"
     open-floating true
     default-window-height { fixed 220; }
     default-column-width { proportion 0.8; }
     default-floating-position x=200 y=-20 relative-to="top-left"
+}
+window-rule {
+    match app-id="openshot" title="Preview"
+    match app-id="openshot" title="Export Video"
+    open-floating true
 }
 window-rule {
     match app-id="Alacritty.floating"
