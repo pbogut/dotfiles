@@ -52,10 +52,13 @@ __fuzzel() {
     echo $? > /tmp/fuzzel.exit
 }
 
+fzf_select=enter
 if [[ $TERM == "dumb" ]]; then
     project=$(all_projects | sed -E "s;(.*);\1\x00icon\x1f$ICONS/git.svg;" | __fuzzel "$1" | select_project)
 else
-    project=$(all_projects | fzf -q "$1" --height=100% | select_project)
+    project=$(all_projects | fzf --expect="ctrl-n,enter" -q "$1" --height=100%)
+    fzf_select=$(head -n1 <<< "$project")
+    project=$(tail -n1 <<< "$project" | select_project)
 fi
 
 __find_project_path() {
@@ -70,31 +73,55 @@ __find_project_path() {
     done
 }
 
+__create_new() {
+    project_base_path=$(__find_project_path "$project")
+    echo "Project base path: $project_base_path"
+    project_base_name=${project_base_path##${PROJECTS}/}
+
+    name="$(zenity --entry \
+      --title="New dated worktree" \
+      --text="$project_base_name\n\nNew branch name:" \
+      --entry-text="" \
+      --ok-label="Create" \
+      --cancel-label="Cancel")"
+
+    if [[ -z $name ]]; then
+        exit 1
+    fi
+
+    cd "$project_base_path" || exit 1
+    cd "$(git new-dated-worktree "$name" | tail -n 1)" || exit 1
+}
+
 if [[ ! $project == "" ]]; then
     cd "$PROJECTS/$project" || exit
     touch -h "$PROJECTS/$project"
     if [[ $TERM == "dumb" ]]; then
         if [[ $(__fuzzel_exit) -ge 10 ]]; then
-            project_base_path=$(__find_project_path "$project")
-            echo "Project base path: $project_base_path"
-            project_base_name=${project_base_path##${PROJECTS}/}
+            # project_base_path=$(__find_project_path "$project")
+            # echo "Project base path: $project_base_path"
+            # project_base_name=${project_base_path##${PROJECTS}/}
 
-            name="$(zenity --entry \
-              --title="New dated worktree" \
-              --text="$project_base_name\n\nNew branch name:" \
-              --entry-text="" \
-              --ok-label="Create" \
-              --cancel-label="Cancel")"
+            # name="$(zenity --entry \
+            #   --title="New dated worktree" \
+            #   --text="$project_base_name\n\nNew branch name:" \
+            #   --entry-text="" \
+            #   --ok-label="Create" \
+            #   --cancel-label="Cancel")"
 
-            if [[ -z $name ]]; then
-                exit 1
-            fi
+            # if [[ -z $name ]]; then
+            #     exit 1
+            # fi
 
-            cd "$project_base_path" || exit 1
-            cd "$(git new-dated-worktree "$name" | tail -n 1)" || exit 1
+            # cd "$project_base_path" || exit 1
+            # cd "$(git new-dated-worktree "$name" | tail -n 1)" || exit 1
+            __create_new
         fi
         terminal -c project -e tmux-vim
     else
+        if [[ $fzf_select == "ctrl-n" ]]; then
+            __create_new
+        fi
         tmux-vim
     fi
 fi
