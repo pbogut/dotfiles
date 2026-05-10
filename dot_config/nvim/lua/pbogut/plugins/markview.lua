@@ -1,6 +1,6 @@
 ---@type LazyPluginSpec
 return {
-  enabled = true,
+  enabled = false,
   -- lazy = false, -- Recommended
   'oxy2dev/markview.nvim',
   dependencies = {

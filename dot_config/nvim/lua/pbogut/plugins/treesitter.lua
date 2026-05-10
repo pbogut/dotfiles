@@ -50,6 +50,8 @@ return {
             if ok and not no_highlight[vim.bo.filetype] then
               vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
             end
+          else
+              vim.bo.indentexpr = ""
           end
         end,
       })
