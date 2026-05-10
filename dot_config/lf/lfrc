@@ -26,6 +26,15 @@ cmd trash %{{
   fi
 }}
 
+cmd remove %{{
+  echo "rm -fr? [y] "
+  read -r confirm
+  echo $confirm
+  if [[ $confirm == 'y' ]]; then
+    rm -rf $fx
+  fi
+}}
+
 cmd mkdir %{{
   echo -n "mkdir -p "
   read -r dir
@@ -84,7 +93,7 @@ map O openall
 map u umount
 map K mkdir
 map T trash
-map D trash
+map D remove
 map R reload
 map S $zsh
 
