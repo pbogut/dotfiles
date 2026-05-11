@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   git-new-dated-worktree
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   24/03/2026
+#=================================================
+name="$1"
+
+__find_project_path() {
+    start=$(pwd)
+    while [[ -d "$start" ]]; do
+        if [[ -d "$start/.bare" ]]; then
+            echo "$start"
+            break
+        else
+            start=$(dirname "$start")
+        fi
+    done
+}
+
+project_path=$(__find_project_path)
+if [[ -z "$project_path" ]]; then
+  exit 1
+fi
+main_branch=$(cat "$project_path/.bare/HEAD" | sed 's,ref: .*/,,')
+full_name="$(date +%Y-%m-%d)-$name"
+
+git wt add "$full_name" "$main_branch"
+echo "$project_path/$full_name"
