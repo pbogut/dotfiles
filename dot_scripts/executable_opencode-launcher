@@ -1,0 +1,33 @@
+#!/bin/bash
+find_up() {
+  local name="$1"
+  local dir="$PWD"
+
+  while true; do
+    if [ -e "$dir/$name" ]; then
+      echo "$dir/$name"
+      return 0
+    fi
+
+    if [ "$dir" = "/" ]; then
+      return 1
+    fi
+
+    dir="$(dirname "$dir")"
+  done
+}
+
+profile="$1"
+if [ -z "$profile" ]; then
+  opencode_cfg=$(find_up ".opencoderc")
+  if [ -z "$opencode_cfg" ]; then
+    echo "Could not find .opencoderc file"
+    exit 1
+  fi
+  profile=$(cat "$opencode_cfg")
+fi
+
+echo "Profile: $profile"
+touch "$HOME/.local/share/opencode/$profile-auth.json"
+ln -f "$HOME/.local/share/opencode/$profile-auth.json" "$HOME/.local/share/opencode/auth.json"
+opencode

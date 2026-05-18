@@ -9,7 +9,7 @@ if ! tmux select-window -t ":$number"; then
       6) tmux new-window -a -t ":$number" 'zsh -ic "rest"' ;;
       7) tmux new-window -a -t ":$number" 'lazygit --use-config-file="/home/pbogut/.config/lazygit/config.yml,/home/pbogut/.config/lazygit/config-tmux.yml"' ;;
       8) tmux new-window -a -t ":$number" 'lazydocker' ;;
-      9) tmux new-window -a -t ":$number" 'zsh -ic "opencode"' ;;
+      9) tmux new-window -a -t ":$number" 'zsh -ic "opencode-launcher"' ;;
       *) tmux new-window -a -t ":$number" ;;
     esac
   else
