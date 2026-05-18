@@ -12,6 +12,7 @@ stash_path="$(jq -r '.stash_path' ~/.config/drone-sync.json -c)"
 
 find "$local_path" -type d | fzf --preview 'tree -a {}' | while read -r dir; do
   dest="$stash_path/${dir#"$local_path"/}"
+  echo "Stashing ${dir#"$local_path"/}"
   rsync -av "$dir/" "$dest/" --remove-source-files
   find "$dir" -type d -delete
 done

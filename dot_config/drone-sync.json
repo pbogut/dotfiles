@@ -64,7 +64,9 @@
       "test": "dji_goggles_n3",
       "src": "DCIM/100MEDIA/",
       "dst": "DjiGogglesN3/",
-      "remove": null
+      "remove": [
+        "DCIM/*/*.MOV"
+      ]
     },
     {
       "name": "Skyzone Cobra X",
@@ -73,6 +75,16 @@
       "dst": "CobraX/",
       "remove": [
         "DCIM/*.mov"
+      ]
+    },
+    {
+      "name": "HDZero Goggles 2",
+      "test": "hdzero_goggles2",
+      "src": "DCIM/100HDZRO/",
+      "dst": "HDZeroG2/",
+      "remove": [
+        "DCIM/100HDZRO/*.ts",
+        "DCIM/100HDZRO/*.jpg"
       ]
     },
     {
