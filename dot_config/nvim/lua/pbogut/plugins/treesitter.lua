@@ -38,20 +38,20 @@ return {
       vim.cmd.TSInstallMy()
     end,
     init = function()
-      local no_highlight = { 'markdown' }
-      local no_indent = { 'blade' }
+      local no_highlight = { markdown = true }
+      local no_indent = { blade = true }
 
       -- enable highlighting for all buffers
       vim.api.nvim_create_autocmd('FileType', {
-        pattern =  '*' ,
+        pattern = '*',
         callback = function()
-          if not no_indent[vim.bo.filetype] then
-            local ok, err = pcall(vim.treesitter.start)
-            if ok and not no_highlight[vim.bo.filetype] then
+          if not no_highlight[vim.bo.filetype] then
+            pcall(vim.treesitter.start)
+            if not no_indent[vim.bo.filetype] then
               vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+            else
+              vim.bo.indentexpr = ''
             end
-          else
-              vim.bo.indentexpr = ""
           end
         end,
       })
