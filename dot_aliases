@@ -1,5 +1,5 @@
 alias time="\time -f '\nExecution time: %es'"
-alias gp="nvim -c ':GpChatFinder'"
+alias gp="opencode-launcher chat"
 alias tvi=tmux-vim
 alias tv=tmux-vim
 alias vit=tmux-vim

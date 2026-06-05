@@ -30,4 +30,13 @@ fi
 echo "Profile: $profile"
 touch "$HOME/.local/share/opencode/$profile-auth.json"
 ln -f "$HOME/.local/share/opencode/$profile-auth.json" "$HOME/.local/share/opencode/auth.json"
+
+touch "$HOME/.config/opencode/$profile-opencode.json"
+ln -f "$HOME/.config/opencode/$profile-opencode.json" "$HOME/.config/opencode/opencode.json"
+
+# if timux rename window
+if [ -n "$TMUX" ]; then
+  tmux rename-window "opencode[$profile]"
+fi
+
 opencode

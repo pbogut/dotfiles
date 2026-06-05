@@ -1,0 +1,28 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "build": {
+      "disable": true
+    },
+    "plan": {
+      "disable": true
+    },
+    "chat": {
+      "mode": "primary",
+      "model": "openai/gpt-5-mini",
+      "variant": "minimal",
+      "description": "General chat agent with web access only",
+      "permission": {
+        "bash": "deny",
+        "edit": "deny",
+        "write": "deny",
+        "read": "deny",
+        "glob": "deny",
+        "grep": "deny",
+        "webfetch": "allow",
+        "websearch": "allow"
+      },
+      "prompt": "You are a helpful general-purpose chat assistant. You have access to the web to fetch information. Do not attempt to modify files or execute shell commands."
+    }
+  }
+}
