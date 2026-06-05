@@ -88,6 +88,7 @@ __create_new() {
     if [[ -z $name ]]; then
         exit 1
     fi
+    name="${name// /-}"
 
     cd "$project_base_path" || exit 1
     cd "$(git new-dated-worktree "$name" | tail -n 1)" || exit 1
