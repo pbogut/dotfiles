@@ -66,7 +66,7 @@ input {
 
     // Focus windows and outputs automatically when moving the mouse into them.
     // Setting max-scroll-amount="0%" makes it work only on windows already fully on screen.
-    focus-follows-mouse max-scroll-amount="10%"
+    focus-follows-mouse max-scroll-amount="100%"
 }
 
 // You can configure outputs by their name, which you can find
@@ -449,7 +449,7 @@ window-rule {
     default-column-width { proportion 0.5; }
 }
 window-rule {
-    match app-id="WebCord"
+    match app-id="webcord"
     match app-id="ferdium"
     match app-id="Alacritty.mutt"
     match app-id=r#"^(.*\-meet\.google\.com__).*$"#
