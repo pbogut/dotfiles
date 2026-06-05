@@ -43,6 +43,7 @@ cmd mkdir %{{
 }}
 
 cmd umount %{{
+  sync
   umount $f
   #lf -remote "send $id reload"
 }}
@@ -109,6 +110,11 @@ cmd go_media %{{
   lf -remote "send $id cd $dest"
 }}
 
+cmd go_3dmodels %{{
+  dest="$HOME/3DPrint"
+  lf -remote "send $id cd $dest"
+}}
+
 cmd go_faktury %{{
   dest="$HOME/Documents/Axolit/Faktury/$(date '+%Y/%m')"
   mkdir -p "$dest"
@@ -132,6 +138,7 @@ map gn cd ~/Nextcloud
 map gv cd ~/Videos
 map gp go_project
 map gm go_media
+map g3 go_3dmodels
 map gf go_faktury
 map gs cd ~/Pictures/screenshots
 
