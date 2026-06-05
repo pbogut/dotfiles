@@ -32,6 +32,16 @@ while test $# -gt 0; do
     action="save"
     shift
     ;;
+  --record-time|--record-time=*|-r)
+    if [[ $1 =~ --[a-z\-]+= ]]; then
+      _val="${1//--time=/}"
+      shift
+    else
+      _val="$2"
+      shift; shift
+    fi
+    record_minutes="$_val"
+    ;;
   --fullscreen | -f)
     action="fullscreen"
     shift
@@ -48,6 +58,34 @@ while test $# -gt 0; do
     ;;
   esac
 done
+
+_prams_audio() {
+    audio=()
+    gpu-screen-recorder --list-audio-devices | grep -q VR_P10
+    vrp10=$?
+    gpu-screen-recorder --list-audio-devices | grep -q Arctis_Pro_Wireless
+    arctispro=$?
+    gpu-screen-recorder --list-audio-devices | grep -q  'Easy Effects'
+    easyeffects=$?
+    if [[ $easyeffects -eq 0 ]]; then
+        audio+=(-a "easyeffects_sink.monitor|easyeffects_source")
+        audio+=(-a "easyeffects_sink.monitor")
+        audio+=(-a "easyeffects_source")
+    elif [[ $arctispro -eq 0 ]] && [[ $vrp10 -eq 0 ]]; then
+        audio+=(-a "default_output|alsa_input.usb-SteelSeries_Arctis_Pro_Wireless-00.mono-fallback|alsa_input.usb-Telink_VR_P10_Dongle-00.mono-fallback")
+        audio+=(-a "default_output")
+        audio+=(-a "alsa_input.usb-SteelSeries_Arctis_Pro_Wireless-00.mono-fallback")
+        audio+=(-a "alsa_input.usb-Telink_VR_P10_Dongle-00.mono-fallback")
+    elif [[ $arctispro -eq 0 ]]; then
+        audio+=(-a "default_output|alsa_input.usb-SteelSeries_Arctis_Pro_Wireless-00.mono-fallback")
+        audio+=(-a "default_output")
+        audio+=(-a "alsa_input.usb-SteelSeries_Arctis_Pro_Wireless-00.mono-fallback")
+    elif [[ $vrp10 -eq 0 ]]; then
+        audio+=(-a "default_output|alsa_input.usb-Telink_VR_P10_Dongle-00.mono-fallback")
+        audio+=(-a "default_output")
+        audio+=(-a "alsa_input.usb-Telink_VR_P10_Dongle-00.mono-fallback")
+    fi
+}
 
 if [[ -z $action ]]; then
   usage
@@ -83,7 +121,9 @@ if [[ $action == "fullscreen" ]]; then
 
     mkdir -p "$path"
 
-      gpu-screen-recorder -w "$screen" \
+      # shellcheck disable=SC2046
+      gpu-screen-recorder $(_prams_audio) \
+        -w "$screen" \
         -c mp4 -f $record_fps \
         -a "$(pactl get-default-sink).monitor" \
         -r $record_minutes \
