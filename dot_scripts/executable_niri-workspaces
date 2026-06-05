@@ -68,10 +68,10 @@ niri-prop -l | while read -r line; do
     # niri-named-workspace move web -o DP-1
     # ;;
     # "ferdium")
-    # niri-named-workspace move chat -o HDMI-A-1
+    # niri-named-workspace move chat -o DP-2
     # ;;
     # "vivaldi-work")
-    # niri-named-workspace move work -o HDMI-A-1
+    # niri-named-workspace move work -o DP-2
     # ;;
   esac
   # actions to run every "tick"

@@ -106,14 +106,22 @@ input {
     position x=1280 y=0
 }
 // {{ if eq .hostname "redeye" }}
-output "HDMI-A-1" {
+output "DP-1" {
+    mode "1920x1080@144.000"
+    scale 1
+    transform "normal"
+    position x=0 y=0
+    variable-refresh-rate on-demand=true
+}
+
+output "DP-2" {
     mode "1920x1080@60.000"
     scale 1
     transform "normal"
     position x=1920 y=0
 }
 
-output "DP-1" {
+output "HDMI-A-1" {
     mode "1920x1080@144.000"
     scale 1
     transform "normal"
@@ -123,7 +131,7 @@ output "DP-1" {
 // {{ end }}
 // {{ if eq .hostname "silverspoon" }}
 output "eDP-1" {
-    scale 1.25
+    scale 1
     transform "normal"
     position x=0 y=0
 }
@@ -359,16 +367,16 @@ workspace "game" {
   open-on-output "DP-1"
 }
 workspace "chat" {
-  open-on-output "HDMI-A-1"
+  open-on-output "DP-2"
   layout {
       center-focused-column "always"
   }
 }
 workspace "work" {
-  open-on-output "HDMI-A-1"
+  open-on-output "DP-2"
 }
 workspace "media" {
-  open-on-output "HDMI-A-1"
+  open-on-output "DP-2"
 }
 
 // Window rules let you adjust behavior for individual windows.

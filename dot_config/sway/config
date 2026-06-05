@@ -243,7 +243,7 @@ hide_edge_borders --i3 both
 workspace_layout stacking
 
 set $display_laptop eDP-1
-set $display_right HDMI-A-1
+set $display_right DP-2
 set $display_main DP-1
 
 # assign workspace to display
@@ -301,7 +301,7 @@ for_window [title="^Picture-in-Picture"] floating enable; sticky on
 for_window [app_id="nngceckbapebfimnlniiiahkandclblb"] floating enable;
 
 # laptop mirror
-workspace "mirror" output HDMI-A-1
+workspace "mirror" output DP-2
 assign [app_id="at.yrlf.wl_mirror"] "mirror"
 for_window [app_id="at.yrlf.wl_mirror"] floating enable fullscreen enable
 
