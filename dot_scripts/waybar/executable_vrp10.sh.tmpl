@@ -28,18 +28,18 @@ __switch_sink() {
   done <<< "$(pactl list short sink-inputs | awk '{print $1}')"
 }
 
-if [[ $current == "$buds" ]]; then
-  if $toggle; then
-    __switch_sink "$speaker"
-    echo ""
-  else
-    echo ""
-  fi
-else
+if [[ $current == "$speaker" ]]; then
   if $toggle; then
     __switch_sink "$buds"
     echo ""
   else
     echo ""
+  fi
+else
+  if $toggle; then
+    __switch_sink "$speaker"
+    echo ""
+  else
+    echo ""
   fi
 fi
