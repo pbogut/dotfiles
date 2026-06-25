@@ -1,4 +1,45 @@
 #!/bin/bash
+
+usage() {
+  echo "Ussage: ${0##*/} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help            display this help and exit"
+  echo "  -p, --profile         profile name"
+  echo "  -ls, --list-profiles  list available profiles"
+}
+
+profile=""
+params=()
+
+while test $# -gt 0; do
+  case "$1" in
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --list-profiles|-ls)
+      (
+        find "$HOME/.config/opencode/" -name "*-opencode.json"
+        find "$HOME/.local/share/opencode/" -name "*-auth.json"
+      ) |
+      sed -E 's/.*\/([^-]+)-(opencode|auth)\.json/\1/' |
+      sort -u
+
+      exit 0
+      ;;
+    --profile|-p)
+      shift
+      profile="$1"
+      shift
+      ;;
+    *)
+      params+=("$1")
+      shift
+      ;;
+  esac
+done
+
 find_up() {
   local name="$1"
   local dir="$PWD"
@@ -17,7 +58,6 @@ find_up() {
   done
 }
 
-profile="$1"
 if [ -z "$profile" ]; then
   opencode_cfg=$(find_up ".opencoderc")
   if [ -z "$opencode_cfg" ]; then
@@ -39,4 +79,5 @@ if [ -n "$TMUX" ]; then
   tmux rename-window "opencode[$profile]"
 fi
 
-opencode
+echo opencode "${params[@]}"
+opencode "${params[@]}"
