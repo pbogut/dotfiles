@@ -1,0 +1,13 @@
+{
+  "lsp": {},
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "build": {
+      "model": "opencode-go/deepseek-v4-pro"
+    },
+    "plan": {
+      "model": "opencode-go/deepseek-v4-pro"
+    }
+  },
+  "provider": {{ include (joinPath .chezmoi.homeDir ".config/opencode/providers.json") }}
+}

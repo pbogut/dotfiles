@@ -1,11 +1,12 @@
 {
+  "lsp": {},
   "$schema": "https://opencode.ai/config.json",
   "agent": {
     "build": {
-      "model": "github-copilot/gpt-5.3-codex"
+      "model": "opencode-go/deepseek-v4-pro"
     },
     "plan": {
-      "model": "github-copilot/gpt-5.3-codex"
+      "model": "opencode-go/deepseek-v4-pro"
     }
   }
 }

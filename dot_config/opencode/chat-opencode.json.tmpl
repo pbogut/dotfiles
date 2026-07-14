@@ -1,5 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "default_agent": "chat",
   "agent": {
     "build": {
       "disable": true
@@ -9,20 +10,21 @@
     },
     "chat": {
       "mode": "primary",
-      "model": "openai/gpt-5-mini",
-      "variant": "minimal",
+      "model": "opencode-go/deepseek-v4-pro",
+      "variant": "medium",
       "description": "General chat agent with web access only",
       "permission": {
-        "bash": "deny",
-        "edit": "deny",
-        "write": "deny",
-        "read": "deny",
-        "glob": "deny",
-        "grep": "deny",
+        "bash": "ask",
+        "edit": "ask",
+        "write": "ask",
+        "read": "ask",
+        "glob": "ask",
+        "grep": "ask",
         "webfetch": "allow",
         "websearch": "allow"
       },
       "prompt": "You are a helpful general-purpose chat assistant. You have access to the web to fetch information. Do not attempt to modify files or execute shell commands."
     }
-  }
+  },
+  "provider": {{ include (joinPath .chezmoi.homeDir ".config/opencode/providers.json") }}
 }

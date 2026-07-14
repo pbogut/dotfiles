@@ -1,0 +1,22 @@
+{
+  "ollama": {
+    "options": {
+      "baseURL": "http://localhost:11434/v1",
+      "apiKey": "ollama"
+    },
+    "models": {
+      "qwen2.5:14b": {
+        "name": "qwen2.5:14b"
+      },
+      "qwen2.5:14b-32k": {
+        "name": "qwen2.5:14b-32k"
+      },
+      "qwen3:14b": {
+        "name": "qwen3:14b"
+      },
+      "qwen3:14b-32k": {
+        "name": "qwen3:14b-32k"
+      }
+    }
+  }
+}
