@@ -23,6 +23,16 @@
       ]
     },
     {
+      "name": "Geko25 with Dji O4",
+      "test": "djio4_geko25",
+      "src": "DCIM/",
+      "dst": "DjiO4_Geko25/",
+      "remove": [
+        "DCIM/*/*.MP4",
+        "DCIM/*/*.SRT"
+      ]
+    },
+    {
       "name": "Volador CX3.5 with Dji O4",
       "test": "djio4_volador_cx35",
       "src": "DCIM/",
@@ -58,6 +68,15 @@
       "src": "DCIM/100MEDIA/",
       "dst": "DjiMini4K/",
       "remove": null
+    },
+    {
+      "name": "DJI Goggles 3",
+      "test": "dji_goggles_3",
+      "src": "DCIM/100MEDIA/",
+      "dst": "DjiGoggles3/",
+      "remove": [
+        "DCIM/*/*.MOV"
+      ]
     },
     {
       "name": "DJI Goggles N3",
