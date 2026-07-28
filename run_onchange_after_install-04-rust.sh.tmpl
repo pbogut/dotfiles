@@ -24,3 +24,6 @@ cargo install --git {{ . }}
 # {{ range .packages.cargo }}
 cargo install {{ . }}
 # {{ end }}
+# {{ range .packages.cargo_nightly }}
+cargo +nightly install {{ . }}
+# {{ end }}
