@@ -194,7 +194,8 @@
       },
       "modules": [
           "pulseaudio",
-          "custom/vrp10",
+          "custom/pipewire-device",
+          // "custom/vrp10",
           {{ if eq .chezmoi.hostname "redeye" }}"custom/audioshare-client",{{ end }}
           {{ if eq .chezmoi.hostname "redeye" }}"custom/audio-loopback",{{ end }}
           {{ if eq .chezmoi.hostname "redeye" }}"custom/easyeffects-in",{{ end }}
@@ -229,6 +230,16 @@
         "children-class": "tray-group-item"
       },
       "modules": ["custom/expand-icon", "custom/expand-spacer", "tray"]
+    },
+    "custom/pipewire-device": {
+        "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
+        "interval": 3600,
+        "signal": 23,
+        "exec": "$HOME/.scripts/waybar/pipewire-device.sh | cut -d' ' -f-2",
+        "format-icons": {
+            "default": "󱄠"
+        },
+        "on-click": "$HOME/.scripts/waybar/pipewire-device.sh toggle; pkill -RTMIN+23 -x waybar"
     },
     "custom/expand-icon": {
         "format": "<span color=\"{{ $iconNormal }}\">{icon}{0}</span>",

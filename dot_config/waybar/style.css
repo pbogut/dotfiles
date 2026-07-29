@@ -153,6 +153,7 @@ button:hover {
     margin-bottom: 1px;
 }
 .audio-group-item #custom-vrp10,
+.audio-group-item #custom-pipewire-device,
 .audio-group-item #custom-audioshare-client,
 .audio-group-item #custom-audio-loopback,
 .audio-group-item #custom-easyeffects-in,
