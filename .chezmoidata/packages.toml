@@ -8,6 +8,7 @@ paru = [
   "base-devel",
   "chafa",
   "cmake",
+  "codeberg-cli-git",
   "copyq",
   "dbus-broker",
   "ddcutil",
@@ -132,7 +133,6 @@ cargo = [
   "lsp-ai",
   "mprocs",
   "rtx-cli",
-  "codeberg-cli",
 ]
 cargo_git = [
   "https://github.com/pbogut/enrichmail.git",
