@@ -66,7 +66,7 @@ input {
 
     // Focus windows and outputs automatically when moving the mouse into them.
     // Setting max-scroll-amount="0%" makes it work only on windows already fully on screen.
-    focus-follows-mouse max-scroll-amount="100%"
+    focus-follows-mouse max-scroll-amount="30%"
 }
 
 // You can configure outputs by their name, which you can find
@@ -136,7 +136,9 @@ output "eDP-1" {
     position x=0 y=0
 }
 output "DP-1" {
-    off
+    scale 1
+    transform "normal"
+    position x=1920 y=0
 }
 // {{ end }}
 
@@ -427,11 +429,13 @@ window-rule {
 }
 window-rule {
     match app-id="vivaldi-personal"
+    match app-id="brave-personal"
     default-column-width { proportion 0.9; }
     open-on-workspace "web"
 }
 window-rule {
     match app-id="vivaldi-work"
+    match app-id="brave-work"
     default-column-width { proportion 0.9; }
     open-on-workspace "work"
 }
@@ -454,11 +458,13 @@ window-rule {
     match app-id="Alacritty.mutt"
     match app-id=r#"^(.*\-meet\.google\.com__).*$"#
     match app-id=r#"^(.*\-[a-z0-9]+\.zoom\.us__).*$"#
+    match app-id=r#"^(.*\-chatgpt\.com__).*$"#
     open-on-workspace "chat"
 }
 window-rule {
     match title="Bitwarden - Vivaldi"
-    match app-id=r#"^(chrome\-[a-z]+\-Default)$"#
+    match app-id=r#"^(chrome\-[a-z]+\-(Default|Personal|Work))$"#
+    match app-id=r#"^(brave\-[a-z]+\-(Default|Personal|Work))$"#
     open-floating true
     block-out-from "screen-capture"
 }
@@ -473,6 +479,8 @@ window-rule {
 window-rule {
     match app-id="openshot" title="Preview"
     match app-id="openshot" title="Export Video"
+    match app-id="Flowbladesinglerender" title="Flowblade Timeline Render"
+    match app-id="Flowbladesinglerender" title="Flowblade Batch Render"
     open-floating true
 }
 window-rule {
@@ -562,6 +570,7 @@ binds {
     Mod+B hotkey-overlay-title="Browser" { spawn "browser" "focus"; }
     Mod+Ctrl+F hotkey-overlay-title="Ferdium" { spawn "focus-or-exec" "ferdium" "ferdium"; }
     Mod+Ctrl+D hotkey-overlay-title="Discord" { spawn "discord"; }
+    Mod+Ctrl+G hotkey-overlay-title="ChatGPT" { spawn "chatgpt"; }
     Mod+Q hotkey-overlay-title="Quick Menu" { spawn "quick-menu"; }
     Mod+apostrophe hotkey-overlay-title="CopyQ" { spawn "copyq-dmenu"; }
     Mod+Ctrl+K hotkey-overlay-title="Calendar" { spawn-sh "terminal-float -t 'khal' -e khal interactive"; }
@@ -792,7 +801,8 @@ binds {
 
     // Move the focused window between the floating and the tiling layout.
     Mod+Space { toggle-window-floating; }
-    Mod+Tab   { switch-focus-between-floating-and-tiling; }
+    Mod+Shift+Space   { switch-focus-between-floating-and-tiling; }
+    Mod+Tab   { spawn "niri-focus-window"; }
 
     // Toggle tabbed column display mode.
     // Windows in this column will appear as vertical tabs,
