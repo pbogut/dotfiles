@@ -131,11 +131,23 @@ cmd go_project ${{
   fi
 }}
 
+cmd go_anywhere ${{
+  clear
+  local startdir query dir
+  startdir="/home/pbogut"
+  dir=$(find -L /home/pbogut -name '.*' -prune -o -path '/home/pbogut/Projects' -prune -o -type d -print 2> /dev/null | fzf +m)
+
+  if [[ ! $dir == "" ]]; then
+    lf -remote "send $id cd $dir"
+  fi
+}}
+
 map gw cd ~/Work
 map gd cd ~/Documents
 map gD cd ~/Downloads
 map gn cd ~/Nextcloud
 map gv cd ~/Videos
+map ga go_anywhere
 map gp go_project
 map gm go_media
 map g3 go_3dmodels
