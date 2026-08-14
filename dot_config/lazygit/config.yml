@@ -31,10 +31,10 @@ gui:
   showCommandLog: true
   commandLogSize: 8
 git:
-  paging:
-    colorArg: always
-    pager: diff-so-fancy
-    # useConfig: false
+  pagers:
+    - colorArg: always
+      pager: diff-so-fancy
+      # useConfig: false
   merging:
     manualCommit: false
     args: ""
@@ -139,7 +139,7 @@ keybinding:
     viewResetOptions: D
     fetch: f
     toggleTreeView: '`'
-    openMergeTool: M
+    openMergeOptions: M
   branches:
     createPullRequest: o
     copyPullRequestURL: <c-y>
@@ -190,7 +190,6 @@ keybinding:
 os:
   open: '$TERMINAL -e nvim {{filename}}'
   openLink: xdg-open {{link}} >/dev/null 2>&1
-
 disableStartupPopups: false
 customCommands:
   - key: 'C'
