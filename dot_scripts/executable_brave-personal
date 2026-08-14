@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   chromium-start
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   17/08/2024
+#=================================================
+if [[ "$1" == "focus" ]]; then
+    shift
+    focus-or-exec "brave-personal" brave \
+        --ozone-platform=wayland \
+        --class=brave-personal \
+        --user-data-dir="$HOME/.config/BraveSoftware/Personal/" \
+        --profile-directory=Personal \
+        "$@"
+else
+    brave \
+        --ozone-platform=wayland \
+        --class=brave-personal \
+        --user-data-dir="$HOME/.config/BraveSoftware/Personal/" \
+        --profile-directory=Personal \
+        "$@"
+fi

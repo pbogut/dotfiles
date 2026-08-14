@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   chromium-start
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   17/08/2024
+#=================================================
+if [[ -z "$*" ]]; then
+    focus-or-exec "brave-work" brave \
+        --ozone-platform=wayland \
+        --class=brave-work \
+        --user-data-dir="$HOME/.config/BraveSoftware/Work/" \
+        --profile-directory=Work \
+        "$@"
+else
+    brave \
+        --ozone-platform=wayland \
+        --class=brave-work \
+        --user-data-dir="$HOME/.config/BraveSoftware/Work/" \
+        --profile-directory=Work \
+        "$@"
+fi

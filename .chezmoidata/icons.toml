@@ -20,6 +20,10 @@ vaultwarden-light=["vaultwarden-dmenu"]
 vivaldi = [
   "vivaldi-work",
   "vivaldi-personal",
+]
+brave = [
+  "brave-work",
+  "brave-personal",
   "browser-work",
   "browser-personal"
 ]
