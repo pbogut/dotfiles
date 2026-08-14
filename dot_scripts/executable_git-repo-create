@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   git-repo-create
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   28/07/2026
+#=================================================
+origin_url=$(git remote get-url origin 2>/dev/null)
+if [[ -z "$origin_url" ]]; then
+  echo "No origin remote found"
+  exit 1
+fi
+
+origin_host=$(echo "$origin_url" | sed -E 's/.*@([^:/]+).*/\1/;s/^https?:\/\/([^\/]+).*/\1/')
+repo_name=$(basename "$origin_url" .git)
+
+if [[ "$origin_host" == "codeberg.org" ]]; then
+  codeberg-cli repo create -n "$repo_name" --default-branch master
+elif [[ "$origin_host" == "github.com" ]]; then
+  gh repo create "$repo_name"
+else
+  echo "Origin host not supported ($origin_host)"
+  exit 1
+fi
