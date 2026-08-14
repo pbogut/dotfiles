@@ -7,8 +7,16 @@
 currenttime=$(date +%H:%M)
 start_time="$1"
 end_time="$2"
-if [[ "$currenttime" > "$start_time" ]] || [[ "$currenttime" < "$end_time" ]]; then
-    exit 0
+if [[ "$start_time" > "$end_time" ]]; then
+    if [[ "$currenttime" > "$start_time" ]] || [[ "$currenttime" < "$end_time" ]]; then
+        exit 0
+    else
+        exit 1
+    fi
 else
-    exit 1
+    if [[ "$currenttime" > "$start_time" ]] && [[ "$currenttime" < "$end_time" ]]; then
+        exit 0
+    else
+        exit 1
+    fi
 fi
