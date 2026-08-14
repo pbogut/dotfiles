@@ -109,17 +109,16 @@ paru = [
   "alacritty-sixel-git",
   "apg",
   "codeberg-cli-git",
-  "xtitle",
   "input-remapper-bin",
   "pandoc-bin",
   "python-upnpclient",
   "udevil",
   "udisksvm",
-  "wezterm-git",
   "wkhtmltopdf-static",
   "xcwd-git",
   "xdg-desktop-portal-termfilechooser-boydaihungst-git",
   "xob",
+  "xtitle",
 ]
 go = [
   "github.com/pbogut/audio-share-pc-client/audio-share-go-client@latest",
