@@ -118,7 +118,13 @@ if [[ ! $project == "" ]]; then
             # cd "$(git new-dated-worktree "$name" | tail -n 1)" || exit 1
             __create_new
         fi
-        terminal -c project -e tmux-vim
+        name=$(tmux-session-name)
+        session_id=$(tmux display-message -t "$name" -p '#{session_id}')
+        if [[ -z $session_id ]]; then
+            terminal -c project -e tmux-vim
+        else
+            focus-or-exec --title "\\|t\\$session_id$" terminal -c project -e tmux-vim
+        fi
     else
         if [[ $fzf_select == "ctrl-n" ]]; then
             __create_new
