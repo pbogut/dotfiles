@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+      eramxit 0
 #=================================================
 # name:   steam-game
 # author: Pawel Bogut <pbogut@pbogut.me>
@@ -9,17 +10,23 @@ usage() {
   echo ""
   echo "Options:"
   echo "  -h, --help     display this help and exit"
-  echo "  --nods4        ignore my DS4 controller, avoiding double input with steaminput"
+  echo "  --doubleinputfix        ignore my DS4 controller, avoiding double input with steaminput"
 }
 params=()
 w=1920
 h=1080
 while test $# -gt 0; do
   case "$1" in
-    --nods4)
-      export SDL_GAMECONTROLLER_IGNORE_DEVICES="0x054c/0x09cc"
+    --doubleinputfix)
+      # export SDL_GAMECONTROLLER_IGNORE_DEVICES="0x054c/0x09cc" # ds4
+      # export SDL_GAMECONTROLLER_IGNORE_DEVICES="0x28de/0x1304" # sc
+      export SDL_GAMECONTROLLER_IGNORE_DEVICES="0x054c/0x09cc;0x28de/0x1304"
       shift
     ;;
+    --clean-ld)
+      export LD_PRELOAD="" # fix stutter timebomb in cs2
+      shift
+      ;;
     --potato)
       w=1280
       h=720
@@ -61,7 +68,6 @@ while test $# -gt 0; do
       ;;
   esac
 done
-export LD_PRELOAD="" # fix stutter timebomb in cs2
 #shellcheck disable=SC2068
 gamescope ${params[@]} --fullscreen -w $w -h $h -W 1920 -H 1080 --force-grab-cursor -- "$@"
 input-remapper-control --device "Razer Razer Naga V2 HyperSpeed" --command stop
