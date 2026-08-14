@@ -262,7 +262,7 @@ if [[ $action == "remove" ]] && [[ -n $worktree ]]; then
       echo "summary:"
       git status -s
       cd - >/dev/null || exit 1
-      echo "Remove worktree with --force? [y/N]"
+      echo "Remove $worktree worktree with --force? [y/N]"
       read -r ans
       if [[ $ans == "y" ]]; then
         if ! git worktree remove --force "$worktree"; then
