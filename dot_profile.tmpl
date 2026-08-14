@@ -53,7 +53,6 @@ fi
 
 # redeye {{"{{{"}} {{- if eq .chezmoi.hostname "redeye" }}
 export MAKEFLAGS="-j 24"
-export PA_DEFAULT_SINK="Starship/Matisse"
 #{{- if ne .chezmoi.username "pbogut" }}
 export PULSE_SERVER="tcp:127.0.0.1:4713"
 #{{- end }}
@@ -61,7 +60,6 @@ export PULSE_SERVER="tcp:127.0.0.1:4713"
 
 # silverspoon {{"{{{"}} {{- if eq .chezmoi.hostname "silverspoon" }}
 export MAKEFLAGS="-j 8"
-export PA_DEFAULT_SINK="Speaker"
 # silverspoon {{"}}}"}} {{- end }}
 
 export $(gnome-keyring-daemon --start --components=pkcs11\,secrets\,ssh 2>/dev/null)
