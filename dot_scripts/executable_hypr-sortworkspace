@@ -36,7 +36,7 @@ case  "$class" in
   zoom|chrome-*.zoom.us__-*)
   move_and_swich "zoom"
   ;;
-  brave-www.youtube.com__*|chrome-www.youtube.com__*)
+  brave-www.youtube.com__*|chrome-www.youtube.com__*|vivaldi-www.youtube.com__*)
   move_and_swich "media"
   ;;
 esac
