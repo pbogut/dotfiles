@@ -7,11 +7,13 @@
 export PATH="$PATH:/home/$USER/.bin"
 export PATH="$PATH:/home/$USER/.scripts"
 
-url="$1"
+# browser="vivaldi"
+browser="brave"
 
+url="$1"
 if [[ "$1" == '--work' ]]; then
   shift
-  vivaldi-work "$@" &
+  $browser-work "$@" &
 elif [[ $url =~ ^https://invidious\.pbogut\.me/watch\?v= ]]; then
   shift
   youtube "$url" "${@//\[\[AMPERSAND\]\]/&}" &
@@ -19,7 +21,7 @@ elif [[ $url =~ ^https://www\.youtube\.com/watch\?v= ]]; then
   shift
   youtube "$url" "${@//\[\[AMPERSAND\]\]/&}" &
 elif [[ $url =~ ^https://open\.spotify\.com ]]; then
-  vivaldi-personal "$@" &
+  $browser-personal "$@" &
 elif [[ $url =~ ^https://.*\.zoom\.us ]]; then
   shift
   chromium --app="$url" --profile-directory=Default "$@" &
@@ -30,17 +32,17 @@ elif [[ $url =~ ^https://teams\.microsoft\.com ]]; then
   shift
   chromium --app="$url" --profile-directory=Default "$@" &
 elif [[ $url =~ ^https://.*\.richpanel\.com ]]; then
-  vivaldi-work "$@" &
+  $browser-work "$@" &
 elif [[ $url =~ ^https://gitlab\.com ]]; then
-  vivaldi-work "$@" &
+  $browser-work "$@" &
 elif [[ $url =~ ^https://pms\.* ]]; then
-  vivaldi-work "$@" &
+  $browser-work "$@" &
 elif [[ $url =~ ^https://local\.* ]]; then
-  vivaldi-work "$@" &
+  $browser-work "$@" &
 elif [[ $url =~ ^https?://*\.local ]]; then
-  vivaldi-work "$@" &
+  $browser-work "$@" &
 else
-  vivaldi-personal "$@" &
+  $browser-personal "$@" &
 fi
 
 exit 0;
