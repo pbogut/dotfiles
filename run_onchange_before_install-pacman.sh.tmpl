@@ -25,40 +25,73 @@ if ! paru --version; then
 fi
 
 installed=$(pacman -Q | awk '{print $1}')
-should_install="{{ range .packages.paru -}}{{ . }} {{ end }}"
-to_install=""
+should_install_pacman="{{ range .packages.pacman -}}{{ . }} {{ end }}"
+to_install_pacman=""
 
 # Loop through the packages to install and check if they are already installed
-for package in $should_install; do
+for package in $should_install_pacman; do
     if ! echo "$installed" | grep -q "^$package$"; then
-        to_install="$to_install $package"
+        to_install_pacman="$to_install_paru $package"
     fi
 done
 
-if [[ $to_install != "" ]]; then
-    echo "To install: $to_install"
+if [[ $to_install_pacman != "" ]]; then
+    echo "To install: $to_install_pacman"
+    sudo pacman -S \
+        --needed \
+        $to_install_pacman
+fi
+
+should_install_paru="{{ range .packages.paru -}}{{ . }} {{ end }}"
+to_install_paru=""
+
+for package in $should_install_paru; do
+    if ! echo "$installed" | grep -q "^$package$"; then
+        to_install_paru="$to_install_paru $package"
+    fi
+done
+
+if [[ $to_install_paru != "" ]]; then
+    echo "To install: $to_install_paru"
     paru -S \
         --skipreview \
         --needed \
-        $to_install
+        $to_install_paru
 fi
 
 # {{- if eq .hostname "silverspoon" }} [[[ silverspoon
-should_install="{{ range .silverspoon.packages.paru -}}{{ . }} {{ end }}"
-to_install=""
+should_install_pacman="{{ range .silverspoon.packages.paru -}}{{ . }} {{ end }}"
+to_install_pacman=""
 
 # Loop through the packages to install and check if they are already installed
-for package in $should_install; do
+for package in $should_install_pacman; do
     if ! echo "$installed" | grep -q "^$package$"; then
-        to_install="$to_install $package"
+        to_install_pacman="$to_install_pacman $package"
     fi
 done
 
-if [[ $to_install != "" ]]; then
-    echo "To install: $to_install"
+if [[ $to_install_pacman != "" ]]; then
+    echo "To install: $to_install_pacman"
+    sudo pacman -S \
+        --needed \
+        $to_install_pacman
+fi
+
+should_install_paru="{{ range .silverspoon.packages.paru -}}{{ . }} {{ end }}"
+to_install_paru=""
+
+# Loop through the packages to install and check if they are already installed
+for package in $should_install_paru; do
+    if ! echo "$installed" | grep -q "^$package$"; then
+        to_install_paru="$to_install_paru $package"
+    fi
+done
+
+if [[ $to_install_paru != "" ]]; then
+    echo "To install: $to_install_paru"
     paru -S \
         --skipreview \
         --needed \
-        $to_install
+        $to_install_paru
 fi
 # silverspoon ]]] {{- end }}
