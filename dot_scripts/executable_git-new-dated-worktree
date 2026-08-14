@@ -24,6 +24,7 @@ if [[ -z "$project_path" ]]; then
 fi
 main_branch=$(cat "$project_path/.bare/HEAD" | sed 's,ref: .*/,,')
 full_name="$(date +%Y-%m-%d)-$name"
+source_branch="${2-$main_branch}"
 
-git wt add "$full_name" "$main_branch"
+git wt add "$full_name" "$source_branch"
 echo "$project_path/$full_name"
