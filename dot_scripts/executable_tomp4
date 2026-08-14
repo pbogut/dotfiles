@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   tomp4
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   25/06/2026
+#=================================================
+for file in "$@"; do
+    if [[ ! -f "$file" ]]; then
+        echo "File not found: $file" >&2
+        continue
+    fi
+
+    filename=$(basename "$file")
+    name="${filename%.*}"
+    output="${name}.mp4"
+
+    ffmpeg -nostdin -i "$file" -c:v copy -c:a copy -c:s copy -movflags +faststart "$output"
+done
