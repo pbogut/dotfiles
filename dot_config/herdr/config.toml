@@ -3,6 +3,10 @@ onboarding = false
 [theme]
 name = "tokyonight"
 
+[theme.custom]
+surface_dim = "#42396b"
+overlay0 = "#9d7cd8"
+
 [terminal]
 new_cwd = "follow"
 
