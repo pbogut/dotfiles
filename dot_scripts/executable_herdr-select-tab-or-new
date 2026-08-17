@@ -98,12 +98,8 @@ restore_tab() {
 	fi
 
 	pane_id=$(jq -r '.pane_id' <<<"$pane")
-	for _ in {1..40}; do
+	for _ in {1..100}; do
 		process_info=$(herdr pane process-info --pane "$pane_id") || return 1
-		if [[ $(jq '.result.process_info.foreground_processes | length' <<<"$process_info") -eq 0 ]]; then
-			sleep 0.05
-			continue
-		fi
 		if jq -e --arg shell_name "$shell_name" '
       .result.process_info as $process |
       ($process.foreground_processes | length) == 1 and
@@ -112,8 +108,9 @@ restore_tab() {
       ($process.foreground_processes[0].argv | length) == 1
     ' >/dev/null <<<"$process_info"; then
 			shell_ready=true
+			break
 		fi
-		break
+		sleep 0.1
 	done
 
 	if ! $shell_ready; then
