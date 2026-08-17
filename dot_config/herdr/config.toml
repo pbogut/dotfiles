@@ -1,0 +1,94 @@
+onboarding = false
+
+[theme]
+name = "tokyonight"
+
+[terminal]
+new_cwd = "follow"
+
+[keys]
+prefix = "ctrl+g"
+settings = "prefix+shift+s"
+copy_mode = ["prefix+y", "prefix+ctrl+y"]
+previous_workspace = "prefix+ctrl+k"
+navigate_workspace_up = "k"
+navigate_workspace_down = "j"
+navigate_pane_up = "ctrl+k"
+navigate_pane_down = "ctrl+j"
+new_tab = "prefix+c"
+previous_tab = ["prefix+p", "alt+p"]
+next_tab = ["prefix+n", "alt+n"]
+split_vertical = "prefix+v"
+split_horizontal = "prefix+s"
+workspace_picker = ["prefix+w", "prefix+ctrl+w"]
+toggle_sidebar = ["prefix+b", "prefix+t", "prefix+ctrl+t", "alt+t"]
+next_agent = "prefix+]"
+previous_agent = "prefix+["
+
+[[keys.command]]
+key = "alt+j"
+type = "shell"
+command = "herdr-select-tab-or-new 1"
+description = "select editor tab"
+
+[[keys.command]]
+key = "alt+k"
+type = "shell"
+command = "herdr-select-tab-or-new 2"
+description = "select shell tab 2"
+
+[[keys.command]]
+key = "alt+l"
+type = "shell"
+command = "herdr-select-tab-or-new 3"
+description = "select shell tab 3"
+
+[[keys.command]]
+key = "alt+semicolon"
+type = "shell"
+command = "herdr-select-tab-or-new 4"
+description = "select development tab"
+
+[[keys.command]]
+key = "alt+m"
+type = "shell"
+command = "herdr-select-tab-or-new 5"
+description = "select SQL draft tab"
+
+[[keys.command]]
+key = "alt+comma"
+type = "shell"
+command = "herdr-select-tab-or-new 6"
+description = "select REST tab"
+
+[[keys.command]]
+key = "alt+period"
+type = "shell"
+command = "herdr-select-tab-or-new 7"
+description = "select lazygit tab"
+
+[[keys.command]]
+key = "alt+slash"
+type = "shell"
+command = "herdr-select-tab-or-new 8"
+description = "select lazydocker tab"
+
+[[keys.command]]
+key = "alt+h"
+type = "shell"
+command = "herdr-select-tab-or-new 9"
+description = "select opencode tab"
+
+[[keys.command]]
+key = "prefix+ctrl+p"
+type = "popup"
+command = "herdr-project"
+description = "open project"
+width = "90%"
+height = "90%"
+
+[ui]
+tab_bar_position = "bottom"
+pane_outer_borders = false
+pane_scrollbars = false
+pane_gaps = false

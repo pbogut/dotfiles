@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+
+number=${1:?"tab number is required"}
+workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
+
+if [[ -z $workspace_id ]]; then
+	echo "No active Herdr workspace" >&2
+	exit 1
+fi
+
+case "$number" in
+1)
+	label="1:nvim"
+	command="nvim"
+	;;
+2)
+	label="2:shell"
+	command=""
+	;;
+3)
+	label="3:shell"
+	command=""
+	;;
+4)
+	label="4:dev"
+	command='zsh -ic "start-dev"'
+	;;
+5)
+	label="5:sql"
+	command='zsh -ic "draft sql"'
+	;;
+6)
+	label="6:rest"
+	command='zsh -ic "rest"'
+	;;
+7)
+	label="7:git"
+	command="lazygit --use-config-file=$HOME/.config/lazygit/config.yml"
+	;;
+8)
+	label="8:docker"
+	command="lazydocker"
+	;;
+9)
+	label="9:opencode"
+	command='zsh -ic "opencode-launcher --port"'
+	;;
+10)
+	label="10:shell"
+	command=""
+	;;
+*)
+	echo "Unsupported tab number: $number" >&2
+	exit 1
+	;;
+esac
+
+tabs=$(herdr tab list --workspace "$workspace_id") || exit 1
+
+# Logical labels preserve sparse tmux-style slots even though Herdr numbers tabs contiguously.
+tab_id=$(jq -r --arg prefix "$number:" '
+  .result.tabs[] | select(.label | startswith($prefix)) | .tab_id
+' <<<"$tabs" | head -n 1)
+
+if [[ -z $tab_id ]]; then
+	tab_id=$(jq -r --argjson number "$number" '
+    .result.tabs[] |
+    select(.number == $number and (.label | test("^[0-9]+:") | not)) |
+    .tab_id
+  ' <<<"$tabs" | head -n 1)
+fi
+
+if [[ -n $tab_id ]]; then
+	herdr tab focus "$tab_id" >/dev/null
+	exit
+fi
+
+response=$(herdr tab create \
+	--workspace "$workspace_id" \
+	--cwd "${HERDR_ACTIVE_PANE_CWD:-$PWD}" \
+	--label "$label" \
+	--focus) || exit 1
+
+if [[ -n $command ]]; then
+	pane_id=$(jq -r '.result.root_pane.pane_id' <<<"$response")
+	herdr pane run "$pane_id" "exec $command" >/dev/null
+fi

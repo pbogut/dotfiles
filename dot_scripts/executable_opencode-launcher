@@ -80,4 +80,4 @@ if [ -n "$TMUX" ]; then
 fi
 
 echo opencode "${params[@]}"
-opencode "${params[@]}"
+~/.opencode/bin/opencode "${params[@]}"
