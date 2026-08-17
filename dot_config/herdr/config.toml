@@ -88,6 +88,7 @@ width = "90%"
 height = "90%"
 
 [ui]
+window_title = "{terminal_title} [{workspace}] |h$"
 tab_bar_position = "bottom"
 pane_outer_borders = false
 pane_scrollbars = false

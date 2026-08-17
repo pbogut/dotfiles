@@ -1,12 +1,134 @@
 #!/usr/bin/env bash
 
+if [[ ${1:-} == --restore-all ]]; then
+	snapshot=$(herdr api snapshot) || exit 1
+	while IFS=$'\t' read -r workspace_id number; do
+		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id bash "$0" "$number" --restore
+	done < <(jq -r '
+    .result.snapshot.tabs[] |
+    select(.label | test("^[0-9]+:")) |
+    [.workspace_id, (.label | capture("^(?<slot>[0-9]+):").slot)] |
+    @tsv
+  ' <<<"$snapshot")
+	exit
+fi
+
 number=${1:?"tab number is required"}
+restore_only=false
+[[ ${2:-} == --restore ]] && restore_only=true
 workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
 
 if [[ -z $workspace_id ]]; then
 	echo "No active Herdr workspace" >&2
 	exit 1
 fi
+
+socket_path=${HERDR_SOCKET_PATH:-}
+if [[ -z $socket_path ]]; then
+	socket_path=$(herdr status server 2>/dev/null | sed -n 's/^socket: //p')
+fi
+
+move_tab() {
+	local tab_id=$1
+	local insert_index=$2
+	local request response
+
+	request=$(jq -cn \
+		--arg id "herdr-select-tab:$tab_id" \
+		--arg tab_id "$tab_id" \
+		--argjson insert_index "$insert_index" \
+		'{id: $id, method: "tab.move", params: {tab_id: $tab_id, insert_index: $insert_index}}')
+
+	response=$(python -c '
+import socket
+import sys
+
+client = socket.socket(socket.AF_UNIX)
+client.connect(sys.argv[1])
+client.sendall((sys.argv[2] + "\n").encode())
+print(client.makefile().readline(), end="")
+' "$socket_path" "$request") || return
+
+	if jq -e '.error' >/dev/null <<<"$response"; then
+		jq -r '.error.message' <<<"$response" >&2
+		return 1
+	fi
+}
+
+sort_tabs() {
+	local tabs=$1
+	local index=0
+	local tab_id
+
+	while IFS= read -r tab_id; do
+		move_tab "$tab_id" "$index" || return
+		((index += 1))
+	done < <(jq -r '
+    .result.tabs as $tabs |
+    ([$tabs[] | select(.label | test("^[0-9]+:"))] |
+      sort_by(.label | capture("^(?<slot>[0-9]+):").slot | tonumber)) as $sorted |
+    reduce $tabs[] as $tab (
+      {order: [], managed_index: 0};
+      if ($tab.label | test("^[0-9]+:")) then
+        .order += [$sorted[.managed_index].tab_id] |
+        .managed_index += 1
+      else
+        .order += [$tab.tab_id]
+      end
+    ) |
+    .order[]
+  ' <<<"$tabs")
+}
+
+restore_tab() {
+	local tab_id=$1
+	local panes pane pane_id process_info
+	local shell_name=${SHELL##*/}
+	local shell_ready=false
+
+	panes=$(herdr pane list --workspace "$workspace_id") || return 1
+	pane=$(jq -c --arg tab_id "$tab_id" '
+    [.result.panes[] | select(.tab_id == $tab_id)][0] // empty
+  ' <<<"$panes")
+	[[ -n $pane ]] || return 1
+
+	# Official integrations own native agent resume and may still be starting asynchronously.
+	if jq -e 'has("agent_session")' >/dev/null <<<"$pane"; then
+		return
+	fi
+
+	pane_id=$(jq -r '.pane_id' <<<"$pane")
+	for _ in {1..40}; do
+		process_info=$(herdr pane process-info --pane "$pane_id") || return 1
+		if [[ $(jq '.result.process_info.foreground_processes | length' <<<"$process_info") -eq 0 ]]; then
+			sleep 0.05
+			continue
+		fi
+		if jq -e --arg shell_name "$shell_name" '
+      .result.process_info as $process |
+      ($process.foreground_processes | length) == 1 and
+      $process.foreground_processes[0].pid == $process.shell_pid and
+      $process.foreground_processes[0].name == $shell_name and
+      ($process.foreground_processes[0].argv | length) == 1
+    ' >/dev/null <<<"$process_info"; then
+			shell_ready=true
+		fi
+		break
+	done
+
+	if ! $shell_ready; then
+		return
+	fi
+
+	if $restore_only && [[ $number == 5 || $number == 6 || $number == 9 ]]; then
+		herdr tab close "$tab_id" >/dev/null
+		return
+	fi
+
+	if [[ -n $command ]]; then
+		herdr pane run "$pane_id" "exec $command" >/dev/null
+	fi
+}
 
 case "$number" in
 1)
@@ -71,7 +193,16 @@ if [[ -z $tab_id ]]; then
 fi
 
 if [[ -n $tab_id ]]; then
+	if $restore_only; then
+		restore_tab "$tab_id"
+		exit
+	fi
+	sort_tabs "$tabs" || echo "Could not reorder Herdr tabs" >&2
 	herdr tab focus "$tab_id" >/dev/null
+	exit
+fi
+
+if $restore_only; then
 	exit
 fi
 
@@ -80,6 +211,9 @@ response=$(herdr tab create \
 	--cwd "${HERDR_ACTIVE_PANE_CWD:-$PWD}" \
 	--label "$label" \
 	--focus) || exit 1
+
+tabs=$(herdr tab list --workspace "$workspace_id")
+sort_tabs "$tabs" || echo "Could not reorder Herdr tabs" >&2
 
 if [[ -n $command ]]; then
 	pane_id=$(jq -r '.result.root_pane.pane_id' <<<"$response")

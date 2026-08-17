@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# Rerun when the plugin manifest changes.
+# {{ include (joinPath .chezmoi.sourceDir "dot_config/herdr/plugins/managed-tabs/herdr-plugin.toml") | sha256sum }}
+
+if command -v herdr >/dev/null; then
+	herdr plugin link "$HOME/.config/herdr/plugins/managed-tabs" --enabled
+fi

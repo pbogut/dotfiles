@@ -87,7 +87,6 @@ focus_client() {
 	fi
 }
 
-started_server=false
 ensure_server() {
 	if herdr status server 2>/dev/null | grep -q '^status: running$'; then
 		return
@@ -96,7 +95,6 @@ ensure_server() {
 	nohup herdr server >/dev/null 2>&1 &
 	for _ in {1..50}; do
 		if herdr status server 2>/dev/null | grep -q '^status: running$'; then
-			started_server=true
 			return
 		fi
 		sleep 0.1
@@ -139,27 +137,22 @@ workspace_id=$(jq -r --arg path "$project_path" '
 ' <<<"$snapshot")
 
 if [[ -z $workspace_id ]]; then
-	workspace_id=$(jq -r --arg label "$project" '
+	workspace_id=$(jq -r --arg label "$project_label" '
     [.result.snapshot.workspaces[] | select(.label == $label) | .workspace_id][0] // empty
   ' <<<"$snapshot")
 fi
 
 if [[ -n $workspace_id ]]; then
-	if $started_server; then
-		tab_id=$(jq -r --arg workspace_id "$workspace_id" '
-      [.result.snapshot.tabs[] | select(.workspace_id == $workspace_id) | .tab_id][0]
-    ' <<<"$snapshot")
-		pane_id=$(jq -r --arg workspace_id "$workspace_id" '
-      [.result.snapshot.panes[] | select(.workspace_id == $workspace_id) | .pane_id][0]
-    ' <<<"$snapshot")
-		process_info=$(herdr pane process-info --pane "$pane_id")
-		if [[ $(jq '.result.process_info.foreground_processes | length' <<<"$process_info") -eq 0 ]]; then
-			herdr workspace rename "$workspace_id" "$project" >/dev/null
-			herdr tab rename "$tab_id" "1:nvim" >/dev/null
-			herdr pane run "$pane_id" "exec nvim" >/dev/null
-		fi
+	tab=$(jq -c --arg workspace_id "$workspace_id" '
+    [.result.snapshot.tabs[] | select(.workspace_id == $workspace_id) | select(.number == 1)][0]
+  ' <<<"$snapshot")
+	if [[ $(jq -r '.label' <<<"$tab") == 1 ]]; then
+		herdr tab rename "$(jq -r '.tab_id' <<<"$tab")" "1:nvim" >/dev/null
 	fi
 	herdr workspace focus "$workspace_id" >/dev/null
+	HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
+		HERDR_ACTIVE_PANE_CWD=$project_path \
+		herdr-select-tab-or-new 1
 	focus_client
 	exit
 fi

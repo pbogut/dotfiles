@@ -1,0 +1,9 @@
+id = "pbogut.managed-tabs"
+name = "Managed Tabs"
+version = "0.1.0"
+min_herdr_version = "0.8.0"
+description = "Restore commands in managed tabs after a cold Herdr restart"
+platforms = ["linux"]
+
+[[startup]]
+command = ["herdr-select-tab-or-new", "--restore-all"]
