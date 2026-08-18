@@ -231,6 +231,15 @@
       },
       "modules": ["custom/expand-icon", "custom/expand-spacer", "tray"]
     },
+    "custom/herdr": {
+        "format": "{}",
+        "return-type": "json",
+        "restart-interval": 2,
+        "exec-on-event": false,
+        "escape": false,
+        "exec": "$HOME/.scripts/waybar/herdr-agents.py",
+        "on-click": "focus-or-exec Alacritty.herdr terminal -c herdr -e herdr"
+    },
     "custom/pipewire-device": {
         "format": "<span color=\"{{ $iconNormal }}\">{icon}</span> {0}",
         "interval": 3600,
