@@ -20,67 +20,69 @@ navigate_workspace_down = "j"
 navigate_pane_up = "ctrl+k"
 navigate_pane_down = "ctrl+j"
 new_tab = "prefix+c"
-previous_tab = ["prefix+p", "alt+p"]
-next_tab = ["prefix+n", "alt+n"]
 split_vertical = "prefix+v"
 split_horizontal = "prefix+s"
 workspace_picker = ["prefix+w", "prefix+ctrl+w"]
 toggle_sidebar = ["prefix+b", "prefix+t", "prefix+ctrl+t", "alt+t"]
-next_agent = "prefix+]"
-previous_agent = "prefix+["
+# previous_tab = ["prefix+p", "alt+p"]
+# next_tab = ["prefix+n", "alt+n"]
+# next_agent = "prefix+]"
+# previous_agent = "prefix+["
+previous_agent = ["prefix+p", "alt+p"]
+next_agent = ["prefix+n", "alt+n"]
 
 [[keys.command]]
 key = "alt+j"
 type = "shell"
-command = "herdr-select-tab-or-new 1"
+command = "herdr-select-tab-or-new nvim"
 description = "select editor tab"
 
 [[keys.command]]
 key = "alt+k"
 type = "shell"
-command = "herdr-select-tab-or-new 2"
+command = "herdr-select-tab-or-new shell"
 description = "select shell tab 2"
 
 [[keys.command]]
 key = "alt+l"
 type = "shell"
-command = "herdr-select-tab-or-new 3"
+command = "herdr-select-tab-or-new shell-2"
 description = "select shell tab 3"
 
 [[keys.command]]
 key = "alt+semicolon"
 type = "shell"
-command = "herdr-select-tab-or-new 4"
+command = "herdr-select-tab-or-new dev"
 description = "select development tab"
 
 [[keys.command]]
 key = "alt+m"
 type = "shell"
-command = "herdr-select-tab-or-new 5"
+command = "herdr-select-tab-or-new sql"
 description = "select SQL draft tab"
 
 [[keys.command]]
 key = "alt+comma"
 type = "shell"
-command = "herdr-select-tab-or-new 6"
+command = "herdr-select-tab-or-new rest"
 description = "select REST tab"
 
 [[keys.command]]
 key = "alt+period"
 type = "shell"
-command = "herdr-select-tab-or-new 7"
+command = "herdr-select-tab-or-new git"
 description = "select lazygit tab"
 
 [[keys.command]]
 key = "alt+slash"
 type = "shell"
-command = "herdr-select-tab-or-new 8"
+command = "herdr-select-tab-or-new docker"
 description = "select lazydocker tab"
 
 [[keys.command]]
 key = "alt+h"
 type = "shell"
-command = "herdr-select-tab-or-new 9"
+command = "herdr-select-tab-or-new opencode"
 description = "select opencode tab"
 
 [[keys.command]]
@@ -97,3 +99,6 @@ tab_bar_position = "bottom"
 pane_outer_borders = false
 pane_scrollbars = false
 pane_gaps = false
+
+[ui.toast]
+delivery = "system"

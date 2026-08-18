@@ -2,18 +2,32 @@
 
 if [[ ${1:-} == --restore-all ]]; then
 	snapshot=$(herdr api snapshot) || exit 1
-	while IFS=$'\t' read -r workspace_id number; do
-		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id bash "$0" "$number" --restore
+	while IFS=$'\t' read -r workspace_id role; do
+		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id bash "$0" "$role" --restore
 	done < <(jq -r '
+    def managed_role:
+      if . == "nvim" or startswith("1:") then "nvim"
+      elif . == "shell" or startswith("2:") then "shell"
+      elif . == "shell-2" or startswith("3:") then "shell-2"
+      elif . == "dev" or startswith("4:") then "dev"
+      elif . == "sql" or startswith("5:") then "sql"
+      elif . == "rest" or startswith("6:") then "rest"
+      elif . == "git" or startswith("7:") then "git"
+      elif . == "docker" or startswith("8:") then "docker"
+      elif . == "opencode" or startswith("9:") then "opencode"
+      elif . == "shell-3" or startswith("10:") then "shell-3"
+      else null
+      end;
     .result.snapshot.tabs[] |
-    select(.label | test("^[0-9]+:")) |
-    [.workspace_id, (.label | capture("^(?<slot>[0-9]+):").slot)] |
+    (.label | managed_role) as $role |
+    select($role != null) |
+    [.workspace_id, $role] |
     @tsv
   ' <<<"$snapshot")
 	exit
 fi
 
-number=${1:?"tab number is required"}
+role=${1:?"tab role is required"}
 restore_only=false
 [[ ${2:-} == --restore ]] && restore_only=true
 workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
@@ -64,12 +78,25 @@ sort_tabs() {
 		move_tab "$tab_id" "$index" || return
 		((index += 1))
 	done < <(jq -r '
+    def managed_rank:
+      if . == "nvim" or startswith("1:") then 1
+      elif . == "shell" or startswith("2:") then 2
+      elif . == "shell-2" or startswith("3:") then 3
+      elif . == "dev" or startswith("4:") then 4
+      elif . == "sql" or startswith("5:") then 5
+      elif . == "rest" or startswith("6:") then 6
+      elif . == "git" or startswith("7:") then 7
+      elif . == "docker" or startswith("8:") then 8
+      elif . == "opencode" or startswith("9:") then 9
+      elif . == "shell-3" or startswith("10:") then 10
+      else null
+      end;
     .result.tabs as $tabs |
-    ([$tabs[] | select(.label | test("^[0-9]+:"))] |
-      sort_by(.label | capture("^(?<slot>[0-9]+):").slot | tonumber)) as $sorted |
+    ([$tabs[] | select((.label | managed_rank) != null)] |
+      sort_by(.label | managed_rank)) as $sorted |
     reduce $tabs[] as $tab (
       {order: [], managed_index: 0};
-      if ($tab.label | test("^[0-9]+:")) then
+      if (($tab.label | managed_rank) != null) then
         .order += [$sorted[.managed_index].tab_id] |
         .managed_index += 1
       else
@@ -117,7 +144,7 @@ restore_tab() {
 		return
 	fi
 
-	if $restore_only && [[ $number == 5 || $number == 6 || $number == 9 ]]; then
+	if $restore_only && [[ $role == sql || $role == rest || $role == opencode ]]; then
 		herdr tab close "$tab_id" >/dev/null
 		return
 	fi
@@ -127,74 +154,99 @@ restore_tab() {
 	fi
 }
 
-case "$number" in
-1)
-	label="1:nvim"
+case "$role" in
+nvim | 1)
+	role="nvim"
+	label="nvim"
+	legacy_slot=1
 	command="nvim"
 	;;
-2)
-	label="2:shell"
+shell | 2)
+	role="shell"
+	label="shell"
+	legacy_slot=2
 	command=""
 	;;
-3)
-	label="3:shell"
+shell-2 | 3)
+	role="shell-2"
+	label="shell-2"
+	legacy_slot=3
 	command=""
 	;;
-4)
-	label="4:dev"
+dev | 4)
+	role="dev"
+	label="dev"
+	legacy_slot=4
 	command='zsh -ic "start-dev"'
 	;;
-5)
-	label="5:sql"
+sql | 5)
+	role="sql"
+	label="sql"
+	legacy_slot=5
 	command='zsh -ic "draft sql"'
 	;;
-6)
-	label="6:rest"
+rest | 6)
+	role="rest"
+	label="rest"
+	legacy_slot=6
 	command='zsh -ic "rest"'
 	;;
-7)
-	label="7:git"
+git | 7)
+	role="git"
+	label="git"
+	legacy_slot=7
 	command="lazygit --use-config-file=$HOME/.config/lazygit/config.yml"
 	;;
-8)
-	label="8:docker"
+docker | 8)
+	role="docker"
+	label="docker"
+	legacy_slot=8
 	command="lazydocker"
 	;;
-9)
-	label="9:opencode"
+opencode | 9)
+	role="opencode"
+	label="opencode"
+	legacy_slot=9
 	command='zsh -ic "opencode-launcher --port"'
 	;;
-10)
-	label="10:shell"
+shell-3 | 10)
+	role="shell-3"
+	label="shell-3"
+	legacy_slot=10
 	command=""
 	;;
 *)
-	echo "Unsupported tab number: $number" >&2
+	echo "Unsupported tab role: $role" >&2
 	exit 1
 	;;
 esac
 
 tabs=$(herdr tab list --workspace "$workspace_id") || exit 1
 
-# Logical labels preserve sparse tmux-style slots even though Herdr numbers tabs contiguously.
-tab_id=$(jq -r --arg prefix "$number:" '
-  .result.tabs[] | select(.label | startswith($prefix)) | .tab_id
-' <<<"$tabs" | head -n 1)
-
-if [[ -z $tab_id ]]; then
-	tab_id=$(jq -r --argjson number "$number" '
-    .result.tabs[] |
-    select(.number == $number and (.label | test("^[0-9]+:") | not)) |
-    .tab_id
-  ' <<<"$tabs" | head -n 1)
-fi
+tab=$(jq -c \
+	--arg label "$label" \
+	--arg legacy_prefix "$legacy_slot:" \
+	--arg role "$role" '
+  (
+    [.result.tabs[] | select(.label == $label)][0] //
+    [.result.tabs[] | select(.label | startswith($legacy_prefix))][0] //
+    (if $role == "nvim" then
+      [.result.tabs[] | select(.number == 1 and .label == "1")][0]
+    else
+      null
+    end)
+  ) // empty
+' <<<"$tabs")
+tab_id=$(jq -r '.tab_id // empty' <<<"$tab")
 
 if [[ -n $tab_id ]]; then
+	if [[ $(jq -r '.label' <<<"$tab") != "$label" ]]; then
+		herdr tab rename "$tab_id" "$label" >/dev/null || exit 1
+	fi
 	if $restore_only; then
 		restore_tab "$tab_id"
 		exit
 	fi
-	sort_tabs "$tabs" || echo "Could not reorder Herdr tabs" >&2
 	herdr tab focus "$tab_id" >/dev/null
 	exit
 fi

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+exec terminal -c herdr.redeye -e \
+	herdr --remote redeye --remote-keybindings server "$@"

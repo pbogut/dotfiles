@@ -405,6 +405,7 @@ window-rule {
 window-rule {
     match app-id="Alacritty.project"
     match app-id="Alacritty.herdr"
+    match app-id="Alacritty.herdr.redeye"
     default-column-width { proportion 0.9; }
     open-on-workspace "code"
 }
@@ -783,8 +784,9 @@ binds {
 
     Mod+C { center-column; }
 
-    // Center all fully visible columns on screen.
-    Mod+Ctrl+C { center-visible-columns; }
+    Mod+Ctrl+C hotkey-overlay-title="Focus or open Herdr" {
+        spawn "focus-or-exec" r#"^Alacritty\.herdr$"# "herdr-project";
+    }
 
     // Finer width adjustments.
     // This command can also:

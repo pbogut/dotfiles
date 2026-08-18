@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 
 open_workspaces() {
-	herdr workspace list 2>/dev/null |
-		jq -r '.result.workspaces[].label' |
-		while IFS= read -r path; do
-			[[ -d "$PROJECTS/$path" ]] && printf ' %s\n' "$path"
-		done
+	herdr api snapshot 2>/dev/null |
+		jq -r --arg projects "$PROJECTS/" --arg pwd "$PWD" '
+      .result.snapshot as $snapshot |
+      $snapshot.workspaces[] as $workspace |
+      [$snapshot.panes[] |
+        select(.workspace_id == $workspace.workspace_id) |
+        .cwd |
+        select(startswith($projects) and . != $pwd)][0] // empty
+    ' |
+		sed 's,^'"$PROJECTS/"',,g' |
+		sed 's,^\(.*\)$,󰳆 \1,'
 }
 
 list_projects() {
@@ -147,12 +153,12 @@ if [[ -n $workspace_id ]]; then
     [.result.snapshot.tabs[] | select(.workspace_id == $workspace_id) | select(.number == 1)][0]
   ' <<<"$snapshot")
 	if [[ $(jq -r '.label' <<<"$tab") == 1 ]]; then
-		herdr tab rename "$(jq -r '.tab_id' <<<"$tab")" "1:nvim" >/dev/null
+		herdr tab rename "$(jq -r '.tab_id' <<<"$tab")" "nvim" >/dev/null
 	fi
 	herdr workspace focus "$workspace_id" >/dev/null
 	HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
 		HERDR_ACTIVE_PANE_CWD=$project_path \
-		herdr-select-tab-or-new 1
+		herdr-select-tab-or-new nvim
 	focus_client
 	exit
 fi
@@ -165,6 +171,6 @@ response=$(herdr workspace create \
 
 tab_id=$(jq -r '.result.tab.tab_id' <<<"$response")
 pane_id=$(jq -r '.result.root_pane.pane_id' <<<"$response")
-herdr tab rename "$tab_id" "1:nvim" >/dev/null
+herdr tab rename "$tab_id" "nvim" >/dev/null
 herdr pane run "$pane_id" "exec nvim" >/dev/null
 focus_client
