@@ -42,6 +42,24 @@ __add() {
   fi
 }
 
+__reload_dns() {
+  if systemctl is-active --quiet dnsmasq.service; then
+    systemctl reload dnsmasq.service
+  fi
+}
+
+__allow_tailscale_web() {
+  [[ $EUID == 0 ]] || return
+
+  local subnet
+  subnet=$(docker network inspect external --format '{{(index .IPAM.Config 0).Subnet}}' 2>/dev/null)
+  [[ -n $subnet ]] || return
+
+  local -a rule=(-i tailscale0 -d "$subnet" -p tcp -m multiport --dports "80,443" -j ACCEPT)
+  iptables -t raw -C PREROUTING "${rule[@]}" 2>/dev/null ||
+    iptables -t raw -I PREROUTING 1 "${rule[@]}"
+}
+
 __connect() {
       hash=$1
       echo $hash
@@ -55,7 +73,10 @@ __connect() {
           url=$host.$domain
         fi
 
-        ip=$(echo $inspect | jq '.[0].NetworkSettings.IPAddress' -r)
+        ip=$(echo "$inspect" | jq -r '.[0].NetworkSettings.Networks.external.IPAddress // empty')
+        if [[ $ip == "" ]] || [[ $ip == "null" ]]; then
+          ip=$(echo $inspect | jq '.[0].NetworkSettings.IPAddress' -r)
+        fi
         if [[ $ip == "" ]] || [[ $ip == "null" ]]; then
           ip=$(echo $inspect |jq '.[0].NetworkSettings.Networks | map(.IPAddress) | first' -r)
         fi
@@ -78,8 +99,8 @@ while :; do # in case something crashes we want to restart it
     hash=$(echo $hash |sed 's,^\(.\{12\}\).*,\1,')
     __connect $hash
   done
-
-  # systemctl restart dnsmasq
+  __allow_tailscale_web
+  __reload_dns
 
   docker events | while read line; do
     echo $line | grep 'network \(connect\|disconnect\)' | sed 's,.*network \(disconnect\|connect\).*container=\([0-9a-z]*\)\,.*,\1 \2,' | (read action hash
@@ -89,6 +110,8 @@ while :; do # in case something crashes we want to restart it
       elif [[ $action == "disconnect" ]]; then
         __disconnet $hash
       fi
+      __allow_tailscale_web
+      __reload_dns
     )
   done
 done
