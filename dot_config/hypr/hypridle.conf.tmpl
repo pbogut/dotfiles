@@ -11,6 +11,12 @@ listener {
     timeout = 900 # 15min. (+screensaver time)
     on-timeout = loginctl lock-session
 }
+
+listener {
+    timeout = 1200 # 20min.
+    on-timeout = monitor-power off
+    on-resume = monitor-power on
+}
 # redeye ]]] {{- end }}
 
 # silverspoon [[[ {{- if eq .chezmoi.hostname "silverspoon" }}
@@ -28,33 +34,34 @@ listener {
 
 listener {
     timeout = 300 # 5min.
-    on-timeout = systemd-ac-power || hyprctl dispatch dpms off
-    on-resume = hyprctl dispatch dpms on && brightnessctl -r
+    on-timeout = systemd-ac-power || monitor-power off
+    on-resume = monitor-power on && brightnessctl -r
 }
 
 listener {
     timeout = 310 # 5min.
     on-timeout = systemd-ac-power || loginctl lock-session
-    on-resume = hyprctl dispatch dpms on && brightnessctl -r
+    on-resume = monitor-power on && brightnessctl -r
 }
 
 listener {
     timeout = 890 # 15min.
     on-timeout = loginctl lock-session
-    on-resume = hyprctl dispatch dpms on && brightnessctl -r
+    on-resume = monitor-power on && brightnessctl -r
 }
 
 listener {
     timeout = 900 # 15 minutes, we testing
     on-timeout = systemd-ac-power || systemctl suspend
-    on-resume = hyprctl dispatch dpms on && brightnessctl -r
+    on-resume = monitor-power on && brightnessctl -r
 }
 # silverspoon ]]] {{- end }}
 
+{{- if ne .chezmoi.hostname "redeye" }}
 listener {
     timeout = 3600 # 1h
     on-timeout = systemctl suspend
-    on-resume = hyprctl dispatch dpms on && brightnessctl -r
+    on-resume = monitor-power on && brightnessctl -r
 }
 
 # Night suspend
@@ -65,6 +72,7 @@ listener {
 listener {
     timeout = {{ . }}
     on-timeout = time-is-between "22:00" "06:00" && systemctl suspend
-    on-resume = hyprctl dispatch dpms on && brightnessctl -r
+    on-resume = monitor-power on && brightnessctl -r
 }
 {{ end }}
+{{- end }}

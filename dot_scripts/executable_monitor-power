@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+action=${1:-}
+if [[ $action != on && $action != off ]]; then
+	echo "Usage: ${0##*/} <on|off>" >&2
+	exit 2
+fi
+
+desktop=${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-}}
+case ${desktop,,} in
+*niri*)
+	exec niri msg action "power-$action-monitors"
+	;;
+*hyprland*)
+	exec hyprctl dispatch dpms "$action"
+	;;
+*)
+	echo "Unsupported desktop: ${desktop:-unknown}" >&2
+	exit 1
+	;;
+esac
