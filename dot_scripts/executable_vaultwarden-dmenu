@@ -91,6 +91,18 @@ __type() {
   fi
 }
 
+__copy() {
+  input="$1"
+  if [[ -n "$WAYLAND_DISPLAY" ]]; then
+    if [[ $input == "<tab>" ]]; then
+      input="	"
+    fi
+    wl-copy <<< "$input"
+  else
+    xclip -selection clipboard <<< "$input"
+  fi
+}
+
 __json() {
   id="$1"
   user=$(rbw get -f user "$id")
@@ -143,11 +155,15 @@ __login() {
   id="$1"
   user=$(rbw get -f user "$id")
   pass=$(rbw get -f password "$id")
+  totp=$(rbw get -f code "$id")
   login_instruction=$(rbw get --field LOGIN "$id")
   if [[ $login_instruction == "" ]]; then
       __type "$user"
       __type "<tab>"
       __type "$pass"
+    if [[ "$totp" != "" ]]; then
+      __copy "$totp"
+    fi
   else
     echo "$login_instruction"
     echo "$login_instruction" \
