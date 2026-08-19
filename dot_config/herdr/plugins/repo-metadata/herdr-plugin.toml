@@ -1,0 +1,21 @@
+id = "pbogut.repo-metadata"
+name = "Repository Metadata"
+version = "0.1.0"
+min_herdr_version = "0.8.0"
+description = "Show repository and stripped feature names in Agent and Space rows"
+platforms = ["linux"]
+
+[[startup]]
+command = ["bash", "report-repo.sh", "--all"]
+
+[[events]]
+on = "pane.created"
+command = ["bash", "report-repo.sh"]
+
+[[events]]
+on = "pane.agent_detected"
+command = ["bash", "report-repo.sh"]
+
+[[events]]
+on = "pane.moved"
+command = ["bash", "report-repo.sh"]

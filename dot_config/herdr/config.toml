@@ -5,7 +5,7 @@ name = "tokyonight"
 
 [theme.custom]
 surface_dim = "#42396b"
-overlay0 = "#9d7cd8"
+sidebar_bg = "#16161e"
 
 [terminal]
 new_cwd = "follow"
@@ -102,3 +102,28 @@ pane_gaps = false
 
 [ui.toast]
 delivery = "system"
+
+[ui.sidebar.agents]
+rows = [
+  [
+    "state_icon",
+    "workspace",
+    { token = "$project", fg = "#9d7cd8", bold = true, dim = false },
+  ],
+  [
+    { token = "$feature", fg = "#9d7cd8", dim = false },
+  ],
+]
+
+[ui.sidebar.spaces]
+rows = [
+  [
+    "state_icon",
+    "workspace",
+    { token = "$project", fg = "#9d7cd8", bold = true, dim = false },
+  ],
+  [
+    { token = "$feature", fg = "#9d7cd8", dim = false },
+    "git_status"
+  ],
+]
