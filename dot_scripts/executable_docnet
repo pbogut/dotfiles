@@ -49,15 +49,102 @@ __reload_dns() {
 }
 
 __allow_tailscale_web() {
+  local subnet=$1
+  local -a rule=(-i tailscale0 -d "$subnet" -p tcp -m multiport --dports "80,443" -j ACCEPT)
+  iptables -t raw -C PREROUTING "${rule[@]}" 2>/dev/null ||
+    iptables -t raw -I PREROUTING 1 "${rule[@]}"
+}
+
+__notify_tailscale_route() {
+  local operator=$1
+  local subnet=$2
+  local notification_file=/var/lib/docnet/tailscale-notification-id
+  local uid runtime notification_id
+  local -a replace
+
+  [[ -n $operator ]] || return
+  uid=$(id -u "$operator" 2>/dev/null) || return
+  runtime=/run/user/$uid
+  [[ -S $runtime/bus ]] || return
+  [[ -f $notification_file ]] && replace=(-r "$(<"$notification_file")")
+
+  notification_id=$(runuser -u "$operator" -- env \
+    XDG_RUNTIME_DIR="$runtime" \
+    DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime/bus" \
+    dunstify -p "${replace[@]}" -u critical -t 0 -a docnet \
+    "Tailscale route approval required" \
+    "Approve Docker subnet $subnet for redeye in the Tailscale admin console.") || return
+  [[ $notification_id =~ ^[0-9]+$ ]] && printf '%s\n' "$notification_id" > "$notification_file"
+}
+
+__close_tailscale_notification() {
+  local operator=$1
+  local notification_file=/var/lib/docnet/tailscale-notification-id
+  local uid runtime notification_id
+
+  [[ -n $operator && -f $notification_file ]] || return
+  notification_id=$(<"$notification_file")
+  uid=$(id -u "$operator" 2>/dev/null) || return
+  runtime=/run/user/$uid
+  [[ -S $runtime/bus ]] || return
+
+  runuser -u "$operator" -- env \
+    XDG_RUNTIME_DIR="$runtime" \
+    DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime/bus" \
+    dunstify -C "$notification_id" 2>/dev/null || true
+  rm -f "$notification_file"
+}
+
+__sync_tailscale_route() {
+  local subnet=$1
+  local prefs operator previous route desired_csv found=false
+  local state_dir=/var/lib/docnet
+  local state_file=$state_dir/tailscale-external-subnet
+  local -a advertised desired
+
+  command -v tailscale >/dev/null || return
+  prefs=$(tailscale debug prefs 2>/dev/null) || return
+  operator=$(jq -r '.OperatorUser // empty' <<< "$prefs")
+  mapfile -t advertised < <(jq -r '.AdvertiseRoutes[]?' <<< "$prefs")
+
+  [[ -f $state_file ]] && previous=$(<"$state_file")
+  for route in "${advertised[@]}"; do
+    [[ -n $previous && $route == "$previous" && $route != "$subnet" ]] || desired+=("$route")
+    [[ $route == "$subnet" ]] && found=true
+  done
+  if [[ $found == false ]]; then
+    desired+=("$subnet")
+  fi
+  desired_csv=$(IFS=,; echo "${desired[*]}")
+
+  if [[ $(IFS=,; echo "${advertised[*]}") != "$desired_csv" ]]; then
+    if ! tailscale set --advertise-routes="$desired_csv"; then
+      logger -t docnet "Unable to advertise Tailscale route $subnet"
+      return
+    fi
+  fi
+
+  install -d -m 0755 "$state_dir"
+  printf '%s\n' "$subnet" > "$state_file"
+
+  if tailscale status --json 2>/dev/null |
+    jq -e --arg subnet "$subnet" '(.Self.PrimaryRoutes // []) | index($subnet)' >/dev/null; then
+    __close_tailscale_notification "$operator"
+  else
+    logger -t docnet "Tailscale route $subnet is advertised but awaiting approval"
+    __notify_tailscale_route "$operator" "$subnet"
+  fi
+}
+
+__configure_external_access() {
   [[ $EUID == 0 ]] || return
 
   local subnet
   subnet=$(docker network inspect external --format '{{(index .IPAM.Config 0).Subnet}}' 2>/dev/null)
   [[ -n $subnet ]] || return
 
-  local -a rule=(-i tailscale0 -d "$subnet" -p tcp -m multiport --dports "80,443" -j ACCEPT)
-  iptables -t raw -C PREROUTING "${rule[@]}" 2>/dev/null ||
-    iptables -t raw -I PREROUTING 1 "${rule[@]}"
+  __allow_tailscale_web "$subnet"
+  __sync_tailscale_route "$subnet"
 }
 
 __connect() {
@@ -99,7 +186,7 @@ while :; do # in case something crashes we want to restart it
     hash=$(echo $hash |sed 's,^\(.\{12\}\).*,\1,')
     __connect $hash
   done
-  __allow_tailscale_web
+  __configure_external_access
   __reload_dns
 
   docker events | while read line; do
@@ -110,7 +197,7 @@ while :; do # in case something crashes we want to restart it
       elif [[ $action == "disconnect" ]]; then
         __disconnet $hash
       fi
-      __allow_tailscale_web
+      __configure_external_access
       __reload_dns
     )
   done
