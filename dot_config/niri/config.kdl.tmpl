@@ -576,7 +576,10 @@ binds {
     Mod+Ctrl+G hotkey-overlay-title="ChatGPT" { spawn "chatgpt"; }
     Mod+Q hotkey-overlay-title="Quick Menu" { spawn "quick-menu"; }
     Mod+apostrophe hotkey-overlay-title="CopyQ" { spawn "copyq-dmenu"; }
-    Mod+Ctrl+K hotkey-overlay-title="Calendar" { spawn-sh "terminal-float -t 'khal' -e khal interactive"; }
+    Mod+Ctrl+K hotkey-overlay-title="Calendar" { spawn-sh "focus-or-exec --title khal terminal-float -t 'khal' -e khal interactive"; }
+    Mod+Ctrl+N hotkey-overlay-title="Wi-Fi" { spawn-sh "focus-or-exec --title wlctl terminal-float -t 'wlctl' -e wlctl"; }
+    Mod+Ctrl+B hotkey-overlay-title="Bluetooth" { spawn-sh "focus-or-exec --title bluetui terminal-float -t 'bluetui' -e bluetui"; }
+
     Mod+E hotkey-overlay-title="File browser" { spawn "lf-term"; }
     Mod+Shift+MouseMiddle hotkey-overlay-title="Color picker" { spawn "hyprpicker" "-a"; }
 
