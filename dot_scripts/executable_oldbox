@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #=================================================
-# name:   netflix
+# name:   oldbox
 # author: Pawel Bogut <pbogut@pbogut.me>
-# date:   21/01/2025
+# date:   17/08/2026
 #=================================================
 chromium --app=http://oldbox.local --profile-directory=Default
