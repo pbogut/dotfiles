@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "keybinds": {
+    "messages_copy": "none"
+  },
+  "plugin": [
+    [
+      "./plugins/temp-export.ts",
+      {
+        "keybind": "<leader>y",
+        "timestamps": true,
+        "turnDuration": true,
+        "thinking": false,
+        "toolDetails": false,
+        "assistantMetadata": true
+      }
+    ]
+  ]
+}
