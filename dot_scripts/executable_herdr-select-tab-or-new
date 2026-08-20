@@ -154,6 +154,40 @@ restore_tab() {
 	fi
 }
 
+cache_opencode_session() {
+	local session_id=$1
+
+	[[ $session_id =~ ^[A-Za-z0-9._:-]{1,80}$ ]] || return
+	herdr workspace report-metadata "$workspace_id" \
+		--source plugin:pbogut.repo-metadata \
+		--token "opencode_session=$session_id" >/dev/null
+}
+
+set_opencode_command() {
+	local workspace session_id
+
+	workspace=$(herdr workspace get "$workspace_id" 2>/dev/null) || return
+	session_id=$(jq -r '.result.workspace.tokens.opencode_session // empty' <<<"$workspace")
+	if [[ $session_id =~ ^[A-Za-z0-9._:-]{1,80}$ ]]; then
+		command="opencode-launcher --session $session_id --port"
+	else
+		command='opencode-launcher --continue --port'
+	fi
+}
+
+opencode_is_running() {
+	local pane_id=$1
+	local process_info
+
+	process_info=$(herdr pane process-info --pane "$pane_id" 2>/dev/null) || return 1
+	jq -e '
+    any(.result.process_info.foreground_processes[]?;
+      .name == "opencode" or
+      any(.argv[]?; test("(^|/)(opencode|opencode-launcher)$"))
+    )
+  ' >/dev/null <<<"$process_info"
+}
+
 case "$role" in
 nvim | 1)
 	role="nvim"
@@ -207,7 +241,7 @@ opencode | 9)
 	role="opencode"
 	label="opencode"
 	legacy_slot=9
-	command='zsh -ic "opencode-launcher --port"'
+	command='opencode-launcher --continue --port'
 	;;
 shell-3 | 10)
 	role="shell-3"
@@ -220,6 +254,10 @@ shell-3 | 10)
 	exit 1
 	;;
 esac
+
+if [[ $role == opencode ]]; then
+	set_opencode_command
+fi
 
 tabs=$(herdr tab list --workspace "$workspace_id") || exit 1
 
@@ -247,8 +285,28 @@ if [[ -n $tab_id ]]; then
 		restore_tab "$tab_id"
 		exit
 	fi
-	herdr tab focus "$tab_id" >/dev/null
-	exit
+	if [[ $role == opencode ]]; then
+		panes=$(herdr pane list --workspace "$workspace_id") || exit 1
+		pane=$(jq -c --arg tab_id "$tab_id" '
+      [.result.panes[] | select(.tab_id == $tab_id)][0] // empty
+    ' <<<"$panes")
+		pane_id=$(jq -r '.pane_id // empty' <<<"$pane")
+		if [[ -n $pane_id ]] && opencode_is_running "$pane_id"; then
+			herdr tab focus "$tab_id" >/dev/null
+			exit
+		fi
+
+		session_id=$(jq -r '
+      select(.agent_session.agent == "opencode" and .agent_session.source == "herdr:opencode") |
+      .agent_session.value // empty
+    ' <<<"$pane")
+		[[ -n $session_id ]] && cache_opencode_session "$session_id"
+		herdr tab close "$tab_id" >/dev/null || exit 1
+		set_opencode_command
+	else
+		herdr tab focus "$tab_id" >/dev/null
+		exit
+	fi
 fi
 
 if $restore_only; then

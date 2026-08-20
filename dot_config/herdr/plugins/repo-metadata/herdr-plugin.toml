@@ -8,6 +8,9 @@ platforms = ["linux"]
 [[startup]]
 command = ["bash", "report-repo.sh", "--all"]
 
+[[startup]]
+command = ["bash", "cache-opencode-session.sh", "--all"]
+
 [[events]]
 on = "pane.created"
 command = ["bash", "report-repo.sh"]
@@ -17,5 +20,13 @@ on = "pane.agent_detected"
 command = ["bash", "report-repo.sh"]
 
 [[events]]
+on = "pane.agent_detected"
+command = ["bash", "cache-opencode-session.sh"]
+
+[[events]]
 on = "pane.moved"
 command = ["bash", "report-repo.sh"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["bash", "cache-opencode-session.sh"]
