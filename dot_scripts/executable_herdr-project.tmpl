@@ -158,7 +158,7 @@ if [[ -n $workspace_id ]]; then
 	herdr workspace focus "$workspace_id" >/dev/null
 	HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
 		HERDR_ACTIVE_PANE_CWD=$project_path \
-		herdr-select-tab-or-new nvim
+		herdr-select-tab-or-new nvim --ensure-running
 	focus_client
 	exit
 fi
@@ -172,5 +172,5 @@ response=$(herdr workspace create \
 tab_id=$(jq -r '.result.tab.tab_id' <<<"$response")
 pane_id=$(jq -r '.result.root_pane.pane_id' <<<"$response")
 herdr tab rename "$tab_id" "nvim" >/dev/null
-herdr pane run "$pane_id" "exec nvim" >/dev/null
+herdr pane run "$pane_id" "exec herdr-vim --start" >/dev/null
 focus_client

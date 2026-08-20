@@ -29,7 +29,11 @@ fi
 
 role=${1:?"tab role is required"}
 restore_only=false
-[[ ${2:-} == --restore ]] && restore_only=true
+ensure_running=false
+case ${2:-} in
+--restore) restore_only=true ;;
+--ensure-running) ensure_running=true ;;
+esac
 workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
 
 if [[ -z $workspace_id ]]; then
@@ -188,12 +192,56 @@ opencode_is_running() {
   ' >/dev/null <<<"$process_info"
 }
 
+ensure_nvim_tab() {
+	local tab_id=$1
+	local panes pane pane_id process_info shell_name
+	shell_name=${SHELL##*/}
+
+	if HERDR_ACTIVE_WORKSPACE_ID=$workspace_id herdr-vim --ping; then
+		herdr tab focus "$tab_id" >/dev/null
+		return
+	fi
+
+	panes=$(herdr pane list --workspace "$workspace_id") || return 2
+	pane=$(jq -c --arg tab_id "$tab_id" '
+    [.result.panes[] | select(.tab_id == $tab_id)][0] // empty
+  ' <<<"$panes")
+	pane_id=$(jq -r '.pane_id // empty' <<<"$pane")
+	[[ -n $pane_id ]] || return 1
+
+	process_info=$(herdr pane process-info --pane "$pane_id") || return 2
+	if jq -e '
+    any(.result.process_info.foreground_processes[]?;
+      .name == "nvim" or
+      .name == "herdr-vim" or
+      any(.argv[]?; test("(^|/)(nvim|herdr-vim)$"))
+    )
+  ' >/dev/null <<<"$process_info"; then
+		herdr tab focus "$tab_id" >/dev/null
+		return
+	fi
+
+	if jq -e --arg shell_name "$shell_name" '
+    .result.process_info as $process |
+    ($process.foreground_processes | length) == 1 and
+    $process.foreground_processes[0].pid == $process.shell_pid and
+    $process.foreground_processes[0].name == $shell_name and
+    ($process.foreground_processes[0].argv | length) == 1
+  ' >/dev/null <<<"$process_info"; then
+		herdr pane run "$pane_id" "exec $command" >/dev/null || return 2
+		herdr tab focus "$tab_id" >/dev/null
+		return
+	fi
+
+	return 1
+}
+
 case "$role" in
 nvim | 1)
 	role="nvim"
 	label="nvim"
 	legacy_slot=1
-	command="nvim"
+	command="herdr-vim --start"
 	;;
 shell | 2)
 	role="shell"
@@ -229,7 +277,7 @@ git | 7)
 	role="git"
 	label="git"
 	legacy_slot=7
-	command="lazygit --use-config-file=$HOME/.config/lazygit/config.yml"
+	command="lazygit --use-config-file=$HOME/.config/lazygit/config.yml,$HOME/.config/lazygit/config-herdr.yml"
 	;;
 docker | 8)
 	role="docker"
@@ -285,7 +333,16 @@ if [[ -n $tab_id ]]; then
 		restore_tab "$tab_id"
 		exit
 	fi
-	if [[ $role == opencode ]]; then
+	if $ensure_running && [[ $role == nvim ]]; then
+		ensure_nvim_tab "$tab_id"
+		status=$?
+		if ((status == 0)); then
+			exit
+		elif ((status == 2)); then
+			exit 1
+		fi
+		herdr tab close "$tab_id" >/dev/null || exit 1
+	elif [[ $role == opencode ]]; then
 		panes=$(herdr pane list --workspace "$workspace_id") || exit 1
 		pane=$(jq -c --arg tab_id "$tab_id" '
       [.result.panes[] | select(.tab_id == $tab_id)][0] // empty

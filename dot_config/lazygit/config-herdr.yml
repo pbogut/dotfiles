@@ -1,0 +1,23 @@
+os:
+  edit: 'herdr-vim {{filename}}'
+  editAtLine: 'herdr-vim --line {{line}} {{filename}}'
+  editInTerminal: false
+  open: 'herdr-vim {{filename}}'
+
+customCommands:
+  - key: 'q'
+    description: 'Go back to nvim'
+    context: 'global'
+    command: 'herdr-select-tab-or-new nvim'
+  - key: 'o'
+    description: 'Open file'
+    context: 'files'
+    command: 'herdr-vim {{ .SelectedFile.Name | quote }}'
+  - key: 'o'
+    description: 'Open file'
+    context: 'commitFiles'
+    command: 'herdr-vim {{ .SelectedCommitFile.Name | quote }}'
+  - key: 'o'
+    description: 'Open file'
+    context: 'staging'
+    command: 'herdr-vim {{ .SelectedFile.Name | quote }}'

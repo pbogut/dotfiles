@@ -108,9 +108,9 @@ delivery = "system"
 rows = [
   [
     "state_icon",
-    "workspace",
+    # "workspace",
+    { token = "$project", fg = "#acb0d0", bold = true, dim = false },
     { token = "$opencode_profile", fg = "#9d7cd8", bold = true, dim = true },
-    { token = "$project", fg = "#9d7cd8", bold = true, dim = false },
   ],
   [
     { token = "$feature", fg = "#9d7cd8", dim = false },
@@ -122,7 +122,8 @@ rows = [
   [
     "state_icon",
     "workspace",
-    { token = "$project", fg = "#9d7cd8", bold = true, dim = false },
+    { token = "$project", fg = "#acb0d0", bold = true, dim = false },
+    # { token = "$project", fg = "#9d7cd8", bold = true, dim = false },
   ],
   [
     { token = "$feature", fg = "#9d7cd8", dim = false },

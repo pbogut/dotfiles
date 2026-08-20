@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+
+workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
+if [[ -z $workspace_id ]]; then
+	echo "No active Herdr workspace" >&2
+	exit 1
+fi
+
+if [[ ! $workspace_id =~ ^[A-Za-z0-9_-]+$ ]]; then
+	echo "Invalid Herdr workspace ID: $workspace_id" >&2
+	exit 1
+fi
+
+runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$UID}
+socket_path=$runtime_dir/nvim.herdr-$workspace_id.0
+
+nvim_is_ready() {
+	nvim --server "$socket_path" --remote-expr '1' >/dev/null 2>&1
+}
+
+if [[ ${1:-} == --ping ]]; then
+	nvim_is_ready
+	exit
+fi
+
+if [[ ${1:-} == --start ]]; then
+	shift
+	if [[ -e $socket_path ]]; then
+		if nvim_is_ready; then
+			echo "Neovim is already running for Herdr workspace $workspace_id" >&2
+			exit 1
+		fi
+		rm -f -- "$socket_path"
+	fi
+	exec nvim --listen "$socket_path" "$@"
+fi
+
+line=
+declare -a files=()
+while (($#)); do
+	case "$1" in
+	--line)
+		if (($# < 2)) || [[ ! $2 =~ ^[0-9]+$ ]]; then
+			echo "--line requires a line number" >&2
+			exit 2
+		fi
+		line=$2
+		shift 2
+		;;
+	--)
+		shift
+		files+=("$@")
+		break
+		;;
+	*)
+		files+=("$1")
+		shift
+		;;
+	esac
+done
+
+if ((${#files[@]} == 0)); then
+	echo "No file to open" >&2
+	exit 2
+fi
+
+HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
+	herdr-select-tab-or-new nvim --ensure-running || exit 1
+
+for _ in {1..100}; do
+	if nvim_is_ready; then
+		break
+	fi
+	sleep 0.05
+done
+
+if ! nvim_is_ready; then
+	echo "Neovim did not start for Herdr workspace $workspace_id" >&2
+	exit 1
+fi
+
+declare -a remote_files=()
+for file in "${files[@]}"; do
+	remote_files+=("$(realpath -m -- "$file")")
+done
+
+nvim --server "$socket_path" --remote "${remote_files[@]}" || exit 1
+nvim --server "$socket_path" --remote "${remote_files[0]}" || exit 1
+if [[ -n $line ]]; then
+	nvim --server "$socket_path" --remote-expr "cursor($line, 1)" >/dev/null || exit 1
+fi
+
+tabs=$(herdr tab list --workspace "$workspace_id") || exit 1
+tab_id=$(jq -r '[.result.tabs[] | select(.label == "nvim")][0].tab_id // empty' <<<"$tabs")
+if [[ -z $tab_id ]]; then
+	echo "No managed Neovim tab in Herdr workspace $workspace_id" >&2
+	exit 1
+fi
+
+herdr tab focus "$tab_id" >/dev/null
