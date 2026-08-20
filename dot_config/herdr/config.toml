@@ -1,7 +1,8 @@
 onboarding = false
 
 [theme]
-name = "tokyonight"
+name = "tokyo-night"
+auto_switch = false
 
 [theme.custom]
 surface_dim = "#42396b"
@@ -108,6 +109,7 @@ rows = [
   [
     "state_icon",
     "workspace",
+    { token = "$opencode_profile", fg = "#9d7cd8", bold = true, dim = true },
     { token = "$project", fg = "#9d7cd8", bold = true, dim = false },
   ],
   [

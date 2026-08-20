@@ -78,6 +78,11 @@ ln -f "$HOME/.config/opencode/$profile-opencode.json" "$HOME/.config/opencode/op
 if [ -n "$TMUX" ]; then
   tmux rename-window "opencode[$profile]"
 fi
+if [[ -n ${HERDR_PANE_ID:-} ]]; then
+  herdr pane report-metadata "$HERDR_PANE_ID" \
+    --source local:sidebar \
+    --token opencode_profile="$profile"
+fi
 
 echo opencode "${params[@]}"
 ~/.opencode/bin/opencode "${params[@]}"
