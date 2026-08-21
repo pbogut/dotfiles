@@ -40,6 +40,20 @@ while test $# -gt 0; do
   esac
 done
 
+array_contains() {
+    local needle="$1"
+    shift
+
+    local item
+    for item in "$@"; do
+        if [[ "$item" == "$needle" ]]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 find_up() {
   local name="$1"
   local dir="$PWD"
@@ -84,5 +98,9 @@ if [[ -n ${HERDR_PANE_ID:-} ]]; then
     --token opencode_profile="$profile"
 fi
 
+# ensure --port is always provided
+if ! array_contains "--port" "${params[@]}"; then
+  params+=("--port")
+fi
 echo opencode "${params[@]}"
-~/.opencode/bin/opencode "${params[@]}"
+~/.opencode/bin/opencode  "${params[@]}"
