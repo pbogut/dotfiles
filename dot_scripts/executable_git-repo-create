@@ -16,7 +16,21 @@ repo_name=$(basename "$origin_url" .git)
 if [[ "$origin_host" == "codeberg.org" ]]; then
   codeberg-cli repo create -n "$repo_name" --default-branch master
 elif [[ "$origin_host" == "github.com" ]]; then
-  gh repo create "$repo_name"
+  echo "Select repository visibility:"
+  PS3="Visibility: "
+  select visibility in private public internal; do
+    case "$visibility" in
+      private | public | internal)
+        exec gh repo create "$repo_name" "--$visibility"
+        ;;
+      *)
+        echo "Invalid selection"
+        ;;
+    esac
+  done
+
+  echo "No visibility selected"
+  exit 1
 else
   echo "Origin host not supported ($origin_host)"
   exit 1
