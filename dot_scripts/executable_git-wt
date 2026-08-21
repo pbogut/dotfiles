@@ -31,6 +31,7 @@ candidates=false
 
 worktree=""
 source_branch=""
+with_branch=false
 
 while test $# -gt 0; do
   case "$1" in
@@ -63,6 +64,10 @@ while test $# -gt 0; do
     ;;
   prune)
     action=prune
+    shift
+    ;;
+  --with-branch)
+    with_branch=true
     shift
     ;;
   --upstream)
@@ -279,6 +284,16 @@ if [[ $action == "remove" ]] && [[ -n $worktree ]]; then
           fi
         fi
       fi
+    elif $with_branch; then
+        echo "Removing branch with git branch -d $(basename "$worktree")";
+        if ! git branch -d "$(basename "$worktree")"; then
+            echo "Remove branch with force? [y/N]"
+            read -r ans
+            if [[ $ans == "y" ]]; then
+            echo "Removing branch with git branch -D $(basename "$worktree")";
+              git branch -D "$(basename "$worktree")"
+            fi
+        fi
     fi
   else
     echo "Not a git worktree: $worktree"

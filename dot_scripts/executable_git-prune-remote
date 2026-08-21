@@ -5,7 +5,7 @@
 # date:   20/07/2022
 #=================================================
 master="$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
-branches=$(git branch --remote --merged "origin/$master" | grep -v "  origin/$master")
+branches=$(git branch --remote --merged "origin/$master" | grep -v "  origin/$master" | grep -v "  origin/HEAD")
 
 if [[ -n $branches ]]; then
   echo "Remote branches merged with origin/$master:"
@@ -16,6 +16,8 @@ if [[ -n $branches ]]; then
 
   if [[ $confirm == "y" ]]; then
     # shellcheck disable=SC2086,SC2046,SC2001
-    git push origin --delete $(sed 's,^  origin/,,g' <<< "$branches")
+    for branch in $branches; do
+      git push origin --delete "${branch##origin/}"
+    done
   fi
 fi
