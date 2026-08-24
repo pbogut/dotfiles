@@ -1,6 +1,6 @@
 id = "pbogut.project-layout"
 name = "Project Layout"
-version = "0.2.0"
+version = "0.5.2"
 min_herdr_version = "0.8.0"
 description = "Apply trusted per-project setup and managed tabs to Git worktrees"
 platforms = ["linux"]
@@ -29,6 +29,12 @@ title = "Revoke project layout trust"
 contexts = ["workspace"]
 command = ["herdr-project-layout", "revoke"]
 
+[[actions]]
+id = "close"
+title = "Close workspace with project teardown"
+contexts = ["workspace"]
+command = ["herdr-project-layout", "close"]
+
 [[events]]
 on = "worktree.created"
 command = ["herdr-project-layout", "event"]
@@ -44,3 +50,23 @@ placement = "popup"
 width = "70%"
 height = 13
 command = ["herdr-project-layout", "prompt"]
+
+[[panes]]
+id = "setup"
+title = "setup"
+placement = "tab"
+command = ["herdr-project-layout", "setup"]
+
+[[panes]]
+id = "teardown-confirm"
+title = "Close project workspace"
+placement = "popup"
+width = "70%"
+height = 12
+command = ["herdr-project-layout", "confirm-close"]
+
+[[panes]]
+id = "teardown"
+title = "teardown"
+placement = "tab"
+command = ["herdr-project-layout", "teardown"]

@@ -25,6 +25,10 @@ fi
 
 if [[ ${1:-} == --start ]]; then
 	shift
+	if [[ -n ${HERDR_VIM_LAUNCH_ACK:-} ]]; then
+		umask 077
+		printf '%s\n' "$$" >"$HERDR_VIM_LAUNCH_ACK" || exit 1
+	fi
 	if [[ -e $socket_path ]]; then
 		if nvim_is_ready; then
 			echo "Neovim is already running for Herdr workspace $workspace_id" >&2

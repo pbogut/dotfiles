@@ -9,14 +9,108 @@ workspace_id=${HERDR_LAYOUT_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
 worktree_dir=""
 project_dir=""
 layout_file=""
+setup_deferred_status=75
+setup_resume_status=76
+setup_failed_status=77
+setup_ready_status=78
 
 notify() {
 	"$herdr" notification show "$1" --body "$2" >/dev/null 2>&1 || true
 }
 
+print_confirmation_buttons() {
+	local confirm_label=${1:-confirm}
+	local cancel_label=${2:-cancel}
+	local variant=${3:-danger}
+	local confirm_text=" ↵ $confirm_label "
+	local cancel_text=" esc $cancel_label "
+	local columns padding primary_rgb
+
+	case $variant in
+	accent) primary_rgb='122;162;247' ;;
+	*) primary_rgb='247;118;142' ;;
+	esac
+
+	# Match Herdr's Tokyo Night primary and secondary action buttons.
+	if columns=$(tput cols 2>/dev/null) && [[ $columns =~ ^[0-9]+$ ]]; then
+		padding=$(((columns - ${#confirm_text} - ${#cancel_text} - 2) / 2))
+		((padding > 0)) && printf '%*s' "$padding" ''
+	fi
+	printf '\033[1;38;2;26;27;38;48;2;%sm%s\033[0m  ' "$primary_rgb" "$confirm_text"
+	printf '\033[1;38;2;192;202;245;48;2;36;40;59m%s\033[0m\n' "$cancel_text"
+}
+
+print_action_button() {
+	local label=${1:-done}
+	local text=" ↵ $label "
+	local columns padding
+
+	if columns=$(tput cols 2>/dev/null) && [[ $columns =~ ^[0-9]+$ ]]; then
+		padding=$(((columns - ${#text}) / 2))
+		((padding > 0)) && printf '%*s' "$padding" ''
+	fi
+	printf '\033[1;38;2;26;27;38;48;2;122;162;247m%s\033[0m\n' "$text"
+}
+
+confirm_with_enter() {
+	local choice
+
+	while IFS= read -r -s -n 1 choice; do
+		case $choice in
+		"")
+			return 0
+			;;
+		$'\e')
+			return 1
+			;;
+		esac
+	done
+
+	return 1
+}
+
+wait_for_enter() {
+	local choice
+
+	while IFS= read -r -s -n 1 choice; do
+		if [[ -z $choice ]]; then
+			return 0
+		fi
+	done
+
+	return 1
+}
+
+wait_for_setup_autoclose() {
+	local seconds choice
+
+	for seconds in 5 4 3 2 1; do
+		printf '\r\033[K'
+		print_confirmation_buttons "close in ${seconds}s" "keep open" accent
+		printf '\033[1A'
+		choice=
+		if IFS= read -r -s -n 1 -t 1 choice; then
+			case $choice in
+			"")
+				printf '\r\033[K'
+				return 0
+				;;
+			$'\e')
+				printf '\r\033[KAuto-close cancelled.\n\n'
+				print_action_button close
+				wait_for_enter
+				return
+				;;
+			esac
+		fi
+	done
+	# printf '\r\033[K'
+	return 0
+}
+
 resolve_context() {
 	local candidate=${1:-${HERDR_LAYOUT_WORKTREE:-}}
-	local event context common_dir
+	local event context common_dir panes
 
 	event=${HERDR_PLUGIN_EVENT_JSON:-'{}'}
 	context=${HERDR_PLUGIN_CONTEXT_JSON:-'{}'}
@@ -38,6 +132,14 @@ resolve_context() {
       empty
     ' <<<"$context" 2>/dev/null)
 	fi
+	if [[ -z $candidate && -n $workspace_id ]]; then
+		panes=$("$herdr" pane list --workspace "$workspace_id" 2>/dev/null) || panes='{}'
+		candidate=$(jq -r '
+      ([.result.panes[]? | select(.focused) | (.foreground_cwd // .cwd)][0] //
+       [.result.panes[]? | (.foreground_cwd // .cwd)][0] //
+       empty)
+    ' <<<"$panes" 2>/dev/null)
+	fi
 	[[ -n $candidate ]] || candidate=$PWD
 	[[ -d $candidate ]] || return 1
 
@@ -50,6 +152,30 @@ resolve_context() {
 	project_dir=$(realpath -e -- "${common_dir%/*}") || return 1
 	[[ $worktree_dir == "$project_dir/"* ]] || return 1
 	layout_file="$project_dir/$layout_name"
+}
+
+refresh_workspace_id() {
+	local snapshot resolved
+
+	for _ in {1..50}; do
+		snapshot=$("$herdr" api snapshot 2>/dev/null) || {
+			sleep 0.1
+			continue
+		}
+		resolved=$(jq -r --arg path "$worktree_dir" '
+      [.result.snapshot.panes[] |
+        select(.cwd == $path or .foreground_cwd == $path) |
+        .workspace_id][0] // empty
+    ' <<<"$snapshot")
+		if [[ -n $resolved ]]; then
+			workspace_id=$resolved
+			return 0
+		fi
+		sleep 0.1
+	done
+
+	echo "No Herdr workspace found for $worktree_dir" >&2
+	return 1
 }
 
 is_layout_file() {
@@ -73,6 +199,16 @@ write_layout_template() {
 		'  # Example:' \
 		'  # [[ -e "$HERDR_WORKTREE_DIR/.env" ]] ||' \
 		'  #   install -m 600 "$HERDR_PROJECT_DIR/shared/.env" "$HERDR_WORKTREE_DIR/.env"' \
+		'  :' \
+		'}' \
+		'' \
+		'# Teardown runs before the safe-close shortcut closes the workspace.' \
+		'# Return nonzero when cleanup is unsafe or incomplete; Herdr will ask whether to close anyway.' \
+		'herdr_teardown() {' \
+		'  # Example:' \
+		'  # git-wt-cleanup --check "$HERDR_WORKTREE_DIR" || return' \
+		'  # docker compose down || return' \
+		'  # git-wt-cleanup --safe-only "$HERDR_WORKTREE_DIR"' \
 		'  :' \
 		'}'
 }
@@ -99,7 +235,7 @@ init_layout() {
 		notify "Project layout created" "$layout_file"
 	fi
 
-	if [[ -n $workspace_id ]]; then
+	if [[ -n $workspace_id ]] && refresh_workspace_id; then
 		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
 			HERDR_ACTIVE_PANE_CWD=$worktree_dir \
 			herdr-vim -- "$layout_file"
@@ -203,6 +339,7 @@ load_layout() {
 	HERDR_DEV_COMMAND=(make dev)
 	HERDR_SETUP_VERSION=1
 	unset -f herdr_setup 2>/dev/null || true
+	unset -f herdr_teardown 2>/dev/null || true
 	export HERDR_PROJECT_DIR=$project_dir
 	export HERDR_WORKTREE_DIR=$worktree_dir
 	export HERDR_LAYOUT_FILE=$layout_file
@@ -223,10 +360,24 @@ load_layout() {
 	fi
 }
 
+finish_setup() {
+	if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} == trust ]]; then
+		if "$herdr" plugin action invoke apply --plugin "$plugin_id" >/dev/null 2>&1; then
+			return "$setup_resume_status"
+		fi
+		notify "Project layout handoff failed" "Opening tabs in the current popup"
+	fi
+	return 0
+}
+
 run_setup() {
 	local config_dir setup_dir worktree_identity marker_key marker tmp lock_fd
+	local setup_status
 
-	declare -F herdr_setup >/dev/null || return 0
+	if ! declare -F herdr_setup >/dev/null; then
+		finish_setup
+		return
+	fi
 	config_dir=$(get_config_dir) || return 1
 	setup_dir="$config_dir/setup"
 	mkdir -p -- "$setup_dir" || return 1
@@ -246,14 +397,29 @@ run_setup() {
 	fi
 	if [[ -f $marker ]]; then
 		exec {lock_fd}>&- || true
-		return 0
+		finish_setup
+		return
 	fi
 
-	if ! (cd "$worktree_dir" && herdr_setup); then
-		echo "Project setup failed for $worktree_dir" >&2
-		notify "Project setup failed" "$worktree_dir"
+	if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} != setup ]]; then
 		exec {lock_fd}>&-
-		return 1
+		request_setup_tab || return 1
+		return "$setup_deferred_status"
+	fi
+
+	[[ ! -t 1 ]] || printf '\033[2J\033[H'
+	printf 'Setting up...\n\n'
+	if (cd "$worktree_dir" && herdr_setup); then
+		setup_status=0
+	else
+		setup_status=$?
+	fi
+
+	if ((setup_status != 0)); then
+		printf '\nSetup failed (exit %d).\n\n' "$setup_status"
+		notify "Project setup failed" "$worktree_dir"
+		exec {lock_fd}>&- || true
+		return "$setup_failed_status"
 	fi
 
 	umask 077
@@ -271,25 +437,108 @@ run_setup() {
 		return 1
 	fi
 	exec {lock_fd}>&- || true
-	return 0
+	finish_setup
+}
+
+select_managed_tab() {
+	local role=$1
+	local status=1
+	shift
+
+	for _ in {1..3}; do
+		refresh_workspace_id || return 1
+		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
+			HERDR_ACTIVE_PANE_CWD=$worktree_dir \
+			herdr-select-tab-or-new "$role" "$@"
+		status=$?
+		((status == 0)) && return 0
+		sleep 0.1
+	done
+
+	return "$status"
 }
 
 ensure_editor() {
-	[[ -n $workspace_id ]] || return 1
-	HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
-		HERDR_ACTIVE_PANE_CWD=$worktree_dir \
-		herdr-select-tab-or-new nvim --ensure-running
+	select_managed_tab nvim
+	select_managed_tab nvim --ensure-running
+}
+
+close_plugin_tab() {
+	[[ -n ${HERDR_TAB_ID:-} ]] || return 1
+	"$herdr" tab close "$HERDR_TAB_ID" >/dev/null
+}
+
+close_sibling_tabs() {
+	local tabs tab_ids tab_id
+
+	[[ -n ${HERDR_TAB_ID:-} ]] || {
+		echo "No teardown tab is available" >&2
+		return 1
+	}
+	tabs=$("$herdr" tab list --workspace "$workspace_id" 2>/dev/null) || {
+		echo "Could not list tabs for workspace $workspace_id" >&2
+		return 1
+	}
+	if ! jq -e --arg current "$HERDR_TAB_ID" '
+      .result.tabs | type == "array" and any(.[]; .tab_id == $current)
+    ' >/dev/null 2>&1 <<<"$tabs"; then
+		echo "Teardown tab $HERDR_TAB_ID was not found in workspace $workspace_id" >&2
+		return 1
+	fi
+	tab_ids=$(jq -r --arg current "$HERDR_TAB_ID" '
+      .result.tabs[] | select(.tab_id != $current) | .tab_id
+    ' <<<"$tabs") || return 1
+
+	while IFS= read -r tab_id; do
+		[[ -n $tab_id ]] || continue
+		if ! "$herdr" tab close "$tab_id" >/dev/null; then
+			echo "Could not close tab $tab_id" >&2
+			return 1
+		fi
+	done <<<"$tab_ids"
+}
+
+finish_setup_tab() {
+	local outcome=$1
+
+	if [[ $outcome == failed ]]; then
+		print_action_button "open nvim"
+		wait_for_enter || return 1
+	else
+		printf '\nDone.\n\n'
+		wait_for_setup_autoclose || return 0
+	fi
+	ensure_editor || true
+	if ! close_plugin_tab; then
+		notify "Project setup tab remained open" "Close it manually"
+		return 1
+	fi
 }
 
 apply_layout_unlocked() {
-	local role status=0
+	local role setup_status status=0
 	local -A seen=()
 
+	refresh_workspace_id || return 1
 	load_layout || {
 		notify "Invalid project layout" "$layout_file"
 		return 1
 	}
-	run_setup || return 1
+	run_setup
+	setup_status=$?
+	if ((setup_status == setup_resume_status)); then
+		return "$setup_resume_status"
+	elif ((setup_status == setup_deferred_status)); then
+		return 0
+	elif ((setup_status == setup_failed_status)); then
+		return "$setup_failed_status"
+	elif ((setup_status != 0)); then
+		if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} == setup ]]; then
+			return "$setup_failed_status"
+		fi
+		ensure_editor || true
+		return 1
+	fi
 	[[ -n $workspace_id ]] || {
 		echo "No Herdr workspace is available for $worktree_dir" >&2
 		return 1
@@ -307,19 +556,20 @@ apply_layout_unlocked() {
 		[[ -z ${seen[$role]:-} ]] || continue
 		seen[$role]=1
 		if [[ $role == nvim ]]; then
-			HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
-				HERDR_ACTIVE_PANE_CWD=$worktree_dir \
-				herdr-select-tab-or-new "$role" --ensure-running --no-focus || status=1
+			select_managed_tab "$role" --ensure-running --no-focus || status=1
 		else
-			HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
-				HERDR_ACTIVE_PANE_CWD=$worktree_dir \
-				herdr-select-tab-or-new "$role" --no-focus || status=1
+			select_managed_tab "$role" --no-focus || status=1
 		fi
 	done
 
-	ensure_editor || status=1
+	if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} != setup ]]; then
+		ensure_editor || status=1
+	fi
 	if ((status != 0)); then
 		notify "Project layout incomplete" "$worktree_dir"
+	fi
+	if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} == setup ]]; then
+		return "$setup_ready_status"
 	fi
 	return "$status"
 }
@@ -343,7 +593,19 @@ apply_layout() {
 
 	apply_layout_unlocked
 	status=$?
+	if ((status == setup_resume_status)); then
+		# Keep the lock until process exit so the background action starts after the popup closes.
+		exit 0
+	fi
 	exec {lock_fd}>&- || true
+	if ((status == setup_ready_status)); then
+		finish_setup_tab ready
+		return
+	elif ((status == setup_failed_status)) ||
+		[[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} == setup && $status != 0 ]]; then
+		finish_setup_tab failed
+		return 1
+	fi
 	return "$status"
 }
 
@@ -361,7 +623,6 @@ request_prompt() {
 		response=$("$herdr" plugin pane open \
 			--plugin "$plugin_id" \
 			--entrypoint trust \
-			--placement popup \
 			--cwd "$worktree_dir" \
 			--env "HERDR_LAYOUT_WORKTREE=$worktree_dir" \
 			--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
@@ -375,6 +636,205 @@ request_prompt() {
 	return 1
 }
 
+rename_opened_plugin_tab() {
+	local response=$1
+	local label=$2
+	local tab_id
+
+	tab_id=$(jq -r '.result.plugin_pane.pane.tab_id // empty' <<<"$response") || return 1
+	[[ -n $tab_id ]] || return 1
+	"$herdr" tab rename "$tab_id" "$label" >/dev/null
+}
+
+request_setup_tab() {
+	local response focused_workspace
+
+	for _ in {1..30}; do
+		focused_workspace=$("$herdr" api snapshot 2>/dev/null |
+			jq -r '.result.snapshot.focused_workspace_id // empty')
+		if [[ $focused_workspace != "$workspace_id" ]]; then
+			notify "Project setup pending" "Focus $worktree_dir and apply its project layout"
+			return 1
+		fi
+
+		if response=$("$herdr" plugin pane open \
+			--plugin "$plugin_id" \
+			--entrypoint setup \
+			--placement tab \
+			--workspace "$workspace_id" \
+			--cwd "$worktree_dir" \
+			--env "HERDR_LAYOUT_WORKTREE=$worktree_dir" \
+			--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
+			--focus 2>&1); then
+			rename_opened_plugin_tab "$response" setup ||
+				notify "Project setup tab was not named" "Rename it to setup manually"
+			return 0
+		fi
+		[[ $response == *ui_busy* ]] || break
+		sleep 0.1
+	done
+
+	echo "$response" >&2
+	notify "Project setup pending" "Could not open the setup tab for $worktree_dir"
+	return 1
+}
+
+request_teardown_confirmation() {
+	local candidate context focused_workspace panes response
+
+	context=${HERDR_PLUGIN_CONTEXT_JSON:-'{}'}
+	if [[ -z $workspace_id ]]; then
+		workspace_id=$(jq -r '.workspace_id // empty' <<<"$context" 2>/dev/null)
+	fi
+	[[ -n $workspace_id ]] || {
+		echo "No Herdr workspace is available" >&2
+		return 1
+	}
+
+	candidate=${HERDR_LAYOUT_WORKTREE:-}
+	if [[ -z $candidate ]]; then
+		candidate=$(jq -r '
+      .worktree.checkout_path //
+      .focused_pane_cwd //
+      .workspace_cwd //
+      empty
+    ' <<<"$context" 2>/dev/null)
+	fi
+	if [[ -z $candidate ]]; then
+		panes=$("$herdr" pane list --workspace "$workspace_id" 2>/dev/null) || panes='{}'
+		candidate=$(jq -r '
+      ([.result.panes[]? | select(.focused) | (.foreground_cwd // .cwd)][0] //
+       [.result.panes[]? | (.foreground_cwd // .cwd)][0] //
+       empty)
+    ' <<<"$panes" 2>/dev/null)
+	fi
+	[[ -d $candidate ]] || candidate=$PWD
+	[[ -d $candidate ]] || candidate=$HOME
+
+	for _ in {1..30}; do
+		focused_workspace=$("$herdr" api snapshot 2>/dev/null |
+			jq -r '.result.snapshot.focused_workspace_id // empty')
+		if [[ $focused_workspace != "$workspace_id" ]]; then
+			notify "Workspace was not closed" "Focus it and run the close shortcut again"
+			return 1
+		fi
+
+		response=$("$herdr" plugin pane open \
+			--plugin "$plugin_id" \
+			--entrypoint teardown-confirm \
+			--cwd "$candidate" \
+			--env "HERDR_LAYOUT_WORKTREE=$candidate" \
+			--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
+			--focus 2>&1) && return 0
+		[[ $response == *ui_busy* ]] || break
+		sleep 0.1
+	done
+
+	echo "$response" >&2
+	notify "Workspace was not closed" "Could not open the teardown popup"
+	return 1
+}
+
+request_teardown_tab() {
+	local candidate=$1
+	local response
+
+	if response=$("$herdr" plugin pane open \
+		--plugin "$plugin_id" \
+		--entrypoint teardown \
+		--placement tab \
+		--workspace "$workspace_id" \
+		--cwd "$candidate" \
+		--env "HERDR_LAYOUT_WORKTREE=$candidate" \
+		--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
+		--focus 2>&1); then
+		rename_opened_plugin_tab "$response" teardown ||
+			notify "Project teardown tab was not named" "Rename it to teardown manually"
+		return 0
+	fi
+
+	echo "$response" >&2
+	notify "Workspace was not closed" "Could not open the teardown tab"
+	return 1
+}
+
+confirm_workspace_close() {
+	local candidate
+
+	[[ -n $workspace_id ]] || {
+		echo "No Herdr workspace is available" >&2
+		return 1
+	}
+	candidate=${HERDR_LAYOUT_WORKTREE:-$PWD}
+
+	printf '\n\033[1;38;2;247;118;142mClose workspace?\033[0m\n\n'
+	printf 'Workspace: %s\n' "$workspace_id"
+	printf 'Directory: %s\n\n' "$candidate"
+	print_confirmation_buttons
+	if ! confirm_with_enter; then
+		printf 'Cancelled.\n'
+		return 0
+	fi
+
+	request_teardown_tab "$candidate"
+}
+
+close_workspace_with_teardown() {
+	local candidate teardown_status=0
+	local teardown_configured=false
+
+	[[ -n $workspace_id ]] || {
+		echo "No Herdr workspace is available" >&2
+		return 1
+	}
+	candidate=${HERDR_LAYOUT_WORKTREE:-$PWD}
+
+	if resolve_context "$candidate" && is_layout_file && is_trusted; then
+		teardown_configured=true
+		if ! load_layout; then
+			teardown_status=1
+		elif declare -F herdr_teardown >/dev/null; then
+			printf '\nTearing down...\n\n'
+			if ! close_sibling_tabs; then
+				teardown_status=1
+			elif (cd "$worktree_dir" && herdr_teardown); then
+				teardown_status=0
+			else
+				teardown_status=$?
+			fi
+		else
+			teardown_configured=false
+		fi
+	fi
+
+	if $teardown_configured; then
+		if ((teardown_status == 0)); then
+			printf '\nDone.\n'
+			notify "Project teardown complete" "$candidate"
+		else
+			printf '\nTeardown did not complete (exit %d).\n' "$teardown_status"
+			printf 'Project resources may remain.\n\n'
+			notify "Project teardown failed" "$candidate"
+			print_confirmation_buttons "close anyway" "keep open"
+			if ! confirm_with_enter; then
+				printf 'Workspace kept open.\n'
+				ensure_editor || true
+				if ! close_plugin_tab; then
+					notify "Project teardown tab remained open" "Close it manually"
+				fi
+				return 0
+			fi
+		fi
+	else
+		printf '\nNo trusted project teardown is configured.\n'
+	fi
+
+	if ! "$herdr" workspace close "$workspace_id" >/dev/null; then
+		notify "Workspace close failed" "$workspace_id"
+		return 1
+	fi
+}
+
 trust_project() {
 	is_layout_file || {
 		echo "No regular $layout_name file at $project_dir" >&2
@@ -386,8 +846,6 @@ trust_project() {
 }
 
 prompt_for_trust() {
-	local choice
-
 	resolve_context || exit 1
 	is_layout_file || exit 0
 	if is_trusted; then
@@ -399,13 +857,13 @@ prompt_for_trust() {
 	printf 'Project: %s\n' "$project_dir"
 	printf 'Config:  %s\n\n' "$layout_file"
 	printf 'This file may copy files and execute commands in every worktree.\n\n'
-	printf '[t] Trust and apply    [n] Not now: '
-	IFS= read -r -n 1 choice
-	printf '\n'
-	case $choice in
-	t | T | y | Y) trust_project ;;
-	*) printf 'Project layout was not trusted.\n' ;;
-	esac
+	print_confirmation_buttons "trust and apply" "not now" accent
+	if confirm_with_enter; then
+		trust_project
+	else
+		printf 'Project layout was not trusted.\n'
+		ensure_editor
+	fi
 }
 
 handle_event() {
@@ -417,8 +875,7 @@ handle_event() {
 	if is_trusted; then
 		apply_layout
 	else
-		ensure_editor || exit 1
-		request_prompt
+		request_prompt || ensure_editor
 	fi
 }
 
@@ -450,14 +907,30 @@ event)
 prompt)
 	prompt_for_trust
 	;;
+setup)
+	resolve_context || exit 1
+	is_layout_file && is_trusted || exit 1
+	apply_layout
+	;;
+close)
+	request_teardown_confirmation
+	;;
+confirm-close)
+	confirm_workspace_close
+	;;
+teardown)
+	close_workspace_with_teardown
+	;;
 apply)
 	resolve_context || exit 1
-	is_layout_file || exit 0
+	is_layout_file || {
+		ensure_editor
+		exit
+	}
 	if is_trusted; then
 		apply_layout
 	else
-		ensure_editor || exit 1
-		request_prompt
+		request_prompt || ensure_editor
 	fi
 	;;
 trust)
@@ -473,7 +946,7 @@ dev)
 	run_dev
 	;;
 *)
-	echo "usage: ${0##*/} init|event|prompt|apply|trust|revoke|dev" >&2
+	echo "usage: ${0##*/} init|event|prompt|setup|close|confirm-close|teardown|apply|trust|revoke|dev" >&2
 	exit 2
 	;;
 esac

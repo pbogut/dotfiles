@@ -39,9 +39,20 @@ herdr_setup() {
       "$HERDR_PROJECT_DIR/shared/.env" \
       "$HERDR_WORKTREE_DIR/.env"
 }
+
+herdr_teardown() {
+  git-wt-cleanup --check "$HERDR_WORKTREE_DIR" || return
+  docker compose down || return
+  git-wt-cleanup --safe-only "$HERDR_WORKTREE_DIR"
+}
 ```
 
 `HERDR_TABS` supports the roles understood by `herdr-select-tab-or-new`.
 `HERDR_DEV_COMMAND` is a Bash array and runs from the worktree. Setup runs once
 for each worktree and setup version. Increment `HERDR_SETUP_VERSION` when setup
 needs to run again.
+
+Setup and teardown run in temporary Herdr tabs so long commands do not block
+the rest of the UI. Setup opens missing managed tabs before showing its Done
+button. Closing a workspace still asks for confirmation in a popup. After
+confirmation, Herdr closes the other workspace tabs before starting teardown.

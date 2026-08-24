@@ -109,6 +109,8 @@ sort_tabs() {
       elif . == "docker" or startswith("8:") then 8
       elif . == "opencode" or startswith("9:") then 9
       elif . == "shell-3" or startswith("10:") then 10
+      elif . == "setup" then 99
+      elif . == "teardown" then 99
       else null
       end;
     .result.tabs as $tabs |
@@ -208,12 +210,31 @@ opencode_is_running() {
   ' >/dev/null <<<"$process_info"
 }
 
+clear_nvim_launch_state() {
+	rm -f -- "$nvim_pending_file" "$nvim_ack_file"
+}
+
+request_nvim_launch() {
+	local pane_id=$1
+	local quoted_ack
+
+	clear_nvim_launch_state
+	printf '%s\n' "$pane_id" >"$nvim_pending_file" || return 2
+	printf -v quoted_ack '%q' "$nvim_ack_file"
+	if ! herdr pane run "$pane_id" \
+		"HERDR_VIM_LAUNCH_ACK=$quoted_ack exec $command" >/dev/null; then
+		clear_nvim_launch_state
+		return 2
+	fi
+}
+
 ensure_nvim_tab() {
 	local tab_id=$1
-	local panes pane pane_id process_info shell_name
+	local panes pane pane_id process_info shell_name pending_pane launch_pid launch_command
 	shell_name=${SHELL##*/}
 
 	if HERDR_ACTIVE_WORKSPACE_ID=$workspace_id herdr-vim --ping; then
+		clear_nvim_launch_state
 		focus_managed_tab "$tab_id"
 		return
 	fi
@@ -233,8 +254,30 @@ ensure_nvim_tab() {
       any(.argv[]?; test("(^|/)(nvim|herdr-vim)$"))
     )
   ' >/dev/null <<<"$process_info"; then
+		clear_nvim_launch_state
 		focus_managed_tab "$tab_id"
 		return
+	fi
+
+	if [[ -f $nvim_pending_file ]]; then
+		read -r pending_pane <"$nvim_pending_file" || pending_pane=
+		if [[ $pending_pane != "$pane_id" ]]; then
+			clear_nvim_launch_state
+		elif [[ ! -f $nvim_ack_file ]]; then
+			focus_managed_tab "$tab_id"
+			return
+		else
+			read -r launch_pid <"$nvim_ack_file" || launch_pid=
+			launch_command=
+			if [[ $launch_pid =~ ^[0-9]+$ && -r /proc/$launch_pid/cmdline ]]; then
+				launch_command=$(tr '\0' ' ' <"/proc/$launch_pid/cmdline")
+			fi
+			if [[ $launch_command =~ (^|/)(nvim|herdr-vim)([[:space:]]|$) ]]; then
+				focus_managed_tab "$tab_id"
+				return
+			fi
+			clear_nvim_launch_state
+		fi
 	fi
 
 	if jq -e --arg shell_name "$shell_name" '
@@ -244,7 +287,7 @@ ensure_nvim_tab() {
     $process.foreground_processes[0].name == $shell_name and
     ($process.foreground_processes[0].argv | length) == 1
   ' >/dev/null <<<"$process_info"; then
-		herdr pane run "$pane_id" "exec $command" >/dev/null || return 2
+		request_nvim_launch "$pane_id" || return 2
 		focus_managed_tab "$tab_id"
 		return
 	fi
@@ -331,6 +374,8 @@ chmod 700 "$lock_dir" || exit 1
 read -r lock_key _ < <(printf '%s\0%s\0' "$workspace_id" "$role" | sha256sum)
 exec {lock_fd}>"$lock_dir/$lock_key.lock" || exit 1
 flock "$lock_fd" || exit 1
+nvim_pending_file="$lock_dir/$lock_key.nvim-pending"
+nvim_ack_file="$lock_dir/$lock_key.nvim-ack"
 
 tabs=$(herdr tab list --workspace "$workspace_id") || exit 1
 
@@ -408,5 +453,9 @@ sort_tabs "$tabs" || echo "Could not reorder Herdr tabs" >&2
 
 if [[ -n $command ]]; then
 	pane_id=$(jq -r '.result.root_pane.pane_id' <<<"$response")
-	herdr pane run "$pane_id" "exec $command" >/dev/null
+	if [[ $role == nvim ]]; then
+		request_nvim_launch "$pane_id"
+	else
+		herdr pane run "$pane_id" "exec $command" >/dev/null
+	fi
 fi

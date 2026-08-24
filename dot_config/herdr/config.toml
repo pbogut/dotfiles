@@ -31,6 +31,7 @@ toggle_sidebar = ["prefix+b", "prefix+t", "prefix+ctrl+t", "alt+t"]
 # previous_agent = "prefix+["
 previous_agent = ["prefix+p", "alt+p"]
 next_agent = ["prefix+n", "alt+n"]
+close_workspace = "prefix+ctrl+shift+d"
 
 [[keys.command]]
 key = "alt+j"
@@ -95,10 +96,16 @@ width = "90%"
 height = "90%"
 
 [[keys.command]]
-key = "prefix+l"
+key = "prefix+shift+i"
 type = "plugin_action"
 command = "pbogut.project-layout.init"
 description = "create or edit project layout"
+
+[[keys.command]]
+key = "prefix+shift+d"
+type = "plugin_action"
+command = "pbogut.project-layout.close"
+description = "close workspace with project teardown"
 
 [ui]
 window_title = "{terminal_title} [{workspace}] |h$"
@@ -106,6 +113,7 @@ tab_bar_position = "bottom"
 pane_outer_borders = false
 pane_scrollbars = false
 pane_gaps = false
+agent_panel_sort = "spaces"
 
 [ui.toast]
 delivery = "system"

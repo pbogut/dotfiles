@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
-if [[ -f ./Makefile ]]; then
+status=0
+if [[ ${HERDR_ENV:-} == 1 ]]; then
+  herdr-project-layout dev
+  status=$?
+elif [[ -f ./Makefile ]]; then
   make dev
+  status=$?
 fi
 read -r -p "Press enter to exit"
-exit 0
+exit "$status"
