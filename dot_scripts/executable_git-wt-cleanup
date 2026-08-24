@@ -1,0 +1,212 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   git-wt-cleanup
+# author: Pawel Bogut <https://pbogut.me>
+# date:   24/08/2026
+#
+# Removes the current git worktree after its merge request has been
+# accepted. Verifies the branch is merged into the remote default branch
+# (usually master) before removing the worktree, its local branch, and the
+# remote branch.
+#
+# Run through the git-wt-cleanup zsh function so the calling shell moves
+# out of the worktree before it is deleted.
+#=================================================
+
+check_only=false
+force=false
+safe_only=false
+
+usage() {
+  echo "Usage: ${0##*/} [OPTIONS] [DIR]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help           display this help and exit"
+  echo "  --check              report whether cleanup is safe without removing"
+  echo "  --safe-only          remove only when fully merged and clean"
+  echo "  --force              skip confirmation prompts and remove regardless"
+}
+
+err() { echo "error: $*" >&2; }
+
+while test $# -gt 0; do
+  case "$1" in
+    --force)
+      force=true
+      shift
+      ;;
+    --check)
+      check_only=true
+      shift
+      ;;
+    --safe-only)
+      safe_only=true
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*)
+      usage >&2
+      exit 2
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if $force && { $check_only || $safe_only; }; then
+  err "--force cannot be combined with --check or --safe-only"
+  exit 2
+fi
+
+target_dir="${1:-.}"
+if [[ $# -gt 1 ]]; then
+  usage >&2
+  exit 2
+fi
+
+cd "$target_dir" || { err "cannot enter $target_dir"; exit 1; }
+
+worktree_dir=$(git rev-parse --show-toplevel 2>/dev/null) \
+  || { err "not inside a git repository"; exit 1; }
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null) \
+  || { err "detached HEAD; nothing to clean up"; exit 1; }
+
+git_common_dir=$(git rev-parse --git-common-dir 2>/dev/null) \
+  || { err "cannot resolve git common dir"; exit 1; }
+git_common_dir=$(cd "$git_common_dir" && pwd)
+git_dir=$(git rev-parse --absolute-git-dir 2>/dev/null) \
+  || { err "cannot resolve git dir"; exit 1; }
+
+if [[ "$git_common_dir" == "$git_dir" ]]; then
+  err "this is the primary checkout, not a linked worktree"
+  exit 1
+fi
+
+# Resolve the remote default branch (origin/HEAD -> origin/master, etc.).
+default_branch=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##')
+if [[ -z $default_branch ]]; then
+  default_branch=$(git remote show origin 2>/dev/null | sed -n '/HEAD branch/s/.*: //p')
+fi
+if [[ -z $default_branch ]]; then
+  err "cannot determine the remote default branch"
+  exit 1
+fi
+
+if [[ "$branch" == "$default_branch" ]]; then
+  err "current branch is the default branch ($default_branch); refusing"
+  exit 1
+fi
+
+echo "Worktree:  $worktree_dir"
+echo "Branch:    $branch"
+echo "Target:    origin/$default_branch"
+echo "Fetching origin..."
+git fetch --prune origin || { err "git fetch failed"; exit 1; }
+
+target="origin/$default_branch"
+git rev-parse --verify -q "$target" >/dev/null \
+  || { err "target ref $target does not exist"; exit 1; }
+
+if git merge-base --is-ancestor "$branch" "$target" 2>/dev/null; then
+  branch_merged=true
+else
+  branch_merged=false
+fi
+
+remote_exists=false
+remote_merged=false
+if git rev-parse --verify -q "refs/remotes/origin/$branch" >/dev/null; then
+  remote_exists=true
+  remote_sha=$(git rev-parse "refs/remotes/origin/$branch")
+  if git merge-base --is-ancestor "$remote_sha" "$target" 2>/dev/null; then
+    remote_merged=true
+  fi
+fi
+
+status=$(git status --porcelain)
+if [[ -z $status ]]; then
+  clean=true
+else
+  clean=false
+fi
+
+if $remote_exists; then
+  echo "Remote:    origin/$branch"
+else
+  echo "Remote:    origin/$branch (not present)"
+fi
+
+if $clean; then
+  echo "Status:    clean"
+else
+  echo "Status:    dirty (uncommitted or untracked changes)"
+  printf '  %s\n' "${status//$'\n'/$'\n  '}"
+fi
+
+fully_merged=true
+$branch_merged || fully_merged=false
+if $remote_exists && ! $remote_merged; then
+  fully_merged=false
+fi
+
+if $fully_merged && $clean; then
+  echo ""
+  echo "Branch is fully merged into $target and the worktree is clean."
+  $check_only && exit 0
+else
+  echo ""
+  echo "NOT fully merged / not clean. The following would be discarded:"
+  $branch_merged || echo "  - local commits in $branch not present in $target"
+  if $remote_exists && ! $remote_merged; then
+    echo "  - remote commits in origin/$branch not present in $target"
+  fi
+  $clean || echo "  - uncommitted and untracked changes"
+  if $check_only || $safe_only; then
+    echo "Cleanup refused."
+    exit 1
+  elif ! $force; then
+    read -r -p "Nuke it anyway? [y/N] " confirm
+    [[ $confirm == "y" || $confirm == "Y" ]] || { echo "Aborted."; exit 130; }
+  fi
+fi
+
+# Move out of the worktree before removing it.
+cd "$git_common_dir" || { err "cannot enter $git_common_dir"; exit 1; }
+
+echo ""
+echo "Removing worktree: $worktree_dir"
+if $clean; then
+  git worktree remove "$worktree_dir" \
+    || { err "failed to remove worktree"; exit 1; }
+else
+  git worktree remove --force "$worktree_dir" \
+    || { err "failed to remove worktree"; exit 1; }
+fi
+
+echo "Removing local branch: $branch"
+git branch -D "$branch" \
+  || { err "failed to remove local branch"; exit 1; }
+
+if $remote_exists; then
+  echo "Removing remote branch: origin/$branch"
+  if git push \
+    --force-with-lease="refs/heads/$branch:$remote_sha" \
+    origin ":refs/heads/$branch"; then
+    git remote prune origin >/dev/null
+  else
+    err "failed to remove remote branch (changed on remote?)"
+    exit 1
+  fi
+fi
+
+echo ""
+echo "Done."
