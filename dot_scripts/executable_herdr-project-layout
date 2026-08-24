@@ -1,0 +1,479 @@
+#!/usr/bin/env bash
+
+set -o pipefail
+
+plugin_id="pbogut.project-layout"
+layout_name=".herdr-layout.sh"
+herdr=${HERDR_BIN_PATH:-herdr}
+workspace_id=${HERDR_LAYOUT_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
+worktree_dir=""
+project_dir=""
+layout_file=""
+
+notify() {
+	"$herdr" notification show "$1" --body "$2" >/dev/null 2>&1 || true
+}
+
+resolve_context() {
+	local candidate=${1:-${HERDR_LAYOUT_WORKTREE:-}}
+	local event context common_dir
+
+	event=${HERDR_PLUGIN_EVENT_JSON:-'{}'}
+	context=${HERDR_PLUGIN_CONTEXT_JSON:-'{}'}
+	if [[ -z $workspace_id ]]; then
+		workspace_id=$(jq -r '.data.workspace.workspace_id // empty' <<<"$event" 2>/dev/null)
+	fi
+	if [[ -z $workspace_id ]]; then
+		workspace_id=$(jq -r '.workspace_id // empty' <<<"$context" 2>/dev/null)
+	fi
+
+	if [[ -z $candidate ]]; then
+		candidate=$(jq -r '.data.worktree.path // empty' <<<"$event" 2>/dev/null)
+	fi
+	if [[ -z $candidate ]]; then
+		candidate=$(jq -r '
+      .worktree.checkout_path //
+      .focused_pane_cwd //
+      .workspace_cwd //
+      empty
+    ' <<<"$context" 2>/dev/null)
+	fi
+	[[ -n $candidate ]] || candidate=$PWD
+	[[ -d $candidate ]] || return 1
+
+	worktree_dir=$(git -C "$candidate" rev-parse --show-toplevel 2>/dev/null) || return 1
+	worktree_dir=$(realpath -e -- "$worktree_dir") || return 1
+	common_dir=$(git -C "$worktree_dir" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || return 1
+	common_dir=$(realpath -e -- "$common_dir") || return 1
+	[[ ${common_dir##*/} == .bare ]] || return 1
+
+	project_dir=$(realpath -e -- "${common_dir%/*}") || return 1
+	[[ $worktree_dir == "$project_dir/"* ]] || return 1
+	layout_file="$project_dir/$layout_name"
+}
+
+is_layout_file() {
+	[[ -f $layout_file && ! -L $layout_file ]]
+}
+
+write_layout_template() {
+	# shellcheck disable=SC2016 # Template variables must remain literal.
+	printf '%s\n' \
+		'# Tabs to create whenever this worktree is opened through herdr-project.' \
+		'HERDR_TABS=(nvim dev opencode)' \
+		'' \
+		'# Use a Bash array. This command runs from the worktree root.' \
+		'HERDR_DEV_COMMAND=(make dev)' \
+		'' \
+		'# Increment this value when setup needs to run again.' \
+		'HERDR_SETUP_VERSION=1' \
+		'' \
+		'# Setup runs once per worktree and setup version. Keep it idempotent.' \
+		'herdr_setup() {' \
+		'  # Example:' \
+		'  # [[ -e "$HERDR_WORKTREE_DIR/.env" ]] ||' \
+		'  #   install -m 600 "$HERDR_PROJECT_DIR/shared/.env" "$HERDR_WORKTREE_DIR/.env"' \
+		'  :' \
+		'}'
+}
+
+init_layout() {
+	local editor
+
+	resolve_context || {
+		echo "Run this command from a worktree whose common Git directory is .bare" >&2
+		return 1
+	}
+	if [[ -e $layout_file || -L $layout_file ]]; then
+		is_layout_file || {
+			echo "Project layout is not a regular file: $layout_file" >&2
+			return 1
+		}
+	else
+		umask 077
+		if ! (set -o noclobber; write_layout_template >"$layout_file"); then
+			echo "Could not create project layout: $layout_file" >&2
+			return 1
+		fi
+		chmod 600 "$layout_file" || return 1
+		notify "Project layout created" "$layout_file"
+	fi
+
+	if [[ -n $workspace_id ]]; then
+		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
+			HERDR_ACTIVE_PANE_CWD=$worktree_dir \
+			herdr-vim -- "$layout_file"
+		return
+	fi
+
+	editor=${VISUAL:-${EDITOR:-nvim}}
+	"$editor" "$layout_file"
+}
+
+get_config_dir() {
+	if [[ -n ${HERDR_PLUGIN_CONFIG_DIR:-} ]]; then
+		printf '%s\n' "$HERDR_PLUGIN_CONFIG_DIR"
+		return
+	fi
+	"$herdr" plugin config-dir "$plugin_id" 2>/dev/null
+}
+
+is_trusted() {
+	local config_dir trust_file
+
+	config_dir=$(get_config_dir) || return 1
+	trust_file="$config_dir/trusted-projects.json"
+	[[ -f $trust_file ]] || return 1
+	jq -e --arg project "$project_dir" '
+    type == "array" and index($project) != null
+  ' "$trust_file" >/dev/null 2>&1
+}
+
+update_trust() {
+	local operation=$1
+	local config_dir trust_file trust_json updated tmp
+	local lock_fd
+
+	config_dir=$(get_config_dir) || {
+		echo "Could not locate the project-layout config directory" >&2
+		return 1
+	}
+	mkdir -p -- "$config_dir" || return 1
+	trust_file="$config_dir/trusted-projects.json"
+	umask 077
+	if ! exec {lock_fd}>"$trust_file.lock"; then
+		echo "Could not open trust registry lock" >&2
+		return 1
+	fi
+	if ! flock "$lock_fd"; then
+		echo "Could not lock the trust registry" >&2
+		exec {lock_fd}>&-
+		return 1
+	fi
+
+	if [[ -f $trust_file ]]; then
+		trust_json=$(<"$trust_file")
+		if ! jq -e 'type == "array" and all(.[]; type == "string")' >/dev/null 2>&1 <<<"$trust_json"; then
+			echo "Invalid trust registry: $trust_file" >&2
+			exec {lock_fd}>&-
+			return 1
+		fi
+	else
+		trust_json='[]'
+	fi
+
+	case $operation in
+	add)
+		updated=$(jq -c --arg project "$project_dir" '
+      if index($project) == null then . + [$project] else . end
+    ' <<<"$trust_json") || {
+			exec {lock_fd}>&-
+			return 1
+		}
+		;;
+	remove)
+		updated=$(jq -c --arg project "$project_dir" 'map(select(. != $project))' <<<"$trust_json") || {
+			exec {lock_fd}>&-
+			return 1
+		}
+		;;
+	*)
+		exec {lock_fd}>&-
+		return 1
+		;;
+	esac
+
+	tmp=$(mktemp "$config_dir/.trusted-projects.XXXXXX") || {
+		exec {lock_fd}>&-
+		return 1
+	}
+	if ! printf '%s\n' "$updated" >"$tmp" ||
+		! chmod 600 "$tmp" ||
+		! mv -f -- "$tmp" "$trust_file"; then
+		rm -f -- "$tmp"
+		exec {lock_fd}>&-
+		return 1
+	fi
+	exec {lock_fd}>&- || true
+	return 0
+}
+
+load_layout() {
+	HERDR_TABS=(nvim dev opencode)
+	HERDR_DEV_COMMAND=(make dev)
+	HERDR_SETUP_VERSION=1
+	unset -f herdr_setup 2>/dev/null || true
+	export HERDR_PROJECT_DIR=$project_dir
+	export HERDR_WORKTREE_DIR=$worktree_dir
+	export HERDR_LAYOUT_FILE=$layout_file
+
+	# shellcheck source=/dev/null
+	source "$layout_file" || return 1
+	if [[ $(declare -p HERDR_TABS 2>/dev/null) != "declare -a"* ]]; then
+		echo "HERDR_TABS must be a Bash array in $layout_file" >&2
+		return 1
+	fi
+	if [[ $(declare -p HERDR_DEV_COMMAND 2>/dev/null) != "declare -a"* ]]; then
+		echo "HERDR_DEV_COMMAND must be a Bash array in $layout_file" >&2
+		return 1
+	fi
+	if [[ ! $HERDR_SETUP_VERSION =~ ^[A-Za-z0-9._-]{1,80}$ ]]; then
+		echo "HERDR_SETUP_VERSION is invalid in $layout_file" >&2
+		return 1
+	fi
+}
+
+run_setup() {
+	local config_dir setup_dir worktree_identity marker_key marker tmp lock_fd
+
+	declare -F herdr_setup >/dev/null || return 0
+	config_dir=$(get_config_dir) || return 1
+	setup_dir="$config_dir/setup"
+	mkdir -p -- "$setup_dir" || return 1
+	worktree_identity=$(stat -c '%d:%i:%W' "$worktree_dir/.git") || return 1
+	read -r marker_key _ < <(
+		printf '%s\0%s\0%s\0' "$worktree_dir" "$worktree_identity" "$HERDR_SETUP_VERSION" | sha256sum
+	)
+	marker="$setup_dir/$marker_key"
+	if ! exec {lock_fd}>"$marker.lock"; then
+		echo "Could not open the project setup lock" >&2
+		return 1
+	fi
+	if ! flock "$lock_fd"; then
+		echo "Could not lock project setup" >&2
+		exec {lock_fd}>&-
+		return 1
+	fi
+	if [[ -f $marker ]]; then
+		exec {lock_fd}>&- || true
+		return 0
+	fi
+
+	if ! (cd "$worktree_dir" && herdr_setup); then
+		echo "Project setup failed for $worktree_dir" >&2
+		notify "Project setup failed" "$worktree_dir"
+		exec {lock_fd}>&-
+		return 1
+	fi
+
+	umask 077
+	tmp=$(mktemp "$setup_dir/.setup.XXXXXX") || {
+		exec {lock_fd}>&-
+		return 1
+	}
+	if ! printf 'project=%s\nworktree=%s\nversion=%s\n' \
+		"$project_dir" "$worktree_dir" "$HERDR_SETUP_VERSION" >"$tmp" ||
+		! mv -f -- "$tmp" "$marker"; then
+		rm -f -- "$tmp"
+		echo "Could not record project setup for $worktree_dir" >&2
+		notify "Project setup state was not saved" "$worktree_dir"
+		exec {lock_fd}>&-
+		return 1
+	fi
+	exec {lock_fd}>&- || true
+	return 0
+}
+
+ensure_editor() {
+	[[ -n $workspace_id ]] || return 1
+	HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
+		HERDR_ACTIVE_PANE_CWD=$worktree_dir \
+		herdr-select-tab-or-new nvim --ensure-running
+}
+
+apply_layout_unlocked() {
+	local role status=0
+	local -A seen=()
+
+	load_layout || {
+		notify "Invalid project layout" "$layout_file"
+		return 1
+	}
+	run_setup || return 1
+	[[ -n $workspace_id ]] || {
+		echo "No Herdr workspace is available for $worktree_dir" >&2
+		return 1
+	}
+
+	for role in "${HERDR_TABS[@]}"; do
+		case $role in
+		nvim | shell | shell-2 | dev | sql | rest | git | docker | opencode | shell-3) ;;
+		*)
+			echo "Unsupported project layout tab: $role" >&2
+			status=1
+			continue
+			;;
+		esac
+		[[ -z ${seen[$role]:-} ]] || continue
+		seen[$role]=1
+		if [[ $role == nvim ]]; then
+			HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
+				HERDR_ACTIVE_PANE_CWD=$worktree_dir \
+				herdr-select-tab-or-new "$role" --ensure-running --no-focus || status=1
+		else
+			HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
+				HERDR_ACTIVE_PANE_CWD=$worktree_dir \
+				herdr-select-tab-or-new "$role" --no-focus || status=1
+		fi
+	done
+
+	ensure_editor || status=1
+	if ((status != 0)); then
+		notify "Project layout incomplete" "$worktree_dir"
+	fi
+	return "$status"
+}
+
+apply_layout() {
+	local config_dir lock_dir lock_key status lock_fd
+
+	config_dir=$(get_config_dir) || return 1
+	lock_dir="$config_dir/apply-locks"
+	mkdir -p -- "$lock_dir" || return 1
+	read -r lock_key _ < <(printf '%s\0' "$worktree_dir" | sha256sum)
+	if ! exec {lock_fd}>"$lock_dir/$lock_key.lock"; then
+		echo "Could not open the project layout lock" >&2
+		return 1
+	fi
+	if ! flock "$lock_fd"; then
+		echo "Could not lock the project layout" >&2
+		exec {lock_fd}>&-
+		return 1
+	fi
+
+	apply_layout_unlocked
+	status=$?
+	exec {lock_fd}>&- || true
+	return "$status"
+}
+
+request_prompt() {
+	local response focused_workspace
+
+	for _ in {1..30}; do
+		focused_workspace=$("$herdr" api snapshot 2>/dev/null |
+			jq -r '.result.snapshot.focused_workspace_id // empty')
+		if [[ $focused_workspace != "$workspace_id" ]]; then
+			notify "Project layout needs trust" "Focus $worktree_dir and use the Trust and apply project layout action"
+			return 1
+		fi
+
+		response=$("$herdr" plugin pane open \
+			--plugin "$plugin_id" \
+			--entrypoint trust \
+			--placement popup \
+			--cwd "$worktree_dir" \
+			--env "HERDR_LAYOUT_WORKTREE=$worktree_dir" \
+			--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
+			--focus 2>&1) && return 0
+		[[ $response == *ui_busy* ]] || break
+		sleep 0.1
+	done
+
+	echo "$response" >&2
+	notify "Project layout needs trust" "Use the Trust and apply project layout action for $project_dir"
+	return 1
+}
+
+trust_project() {
+	is_layout_file || {
+		echo "No regular $layout_name file at $project_dir" >&2
+		return 1
+	}
+	update_trust add || return 1
+	notify "Project layout trusted" "$project_dir"
+	apply_layout
+}
+
+prompt_for_trust() {
+	local choice
+
+	resolve_context || exit 1
+	is_layout_file || exit 0
+	if is_trusted; then
+		apply_layout
+		exit
+	fi
+
+	printf '\nTrust project layout?\n\n'
+	printf 'Project: %s\n' "$project_dir"
+	printf 'Config:  %s\n\n' "$layout_file"
+	printf 'This file may copy files and execute commands in every worktree.\n\n'
+	printf '[t] Trust and apply    [n] Not now: '
+	IFS= read -r -n 1 choice
+	printf '\n'
+	case $choice in
+	t | T | y | Y) trust_project ;;
+	*) printf 'Project layout was not trusted.\n' ;;
+	esac
+}
+
+handle_event() {
+	resolve_context || exit 0
+	if ! is_layout_file; then
+		ensure_editor
+		exit
+	fi
+	if is_trusted; then
+		apply_layout
+	else
+		ensure_editor || exit 1
+		request_prompt
+	fi
+}
+
+run_dev() {
+	local dev_dir=$PWD
+
+	if resolve_context; then
+		dev_dir=$worktree_dir
+		if is_layout_file && is_trusted; then
+			load_layout || return 1
+			((${#HERDR_DEV_COMMAND[@]} > 0)) || return 0
+			(cd "$worktree_dir" && "${HERDR_DEV_COMMAND[@]}")
+			return
+		fi
+	fi
+
+	if [[ -f $dev_dir/Makefile ]]; then
+		(cd "$dev_dir" && make dev)
+	fi
+}
+
+case ${1:-} in
+init)
+	init_layout
+	;;
+event)
+	handle_event
+	;;
+prompt)
+	prompt_for_trust
+	;;
+apply)
+	resolve_context || exit 1
+	is_layout_file || exit 0
+	if is_trusted; then
+		apply_layout
+	else
+		ensure_editor || exit 1
+		request_prompt
+	fi
+	;;
+trust)
+	resolve_context || exit 1
+	trust_project
+	;;
+revoke)
+	resolve_context || exit 1
+	update_trust remove || exit 1
+	notify "Project layout trust revoked" "$project_dir"
+	;;
+dev)
+	run_dev
+	;;
+*)
+	echo "usage: ${0##*/} init|event|prompt|apply|trust|revoke|dev" >&2
+	exit 2
+	;;
+esac

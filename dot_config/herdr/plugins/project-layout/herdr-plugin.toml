@@ -1,0 +1,46 @@
+id = "pbogut.project-layout"
+name = "Project Layout"
+version = "0.2.0"
+min_herdr_version = "0.8.0"
+description = "Apply trusted per-project setup and managed tabs to Git worktrees"
+platforms = ["linux"]
+
+[[actions]]
+id = "init"
+title = "Create or edit project layout"
+contexts = ["workspace"]
+command = ["herdr-project-layout", "init"]
+
+[[actions]]
+id = "apply"
+title = "Apply project layout"
+contexts = ["workspace"]
+command = ["herdr-project-layout", "apply"]
+
+[[actions]]
+id = "trust"
+title = "Trust and apply project layout"
+contexts = ["workspace"]
+command = ["herdr-project-layout", "trust"]
+
+[[actions]]
+id = "revoke-trust"
+title = "Revoke project layout trust"
+contexts = ["workspace"]
+command = ["herdr-project-layout", "revoke"]
+
+[[events]]
+on = "worktree.created"
+command = ["herdr-project-layout", "event"]
+
+[[events]]
+on = "worktree.opened"
+command = ["herdr-project-layout", "event"]
+
+[[panes]]
+id = "trust"
+title = "Trust project layout"
+placement = "popup"
+width = "70%"
+height = 13
+command = ["herdr-project-layout", "prompt"]

@@ -94,6 +94,12 @@ description = "open project"
 width = "90%"
 height = "90%"
 
+[[keys.command]]
+key = "prefix+l"
+type = "plugin_action"
+command = "pbogut.project-layout.init"
+description = "create or edit project layout"
+
 [ui]
 window_title = "{terminal_title} [{workspace}] |h$"
 tab_bar_position = "bottom"

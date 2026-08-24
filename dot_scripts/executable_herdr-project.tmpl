@@ -93,6 +93,15 @@ focus_client() {
 	fi
 }
 
+apply_project_layout() {
+	local workspace_id=$1
+	local project_path=$2
+
+	HERDR_LAYOUT_WORKSPACE_ID=$workspace_id \
+		HERDR_LAYOUT_WORKTREE=$project_path \
+		nohup herdr-project-layout apply >/dev/null 2>&1 &
+}
+
 ensure_server() {
 	if herdr status server 2>/dev/null | grep -q '^status: running$'; then
 		return
@@ -160,6 +169,7 @@ if [[ -n $workspace_id ]]; then
 		HERDR_ACTIVE_PANE_CWD=$project_path \
 		herdr-select-tab-or-new nvim --ensure-running
 	focus_client
+	apply_project_layout "$workspace_id" "$project_path"
 	exit
 fi
 
@@ -169,8 +179,10 @@ response=$(herdr workspace create \
 	--env "PROJECT=$project" \
 	--focus) || exit 1
 
+workspace_id=$(jq -r '.result.workspace.workspace_id' <<<"$response")
 tab_id=$(jq -r '.result.tab.tab_id' <<<"$response")
 pane_id=$(jq -r '.result.root_pane.pane_id' <<<"$response")
 herdr tab rename "$tab_id" "nvim" >/dev/null
 herdr pane run "$pane_id" "exec herdr-vim --start" >/dev/null
 focus_client
+apply_project_layout "$workspace_id" "$project_path"

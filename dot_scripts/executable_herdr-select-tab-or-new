@@ -28,12 +28,22 @@ if [[ ${1:-} == --restore-all ]]; then
 fi
 
 role=${1:?"tab role is required"}
+shift
 restore_only=false
 ensure_running=false
-case ${2:-} in
---restore) restore_only=true ;;
---ensure-running) ensure_running=true ;;
-esac
+focus_requested=true
+while (($#)); do
+	case $1 in
+	--restore) restore_only=true ;;
+	--ensure-running) ensure_running=true ;;
+	--no-focus) focus_requested=false ;;
+	*)
+		echo "Unsupported option: $1" >&2
+		exit 1
+		;;
+	esac
+	shift
+done
 workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
 
 if [[ -z $workspace_id ]]; then
@@ -45,6 +55,12 @@ socket_path=${HERDR_SOCKET_PATH:-}
 if [[ -z $socket_path ]]; then
 	socket_path=$(herdr status server 2>/dev/null | sed -n 's/^socket: //p')
 fi
+
+focus_managed_tab() {
+	if $focus_requested; then
+		herdr tab focus "$1" >/dev/null
+	fi
+}
 
 move_tab() {
 	local tab_id=$1
@@ -175,7 +191,7 @@ set_opencode_command() {
 	if [[ $session_id =~ ^[A-Za-z0-9._:-]{1,80}$ ]]; then
 		command="opencode-launcher --session $session_id --port"
 	else
-		command='opencode-launcher --continue --port'
+		command='opencode-launcher --port'
 	fi
 }
 
@@ -198,7 +214,7 @@ ensure_nvim_tab() {
 	shell_name=${SHELL##*/}
 
 	if HERDR_ACTIVE_WORKSPACE_ID=$workspace_id herdr-vim --ping; then
-		herdr tab focus "$tab_id" >/dev/null
+		focus_managed_tab "$tab_id"
 		return
 	fi
 
@@ -217,7 +233,7 @@ ensure_nvim_tab() {
       any(.argv[]?; test("(^|/)(nvim|herdr-vim)$"))
     )
   ' >/dev/null <<<"$process_info"; then
-		herdr tab focus "$tab_id" >/dev/null
+		focus_managed_tab "$tab_id"
 		return
 	fi
 
@@ -229,7 +245,7 @@ ensure_nvim_tab() {
     ($process.foreground_processes[0].argv | length) == 1
   ' >/dev/null <<<"$process_info"; then
 		herdr pane run "$pane_id" "exec $command" >/dev/null || return 2
-		herdr tab focus "$tab_id" >/dev/null
+		focus_managed_tab "$tab_id"
 		return
 	fi
 
@@ -289,7 +305,7 @@ opencode | 9)
 	role="opencode"
 	label="opencode"
 	legacy_slot=9
-	command='opencode-launcher --continue --port'
+	command='opencode-launcher --port'
 	;;
 shell-3 | 10)
 	role="shell-3"
@@ -306,6 +322,15 @@ esac
 if [[ $role == opencode ]]; then
 	set_opencode_command
 fi
+
+lock_dir="${XDG_RUNTIME_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}}/herdr/managed-tab-locks"
+umask 077
+mkdir -p -- "$lock_dir" || exit 1
+[[ -O $lock_dir && ! -L $lock_dir ]] || exit 1
+chmod 700 "$lock_dir" || exit 1
+read -r lock_key _ < <(printf '%s\0%s\0' "$workspace_id" "$role" | sha256sum)
+exec {lock_fd}>"$lock_dir/$lock_key.lock" || exit 1
+flock "$lock_fd" || exit 1
 
 tabs=$(herdr tab list --workspace "$workspace_id") || exit 1
 
@@ -349,7 +374,7 @@ if [[ -n $tab_id ]]; then
     ' <<<"$panes")
 		pane_id=$(jq -r '.pane_id // empty' <<<"$pane")
 		if [[ -n $pane_id ]] && opencode_is_running "$pane_id"; then
-			herdr tab focus "$tab_id" >/dev/null
+			focus_managed_tab "$tab_id"
 			exit
 		fi
 
@@ -361,7 +386,7 @@ if [[ -n $tab_id ]]; then
 		herdr tab close "$tab_id" >/dev/null || exit 1
 		set_opencode_command
 	else
-		herdr tab focus "$tab_id" >/dev/null
+		focus_managed_tab "$tab_id"
 		exit
 	fi
 fi
@@ -370,11 +395,13 @@ if $restore_only; then
 	exit
 fi
 
+focus_arg=--focus
+$focus_requested || focus_arg=--no-focus
 response=$(herdr tab create \
 	--workspace "$workspace_id" \
 	--cwd "${HERDR_ACTIVE_PANE_CWD:-$PWD}" \
 	--label "$label" \
-	--focus) || exit 1
+	"$focus_arg") || exit 1
 
 tabs=$(herdr tab list --workspace "$workspace_id")
 sort_tabs "$tabs" || echo "Could not reorder Herdr tabs" >&2
