@@ -34,3 +34,11 @@
 (once
   (directive_start) @open.once
   (directive_end) @close.once) @scope.once
+
+(element
+  (start_tag (tag_name) @open.tag)
+  (end_tag (tag_name) @close.tag)) @scope.tag
+
+(script_element
+  (start_tag (tag_name) @open.tag)
+  (end_tag (tag_name) @close.tag)) @scope.tag
