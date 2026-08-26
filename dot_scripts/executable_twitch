@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   twitch
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   21/08/2026
+#=================================================
+chromium --app=https://www.twitch.tv --profile-directory=Default

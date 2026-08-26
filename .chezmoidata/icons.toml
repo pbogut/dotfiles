@@ -31,6 +31,7 @@ discord = ["equibop"]
 google-messages = ["kdeconnect-sms"]
 windows-retro-light = ["windows"]
 zohomail = ["email"]
+x-light = ["x"]
 # Custom icons
 "custom/poweroff" = ["poweroff"]
 "custom/yadaphone" = ["yadaphone"]

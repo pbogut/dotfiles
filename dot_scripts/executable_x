@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   x
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   17/08/2026
+#=================================================
+chromium --app=https://www.x.com --profile-directory=Default
