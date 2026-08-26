@@ -23,7 +23,7 @@ navigate_pane_down = "ctrl+j"
 new_tab = "prefix+c"
 split_vertical = "prefix+v"
 split_horizontal = "prefix+s"
-workspace_picker = ["prefix+w", "prefix+ctrl+w"]
+workspace_picker = ["prefix+w", "prefix+ctrl+w", "alt+o"]
 toggle_sidebar = ["prefix+b", "prefix+t", "prefix+ctrl+t", "alt+t"]
 # previous_tab = ["prefix+p", "alt+p"]
 # next_tab = ["prefix+n", "alt+n"]
@@ -96,7 +96,7 @@ width = "90%"
 height = "90%"
 
 [[keys.command]]
-key = "prefix+shift+i"
+key = "prefix+shift+l"
 type = "plugin_action"
 command = "pbogut.project-layout.init"
 description = "create or edit project layout"
