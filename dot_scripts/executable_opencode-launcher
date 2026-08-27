@@ -7,6 +7,8 @@ usage() {
   echo "  -h, --help            display this help and exit"
   echo "  -p, --profile         profile name"
   echo "  -ls, --list-profiles  list available profiles"
+
+  exec "$(mise which opencode)" --help
 }
 
 profile=""
@@ -103,4 +105,4 @@ if ! array_contains "--port" "${params[@]}"; then
   params+=("--port")
 fi
 echo opencode "${params[@]}"
-~/.opencode/bin/opencode  "${params[@]}"
+exec "$(mise which opencode)" "${params[@]}"
