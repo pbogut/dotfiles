@@ -10,6 +10,27 @@ usage() {
     echo ""
     echo "Options:"
     echo "  -h, --help     display this help and exit"
+    echo "      --host     remote host to connect to"
+}
+
+get_free_port() {
+    local port="${1:-9000}"
+    local listeners
+
+    while ((port <= 65535)); do
+        if ! listeners=$(ss -H -ltn "sport = :$port"); then
+            echo "Unable to inspect local TCP ports" >&2
+            return 1
+        fi
+        if [[ -z $listeners ]]; then
+            printf '%s\n' "$port"
+            return 0
+        fi
+        ((port++))
+    done
+
+    echo "No free TCP port found at or above ${1:-9000}" >&2
+    return 1
 }
 
 host=""
@@ -36,7 +57,7 @@ while test $# -gt 0; do
     esac
 done
 
-port=$(freeport -m 9000)
+port=$(get_free_port 9000) || exit 1
 
 echo "http://localhost:$port"
 echo ""
