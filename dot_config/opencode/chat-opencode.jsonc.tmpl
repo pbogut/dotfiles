@@ -26,5 +26,8 @@
       "prompt": "You are a helpful general-purpose chat assistant. You have access to the web to fetch information. Do not attempt to modify files or execute shell commands."
     }
   },
-  "provider": {{ include (joinPath .chezmoi.homeDir ".config/opencode/providers.json") }}
+  "provider": {{ include (joinPath .chezmoi.homeDir ".config/opencode/providers.json") }},
+  "plugin": [
+    "@slkiser/opencode-quota@latest"
+  ]
 }

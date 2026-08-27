@@ -9,5 +9,8 @@
       "model": "openai/gpt-5.6-sol"
     }
   },
-  "provider": {{ include (joinPath .chezmoi.homeDir ".config/opencode/providers.json") }}
+  "provider": {{ include (joinPath .chezmoi.homeDir ".config/opencode/providers.json") }},
+  "plugin": [
+    "@slkiser/opencode-quota@latest"
+  ]
 }

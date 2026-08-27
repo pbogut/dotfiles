@@ -20,7 +20,7 @@ while test $# -gt 0; do
       ;;
     --list-profiles|-ls)
       (
-        find "$HOME/.config/opencode/" -name "*-opencode.json"
+        find "$HOME/.config/opencode/" -name "*-opencode.jsonc"
         find "$HOME/.local/share/opencode/" -name "*-auth.json"
       ) |
       sed -E 's/.*\/([^-]+)-(opencode|auth)\.json/\1/' |
@@ -85,8 +85,8 @@ echo "Profile: $profile"
 touch "$HOME/.local/share/opencode/$profile-auth.json"
 ln -f "$HOME/.local/share/opencode/$profile-auth.json" "$HOME/.local/share/opencode/auth.json"
 
-touch "$HOME/.config/opencode/$profile-opencode.json"
-ln -f "$HOME/.config/opencode/$profile-opencode.json" "$HOME/.config/opencode/opencode.json"
+touch "$HOME/.config/opencode/$profile-opencode.jsonc"
+ln -f "$HOME/.config/opencode/$profile-opencode.jsonc" "$HOME/.config/opencode/opencode.jsonc"
 
 # if timux rename window
 if [ -n "$TMUX" ]; then
