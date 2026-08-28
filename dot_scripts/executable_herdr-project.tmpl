@@ -1,131 +1,126 @@
 #!/usr/bin/env bash
 
 open_workspaces() {
-	herdr api snapshot 2>/dev/null |
-		jq -r --arg projects "$PROJECTS/" --arg pwd "$PWD" '
+    herdr api snapshot 2> /dev/null |
+        jq -r --arg projects "$PROJECTS/" --arg pwd "$PWD" '
       .result.snapshot as $snapshot |
-      $snapshot.workspaces[] as $workspace |
-      [$snapshot.panes[] |
-        select(.workspace_id == $workspace.workspace_id) |
-        .cwd |
-        select(startswith($projects) and . != $pwd)][0] // empty
-    ' |
-		sed 's,^'"$PROJECTS/"',,g' |
-		sed 's,^\(.*\)$,󰳆 \1,'
+      $snapshot.workspaces[] | .label' |
+        sed 's,^'"$PROJECTS/"',,g' |
+        sed 's,^\(.*\)$,󰳆 \1,'
 }
 
 list_projects() {
-	ls-project -f |
-		awk '{if ($1 != ENVIRON["PWD"]) print $0}' |
-		sed 's,^'"$PROJECTS/"',,g' |
-		sed 's,^\(.*\)$,  \1,'
+    ls-project -f |
+        awk '{if ($1 != ENVIRON["PWD"]) print $0}' |
+        sed 's,^'"$PROJECTS/"',,g' |
+        sed 's,^\(.*\)$,  \1,'
 }
 
 compact_project() {
-	#{{ range $full, $short := .dir_aliases }}
-	sed 's,{{ $full }}/,{{ $short }}󰿟,' |
-		#{{ end }}
-		cat
+    #{{ range $full, $short := .dir_aliases }}
+    sed 's,{{ $full }}/,{{ $short }}󰿟,' |
+        #{{ end }}
+        cat
 }
 
 expand_project() {
-	#{{ range $full, $short := .dir_aliases }}
-	sed 's,{{ $short }}󰿟,{{ $full }}/,' |
-	#{{ end }}
-	cat
+    #{{ range $full, $short := .dir_aliases }}
+    sed 's,{{ $short }}󰿟,{{ $full }}/,' |
+        #{{ end }}
+        cat
 }
 
 all_projects() {
-	(
-		open_workspaces
-		list_projects
-	) |
-		compact_project |
-		awk '!seen[$2]++'
+    (
+        open_workspaces
+        list_projects
+    ) |
+        compact_project |
+        awk '!seen[$2]++'
 }
 
 select_project() {
-	sed 's,..\(.*\)$,\1,' | expand_project
+    sed 's,..\(.*\)$,\1,' | expand_project
 }
 
 fuzzel_exit_file=$(mktemp)
 trap 'rm -f "$fuzzel_exit_file"' EXIT
 
 run_fuzzel() {
-	fuzzel --dmenu --no-sort --search "$1" --cache /dev/null
-	printf '%s\n' "$?" >"$fuzzel_exit_file"
+    fuzzel --dmenu --no-sort --search "$1" --cache /dev/null
+    printf '%s\n' "$?" > "$fuzzel_exit_file"
 }
 
 find_project_path() {
-	local start="$PROJECTS/$1"
-	while [[ -d $start ]]; do
-		if [[ -d $start/.bare ]]; then
-			printf '%s\n' "$start"
-			return
-		fi
-		start=$(dirname "$start")
-	done
+    local start="$PROJECTS/$1"
+    while [[ -d $start ]]; do
+        if [[ -d $start/.bare ]]; then
+            printf '%s\n' "$start"
+            return
+        fi
+        start=$(dirname "$start")
+    done
 }
 
 create_worktree() {
-	local project_base_path project_base_name name
-	project_base_path=$(find_project_path "$project")
-	project_base_name=${project_base_path##"$PROJECTS/"}
+    local project_base_path project_base_name name
+    project_base_path=$(find_project_path "$project")
+    project_base_name=${project_base_path##"$PROJECTS/"}
 
-	name=$(zenity --entry \
-		--title="New dated worktree" \
-		--text="$project_base_name\n\nNew branch name:" \
-		--entry-text="" \
-		--ok-label="Create" \
-		--cancel-label="Cancel")
+    name=$(zenity --entry \
+        --title="New dated worktree" \
+        --text="$project_base_name\n\nNew branch name:" \
+        --entry-text="" \
+        --ok-label="Create" \
+        --cancel-label="Cancel")
 
-	[[ -n $name ]] || exit 1
-	name=${name// /-}
+    [[ -n $name ]] || exit 1
+    name=${name// /-}
 
-	cd "$project_base_path" || exit 1
-	cd "$(git new-dated-worktree "$name" | tail -n 1)" || exit 1
-	project=${PWD##"$PROJECTS/"}
+    cd "$project_base_path" || exit 1
+    cd "$(git new-dated-worktree "$name" | tail -n 1)" || exit 1
+    project=${PWD##"$PROJECTS/"}
 }
 
 focus_client() {
-	if [[ -z ${HERDR_SOCKET_PATH:-} ]]; then
-		focus-or-exec "Alacritty.herdr" terminal -c herdr -e herdr
-	fi
+    if [[ -z ${HERDR_SOCKET_PATH:-} ]]; then
+        focus-or-exec "Alacritty.herdr" terminal -c herdr -e herdr
+    fi
 }
 
 apply_project_layout() {
-	local workspace_id=$1
-	local project_path=$2
+    local workspace_id=$1
+    local project_path=$2
 
-	HERDR_LAYOUT_WORKSPACE_ID=$workspace_id \
-		HERDR_LAYOUT_WORKTREE=$project_path \
-		nohup herdr-project-layout apply >/dev/null 2>&1 &
+    HERDR_LAYOUT_WORKSPACE_ID=$workspace_id \
+        HERDR_LAYOUT_WORKTREE=$project_path \
+        nohup herdr-project-layout apply > /dev/null 2>&1 &
 }
 
 ensure_server() {
-	if herdr status server 2>/dev/null | grep -q '^status: running$'; then
-		return
-	fi
+    if herdr status server 2> /dev/null | grep -q '^status: running$'; then
+        return
+    fi
 
-	nohup herdr server >/dev/null 2>&1 &
-	for _ in {1..50}; do
-		if herdr status server 2>/dev/null | grep -q '^status: running$'; then
-			return
-		fi
-		sleep 0.1
-	done
+    nohup herdr server > /dev/null 2>&1 &
+    for _ in {1..50}; do
+        if herdr status server 2> /dev/null | grep -q '^status: running$'; then
+            return
+        fi
+        sleep 0.1
+    done
 
-	echo "Herdr server did not start" >&2
-	exit 1
+    echo "Herdr server did not start" >&2
+    exit 1
 }
 
 fzf_select=enter
 if [[ ${TERM:-dumb} == dumb ]]; then
-	project=$(all_projects | sed -E "s;(.*);\1\x00icon\x1f$ICONS/git.svg;" | run_fuzzel "${1:-}" | select_project)
+    project=$(all_projects | sed -E "s;(.*);\1\x00icon\x1f$ICONS/git.svg;" | run_fuzzel "${1:-}" | select_project)
 else
-	selection=$(all_projects | fzf --expect="ctrl-n,enter" -q "${1:-}" --height=100%)
-	fzf_select=$(head -n 1 <<<"$selection")
-	project=$(tail -n 1 <<<"$selection" | select_project)
+    selection=$(all_projects | fzf --expect="ctrl-n,enter" -q "${1:-}" --height=100%)
+    fzf_select=$(head -n 1 <<< "$selection")
+    project=$(tail -n 1 <<< "$selection" | select_project)
 fi
 
 [[ -n $project ]] || exit
@@ -134,14 +129,14 @@ cd "$PROJECTS/$project" || exit 1
 touch -h "$PWD"
 
 if [[ ${TERM:-dumb} == dumb ]]; then
-	[[ $(<"$fuzzel_exit_file") -lt 10 ]] || create_worktree
+    [[ $(< "$fuzzel_exit_file") -lt 10 ]] || create_worktree
 elif [[ $fzf_select == ctrl-n ]]; then
-	create_worktree
+    create_worktree
 fi
 
 project_path=$PWD
 project=${project_path##"$PROJECTS/"}
-project_label=$(compact_project <<<"$project")
+project_label=$(compact_project <<< "$project")
 ensure_server
 
 snapshot=$(herdr api snapshot)
@@ -149,35 +144,35 @@ workspace_id=$(jq -r --arg path "$project_path" '
   [.result.snapshot.panes[] |
     select(.cwd == $path or .foreground_cwd == $path) |
     .workspace_id][0] // empty
-' <<<"$snapshot")
+' <<< "$snapshot")
 
 if [[ -z $workspace_id ]]; then
-	workspace_id=$(jq -r --arg label "$project_label" '
+    workspace_id=$(jq -r --arg label "$project_label" '
     [.result.snapshot.workspaces[] | select(.label == $label) | .workspace_id][0] // empty
-  ' <<<"$snapshot")
+  ' <<< "$snapshot")
 fi
 
 if [[ -n $workspace_id ]]; then
-	tab=$(jq -c --arg workspace_id "$workspace_id" '
+    tab=$(jq -c --arg workspace_id "$workspace_id" '
     [.result.snapshot.tabs[] | select(.workspace_id == $workspace_id) | select(.number == 1)][0]
-  ' <<<"$snapshot")
-	if [[ $(jq -r '.label' <<<"$tab") == 1 ]]; then
-		herdr tab rename "$(jq -r '.tab_id' <<<"$tab")" "nvim" >/dev/null
-	fi
-	herdr workspace focus "$workspace_id" >/dev/null
-	focus_client
-	apply_project_layout "$workspace_id" "$project_path"
-	exit
+  ' <<< "$snapshot")
+    if [[ $(jq -r '.label' <<< "$tab") == 1 ]]; then
+        herdr tab rename "$(jq -r '.tab_id' <<< "$tab")" "nvim" > /dev/null
+    fi
+    herdr workspace focus "$workspace_id" > /dev/null
+    focus_client
+    apply_project_layout "$workspace_id" "$project_path"
+    exit
 fi
 
 response=$(herdr workspace create \
-	--cwd "$project_path" \
-	--label "$project_label" \
-	--env "PROJECT=$project" \
-	--focus) || exit 1
+    --cwd "$project_path" \
+    --label "$project_label" \
+    --env "PROJECT=$project" \
+    --focus) || exit 1
 
-workspace_id=$(jq -r '.result.workspace.workspace_id' <<<"$response")
-tab_id=$(jq -r '.result.tab.tab_id' <<<"$response")
-herdr tab rename "$tab_id" "nvim" >/dev/null
+workspace_id=$(jq -r '.result.workspace.workspace_id' <<< "$response")
+tab_id=$(jq -r '.result.tab.tab_id' <<< "$response")
+herdr tab rename "$tab_id" "nvim" > /dev/null
 focus_client
 apply_project_layout "$workspace_id" "$project_path"
