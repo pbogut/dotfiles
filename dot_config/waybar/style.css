@@ -344,14 +344,13 @@ label:focus {
     background-color: #eb4d4b;
 }
 
-/* #idle_inhibitor { */
-/*     background-color: #2d3436; */
-/* } */
+#idle_inhibitor {
+    opacity: 0.2;
+}
 
-/* #idle_inhibitor.activated { */
-/*     background-color: #ecf0f1; */
-/*     color: #2d3436; */
-/* } */
+#idle_inhibitor.activated {
+    opacity: 1;
+}
 
 #mpd {
     background-color: #66cc99;
