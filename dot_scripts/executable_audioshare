@@ -14,5 +14,5 @@ else
     done <<< "$(pactl list short sink-inputs | awk '{print $1}')"
 
     killall as-cmd
-    as-cmd -b "$(ip addr | grep 192 | awk '{print $2}' | sed 's,/.*$,,')"
+    as-cmd --bind="$(ip addr | grep 192.168 | awk '{print $2}' | sed 's,/.*$,,')"
 fi
