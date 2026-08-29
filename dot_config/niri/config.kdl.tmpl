@@ -453,6 +453,8 @@ window-rule {
 }
 window-rule {
     match title=r#"Developer Tools.*"#
+    match app-id="brave-work" title="DevTools"
+    match app-id="brave-work" title=r#"^DevTools - .*$"#
     default-column-width { proportion 0.5; }
 }
 window-rule {
