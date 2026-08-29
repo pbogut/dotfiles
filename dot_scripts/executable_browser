@@ -39,7 +39,9 @@ elif [[ $url =~ ^https://pms\.* ]]; then
   $browser-work "$@" &
 elif [[ $url =~ ^https://local\.* ]]; then
   $browser-work "$@" &
-elif [[ $url =~ ^https?://*\.local ]]; then
+elif [[ $url =~ ^https?://.*\.local ]]; then
+  $browser-work "$@" &
+elif [[ $url =~ ^https?://.*\.test ]]; then
   $browser-work "$@" &
 else
   $browser-personal "$@" &
