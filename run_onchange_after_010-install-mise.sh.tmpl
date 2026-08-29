@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   run_onchange_after_install-07-mise.sh
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   29/08/2026
+#=================================================
+{{ range .packages.mise -}}
+mise use -g {{ . }}
+{{ end }}

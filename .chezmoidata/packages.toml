@@ -49,7 +49,6 @@ pacman = [
   "notmuch",
   "notmuch-runtime",
   "noto-fonts-emoji",
-  "npm",
   "numlockx",
   "pipewire",
   "pkgconf",
@@ -67,7 +66,6 @@ pacman = [
   "ripgrep",
   "rofi",
   "ruby",
-  "rustup",
   "satty",
   "shfmt",
   "slop",
@@ -99,7 +97,6 @@ pacman = [
   "xdg-desktop-portal-wlr",
   "xdotool",
   "xwayland-satellite",
-  "yarn",
   "yazi",
   "yt-dlp",
   "zenity",
@@ -143,4 +140,14 @@ cargo_git = [
 ]
 cargo_nightly = [
   "https://github.com/ilya-epifanov/betaflight-blackbox-splitter"
+]
+mise = [
+  "elixir",
+  "go",
+  "herdr",
+  "node",
+  "npm",
+  "opencode",
+  "rust",
+  "yarn",
 ]
