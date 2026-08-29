@@ -13,7 +13,7 @@ return {
     'saadparwaiz1/cmp_luasnip',
     'kristijanhusak/vim-dadbod-completion',
     'luckasRanarison/tailwind-tools.nvim',
-    { 'zbirenbaum/copilot-cmp', after = 'copilot.lua' },
+    -- { 'zbirenbaum/copilot-cmp', after = 'copilot.lua' },
   },
   event = 'InsertEnter',
   config = function()
