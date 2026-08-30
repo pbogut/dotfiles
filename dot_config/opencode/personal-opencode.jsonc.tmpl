@@ -9,6 +9,7 @@
     }
   },
   "provider": {{ include (joinPath .chezmoi.homeDir ".config/opencode/providers.json") }},
+  "permission": {{ include (joinPath .chezmoi.homeDir ".config/opencode/permission.jsonc") }},
   "plugin": [
     "@slkiser/opencode-quota@latest"
   ]
