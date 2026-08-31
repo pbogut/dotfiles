@@ -1,0 +1,17 @@
+{
+  "id": "notmuchEmail",
+  "name": "Notmuch Inbox",
+  "description": "Show Notmuch inbox counts and recent messages in DankBar",
+  "version": "1.0.0",
+  "author": "Pawel Bogut",
+  "type": "composite",
+  "capabilities": ["daemon", "dankbar-widget"],
+  "components": {
+    "daemon": "./NotmuchEmailDaemon.qml",
+    "widget": "./NotmuchEmailWidget.qml"
+  },
+  "icon": "mail",
+  "requires_dms": ">=1.5.0",
+  "dependencies": ["notmuch", "python3", "gio", "mails-go-web"],
+  "permissions": ["process"]
+}
