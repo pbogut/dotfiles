@@ -1,0 +1,17 @@
+{
+  "id": "herdrAgents",
+  "name": "Herdr Agents",
+  "description": "Show live Herdr agent status in DankBar",
+  "version": "1.1.0",
+  "author": "Pawel Bogut",
+  "type": "composite",
+  "capabilities": ["daemon", "dankbar-widget"],
+  "components": {
+    "daemon": "./HerdrAgentsDaemon.qml",
+    "widget": "./HerdrAgentsWidget.qml"
+  },
+  "icon": "terminal",
+  "requires_dms": ">=1.5.0",
+  "dependencies": ["herdr", "python3"],
+  "permissions": ["process"]
+}
