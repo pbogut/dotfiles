@@ -23,7 +23,7 @@ while test $# -gt 0; do
     --list-profiles|-ls)
       (
         find "$HOME/.config/opencode/" -name "*-opencode.jsonc"
-        find "$HOME/.local/share/opencode/" -name "*-auth.json"
+        # find "$HOME/.local/share/opencode/" -name "*-auth.json"
       ) |
       sed -E 's/.*\/([^-]+)-(opencode|auth)\.json/\1/' |
       sort -u
@@ -84,8 +84,8 @@ if [ -z "$profile" ]; then
 fi
 
 echo "Profile: $profile"
-touch "$HOME/.local/share/opencode/$profile-auth.json"
-ln -f "$HOME/.local/share/opencode/$profile-auth.json" "$HOME/.local/share/opencode/auth.json"
+# touch "$HOME/.local/share/opencode/$profile-auth.json"
+# ln -f "$HOME/.local/share/opencode/$profile-auth.json" "$HOME/.local/share/opencode/auth.json"
 
 touch "$HOME/.config/opencode/$profile-opencode.jsonc"
 ln -f "$HOME/.config/opencode/$profile-opencode.jsonc" "$HOME/.config/opencode/opencode.jsonc"
