@@ -1,0 +1,27 @@
+{
+  // Automatic quota surfaces. Slash commands remain available when these are disabled.
+  "enableToast": false,
+  "tuiCommandDisplay": "inline",
+  // Include or hide session input and output token totals.
+  "showSessionTokens": true,
+  // Session token totals: "current" session only, or "tree" including descendants.
+  "sessionTokenScope": "tree",
+  // Provider selection: "auto" detects providers; an array tracks only listed providers.
+  "enabledProviders": "auto",
+  // Quota presentation and reset-period choices.
+  "formatStyle": "allWindows",
+  "percentDisplayMode": "remaining",
+  // TUI-only surfaces.
+  "tuiSidebarPanel": {
+    "enabled": true
+  },
+  // Optional bundled maintainer Home announcements.
+  "maintainerAnnouncements": {
+    "enabled": true,
+    "home": true
+  },
+  // Write a sanitized quota export for the DMS Herdr panel and other tools.
+  "export": {
+    "enabled": true
+  }
+}
