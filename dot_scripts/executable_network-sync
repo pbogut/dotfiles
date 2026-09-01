@@ -96,16 +96,33 @@ if [[ $debug == "yes" ]]; then
 fi
 
 run() {
+  lock="$1"
+  shift;
   if [[ $debug == "yes" ]]; then
     echo "Running: $*"
     echo "---"
   fi
+
+  # lock=$(md5sum <<< "$@")
+  lockfile="/tmp/sync-$lock.lock"
+  while :; do
+    if [[ -f $lockfile ]]; then
+      echo "Already running, waiting..."
+      sleep 10s;
+      continue
+    else
+      touch "$lockfile"
+      break
+    fi
+  done
 
   # shellcheck disable=2294 # this is the way
   if ! eval "$@"; then
     DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-"unix:path=/run/user/$(id -u)/bus"} \
       dunstify -i error "Network sync error while running: $*"
   fi
+
+  rm "$lockfile"
 }
 
 print_status() {
@@ -114,7 +131,7 @@ print_status() {
 
 # enable / disable / status
 if [[ $action == "enable" ]]; then
-  run touch ~/.netsync-enabled >/dev/null 2>&1
+  touch ~/.netsync-enabled >/dev/null 2>&1
   print_status
   exit
 fi
@@ -139,23 +156,23 @@ fi
 # sync inbox
 if [[ $action == "inbox" ]]; then
   [[ $quiet == "yes" ]] && quiet="-u quiet"
-  run "OFFLINEIMAP_INBOX_ONLY=1 $trickle offlineimap $quiet"
+  run mail "OFFLINEIMAP_INBOX_ONLY=1 $trickle offlineimap $quiet"
   exit
 fi
 
 # sync full email
 if [[ $action == "mail" ]] || [[ $action == "all" ]]; then
   [[ $quiet == "yes" ]] && quiet="-u quiet"
-  run "$trickle offlineimap $quiet"
+  run mail "$trickle offlineimap $quiet"
   exit
 fi
 
 # sync calendars
 if [[ $action == "calendar" ]] || [[ $action == "all" ]]; then
   if [[ $quiet == "yes" ]]; then
-    run "$trickle vdirsyncer sync > /dev/null 2>&1"
+    run calendar "$trickle vdirsyncer sync > /dev/null 2>&1"
   else
-    run "$trickle vdirsyncer sync 2>&1"
+    run calendar "$trickle vdirsyncer sync 2>&1"
   fi
   exit
 fi
