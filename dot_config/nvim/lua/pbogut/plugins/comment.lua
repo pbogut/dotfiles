@@ -12,13 +12,14 @@ return {
   opts = {
     comment_strings = {
       asm = '//%s',
-      php_only = { '//%s', '/* %s */' },
       blade = { '{{-- %s --}}', '{{-- %s --}}' },
       crontab = '# %s',
       devicetree = { '// %s', '/* %s */' },
       heex = { '<%!-- %s --%>', '<%!-- %s --%>' },
       kdl = '// %s',
       openscad = '// %s',
+      php_only = { '//%s', '/* %s */' },
+      qml = { '//%s', '/* %s */' },
       query = '; %s',
       swayconfig = '# %s',
     },
@@ -31,7 +32,7 @@ return {
 
     local ft = require('Comment.ft')
     for file_type, comment_string in pairs(opts.comment_strings) do
-      ft[file_type] = comment_string
+      ft.set(file_type, comment_string)
     end
   end,
 }

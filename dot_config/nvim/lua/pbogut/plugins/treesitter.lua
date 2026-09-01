@@ -149,6 +149,7 @@ return {
             'printf',
             'properties',
             'python',
+            'qmljs',
             'query',
             'readline',
             'regex',
