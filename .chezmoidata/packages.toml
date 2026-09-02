@@ -61,6 +61,7 @@ pacman = [
   "python-pip",
   "qutebrowser",
   "ranger",
+  "rbw",
   "redshift",
   "resvg",
   "ripgrep",
@@ -136,7 +137,6 @@ cargo = [
 cargo_git = [
   "https://github.com/pbogut/enrichmail.git",
   "https://github.com/pbogut/cargo-workspace.git",
-  "https://github.com/pbogut/rbw.git --branch add-uris-to-list",
 ]
 cargo_nightly = [
   "https://github.com/ilya-epifanov/betaflight-blackbox-splitter"

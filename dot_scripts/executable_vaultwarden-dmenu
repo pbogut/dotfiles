@@ -58,7 +58,7 @@ __refresh_cache() {
   rbw sync
 }
 __list() {
-  rbw list --fields id,name,user,uris |
+  rbw list --raw | jq -r '.[] | [.id, .name, .user, (.uris | join(","))] | @tsv' |
   awk 'BEGIN{OFS=FS="\t"} {$2=substr($2,1,40)}1' | # Trim length of name
   column -s $'\t' -t -o' | ' | # Convert tabs to pipe separetor
   sed 's/ | /\t/' # Convert first pipe to tab
