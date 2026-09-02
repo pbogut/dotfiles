@@ -29,18 +29,26 @@ art="
                                  ..^~!!7???7!~^."
 
 screensaver_in_focus() {
-  hyprctl activewindow -j | jq -e '.class == "Screensaver"' >/dev/null 2>&1
+  if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
+    hyprctl activewindow -j | jq -e '.class == "Screensaver"' >/dev/null 2>&1
+  elif [[ $XDG_CURRENT_DESKTOP == "niri" ]]; then
+    niri msg -j focused-window | jq -e '.app_id == "Screensaver"' >/dev/null 2>&1
+  else
+    return 1
+  fi
 }
 
 exit_screensaver() {
-  hyprctl -q keyword cursor:invisible false
-  pkill -x tte 2>/dev/null
+  if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
+    hyprctl -q keyword cursor:invisible false
+  fi
+  pkill -x ttfx 2>/dev/null
   pkill -f "alacritty --class Screensaver" 2>/dev/null
-  exit 0
+  exit "${1:-0}"
 }
 
-# Exit early if we don't have the tte show
-if ! command -v tte &>/dev/null; then
+# Exit early if we don't have the ttfx show
+if ! command -v ttfx &>/dev/null; then
   exit 1
 fi
 
@@ -51,7 +59,9 @@ fi
 if [[ $1 == "run" ]]; then
   trap exit_screensaver SIGINT SIGTERM SIGHUP SIGQUIT
 
-  hyprctl -q keyword cursor:invisible true &>/dev/null
+  if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
+    hyprctl -q keyword cursor:invisible true &>/dev/null
+  fi
 
   while true; do
 
@@ -78,25 +88,16 @@ if [[ $1 == "run" ]]; then
 
     for effect in "${effects[@]}"; do
       sleep 0.1
-      tte -i <(echo "$art") \
+      ttfx -i <(echo "$art") \
         --frame-rate 240 --canvas-width 0 --canvas-height $(($(tput lines) - 2)) --anchor-canvas c --anchor-text c \
         "$effect" &
 
-      while pgrep -x tte >/dev/null; do
+      while pgrep -x ttfx >/dev/null; do
         if read -r -n 1 -t 3 || ! screensaver_in_focus; then
           exit_screensaver
         fi
       done
-
     done
-
-
-    # effect=$(tte 2>&1 | grep -oP '{\K[^}]+' | tr ',' ' ' | tr ' ' '\n' | sed -n '/^beams$/,$p' | sort -u | shuf -n1)
-    # # effect="matrix"
-    # tte -i <(echo "$art") \
-    #   --frame-rate 240 --canvas-width 0 --canvas-height $(($(tput lines) - 2)) --anchor-canvas c --anchor-text c \
-    #   "$effect" &
-
   done
 fi
 
@@ -108,15 +109,56 @@ if [[ -f ~/.local/state/omarchy/toggles/screensaver-off ]] && [[ $1 != "force" ]
   exit 1
 fi
 
-focused=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true).name')
+if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
+  focused=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true).name')
 
-for m in $(hyprctl monitors -j | jq -r '.[] | .name'); do
-  hyprctl -q dispatch focusmonitor "$m"
+  for m in $(hyprctl monitors -j | jq -r '.[] | .name'); do
+    hyprctl -q dispatch focusmonitor "$m"
 
-  hyprctl -q dispatch exec -- \
-    alacritty --class Screensaver \
-    --config-file ~/.config/alacritty/screensaver.toml \
-    -e screensaver run
-done
+    hyprctl -q dispatch exec -- \
+      alacritty --class Screensaver \
+      --config-file ~/.config/alacritty/screensaver.toml \
+      -e screensaver run
+  done
 
-hyprctl -q dispatch focusmonitor "$focused"
+  hyprctl -q dispatch focusmonitor "$focused"
+elif [[ $XDG_CURRENT_DESKTOP == "niri" ]]; then
+  focused=$(niri msg -j focused-output | jq -r '.name')
+  declare -A screensaver_windows=()
+  coproc NIRI_EVENTS { niri msg -j event-stream; }
+  niri_events_fd=${NIRI_EVENTS[0]}
+  # Named coprocesses expose their PID through NAME_PID.
+  # shellcheck disable=SC2153
+  niri_events_pid=$NIRI_EVENTS_PID
+
+  for m in $(niri msg -j outputs | jq -r '.[].name'); do
+    niri msg action spawn -- \
+      alacritty --class Screensaver \
+      --config-file ~/.config/alacritty/screensaver.toml \
+      -e screensaver run &>/dev/null
+
+    window_id=
+    while IFS= read -r -t 5 -u "$niri_events_fd" event; do
+      candidate=$(jq -r '.WindowOpenedOrChanged.window | select(.app_id == "Screensaver") | .id // empty' <<< "$event")
+      if [[ -n $candidate && -z ${screensaver_windows["$candidate"]+x} ]]; then
+        window_id=$candidate
+        screensaver_windows["$window_id"]=1
+        break
+      fi
+    done
+
+    if [[ -z $window_id ]] || ! niri msg action move-window-to-monitor --id "$window_id" "$m" &>/dev/null; then
+      kill "$niri_events_pid" 2>/dev/null
+      wait "$niri_events_pid" 2>/dev/null
+      echo "Could not place screensaver on output: $m" >&2
+      exit_screensaver 1
+    fi
+  done
+
+  kill "$niri_events_pid" 2>/dev/null
+  wait "$niri_events_pid" 2>/dev/null
+  niri msg action focus-monitor "$focused" &>/dev/null
+else
+  echo "Unsupported desktop: ${XDG_CURRENT_DESKTOP:-unknown}" >&2
+  exit 1
+fi

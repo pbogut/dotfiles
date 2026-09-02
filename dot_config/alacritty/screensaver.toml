@@ -9,3 +9,4 @@ size = 18.0
 
 [window]
 opacity = 1.0
+startup_mode = "Fullscreen"
