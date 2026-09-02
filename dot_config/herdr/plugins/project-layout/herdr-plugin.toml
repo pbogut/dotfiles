@@ -1,6 +1,6 @@
 id = "pbogut.project-layout"
 name = "Project Layout"
-version = "0.5.2"
+version = "0.8.0"
 min_herdr_version = "0.8.0"
 description = "Apply trusted per-project setup and managed tabs to Git worktrees"
 platforms = ["linux"]
@@ -35,6 +35,12 @@ title = "Close workspace with project teardown"
 contexts = ["workspace"]
 command = ["herdr-project-layout", "close"]
 
+[[actions]]
+id = "tasks"
+title = "Run project task"
+contexts = ["workspace"]
+command = ["herdr-project-layout", "tasks"]
+
 [[events]]
 on = "worktree.created"
 command = ["herdr-project-layout", "event"]
@@ -50,6 +56,14 @@ placement = "popup"
 width = "70%"
 height = 13
 command = ["herdr-project-layout", "prompt"]
+
+[[panes]]
+id = "task-picker"
+title = "Project tasks"
+placement = "popup"
+width = "70%"
+height = 15
+command = ["herdr-project-layout", "task-picker"]
 
 [[panes]]
 id = "setup"

@@ -3,7 +3,7 @@
 set -o pipefail
 
 plugin_id="pbogut.project-layout"
-layout_name=".herdr-layout.sh"
+project_file="herdr-project.sh"
 herdr=${HERDR_BIN_PATH:-herdr}
 workspace_id=${HERDR_LAYOUT_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
 worktree_dir=""
@@ -13,6 +13,10 @@ setup_deferred_status=75
 setup_resume_status=76
 setup_failed_status=77
 setup_ready_status=78
+declare -a registered_task_names=()
+declare -a registered_task_progress=()
+declare -a registered_task_close=()
+task_registration_failed=false
 
 notify() {
 	"$herdr" notification show "$1" --body "$2" >/dev/null 2>&1 || true
@@ -151,7 +155,7 @@ resolve_context() {
 
 	project_dir=$(realpath -e -- "${common_dir%/*}") || return 1
 	[[ $worktree_dir == "$project_dir/"* ]] || return 1
-	layout_file="$project_dir/$layout_name"
+	layout_file="$project_dir/$project_file"
 }
 
 refresh_workspace_id() {
@@ -191,6 +195,11 @@ write_layout_template() {
 		'# Use a Bash array. This command runs from the worktree root.' \
 		'HERDR_DEV_COMMAND=(make dev)' \
 		'' \
+		'# Tasks appear in the project task picker. Add --progress for an animated tab label.' \
+		'# herdr_task --progress "deployment - prod" -- make deploy TARGET=prod' \
+		'# herdr_task "ssh - prod" -- ssh production' \
+		'# herdr_task --close "refresh cache" -- make refresh-cache' \
+		'' \
 		'# Increment this value when setup needs to run again.' \
 		'HERDR_SETUP_VERSION=1' \
 		'' \
@@ -206,11 +215,122 @@ write_layout_template() {
 		'# Return nonzero when cleanup is unsafe or incomplete; Herdr will ask whether to close anyway.' \
 		'herdr_teardown() {' \
 		'  # Example:' \
-		'  # git-wt-cleanup --check "$HERDR_WORKTREE_DIR" || return' \
-		'  # docker compose down || return' \
-		'  # git-wt-cleanup --safe-only "$HERDR_WORKTREE_DIR"' \
+		'  # current=$(git branch --show-current)' \
+		'  # read -r _ default _ < <(git ls-remote --symref origin HEAD)' \
+		'  # default=${default#refs/heads/}' \
+		'' \
+		'  # if [[ "$current" != "$default" ]]; then' \
+		'  #   git-wt-cleanup --check "$HERDR_WORKTREE_DIR" || return' \
+		'  #   docker compose down || return' \
+		'  #   git-wt-cleanup --safe-only "$HERDR_WORKTREE_DIR"' \
+		'  # fi' \
 		'  :' \
-		'}'
+		'}' \
+		'' \
+		'# herdr_task --close "ssh staging" -- ssh staging.example.com' \
+		'# herdr_task --progress "deploy" -- make deploy'
+}
+
+reset_registered_tasks() {
+	local index
+
+	for index in "${!registered_task_names[@]}"; do
+		unset "registered_task_command_$index"
+	done
+	registered_task_names=()
+	registered_task_progress=()
+	registered_task_close=()
+	task_registration_failed=false
+}
+
+is_reserved_task_name() {
+	case $1 in
+	nvim | shell | shell-2 | dev | sql | rest | git | docker | opencode | shell-3 | setup | teardown) return 0 ;;
+	[1-9]:* | 10:*) return 0 ;;
+	*) return 1 ;;
+	esac
+}
+
+herdr_task() {
+	local progress=false close=false name index command_variable
+	local existing
+
+	while [[ ${1:-} == --* ]]; do
+		case $1 in
+		--progress) progress=true ;;
+		--close) close=true ;;
+		*)
+			echo "Unknown herdr_task option: $1" >&2
+			task_registration_failed=true
+			return 1
+			;;
+		esac
+		shift
+	done
+	name=${1:-}
+	if [[ -z $name ]]; then
+		echo "herdr_task requires a task name" >&2
+		task_registration_failed=true
+		return 1
+	fi
+	shift
+	if [[ ${1:-} != -- ]]; then
+		echo "herdr_task '$name' requires -- before its command" >&2
+		task_registration_failed=true
+		return 1
+	fi
+	shift
+	if (($# == 0)); then
+		echo "herdr_task '$name' requires a command" >&2
+		task_registration_failed=true
+		return 1
+	fi
+	if ((${#name} > 64)) || [[ $name == [[:space:]]* || $name == *[[:space:]] || $name == *[[:cntrl:]]* ]]; then
+		echo "Invalid project task name: $name" >&2
+		task_registration_failed=true
+		return 1
+	fi
+	case $name in
+	*" ✓" | *" ✗")
+		echo "Project task name uses a reserved status suffix: $name" >&2
+		task_registration_failed=true
+		return 1
+		;;
+	esac
+	if is_reserved_task_name "$name"; then
+		echo "Project task name is reserved: $name" >&2
+		task_registration_failed=true
+		return 1
+	fi
+	for existing in "${registered_task_names[@]}"; do
+		if [[ $existing == "$name" ]]; then
+			echo "Duplicate project task name: $name" >&2
+			task_registration_failed=true
+			return 1
+		fi
+	done
+
+	index=${#registered_task_names[@]}
+	registered_task_names[index]=$name
+	registered_task_progress[index]=$progress
+	registered_task_close[index]=$close
+	command_variable="registered_task_command_$index"
+	declare -g -a "$command_variable"
+	local -n command=$command_variable
+	# shellcheck disable=SC2034 # The task runner reads this dynamic array through a nameref.
+	command=("$@")
+}
+
+find_task_index() {
+	local name=$1 index
+
+	for index in "${!registered_task_names[@]}"; do
+		if [[ ${registered_task_names[index]} == "$name" ]]; then
+			printf '%s\n' "$index"
+			return 0
+		fi
+	done
+	return 1
 }
 
 init_layout() {
@@ -335,6 +455,7 @@ update_trust() {
 }
 
 load_layout() {
+	reset_registered_tasks
 	HERDR_TABS=(nvim dev opencode)
 	HERDR_DEV_COMMAND=(make dev)
 	HERDR_SETUP_VERSION=1
@@ -356,6 +477,10 @@ load_layout() {
 	fi
 	if [[ ! $HERDR_SETUP_VERSION =~ ^[A-Za-z0-9._-]{1,80}$ ]]; then
 		echo "HERDR_SETUP_VERSION is invalid in $layout_file" >&2
+		return 1
+	fi
+	if $task_registration_failed; then
+		echo "Project task registration failed in $layout_file" >&2
 		return 1
 	fi
 }
@@ -679,6 +804,456 @@ request_setup_tab() {
 	return 1
 }
 
+request_task_picker() {
+	local response focused_workspace
+
+	resolve_context || {
+		notify "Project tasks unavailable" "Open the picker from a .bare-backed project workspace"
+		return 1
+	}
+	is_layout_file || {
+		notify "No project layout" "$layout_file"
+		return 1
+	}
+	if ! is_trusted; then
+		request_prompt || ensure_editor
+		return
+	fi
+	load_layout || {
+		notify "Invalid project layout" "$layout_file"
+		return 1
+	}
+	if ((${#registered_task_names[@]} == 0)); then
+		notify "No project tasks" "Add herdr_task entries to $layout_file"
+		return 0
+	fi
+	refresh_workspace_id || return 1
+
+	for _ in {1..30}; do
+		focused_workspace=$("$herdr" api snapshot 2>/dev/null |
+			jq -r '.result.snapshot.focused_workspace_id // empty')
+		if [[ $focused_workspace != "$workspace_id" ]]; then
+			notify "Project tasks unavailable" "Focus $worktree_dir and open the task picker again"
+			return 1
+		fi
+
+		response=$("$herdr" plugin pane open \
+			--plugin "$plugin_id" \
+			--entrypoint task-picker \
+			--cwd "$worktree_dir" \
+			--env "HERDR_LAYOUT_WORKTREE=$worktree_dir" \
+			--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
+			--focus 2>&1) && return 0
+		[[ $response == *ui_busy* ]] || break
+		sleep 0.1
+	done
+
+	echo "$response" >&2
+	notify "Project tasks unavailable" "Could not open the task picker"
+	return 1
+}
+
+task_key_for_name() {
+	local name=$1 key
+
+	read -r key _ < <(printf '%s\0%s\0' "$layout_file" "$name" | sha256sum)
+	printf '%s\n' "$key"
+}
+
+find_task_name_by_key() {
+	local task_key=$1 name
+
+	for name in "${registered_task_names[@]}"; do
+		if [[ $(task_key_for_name "$name") == "$task_key" ]]; then
+			printf '%s\n' "$name"
+			return 0
+		fi
+	done
+	return 1
+}
+
+report_task_state() {
+	local pane_id=$1 task_key=$2 state=$3
+
+	"$herdr" pane report-metadata "$pane_id" \
+		--source "$plugin_id:task" \
+		--token "layout_task=$task_key" \
+		--token "layout_task_state=$state" >/dev/null
+}
+
+get_task_pane_state() {
+	local pane_id=$1 task_key=$2 pane
+
+	pane=$("$herdr" pane get "$pane_id" 2>/dev/null) || return 1
+	jq -er --arg task_key "$task_key" '
+    .result.pane |
+    select(.tokens.layout_task == $task_key) |
+    (.tokens.layout_task_state // "")
+  ' <<<"$pane"
+}
+
+wait_for_task_start() {
+	local pane_id=$1 task_key=$2 state
+
+	for _ in {1..50}; do
+		state=$(get_task_pane_state "$pane_id" "$task_key") || return 0
+		[[ $state == starting ]] || return 0
+		sleep 0.1
+	done
+	return 1
+}
+
+task_pane_is_running() {
+	local pane_id=$1 state=$2 process_info expected_shell attempt
+
+	expected_shell=${SHELL##*/}
+	for attempt in {1..5}; do
+		process_info=$("$herdr" pane process-info --pane "$pane_id" 2>/dev/null) || break
+		if jq -e '
+      .result.process_info.shell_pid != null and
+      .result.process_info.foreground_process_group_id != null and
+      .result.process_info.shell_pid != .result.process_info.foreground_process_group_id
+    ' >/dev/null 2>&1 <<<"$process_info"; then
+			return 0
+		fi
+		if jq -e --arg shell "$expected_shell" '
+      .result.process_info as $info |
+      .result.process_info.shell_pid != null and
+      .result.process_info.foreground_process_group_id != null and
+      .result.process_info.shell_pid == .result.process_info.foreground_process_group_id and
+      ($info.foreground_processes | length) == 1 and
+      $info.foreground_processes[0].pid == $info.shell_pid and
+      (($info.foreground_processes[0].name | ltrimstr("-")) == $shell)
+    ' >/dev/null 2>&1 <<<"$process_info"; then
+			if [[ $state == starting && $attempt != 5 ]]; then
+				sleep 0.1
+				continue
+			fi
+			return 1
+		fi
+		return 0
+	done
+
+	[[ $state != finished ]]
+}
+
+find_task_tab() {
+	local task_key=$1 name=$2 panes tabs match tab_id pane_id label state
+
+	panes=$("$herdr" pane list --workspace "$workspace_id" 2>/dev/null) || return 1
+	match=$(jq -r --arg task_key "$task_key" '
+    [.result.panes[]? |
+      select(.tokens.layout_task == $task_key) |
+      [.tab_id, .pane_id, (.tokens.layout_task_state // "")]][0] // empty |
+    if . == "" then empty else @tsv end
+  ' <<<"$panes") || return 1
+	if [[ -n $match ]]; then
+		printf '%s\n' "$match"
+		return 0
+	fi
+
+	tabs=$("$herdr" tab list --workspace "$workspace_id" 2>/dev/null) || return 1
+	match=$(jq -r --arg name "$name" '
+    [.result.tabs[]? as $tab |
+      select($tab.label == ($name + " ✓") or $tab.label == ($name + " ✗")) |
+      [$tab.tab_id, $tab.label]][0] // empty |
+    if . == "" then empty else @tsv end
+  ' <<<"$tabs") || return 1
+	[[ -n $match ]] || return 0
+	IFS=$'\t' read -r tab_id label <<<"$match"
+	pane_id=$(jq -r --arg tab_id "$tab_id" '
+    [.result.panes[]? | select(.tab_id == $tab_id) | .pane_id][0] // empty
+  ' <<<"$panes") || return 1
+	[[ -n $pane_id ]] || return 1
+	state=
+	case $label in
+	"$name ✓" | "$name ✗") state=finished ;;
+	esac
+	printf '%s\t%s\t%s\n' "$tab_id" "$pane_id" "$state"
+}
+
+open_task_tab() {
+	local name=$1 task_key config_dir lock_dir lock_fd
+	local existing existing_tab existing_pane existing_state
+	local response tab_id pane_id
+
+	task_key=$(task_key_for_name "$name") || return 1
+	config_dir=$(get_config_dir) || return 1
+	lock_dir="$config_dir/task-locks"
+	mkdir -p -- "$lock_dir" || return 1
+	if ! exec {lock_fd}>"$lock_dir/$task_key.lock"; then
+		echo "Could not open the project task lock" >&2
+		return 1
+	fi
+	if ! flock "$lock_fd"; then
+		echo "Could not lock the project task" >&2
+		exec {lock_fd}>&-
+		return 1
+	fi
+
+	existing=$(find_task_tab "$task_key" "$name") || {
+		exec {lock_fd}>&-
+		return 1
+	}
+	if [[ -n $existing ]]; then
+		IFS=$'\t' read -r existing_tab existing_pane existing_state <<<"$existing"
+		if ! "$herdr" tab focus "$existing_tab" >/dev/null; then
+			exec {lock_fd}>&-
+			return 1
+		fi
+		if task_pane_is_running "$existing_pane" "$existing_state"; then
+			report_task_state "$existing_pane" "$task_key" running >/dev/null 2>&1 || true
+			exec {lock_fd}>&- || true
+			return
+		fi
+		report_task_state "$existing_pane" "$task_key" finished >/dev/null 2>&1 || true
+		exec {lock_fd}>&- || true
+		confirm_task_rerun "$name" "$task_key" "$existing_tab" "$existing_pane"
+		return
+	fi
+
+	response=$("$herdr" tab create \
+		--workspace "$workspace_id" \
+		--cwd "$worktree_dir" \
+		--label "$name" \
+		--env "HERDR_LAYOUT_WORKTREE=$worktree_dir" \
+		--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
+		--env "HERDR_LAYOUT_TASK=$name" \
+		--focus) || {
+		exec {lock_fd}>&-
+		return 1
+	}
+	tab_id=$(jq -r '.result.tab.tab_id // empty' <<<"$response") || true
+	pane_id=$(jq -r '.result.root_pane.pane_id // empty' <<<"$response") || true
+	if [[ -z $tab_id || -z $pane_id ]]; then
+		echo "Could not read the project task tab response" >&2
+		exec {lock_fd}>&-
+		return 1
+	fi
+	if ! report_task_state "$pane_id" "$task_key" starting; then
+		"$herdr" tab close "$tab_id" >/dev/null 2>&1 || true
+		exec {lock_fd}>&-
+		return 1
+	fi
+	if ! "$herdr" pane run "$pane_id" "herdr-project-layout run-task $task_key" >/dev/null; then
+		report_task_state "$pane_id" "$task_key" finished >/dev/null 2>&1 || true
+		"$herdr" tab rename "$tab_id" "$name ✗" >/dev/null 2>&1 || true
+		exec {lock_fd}>&-
+		return 1
+	fi
+	if ! wait_for_task_start "$pane_id" "$task_key"; then
+		report_task_state "$pane_id" "$task_key" finished >/dev/null 2>&1 || true
+		"$herdr" tab rename "$tab_id" "$name ✗" >/dev/null 2>&1 || true
+		notify "Project task did not start" "$name"
+		exec {lock_fd}>&- || true
+		return 1
+	fi
+	exec {lock_fd}>&- || true
+	return 0
+}
+
+confirm_task_rerun() {
+	local name=$1 task_key=$2 tab_id=$3 pane_id=$4 current_key
+	local config_dir lock_dir lock_fd current_state width
+
+	local columns=$COLUMNS
+	local title='Task has finished:'
+	width=$((((columns - ${#title}) / 2)+${#title}))
+	printf '\033[2J\033[H\n\n'
+	printf '%*s\n\n' "$width" "$title"
+	width=$((((columns - ${#name}) / 2)+${#name}))
+	printf '%*s\n\n\n\n' "$width" "$name"
+	print_confirmation_buttons "run again" "cancel" accent
+	confirm_with_enter || return 0
+	config_dir=$(get_config_dir) || return 1
+	lock_dir="$config_dir/task-locks"
+	mkdir -p -- "$lock_dir" || return 1
+	if ! exec {lock_fd}>"$lock_dir/$task_key.lock"; then
+		notify "Project task was not restarted" "Could not open its task lock"
+		return 1
+	fi
+	if ! flock "$lock_fd"; then
+		notify "Project task was not restarted" "Could not lock the task"
+		exec {lock_fd}>&-
+		return 1
+	fi
+
+	if ! is_layout_file || ! is_trusted; then
+		notify "Project task was not restarted" "The project layout is no longer trusted"
+		exec {lock_fd}>&- || true
+		return 1
+	fi
+	load_layout || {
+		notify "Project task was not restarted" "The project layout is invalid"
+		exec {lock_fd}>&- || true
+		return 1
+	}
+	find_task_index "$name" >/dev/null || {
+		notify "Project task was not restarted" "$name is no longer configured"
+		exec {lock_fd}>&- || true
+		return 1
+	}
+	current_key=$(task_key_for_name "$name") || {
+		exec {lock_fd}>&- || true
+		return 1
+	}
+	if [[ $current_key != "$task_key" ]]; then
+		notify "Project task was not restarted" "The task identity changed"
+		exec {lock_fd}>&- || true
+		return 1
+	fi
+	current_state=$(get_task_pane_state "$pane_id" "$task_key") || {
+		notify "Project task was not restarted" "Its terminal is no longer available"
+		exec {lock_fd}>&- || true
+		return 1
+	}
+	if task_pane_is_running "$pane_id" "$current_state"; then
+		notify "Project task is already running" "$name"
+		exec {lock_fd}>&- || true
+		return 0
+	fi
+	if ! report_task_state "$pane_id" "$task_key" starting; then
+		notify "Project task was not restarted" "Its terminal is no longer available"
+		exec {lock_fd}>&- || true
+		return 1
+	fi
+	"$herdr" tab rename "$tab_id" "$name" >/dev/null 2>&1 || true
+	if ! "$herdr" pane run "$pane_id" "herdr-project-layout run-task $task_key" >/dev/null; then
+		report_task_state "$pane_id" "$task_key" finished >/dev/null 2>&1 || true
+		"$herdr" tab rename "$tab_id" "$name ✗" >/dev/null 2>&1 || true
+		notify "Project task was not restarted" "$name"
+		exec {lock_fd}>&- || true
+		return 1
+	fi
+	if ! wait_for_task_start "$pane_id" "$task_key"; then
+		report_task_state "$pane_id" "$task_key" finished >/dev/null 2>&1 || true
+		"$herdr" tab rename "$tab_id" "$name ✗" >/dev/null 2>&1 || true
+		notify "Project task did not start" "$name"
+		exec {lock_fd}>&- || true
+		return 1
+	fi
+	exec {lock_fd}>&- || true
+}
+
+pick_task() {
+	local selection
+
+	resolve_context || return 1
+	is_layout_file && is_trusted || return 1
+	load_layout || return 1
+	((${#registered_task_names[@]} > 0)) || return 0
+	command -v fzf >/dev/null || {
+		echo "fzf is required for the project task picker" >&2
+		return 1
+	}
+
+	selection=$(printf '%s\n' "${registered_task_names[@]}" |
+		fzf --no-multi --layout=reverse --prompt='task> ') || return 0
+	[[ -n $selection ]] || return 0
+	find_task_index "$selection" >/dev/null || return 1
+	open_task_tab "$selection"
+}
+
+spin_task_label() {
+	# local frames=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
+	# local frames=(⠖ ⠒ ⠲ ⠰ ⠴ ⠤ ⠦ ⠆)
+	local frames=(⠖ ⠒ ⠲ ⠰ ⠴ ⠤ ⠦ ⠆)
+	# local frames=(⠖ ⠲ ⠴ ⠦)
+	local frame
+
+	while true; do
+		for frame in "${frames[@]}"; do
+			"$herdr" tab rename "$task_runner_tab_id" "$task_runner_label $frame" >/dev/null 2>&1 || return
+			sleep 0.15
+		done
+	done
+}
+
+finish_project_task() {
+	local status=$?
+	local mark=✗
+	local should_close=false
+
+	trap - EXIT
+	if [[ -n ${task_runner_spinner_pid:-} ]]; then
+		kill "$task_runner_spinner_pid" >/dev/null 2>&1 || true
+		wait "$task_runner_spinner_pid" 2>/dev/null || true
+	fi
+	if [[ ${task_runner_status:-} =~ ^[0-9]+$ ]]; then
+		status=$task_runner_status
+	fi
+	if [[ -n ${task_runner_pane_id:-} && -n ${task_runner_key:-} ]]; then
+		report_task_state "$task_runner_pane_id" "$task_runner_key" finished >/dev/null 2>&1 || true
+	fi
+	if [[ ${task_runner_close:-} == true ]] || { ((status == 0)) && [[ ${task_runner_progress:-} == false ]]; }; then
+		should_close=true
+	fi
+	if $should_close && [[ -n ${task_runner_tab_id:-} ]]; then
+		"$herdr" tab close "$task_runner_tab_id" >/dev/null 2>&1 && return
+	fi
+	((status == 0)) && mark=✓
+	if [[ -n ${task_runner_tab_id:-} && -n ${task_runner_label:-} ]]; then
+		"$herdr" tab rename "$task_runner_tab_id" "$task_runner_label $mark" >/dev/null 2>&1 || true
+	fi
+}
+
+run_project_task() {
+	local requested_key=${1:-} name=${HERDR_LAYOUT_TASK:-} index command_variable
+	local -n task_command
+
+	if [[ -n $requested_key && ! $requested_key =~ ^[0-9a-f]{64}$ ]]; then
+		echo "Invalid project task key" >&2
+		return 1
+	fi
+	task_runner_tab_id=${HERDR_TAB_ID:-}
+	task_runner_label=$name
+	task_runner_spinner_pid=
+	task_runner_status=
+	task_runner_progress=
+	task_runner_close=
+	task_runner_pane_id=${HERDR_PANE_ID:-}
+	task_runner_key=
+	trap finish_project_task EXIT
+
+	resolve_context || exit 1
+	is_layout_file && is_trusted || exit 1
+	load_layout || exit 1
+	if [[ -n $requested_key ]]; then
+		name=$(find_task_name_by_key "$requested_key") || {
+			echo "Project task is no longer configured" >&2
+			exit 1
+		}
+	fi
+	[[ -n $name ]] || {
+		echo "No project task was selected" >&2
+		exit 1
+	}
+	task_runner_label=$name
+	index=$(find_task_index "$name") || {
+		echo "Project task is no longer configured: $name" >&2
+		exit 1
+	}
+	command_variable="registered_task_command_$index"
+	task_command=$command_variable
+	task_runner_progress=${registered_task_progress[index]}
+	task_runner_close=${registered_task_close[index]}
+	task_runner_key=$(task_key_for_name "$name") || exit 1
+	if [[ -n $task_runner_pane_id ]]; then
+		report_task_state "$task_runner_pane_id" "$task_runner_key" running >/dev/null 2>&1 || true
+	fi
+
+	if [[ $task_runner_progress == true ]]; then
+		spin_task_label &
+		task_runner_spinner_pid=$!
+	else
+		"$herdr" tab rename "$task_runner_tab_id" "$task_runner_label" >/dev/null 2>&1 || true
+	fi
+
+	(cd "$worktree_dir" && "${task_command[@]}")
+	task_runner_status=$?
+	exit "$task_runner_status"
+}
+
 request_teardown_confirmation() {
 	local candidate context focused_workspace panes response
 
@@ -837,7 +1412,7 @@ close_workspace_with_teardown() {
 
 trust_project() {
 	is_layout_file || {
-		echo "No regular $layout_name file at $project_dir" >&2
+		echo "No regular $project_file file at $project_dir" >&2
 		return 1
 	}
 	update_trust add || return 1
@@ -937,6 +1512,15 @@ trust)
 	resolve_context || exit 1
 	trust_project
 	;;
+tasks)
+	request_task_picker
+	;;
+task-picker)
+	pick_task
+	;;
+run-task)
+	run_project_task "${2:-}"
+	;;
 revoke)
 	resolve_context || exit 1
 	update_trust remove || exit 1
@@ -946,7 +1530,7 @@ dev)
 	run_dev
 	;;
 *)
-	echo "usage: ${0##*/} init|event|prompt|setup|close|confirm-close|teardown|apply|trust|revoke|dev" >&2
+	echo "usage: ${0##*/} init|event|prompt|setup|close|confirm-close|teardown|apply|trust|tasks|task-picker|run-task|revoke|dev" >&2
 	exit 2
 	;;
 esac

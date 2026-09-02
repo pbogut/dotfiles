@@ -96,6 +96,12 @@ width = "90%"
 height = "90%"
 
 [[keys.command]]
+key = "prefix+u"
+type = "plugin_action"
+command = "pbogut.project-layout.tasks"
+description = "run project task"
+
+[[keys.command]]
 key = "prefix+shift+l"
 type = "plugin_action"
 command = "pbogut.project-layout.init"

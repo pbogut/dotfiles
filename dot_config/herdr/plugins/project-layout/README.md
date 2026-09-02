@@ -33,6 +33,10 @@ HERDR_TABS=(nvim dev opencode)
 HERDR_DEV_COMMAND=(make dev)
 HERDR_SETUP_VERSION=1
 
+herdr_task --progress "deployment - prod" -- make deploy TARGET=prod
+herdr_task "ssh - prod" -- ssh production
+herdr_task --close "refresh cache" -- make refresh-cache
+
 herdr_setup() {
   [[ -e "$HERDR_WORKTREE_DIR/.env" ]] ||
     install -m 600 \
@@ -51,6 +55,27 @@ herdr_teardown() {
 `HERDR_DEV_COMMAND` is a Bash array and runs from the worktree. Setup runs once
 for each worktree and setup version. Increment `HERDR_SETUP_VERSION` when setup
 needs to run again.
+
+Press `prefix+u` to open the project task picker. Each `herdr_task` receives a
+name followed by `--` and the command arguments. Add `--progress` before the
+name to animate the task tab while it runs. Add `--close` to close the tab after
+either a successful or failed exit; it can be combined with `--progress`. All
+task commands run from the worktree root in an attached terminal, so commands
+such as `ssh` remain interactive. A task may also invoke a function declared in
+the layout file.
+
+Task tabs are singletons while they exist. Selecting a running task focuses its
+tab instead of starting another command. Selecting a retained finished task
+focuses its tab and asks whether to run it again; Enter reruns it in the same
+pane and Escape leaves the tab unchanged. Tasks with `--progress` remain open
+after completion and end with `✓` or `✗` in the tab name. A task without
+`--progress` closes its tab after a successful exit. If it fails, the tab
+remains open with `✗` so its output can be inspected. `--close` overrides this
+retention behavior for both exit outcomes.
+
+The picker and runner source the trusted layout independently. Keep top-level
+code limited to declarations and `herdr_task` registrations; put side effects
+inside task, setup, or teardown functions.
 
 Setup and teardown run in temporary Herdr tabs so long commands do not block
 the rest of the UI. Setup opens missing managed tabs before showing its Done
