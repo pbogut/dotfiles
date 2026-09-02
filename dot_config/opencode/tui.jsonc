@@ -15,6 +15,14 @@
         "assistantMetadata": true
       }
     ],
+    [
+      "file:///usr/lib/opencode-pocket/plugin/tui.js",
+      {
+        "pocketUrls": [
+          "http://127.0.0.1:8787",
+        ]
+      }
+    ],
     "./herdr-tui-session.js",
     "@slkiser/opencode-quota@latest"
   ]
