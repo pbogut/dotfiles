@@ -1,0 +1,16 @@
+{
+  "id": "batteryHub",
+  "name": "Battery Hub",
+  "description": "Show laptop and peripheral batteries with optional Lenovo IdeaPad conservation controls",
+  "version": "1.2.1",
+  "author": "Pawel Bogut",
+  "type": "composite",
+  "capabilities": ["daemon", "dankbar-widget"],
+  "components": {
+    "daemon": "./BatteryHubDaemon.qml",
+    "widget": "./BatteryHubWidget.qml"
+  },
+  "icon": "battery_saver",
+  "requires_dms": ">=1.5.0",
+  "permissions": ["process"]
+}

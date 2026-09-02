@@ -12,6 +12,21 @@ directory are chezmoi sources for `~/.config/DankMaterialShell`.
 - DMS settings and bar layout are not currently managed by chezmoi. Do not
   import or edit the full DMS settings file unless the user explicitly asks.
 
+## Deployed Target Access
+
+- Scoped chezmoi commands, including `chezmoi apply` and `chezmoi diff`, are
+  allowed for managed DMS targets.
+- Do not directly read, list, stat, search, execute, or otherwise inspect files
+  under `~/.config/DankMaterialShell` with filesystem tools such as Read, Glob,
+  Grep, or shell commands. Use the source files and `chezmoi diff` instead.
+- DMS IPC commands for plugin reloads and runtime status checks are allowed;
+  they do not grant permission to inspect deployed files directly.
+- If direct access to a deployed DMS target is genuinely required, explain the
+  reason and ask the user for permission first. General requests such as
+  "implement", "test", "verify", or "continue" do not grant that permission.
+- If the user rejects a deployed-target access request, do not retry it through
+  another tool or command.
+
 ## Known Environment
 
 The last verified installation was `dms-shell 1.5.3`. Check the active version
@@ -164,9 +179,9 @@ qmllint -I /usr/share/quickshell/dms dot_config/DankMaterialShell/plugins/Plugin
 qmllint -I /usr/share/quickshell/dms dot_config/DankMaterialShell/plugins/PluginName/PluginNameWidget.qml
 ```
 
-Run helpers directly before loading the plugin. When helpers return private
-metadata, pipe their output into a schema-only `jq` assertion instead of
-printing subjects, senders, paths, or message bodies.
+Run helper source files from this repository before loading the plugin. When
+helpers return private metadata, pipe their output into a schema-only `jq`
+assertion instead of printing subjects, senders, paths, or message bodies.
 
 Check the patch for whitespace errors:
 

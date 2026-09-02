@@ -10,7 +10,7 @@ import qs.Widgets
 PluginComponent {
     id: root
 
-    layerNamespacePlugin: "battery-conservation"
+    layerNamespacePlugin: "battery-hub"
 
     property var widgetData: null
     property real touchpadAccumulator: 0
@@ -37,7 +37,35 @@ PluginComponent {
         ? widgetData.batteryPillPercentSign
         : SettingsData.batteryPillPercentSign
 
+    readonly property var primaryBattery: BatteryService.device
+    readonly property bool primaryBatteryAvailable: primaryBattery !== null
+    readonly property int primaryBatteryLevel: primaryBatteryAvailable
+        ? Math.max(0, Math.min(100, Math.round(primaryBattery.percentage * 100)))
+        : 0
+    readonly property bool primaryBatteryCharging: primaryBatteryAvailable
+        && primaryBattery.state === UPowerDeviceState.Charging
+    readonly property bool primaryBatteryLow: primaryBatteryAvailable
+        && primaryBatteryLevel <= SettingsData.batteryLowThreshold
+    readonly property real primaryBatteryChangeRate: primaryBatteryAvailable
+        ? Number(primaryBattery.changeRate || 0)
+        : 0
+    readonly property string primaryBatteryStatus: primaryBatteryAvailable
+        ? BatteryService.translateBatteryState(primaryBattery.state)
+        : "No battery"
+    readonly property string primaryBatteryHealth: primaryBatteryAvailable
+        && primaryBattery.healthSupported
+        && primaryBattery.healthPercentage > 0
+        ? Math.round(primaryBattery.healthPercentage) + "%"
+        : "N/A"
+    readonly property real primaryBatteryCapacity: primaryBatteryAvailable
+        ? Number(primaryBattery.energyCapacity || 0)
+        : 0
+    readonly property var additionalLaptopBatteries: BatteryService.batteries.filter(
+        battery => battery !== primaryBattery
+    )
+
     readonly property var conservationData: conservation.value || ({})
+    readonly property bool conservationAvailable: conservationData.available === true
     readonly property bool conservationKnown: conservationData.known === true
     readonly property bool conservationEnabled: conservationData.enabled === true
     readonly property bool conservationBusy: conservationData.busy === true
@@ -46,11 +74,19 @@ PluginComponent {
     )
     readonly property bool conservationHasError: String(conservationData.error || "") !== ""
 
+    readonly property var peripheralData: peripheralBatteries.value || ({})
+    readonly property var peripheralDevices: Array.isArray(peripheralData.devices)
+        ? peripheralData.devices
+        : []
+    readonly property bool peripheralRefreshing: peripheralData.refreshing === true
+    readonly property bool peripheralHasError: String(peripheralData.error || "") !== ""
+    readonly property bool refreshBusy: conservationBusy || peripheralRefreshing
+    readonly property bool showPrimaryBarItem: primaryBatteryAvailable || peripheralDevices.length === 0
+
     readonly property string batteryTimeText: {
         if (showTimeOnlyOnBattery && BatteryService.isPluggedIn)
             return "";
-        const time = BatteryService.formatTimeRemaining();
-        return time !== "Unknown" ? time : "";
+        return formatPrimaryBatteryTime();
     }
 
     readonly property string verticalBatteryTimeText: {
@@ -72,9 +108,9 @@ PluginComponent {
 
     readonly property string horizontalDisplayText: {
         if (showPercent && showTime && batteryTimeText)
-            return BatteryService.batteryLevel + "% (" + batteryTimeText + ")";
+            return primaryBatteryLevel + "% (" + batteryTimeText + ")";
         if (showPercent)
-            return BatteryService.batteryLevel + "%";
+            return primaryBatteryLevel + "%";
         if (showTime && batteryTimeText)
             return batteryTimeText;
         return "";
@@ -82,9 +118,9 @@ PluginComponent {
 
     readonly property string verticalDisplayText: {
         if (showPercent && showTime && batteryTimeText)
-            return BatteryService.batteryLevel + "\n" + verticalBatteryTimeText;
+            return primaryBatteryLevel + "\n" + verticalBatteryTimeText;
         if (showPercent)
-            return BatteryService.batteryLevel.toString();
+            return primaryBatteryLevel.toString();
         if (showTime && batteryTimeText)
             return verticalBatteryTimeText;
         return "";
@@ -96,32 +132,123 @@ PluginComponent {
         return showTime && batteryTimeText ? batteryTimeText : "";
     }
 
-    function batteryColor() {
-        if (!BatteryService.batteryAvailable)
-            return Theme.widgetIconColor;
-        if (BatteryService.isLowBattery && !BatteryService.isCharging)
+    function formatDuration(seconds) {
+        if (!isFinite(seconds) || seconds <= 0 || seconds > 86400)
+            return "";
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
+    }
+
+    function formatPrimaryBatteryTime() {
+        if (!primaryBatteryAvailable)
+            return "";
+
+        if (primaryBatteryCharging)
+            return formatDuration(primaryBattery.timeToFull);
+        if (primaryBattery.state === UPowerDeviceState.Discharging
+                && primaryBatteryChangeRate > 0) {
+            return formatDuration(3600 * primaryBattery.energy / primaryBatteryChangeRate);
+        }
+        return "";
+    }
+
+    function primaryBatteryIcon() {
+        if (!primaryBatteryAvailable)
+            return "power";
+
+        const level = primaryBatteryLevel;
+        if (primaryBatteryCharging || BatteryService.isPluggedIn) {
+            if (level >= 90)
+                return "battery_charging_full";
+            if (level >= 80)
+                return "battery_charging_90";
+            if (level >= 60)
+                return "battery_charging_80";
+            if (level >= 50)
+                return "battery_charging_60";
+            if (level >= 30)
+                return "battery_charging_50";
+            if (level >= 20)
+                return "battery_charging_30";
+            return "battery_charging_20";
+        }
+        if (level >= 95)
+            return "battery_full";
+        if (level >= 85)
+            return "battery_6_bar";
+        if (level >= 70)
+            return "battery_5_bar";
+        if (level >= 55)
+            return "battery_4_bar";
+        if (level >= 40)
+            return "battery_3_bar";
+        if (level >= 25)
+            return "battery_2_bar";
+        return "battery_1_bar";
+    }
+
+    function peripheralTypeIcon(type) {
+        const normalized = String(type || "").toLowerCase();
+        if (normalized === "mouse")
+            return "mouse";
+        if (normalized === "keyboard")
+            return "keyboard";
+        return "";
+    }
+
+    function peripheralBatteryColor(device) {
+        if (device.charging)
+            return Theme.primary;
+        if (device.lowThreshold > 0 && device.percentage <= device.lowThreshold)
             return Theme.error;
-        if (BatteryService.isCharging || BatteryService.isPluggedIn)
+        return Theme.widgetIconColor;
+    }
+
+    function batteryColor() {
+        if (!primaryBatteryAvailable)
+            return Theme.widgetIconColor;
+        if (primaryBatteryLow && !primaryBatteryCharging)
+            return Theme.error;
+        if (primaryBatteryCharging || BatteryService.isPluggedIn)
             return Theme.primary;
         return Theme.widgetIconColor;
     }
 
-    function refreshConservation() {
-        Quickshell.execDetached(["dms", "ipc", "call", "battery-conservation", "refresh"]);
+    function refreshAvailable() {
+        Quickshell.execDetached([
+            "dms", "ipc", "call", "battery-hub-conservation", "refresh"
+        ]);
+        Quickshell.execDetached([
+            "dms", "ipc", "call", "battery-hub-devices", "refresh"
+        ]);
+    }
+
+    function refreshAll() {
+        Quickshell.execDetached([
+            "dms", "ipc", "call", "battery-hub-conservation", "discover"
+        ]);
+        Quickshell.execDetached([
+            "dms", "ipc", "call", "battery-hub-devices", "discover"
+        ]);
     }
 
     function setConservation(enabled) {
+        if (!conservationAvailable)
+            return;
         Quickshell.execDetached([
             "dms",
             "ipc",
             "call",
-            "battery-conservation",
+            "battery-hub-conservation",
             enabled ? "enable" : "disable"
         ]);
     }
 
     function toggleConservation() {
-        Quickshell.execDetached(["dms", "ipc", "call", "battery-conservation", "toggle"]);
+        if (!conservationAvailable)
+            return;
+        Quickshell.execDetached(["dms", "ipc", "call", "battery-hub-conservation", "toggle"]);
     }
 
     function adjustBrightness(delta) {
@@ -141,7 +268,10 @@ PluginComponent {
         DisplayService.setBrightness(level, "", false);
     }
 
-    pillRightClickAction: () => root.toggleConservation()
+    pillRightClickAction: () => {
+        if (root.conservationAvailable)
+            root.toggleConservation();
+    }
     popoutWidth: 400
 
     component OfficialBolt: Shape {
@@ -197,11 +327,11 @@ PluginComponent {
 
         readonly property int signSize: Math.max(1, Math.round(glyphSize * 0.72))
         readonly property real bodyLength: Math.round(thickness * 1.95)
-        readonly property real level: Math.max(0, Math.min(100, BatteryService.batteryLevel))
-        readonly property bool charging: BatteryService.isCharging
-        readonly property bool lowState: BatteryService.isLowBattery && !BatteryService.isCharging
+        readonly property real level: root.primaryBatteryLevel
+        readonly property bool charging: root.primaryBatteryCharging
+        readonly property bool lowState: root.primaryBatteryLow && !root.primaryBatteryCharging
         readonly property color fillColor: {
-            if (!BatteryService.batteryAvailable)
+            if (!root.primaryBatteryAvailable)
                 return Theme.surfaceVariant;
             if (lowState)
                 return Theme.error;
@@ -270,7 +400,7 @@ PluginComponent {
                 id: glyphTrack
 
                 anchors.fill: parent
-                visible: BatteryService.batteryAvailable
+                visible: root.primaryBatteryAvailable
                     && ((batteryPill.charging && batteryPill.vertical)
                         || (!batteryPill.vertical && batteryPill.showNumber))
 
@@ -386,6 +516,7 @@ PluginComponent {
 
         varName: "conservation"
         defaultValue: ({
+            "available": false,
             "known": false,
             "enabled": false,
             "busy": true,
@@ -397,21 +528,34 @@ PluginComponent {
         })
     }
 
+    PluginGlobalVar {
+        id: peripheralBatteries
+
+        varName: "peripheralBatteries"
+        defaultValue: ({
+            "available": false,
+            "devices": [],
+            "refreshing": true,
+            "error": "",
+            "updatedAt": 0
+        })
+    }
+
     horizontalBarPill: Component {
         Row {
             spacing: (root.barConfig?.noBackground ?? false) ? 1 : 2
 
             DankIcon {
                 anchors.verticalCenter: parent.verticalCenter
-                visible: !root.pillStyle
-                name: BatteryService.getBatteryIcon()
+                visible: root.showPrimaryBarItem && !root.pillStyle
+                name: root.primaryBatteryIcon()
                 size: root.iconSize
                 color: root.batteryColor()
             }
 
             BatteryPill {
                 anchors.verticalCenter: parent.verticalCenter
-                visible: root.pillStyle
+                visible: root.showPrimaryBarItem && root.pillStyle
                 vertical: false
                 showNumber: root.showPercent
                 showPercentSign: root.pillPercentSign
@@ -421,15 +565,15 @@ PluginComponent {
             OfficialBolt {
                 anchors.verticalCenter: parent.verticalCenter
                 visible: root.pillStyle
-                    && BatteryService.batteryAvailable
-                    && BatteryService.isCharging
+                    && root.primaryBatteryAvailable
+                    && root.primaryBatteryCharging
                 fillColor: Theme.primary
                 size: Math.round(root.iconSize * 0.85)
             }
 
             StyledText {
                 anchors.verticalCenter: parent.verticalCenter
-                visible: BatteryService.batteryAvailable && root.horizontalSideText !== ""
+                visible: root.primaryBatteryAvailable && root.horizontalSideText !== ""
                 text: root.horizontalSideText
                 font.pixelSize: Theme.barTextSize(
                     root.barThickness,
@@ -437,6 +581,51 @@ PluginComponent {
                     root.barConfig?.maximizeWidgetText
                 )
                 color: Theme.widgetTextColor
+            }
+
+            Repeater {
+                model: root.peripheralDevices
+
+                delegate: Row {
+                    id: horizontalPeripheralBattery
+
+                    required property var modelData
+                    readonly property string typeIcon: root.peripheralTypeIcon(modelData.type)
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: Theme.spacingXXS
+
+                    DankIcon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: horizontalPeripheralBattery.typeIcon !== ""
+                        name: horizontalPeripheralBattery.typeIcon
+                        size: root.iconSize
+                        color: root.peripheralBatteryColor(horizontalPeripheralBattery.modelData)
+                    }
+
+                    StyledText {
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: horizontalPeripheralBattery.typeIcon === ""
+                        text: String(horizontalPeripheralBattery.modelData.type || "device")
+                        font.pixelSize: Theme.barTextSize(
+                            root.barThickness,
+                            root.barConfig?.fontScale,
+                            root.barConfig?.maximizeWidgetText
+                        )
+                        color: root.peripheralBatteryColor(horizontalPeripheralBattery.modelData)
+                    }
+
+                    StyledText {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: horizontalPeripheralBattery.modelData.percentage + "%"
+                        font.pixelSize: Theme.barTextSize(
+                            root.barThickness,
+                            root.barConfig?.fontScale,
+                            root.barConfig?.maximizeWidgetText
+                        )
+                        color: root.peripheralBatteryColor(horizontalPeripheralBattery.modelData)
+                    }
+                }
             }
 
             WheelHandler {
@@ -455,15 +644,15 @@ PluginComponent {
 
             DankIcon {
                 anchors.horizontalCenter: parent.horizontalCenter
-                visible: !root.pillStyle
-                name: BatteryService.getBatteryIcon()
+                visible: root.showPrimaryBarItem && !root.pillStyle
+                name: root.primaryBatteryIcon()
                 size: root.iconSizeLarge
                 color: root.batteryColor()
             }
 
             BatteryPill {
                 anchors.horizontalCenter: parent.horizontalCenter
-                visible: root.pillStyle
+                visible: root.showPrimaryBarItem && root.pillStyle
                 vertical: true
                 showNumber: false
                 thickness: root.iconSizeLarge
@@ -471,7 +660,7 @@ PluginComponent {
 
             StyledText {
                 anchors.horizontalCenter: parent.horizontalCenter
-                visible: BatteryService.batteryAvailable && root.verticalDisplayText !== ""
+                visible: root.primaryBatteryAvailable && root.verticalDisplayText !== ""
                 text: root.verticalDisplayText
                 font.pixelSize: Theme.barTextSize(
                     root.barThickness,
@@ -480,6 +669,52 @@ PluginComponent {
                 )
                 color: Theme.widgetTextColor
                 horizontalAlignment: Text.AlignHCenter
+            }
+
+            Repeater {
+                model: root.peripheralDevices
+
+                delegate: Column {
+                    id: verticalPeripheralBattery
+
+                    required property var modelData
+                    readonly property string typeIcon: root.peripheralTypeIcon(modelData.type)
+
+                    spacing: 1
+
+                    DankIcon {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        visible: verticalPeripheralBattery.typeIcon !== ""
+                        name: verticalPeripheralBattery.typeIcon
+                        size: root.iconSizeLarge
+                        color: root.peripheralBatteryColor(verticalPeripheralBattery.modelData)
+                    }
+
+                    StyledText {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        visible: verticalPeripheralBattery.typeIcon === ""
+                        text: String(verticalPeripheralBattery.modelData.type || "device")
+                        font.pixelSize: Theme.barTextSize(
+                            root.barThickness,
+                            root.barConfig?.fontScale,
+                            root.barConfig?.maximizeWidgetText
+                        )
+                        color: root.peripheralBatteryColor(verticalPeripheralBattery.modelData)
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+
+                    StyledText {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: verticalPeripheralBattery.modelData.percentage + "%"
+                        font.pixelSize: Theme.barTextSize(
+                            root.barThickness,
+                            root.barConfig?.fontScale,
+                            root.barConfig?.maximizeWidgetText
+                        )
+                        color: root.peripheralBatteryColor(verticalPeripheralBattery.modelData)
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                }
             }
 
             WheelHandler {
@@ -497,12 +732,15 @@ PluginComponent {
             id: panel
 
             readonly property string timeInfoText: {
-                if (!BatteryService.batteryAvailable)
-                    return "No battery detected";
-                const time = BatteryService.formatTimeRemaining();
-                if (time === "Unknown")
+                if (!root.primaryBatteryAvailable) {
+                    if (root.peripheralDevices.length > 0)
+                        return root.peripheralDevices.length + " peripheral battery device(s)";
+                    return "No batteries detected";
+                }
+                const time = root.formatPrimaryBatteryTime();
+                if (!time)
                     return "";
-                return BatteryService.isCharging
+                return root.primaryBatteryCharging
                     ? "Time until full: " + time
                     : "Time remaining: " + time;
             }
@@ -518,8 +756,8 @@ PluginComponent {
                 if (battery.state === UPowerDeviceState.Charging) {
                     seconds = battery.timeToFull;
                 } else if (battery.state === UPowerDeviceState.Discharging
-                        && BatteryService.changeRate > 0) {
-                    seconds = (3600 * battery.energy) / BatteryService.changeRate;
+                        && battery.changeRate > 0) {
+                    seconds = (3600 * battery.energy) / battery.changeRate;
                 }
                 if (seconds > 0 && seconds <= 86400) {
                     const hours = Math.floor(seconds / 3600);
@@ -531,7 +769,7 @@ PluginComponent {
                 return details.join(" | ");
             }
 
-            headerText: "Battery"
+            headerText: "Battery Hub"
             detailsText: timeInfoText
             showCloseButton: true
             headerActions: Component {
@@ -539,18 +777,18 @@ PluginComponent {
                     id: refreshButton
 
                     iconName: "refresh"
-                    tooltipText: root.conservationBusy
-                        ? "Checking conservation mode"
-                        : "Refresh conservation mode"
-                    enabled: !root.conservationBusy
-                    onClicked: root.refreshConservation()
+                    tooltipText: root.refreshBusy
+                        ? "Refreshing battery information"
+                        : "Refresh battery information"
+                    enabled: !root.refreshBusy
+                    onClicked: root.refreshAll()
 
                     RotationAnimator on rotation {
                         from: 0
                         to: 360
                         duration: 1000
                         loops: Animation.Infinite
-                        running: root.conservationBusy
+                        running: root.refreshBusy
 
                         onRunningChanged: {
                             if (!running)
@@ -564,7 +802,7 @@ PluginComponent {
                 target: panel.parentPopout
                 function onShouldBeVisibleChanged() {
                     if (panel.parentPopout?.shouldBeVisible)
-                        root.refreshConservation();
+                        root.refreshAvailable();
                 }
             }
 
@@ -575,6 +813,7 @@ PluginComponent {
                 StyledRect {
                     width: parent.width
                     height: 72
+                    visible: root.primaryBatteryAvailable
                     radius: Theme.cornerRadius
                     color: Theme.nestedSurface
                     border.width: 0
@@ -586,12 +825,12 @@ PluginComponent {
 
                         DankIcon {
                             anchors.verticalCenter: parent.verticalCenter
-                            name: BatteryService.getBatteryIcon()
+                            name: root.primaryBatteryIcon()
                             size: Theme.iconSizeLarge
                             color: {
-                                if (BatteryService.isLowBattery && !BatteryService.isCharging)
+                                if (root.primaryBatteryLow && !root.primaryBatteryCharging)
                                     return Theme.error;
-                                if (BatteryService.isCharging || BatteryService.isPluggedIn)
+                                if (root.primaryBatteryCharging || BatteryService.isPluggedIn)
                                     return Theme.primary;
                                 return Theme.surfaceText;
                             }
@@ -606,39 +845,35 @@ PluginComponent {
                                 spacing: Theme.spacingS
 
                                 StyledText {
-                                    text: BatteryService.batteryAvailable
-                                        ? BatteryService.batteryLevel + "%"
-                                        : "Power"
+                                    text: root.primaryBatteryLevel + "%"
                                     font.pixelSize: Theme.fontSizeXLarge
                                     font.weight: Font.Bold
-                                    color: BatteryService.isLowBattery && !BatteryService.isCharging
+                                    color: root.primaryBatteryLow && !root.primaryBatteryCharging
                                         ? Theme.error
-                                        : (BatteryService.isCharging ? Theme.primary : Theme.surfaceText)
+                                        : (root.primaryBatteryCharging ? Theme.primary : Theme.surfaceText)
                                 }
 
                                 StyledText {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    visible: BatteryService.batteryAvailable
-                                    text: BatteryService.batteryStatus
+                                    text: root.primaryBatteryStatus
                                     font.pixelSize: Theme.fontSizeLarge
                                     font.weight: Font.Medium
-                                    color: BatteryService.isLowBattery && !BatteryService.isCharging
+                                    color: root.primaryBatteryLow && !root.primaryBatteryCharging
                                         ? Theme.error
-                                        : (BatteryService.isCharging ? Theme.primary : Theme.surfaceText)
+                                        : (root.primaryBatteryCharging ? Theme.primary : Theme.surfaceText)
                                 }
                             }
 
                             StyledText {
-                                visible: BatteryService.batteryAvailable
-                                    && Math.abs(BatteryService.changeRate) > 0.05
+                                visible: Math.abs(root.primaryBatteryChangeRate) > 0.05
                                 text: {
-                                    const onAc = BatteryService.isCharging || BatteryService.isPluggedIn;
+                                    const onAc = root.primaryBatteryCharging || BatteryService.isPluggedIn;
                                     const prefix = onAc ? "+" : "-";
-                                    return prefix + Math.abs(BatteryService.changeRate).toFixed(1) + "W";
+                                    return prefix + Math.abs(root.primaryBatteryChangeRate).toFixed(1) + "W";
                                 }
                                 font.pixelSize: Theme.fontSizeSmall
                                 font.weight: Font.Medium
-                                color: BatteryService.isCharging || BatteryService.isPluggedIn
+                                color: root.primaryBatteryCharging || BatteryService.isPluggedIn
                                     ? Theme.primary
                                     : Theme.warning
                             }
@@ -649,7 +884,7 @@ PluginComponent {
                 Row {
                     width: parent.width
                     spacing: Theme.spacingM
-                    visible: BatteryService.batteryAvailable
+                    visible: root.primaryBatteryAvailable
 
                     StyledRect {
                         width: (parent.width - Theme.spacingM) / 2
@@ -672,13 +907,13 @@ PluginComponent {
 
                             StyledText {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                text: BatteryService.batteryHealth
+                                text: root.primaryBatteryHealth
                                 font.pixelSize: Theme.fontSizeLarge
                                 font.weight: Font.Bold
                                 color: {
-                                    if (BatteryService.batteryHealth === "N/A")
+                                    if (root.primaryBatteryHealth === "N/A")
                                         return Theme.surfaceText;
-                                    return parseInt(BatteryService.batteryHealth, 10) < 80
+                                    return parseInt(root.primaryBatteryHealth, 10) < 80
                                         ? Theme.error
                                         : Theme.surfaceText;
                                 }
@@ -707,8 +942,8 @@ PluginComponent {
 
                             StyledText {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                text: BatteryService.batteryCapacity > 0
-                                    ? BatteryService.batteryCapacity.toFixed(1) + " Wh"
+                                text: root.primaryBatteryCapacity > 0
+                                    ? root.primaryBatteryCapacity.toFixed(1) + " Wh"
                                     : "Unknown"
                                 font.pixelSize: Theme.fontSizeLarge
                                 font.weight: Font.Bold
@@ -721,10 +956,10 @@ PluginComponent {
                 Column {
                     width: parent.width
                     spacing: Theme.spacingS
-                    visible: !BatteryService.usePreferred && BatteryService.batteries.length > 1
+                    visible: root.additionalLaptopBatteries.length > 0
 
                     StyledText {
-                        text: "Individual batteries"
+                        text: "Additional laptop batteries"
                         font.pixelSize: Theme.fontSizeSmall
                         font.weight: Font.Medium
                         color: Theme.surfaceTextMedium
@@ -732,7 +967,7 @@ PluginComponent {
 
                     Repeater {
                         model: ScriptModel {
-                            values: BatteryService.batteries
+                            values: root.additionalLaptopBatteries
                         }
 
                         delegate: StyledRect {
@@ -803,9 +1038,134 @@ PluginComponent {
                     }
                 }
 
+                Column {
+                    width: parent.width
+                    spacing: Theme.spacingS
+                    visible: root.peripheralDevices.length > 0 || root.peripheralHasError
+
+                    Row {
+                        spacing: Theme.spacingS
+
+                        StyledText {
+                            text: "Peripheral batteries"
+                            font.pixelSize: Theme.fontSizeSmall
+                            font.weight: Font.Medium
+                            color: Theme.surfaceTextMedium
+                        }
+
+                        StyledText {
+                            visible: root.peripheralRefreshing
+                            text: "Refreshing..."
+                            font.pixelSize: Theme.fontSizeSmall
+                            color: Theme.surfaceTextMedium
+                        }
+                    }
+
+                    StyledText {
+                        width: parent.width
+                        visible: root.peripheralHasError
+                        text: String(root.peripheralData.error || "Could not refresh peripheral batteries.")
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: Theme.error
+                        wrapMode: Text.WordWrap
+                    }
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: root.peripheralDevices
+                        }
+
+                        delegate: StyledRect {
+                            id: peripheralBatteryRow
+
+                            required property var modelData
+                            readonly property string typeIcon: root.peripheralTypeIcon(modelData.type)
+
+                            width: parent.width
+                            height: 64
+                            radius: Theme.cornerRadius
+                            color: Theme.nestedSurface
+                            border.width: 0
+
+                            Row {
+                                anchors.fill: parent
+                                anchors.margins: Theme.spacingM
+                                spacing: Theme.spacingM
+
+                                Item {
+                                    id: peripheralTypeBadge
+
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: Math.max(Theme.iconSize, peripheralTypeText.implicitWidth)
+                                    height: Theme.iconSize
+
+                                    DankIcon {
+                                        anchors.centerIn: parent
+                                        visible: peripheralBatteryRow.typeIcon !== ""
+                                        name: peripheralBatteryRow.typeIcon
+                                        size: Theme.iconSize
+                                        color: root.peripheralBatteryColor(peripheralBatteryRow.modelData)
+                                    }
+
+                                    StyledText {
+                                        id: peripheralTypeText
+
+                                        anchors.centerIn: parent
+                                        visible: peripheralBatteryRow.typeIcon === ""
+                                        text: String(peripheralBatteryRow.modelData.type || "device")
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        font.weight: Font.Medium
+                                        color: root.peripheralBatteryColor(peripheralBatteryRow.modelData)
+                                    }
+                                }
+
+                                Column {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: parent.width
+                                        - peripheralTypeBadge.width
+                                        - peripheralPercent.implicitWidth
+                                        - Theme.spacingM * 2
+                                    spacing: Theme.spacingXXS
+
+                                    StyledText {
+                                        width: parent.width
+                                        text: String(peripheralBatteryRow.modelData.name || "Peripheral device")
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        font.weight: Font.Medium
+                                        color: Theme.surfaceText
+                                        elide: Text.ElideRight
+                                    }
+
+                                    StyledText {
+                                        width: parent.width
+                                        text: String(peripheralBatteryRow.modelData.type || "device")
+                                            + (peripheralBatteryRow.modelData.charging
+                                                ? " | Charging"
+                                                : " | On battery")
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        color: Theme.surfaceTextMedium
+                                        elide: Text.ElideRight
+                                    }
+                                }
+
+                                StyledText {
+                                    id: peripheralPercent
+
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: peripheralBatteryRow.modelData.percentage + "%"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    font.weight: Font.Bold
+                                    color: root.peripheralBatteryColor(peripheralBatteryRow.modelData)
+                                }
+                            }
+                        }
+                    }
+                }
+
                 StyledRect {
                     width: parent.width
                     height: 72
+                    visible: root.conservationAvailable
                     radius: Theme.cornerRadius
                     color: root.conservationHasError
                         ? Theme.withAlpha(Theme.error, 0.10)
