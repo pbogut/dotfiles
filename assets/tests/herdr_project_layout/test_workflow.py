@@ -17,6 +17,7 @@ PROJECT_PLUGIN = ROOT / "dot_config/herdr/plugins/project-layout"
 RUNTIME = PROJECT_PLUGIN / "lib/runtime.sh"
 SELECTOR = PROJECT_PLUGIN / "executable_managed-tabs"
 OPENCODE_LAUNCHER = ROOT / "dot_scripts/executable_opencode-launcher"
+PROJECT_LAUNCHER = ROOT / "dot_scripts/executable_herdr-project.tmpl"
 SESSION_CACHE = PROJECT_PLUGIN / "executable_cache-opencode-session.sh"
 STARTUP = PROJECT_PLUGIN / "executable_startup.sh"
 MANIFEST = PROJECT_PLUGIN / "herdr-plugin.toml"
@@ -110,6 +111,9 @@ class HerdrWorkflowTest(unittest.TestCase):
             "\"${HERDR_ACTIVE_PANE_CWD:-}\" \"$@\"\n"
         )
         fake_selector.chmod(0o755)
+        fake_vim = bindir / "herdr-vim"
+        fake_vim.write_text("#!/usr/bin/env bash\nexit 0\n")
+        fake_vim.chmod(0o755)
         self.env = os.environ.copy()
         worktree = self.temp / "worktree"
         worktree.mkdir()
@@ -188,6 +192,31 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.assertEqual(
             self.calls(), [["tab", "list", "--workspace", "w1"]]
         )
+
+    def test_managed_selector_adopts_the_initial_workspace_tab(self):
+        self.env["FAKE_HERDR_TABS"] = json.dumps(
+            {
+                "result": {
+                    "tabs": [
+                        {"tab_id": "initial-tab", "label": "1", "number": 1},
+                    ]
+                }
+            }
+        )
+
+        result = self.run_script(SELECTOR, "nvim")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            self.calls(),
+            [
+                ["tab", "list", "--workspace", "w1"],
+                ["tab", "rename", "initial-tab", "nvim"],
+                ["pane", "list", "--workspace", "w1"],
+                ["tab", "focus", "initial-tab"],
+            ],
+        )
+        self.assertNotIn("herdr tab rename", PROJECT_LAUNCHER.read_text())
 
     def test_session_cache_accepts_only_native_opencode_ids(self):
         valid_pane = {
