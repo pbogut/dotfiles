@@ -753,6 +753,9 @@ apply_layout() {
 
 	refresh_workspace_id || return 1
 	herdr_acquire_topology_lock "$workspace_id" || return 1
+	if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} == setup ]]; then
+		name_current_plugin_tab setup
+	fi
 
 	apply_layout_unlocked
 	status=$?
@@ -799,14 +802,11 @@ request_prompt() {
 	return 1
 }
 
-rename_opened_plugin_tab() {
-	local response=$1
-	local label=$2
-	local tab_id
+name_current_plugin_tab() {
+	local label=$1
 
-	tab_id=$(jq -r '.result.plugin_pane.pane.tab_id // empty' <<<"$response") || return 1
-	[[ -n $tab_id ]] || return 1
-	"$herdr" tab rename "$tab_id" "$label" >/dev/null
+	[[ -n ${HERDR_TAB_ID:-} ]] || return 0
+	"$herdr" tab rename "$HERDR_TAB_ID" "$label" >/dev/null 2>&1 || true
 }
 
 request_setup_tab() {
@@ -829,8 +829,6 @@ request_setup_tab() {
 			--env "HERDR_LAYOUT_WORKTREE=$worktree_dir" \
 			--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
 			--focus 2>&1); then
-			rename_opened_plugin_tab "$response" setup ||
-				notify "Project setup tab was not named" "Rename it to setup manually"
 			return 0
 		fi
 		[[ $response == *ui_busy* ]] || break
@@ -1312,8 +1310,6 @@ request_teardown_tab() {
 		--env "HERDR_LAYOUT_WORKTREE=$candidate" \
 		--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
 		--focus 2>&1); then
-		rename_opened_plugin_tab "$response" teardown ||
-			notify "Project teardown tab was not named" "Rename it to teardown manually"
 		return 0
 	fi
 
@@ -1365,6 +1361,7 @@ close_workspace_with_teardown() {
 
 	herdr_acquire_topology_lock "$workspace_id" || return 1
 	topology_locked=true
+	name_current_plugin_tab teardown
 	if ! cache_workspace_sessions; then
 		teardown_status=1
 	elif ((teardown_status == 0)) && $teardown_configured; then

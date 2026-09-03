@@ -98,6 +98,10 @@ class HerdrWorkflowTest(unittest.TestCase):
                     print(os.environ["FAKE_HERDR_PROCESS_INFO"])
                 elif args[:2] == ["workspace", "get"]:
                     print(os.environ["FAKE_HERDR_WORKSPACE"])
+                elif args[:2] == ["api", "snapshot"]:
+                    print(os.environ["FAKE_HERDR_SNAPSHOT"])
+                elif args[:3] == ["plugin", "pane", "open"]:
+                    print(os.environ["FAKE_HERDR_PLUGIN_PANE_OPEN"])
                 else:
                     print(json.dumps({"result": {}}))
                 """
@@ -123,6 +127,24 @@ class HerdrWorkflowTest(unittest.TestCase):
                 "FAKE_HERDR_PANES": json.dumps({"result": {"panes": []}}),
                 "FAKE_HERDR_PROCESS_INFO": json.dumps(
                     {"result": {"process_info": {"foreground_processes": []}}}
+                ),
+                "FAKE_HERDR_PLUGIN_PANE_OPEN": json.dumps(
+                    {"result": {"type": "ok"}}
+                ),
+                "FAKE_HERDR_SNAPSHOT": json.dumps(
+                    {
+                        "result": {
+                            "snapshot": {
+                                "focused_workspace_id": "w1",
+                                "panes": [
+                                    {
+                                        "cwd": str(worktree),
+                                        "workspace_id": "w1",
+                                    }
+                                ],
+                            }
+                        }
+                    }
                 ),
                 "FAKE_HERDR_TABS": json.dumps({"result": {"tabs": []}}),
                 "FAKE_HERDR_WORKSPACE": json.dumps(
@@ -367,11 +389,13 @@ class HerdrWorkflowTest(unittest.TestCase):
             "--token",
             f"opencode_session={session_id}",
         ]
+        rename = ["tab", "rename", "teardown-tab", "teardown"]
         closed_tabs = [
             index
             for index, call in enumerate(calls)
             if isinstance(call, list) and call[:2] == ["tab", "close"]
         ]
+        self.assertLess(calls.index(rename), calls.index(cache))
         self.assertLess(calls.index(cache), min(closed_tabs))
         self.assertLess(max(closed_tabs), calls.index("teardown"))
         self.assertLess(
@@ -591,6 +615,21 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.env.update(
             {
                 "COLUMNS": "80",
+                "FAKE_HERDR_SNAPSHOT": json.dumps(
+                    {
+                        "result": {
+                            "snapshot": {
+                                "focused_workspace_id": "w1",
+                                "panes": [
+                                    {
+                                        "cwd": str(worktree),
+                                        "workspace_id": "w1",
+                                    }
+                                ],
+                            }
+                        }
+                    }
+                ),
                 "HERDR_LAYOUT_WORKSPACE_ID": "w1",
                 "HERDR_LAYOUT_WORKTREE": str(worktree),
                 "HERDR_PLUGIN_CONFIG_DIR": str(config_dir),
@@ -598,6 +637,65 @@ class HerdrWorkflowTest(unittest.TestCase):
             }
         )
         return layout, worktree
+
+    def test_setup_pane_open_accepts_a_generic_success_response(self):
+        layout, _ = self.project_fixture()
+        layout.write_text(
+            "HERDR_TABS=(nvim)\n"
+            "herdr_setup() { :; }\n"
+        )
+
+        result = self.run_script(
+            PROJECT_PLUGIN / "executable_project-layout", "apply"
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = self.calls()
+        self.assertTrue(
+            any(call[:3] == ["plugin", "pane", "open"] for call in calls)
+        )
+        self.assertFalse(any(call[:2] == ["tab", "rename"] for call in calls))
+        self.assertFalse(
+            any(
+                call[:3]
+                == ["notification", "show", "Project setup tab was not named"]
+                for call in calls
+            )
+        )
+
+    def test_setup_pane_names_its_own_tab(self):
+        layout, _ = self.project_fixture()
+        layout.write_text(
+            "HERDR_TABS=(nvim)\n"
+            "herdr_setup() { :; }\n"
+        )
+        self.env.update(
+            {
+                "HERDR_PANE_ID": "setup-pane",
+                "HERDR_PLUGIN_ENTRYPOINT_ID": "setup",
+                "HERDR_TAB_ID": "setup-tab",
+            }
+        )
+
+        result = subprocess.run(
+            [
+                "bash",
+                str(PROJECT_PLUGIN / "executable_project-layout"),
+                "setup",
+            ],
+            input="\n",
+            check=False,
+            capture_output=True,
+            text=True,
+            env=self.env,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = self.calls()
+        self.assertIn(["tab", "rename", "setup-tab", "setup"], calls)
+        self.assertNotIn(
+            ["notification", "show", "Project setup tab was not named"], calls
+        )
 
     def test_new_project_task_uses_layout_apply(self):
         _, worktree = self.project_fixture()
