@@ -7,13 +7,13 @@ cache_pane() {
   local pane=$1
   local workspace_id session_id current
 
-  [[ $(jq -r '.agent_session.agent // empty' <<<"$pane") == opencode ]] || return
-  [[ $(jq -r '.agent_session.source // empty' <<<"$pane") == herdr:opencode ]] || return
-  [[ $(jq -r '.agent_session.kind // empty' <<<"$pane") == id ]] || return
+  [[ $(jq -r '.agent_session.agent // empty' <<<"$pane") == opencode ]] || return 0
+  [[ $(jq -r '.agent_session.source // empty' <<<"$pane") == herdr:opencode ]] || return 0
+  [[ $(jq -r '.agent_session.kind // empty' <<<"$pane") == id ]] || return 0
 
   workspace_id=$(jq -r '.workspace_id // empty' <<<"$pane")
   session_id=$(jq -r '.agent_session.value // empty' <<<"$pane")
-  [[ -n $workspace_id && $session_id =~ ^[A-Za-z0-9._:-]{1,80}$ ]] || return
+  [[ -n $workspace_id && $session_id =~ ^[A-Za-z0-9._:-]{1,80}$ ]] || return 0
 
   current=$("$herdr" workspace get "$workspace_id" 2>/dev/null |
     jq -r '.result.workspace.tokens.opencode_session // empty')
