@@ -1,9 +1,11 @@
 import json
 import os
 from pathlib import Path
+import socket
 import subprocess
 import tempfile
 import textwrap
+import threading
 import time
 import unittest
 
@@ -14,6 +16,50 @@ RUNTIME = PROJECT_PLUGIN / "lib/runtime.sh"
 SELECTOR = PROJECT_PLUGIN / "executable_managed-tabs"
 OPENCODE_LAUNCHER = ROOT / "dot_scripts/executable_opencode-launcher"
 SESSION_CACHE = PROJECT_PLUGIN / "executable_cache-opencode-session.sh"
+
+
+class FakeHerdrApi:
+    def __init__(self, socket_path):
+        self.socket_path = str(socket_path)
+        self.requests = []
+        self.server = socket.socket(socket.AF_UNIX)
+        self.server.bind(self.socket_path)
+        self.server.listen()
+        self.stopping = threading.Event()
+        self.thread = threading.Thread(target=self.serve, daemon=True)
+
+    def __enter__(self):
+        self.thread.start()
+        return self
+
+    def __exit__(self, *_):
+        self.stopping.set()
+        with socket.socket(socket.AF_UNIX) as client:
+            client.connect(self.socket_path)
+        self.thread.join(timeout=2)
+        self.server.close()
+
+    def serve(self):
+        while not self.stopping.is_set():
+            client, _ = self.server.accept()
+            with client:
+                input_bytes = b""
+                while b"\n" not in input_bytes:
+                    chunk = client.recv(65536)
+                    if not chunk:
+                        break
+                    input_bytes += chunk
+                if not input_bytes or self.stopping.is_set():
+                    continue
+                request = json.loads(input_bytes.split(b"\n", 1)[0])
+                self.requests.append(request)
+                response = {
+                    "id": request["id"],
+                    "result": {
+                        "layout": {"tab_id": "new-tab", "root_pane_id": "new-pane"}
+                    },
+                }
+                client.sendall((json.dumps(response) + "\n").encode())
 
 
 class HerdrWorkflowTest(unittest.TestCase):
@@ -39,8 +85,12 @@ class HerdrWorkflowTest(unittest.TestCase):
 
                 if args[:2] == ["tab", "list"]:
                     print(os.environ["FAKE_HERDR_TABS"])
+                elif args[:2] == ["pane", "list"]:
+                    print(os.environ["FAKE_HERDR_PANES"])
+                elif args[:2] == ["pane", "process-info"]:
+                    print(os.environ["FAKE_HERDR_PROCESS_INFO"])
                 elif args[:2] == ["workspace", "get"]:
-                    print(json.dumps({"result": {"workspace": {"tokens": {}}}}))
+                    print(os.environ["FAKE_HERDR_WORKSPACE"])
                 else:
                     print(json.dumps({"result": {}}))
                 """
@@ -48,16 +98,28 @@ class HerdrWorkflowTest(unittest.TestCase):
         )
         fake_herdr.chmod(0o755)
         self.env = os.environ.copy()
+        worktree = self.temp / "worktree"
+        worktree.mkdir()
         self.env.update(
             {
                 "FAKE_HERDR_LOG": str(self.log),
+                "FAKE_HERDR_PANES": json.dumps({"result": {"panes": []}}),
+                "FAKE_HERDR_PROCESS_INFO": json.dumps(
+                    {"result": {"process_info": {"foreground_processes": []}}}
+                ),
                 "FAKE_HERDR_TABS": json.dumps({"result": {"tabs": []}}),
+                "FAKE_HERDR_WORKSPACE": json.dumps(
+                    {"result": {"workspace": {"tokens": {}}}}
+                ),
                 "HERDR_ACTIVE_WORKSPACE_ID": "w1",
+                "HERDR_ACTIVE_PANE_CWD": str(worktree),
                 "HERDR_BIN_PATH": str(fake_herdr),
                 "HERDR_SOCKET_PATH": str(self.temp / "herdr.sock"),
                 "PATH": f"{bindir}:{os.environ['PATH']}",
+                "XDG_RUNTIME_DIR": str(self.temp / "runtime"),
             }
         )
+        (self.temp / "runtime").mkdir()
 
     def run_script(self, script, *args, env=None):
         return subprocess.run(
@@ -164,6 +226,82 @@ class HerdrWorkflowTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(self.calls(), [])
+
+    def test_missing_role_uses_layout_apply_with_direct_argv(self):
+        api_path = self.temp / "layout.sock"
+        self.env["HERDR_SOCKET_PATH"] = str(api_path)
+
+        with FakeHerdrApi(api_path) as api:
+            result = self.run_script(SELECTOR, "dev", "--no-focus")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(len(api.requests), 1)
+        request = api.requests[0]
+        self.assertEqual(request["method"], "layout.apply")
+        self.assertEqual(
+            request["params"],
+            {
+                "workspace_id": "w1",
+                "tab_label": "dev",
+                "focus": False,
+                "root": {
+                    "type": "pane",
+                    "cwd": self.env["HERDR_ACTIVE_PANE_CWD"],
+                    "command": ["zsh", "-ic", "start-dev"],
+                },
+            },
+        )
+        self.assertFalse(
+            any(call[:2] in (["pane", "run"], ["tab", "close"]) for call in self.calls())
+        )
+
+    def test_stale_opencode_tab_is_replaced_with_exact_session_argv(self):
+        api_path = self.temp / "layout.sock"
+        self.env["HERDR_SOCKET_PATH"] = str(api_path)
+        self.env["FAKE_HERDR_TABS"] = json.dumps(
+            {
+                "result": {
+                    "tabs": [
+                        {"tab_id": "old-tab", "label": "opencode", "number": 1}
+                    ]
+                }
+            }
+        )
+        session_id = "ses exact;$value"
+        self.env["FAKE_HERDR_PANES"] = json.dumps(
+            {
+                "result": {
+                    "panes": [
+                        {
+                            "pane_id": "old-pane",
+                            "tab_id": "old-tab",
+                            "workspace_id": "w1",
+                            "agent_session": {
+                                "agent": "opencode",
+                                "source": "herdr:opencode",
+                                "kind": "id",
+                                "value": session_id,
+                            },
+                        }
+                    ]
+                }
+            }
+        )
+
+        with FakeHerdrApi(api_path) as api:
+            result = self.run_script(SELECTOR, "opencode")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        layout = next(request for request in api.requests if request["method"] == "layout.apply")
+        self.assertEqual(layout["params"]["tab_id"], "old-tab")
+        self.assertNotIn("workspace_id", layout["params"])
+        self.assertEqual(
+            layout["params"]["root"]["command"],
+            ["opencode-launcher", "--session", session_id, "--port"],
+        )
+        self.assertFalse(
+            any(call[:2] in (["pane", "run"], ["tab", "close"]) for call in self.calls())
+        )
 
 
 class OpenCodeLauncherTest(unittest.TestCase):

@@ -17,6 +17,40 @@ herdr_resolve_socket() {
 	printf '%s\n' "$socket_path"
 }
 
+herdr_api_request() {
+	local method=$1 params=$2 socket_path request response
+
+	socket_path=$(herdr_resolve_socket) || return 1
+	request=$(jq -cn \
+		--arg id "pbogut.project-layout:$BASHPID:$RANDOM" \
+		--arg method "$method" \
+		--argjson params "$params" \
+		'{id: $id, method: $method, params: $params}') || return 1
+	response=$(python3 -c '
+import socket
+import sys
+
+with socket.socket(socket.AF_UNIX) as client:
+    client.settimeout(5)
+    client.connect(sys.argv[1])
+    client.sendall((sys.argv[2] + "\n").encode())
+    with client.makefile() as response:
+        line = response.readline()
+if not line:
+    raise SystemExit(1)
+print(line, end="")
+' "$socket_path" "$request") || return 1
+	if ! jq -e 'type == "object"' >/dev/null 2>&1 <<<"$response"; then
+		echo "Invalid response from Herdr API" >&2
+		return 1
+	fi
+	if jq -e '.error != null' >/dev/null 2>&1 <<<"$response"; then
+		jq -r '.error.message // .error // "Herdr API error"' <<<"$response" >&2
+		return 1
+	fi
+	printf '%s\n' "$response"
+}
+
 herdr_acquire_topology_lock() {
 	local workspace_id=$1 socket_path lock_key lock_dir lock_path lock_fd inherited_fd
 

@@ -5,10 +5,13 @@ plugin_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=lib/runtime.sh
 source "$plugin_root/lib/runtime.sh"
 
+herdr=${HERDR_BIN_PATH:-herdr}
+
 if [[ ${1:-} == --restore-all ]]; then
-	snapshot=$(herdr api snapshot) || exit 1
+	snapshot=$("$herdr" api snapshot) || exit 1
+	status=0
 	while IFS=$'\t' read -r workspace_id role; do
-		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id bash "$0" "$role" --restore
+		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id bash "$0" "$role" --restore || status=1
 	done < <(jq -r '
     def managed_role:
       if . == "nvim" then "nvim"
@@ -29,7 +32,7 @@ if [[ ${1:-} == --restore-all ]]; then
     [.workspace_id, $role] |
     @tsv
   ' <<<"$snapshot")
-	exit
+	exit "$status"
 fi
 
 role=${1:?"tab role is required"}
@@ -49,58 +52,100 @@ while (($#)); do
 	esac
 	shift
 done
-workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
 
-if [[ -z $workspace_id ]]; then
+declare -a command=()
+case $role in
+nvim | 1)
+	role=nvim
+	label=nvim
+	legacy_slot=1
+	command=(herdr-vim --start)
+	;;
+shell | 2)
+	role=shell
+	label=shell
+	legacy_slot=2
+	;;
+shell-2 | 3)
+	role=shell-2
+	label=shell-2
+	legacy_slot=3
+	;;
+dev | 4)
+	role=dev
+	label=dev
+	legacy_slot=4
+	command=(zsh -ic start-dev)
+	;;
+sql | 5)
+	role=sql
+	label=sql
+	legacy_slot=5
+	command=(zsh -ic 'draft sql')
+	;;
+rest | 6)
+	role=rest
+	label=rest
+	legacy_slot=6
+	command=(zsh -ic rest)
+	;;
+git | 7)
+	role=git
+	label=git
+	legacy_slot=7
+	command=(lazygit "--use-config-file=$HOME/.config/lazygit/config.yml,$HOME/.config/lazygit/config-herdr.yml")
+	;;
+docker | 8)
+	role=docker
+	label=docker
+	legacy_slot=8
+	command=(lazydocker)
+	;;
+opencode | 9)
+	role=opencode
+	label=opencode
+	legacy_slot=9
+	;;
+shell-3 | 10)
+	role=shell-3
+	label=shell-3
+	legacy_slot=10
+	;;
+*)
+	echo "Unsupported tab role: $role" >&2
+	exit 1
+	;;
+esac
+
+workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
+[[ -n $workspace_id ]] || {
 	echo "No active Herdr workspace" >&2
 	exit 1
-fi
-
-socket_path=${HERDR_SOCKET_PATH:-}
-if [[ -z $socket_path ]]; then
-	socket_path=$(herdr_resolve_socket) || exit 1
-fi
+}
+herdr_acquire_topology_lock "$workspace_id" || exit 1
+role_cwd=${HERDR_ACTIVE_PANE_CWD:-$PWD}
 
 focus_managed_tab() {
 	if $focus_requested; then
-		herdr tab focus "$1" >/dev/null
+		"$herdr" tab focus "$1" >/dev/null
 	fi
 }
 
 move_tab() {
-	local tab_id=$1
-	local insert_index=$2
-	local request response
+	local tab_id=$1 insert_index=$2 params
 
-	request=$(jq -cn \
-		--arg id "herdr-select-tab:$tab_id" \
+	params=$(jq -cn \
 		--arg tab_id "$tab_id" \
 		--argjson insert_index "$insert_index" \
-		'{id: $id, method: "tab.move", params: {tab_id: $tab_id, insert_index: $insert_index}}')
-
-	response=$(python -c '
-import socket
-import sys
-
-client = socket.socket(socket.AF_UNIX)
-client.connect(sys.argv[1])
-client.sendall((sys.argv[2] + "\n").encode())
-print(client.makefile().readline(), end="")
-' "$socket_path" "$request") || return
-
-	if jq -e '.error' >/dev/null <<<"$response"; then
-		jq -r '.error.message' <<<"$response" >&2
-		return 1
-	fi
+		'{tab_id: $tab_id, insert_index: $insert_index}') || return 1
+	herdr_api_request tab.move "$params" >/dev/null
 }
 
 sort_tabs() {
-	local tabs=$1
-	local index=0
-	local tab_id
+	local tabs=$1 index=0 tab_id
 
 	while IFS= read -r tab_id; do
-		move_tab "$tab_id" "$index" || return
+		move_tab "$tab_id" "$index" || return 1
 		((index += 1))
 	done < <(jq -r '
     def managed_rank:
@@ -114,270 +159,127 @@ sort_tabs() {
       elif . == "docker" then 8
       elif . == "opencode" then 9
       elif . == "shell-3" then 10
-      elif . == "setup" then 99
-      elif . == "teardown" then 99
+      elif . == "setup" or . == "teardown" then 99
       else 999
       end;
-    .result.tabs as $tabs |
-    ([$tabs[] | select((.label | managed_rank) != null)] |
-      sort_by(.label | managed_rank)) as $sorted |
-    reduce $tabs[] as $tab (
-      {order: [], managed_index: 0};
-      if (($tab.label | managed_rank) != null) then
-        .order += [$sorted[.managed_index].tab_id] |
-        .managed_index += 1
-      else
-        .order += [$tab.tab_id]
-      end
-    ) |
-    .order[]
+    .result.tabs | sort_by(.label | managed_rank) | .[].tab_id
   ' <<<"$tabs")
 }
 
-restore_tab() {
-	local tab_id=$1
-	local panes pane pane_id process_info
-	local shell_name=${SHELL##*/}
-	local shell_ready=false
+pane_for_tab() {
+	local tab_id=$1 panes
 
-	panes=$(herdr pane list --workspace "$workspace_id") || return 1
-	pane=$(jq -c --arg tab_id "$tab_id" '
-    [.result.panes[] | select(.tab_id == $tab_id)][0] // empty
-  ' <<<"$panes")
-	[[ -n $pane ]] || return 1
+	panes=$("$herdr" pane list --workspace "$workspace_id") || return 1
+	jq -c --arg tab_id "$tab_id" '
+    [.result.panes[]? | select(.tab_id == $tab_id)][0] // empty
+  ' <<<"$panes"
+}
 
-	# Official integrations own native agent resume and may still be starting asynchronously.
-	if jq -e 'has("agent_session")' >/dev/null <<<"$pane"; then
-		return
-	fi
+valid_session_id() {
+	local session_id=$1
 
-	pane_id=$(jq -r '.pane_id' <<<"$pane")
-	for _ in {1..100}; do
-		process_info=$(herdr pane process-info --pane "$pane_id") || return 1
-		if jq -e --arg shell_name "$shell_name" '
-      .result.process_info as $process |
-      ($process.foreground_processes | length) == 1 and
-      $process.foreground_processes[0].pid == $process.shell_pid and
-      $process.foreground_processes[0].name == $shell_name and
-      ($process.foreground_processes[0].argv | length) == 1
-    ' >/dev/null <<<"$process_info"; then
-			shell_ready=true
-			break
-		fi
-		sleep 0.1
-	done
+	[[ -n $session_id && ${#session_id} -le 256 && $session_id != *$'\n'* && $session_id != *$'\r'* ]]
+}
 
-	if ! $shell_ready; then
-		return
-	fi
+native_opencode_session() {
+	local pane=$1 session_id
 
-	if $restore_only && [[ $role == sql || $role == rest || $role == opencode ]]; then
-		herdr tab close "$tab_id" >/dev/null
-		return
-	fi
+	session_id=$(jq -er '
+    .agent_session |
+    select(.agent == "opencode" and .source == "herdr:opencode" and .kind == "id") |
+    .value | select(type == "string")
+  ' <<<"$pane" 2>/dev/null) || return 1
+	valid_session_id "$session_id" || return 1
+	printf '%s\n' "$session_id"
+}
 
-	if [[ -n $command ]]; then
-		herdr pane run "$pane_id" "exec $command" >/dev/null
-	fi
+has_native_agent_session() {
+	jq -e '
+    .agent_session |
+    .kind == "id" and (.value | type == "string" and length > 0)
+  ' >/dev/null 2>&1 <<<"$1"
 }
 
 cache_opencode_session() {
 	local session_id=$1
 
-	[[ $session_id =~ ^[A-Za-z0-9._:-]{1,80}$ ]] || return
-	herdr workspace report-metadata "$workspace_id" \
-		--source plugin:pbogut.repo-metadata \
+	valid_session_id "$session_id" || return 0
+	"$herdr" workspace report-metadata "$workspace_id" \
+		--source plugin:pbogut.project-layout \
 		--token "opencode_session=$session_id" >/dev/null
 }
 
 set_opencode_command() {
-	local workspace session_id
+	local session_id=${1:-} workspace
 
-	workspace=$(herdr workspace get "$workspace_id" 2>/dev/null) || return
-	session_id=$(jq -r '.result.workspace.tokens.opencode_session // empty' <<<"$workspace")
-	if [[ $session_id =~ ^[A-Za-z0-9._:-]{1,80}$ ]]; then
-		command="opencode-launcher --session $session_id --port"
+	if ! valid_session_id "$session_id"; then
+		workspace=$("$herdr" workspace get "$workspace_id" 2>/dev/null) || workspace='{}'
+		session_id=$(jq -r '.result.workspace.tokens.opencode_session // empty' <<<"$workspace")
+	fi
+	command=(opencode-launcher)
+	if valid_session_id "$session_id"; then
+		command+=(--session "$session_id")
+	fi
+	command+=(--port)
+}
+
+process_matches_role() {
+	local pane_id=$1 process_info
+
+	process_info=$("$herdr" pane process-info --pane "$pane_id" 2>/dev/null) || return 1
+	jq -e --arg role "$role" '
+    any(.result.process_info.foreground_processes[]?;
+      if $role == "nvim" then
+        .name == "nvim" or .name == "herdr-vim" or
+        any(.argv[]?; test("(^|/)(nvim|herdr-vim)$"))
+      elif $role == "opencode" then
+        .name == "opencode" or
+        any(.argv[]?; test("(^|/)(opencode|opencode-launcher)$"))
+      elif $role == "dev" then
+        any(.argv[]?; . == "start-dev")
+      elif $role == "git" then
+        .name == "lazygit" or any(.argv[]?; test("(^|/)lazygit$"))
+      elif $role == "docker" then
+        .name == "lazydocker" or any(.argv[]?; test("(^|/)lazydocker$"))
+      else
+        false
+      end
+    )
+  ' >/dev/null 2>&1 <<<"$process_info"
+}
+
+apply_role() {
+	local target_kind=$1 target_id=$2 root params command_json focus_json
+
+	command_json=$(if ((${#command[@]})); then
+		jq -cn --args '$ARGS.positional' -- "${command[@]}"
 	else
-		command='opencode-launcher --port'
-	fi
+		printf 'null\n'
+	fi) || return 1
+	root=$(jq -cn \
+		--arg cwd "$role_cwd" \
+		--argjson command "$command_json" '
+      {type: "pane", cwd: $cwd} +
+      if $command == null then {} else {command: $command} end
+    ') || return 1
+	$focus_requested && focus_json=true || focus_json=false
+	params=$(jq -cn \
+		--arg target_kind "$target_kind" \
+		--arg target_id "$target_id" \
+		--arg tab_label "$label" \
+		--argjson focus "$focus_json" \
+		--argjson root "$root" '
+      {tab_label: $tab_label, focus: $focus, root: $root} +
+      if $target_kind == "tab" then
+        {tab_id: $target_id}
+      else
+        {workspace_id: $target_id}
+      end
+    ') || return 1
+	herdr_api_request layout.apply "$params" >/dev/null
 }
 
-opencode_is_running() {
-	local pane_id=$1
-	local process_info
-
-	process_info=$(herdr pane process-info --pane "$pane_id" 2>/dev/null) || return 1
-	jq -e '
-    any(.result.process_info.foreground_processes[]?;
-      .name == "opencode" or
-      any(.argv[]?; test("(^|/)(opencode|opencode-launcher)$"))
-    )
-  ' >/dev/null <<<"$process_info"
-}
-
-clear_nvim_launch_state() {
-	rm -f -- "$nvim_pending_file" "$nvim_ack_file"
-}
-
-request_nvim_launch() {
-	local pane_id=$1
-	local quoted_ack
-
-	clear_nvim_launch_state
-	printf '%s\n' "$pane_id" >"$nvim_pending_file" || return 2
-	printf -v quoted_ack '%q' "$nvim_ack_file"
-	if ! herdr pane run "$pane_id" \
-		"HERDR_VIM_LAUNCH_ACK=$quoted_ack exec $command" >/dev/null; then
-		clear_nvim_launch_state
-		return 2
-	fi
-}
-
-ensure_nvim_tab() {
-	local tab_id=$1
-	local panes pane pane_id process_info shell_name pending_pane launch_pid launch_command
-	shell_name=${SHELL##*/}
-
-	if HERDR_ACTIVE_WORKSPACE_ID=$workspace_id herdr-vim --ping; then
-		clear_nvim_launch_state
-		focus_managed_tab "$tab_id"
-		return
-	fi
-
-	panes=$(herdr pane list --workspace "$workspace_id") || return 2
-	pane=$(jq -c --arg tab_id "$tab_id" '
-    [.result.panes[] | select(.tab_id == $tab_id)][0] // empty
-  ' <<<"$panes")
-	pane_id=$(jq -r '.pane_id // empty' <<<"$pane")
-	[[ -n $pane_id ]] || return 1
-
-	process_info=$(herdr pane process-info --pane "$pane_id") || return 2
-	if jq -e '
-    any(.result.process_info.foreground_processes[]?;
-      .name == "nvim" or
-      .name == "herdr-vim" or
-      any(.argv[]?; test("(^|/)(nvim|herdr-vim)$"))
-    )
-  ' >/dev/null <<<"$process_info"; then
-		clear_nvim_launch_state
-		focus_managed_tab "$tab_id"
-		return
-	fi
-
-	if [[ -f $nvim_pending_file ]]; then
-		read -r pending_pane <"$nvim_pending_file" || pending_pane=
-		if [[ $pending_pane != "$pane_id" ]]; then
-			clear_nvim_launch_state
-		elif [[ ! -f $nvim_ack_file ]]; then
-			focus_managed_tab "$tab_id"
-			return
-		else
-			read -r launch_pid <"$nvim_ack_file" || launch_pid=
-			launch_command=
-			if [[ $launch_pid =~ ^[0-9]+$ && -r /proc/$launch_pid/cmdline ]]; then
-				launch_command=$(tr '\0' ' ' <"/proc/$launch_pid/cmdline")
-			fi
-			if [[ $launch_command =~ (^|/)(nvim|herdr-vim)([[:space:]]|$) ]]; then
-				focus_managed_tab "$tab_id"
-				return
-			fi
-			clear_nvim_launch_state
-		fi
-	fi
-
-	if jq -e --arg shell_name "$shell_name" '
-    .result.process_info as $process |
-    ($process.foreground_processes | length) == 1 and
-    $process.foreground_processes[0].pid == $process.shell_pid and
-    $process.foreground_processes[0].name == $shell_name and
-    ($process.foreground_processes[0].argv | length) == 1
-  ' >/dev/null <<<"$process_info"; then
-		request_nvim_launch "$pane_id" || return 2
-		focus_managed_tab "$tab_id"
-		return
-	fi
-
-	return 1
-}
-
-case "$role" in
-nvim | 1)
-	role="nvim"
-	label="nvim"
-	legacy_slot=1
-	command="herdr-vim --start"
-	;;
-shell | 2)
-	role="shell"
-	label="shell"
-	legacy_slot=2
-	command=""
-	;;
-shell-2 | 3)
-	role="shell-2"
-	label="shell-2"
-	legacy_slot=3
-	command=""
-	;;
-dev | 4)
-	role="dev"
-	label="dev"
-	legacy_slot=4
-	command='zsh -ic "start-dev"'
-	;;
-sql | 5)
-	role="sql"
-	label="sql"
-	legacy_slot=5
-	command='zsh -ic "draft sql"'
-	;;
-rest | 6)
-	role="rest"
-	label="rest"
-	legacy_slot=6
-	command='zsh -ic "rest"'
-	;;
-git | 7)
-	role="git"
-	label="git"
-	legacy_slot=7
-	command="lazygit --use-config-file=$HOME/.config/lazygit/config.yml,$HOME/.config/lazygit/config-herdr.yml"
-	;;
-docker | 8)
-	role="docker"
-	label="docker"
-	legacy_slot=8
-	command="lazydocker"
-	;;
-opencode | 9)
-	role="opencode"
-	label="opencode"
-	legacy_slot=9
-	command='opencode-launcher --port'
-	;;
-shell-3 | 10)
-	role="shell-3"
-	label="shell-3"
-	legacy_slot=10
-	command=""
-	;;
-*)
-	echo "Unsupported tab role: $role" >&2
-	exit 1
-	;;
-esac
-
-if [[ $role == opencode ]]; then
-	set_opencode_command
-fi
-
-herdr_acquire_topology_lock "$workspace_id" || exit 1
-socket_path=$HERDR_SOCKET_PATH
-nvim_pending_file="$HERDR_TOPOLOGY_LOCK_PATH.nvim-pending"
-nvim_ack_file="$HERDR_TOPOLOGY_LOCK_PATH.nvim-ack"
-
-tabs=$(herdr tab list --workspace "$workspace_id") || exit 1
-
+tabs=$("$herdr" tab list --workspace "$workspace_id") || exit 1
 tab=$(jq -c \
 	--arg label "$label" \
 	--arg legacy_prefix "$legacy_slot:" \
@@ -396,65 +298,71 @@ tab_id=$(jq -r '.tab_id // empty' <<<"$tab")
 
 if [[ -n $tab_id ]]; then
 	if [[ $(jq -r '.label' <<<"$tab") != "$label" ]]; then
-		herdr tab rename "$tab_id" "$label" >/dev/null || exit 1
+		"$herdr" tab rename "$tab_id" "$label" >/dev/null || exit 1
 	fi
+	pane=
+	pane_id=
+	if $restore_only || [[ $role == nvim || $role == opencode ]]; then
+		pane=$(pane_for_tab "$tab_id") || exit 1
+		pane_id=$(jq -r '.pane_id // empty' <<<"$pane")
+		pane_cwd=$(jq -r '.foreground_cwd // .cwd // empty' <<<"$pane")
+		[[ ! -d $pane_cwd ]] || role_cwd=$pane_cwd
+	fi
+
 	if $restore_only; then
-		restore_tab "$tab_id"
+		if has_native_agent_session "$pane"; then
+			exit 0
+		fi
+		case $role in
+		shell | shell-2 | shell-3) exit 0 ;;
+		sql | rest)
+			"$herdr" tab close "$tab_id" >/dev/null
+			exit
+			;;
+		opencode) set_opencode_command ;;
+		esac
+		if [[ -n $pane_id ]] && process_matches_role "$pane_id"; then
+			exit 0
+		fi
+		apply_role tab "$tab_id" || exit 1
+		tabs=$("$herdr" tab list --workspace "$workspace_id") || exit 1
+		sort_tabs "$tabs" || echo "Could not reorder Herdr tabs" >&2
 		exit
 	fi
-	if $ensure_running && [[ $role == nvim ]]; then
-		ensure_nvim_tab "$tab_id"
-		status=$?
-		if ((status == 0)); then
-			exit
-		elif ((status == 2)); then
-			exit 1
-		fi
-		herdr tab close "$tab_id" >/dev/null || exit 1
-	elif [[ $role == opencode ]]; then
-		panes=$(herdr pane list --workspace "$workspace_id") || exit 1
-		pane=$(jq -c --arg tab_id "$tab_id" '
-      [.result.panes[] | select(.tab_id == $tab_id)][0] // empty
-    ' <<<"$panes")
-		pane_id=$(jq -r '.pane_id // empty' <<<"$pane")
-		if [[ -n $pane_id ]] && opencode_is_running "$pane_id"; then
+
+	case $role in
+	nvim)
+		if HERDR_ACTIVE_WORKSPACE_ID=$workspace_id HERDR_SOCKET_PATH=$HERDR_SOCKET_PATH herdr-vim --ping ||
+			{ [[ -n $pane_id ]] && process_matches_role "$pane_id"; }; then
 			focus_managed_tab "$tab_id"
 			exit
 		fi
-
-		session_id=$(jq -r '
-      select(.agent_session.agent == "opencode" and .agent_session.source == "herdr:opencode") |
-      .agent_session.value // empty
-    ' <<<"$pane")
-		[[ -n $session_id ]] && cache_opencode_session "$session_id"
-		herdr tab close "$tab_id" >/dev/null || exit 1
-		set_opencode_command
-	else
+		if ! $ensure_running; then
+			focus_managed_tab "$tab_id"
+			exit
+		fi
+		;;
+	opencode)
+		if [[ -n $pane_id ]] && process_matches_role "$pane_id"; then
+			focus_managed_tab "$tab_id"
+			exit
+		fi
+		session_id=$(native_opencode_session "$pane" 2>/dev/null) || session_id=
+		[[ -z $session_id ]] || cache_opencode_session "$session_id"
+		set_opencode_command "$session_id"
+		;;
+	*)
 		focus_managed_tab "$tab_id"
 		exit
-	fi
+		;;
+	esac
+
+	apply_role tab "$tab_id" || exit 1
+else
+	$restore_only && exit 0
+	[[ $role != opencode ]] || set_opencode_command
+	apply_role workspace "$workspace_id" || exit 1
 fi
 
-if $restore_only; then
-	exit
-fi
-
-focus_arg=--focus
-$focus_requested || focus_arg=--no-focus
-response=$(herdr tab create \
-	--workspace "$workspace_id" \
-	--cwd "${HERDR_ACTIVE_PANE_CWD:-$PWD}" \
-	--label "$label" \
-	"$focus_arg") || exit 1
-
-tabs=$(herdr tab list --workspace "$workspace_id")
+tabs=$("$herdr" tab list --workspace "$workspace_id") || exit 1
 sort_tabs "$tabs" || echo "Could not reorder Herdr tabs" >&2
-
-if [[ -n $command ]]; then
-	pane_id=$(jq -r '.result.root_pane.pane_id' <<<"$response")
-	if [[ $role == nvim ]]; then
-		request_nvim_launch "$pane_id"
-	else
-		herdr pane run "$pane_id" "exec $command" >/dev/null
-	fi
-fi
