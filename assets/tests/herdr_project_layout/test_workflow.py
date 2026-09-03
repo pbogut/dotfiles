@@ -9,6 +9,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[3]
 SELECTOR = ROOT / "dot_scripts/executable_herdr-select-tab-or-new"
+OPENCODE_LAUNCHER = ROOT / "dot_scripts/executable_opencode-launcher"
 SESSION_CACHE = (
     ROOT
     / "dot_config/herdr/plugins/repo-metadata/executable_cache-opencode-session.sh"
@@ -163,6 +164,94 @@ class HerdrWorkflowTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(self.calls(), [])
+
+
+class OpenCodeLauncherTest(unittest.TestCase):
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tempdir.cleanup)
+        self.temp = Path(self.tempdir.name)
+        self.home = self.temp / "home"
+        self.config_dir = self.home / ".config/opencode"
+        self.config_dir.mkdir(parents=True)
+        self.profile_config = self.config_dir / "personal-opencode.jsonc"
+        self.profile_config.write_text("{}\n")
+        self.log = self.temp / "opencode.json"
+        bindir = self.temp / "bin"
+        bindir.mkdir()
+
+        opencode = bindir / "opencode-real"
+        opencode.write_text(
+            textwrap.dedent(
+                """\
+                #!/usr/bin/env python3
+                import json
+                import os
+                import sys
+
+                with open(os.environ["FAKE_OPENCODE_LOG"], "w", encoding="utf-8") as log:
+                    json.dump(
+                        {
+                            "argv": sys.argv[1:],
+                            "config": os.environ.get("OPENCODE_CONFIG"),
+                        },
+                        log,
+                    )
+                """
+            )
+        )
+        opencode.chmod(0o755)
+
+        mise = bindir / "mise"
+        mise.write_text(
+            textwrap.dedent(
+                """\
+                #!/usr/bin/env python3
+                import os
+                import sys
+
+                if sys.argv[1:] != ["which", "opencode"]:
+                    raise SystemExit(2)
+                print(os.environ["FAKE_OPENCODE_BIN"])
+                """
+            )
+        )
+        mise.chmod(0o755)
+
+        self.env = os.environ.copy()
+        self.env.update(
+            {
+                "FAKE_OPENCODE_BIN": str(opencode),
+                "FAKE_OPENCODE_LOG": str(self.log),
+                "HOME": str(self.home),
+                "PATH": f"{bindir}:{os.environ['PATH']}",
+            }
+        )
+        self.env.pop("HERDR_PANE_ID", None)
+
+    def test_profile_is_process_local_and_arguments_stay_separate(self):
+        result = subprocess.run(
+            [
+                "bash",
+                str(OPENCODE_LAUNCHER),
+                "--profile",
+                "personal",
+                "--session",
+                "ses_exact_123",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            env=self.env,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        launched = json.loads(self.log.read_text())
+        self.assertEqual(launched["config"], str(self.profile_config))
+        self.assertEqual(
+            launched["argv"], ["--session", "ses_exact_123", "--port"]
+        )
+        self.assertFalse((self.config_dir / "opencode.jsonc").exists())
 
 
 if __name__ == "__main__":

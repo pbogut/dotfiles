@@ -87,8 +87,9 @@ echo "Profile: $profile"
 # touch "$HOME/.local/share/opencode/$profile-auth.json"
 # ln -f "$HOME/.local/share/opencode/$profile-auth.json" "$HOME/.local/share/opencode/auth.json"
 
-touch "$HOME/.config/opencode/$profile-opencode.jsonc"
-ln -f "$HOME/.config/opencode/$profile-opencode.jsonc" "$HOME/.config/opencode/opencode.jsonc"
+profile_config="$HOME/.config/opencode/$profile-opencode.jsonc"
+touch "$profile_config"
+export OPENCODE_CONFIG="$profile_config"
 
 # if timux rename window
 if [ -n "$TMUX" ]; then

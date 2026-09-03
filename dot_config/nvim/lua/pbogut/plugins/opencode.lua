@@ -12,13 +12,17 @@ return {
     { '<S-C-d>', '<plug>(opencode-scroll-down)', desc = 'Scroll OpenCode down', mode = 'n' },
   },
   config = function()
-    start = function()
+    local start = function()
       vim.cmd('belowright 15split')
       vim.cmd.enew()
       vim.fn.termopen('opencode-launcher --port')
       vim.cmd.wincmd('k')
     end
-    if os.getenv('TMUX') then
+    if os.getenv('HERDR_ENV') == '1' then
+      start = function()
+        vim.fn.jobstart({ 'herdr-select-tab-or-new', 'opencode' }, { detach = true })
+      end
+    elseif os.getenv('TMUX') then
       start = function()
         vim.fn.jobstart({ 'tmux-select-window-or-new', '9' }, {
           on_stdout = function(_) end,
@@ -29,7 +33,6 @@ return {
     end
     ---@type opencode.Opts
     vim.g.opencode_opts = {
-      -- Your configuration, if any; goto definition on the type or field for details
       server = {
         start = start,
       },
