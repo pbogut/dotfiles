@@ -4,11 +4,13 @@ from pathlib import Path
 import subprocess
 import tempfile
 import textwrap
+import time
 import unittest
 
 
 ROOT = Path(__file__).resolve().parents[3]
 PROJECT_PLUGIN = ROOT / "dot_config/herdr/plugins/project-layout"
+RUNTIME = PROJECT_PLUGIN / "lib/runtime.sh"
 SELECTOR = PROJECT_PLUGIN / "executable_managed-tabs"
 OPENCODE_LAUNCHER = ROOT / "dot_scripts/executable_opencode-launcher"
 SESSION_CACHE = PROJECT_PLUGIN / "executable_cache-opencode-session.sh"
@@ -250,6 +252,114 @@ class OpenCodeLauncherTest(unittest.TestCase):
             launched["argv"], ["--session", "ses_exact_123", "--port"]
         )
         self.assertFalse((self.config_dir / "opencode.jsonc").exists())
+
+
+class TopologyLockTest(unittest.TestCase):
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tempdir.cleanup)
+        self.temp = Path(self.tempdir.name)
+        runtime_dir = self.temp / "runtime"
+        runtime_dir.mkdir()
+        self.env = os.environ.copy()
+        self.env.update(
+            {
+                "HERDR_SOCKET_PATH": str(self.temp / "herdr-a.sock"),
+                "RUNTIME_FILE": str(RUNTIME),
+                "XDG_RUNTIME_DIR": str(runtime_dir),
+            }
+        )
+
+    def start_holder(self):
+        ready = self.temp / "ready"
+        env = self.env.copy()
+        env["READY"] = str(ready)
+        holder = subprocess.Popen(
+            [
+                "bash",
+                "-c",
+                'source "$RUNTIME_FILE"; '
+                'herdr_acquire_topology_lock w1; : >"$READY"; sleep 0.6',
+            ],
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        self.addCleanup(lambda: holder.poll() is None and holder.kill())
+        for _ in range(100):
+            if ready.exists():
+                return holder
+            if holder.poll() is not None:
+                _, stderr = holder.communicate()
+                self.fail(f"lock holder exited early: {stderr}")
+            time.sleep(0.01)
+        self.fail("lock holder did not become ready")
+
+    def test_same_socket_and_workspace_serialize(self):
+        holder = self.start_holder()
+
+        started = time.monotonic()
+        contender = subprocess.run(
+            [
+                "bash",
+                "-c",
+                'source "$RUNTIME_FILE"; herdr_acquire_topology_lock w1',
+            ],
+            env=self.env,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+        elapsed = time.monotonic() - started
+        _, holder_stderr = holder.communicate(timeout=2)
+
+        self.assertEqual(contender.returncode, 0, contender.stderr)
+        self.assertEqual(holder.returncode, 0, holder_stderr)
+        self.assertGreater(elapsed, 0.35)
+
+    def test_different_socket_does_not_block(self):
+        holder = self.start_holder()
+        env = self.env.copy()
+        env["HERDR_SOCKET_PATH"] = str(self.temp / "herdr-b.sock")
+
+        started = time.monotonic()
+        contender = subprocess.run(
+            [
+                "bash",
+                "-c",
+                'source "$RUNTIME_FILE"; herdr_acquire_topology_lock w1',
+            ],
+            env=env,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+        elapsed = time.monotonic() - started
+        _, holder_stderr = holder.communicate(timeout=2)
+
+        self.assertEqual(contender.returncode, 0, contender.stderr)
+        self.assertEqual(holder.returncode, 0, holder_stderr)
+        self.assertLess(elapsed, 0.3)
+
+    def test_inherited_lock_is_reentrant(self):
+        result = subprocess.run(
+            [
+                "bash",
+                "-c",
+                'source "$RUNTIME_FILE"; herdr_acquire_topology_lock w1; '
+                "bash -c 'source \"$RUNTIME_FILE\"; herdr_acquire_topology_lock w1'",
+            ],
+            env=self.env,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
 
 
 if __name__ == "__main__":

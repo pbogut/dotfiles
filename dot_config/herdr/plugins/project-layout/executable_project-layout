@@ -2,6 +2,11 @@
 
 set -o pipefail
 
+plugin_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source-path=SCRIPTDIR
+# shellcheck source=lib/runtime.sh
+source "$plugin_root/lib/runtime.sh"
+
 plugin_id="pbogut.project-layout"
 project_file="herdr-project.sh"
 herdr=${HERDR_BIN_PATH:-herdr}
@@ -700,21 +705,10 @@ apply_layout_unlocked() {
 }
 
 apply_layout() {
-	local config_dir lock_dir lock_key status lock_fd
+	local status
 
-	config_dir=$(get_config_dir) || return 1
-	lock_dir="$config_dir/apply-locks"
-	mkdir -p -- "$lock_dir" || return 1
-	read -r lock_key _ < <(printf '%s\0' "$worktree_dir" | sha256sum)
-	if ! exec {lock_fd}>"$lock_dir/$lock_key.lock"; then
-		echo "Could not open the project layout lock" >&2
-		return 1
-	fi
-	if ! flock "$lock_fd"; then
-		echo "Could not lock the project layout" >&2
-		exec {lock_fd}>&-
-		return 1
-	fi
+	refresh_workspace_id || return 1
+	herdr_acquire_topology_lock "$workspace_id" || return 1
 
 	apply_layout_unlocked
 	status=$?
@@ -722,7 +716,7 @@ apply_layout() {
 		# Keep the lock until process exit so the background action starts after the popup closes.
 		exit 0
 	fi
-	exec {lock_fd}>&- || true
+	herdr_release_topology_lock
 	if ((status == setup_ready_status)); then
 		finish_setup_tab ready
 		return

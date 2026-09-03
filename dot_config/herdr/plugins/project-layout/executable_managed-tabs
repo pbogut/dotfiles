@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+plugin_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source-path=SCRIPTDIR
+# shellcheck source=lib/runtime.sh
+source "$plugin_root/lib/runtime.sh"
+
 if [[ ${1:-} == --restore-all ]]; then
 	snapshot=$(herdr api snapshot) || exit 1
 	while IFS=$'\t' read -r workspace_id role; do
@@ -53,7 +58,7 @@ fi
 
 socket_path=${HERDR_SOCKET_PATH:-}
 if [[ -z $socket_path ]]; then
-	socket_path=$(herdr status server 2>/dev/null | sed -n 's/^socket: //p')
+	socket_path=$(herdr_resolve_socket) || exit 1
 fi
 
 focus_managed_tab() {
@@ -366,16 +371,10 @@ if [[ $role == opencode ]]; then
 	set_opencode_command
 fi
 
-lock_dir="${XDG_RUNTIME_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}}/herdr/managed-tab-locks"
-umask 077
-mkdir -p -- "$lock_dir" || exit 1
-[[ -O $lock_dir && ! -L $lock_dir ]] || exit 1
-chmod 700 "$lock_dir" || exit 1
-read -r lock_key _ < <(printf '%s\0%s\0' "$workspace_id" "$role" | sha256sum)
-exec {lock_fd}>"$lock_dir/$lock_key.lock" || exit 1
-flock "$lock_fd" || exit 1
-nvim_pending_file="$lock_dir/$lock_key.nvim-pending"
-nvim_ack_file="$lock_dir/$lock_key.nvim-ack"
+herdr_acquire_topology_lock "$workspace_id" || exit 1
+socket_path=$HERDR_SOCKET_PATH
+nvim_pending_file="$HERDR_TOPOLOGY_LOCK_PATH.nvim-pending"
+nvim_ack_file="$HERDR_TOPOLOGY_LOCK_PATH.nvim-ack"
 
 tabs=$(herdr tab list --workspace "$workspace_id") || exit 1
 
