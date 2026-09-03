@@ -6,16 +6,16 @@ if [[ ${1:-} == --restore-all ]]; then
 		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id bash "$0" "$role" --restore
 	done < <(jq -r '
     def managed_role:
-      if . == "nvim" or startswith("1:") then "nvim"
-      elif . == "shell" or startswith("2:") then "shell"
-      elif . == "shell-2" or startswith("3:") then "shell-2"
-      elif . == "dev" or startswith("4:") then "dev"
-      elif . == "sql" or startswith("5:") then "sql"
-      elif . == "rest" or startswith("6:") then "rest"
-      elif . == "git" or startswith("7:") then "git"
-      elif . == "docker" or startswith("8:") then "docker"
-      elif . == "opencode" or startswith("9:") then "opencode"
-      elif . == "shell-3" or startswith("10:") then "shell-3"
+      if . == "nvim" then "nvim"
+      elif . == "shell" then "shell"
+      elif . == "shell-2" then "shell-2"
+      elif . == "dev" then "dev"
+      elif . == "sql" then "sql"
+      elif . == "rest" then "rest"
+      elif . == "git" then "git"
+      elif . == "docker" then "docker"
+      elif . == "opencode" then "opencode"
+      elif . == "shell-3" then "shell-3"
       else null
       end;
     .result.snapshot.tabs[] |
@@ -99,19 +99,19 @@ sort_tabs() {
 		((index += 1))
 	done < <(jq -r '
     def managed_rank:
-      if . == "nvim" or startswith("1:") then 1
-      elif . == "shell" or startswith("2:") then 2
-      elif . == "shell-2" or startswith("3:") then 3
-      elif . == "dev" or startswith("4:") then 4
-      elif . == "sql" or startswith("5:") then 5
-      elif . == "rest" or startswith("6:") then 6
-      elif . == "git" or startswith("7:") then 7
-      elif . == "docker" or startswith("8:") then 8
-      elif . == "opencode" or startswith("9:") then 9
-      elif . == "shell-3" or startswith("10:") then 10
+      if . == "nvim" then 1
+      elif . == "shell" then 2
+      elif . == "shell-2" then 3
+      elif . == "dev" then 4
+      elif . == "sql" then 5
+      elif . == "rest" then 6
+      elif . == "git" then 7
+      elif . == "docker" then 8
+      elif . == "opencode" then 9
+      elif . == "shell-3" then 10
       elif . == "setup" then 99
       elif . == "teardown" then 99
-      else null
+      else 999
       end;
     .result.tabs as $tabs |
     ([$tabs[] | select((.label | managed_rank) != null)] |
