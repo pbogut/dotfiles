@@ -598,6 +598,50 @@ close_plugin_tab() {
 	"$herdr" tab close "$HERDR_TAB_ID" >/dev/null
 }
 
+close_plugin_tab_locked() {
+	local status
+
+	herdr_acquire_topology_lock "$workspace_id" || return 1
+	close_plugin_tab
+	status=$?
+	herdr_release_topology_lock
+	return "$status"
+}
+
+close_workspace_locked() {
+	local status
+
+	herdr_acquire_topology_lock "$workspace_id" || return 1
+	"$herdr" workspace close "$workspace_id" >/dev/null
+	status=$?
+	herdr_release_topology_lock
+	if ((status != 0)); then
+		notify "Workspace close failed" "$workspace_id"
+	fi
+	return "$status"
+}
+
+cache_workspace_sessions() {
+	local cache_script=$plugin_root/cache-opencode-session.sh
+
+	[[ -f $cache_script ]] || cache_script=$plugin_root/executable_cache-opencode-session.sh
+	HERDR_PLUGIN_ID=$plugin_id bash "$cache_script" --workspace "$workspace_id"
+}
+
+restore_editor_after_teardown() {
+	local editor_cwd
+
+	for editor_cwd in "$worktree_dir" "$project_dir" "$HOME"; do
+		[[ -n $editor_cwd && -d $editor_cwd ]] || continue
+		editor_cwd=$(realpath -e -- "$editor_cwd") || continue
+		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
+			HERDR_ACTIVE_PANE_CWD=$editor_cwd \
+			herdr-select-tab-or-new nvim --ensure-running
+		return
+	done
+	return 1
+}
+
 close_sibling_tabs() {
 	local tabs tab_ids tab_id
 
@@ -1300,8 +1344,9 @@ confirm_workspace_close() {
 }
 
 close_workspace_with_teardown() {
-	local candidate teardown_status=0
+	local candidate teardown_status=0 close_status
 	local teardown_configured=false
+	local topology_locked=false
 
 	[[ -n $workspace_id ]] || {
 		echo "No Herdr workspace is available" >&2
@@ -1313,45 +1358,61 @@ close_workspace_with_teardown() {
 		teardown_configured=true
 		if ! load_layout; then
 			teardown_status=1
-		elif declare -F herdr_teardown >/dev/null; then
-			printf '\nTearing down...\n\n'
-			if ! close_sibling_tabs; then
-				teardown_status=1
-			elif (cd "$worktree_dir" && herdr_teardown); then
-				teardown_status=0
-			else
-				teardown_status=$?
-			fi
-		else
+		elif ! declare -F herdr_teardown >/dev/null; then
 			teardown_configured=false
 		fi
 	fi
 
-	if $teardown_configured; then
-		if ((teardown_status == 0)); then
-			printf '\nDone.\n'
-			notify "Project teardown complete" "$candidate"
+	herdr_acquire_topology_lock "$workspace_id" || return 1
+	topology_locked=true
+	if ! cache_workspace_sessions; then
+		teardown_status=1
+	elif ((teardown_status == 0)) && $teardown_configured; then
+		printf '\nTearing down...\n\n'
+		if ! close_sibling_tabs; then
+			teardown_status=1
+		elif (cd "$worktree_dir" && herdr_teardown); then
+			teardown_status=0
 		else
-			printf '\nTeardown did not complete (exit %d).\n' "$teardown_status"
-			printf 'Project resources may remain.\n\n'
-			notify "Project teardown failed" "$candidate"
-			print_confirmation_buttons "close anyway" "keep open"
-			if ! confirm_with_enter; then
-				printf 'Workspace kept open.\n'
-				ensure_editor || true
-				if ! close_plugin_tab; then
-					notify "Project teardown tab remained open" "Close it manually"
-				fi
-				return 0
-			fi
+			teardown_status=$?
 		fi
+	fi
+
+	if ((teardown_status != 0)); then
+		$topology_locked && herdr_release_topology_lock
+		topology_locked=false
+		printf '\nTeardown did not complete (exit %d).\n' "$teardown_status"
+		printf 'Project resources may remain.\n\n'
+		notify "Project teardown failed" "$candidate"
+		print_confirmation_buttons "close anyway" "keep open"
+		if ! confirm_with_enter; then
+			printf 'Workspace kept open.\n'
+			if ! restore_editor_after_teardown; then
+				notify "Project editor was not restored" "The teardown tab remains open"
+				return 1
+			fi
+			if ! close_plugin_tab_locked; then
+				notify "Project teardown tab remained open" "Close it manually"
+			fi
+			return 0
+		fi
+	elif $teardown_configured; then
+		printf '\nDone.\n'
+		notify "Project teardown complete" "$candidate"
 	else
 		printf '\nNo trusted project teardown is configured.\n'
 	fi
 
-	if ! "$herdr" workspace close "$workspace_id" >/dev/null; then
-		notify "Workspace close failed" "$workspace_id"
-		return 1
+	if $topology_locked; then
+		"$herdr" workspace close "$workspace_id" >/dev/null
+		close_status=$?
+		herdr_release_topology_lock
+		if ((close_status != 0)); then
+			notify "Workspace close failed" "$workspace_id"
+			return "$close_status"
+		fi
+	else
+		close_workspace_locked
 	fi
 }
 

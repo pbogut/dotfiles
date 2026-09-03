@@ -3,6 +3,12 @@
 herdr=${HERDR_BIN_PATH:-herdr}
 source_id="plugin:${HERDR_PLUGIN_ID:-pbogut.repo-metadata}"
 
+valid_session_id() {
+  local session_id=$1
+
+  [[ -n $session_id && ${#session_id} -le 256 && $session_id != *$'\n'* && $session_id != *$'\r'* ]]
+}
+
 cache_pane() {
   local pane=$1
   local workspace_id session_id current
@@ -13,10 +19,10 @@ cache_pane() {
 
   workspace_id=$(jq -r '.workspace_id // empty' <<<"$pane")
   session_id=$(jq -r '.agent_session.value // empty' <<<"$pane")
-  [[ -n $workspace_id && $session_id =~ ^[A-Za-z0-9._:-]{1,80}$ ]] || return 0
+  [[ -n $workspace_id ]] && valid_session_id "$session_id" || return 0
 
   current=$("$herdr" workspace get "$workspace_id" 2>/dev/null |
-    jq -r '.result.workspace.tokens.opencode_session // empty')
+    jq -r '.result.workspace.tokens.opencode_session // empty') || return 1
   [[ $current == "$session_id" ]] && return
 
   "$herdr" workspace report-metadata "$workspace_id" \
@@ -24,11 +30,40 @@ cache_pane() {
     --token "opencode_session=$session_id" >/dev/null
 }
 
+cache_workspace() {
+  local workspace_id=$1 panes pane pane_rows status=0
+
+  panes=$("$herdr" pane list --workspace "$workspace_id") || return 1
+  pane_rows=$(jq -c --arg workspace_id "$workspace_id" '
+    .result.panes[]? |
+    select(.workspace_id == $workspace_id and .agent_session.agent == "opencode")
+  ' <<<"$panes") || return 1
+  while IFS= read -r pane; do
+    [[ -n $pane ]] || continue
+    cache_pane "$pane" || status=1
+  done <<<"$pane_rows"
+  return "$status"
+}
+
 if [[ ${1:-} == --all ]]; then
   snapshot=$("$herdr" api snapshot) || exit
+  pane_rows=$(jq -c '
+    .result.snapshot.panes[]? | select(.agent_session.agent == "opencode")
+  ' <<<"$snapshot") || exit 1
+  status=0
   while IFS= read -r pane; do
-    cache_pane "$pane"
-  done < <(jq -c '.result.snapshot.panes[] | select(.agent_session.agent == "opencode")' <<<"$snapshot")
+    [[ -n $pane ]] || continue
+    cache_pane "$pane" || status=1
+  done <<<"$pane_rows"
+  exit "$status"
+fi
+
+if [[ ${1:-} == --workspace ]]; then
+  [[ -n ${2:-} ]] || {
+    echo "--workspace requires a workspace ID" >&2
+    exit 2
+  }
+  cache_workspace "$2"
   exit
 fi
 

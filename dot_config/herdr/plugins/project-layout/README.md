@@ -81,4 +81,7 @@ inside task, setup, or teardown functions.
 Setup and teardown run in temporary Herdr tabs so long commands do not block
 the rest of the UI. Setup opens missing managed tabs before showing its Done
 button. Closing a workspace still asks for confirmation in a popup. After
-confirmation, Herdr closes the other workspace tabs before starting teardown.
+confirmation, Herdr caches the native OpenCode session and closes the other
+workspace tabs before starting teardown. If teardown fails after removing the
+worktree, keeping the workspace open restores Neovim in the first surviving
+worktree, project, or home directory.

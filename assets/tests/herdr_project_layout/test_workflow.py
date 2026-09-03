@@ -99,6 +99,13 @@ class HerdrWorkflowTest(unittest.TestCase):
             )
         )
         fake_herdr.chmod(0o755)
+        fake_selector = bindir / "herdr-select-tab-or-new"
+        fake_selector.write_text(
+            "#!/usr/bin/env bash\n"
+            "herdr test restore-editor \"${HERDR_ACTIVE_WORKSPACE_ID:-}\" "
+            "\"${HERDR_ACTIVE_PANE_CWD:-}\" \"$@\"\n"
+        )
+        fake_selector.chmod(0o755)
         self.env = os.environ.copy()
         worktree = self.temp / "worktree"
         worktree.mkdir()
@@ -182,11 +189,11 @@ class HerdrWorkflowTest(unittest.TestCase):
         valid_pane = {
             "pane_id": "p1",
             "workspace_id": "w1",
-            "agent_session": {
-                "agent": "opencode",
-                "source": "herdr:opencode",
-                "kind": "id",
-                "value": "ses_exact_123",
+                "agent_session": {
+                    "agent": "opencode",
+                    "source": "herdr:opencode",
+                    "kind": "id",
+                    "value": "ses exact;$value",
             },
         }
         env = self.env.copy()
@@ -206,7 +213,7 @@ class HerdrWorkflowTest(unittest.TestCase):
                     "--source",
                     "plugin:pbogut.repo-metadata",
                     "--token",
-                    "opencode_session=ses_exact_123",
+                    "opencode_session=ses exact;$value",
                 ],
             ],
         )
@@ -256,6 +263,149 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.assertFalse(
             any(call[:2] in (["pane", "run"], ["tab", "close"]) for call in self.calls())
         )
+
+    def test_teardown_caches_session_and_closes_tabs_before_cleanup(self):
+        layout, worktree = self.project_fixture()
+        layout.write_text(
+            "HERDR_TABS=(nvim opencode)\n"
+            "herdr_teardown() {\n"
+            "  printf '%s\\n' '\"teardown\"' >> \"$FAKE_HERDR_LOG\"\n"
+            "}\n"
+        )
+        session_id = "ses exact;$value"
+        self.env.update(
+            {
+                "HERDR_PANE_ID": "teardown-pane",
+                "HERDR_TAB_ID": "teardown-tab",
+                "FAKE_HERDR_TABS": json.dumps(
+                    {
+                        "result": {
+                            "tabs": [
+                                {"tab_id": "nvim-tab", "label": "nvim", "number": 1},
+                                {
+                                    "tab_id": "opencode-tab",
+                                    "label": "opencode",
+                                    "number": 2,
+                                },
+                                {
+                                    "tab_id": "teardown-tab",
+                                    "label": "teardown",
+                                    "number": 3,
+                                },
+                            ]
+                        }
+                    }
+                ),
+                "FAKE_HERDR_PANES": json.dumps(
+                    {
+                        "result": {
+                            "panes": [
+                                {
+                                    "pane_id": "opencode-pane",
+                                    "tab_id": "opencode-tab",
+                                    "workspace_id": "w1",
+                                    "cwd": str(worktree),
+                                    "agent_session": {
+                                        "agent": "opencode",
+                                        "source": "herdr:opencode",
+                                        "kind": "id",
+                                        "value": session_id,
+                                    },
+                                }
+                            ]
+                        }
+                    }
+                ),
+            }
+        )
+
+        result = self.run_script(
+            PROJECT_PLUGIN / "executable_project-layout", "teardown"
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = self.calls()
+        cache = [
+            "workspace",
+            "report-metadata",
+            "w1",
+            "--source",
+            "plugin:pbogut.project-layout",
+            "--token",
+            f"opencode_session={session_id}",
+        ]
+        closed_tabs = [
+            index
+            for index, call in enumerate(calls)
+            if isinstance(call, list) and call[:2] == ["tab", "close"]
+        ]
+        self.assertLess(calls.index(cache), min(closed_tabs))
+        self.assertLess(max(closed_tabs), calls.index("teardown"))
+        self.assertLess(
+            calls.index("teardown"), calls.index(["workspace", "close", "w1"])
+        )
+        self.assertNotIn(["tab", "close", "teardown-tab"], calls)
+
+    def test_failed_teardown_restores_editor_in_surviving_directory(self):
+        layout, worktree = self.project_fixture()
+        project = worktree.parent
+        layout.write_text(
+            "HERDR_TABS=(nvim)\n"
+            "herdr_teardown() {\n"
+            "  rm -rf -- \"$HERDR_WORKTREE_DIR\"\n"
+            "  return 42\n"
+            "}\n"
+        )
+        self.env.update(
+            {
+                "HERDR_PANE_ID": "teardown-pane",
+                "HERDR_TAB_ID": "teardown-tab",
+                "FAKE_HERDR_TABS": json.dumps(
+                    {
+                        "result": {
+                            "tabs": [
+                                {"tab_id": "nvim-tab", "label": "nvim", "number": 1},
+                                {
+                                    "tab_id": "teardown-tab",
+                                    "label": "teardown",
+                                    "number": 2,
+                                },
+                            ]
+                        }
+                    }
+                ),
+                "FAKE_HERDR_PANES": json.dumps({"result": {"panes": []}}),
+            }
+        )
+
+        result = subprocess.run(
+            [
+                "bash",
+                str(PROJECT_PLUGIN / "executable_project-layout"),
+                "teardown",
+            ],
+            input="\x1b",
+            check=False,
+            capture_output=True,
+            text=True,
+            env=self.env,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(worktree.exists())
+        calls = self.calls()
+        restore = [
+            "test",
+            "restore-editor",
+            "w1",
+            str(project),
+            "nvim",
+            "--ensure-running",
+        ]
+        self.assertIn(restore, calls)
+        self.assertLess(calls.index(restore), calls.index(["tab", "close", "teardown-tab"]))
+        self.assertNotIn(["workspace", "close", "w1"], calls)
+        self.assertIn("Workspace kept open.", result.stdout)
 
     def test_stale_opencode_tab_is_replaced_with_exact_session_argv(self):
         api_path = self.temp / "layout.sock"
