@@ -25,12 +25,12 @@ split_vertical = "prefix+v"
 split_horizontal = "prefix+s"
 workspace_picker = ["prefix+w", "prefix+ctrl+w", "alt+o"]
 toggle_sidebar = ["prefix+b", "prefix+t", "prefix+ctrl+t", "alt+t"]
-# previous_tab = ["prefix+p", "alt+p"]
-# next_tab = ["prefix+n", "alt+n"]
-# next_agent = "prefix+]"
-# previous_agent = "prefix+["
-previous_agent = ["prefix+p", "alt+p"]
-next_agent = ["prefix+n", "alt+n"]
+previous_tab = ["prefix+p", "alt+p"]
+next_tab = ["prefix+n", "alt+n"]
+next_agent = "prefix+]"
+previous_agent = "prefix+["
+# previous_agent = ["prefix+p", "alt+p"]
+# next_agent = ["prefix+n", "alt+n"]
 close_workspace = "prefix+ctrl+shift+d"
 
 [[keys.command]]
@@ -75,11 +75,11 @@ type = "shell"
 command = "herdr-select-tab-or-new git"
 description = "select lazygit tab"
 
-[[keys.command]]
-key = "alt+slash"
-type = "shell"
-command = "herdr-select-tab-or-new docker"
-description = "select lazydocker tab"
+# [[keys.command]]
+# key = "alt+slash"
+# type = "shell"
+# command = "herdr-select-tab-or-new docker"
+# description = "select lazydocker tab"
 
 [[keys.command]]
 key = "alt+h"
@@ -96,7 +96,7 @@ width = "90%"
 height = "90%"
 
 [[keys.command]]
-key = "prefix+u"
+key = ["prefix+u", "alt+slash"]
 type = "plugin_action"
 command = "pbogut.project-layout.tasks"
 description = "run project task"
