@@ -875,42 +875,23 @@ report_task_state() {
 		--token "layout_task_state=$state" >/dev/null
 }
 
-get_task_pane_state() {
-	local pane_id=$1 task_key=$2 pane
-
-	pane=$("$herdr" pane get "$pane_id" 2>/dev/null) || return 1
-	jq -er --arg task_key "$task_key" '
-    .result.pane |
-    select(.tokens.layout_task == $task_key) |
-    (.tokens.layout_task_state // "")
-  ' <<<"$pane"
-}
-
-wait_for_task_start() {
-	local pane_id=$1 task_key=$2 state
-
-	for _ in {1..50}; do
-		state=$(get_task_pane_state "$pane_id" "$task_key") || return 0
-		[[ $state == starting ]] || return 0
-		sleep 0.1
-	done
-	return 1
-}
-
 task_pane_is_running() {
-	local pane_id=$1 state=$2 process_info expected_shell attempt
+	local pane_id=$1 state=$2 process_info expected_shell
 
+	[[ $state != starting ]] || return 0
 	expected_shell=${SHELL##*/}
-	for attempt in {1..5}; do
-		process_info=$("$herdr" pane process-info --pane "$pane_id" 2>/dev/null) || break
-		if jq -e '
+	process_info=$("$herdr" pane process-info --pane "$pane_id" 2>/dev/null) || {
+		[[ $state != finished ]]
+		return
+	}
+	if jq -e '
       .result.process_info.shell_pid != null and
       .result.process_info.foreground_process_group_id != null and
       .result.process_info.shell_pid != .result.process_info.foreground_process_group_id
     ' >/dev/null 2>&1 <<<"$process_info"; then
-			return 0
-		fi
-		if jq -e --arg shell "$expected_shell" '
+		return 0
+	fi
+	if jq -e --arg shell "$expected_shell" '
       .result.process_info as $info |
       .result.process_info.shell_pid != null and
       .result.process_info.foreground_process_group_id != null and
@@ -919,16 +900,9 @@ task_pane_is_running() {
       $info.foreground_processes[0].pid == $info.shell_pid and
       (($info.foreground_processes[0].name | ltrimstr("-")) == $shell)
     ' >/dev/null 2>&1 <<<"$process_info"; then
-			if [[ $state == starting && $attempt != 5 ]]; then
-				sleep 0.1
-				continue
-			fi
-			return 1
-		fi
-		return 0
-	done
-
-	[[ $state != finished ]]
+		return 1
+	fi
+	return 0
 }
 
 find_task_tab() {
@@ -949,7 +923,7 @@ find_task_tab() {
 	tabs=$("$herdr" tab list --workspace "$workspace_id" 2>/dev/null) || return 1
 	match=$(jq -r --arg name "$name" '
     [.result.tabs[]? as $tab |
-      select($tab.label == ($name + " ✓") or $tab.label == ($name + " ✗")) |
+      select($tab.label == $name or $tab.label == ($name + " ✓") or $tab.label == ($name + " ✗")) |
       [$tab.tab_id, $tab.label]][0] // empty |
     if . == "" then empty else @tsv end
   ' <<<"$tabs") || return 1
@@ -961,94 +935,88 @@ find_task_tab() {
 	[[ -n $pane_id ]] || return 1
 	state=
 	case $label in
+	"$name") state=starting ;;
 	"$name ✓" | "$name ✗") state=finished ;;
 	esac
 	printf '%s\t%s\t%s\n' "$tab_id" "$pane_id" "$state"
 }
 
+apply_task_tab() {
+	local target_kind=$1 target_id=$2 name=$3 task_key=$4
+	local command_json root params
+
+	command_json=$(jq -cn --args '$ARGS.positional' -- \
+		"$plugin_root/project-layout" run-task "$task_key") || return 1
+	root=$(jq -cn \
+		--arg cwd "$worktree_dir" \
+		--arg worktree "$worktree_dir" \
+		--arg workspace_id "$workspace_id" \
+		--arg task "$name" \
+		--argjson command "$command_json" '
+      {
+        type: "pane",
+        cwd: $cwd,
+        command: $command,
+        env: {
+          HERDR_LAYOUT_WORKTREE: $worktree,
+          HERDR_LAYOUT_WORKSPACE_ID: $workspace_id,
+          HERDR_LAYOUT_TASK: $task
+        }
+      }
+    ') || return 1
+	params=$(jq -cn \
+		--arg target_kind "$target_kind" \
+		--arg target_id "$target_id" \
+		--arg tab_label "$name" \
+		--argjson root "$root" '
+      {tab_label: $tab_label, focus: true, root: $root} +
+      if $target_kind == "tab" then
+        {tab_id: $target_id}
+      else
+        {workspace_id: $target_id}
+      end
+    ') || return 1
+	herdr_api_request layout.apply "$params" >/dev/null
+}
+
 open_task_tab() {
-	local name=$1 task_key config_dir lock_dir lock_fd
+	local name=$1 task_key status
 	local existing existing_tab existing_pane existing_state
-	local response tab_id pane_id
 
 	task_key=$(task_key_for_name "$name") || return 1
-	config_dir=$(get_config_dir) || return 1
-	lock_dir="$config_dir/task-locks"
-	mkdir -p -- "$lock_dir" || return 1
-	if ! exec {lock_fd}>"$lock_dir/$task_key.lock"; then
-		echo "Could not open the project task lock" >&2
-		return 1
-	fi
-	if ! flock "$lock_fd"; then
-		echo "Could not lock the project task" >&2
-		exec {lock_fd}>&-
-		return 1
-	fi
+	herdr_acquire_topology_lock "$workspace_id" || return 1
 
 	existing=$(find_task_tab "$task_key" "$name") || {
-		exec {lock_fd}>&-
+		herdr_release_topology_lock
 		return 1
 	}
 	if [[ -n $existing ]]; then
 		IFS=$'\t' read -r existing_tab existing_pane existing_state <<<"$existing"
 		if ! "$herdr" tab focus "$existing_tab" >/dev/null; then
-			exec {lock_fd}>&-
+			herdr_release_topology_lock
 			return 1
 		fi
 		if task_pane_is_running "$existing_pane" "$existing_state"; then
-			report_task_state "$existing_pane" "$task_key" running >/dev/null 2>&1 || true
-			exec {lock_fd}>&- || true
+			[[ $existing_state == starting ]] ||
+				report_task_state "$existing_pane" "$task_key" running >/dev/null 2>&1 || true
+			herdr_release_topology_lock
 			return
 		fi
 		report_task_state "$existing_pane" "$task_key" finished >/dev/null 2>&1 || true
-		exec {lock_fd}>&- || true
+		herdr_release_topology_lock
 		confirm_task_rerun "$name" "$task_key" "$existing_tab" "$existing_pane"
 		return
 	fi
 
-	response=$("$herdr" tab create \
-		--workspace "$workspace_id" \
-		--cwd "$worktree_dir" \
-		--label "$name" \
-		--env "HERDR_LAYOUT_WORKTREE=$worktree_dir" \
-		--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
-		--env "HERDR_LAYOUT_TASK=$name" \
-		--focus) || {
-		exec {lock_fd}>&-
-		return 1
-	}
-	tab_id=$(jq -r '.result.tab.tab_id // empty' <<<"$response") || true
-	pane_id=$(jq -r '.result.root_pane.pane_id // empty' <<<"$response") || true
-	if [[ -z $tab_id || -z $pane_id ]]; then
-		echo "Could not read the project task tab response" >&2
-		exec {lock_fd}>&-
-		return 1
-	fi
-	if ! report_task_state "$pane_id" "$task_key" starting; then
-		"$herdr" tab close "$tab_id" >/dev/null 2>&1 || true
-		exec {lock_fd}>&-
-		return 1
-	fi
-	if ! "$herdr" pane run "$pane_id" "herdr-project-layout run-task $task_key" >/dev/null; then
-		report_task_state "$pane_id" "$task_key" finished >/dev/null 2>&1 || true
-		"$herdr" tab rename "$tab_id" "$name ✗" >/dev/null 2>&1 || true
-		exec {lock_fd}>&-
-		return 1
-	fi
-	if ! wait_for_task_start "$pane_id" "$task_key"; then
-		report_task_state "$pane_id" "$task_key" finished >/dev/null 2>&1 || true
-		"$herdr" tab rename "$tab_id" "$name ✗" >/dev/null 2>&1 || true
-		notify "Project task did not start" "$name"
-		exec {lock_fd}>&- || true
-		return 1
-	fi
-	exec {lock_fd}>&- || true
-	return 0
+	apply_task_tab workspace "$workspace_id" "$name" "$task_key"
+	status=$?
+	herdr_release_topology_lock
+	return "$status"
 }
 
 confirm_task_rerun() {
 	local name=$1 task_key=$2 tab_id=$3 pane_id=$4 current_key
-	local config_dir lock_dir lock_fd current_state width
+	local existing current_tab current_pane current_state width
 
 	local columns=$COLUMNS
 	local title='Task has finished:'
@@ -1059,74 +1027,48 @@ confirm_task_rerun() {
 	printf '%*s\n\n\n\n' "$width" "$name"
 	print_confirmation_buttons "run again" "cancel" accent
 	confirm_with_enter || return 0
-	config_dir=$(get_config_dir) || return 1
-	lock_dir="$config_dir/task-locks"
-	mkdir -p -- "$lock_dir" || return 1
-	if ! exec {lock_fd}>"$lock_dir/$task_key.lock"; then
-		notify "Project task was not restarted" "Could not open its task lock"
-		return 1
-	fi
-	if ! flock "$lock_fd"; then
-		notify "Project task was not restarted" "Could not lock the task"
-		exec {lock_fd}>&-
-		return 1
-	fi
 
 	if ! is_layout_file || ! is_trusted; then
 		notify "Project task was not restarted" "The project layout is no longer trusted"
-		exec {lock_fd}>&- || true
 		return 1
 	fi
 	load_layout || {
 		notify "Project task was not restarted" "The project layout is invalid"
-		exec {lock_fd}>&- || true
 		return 1
 	}
 	find_task_index "$name" >/dev/null || {
 		notify "Project task was not restarted" "$name is no longer configured"
-		exec {lock_fd}>&- || true
 		return 1
 	}
 	current_key=$(task_key_for_name "$name") || {
-		exec {lock_fd}>&- || true
 		return 1
 	}
 	if [[ $current_key != "$task_key" ]]; then
 		notify "Project task was not restarted" "The task identity changed"
-		exec {lock_fd}>&- || true
 		return 1
 	fi
-	current_state=$(get_task_pane_state "$pane_id" "$task_key") || {
-		notify "Project task was not restarted" "Its terminal is no longer available"
-		exec {lock_fd}>&- || true
+	herdr_acquire_topology_lock "$workspace_id" || return 1
+	existing=$(find_task_tab "$task_key" "$name") || {
+		herdr_release_topology_lock
 		return 1
 	}
-	if task_pane_is_running "$pane_id" "$current_state"; then
+	IFS=$'\t' read -r current_tab current_pane current_state <<<"$existing"
+	if [[ $current_tab != "$tab_id" || $current_pane != "$pane_id" ]]; then
+		notify "Project task was not restarted" "Its terminal is no longer available"
+		herdr_release_topology_lock
+		return 1
+	fi
+	if task_pane_is_running "$current_pane" "$current_state"; then
 		notify "Project task is already running" "$name"
-		exec {lock_fd}>&- || true
+		herdr_release_topology_lock
 		return 0
 	fi
-	if ! report_task_state "$pane_id" "$task_key" starting; then
-		notify "Project task was not restarted" "Its terminal is no longer available"
-		exec {lock_fd}>&- || true
-		return 1
-	fi
-	"$herdr" tab rename "$tab_id" "$name" >/dev/null 2>&1 || true
-	if ! "$herdr" pane run "$pane_id" "herdr-project-layout run-task $task_key" >/dev/null; then
-		report_task_state "$pane_id" "$task_key" finished >/dev/null 2>&1 || true
-		"$herdr" tab rename "$tab_id" "$name ✗" >/dev/null 2>&1 || true
+	if ! apply_task_tab tab "$current_tab" "$name" "$task_key"; then
 		notify "Project task was not restarted" "$name"
-		exec {lock_fd}>&- || true
+		herdr_release_topology_lock
 		return 1
 	fi
-	if ! wait_for_task_start "$pane_id" "$task_key"; then
-		report_task_state "$pane_id" "$task_key" finished >/dev/null 2>&1 || true
-		"$herdr" tab rename "$tab_id" "$name ✗" >/dev/null 2>&1 || true
-		notify "Project task did not start" "$name"
-		exec {lock_fd}>&- || true
-		return 1
-	fi
-	exec {lock_fd}>&- || true
+	herdr_release_topology_lock
 }
 
 pick_task() {
@@ -1167,6 +1109,7 @@ finish_project_task() {
 	local status=$?
 	local mark=✗
 	local should_close=false
+	local topology_locked=false
 
 	trap - EXIT
 	if [[ -n ${task_runner_spinner_pid:-} ]]; then
@@ -1182,13 +1125,21 @@ finish_project_task() {
 	if [[ ${task_runner_close:-} == true ]] || { ((status == 0)) && [[ ${task_runner_progress:-} == false ]]; }; then
 		should_close=true
 	fi
+	if [[ -n ${workspace_id:-} ]] && herdr_acquire_topology_lock "$workspace_id"; then
+		topology_locked=true
+	fi
+	$topology_locked || return
 	if $should_close && [[ -n ${task_runner_tab_id:-} ]]; then
-		"$herdr" tab close "$task_runner_tab_id" >/dev/null 2>&1 && return
+		if "$herdr" tab close "$task_runner_tab_id" >/dev/null 2>&1; then
+			herdr_release_topology_lock
+			return
+		fi
 	fi
 	((status == 0)) && mark=✓
 	if [[ -n ${task_runner_tab_id:-} && -n ${task_runner_label:-} ]]; then
 		"$herdr" tab rename "$task_runner_tab_id" "$task_runner_label $mark" >/dev/null 2>&1 || true
 	fi
+	herdr_release_topology_lock
 }
 
 run_project_task() {

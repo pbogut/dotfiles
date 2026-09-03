@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -70,6 +71,7 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.log = self.temp / "herdr.jsonl"
         bindir = self.temp / "bin"
         bindir.mkdir()
+        self.bindir = bindir
         fake_herdr = bindir / "herdr"
         fake_herdr.write_text(
             textwrap.dedent(
@@ -299,6 +301,150 @@ class HerdrWorkflowTest(unittest.TestCase):
             layout["params"]["root"]["command"],
             ["opencode-launcher", "--session", session_id, "--port"],
         )
+        self.assertFalse(
+            any(call[:2] in (["pane", "run"], ["tab", "close"]) for call in self.calls())
+        )
+
+    def project_fixture(self):
+        project = self.temp / "project"
+        bare = project / ".bare"
+        worktree = project / "main"
+        project.mkdir()
+        subprocess.run(
+            ["git", "init", "--bare", str(bare)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        subprocess.run(
+            ["git", f"--git-dir={bare}", "worktree", "add", "--orphan", str(worktree)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        layout = project / "herdr-project.sh"
+        layout.write_text(
+            'HERDR_TABS=(nvim)\nherdr_task "build assets" -- true\n'
+        )
+        config_dir = self.temp / "plugin-config"
+        config_dir.mkdir()
+        (config_dir / "trusted-projects.json").write_text(
+            json.dumps([str(project.resolve())])
+        )
+        fzf = self.bindir / "fzf"
+        fzf.write_text("#!/usr/bin/env bash\nIFS= read -r line\nprintf '%s\\n' \"$line\"\n")
+        fzf.chmod(0o755)
+        self.env.update(
+            {
+                "COLUMNS": "80",
+                "HERDR_LAYOUT_WORKSPACE_ID": "w1",
+                "HERDR_LAYOUT_WORKTREE": str(worktree),
+                "HERDR_PLUGIN_CONFIG_DIR": str(config_dir),
+                "SHELL": "/bin/bash",
+            }
+        )
+        return layout, worktree
+
+    def test_new_project_task_uses_layout_apply(self):
+        _, worktree = self.project_fixture()
+        api_path = self.temp / "tasks.sock"
+        self.env["HERDR_SOCKET_PATH"] = str(api_path)
+
+        with FakeHerdrApi(api_path) as api:
+            result = self.run_script(PROJECT_PLUGIN / "executable_project-layout", "task-picker")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(len(api.requests), 1)
+        request = api.requests[0]
+        self.assertEqual(request["method"], "layout.apply")
+        self.assertEqual(request["params"]["workspace_id"], "w1")
+        self.assertNotIn("tab_id", request["params"])
+        self.assertEqual(request["params"]["tab_label"], "build assets")
+        self.assertEqual(request["params"]["root"]["cwd"], str(worktree))
+        self.assertEqual(
+            request["params"]["root"]["command"],
+            [
+                str(PROJECT_PLUGIN / "project-layout"),
+                "run-task",
+                request["params"]["root"]["command"][2],
+            ],
+        )
+        self.assertRegex(request["params"]["root"]["command"][2], r"^[0-9a-f]{64}$")
+        self.assertFalse(
+            any(call[:2] in (["pane", "run"], ["tab", "create"]) for call in self.calls())
+        )
+
+    def test_completed_project_task_rerun_replaces_its_tab(self):
+        layout, _ = self.project_fixture()
+        task_key = hashlib.sha256(
+            f"{layout}\0build assets\0".encode()
+        ).hexdigest()
+        self.env["FAKE_HERDR_TABS"] = json.dumps(
+            {
+                "result": {
+                    "tabs": [
+                        {
+                            "tab_id": "finished-tab",
+                            "label": "build assets ✓",
+                            "number": 1,
+                        }
+                    ]
+                }
+            }
+        )
+        self.env["FAKE_HERDR_PANES"] = json.dumps(
+            {
+                "result": {
+                    "panes": [
+                        {
+                            "pane_id": "finished-pane",
+                            "tab_id": "finished-tab",
+                            "tokens": {
+                                "layout_task": task_key,
+                                "layout_task_state": "finished",
+                            },
+                        }
+                    ]
+                }
+            }
+        )
+        self.env["FAKE_HERDR_PROCESS_INFO"] = json.dumps(
+            {
+                "result": {
+                    "process_info": {
+                        "shell_pid": 100,
+                        "foreground_process_group_id": 100,
+                        "foreground_processes": [
+                            {"pid": 100, "name": "bash", "argv": ["bash"]}
+                        ],
+                    }
+                }
+            }
+        )
+        api_path = self.temp / "tasks.sock"
+        self.env["HERDR_SOCKET_PATH"] = str(api_path)
+
+        with FakeHerdrApi(api_path) as api:
+            result = subprocess.run(
+                [
+                    "bash",
+                    str(PROJECT_PLUGIN / "executable_project-layout"),
+                    "task-picker",
+                ],
+                input="\n",
+                check=False,
+                capture_output=True,
+                text=True,
+                env=self.env,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(len(api.requests), 1)
+        request = api.requests[0]
+        self.assertEqual(request["method"], "layout.apply")
+        self.assertEqual(request["params"]["tab_id"], "finished-tab")
+        self.assertNotIn("workspace_id", request["params"])
+        self.assertEqual(request["params"]["root"]["command"][2], task_key)
         self.assertFalse(
             any(call[:2] in (["pane", "run"], ["tab", "close"]) for call in self.calls())
         )

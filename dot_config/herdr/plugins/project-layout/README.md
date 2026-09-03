@@ -6,7 +6,7 @@ repository. Put the layout beside `.bare`, not inside a checkout:
 ```text
 awesome-project/
   .bare/
-  .herdr-layout.sh
+  herdr-project.sh
   main/
   feature-one/
 ```
@@ -26,7 +26,7 @@ herdr-project-layout init
 
 The command opens an existing layout without changing it.
 
-Example `.herdr-layout.sh`:
+Example `herdr-project.sh`:
 
 ```bash
 HERDR_TABS=(nvim dev opencode)
@@ -66,12 +66,13 @@ the layout file.
 
 Task tabs are singletons while they exist. Selecting a running task focuses its
 tab instead of starting another command. Selecting a retained finished task
-focuses its tab and asks whether to run it again; Enter reruns it in the same
-pane and Escape leaves the tab unchanged. Tasks with `--progress` remain open
-after completion and end with `✓` or `✗` in the tab name. A task without
-`--progress` closes its tab after a successful exit. If it fails, the tab
-remains open with `✗` so its output can be inspected. `--close` overrides this
-retention behavior for both exit outcomes.
+focuses its tab and asks whether to run it again. Enter replaces the completed
+tab with a fresh task process, discarding its old PTY and scrollback; Escape
+leaves it unchanged. Tasks with `--progress` remain open after completion and
+end with `✓` or `✗` in the tab name. A task without `--progress` closes its tab
+after a successful exit. If it fails, the tab remains open with `✗` so its
+output can be inspected. `--close` overrides this retention behavior for both
+exit outcomes.
 
 The picker and runner source the trusted layout independently. Keep top-level
 code limited to declarations and `herdr_task` registrations; put side effects
