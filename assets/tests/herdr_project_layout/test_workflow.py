@@ -8,12 +8,10 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[3]
-SELECTOR = ROOT / "dot_scripts/executable_herdr-select-tab-or-new"
+PROJECT_PLUGIN = ROOT / "dot_config/herdr/plugins/project-layout"
+SELECTOR = PROJECT_PLUGIN / "executable_managed-tabs"
 OPENCODE_LAUNCHER = ROOT / "dot_scripts/executable_opencode-launcher"
-SESSION_CACHE = (
-    ROOT
-    / "dot_config/herdr/plugins/repo-metadata/executable_cache-opencode-session.sh"
-)
+SESSION_CACHE = PROJECT_PLUGIN / "executable_cache-opencode-session.sh"
 
 
 class HerdrWorkflowTest(unittest.TestCase):
