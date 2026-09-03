@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+herdr=${HERDR_BIN_PATH:-herdr}
 workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
 if [[ -z $workspace_id ]]; then
 	echo "No active Herdr workspace" >&2
@@ -12,7 +13,27 @@ if [[ ! $workspace_id =~ ^[A-Za-z0-9_-]+$ ]]; then
 fi
 
 runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$UID}
-socket_path=$runtime_dir/nvim.herdr-$workspace_id.0
+herdr_socket=${HERDR_SOCKET_PATH:-}
+if [[ -z $herdr_socket ]]; then
+	herdr_socket=$("$herdr" status server 2>/dev/null | sed -n 's/^socket: //p')
+fi
+if [[ -z $herdr_socket ]]; then
+	echo "Could not determine the Herdr socket" >&2
+	exit 1
+fi
+if [[ $herdr_socket == /* ]]; then
+	herdr_socket=$(realpath -m -- "$herdr_socket")
+fi
+
+read -r session_key _ < <(printf '%s\0' "$herdr_socket" | sha256sum)
+state_dir=$runtime_dir/herdr-nvim/${session_key:0:16}
+socket_path=$state_dir/$workspace_id.sock
+lock_path=$state_dir/$workspace_id.lock
+
+umask 077
+mkdir -p -- "$state_dir" || exit 1
+[[ -O $state_dir && ! -L $state_dir ]] || exit 1
+chmod 700 "$state_dir" || exit 1
 
 nvim_is_ready() {
 	nvim --server "$socket_path" --remote-expr '1' >/dev/null 2>&1
@@ -25,8 +46,16 @@ fi
 
 if [[ ${1:-} == --start ]]; then
 	shift
+	exec {lock_fd}>"$lock_path" || exit 1
+	if ! flock -n "$lock_fd"; then
+		if nvim_is_ready; then
+			echo "Neovim is already running for Herdr workspace $workspace_id" >&2
+		else
+			echo "Neovim is already starting for Herdr workspace $workspace_id" >&2
+		fi
+		exit 1
+	fi
 	if [[ -n ${HERDR_VIM_LAUNCH_ACK:-} ]]; then
-		umask 077
 		printf '%s\n' "$$" >"$HERDR_VIM_LAUNCH_ACK" || exit 1
 	fi
 	if [[ -e $socket_path ]]; then
@@ -69,6 +98,7 @@ if ((${#files[@]} == 0)); then
 fi
 
 HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
+	HERDR_SOCKET_PATH=$herdr_socket \
 	herdr-select-tab-or-new nvim --ensure-running || exit 1
 
 for _ in {1..100}; do
@@ -88,17 +118,18 @@ for file in "${files[@]}"; do
 	remote_files+=("$(realpath -m -- "$file")")
 done
 
-nvim --server "$socket_path" --remote "${remote_files[@]}" || exit 1
-nvim --server "$socket_path" --remote "${remote_files[0]}" || exit 1
-if [[ -n $line ]]; then
-	nvim --server "$socket_path" --remote-expr "cursor($line, 1)" >/dev/null || exit 1
-fi
+line_json=${line:-null}
+request=$(jq -cn --argjson line "$line_json" --args \
+	'{files: $ARGS.positional, line: $line}' -- "${remote_files[@]}") || exit 1
+vim_request=$(jq -Rn --arg request "$request" '$request') || exit 1
+remote_expr="luaeval('(function(request) for _, file in ipairs(request.files) do vim.cmd.badd({ args = { file } }) end vim.cmd.drop({ args = { request.files[1] } }) if request.line then vim.fn.cursor(request.line, 1) end return 1 end)(_A)', json_decode($vim_request))"
+nvim --server "$socket_path" --remote-expr "$remote_expr" >/dev/null || exit 1
 
-tabs=$(herdr tab list --workspace "$workspace_id") || exit 1
+tabs=$("$herdr" tab list --workspace "$workspace_id") || exit 1
 tab_id=$(jq -r '[.result.tabs[] | select(.label == "nvim")][0].tab_id // empty' <<<"$tabs")
 if [[ -z $tab_id ]]; then
 	echo "No managed Neovim tab in Herdr workspace $workspace_id" >&2
 	exit 1
 fi
 
-herdr tab focus "$tab_id" >/dev/null
+"$herdr" tab focus "$tab_id" >/dev/null
