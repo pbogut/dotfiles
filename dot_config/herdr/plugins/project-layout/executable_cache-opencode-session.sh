@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 herdr=${HERDR_BIN_PATH:-herdr}
-source_id="plugin:${HERDR_PLUGIN_ID:-pbogut.repo-metadata}"
+source_id="plugin:${HERDR_PLUGIN_ID:-pbogut.project-layout}"
 
 valid_session_id() {
   local session_id=$1

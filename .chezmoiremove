@@ -1,3 +1,5 @@
 .config/DankMaterialShell/plugins/BatteryConservation
+.config/herdr/plugins/managed-tabs
+.config/herdr/plugins/repo-metadata
 .config/opencode/opencode.jsonc
 .config/opencode/plugins/herdr-agent-state.js

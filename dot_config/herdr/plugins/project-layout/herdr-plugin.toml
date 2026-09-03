@@ -1,53 +1,76 @@
 id = "pbogut.project-layout"
 name = "Project Layout"
-version = "0.8.0"
-min_herdr_version = "0.8.0"
-description = "Apply trusted per-project setup and managed tabs to Git worktrees"
+version = "0.9.0"
+min_herdr_version = "0.8.2"
+description = "Manage project layouts, tabs, sessions, and repository metadata"
 platforms = ["linux"]
+
+[[startup]]
+command = ["bash", "startup.sh"]
 
 [[actions]]
 id = "init"
 title = "Create or edit project layout"
 contexts = ["workspace"]
-command = ["herdr-project-layout", "init"]
+command = ["bash", "project-layout", "init"]
 
 [[actions]]
 id = "apply"
 title = "Apply project layout"
 contexts = ["workspace"]
-command = ["herdr-project-layout", "apply"]
+command = ["bash", "project-layout", "apply"]
 
 [[actions]]
 id = "trust"
 title = "Trust and apply project layout"
 contexts = ["workspace"]
-command = ["herdr-project-layout", "trust"]
+command = ["bash", "project-layout", "trust"]
 
 [[actions]]
 id = "revoke-trust"
 title = "Revoke project layout trust"
 contexts = ["workspace"]
-command = ["herdr-project-layout", "revoke"]
+command = ["bash", "project-layout", "revoke"]
 
 [[actions]]
 id = "close"
 title = "Close workspace with project teardown"
 contexts = ["workspace"]
-command = ["herdr-project-layout", "close"]
+command = ["bash", "project-layout", "close"]
 
 [[actions]]
 id = "tasks"
 title = "Run project task"
 contexts = ["workspace"]
-command = ["herdr-project-layout", "tasks"]
+command = ["bash", "project-layout", "tasks"]
 
 [[events]]
 on = "worktree.created"
-command = ["herdr-project-layout", "event"]
+command = ["bash", "project-layout", "event"]
 
 [[events]]
 on = "worktree.opened"
-command = ["herdr-project-layout", "event"]
+command = ["bash", "project-layout", "event"]
+
+[[events]]
+on = "pane.created"
+command = ["bash", "report-repo.sh"]
+
+[[events]]
+on = "pane.agent_detected"
+command = ["bash", "report-repo.sh"]
+
+[[events]]
+on = "pane.agent_detected"
+command = ["bash", "cache-opencode-session.sh"]
+
+[[events]]
+on = "pane.moved"
+command = ["bash", "report-repo.sh"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["bash", "cache-opencode-session.sh"]
 
 [[panes]]
 id = "trust"
@@ -55,7 +78,7 @@ title = "Trust project layout"
 placement = "popup"
 width = "70%"
 height = 13
-command = ["herdr-project-layout", "prompt"]
+command = ["bash", "project-layout", "prompt"]
 
 [[panes]]
 id = "task-picker"
@@ -63,13 +86,13 @@ title = "Project tasks"
 placement = "popup"
 width = "70%"
 height = 15
-command = ["herdr-project-layout", "task-picker"]
+command = ["bash", "project-layout", "task-picker"]
 
 [[panes]]
 id = "setup"
 title = "setup"
 placement = "tab"
-command = ["herdr-project-layout", "setup"]
+command = ["bash", "project-layout", "setup"]
 
 [[panes]]
 id = "teardown-confirm"
@@ -77,10 +100,10 @@ title = "Close project workspace"
 placement = "popup"
 width = "70%"
 height = 12
-command = ["herdr-project-layout", "confirm-close"]
+command = ["bash", "project-layout", "confirm-close"]
 
 [[panes]]
 id = "teardown"
 title = "teardown"
 placement = "tab"
-command = ["herdr-project-layout", "teardown"]
+command = ["bash", "project-layout", "teardown"]

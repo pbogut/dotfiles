@@ -8,6 +8,7 @@ import tempfile
 import textwrap
 import threading
 import time
+import tomllib
 import unittest
 
 
@@ -17,6 +18,9 @@ RUNTIME = PROJECT_PLUGIN / "lib/runtime.sh"
 SELECTOR = PROJECT_PLUGIN / "executable_managed-tabs"
 OPENCODE_LAUNCHER = ROOT / "dot_scripts/executable_opencode-launcher"
 SESSION_CACHE = PROJECT_PLUGIN / "executable_cache-opencode-session.sh"
+STARTUP = PROJECT_PLUGIN / "executable_startup.sh"
+MANIFEST = PROJECT_PLUGIN / "herdr-plugin.toml"
+PLUGIN_LINK_HOOK = ROOT / "run_onchange_after_link-herdr-plugins.sh.tmpl"
 
 
 class FakeHerdrApi:
@@ -211,7 +215,7 @@ class HerdrWorkflowTest(unittest.TestCase):
                     "report-metadata",
                     "w1",
                     "--source",
-                    "plugin:pbogut.repo-metadata",
+                    "plugin:pbogut.project-layout",
                     "--token",
                     "opencode_session=ses exact;$value",
                 ],
@@ -406,6 +410,77 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.assertLess(calls.index(restore), calls.index(["tab", "close", "teardown-tab"]))
         self.assertNotIn(["workspace", "close", "w1"], calls)
         self.assertIn("Workspace kept open.", result.stdout)
+
+    def test_unified_startup_runs_every_module_in_order(self):
+        modules = self.temp / "modules"
+        modules.mkdir()
+        order_log = self.temp / "startup-order"
+        for name in ("report-repo.sh", "cache-opencode-session.sh", "managed-tabs"):
+            (modules / name).write_text(
+                "#!/usr/bin/env bash\n"
+                "printf '%s %s\\n' \"${0##*/}\" \"$*\" >> \"$FAKE_STARTUP_LOG\"\n"
+                "[[ ${FAKE_STARTUP_FAILURE:-} != \"${0##*/}\" ]]\n"
+            )
+        env = self.env.copy()
+        env.update(
+            {
+                "FAKE_STARTUP_LOG": str(order_log),
+                "HERDR_PLUGIN_ROOT": str(modules),
+            }
+        )
+        expected = [
+            "report-repo.sh --all",
+            "cache-opencode-session.sh --all",
+            "managed-tabs --restore-all",
+        ]
+
+        result = self.run_script(STARTUP, env=env)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(order_log.read_text().splitlines(), expected)
+
+        order_log.unlink()
+        env["FAKE_STARTUP_FAILURE"] = "report-repo.sh"
+        result = self.run_script(STARTUP, env=env)
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertEqual(order_log.read_text().splitlines(), expected)
+
+    def test_project_manifest_owns_all_workflow_hooks(self):
+        with MANIFEST.open("rb") as manifest_file:
+            manifest = tomllib.load(manifest_file)
+
+        self.assertEqual(manifest["id"], "pbogut.project-layout")
+        self.assertEqual(manifest["startup"], [{"command": ["bash", "startup.sh"]}])
+        self.assertEqual(
+            [(event["on"], event["command"]) for event in manifest["events"]],
+            [
+                ("worktree.created", ["bash", "project-layout", "event"]),
+                ("worktree.opened", ["bash", "project-layout", "event"]),
+                ("pane.created", ["bash", "report-repo.sh"]),
+                ("pane.agent_detected", ["bash", "report-repo.sh"]),
+                ("pane.agent_detected", ["bash", "cache-opencode-session.sh"]),
+                ("pane.moved", ["bash", "report-repo.sh"]),
+                (
+                    "pane.agent_status_changed",
+                    ["bash", "cache-opencode-session.sh"],
+                ),
+            ],
+        )
+        for entry in manifest["actions"] + manifest["panes"]:
+            self.assertEqual(entry["command"][:2], ["bash", "project-layout"])
+
+    def test_obsolete_plugins_are_removed_by_the_migration(self):
+        for name in ("managed-tabs", "repo-metadata"):
+            self.assertFalse((ROOT / "dot_config/herdr/plugins" / name).exists())
+
+        remove_targets = (ROOT / ".chezmoiremove").read_text().splitlines()
+        self.assertIn(".config/herdr/plugins/managed-tabs", remove_targets)
+        self.assertIn(".config/herdr/plugins/repo-metadata", remove_targets)
+        hook = PLUGIN_LINK_HOOK.read_text()
+        self.assertIn("herdr plugin unlink pbogut.managed-tabs", hook)
+        self.assertIn("herdr plugin unlink pbogut.repo-metadata", hook)
+        self.assertIn('plugins/project-layout" --enabled', hook)
 
     def test_stale_opencode_tab_is_replaced_with_exact_session_argv(self):
         api_path = self.temp / "layout.sock"

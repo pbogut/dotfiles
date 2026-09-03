@@ -11,6 +11,10 @@ awesome-project/
   feature-one/
 ```
 
+It is also the single physical plugin for managed-tab restoration, OpenCode
+session caching, and repository metadata. On Herdr startup those modules run in
+this order: metadata reporting, session caching, then managed-tab restoration.
+
 The plugin does not source the layout until the canonical project directory has
 been trusted through its popup or the `Trust and apply project layout` action.
 Trust remains in Herdr's plugin config directory until it is revoked with the
