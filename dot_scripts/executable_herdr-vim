@@ -28,7 +28,6 @@ fi
 read -r session_key _ < <(printf '%s\0' "$herdr_socket" | sha256sum)
 state_dir=$runtime_dir/herdr-nvim/${session_key:0:16}
 socket_path=$state_dir/$workspace_id.sock
-lock_path=$state_dir/$workspace_id.lock
 
 umask 077
 mkdir -p -- "$state_dir" || exit 1
@@ -46,15 +45,6 @@ fi
 
 if [[ ${1:-} == --start ]]; then
 	shift
-	exec {lock_fd}>"$lock_path" || exit 1
-	if ! flock -n "$lock_fd"; then
-		if nvim_is_ready; then
-			echo "Neovim is already running for Herdr workspace $workspace_id" >&2
-		else
-			echo "Neovim is already starting for Herdr workspace $workspace_id" >&2
-		fi
-		exit 1
-	fi
 	if [[ -e $socket_path ]]; then
 		if nvim_is_ready; then
 			echo "Neovim is already running for Herdr workspace $workspace_id" >&2

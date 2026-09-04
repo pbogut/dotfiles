@@ -61,6 +61,11 @@ only `nvim`. `HERDR_DEV_COMMAND` is a Bash array and runs from the worktree.
 Setup runs once for each worktree and setup version. Increment
 `HERDR_SETUP_VERSION` when setup needs to run again.
 
+Selecting `nvim` focuses an existing `nvim` tab. If none exists, the selector
+replaces the initial workspace tab or creates a new tab and starts Neovim once.
+It does not inspect or restart an existing tab. The startup restoration hook
+remains responsible for restarting commands after Herdr restores a session.
+
 Press `prefix+u` to open the project task picker. Each `herdr_task` receives a
 name followed by `--` and the command arguments. Add `--progress` before the
 name to animate the task tab while it runs. Add `--close` to close the tab after

@@ -1,3 +1,4 @@
+import fcntl
 import hashlib
 import json
 import os
@@ -299,6 +300,44 @@ class HerdrWorkflowTest(unittest.TestCase):
         project_layout = (PROJECT_PLUGIN / "executable_project-layout").read_text()
         self.assertNotIn("--ensure-running", project_layout)
         self.assertNotIn("ensure_editor()", project_layout)
+
+    def test_stale_workspace_lock_does_not_block_nvim_start(self):
+        socket_path = Path(self.env["HERDR_SOCKET_PATH"]).resolve()
+        session_key = hashlib.sha256(f"{socket_path}\0".encode()).hexdigest()[:16]
+        state_dir = self.temp / "runtime" / "herdr-nvim" / session_key
+        state_dir.mkdir(parents=True)
+        lock_file = (state_dir / "w1.lock").open("w")
+        self.addCleanup(lock_file.close)
+        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+        nvim_log = self.temp / "nvim.json"
+        fake_nvim = self.bindir / "nvim"
+        fake_nvim.write_text(
+            textwrap.dedent(
+                """\
+                #!/usr/bin/env python3
+                import json
+                import os
+                import sys
+
+                if sys.argv[1:2] == ["--server"]:
+                    raise SystemExit(1)
+                with open(os.environ["FAKE_NVIM_LOG"], "w", encoding="utf-8") as log:
+                    json.dump(sys.argv[1:], log)
+                """
+            )
+        )
+        fake_nvim.chmod(0o755)
+        self.env["FAKE_NVIM_LOG"] = str(nvim_log)
+
+        result = self.run_script(HERDR_VIM, "--start")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(nvim_log.read_text()),
+            ["--listen", str(state_dir / "w1.sock")],
+        )
+        self.assertNotIn("already starting", result.stderr)
 
     def test_session_cache_accepts_only_native_opencode_ids(self):
         valid_pane = {
