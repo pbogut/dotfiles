@@ -670,6 +670,57 @@ class HerdrWorkflowTest(unittest.TestCase):
         layout = next(request for request in api.requests if request["method"] == "layout.apply")
         self.assertEqual(layout["params"]["root"]["cwd"], str(workspace.resolve()))
 
+    def test_restore_all_replaces_command_tabs_without_focusing(self):
+        workspace = self.temp / "restore-all-workspace"
+        workspace.mkdir()
+        api_path = self.temp / "layout.sock"
+        self.env.update(
+            {
+                "FAKE_HERDR_SNAPSHOT": json.dumps(
+                    {
+                        "result": {
+                            "snapshot": {
+                                "tabs": [{"workspace_id": "w1", "label": "dev"}]
+                            }
+                        }
+                    }
+                ),
+                "FAKE_HERDR_TABS": json.dumps(
+                    {
+                        "result": {
+                            "tabs": [
+                                {"tab_id": "dev-tab", "label": "dev", "number": 1}
+                            ]
+                        }
+                    }
+                ),
+                "FAKE_HERDR_PANES": json.dumps(
+                    {
+                        "result": {
+                            "panes": [
+                                {
+                                    "pane_id": "dev-pane",
+                                    "tab_id": "dev-tab",
+                                    "workspace_id": "w1",
+                                    "cwd": str(workspace),
+                                }
+                            ]
+                        }
+                    }
+                ),
+                "HERDR_SOCKET_PATH": str(api_path),
+            }
+        )
+        self.record_workspace_root(workspace)
+
+        with FakeHerdrApi(api_path) as api:
+            result = self.run_script(SELECTOR, "--restore-all")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        layout = next(request for request in api.requests if request["method"] == "layout.apply")
+        self.assertFalse(layout["params"]["focus"])
+        self.assertFalse(any(call[:2] == ["tab", "focus"] for call in self.calls()))
+
     def test_restore_keeps_existing_shell_cwd(self):
         workspace = self.temp / "shell-workspace"
         nested = workspace / "nested"

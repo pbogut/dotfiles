@@ -11,7 +11,7 @@ if [[ ${1:-} == --restore-all ]]; then
 	snapshot=$("$herdr" api snapshot) || exit 1
 	status=0
 	while IFS=$'\t' read -r workspace_id role; do
-		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id bash "$0" "$role" --restore || status=1
+		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id bash "$0" "$role" --restore --no-focus || status=1
 	done < <(jq -r '
     def managed_role:
       if . == "nvim" then "nvim"
