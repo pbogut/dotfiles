@@ -846,6 +846,57 @@ class HerdrWorkflowTest(unittest.TestCase):
             ["notification", "show", "Project setup tab was not named"], calls
         )
 
+    def test_setup_uses_supplied_workspace_after_initial_tab_closes(self):
+        layout, worktree = self.project_fixture()
+        layout.write_text(
+            "HERDR_TABS=(nvim shell shell-2 dev)\n"
+            "herdr_setup() { :; }\n"
+        )
+        self.env.update(
+            {
+                "FAKE_HERDR_SNAPSHOT": json.dumps(
+                    {
+                        "result": {
+                            "snapshot": {
+                                "focused_workspace_id": "w1",
+                                "panes": [],
+                            }
+                        }
+                    }
+                ),
+                "HERDR_PANE_ID": "setup-pane",
+                "HERDR_PLUGIN_ENTRYPOINT_ID": "setup",
+                "HERDR_TAB_ID": "setup-tab",
+            }
+        )
+
+        result = subprocess.run(
+            [
+                "bash",
+                str(PROJECT_PLUGIN / "executable_project-layout"),
+                "setup",
+            ],
+            input="\n",
+            cwd=PROJECT_PLUGIN,
+            check=False,
+            capture_output=True,
+            text=True,
+            env=self.env,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("No Herdr workspace found", result.stderr)
+        selector_calls = [
+            call for call in self.calls() if call[:2] == ["test", "restore-editor"]
+        ]
+        self.assertEqual(
+            selector_calls,
+            [
+                ["test", "restore-editor", "w1", str(worktree), role, "--no-focus"]
+                for role in ("nvim", "shell", "shell-2", "dev")
+            ],
+        )
+
     def test_setup_reports_configured_tab_failure(self):
         layout, _ = self.project_fixture()
         layout.write_text(

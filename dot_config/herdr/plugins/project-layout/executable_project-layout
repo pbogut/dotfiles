@@ -166,6 +166,11 @@ resolve_context() {
 refresh_workspace_id() {
 	local snapshot resolved
 
+	if [[ -n $workspace_id ]] && "$herdr" workspace get "$workspace_id" >/dev/null 2>&1; then
+		return 0
+	fi
+	workspace_id=
+
 	for _ in {1..50}; do
 		snapshot=$("$herdr" api snapshot 2>/dev/null) || {
 			sleep 0.1
