@@ -588,9 +588,8 @@ select_managed_tab() {
 	return "$status"
 }
 
-ensure_editor() {
+open_editor() {
 	select_managed_tab nvim
-	select_managed_tab nvim --ensure-running
 }
 
 layout_requests_editor() {
@@ -646,7 +645,7 @@ restore_editor_after_teardown() {
 		editor_cwd=$(realpath -e -- "$editor_cwd") || continue
 		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
 			HERDR_ACTIVE_PANE_CWD=$editor_cwd \
-			herdr-select-tab-or-new nvim --ensure-running
+			herdr-select-tab-or-new nvim
 		return
 	done
 	return 1
@@ -720,7 +719,7 @@ apply_layout_unlocked() {
 		if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} == setup ]]; then
 			return "$setup_failed_status"
 		fi
-		ensure_editor || true
+		open_editor || true
 		return 1
 	fi
 	[[ -n $workspace_id ]] || {
@@ -741,15 +740,11 @@ apply_layout_unlocked() {
 		esac
 		[[ -z ${seen[$role]:-} ]] || continue
 		seen[$role]=1
-		if [[ $role == nvim ]]; then
-			select_managed_tab "$role" --ensure-running --no-focus || status=1
-		else
-			select_managed_tab "$role" --no-focus || status=1
-		fi
+		select_managed_tab "$role" --no-focus || status=1
 	done
 
 	if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} != setup ]] && layout_requests_editor; then
-		ensure_editor || status=1
+		open_editor || status=1
 	fi
 	if ((status != 0)); then
 		notify "Project layout incomplete" "$worktree_dir"
@@ -757,7 +752,7 @@ apply_layout_unlocked() {
 			printf '\nProject layout incomplete.\n\n'
 			return "$setup_failed_status"
 		fi
-		ensure_editor || true
+		open_editor || true
 	fi
 	if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} == setup ]]; then
 		return "$setup_ready_status"
@@ -867,7 +862,7 @@ request_task_picker() {
 		return 1
 	}
 	if ! is_trusted; then
-		request_prompt || ensure_editor
+		request_prompt || open_editor
 		return
 	fi
 	load_layout || {
@@ -1452,20 +1447,20 @@ prompt_for_trust() {
 		trust_project
 	else
 		printf 'Project layout was not trusted.\n'
-		ensure_editor
+		open_editor
 	fi
 }
 
 handle_event() {
 	resolve_context || exit 0
 	if ! is_layout_file; then
-		ensure_editor
+		open_editor
 		exit
 	fi
 	if is_trusted; then
 		apply_layout
 	else
-		request_prompt || ensure_editor
+		request_prompt || open_editor
 	fi
 }
 
@@ -1514,13 +1509,13 @@ teardown)
 apply)
 	resolve_context || exit 1
 	is_layout_file || {
-		ensure_editor
+		open_editor
 		exit
 	}
 	if is_trusted; then
 		apply_layout
 	else
-		request_prompt || ensure_editor
+		request_prompt || open_editor
 	fi
 	;;
 trust)

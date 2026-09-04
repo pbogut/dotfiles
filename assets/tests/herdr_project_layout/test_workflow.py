@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[3]
 PROJECT_PLUGIN = ROOT / "dot_config/herdr/plugins/project-layout"
 RUNTIME = PROJECT_PLUGIN / "lib/runtime.sh"
 SELECTOR = PROJECT_PLUGIN / "executable_managed-tabs"
+HERDR_VIM = ROOT / "dot_scripts/executable_herdr-vim"
 OPENCODE_LAUNCHER = ROOT / "dot_scripts/executable_opencode-launcher"
 PROJECT_LAUNCHER = ROOT / "dot_scripts/executable_herdr-project.tmpl"
 SESSION_CACHE = PROJECT_PLUGIN / "executable_cache-opencode-session.sh"
@@ -216,12 +217,12 @@ class HerdrWorkflowTest(unittest.TestCase):
             self.calls(), [["tab", "list", "--workspace", "w1"]]
         )
 
-    def test_managed_selector_adopts_the_initial_workspace_tab(self):
+    def test_existing_nvim_tab_focuses_without_process_checks(self):
         self.env["FAKE_HERDR_TABS"] = json.dumps(
             {
                 "result": {
                     "tabs": [
-                        {"tab_id": "initial-tab", "label": "1", "number": 1},
+                        {"tab_id": "nvim-tab", "label": "nvim", "number": 1},
                     ]
                 }
             }
@@ -234,12 +235,70 @@ class HerdrWorkflowTest(unittest.TestCase):
             self.calls(),
             [
                 ["tab", "list", "--workspace", "w1"],
-                ["tab", "rename", "initial-tab", "nvim"],
-                ["pane", "list", "--workspace", "w1"],
-                ["tab", "focus", "initial-tab"],
+                ["tab", "focus", "nvim-tab"],
             ],
         )
+
+    def test_managed_selector_replaces_the_initial_tab_with_nvim_once(self):
+        self.env["FAKE_HERDR_TABS"] = json.dumps(
+            {
+                "result": {
+                    "tabs": [
+                        {"tab_id": "initial-tab", "label": "1", "number": 1},
+                    ]
+                }
+            }
+        )
+        api_path = self.temp / "layout.sock"
+        self.env["HERDR_SOCKET_PATH"] = str(api_path)
+
+        with FakeHerdrApi(api_path) as api:
+            first = self.run_script(SELECTOR, "nvim")
+            self.env["FAKE_HERDR_TABS"] = json.dumps(
+                {
+                    "result": {
+                        "tabs": [
+                            {"tab_id": "nvim-tab", "label": "nvim", "number": 1},
+                        ]
+                    }
+                }
+            )
+            second = self.run_script(SELECTOR, "nvim")
+
+        self.assertEqual(first.returncode, 0, first.stderr)
+        self.assertEqual(second.returncode, 0, second.stderr)
+        layout_requests = [
+            request for request in api.requests if request["method"] == "layout.apply"
+        ]
+        self.assertEqual(len(layout_requests), 1)
+        self.assertEqual(
+            layout_requests[0]["params"],
+            {
+                "tab_id": "initial-tab",
+                "tab_label": "nvim",
+                "focus": True,
+                "root": {
+                    "type": "pane",
+                    "cwd": self.env["HERDR_ACTIVE_PANE_CWD"],
+                    "command": ["herdr-vim", "--start"],
+                },
+            },
+        )
+        self.assertIn(["tab", "focus", "nvim-tab"], self.calls())
+        self.assertFalse(
+            any(
+                call[:2] in (["pane", "list"], ["pane", "process-info"])
+                for call in self.calls()
+            )
+        )
         self.assertNotIn("herdr tab rename", PROJECT_LAUNCHER.read_text())
+
+    def test_nvim_selection_has_no_ensure_mode(self):
+        self.assertNotIn("--ensure-running", SELECTOR.read_text())
+        self.assertNotIn("--ensure-running", HERDR_VIM.read_text())
+        project_layout = (PROJECT_PLUGIN / "executable_project-layout").read_text()
+        self.assertNotIn("--ensure-running", project_layout)
+        self.assertNotIn("ensure_editor()", project_layout)
 
     def test_session_cache_accepts_only_native_opencode_ids(self):
         valid_pane = {
@@ -458,7 +517,6 @@ class HerdrWorkflowTest(unittest.TestCase):
             "w1",
             str(project),
             "nvim",
-            "--ensure-running",
         ]
         self.assertIn(restore, calls)
         self.assertLess(calls.index(restore), calls.index(["tab", "close", "teardown-tab"]))

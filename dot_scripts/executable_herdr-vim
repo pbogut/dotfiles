@@ -96,7 +96,7 @@ fi
 
 HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
 	HERDR_SOCKET_PATH=$herdr_socket \
-	herdr-select-tab-or-new nvim --ensure-running || exit 1
+	herdr-select-tab-or-new nvim || exit 1
 
 for _ in {1..100}; do
 	if nvim_is_ready; then

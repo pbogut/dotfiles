@@ -38,12 +38,10 @@ fi
 role=${1:?"tab role is required"}
 shift
 restore_only=false
-ensure_running=false
 focus_requested=true
 while (($#)); do
 	case $1 in
 	--restore) restore_only=true ;;
-	--ensure-running) ensure_running=true ;;
 	--no-focus) focus_requested=false ;;
 	*)
 		echo "Unsupported option: $1" >&2
@@ -282,19 +280,19 @@ apply_role() {
 tabs=$("$herdr" tab list --workspace "$workspace_id") || exit 1
 tab=$(jq -c \
 	--arg label "$label" \
-	--arg legacy_prefix "$legacy_slot:" \
-	--arg role "$role" '
+	--arg legacy_prefix "$legacy_slot:" '
   (
     [.result.tabs[] | select(.label == $label)][0] //
-    [.result.tabs[] | select(.label | startswith($legacy_prefix))][0] //
-    (if $role == "nvim" then
-      [.result.tabs[] | select(.number == 1 and .label == "1")][0]
-    else
-      null
-    end)
+    [.result.tabs[] | select(.label | startswith($legacy_prefix))][0]
   ) // empty
 ' <<<"$tabs")
 tab_id=$(jq -r '.tab_id // empty' <<<"$tab")
+initial_tab_id=
+if [[ -z $tab_id && $role == nvim ]] && ! $restore_only; then
+	initial_tab_id=$(jq -r '
+    [.result.tabs[] | select(.number == 1 and .label == "1")][0].tab_id // empty
+  ' <<<"$tabs")
+fi
 
 if [[ -n $tab_id ]]; then
 	if [[ $(jq -r '.label' <<<"$tab") != "$label" ]]; then
@@ -302,7 +300,7 @@ if [[ -n $tab_id ]]; then
 	fi
 	pane=
 	pane_id=
-	if $restore_only || [[ $role == nvim || $role == opencode ]]; then
+	if $restore_only || [[ $role == opencode ]]; then
 		pane=$(pane_for_tab "$tab_id") || exit 1
 		pane_id=$(jq -r '.pane_id // empty' <<<"$pane")
 		pane_cwd=$(jq -r '.foreground_cwd // .cwd // empty' <<<"$pane")
@@ -332,15 +330,8 @@ if [[ -n $tab_id ]]; then
 
 	case $role in
 	nvim)
-		if HERDR_ACTIVE_WORKSPACE_ID=$workspace_id HERDR_SOCKET_PATH=$HERDR_SOCKET_PATH herdr-vim --ping ||
-			{ [[ -n $pane_id ]] && process_matches_role "$pane_id"; }; then
-			focus_managed_tab "$tab_id"
-			exit
-		fi
-		if ! $ensure_running; then
-			focus_managed_tab "$tab_id"
-			exit
-		fi
+		focus_managed_tab "$tab_id"
+		exit
 		;;
 	opencode)
 		if [[ -n $pane_id ]] && process_matches_role "$pane_id"; then
@@ -361,7 +352,11 @@ if [[ -n $tab_id ]]; then
 else
 	$restore_only && exit 0
 	[[ $role != opencode ]] || set_opencode_command
-	apply_role workspace "$workspace_id" || exit 1
+	if [[ -n $initial_tab_id ]]; then
+		apply_role tab "$initial_tab_id" || exit 1
+	else
+		apply_role workspace "$workspace_id" || exit 1
+	fi
 fi
 
 tabs=$("$herdr" tab list --workspace "$workspace_id") || exit 1
