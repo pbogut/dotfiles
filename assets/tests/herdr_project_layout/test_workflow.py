@@ -115,7 +115,7 @@ class HerdrWorkflowTest(unittest.TestCase):
         fake_selector.write_text(
             "#!/usr/bin/env bash\n"
             "herdr test restore-editor \"${HERDR_ACTIVE_WORKSPACE_ID:-}\" "
-            "\"${HERDR_ACTIVE_PANE_CWD:-}\" \"$@\"\n"
+            "\"${HERDR_MANAGED_TAB_CWD:-}\" \"$@\"\n"
             "[[ ${FAKE_SELECTOR_FAIL_ROLE:-} != ${1:-} ]]\n"
         )
         fake_selector.chmod(0o755)
@@ -180,6 +180,28 @@ class HerdrWorkflowTest(unittest.TestCase):
         if not self.log.exists():
             return []
         return [json.loads(line) for line in self.log.read_text().splitlines()]
+
+    def record_workspace_root(self, root, workspace_id="w1"):
+        env = self.env.copy()
+        env.update(
+            {
+                "HERDR_PLUGIN_EVENT": "pane.created",
+                "HERDR_PLUGIN_EVENT_JSON": json.dumps(
+                    {
+                        "data": {
+                            "pane": {
+                                "pane_id": f"{workspace_id}:p1",
+                                "workspace_id": workspace_id,
+                                "cwd": str(root),
+                            }
+                        }
+                    }
+                ),
+            }
+        )
+        result = self.run_script(REPORT_REPO, env=env)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.log.unlink(missing_ok=True)
 
     def test_existing_role_focuses_without_replacing_other_tabs(self):
         self.env["FAKE_HERDR_TABS"] = json.dumps(
@@ -504,6 +526,197 @@ class HerdrWorkflowTest(unittest.TestCase):
             any(call[:2] in (["pane", "run"], ["tab", "close"]) for call in self.calls())
         )
 
+    def test_recorded_long_workspace_root_wins_over_active_pane_cwd(self):
+        workspace = self.temp / ("workspace-" + "x" * 90)
+        nested = workspace / "nested"
+        nested.mkdir(parents=True)
+        api_path = self.temp / "layout.sock"
+        self.env.update(
+            {
+                "HERDR_ACTIVE_PANE_CWD": str(nested),
+                "HERDR_SOCKET_PATH": str(api_path),
+            }
+        )
+        self.record_workspace_root(workspace)
+
+        with FakeHerdrApi(api_path) as api:
+            result = self.run_script(SELECTOR, "dev", "--no-focus")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        layout = next(request for request in api.requests if request["method"] == "layout.apply")
+        self.assertEqual(layout["params"]["root"]["cwd"], str(workspace.resolve()))
+
+    def test_native_worktree_replaces_a_mismatched_recorded_root(self):
+        stale_root = self.temp / "stale-root"
+        workspace = self.temp / "native-worktree"
+        nested = workspace / "nested"
+        stale_root.mkdir()
+        nested.mkdir(parents=True)
+        api_path = self.temp / "layout.sock"
+        root_id = hashlib.sha256(f"{workspace.resolve()}\0".encode()).hexdigest()
+        self.env.update(
+            {
+                "FAKE_HERDR_WORKSPACE": json.dumps(
+                    {
+                        "result": {
+                            "workspace": {
+                                "tokens": {"workspace_root_id": root_id},
+                                "worktree": {"checkout_path": str(workspace)},
+                            }
+                        }
+                    }
+                ),
+                "HERDR_ACTIVE_PANE_CWD": str(nested),
+                "HERDR_SOCKET_PATH": str(api_path),
+            }
+        )
+        self.record_workspace_root(stale_root)
+
+        with FakeHerdrApi(api_path) as api:
+            result = self.run_script(SELECTOR, "dev", "--no-focus")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        layout = next(request for request in api.requests if request["method"] == "layout.apply")
+        self.assertEqual(layout["params"]["root"]["cwd"], str(workspace.resolve()))
+
+    def test_explicit_managed_root_replaces_a_recorded_root(self):
+        stale_root = self.temp / "stale-root"
+        workspace = self.temp / "explicit-worktree"
+        stale_root.mkdir()
+        workspace.mkdir()
+        api_path = self.temp / "layout.sock"
+        self.env.update(
+            {
+                "HERDR_ACTIVE_PANE_CWD": str(stale_root),
+                "HERDR_MANAGED_TAB_CWD": str(workspace),
+                "HERDR_SOCKET_PATH": str(api_path),
+            }
+        )
+        self.record_workspace_root(stale_root)
+
+        with FakeHerdrApi(api_path) as api:
+            result = self.run_script(SELECTOR, "dev", "--no-focus")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        layout = next(request for request in api.requests if request["method"] == "layout.apply")
+        self.assertEqual(layout["params"]["root"]["cwd"], str(workspace.resolve()))
+        self.assertNotIn(["workspace", "get", "w1"], self.calls())
+
+    def test_legacy_git_workspace_falls_back_to_repository_root(self):
+        workspace = self.temp / "legacy-workspace"
+        nested = workspace / "nested"
+        nested.mkdir(parents=True)
+        subprocess.run(
+            ["git", "init", str(workspace)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        api_path = self.temp / "layout.sock"
+        self.env.update(
+            {
+                "HERDR_ACTIVE_PANE_CWD": str(nested),
+                "HERDR_SOCKET_PATH": str(api_path),
+            }
+        )
+
+        with FakeHerdrApi(api_path) as api:
+            result = self.run_script(SELECTOR, "dev", "--no-focus")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        layout = next(request for request in api.requests if request["method"] == "layout.apply")
+        self.assertEqual(layout["params"]["root"]["cwd"], str(workspace.resolve()))
+
+    def test_restore_restarts_command_at_recorded_root(self):
+        workspace = self.temp / "restore-workspace"
+        nested = workspace / "nested"
+        nested.mkdir(parents=True)
+        api_path = self.temp / "layout.sock"
+        self.env.update(
+            {
+                "FAKE_HERDR_TABS": json.dumps(
+                    {
+                        "result": {
+                            "tabs": [
+                                {"tab_id": "dev-tab", "label": "dev", "number": 1}
+                            ]
+                        }
+                    }
+                ),
+                "FAKE_HERDR_PANES": json.dumps(
+                    {
+                        "result": {
+                            "panes": [
+                                {
+                                    "pane_id": "dev-pane",
+                                    "tab_id": "dev-tab",
+                                    "workspace_id": "w1",
+                                    "cwd": str(nested),
+                                }
+                            ]
+                        }
+                    }
+                ),
+                "HERDR_ACTIVE_PANE_CWD": str(nested),
+                "HERDR_SOCKET_PATH": str(api_path),
+            }
+        )
+        self.record_workspace_root(workspace)
+
+        with FakeHerdrApi(api_path) as api:
+            result = self.run_script(SELECTOR, "dev", "--restore")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        layout = next(request for request in api.requests if request["method"] == "layout.apply")
+        self.assertEqual(layout["params"]["root"]["cwd"], str(workspace.resolve()))
+
+    def test_restore_keeps_existing_shell_cwd(self):
+        workspace = self.temp / "shell-workspace"
+        nested = workspace / "nested"
+        nested.mkdir(parents=True)
+        self.env.update(
+            {
+                "FAKE_HERDR_TABS": json.dumps(
+                    {
+                        "result": {
+                            "tabs": [
+                                {
+                                    "tab_id": "shell-tab",
+                                    "label": "shell",
+                                    "number": 1,
+                                }
+                            ]
+                        }
+                    }
+                ),
+                "FAKE_HERDR_PANES": json.dumps(
+                    {
+                        "result": {
+                            "panes": [
+                                {
+                                    "pane_id": "shell-pane",
+                                    "tab_id": "shell-tab",
+                                    "workspace_id": "w1",
+                                    "cwd": str(nested),
+                                }
+                            ]
+                        }
+                    }
+                ),
+            }
+        )
+        self.record_workspace_root(workspace)
+
+        result = self.run_script(SELECTOR, "shell", "--restore")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(
+            any(
+                call[:2] in (["workspace", "get"], ["workspace", "report-metadata"])
+                for call in self.calls()
+            )
+        )
+
     def test_teardown_caches_session_and_closes_tabs_before_cleanup(self):
         layout, worktree = self.project_fixture()
         layout.write_text(
@@ -721,8 +934,17 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.assertIn('plugins/project-layout" --enabled', hook)
 
     def test_stale_opencode_tab_is_replaced_with_exact_session_argv(self):
+        workspace = self.temp / "opencode-workspace"
+        nested = workspace / "nested"
+        nested.mkdir(parents=True)
         api_path = self.temp / "layout.sock"
-        self.env["HERDR_SOCKET_PATH"] = str(api_path)
+        self.env.update(
+            {
+                "HERDR_ACTIVE_PANE_CWD": str(nested),
+                "HERDR_SOCKET_PATH": str(api_path),
+            }
+        )
+        self.record_workspace_root(workspace)
         self.env["FAKE_HERDR_TABS"] = json.dumps(
             {
                 "result": {
@@ -741,6 +963,7 @@ class HerdrWorkflowTest(unittest.TestCase):
                             "pane_id": "old-pane",
                             "tab_id": "old-tab",
                             "workspace_id": "w1",
+                            "cwd": str(nested),
                             "agent_session": {
                                 "agent": "opencode",
                                 "source": "herdr:opencode",
@@ -764,6 +987,7 @@ class HerdrWorkflowTest(unittest.TestCase):
             layout["params"]["root"]["command"],
             ["opencode-launcher", "--session", session_id, "--port"],
         )
+        self.assertEqual(layout["params"]["root"]["cwd"], str(workspace.resolve()))
         self.assertFalse(
             any(call[:2] in (["pane", "run"], ["tab", "close"]) for call in self.calls())
         )
@@ -860,6 +1084,9 @@ class HerdrWorkflowTest(unittest.TestCase):
                 )
                 self.assertEqual(
                     {call[4] for call in selector_calls}, set(expected_roles)
+                )
+                self.assertEqual(
+                    {call[3] for call in selector_calls}, {str(worktree)}
                 )
 
     def test_setup_pane_open_accepts_a_generic_success_response(self):

@@ -366,8 +366,9 @@ init_layout() {
 	fi
 
 	if [[ -n $workspace_id ]] && refresh_workspace_id; then
+		herdr_record_workspace_root "$workspace_id" "$worktree_dir" >/dev/null 2>&1 || true
 		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
-			HERDR_ACTIVE_PANE_CWD=$worktree_dir \
+			HERDR_MANAGED_TAB_CWD=$worktree_dir \
 			herdr-vim -- "$layout_file"
 		return
 	fi
@@ -583,7 +584,7 @@ select_managed_tab() {
 	for _ in {1..3}; do
 		refresh_workspace_id || return 1
 		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
-			HERDR_ACTIVE_PANE_CWD=$worktree_dir \
+			HERDR_MANAGED_TAB_CWD=$worktree_dir \
 			herdr-select-tab-or-new "$role" "$@"
 		status=$?
 		((status == 0)) && return 0
@@ -649,7 +650,7 @@ restore_editor_after_teardown() {
 		[[ -n $editor_cwd && -d $editor_cwd ]] || continue
 		editor_cwd=$(realpath -e -- "$editor_cwd") || continue
 		HERDR_ACTIVE_WORKSPACE_ID=$workspace_id \
-			HERDR_ACTIVE_PANE_CWD=$editor_cwd \
+			HERDR_MANAGED_TAB_CWD=$editor_cwd \
 			herdr-select-tab-or-new nvim
 		return
 	done
@@ -769,6 +770,7 @@ apply_layout() {
 	local status
 
 	refresh_workspace_id || return 1
+	herdr_record_workspace_root "$workspace_id" "$worktree_dir" >/dev/null 2>&1 || true
 	herdr_acquire_topology_lock "$workspace_id" || return 1
 	if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} == setup ]]; then
 		name_current_plugin_tab setup

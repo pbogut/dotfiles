@@ -66,6 +66,11 @@ replaces the initial workspace tab or creates a new tab and starts Neovim once.
 It does not inspect or restart an existing tab. The startup restoration hook
 remains responsible for restarting commands after Herdr restores a session.
 
+New and restarted managed command tabs start from the workspace root recorded
+when its initial pane was created. Project layouts refresh that root from their
+worktree path. Existing tabs are only focused, and restored shell tabs keep
+their saved working directory.
+
 Press `prefix+u` to open the project task picker. Each `herdr_task` receives a
 name followed by `--` and the command arguments. Add `--progress` before the
 name to animate the task tab while it runs. Add `--close` to close the tab after

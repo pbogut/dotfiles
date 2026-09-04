@@ -121,11 +121,57 @@ workspace_id=${HERDR_ACTIVE_WORKSPACE_ID:-${HERDR_WORKSPACE_ID:-}}
 	exit 1
 }
 herdr_acquire_topology_lock "$workspace_id" || exit 1
-role_cwd=${HERDR_ACTIVE_PANE_CWD:-$PWD}
+role_cwd=
+role_cwd_hint=${HERDR_ACTIVE_PANE_CWD:-$PWD}
 
 focus_managed_tab() {
 	if $focus_requested; then
 		"$herdr" tab focus "$1" >/dev/null
+	fi
+}
+
+resolve_role_cwd() {
+	local workspace='{}'
+	local stored_root stored_root_id reported_root_id checkout_path candidate git_root
+
+	if [[ -n ${HERDR_MANAGED_TAB_CWD:-} ]]; then
+		if [[ ! -d $HERDR_MANAGED_TAB_CWD ]]; then
+			echo "Managed tab cwd does not exist: $HERDR_MANAGED_TAB_CWD" >&2
+			return 1
+		fi
+		role_cwd=$(realpath -e -- "$HERDR_MANAGED_TAB_CWD") || return
+	else
+		workspace=$("$herdr" workspace get "$workspace_id" 2>/dev/null) || workspace='{}'
+		reported_root_id=$(jq -r '.result.workspace.tokens.workspace_root_id // empty' <<<"$workspace")
+
+		if stored_root=$(herdr_get_workspace_root "$workspace_id" 2>/dev/null); then
+			stored_root_id=$(herdr_workspace_root_id "$stored_root")
+			if [[ -z $reported_root_id || $reported_root_id == "$stored_root_id" ]]; then
+				role_cwd=$stored_root
+			fi
+		fi
+
+		if [[ -z $role_cwd ]]; then
+			checkout_path=$(jq -r '.result.workspace.worktree.checkout_path // empty' <<<"$workspace")
+			if [[ -n $checkout_path && -d $checkout_path ]]; then
+				role_cwd=$(realpath -e -- "$checkout_path") || return
+			fi
+		fi
+
+		if [[ -z $role_cwd ]]; then
+			candidate=$role_cwd_hint
+			[[ -d $candidate ]] || candidate=$PWD
+			if [[ ! -d $candidate ]]; then
+				echo "Cannot determine a working directory for workspace $workspace_id" >&2
+				return 1
+			fi
+			git_root=$(git -C "$candidate" rev-parse --show-toplevel 2>/dev/null) || git_root=
+			role_cwd=$(realpath -e -- "${git_root:-$candidate}") || return
+		fi
+	fi
+
+	if ! herdr_record_workspace_root "$workspace_id" "$role_cwd" >/dev/null 2>&1; then
+		echo "Could not remember workspace root: $role_cwd" >&2
 	fi
 }
 
@@ -249,6 +295,8 @@ process_matches_role() {
 apply_role() {
 	local target_kind=$1 target_id=$2 root params command_json focus_json
 
+	resolve_role_cwd || return
+
 	command_json=$(if ((${#command[@]})); then
 		jq -cn --args '$ARGS.positional' -- "${command[@]}"
 	else
@@ -304,7 +352,7 @@ if [[ -n $tab_id ]]; then
 		pane=$(pane_for_tab "$tab_id") || exit 1
 		pane_id=$(jq -r '.pane_id // empty' <<<"$pane")
 		pane_cwd=$(jq -r '.foreground_cwd // .cwd // empty' <<<"$pane")
-		[[ ! -d $pane_cwd ]] || role_cwd=$pane_cwd
+		[[ ! -d $pane_cwd ]] || role_cwd_hint=$pane_cwd
 	fi
 
 	if $restore_only; then
