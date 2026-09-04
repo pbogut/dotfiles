@@ -461,7 +461,7 @@ update_trust() {
 
 load_layout() {
 	reset_registered_tasks
-	HERDR_TABS=(nvim dev opencode)
+	HERDR_TABS=()
 	HERDR_DEV_COMMAND=(make dev)
 	HERDR_SETUP_VERSION=1
 	unset -f herdr_setup 2>/dev/null || true
@@ -593,6 +593,16 @@ ensure_editor() {
 	select_managed_tab nvim --ensure-running
 }
 
+layout_requests_editor() {
+	local role
+
+	((${#HERDR_TABS[@]} == 0)) && return 0
+	for role in "${HERDR_TABS[@]}"; do
+		[[ $role != nvim ]] || return 0
+	done
+	return 1
+}
+
 close_plugin_tab() {
 	[[ -n ${HERDR_TAB_ID:-} ]] || return 1
 	"$herdr" tab close "$HERDR_TAB_ID" >/dev/null
@@ -678,11 +688,14 @@ finish_setup_tab() {
 	if [[ $outcome == failed ]]; then
 		print_action_button "open nvim"
 		wait_for_enter || return 1
+		ensure_editor || true
 	else
 		printf '\nDone.\n\n'
 		wait_for_setup_autoclose || return 0
+		if layout_requests_editor; then
+			ensure_editor || true
+		fi
 	fi
-	ensure_editor || true
 	if ! close_plugin_tab; then
 		notify "Project setup tab remained open" "Close it manually"
 		return 1
@@ -691,6 +704,7 @@ finish_setup_tab() {
 
 apply_layout_unlocked() {
 	local role setup_status status=0
+	local -a roles
 	local -A seen=()
 
 	refresh_workspace_id || return 1
@@ -718,7 +732,9 @@ apply_layout_unlocked() {
 		return 1
 	}
 
-	for role in "${HERDR_TABS[@]}"; do
+	roles=("${HERDR_TABS[@]}")
+	((${#roles[@]} > 0)) || roles=(nvim)
+	for role in "${roles[@]}"; do
 		case $role in
 		nvim | shell | shell-2 | dev | sql | rest | git | docker | opencode | shell-3) ;;
 		*)
@@ -736,11 +752,16 @@ apply_layout_unlocked() {
 		fi
 	done
 
-	if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} != setup ]]; then
+	if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} != setup ]] && layout_requests_editor; then
 		ensure_editor || status=1
 	fi
 	if ((status != 0)); then
 		notify "Project layout incomplete" "$worktree_dir"
+		if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} == setup ]]; then
+			printf '\nProject layout incomplete.\n\n'
+			return "$setup_failed_status"
+		fi
+		ensure_editor || true
 	fi
 	if [[ ${HERDR_PLUGIN_ENTRYPOINT_ID:-} == setup ]]; then
 		return "$setup_ready_status"

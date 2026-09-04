@@ -113,6 +113,7 @@ class HerdrWorkflowTest(unittest.TestCase):
             "#!/usr/bin/env bash\n"
             "herdr test restore-editor \"${HERDR_ACTIVE_WORKSPACE_ID:-}\" "
             "\"${HERDR_ACTIVE_PANE_CWD:-}\" \"$@\"\n"
+            "[[ ${FAKE_SELECTOR_FAIL_ROLE:-} != ${1:-} ]]\n"
         )
         fake_selector.chmod(0o755)
         fake_vim = bindir / "herdr-vim"
@@ -638,6 +639,46 @@ class HerdrWorkflowTest(unittest.TestCase):
         )
         return layout, worktree
 
+    def test_project_layout_uses_configured_tabs_or_nvim_fallback(self):
+        layout, worktree = self.project_fixture()
+        cases = (
+            ("undefined", "HERDR_SETUP_VERSION=1\n", ["nvim"]),
+            ("empty", "HERDR_TABS=()\n", ["nvim"]),
+            (
+                "configured",
+                "HERDR_TABS=(nvim dev opencode)\n",
+                ["nvim", "dev", "opencode"],
+            ),
+            (
+                "authoritative",
+                "HERDR_TABS=(dev opencode)\n",
+                ["dev", "opencode"],
+            ),
+        )
+
+        for name, contents, expected_roles in cases:
+            with self.subTest(name=name):
+                self.log.unlink(missing_ok=True)
+                layout.write_text(contents)
+
+                result = self.run_script(
+                    PROJECT_PLUGIN / "executable_project-layout", "apply"
+                )
+
+                self.assertEqual(result.returncode, 0, result.stderr)
+                selector_calls = [
+                    call
+                    for call in self.calls()
+                    if call[:2] == ["test", "restore-editor"]
+                ]
+                self.assertEqual(
+                    [call[4] for call in selector_calls if "--no-focus" in call],
+                    expected_roles,
+                )
+                self.assertEqual(
+                    {call[4] for call in selector_calls}, set(expected_roles)
+                )
+
     def test_setup_pane_open_accepts_a_generic_success_response(self):
         layout, _ = self.project_fixture()
         layout.write_text(
@@ -697,6 +738,54 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.assertIn(["tab", "rename", "setup-tab", "setup"], calls)
         self.assertNotIn(
             ["notification", "show", "Project setup tab was not named"], calls
+        )
+
+    def test_setup_reports_configured_tab_failure(self):
+        layout, _ = self.project_fixture()
+        layout.write_text(
+            "HERDR_TABS=(nvim dev opencode)\n"
+            "herdr_setup() { :; }\n"
+        )
+        self.env.update(
+            {
+                "FAKE_SELECTOR_FAIL_ROLE": "dev",
+                "HERDR_PANE_ID": "setup-pane",
+                "HERDR_PLUGIN_ENTRYPOINT_ID": "setup",
+                "HERDR_TAB_ID": "setup-tab",
+            }
+        )
+
+        result = subprocess.run(
+            [
+                "bash",
+                str(PROJECT_PLUGIN / "executable_project-layout"),
+                "setup",
+            ],
+            input="\n",
+            check=False,
+            capture_output=True,
+            text=True,
+            env=self.env,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Project layout incomplete.", result.stdout)
+        self.assertNotIn("\nDone.\n", result.stdout)
+        selector_roles = [
+            call[4]
+            for call in self.calls()
+            if call[:2] == ["test", "restore-editor"]
+        ]
+        self.assertIn("opencode", selector_roles)
+        self.assertIn(
+            [
+                "notification",
+                "show",
+                "Project layout incomplete",
+                "--body",
+                str(layout.parent / "main"),
+            ],
+            self.calls(),
         )
 
     def test_new_project_task_uses_layout_apply(self):

@@ -55,10 +55,11 @@ herdr_teardown() {
 }
 ```
 
-`HERDR_TABS` supports the roles understood by `herdr-select-tab-or-new`.
-`HERDR_DEV_COMMAND` is a Bash array and runs from the worktree. Setup runs once
-for each worktree and setup version. Increment `HERDR_SETUP_VERSION` when setup
-needs to run again.
+`HERDR_TABS` supports the roles understood by `herdr-select-tab-or-new`. A
+non-empty array is authoritative. If it is omitted or empty, the layout opens
+only `nvim`. `HERDR_DEV_COMMAND` is a Bash array and runs from the worktree.
+Setup runs once for each worktree and setup version. Increment
+`HERDR_SETUP_VERSION` when setup needs to run again.
 
 Press `prefix+u` to open the project task picker. Each `herdr_task` receives a
 name followed by `--` and the command arguments. Add `--progress` before the
@@ -84,8 +85,9 @@ inside task, setup, or teardown functions.
 
 Setup and teardown run in temporary Herdr tabs so long commands do not block
 the rest of the UI. Setup opens missing managed tabs before showing its Done
-button. Closing a workspace still asks for confirmation in a popup. After
-confirmation, Herdr caches the native OpenCode session and closes the other
-workspace tabs before starting teardown. If teardown fails after removing the
-worktree, keeping the workspace open restores Neovim in the first surviving
-worktree, project, or home directory.
+button and reports failure if any configured tab cannot be opened. Closing a
+workspace still asks for confirmation in a popup. After confirmation, Herdr
+caches the native OpenCode session and closes the other workspace tabs before
+starting teardown. If teardown fails after removing the worktree, keeping the
+workspace open restores Neovim in the first surviving worktree, project, or
+home directory.
