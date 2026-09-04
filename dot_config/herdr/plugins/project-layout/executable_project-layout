@@ -686,15 +686,11 @@ finish_setup_tab() {
 	local outcome=$1
 
 	if [[ $outcome == failed ]]; then
-		print_action_button "open nvim"
+		print_action_button close
 		wait_for_enter || return 1
-		ensure_editor || true
 	else
 		printf '\nDone.\n\n'
 		wait_for_setup_autoclose || return 0
-		if layout_requests_editor; then
-			ensure_editor || true
-		fi
 	fi
 	if ! close_plugin_tab; then
 		notify "Project setup tab remained open" "Close it manually"

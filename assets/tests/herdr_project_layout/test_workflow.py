@@ -736,6 +736,15 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         calls = self.calls()
         self.assertIn(["tab", "rename", "setup-tab", "setup"], calls)
+        selector_calls = [
+            call
+            for call in calls
+            if call[:2] == ["test", "restore-editor"]
+        ]
+        self.assertTrue(selector_calls)
+        self.assertTrue(all("--no-focus" in call for call in selector_calls))
+        self.assertIn("close in 5s", result.stdout)
+        self.assertEqual(calls[-1], ["tab", "close", "setup-tab"])
         self.assertNotIn(
             ["notification", "show", "Project setup tab was not named"], calls
         )
@@ -755,38 +764,59 @@ class HerdrWorkflowTest(unittest.TestCase):
             }
         )
 
-        result = subprocess.run(
+        process = subprocess.Popen(
             [
                 "bash",
                 str(PROJECT_PLUGIN / "executable_project-layout"),
                 "setup",
             ],
-            input="\n",
-            check=False,
-            capture_output=True,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
             env=self.env,
         )
+        self.addCleanup(lambda: process.poll() is None and process.kill())
+        notification = [
+            "notification",
+            "show",
+            "Project layout incomplete",
+            "--body",
+            str(layout.parent / "main"),
+        ]
+        for _ in range(200):
+            calls = self.calls()
+            if notification in calls:
+                break
+            if process.poll() is not None:
+                stdout, stderr = process.communicate()
+                self.fail(
+                    f"setup exited before waiting for close: {stdout}{stderr}"
+                )
+            time.sleep(0.01)
+        else:
+            self.fail("setup did not report the configured tab failure")
 
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("Project layout incomplete.", result.stdout)
-        self.assertNotIn("\nDone.\n", result.stdout)
-        selector_roles = [
-            call[4]
-            for call in self.calls()
+        self.assertIsNone(process.poll())
+        self.assertNotIn(["tab", "close", "setup-tab"], calls)
+        stdout, stderr = process.communicate(input="\n", timeout=2)
+
+        self.assertEqual(process.returncode, 1, stderr)
+        self.assertIn("Project layout incomplete.", stdout)
+        self.assertNotIn("\nDone.\n", stdout)
+        self.assertIn(" close ", stdout)
+        self.assertNotIn("open nvim", stdout)
+        calls = self.calls()
+        selector_calls = [
+            call
+            for call in calls
             if call[:2] == ["test", "restore-editor"]
         ]
+        self.assertTrue(all("--no-focus" in call for call in selector_calls))
+        selector_roles = [call[4] for call in selector_calls]
         self.assertIn("opencode", selector_roles)
-        self.assertIn(
-            [
-                "notification",
-                "show",
-                "Project layout incomplete",
-                "--body",
-                str(layout.parent / "main"),
-            ],
-            self.calls(),
-        )
+        self.assertIn(notification, calls)
+        self.assertIn(["tab", "close", "setup-tab"], calls)
 
     def test_new_project_task_uses_layout_apply(self):
         _, worktree = self.project_fixture()
