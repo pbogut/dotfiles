@@ -651,9 +651,11 @@ class HerdrWorkflowTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         calls = self.calls()
-        self.assertTrue(
-            any(call[:3] == ["plugin", "pane", "open"] for call in calls)
+        pane_open = next(
+            call for call in calls if call[:3] == ["plugin", "pane", "open"]
         )
+        self.assertNotIn("--cwd", pane_open)
+        self.assertIn(f"HERDR_LAYOUT_WORKTREE={layout.parent / 'main'}", pane_open)
         self.assertFalse(any(call[:2] == ["tab", "rename"] for call in calls))
         self.assertFalse(
             any(

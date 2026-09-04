@@ -789,7 +789,6 @@ request_prompt() {
 		response=$("$herdr" plugin pane open \
 			--plugin "$plugin_id" \
 			--entrypoint trust \
-			--cwd "$worktree_dir" \
 			--env "HERDR_LAYOUT_WORKTREE=$worktree_dir" \
 			--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
 			--focus 2>&1) && return 0
@@ -825,7 +824,6 @@ request_setup_tab() {
 			--entrypoint setup \
 			--placement tab \
 			--workspace "$workspace_id" \
-			--cwd "$worktree_dir" \
 			--env "HERDR_LAYOUT_WORKTREE=$worktree_dir" \
 			--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
 			--focus 2>&1); then
@@ -876,7 +874,6 @@ request_task_picker() {
 		response=$("$herdr" plugin pane open \
 			--plugin "$plugin_id" \
 			--entrypoint task-picker \
-			--cwd "$worktree_dir" \
 			--env "HERDR_LAYOUT_WORKTREE=$worktree_dir" \
 			--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
 			--focus 2>&1) && return 0
@@ -1284,7 +1281,6 @@ request_teardown_confirmation() {
 		response=$("$herdr" plugin pane open \
 			--plugin "$plugin_id" \
 			--entrypoint teardown-confirm \
-			--cwd "$candidate" \
 			--env "HERDR_LAYOUT_WORKTREE=$candidate" \
 			--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
 			--focus 2>&1) && return 0
@@ -1306,7 +1302,6 @@ request_teardown_tab() {
 		--entrypoint teardown \
 		--placement tab \
 		--workspace "$workspace_id" \
-		--cwd "$candidate" \
 		--env "HERDR_LAYOUT_WORKTREE=$candidate" \
 		--env "HERDR_LAYOUT_WORKSPACE_ID=$workspace_id" \
 		--focus 2>&1); then
