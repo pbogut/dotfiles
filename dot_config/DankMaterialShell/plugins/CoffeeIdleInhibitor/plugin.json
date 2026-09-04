@@ -1,0 +1,14 @@
+{
+  "id": "coffeeIdleInhibitor",
+  "name": "Coffee Idle Inhibitor",
+  "description": "Keep the session awake from DankBar with a coffee icon",
+  "version": "1.0.0",
+  "author": "Pawel Bogut",
+  "type": "widget",
+  "capabilities": ["dankbar-widget"],
+  "component": "./CoffeeIdleInhibitorWidget.qml",
+  "icon": "coffee",
+  "requires_dms": ">=1.5.0",
+  "dependencies": [],
+  "permissions": []
+}
