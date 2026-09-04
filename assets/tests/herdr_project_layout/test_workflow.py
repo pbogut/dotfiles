@@ -21,6 +21,7 @@ HERDR_VIM = ROOT / "dot_scripts/executable_herdr-vim"
 OPENCODE_LAUNCHER = ROOT / "dot_scripts/executable_opencode-launcher"
 PROJECT_LAUNCHER = ROOT / "dot_scripts/executable_herdr-project.tmpl"
 SESSION_CACHE = PROJECT_PLUGIN / "executable_cache-opencode-session.sh"
+REPORT_REPO = PROJECT_PLUGIN / "executable_report-repo.sh"
 STARTUP = PROJECT_PLUGIN / "executable_startup.sh"
 MANIFEST = PROJECT_PLUGIN / "herdr-plugin.toml"
 PLUGIN_LINK_HOOK = ROOT / "run_onchange_after_link-herdr-plugins.sh.tmpl"
@@ -124,6 +125,8 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.env = os.environ.copy()
         worktree = self.temp / "worktree"
         worktree.mkdir()
+        plugin_config = self.temp / "plugin-config"
+        plugin_config.mkdir()
         self.env.update(
             {
                 "FAKE_HERDR_LOG": str(self.log),
@@ -156,6 +159,7 @@ class HerdrWorkflowTest(unittest.TestCase):
                 "HERDR_ACTIVE_WORKSPACE_ID": "w1",
                 "HERDR_ACTIVE_PANE_CWD": str(worktree),
                 "HERDR_BIN_PATH": str(fake_herdr),
+                "HERDR_PLUGIN_CONFIG_DIR": str(plugin_config),
                 "HERDR_SOCKET_PATH": str(self.temp / "herdr.sock"),
                 "PATH": f"{bindir}:{os.environ['PATH']}",
                 "XDG_RUNTIME_DIR": str(self.temp / "runtime"),
@@ -390,6 +394,88 @@ class HerdrWorkflowTest(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(self.calls(), [])
 
+    def test_initial_pane_event_records_workspace_root_without_querying_pane(self):
+        workspace = self.temp / "non-git-workspace"
+        workspace.mkdir()
+        env = self.env.copy()
+        env.update(
+            {
+                "HERDR_PLUGIN_EVENT": "pane.created",
+                "HERDR_PLUGIN_EVENT_JSON": json.dumps(
+                    {
+                        "data": {
+                            "pane": {
+                                "pane_id": "w1:p1",
+                                "workspace_id": "w1",
+                                "cwd": str(workspace),
+                            }
+                        }
+                    }
+                ),
+            }
+        )
+
+        result = self.run_script(REPORT_REPO, env=env)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(any(call[:2] == ["pane", "get"] for call in self.calls()))
+        metadata = next(
+            call
+            for call in self.calls()
+            if call[:2] == ["workspace", "report-metadata"]
+        )
+        root_id = hashlib.sha256(f"{workspace.resolve()}\0".encode()).hexdigest()
+        self.assertIn(f"workspace_root_id={root_id}", metadata)
+        root_files = list(
+            (Path(self.env["HERDR_PLUGIN_CONFIG_DIR"]) / "workspace-roots").glob(
+                "*/w1.json"
+            )
+        )
+        self.assertEqual(len(root_files), 1)
+        self.assertEqual(json.loads(root_files[0].read_text())["cwd"], str(workspace))
+
+    def test_workspace_close_removes_recorded_root(self):
+        workspace = self.temp / "non-git-workspace"
+        workspace.mkdir()
+        create_env = self.env.copy()
+        create_env.update(
+            {
+                "HERDR_PLUGIN_EVENT": "pane.created",
+                "HERDR_PLUGIN_EVENT_JSON": json.dumps(
+                    {
+                        "data": {
+                            "pane": {
+                                "pane_id": "w1:p1",
+                                "workspace_id": "w1",
+                                "cwd": str(workspace),
+                            }
+                        }
+                    }
+                ),
+            }
+        )
+        self.assertEqual(self.run_script(REPORT_REPO, env=create_env).returncode, 0)
+        root_files = list(
+            (Path(self.env["HERDR_PLUGIN_CONFIG_DIR"]) / "workspace-roots").glob(
+                "*/w1.json"
+            )
+        )
+        self.assertEqual(len(root_files), 1)
+        close_env = self.env.copy()
+        close_env.update(
+            {
+                "HERDR_PLUGIN_EVENT": "workspace.closed",
+                "HERDR_PLUGIN_EVENT_JSON": json.dumps(
+                    {"data": {"workspace_id": "w1"}}
+                ),
+            }
+        )
+
+        result = self.run_script(REPORT_REPO, env=close_env)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(root_files[0].exists())
+
     def test_missing_role_uses_layout_apply_with_direct_argv(self):
         api_path = self.temp / "layout.sock"
         self.env["HERDR_SOCKET_PATH"] = str(api_path)
@@ -612,6 +698,7 @@ class HerdrWorkflowTest(unittest.TestCase):
                 ("pane.agent_detected", ["bash", "report-repo.sh"]),
                 ("pane.agent_detected", ["bash", "cache-opencode-session.sh"]),
                 ("pane.moved", ["bash", "report-repo.sh"]),
+                ("workspace.closed", ["bash", "report-repo.sh"]),
                 (
                     "pane.agent_status_changed",
                     ["bash", "cache-opencode-session.sh"],
@@ -702,8 +789,7 @@ class HerdrWorkflowTest(unittest.TestCase):
         layout.write_text(
             'HERDR_TABS=(nvim)\nherdr_task "build assets" -- true\n'
         )
-        config_dir = self.temp / "plugin-config"
-        config_dir.mkdir()
+        config_dir = Path(self.env["HERDR_PLUGIN_CONFIG_DIR"])
         (config_dir / "trusted-projects.json").write_text(
             json.dumps([str(project.resolve())])
         )

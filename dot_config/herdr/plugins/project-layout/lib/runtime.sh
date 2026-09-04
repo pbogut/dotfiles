@@ -51,6 +51,102 @@ print(line, end="")
 	printf '%s\n' "$response"
 }
 
+herdr_plugin_config_dir() {
+	local plugin_id=${HERDR_PLUGIN_ID:-pbogut.project-layout}
+	local herdr_bin=${HERDR_BIN_PATH:-herdr}
+
+	if [[ -n ${HERDR_PLUGIN_CONFIG_DIR:-} ]]; then
+		printf '%s\n' "$HERDR_PLUGIN_CONFIG_DIR"
+		return
+	fi
+	"$herdr_bin" plugin config-dir "$plugin_id" 2>/dev/null
+}
+
+herdr_workspace_root_id() {
+	local cwd=$1 root_id
+
+	read -r root_id _ < <(printf '%s\0' "$cwd" | sha256sum)
+	printf '%s\n' "$root_id"
+}
+
+herdr_workspace_root_file() {
+	local workspace_id=$1 config_dir socket_path session_key
+
+	[[ $workspace_id =~ ^[A-Za-z0-9_-]+$ ]] || return 1
+	config_dir=$(herdr_plugin_config_dir) || return 1
+	socket_path=$(herdr_resolve_socket) || return 1
+	read -r session_key _ < <(printf '%s\0' "$socket_path" | sha256sum)
+	printf '%s/workspace-roots/%s/%s.json\n' "$config_dir" "$session_key" "$workspace_id"
+}
+
+herdr_report_workspace_root() {
+	local workspace_id=$1 cwd=$2 root_id
+	local herdr_bin=${HERDR_BIN_PATH:-herdr}
+	local source_id="plugin:${HERDR_PLUGIN_ID:-pbogut.project-layout}:workspace-root"
+
+	root_id=$(herdr_workspace_root_id "$cwd") || return 1
+	"$herdr_bin" workspace report-metadata "$workspace_id" \
+		--source "$source_id" \
+		--token "workspace_root_id=$root_id" >/dev/null
+}
+
+herdr_record_workspace_root() {
+	local workspace_id=$1 cwd=$2 root_id root_file root_dir lock_fd tmp
+
+	[[ -d $cwd ]] || return 1
+	cwd=$(realpath -e -- "$cwd") || return 1
+	root_id=$(herdr_workspace_root_id "$cwd") || return 1
+	root_file=$(herdr_workspace_root_file "$workspace_id") || return 1
+	root_dir=${root_file%/*}
+	umask 077
+	mkdir -p -- "$root_dir" || return 1
+	[[ -d $root_dir && -O $root_dir && ! -L $root_dir ]] || return 1
+	chmod 700 "$root_dir" || return 1
+	if ! exec {lock_fd}>"$root_dir/.lock"; then
+		return 1
+	fi
+	if ! flock "$lock_fd"; then
+		exec {lock_fd}>&-
+		return 1
+	fi
+	tmp=$(mktemp "$root_dir/.workspace-root.XXXXXX") || {
+		exec {lock_fd}>&-
+		return 1
+	}
+	if ! jq -cn --arg cwd "$cwd" --arg id "$root_id" \
+		'{cwd: $cwd, id: $id}' >"$tmp" ||
+		! chmod 600 "$tmp" ||
+		! mv -f -- "$tmp" "$root_file"; then
+		rm -f -- "$tmp"
+		exec {lock_fd}>&-
+		return 1
+	fi
+	exec {lock_fd}>&-
+	herdr_report_workspace_root "$workspace_id" "$cwd" 2>/dev/null || true
+}
+
+herdr_get_workspace_root() {
+	local workspace_id=$1 root_file record cwd expected_id actual_id
+
+	root_file=$(herdr_workspace_root_file "$workspace_id") || return 1
+	[[ -f $root_file && ! -L $root_file && -O $root_file ]] || return 1
+	record=$(<"$root_file") || return 1
+	cwd=$(jq -er '.cwd | select(type == "string" and length > 0)' <<<"$record" 2>/dev/null) || return 1
+	expected_id=$(jq -er '.id | select(type == "string" and length == 64)' <<<"$record" 2>/dev/null) || return 1
+	[[ -d $cwd ]] || return 1
+	cwd=$(realpath -e -- "$cwd") || return 1
+	actual_id=$(herdr_workspace_root_id "$cwd") || return 1
+	[[ $actual_id == "$expected_id" ]] || return 1
+	printf '%s\n' "$cwd"
+}
+
+herdr_forget_workspace_root() {
+	local workspace_id=$1 root_file
+
+	root_file=$(herdr_workspace_root_file "$workspace_id") || return 1
+	rm -f -- "$root_file"
+}
+
 herdr_acquire_topology_lock() {
 	local workspace_id=$1 socket_path lock_key lock_dir lock_path lock_fd inherited_fd
 

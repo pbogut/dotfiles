@@ -69,6 +69,10 @@ on = "pane.moved"
 command = ["bash", "report-repo.sh"]
 
 [[events]]
+on = "workspace.closed"
+command = ["bash", "report-repo.sh"]
+
+[[events]]
 on = "pane.agent_status_changed"
 command = ["bash", "cache-opencode-session.sh"]
 
