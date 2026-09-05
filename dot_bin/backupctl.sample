@@ -1,0 +1,673 @@
+#!/usr/bin/env bash
+# =============================================================================
+# CONFIG
+# =============================================================================
+
+# PC, z którego serwer pobiera backup.
+# Najwygodniej użyć hosta Tailscale / MagicDNS.
+SOURCE_SSH="pbogut@redeye.local"
+
+# Katalog zawierający katalogi snapshotów Back In Time.
+#
+# Ma wyglądać mniej więcej:
+#
+#   $SOURCE_SNAPSHOT_ROOT/
+#       20260901-050001-123/
+#       20260902-050001-234/
+#       20260903-050001-456/
+#
+SOURCE_SNAPSHOT_ROOT="/storage2/backintime/backintime/redeye/pbogut/1"
+
+# Strefa czasowa nazw snapshotów. Puste = strefa systemowa serwera.
+# Jeśli PC i serwer mają różne strefy, wpisz tutaj strefę PC.
+SNAPSHOT_TIMEZONE=""
+
+# Dysk backupowy po stronie serwera.
+DEST_MOUNT="/iron"
+
+# Gdzie na nim przechowywać snapshoty tego komputera.
+DEST_ROOT="$DEST_MOUNT/backintime/redeye/pbogut/1"
+
+# Marker zabezpieczający przed zapisaniem backupu do pustego mountpointu,
+# gdyby dysk nie był zamontowany.
+VOLUME_MARKER="$DEST_MOUNT/.backup-volume"
+
+
+# Back In Time zwykle używa nazw timestampowych.
+# Pasuje również do nazw z dodatkowym suffixem:
+#   20260905-050001
+#   20260905-050001-123
+SNAPSHOT_REGEX='^[0-9]{8}-[0-9]{6}(-[0-9]+)?$'
+
+
+# -----------------------------------------------------------------------------
+# RETENTION
+# -----------------------------------------------------------------------------
+
+RETENTION_ENABLED=1
+
+# NA POCZĄTEK zostaw 0.
+# Skrypt pokaże co chciałby skasować, ale nic nie usunie.
+#
+# Po kilku przebiegach zmień na:
+# RETENTION_APPLY=1
+RETENTION_APPLY=0
+
+
+# Te N najnowszych snapshotów zostają zawsze.
+KEEP_LATEST=3
+
+# Zachowaj WSZYSTKIE snapshoty z ostatnich N dni.
+KEEP_ALL_DAYS=14
+
+# Później zachowuj ostatni snapshot każdego dnia
+# aż do wieku N dni.
+KEEP_DAILY_DAYS=30
+
+# Później ostatni snapshot każdego tygodnia
+# aż do wieku N tygodni.
+KEEP_WEEKLY_WEEKS=52
+
+# Później ostatni snapshot każdego miesiąca
+# aż do wieku N miesięcy.
+KEEP_MONTHLY_MONTHS=60
+
+# Później ostatni snapshot każdego roku.
+#
+# 0 = bez limitu, roczne snapshoty zostają na zawsze.
+KEEP_YEARLY_YEARS=0
+
+
+# -----------------------------------------------------------------------------
+# RSYNC
+# -----------------------------------------------------------------------------
+
+RSYNC_OPTS=(
+    -aHAX
+    --numeric-ids
+    --partial
+    --human-readable
+    --info=stats2
+)
+
+SSH_OPTS=(
+    -o BatchMode=yes
+    -o ConnectTimeout=15
+)
+
+# -----------------------------------------------------------------------------
+# STATE / LOGS
+# -----------------------------------------------------------------------------
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/backupctl/redeye1"
+SEEN_FILE="$STATE_DIR/seen-snapshots.txt"
+LOCK_FILE="$STATE_DIR/backupctl.lock"
+LOG_FILE="$STATE_DIR/backupctl.log"
+
+
+# =============================================================================
+# END CONFIG
+# =============================================================================
+
+set -Eeuo pipefail
+export LC_ALL=C
+
+if [[ -n "$SNAPSHOT_TIMEZONE" ]]; then
+    export TZ="$SNAPSHOT_TIMEZONE"
+fi
+
+# Ta sama konfiguracja SSH dla listowania i rsync.
+printf -v RSYNC_RSH '%q ' ssh "${SSH_OPTS[@]}"
+
+
+log()
+{
+    printf '[%s] %s\n' "$(date '+%F %T')" "$*"
+}
+
+
+die()
+{
+    log "ERROR: $*" >&2
+    exit 1
+}
+
+
+validate_config()
+{
+    local name value
+
+    for name in RETENTION_ENABLED RETENTION_APPLY; do
+        value="${!name}"
+        [[ "$value" == 0 || "$value" == 1 ]] ||
+            die "$name must be 0 or 1"
+    done
+
+    for name in KEEP_LATEST KEEP_ALL_DAYS KEEP_DAILY_DAYS \
+        KEEP_WEEKLY_WEEKS KEEP_MONTHLY_MONTHS KEEP_YEARLY_YEARS; do
+        value="${!name}"
+        [[ "$value" =~ ^(0|[1-9][0-9]*)$ && ${#value} -le 9 ]] ||
+            die "$name must be a nonnegative integer of at most 9 digits, without leading zeros"
+    done
+
+    [[ "$DEST_MOUNT" == /* && "$DEST_ROOT" == /* && "$STATE_DIR" == /* ]] ||
+        die "DEST_MOUNT, DEST_ROOT and STATE_DIR must be absolute paths"
+}
+
+
+require()
+{
+    command -v "$1" >/dev/null 2>&1 ||
+        die "Missing command: $1"
+}
+
+
+snapshot_epoch()
+{
+    local name="$1"
+
+    [[ "$name" =~ $SNAPSHOT_REGEX ]] || return 1
+
+    local y="${name:0:4}"
+    local m="${name:4:2}"
+    local d="${name:6:2}"
+    local hh="${name:9:2}"
+    local mm="${name:11:2}"
+    local ss="${name:13:2}"
+
+    date -d "$y-$m-$d $hh:$mm:$ss" +%s
+}
+
+
+filter_snapshot_names()
+{
+    local status
+
+    if grep -E -- "$SNAPSHOT_REGEX"; then
+        return 0
+    else
+        status=$?
+        # Brak dopasowań jest poprawnym wynikiem. Inne błędy propagujemy.
+        ((status == 1)) && return 0
+        return "$status"
+    fi
+}
+
+
+list_dest_snapshots()
+{
+    find "$DEST_ROOT" \
+        -mindepth 1 \
+        -maxdepth 1 \
+        -type d \
+        -printf '%f\n' |
+        filter_snapshot_names |
+        sort
+}
+
+
+list_source_snapshots()
+{
+    local remote_root
+    # Cytowanie zgodne z powłoką POSIX, również dla apostrofów w ścieżce.
+    remote_root="${SOURCE_SNAPSHOT_ROOT//\'/\'\\\'\'}"
+
+    ssh "${SSH_OPTS[@]}" "$SOURCE_SSH" \
+        "find '$remote_root' \
+            -mindepth 1 \
+            -maxdepth 1 \
+            -type d \
+            -printf '%f\\n'" |
+        filter_snapshot_names |
+        sort
+}
+
+
+mark_seen()
+{
+    local snapshot="$1"
+    local tmp
+
+    tmp="$(mktemp "$SEEN_FILE.tmp.XXXXXX")" || die "Cannot create state temporary file"
+
+    # Nie zastępuj bazy, jeśli odczyt, zapis lub sortowanie się nie powiedzie.
+    if ! { cat -- "$SEEN_FILE" && printf '%s\n' "$snapshot"; } |
+        sort -u > "$tmp"; then
+        rm -f -- "$tmp"
+        die "Cannot update seen snapshot database"
+    fi
+
+    mv -fT -- "$tmp" "$SEEN_FILE" || die "Cannot replace seen snapshot database"
+}
+
+
+is_seen()
+{
+    local snapshot="$1"
+    local status
+
+    # Bez -q: grep ma przeczytać cały plik i zgłosić błędy odczytu.
+    if grep -Fx -- "$snapshot" "$SEEN_FILE" > /dev/null; then
+        return 0
+    else
+        status=$?
+        ((status == 1)) && return 1
+        die "Cannot read seen snapshot database (grep exit $status)"
+    fi
+}
+
+
+previous_dest_snapshot()
+{
+    local target="$1"
+    local previous=""
+    local listing snapshot
+
+    listing="$(list_dest_snapshots)" || die "Cannot list destination snapshots"
+
+    [[ -n "$listing" ]] || return 0
+
+    while IFS= read -r snapshot; do
+        [[ "$snapshot" < "$target" ]] || break
+        previous="$snapshot"
+    done <<< "$listing"
+
+    printf '%s\n' "$previous"
+}
+
+
+check_destination()
+{
+    mountpoint -q "$DEST_MOUNT" ||
+        die "$DEST_MOUNT is not mounted"
+
+    [[ -f "$VOLUME_MARKER" ]] ||
+        die "Volume marker missing: $VOLUME_MARKER"
+
+    mkdir -p -- "$DEST_ROOT"
+}
+
+
+init_seen_file()
+{
+    local tmp
+
+    if [[ ! -e "$SEEN_FILE" ]]; then
+        log "Initializing seen snapshot database"
+
+        tmp="$(mktemp "$SEEN_FILE.tmp.XXXXXX")" || die "Cannot create state temporary file"
+        if ! list_dest_snapshots > "$tmp"; then
+            rm -f -- "$tmp"
+            die "Cannot initialize database: destination listing failed"
+        fi
+        mv -fT -- "$tmp" "$SEEN_FILE" || die "Cannot initialize seen snapshot database"
+    fi
+}
+
+
+sync_one_snapshot()
+{
+    local snapshot="$1"
+    local final="$DEST_ROOT/$snapshot"
+    local incoming="$DEST_ROOT/.incoming-$snapshot"
+    local previous
+
+    [[ "$snapshot" =~ $SNAPSHOT_REGEX ]] || die "Invalid snapshot name: $snapshot"
+    [[ ! -L "$final" && ! -L "$incoming" ]] ||
+        die "Snapshot paths must not be symbolic links: $snapshot"
+
+    if [[ -d "$final" ]]; then
+        log "Snapshot already exists: $snapshot"
+        mark_seen "$snapshot"
+        return
+    fi
+
+    previous="$(previous_dest_snapshot "$snapshot")" || die "Cannot select previous snapshot"
+
+    # Gotowe snapshoty źródłowe są niezmienne. Wznawiamy przerwany transfer.
+    mkdir -p -- "$incoming"
+
+    local link_args=()
+
+    if [[ -n "$previous" ]]; then
+        link_args=(
+            --link-dest="../$previous"
+        )
+
+        log "Sync $snapshot, link-dest=$previous"
+    else
+        log "Sync $snapshot, no previous snapshot available"
+    fi
+
+    rsync \
+        -s \
+        "${RSYNC_OPTS[@]}" \
+        "${link_args[@]}" \
+        -e "$RSYNC_RSH" \
+        "${SOURCE_SSH}:${SOURCE_SNAPSHOT_ROOT%/}/${snapshot}/" \
+        "$incoming/" || die "Transfer failed: $snapshot (partial copy retained)"
+
+    # Finalizacja następuje dopiero po poprawnym rsync.
+    [[ ! -e "$final" && ! -L "$final" ]] || die "Destination appeared during transfer: $final"
+    mv -T -- "$incoming" "$final" || die "Cannot finalize snapshot: $snapshot"
+
+    mark_seen "$snapshot"
+
+    log "Snapshot completed: $snapshot"
+}
+
+
+sync_snapshots()
+{
+    log "Reading source snapshot list"
+
+    local listing snapshot
+    local -a source_snapshots=()
+
+    # Status polecenia jest sprawdzany przed mapfile.
+    listing="$(list_source_snapshots)" || die "Cannot list source snapshots"
+    if [[ -n "$listing" ]]; then
+        mapfile -t source_snapshots <<< "$listing"
+    fi
+
+    ((${#source_snapshots[@]} > 0)) ||
+        die "No source snapshots found"
+
+    local new_count=0
+
+    for snapshot in "${source_snapshots[@]}"; do
+
+        # Snapshot był już kiedyś poprawnie pobrany.
+        # Jeśli retencja później go skasowała, NIE pobieramy go ponownie.
+        if is_seen "$snapshot"; then
+            continue
+        fi
+
+        sync_one_snapshot "$snapshot"
+        ((new_count += 1))
+    done
+
+    log "New snapshots synced: $new_count"
+}
+
+
+retention()
+{
+    local apply="${1:-$RETENTION_APPLY}"
+    local listing snapshot epoch key i
+    local -a snapshots=()
+
+    [[ "$apply" == 0 || "$apply" == 1 ]] || die "Invalid retention apply flag"
+    listing="$(list_dest_snapshots)" || die "Cannot list destination snapshots"
+    if [[ -n "$listing" ]]; then
+        mapfile -t snapshots <<< "$listing"
+    fi
+
+    local count="${#snapshots[@]}"
+
+    ((count > 0)) || {
+        log "No snapshots to prune"
+        return
+    }
+
+    # Wszystkie granice liczone względem tego samego momentu.
+    local reference
+    reference="$(date '+%F %T %z')"
+
+    local cutoff_all
+    local cutoff_daily
+    local cutoff_weekly
+    local cutoff_monthly
+    local cutoff_yearly=0
+
+    cutoff_all="$(date -d "$reference $KEEP_ALL_DAYS days ago" +%s)" || die "Invalid all-days cutoff"
+    cutoff_daily="$(date -d "$reference $KEEP_DAILY_DAYS days ago" +%s)" || die "Invalid daily cutoff"
+    cutoff_weekly="$(date -d "$reference $KEEP_WEEKLY_WEEKS weeks ago" +%s)" || die "Invalid weekly cutoff"
+    cutoff_monthly="$(date -d "$reference $KEEP_MONTHLY_MONTHS months ago" +%s)" || die "Invalid monthly cutoff"
+
+    if ((KEEP_YEARLY_YEARS > 0)); then
+        cutoff_yearly="$(date -d "$reference $KEEP_YEARLY_YEARS years ago" +%s)" || die "Invalid yearly cutoff"
+    fi
+
+    ((cutoff_all >= cutoff_daily && cutoff_daily >= cutoff_weekly &&
+        cutoff_weekly >= cutoff_monthly)) || die "Retention age bands must be in increasing order"
+    if ((KEEP_YEARLY_YEARS > 0)); then
+        ((cutoff_monthly >= cutoff_yearly)) || die "Yearly retention must extend beyond monthly retention"
+    fi
+
+
+    declare -A keep=()
+    declare -A reason=()
+
+    declare -A daily=()
+    declare -A weekly=()
+    declare -A monthly=()
+    declare -A yearly=()
+
+
+    # -------------------------------------------------------------------------
+    # Zawsze zostaw N najnowszych
+    # -------------------------------------------------------------------------
+
+    local start=$((count - KEEP_LATEST))
+
+    ((start < 0)) && start=0
+
+    for ((i = start; i < count; i++)); do
+        snapshot="${snapshots[$i]}"
+        keep["$snapshot"]=1
+        reason["$snapshot"]="latest"
+    done
+
+
+    # -------------------------------------------------------------------------
+    # Polityka czasowa
+    # -------------------------------------------------------------------------
+
+    for snapshot in "${snapshots[@]}"; do
+
+        # Cały plan powstaje przed usuwaniem. Błędna data przerywa retencję.
+        epoch="$(snapshot_epoch "$snapshot")" || die "Invalid snapshot date: $snapshot; retention aborted"
+
+        if ((epoch >= cutoff_all)); then
+
+            keep["$snapshot"]=1
+            reason["$snapshot"]="all"
+
+        elif ((epoch >= cutoff_daily)); then
+
+            key="$(date -d "@$epoch" +%F)"
+            daily["$key"]="$snapshot"
+
+        elif ((epoch >= cutoff_weekly)); then
+
+            key="$(date -d "@$epoch" +%G-W%V)"
+            weekly["$key"]="$snapshot"
+
+        elif ((epoch >= cutoff_monthly)); then
+
+            key="$(date -d "@$epoch" +%Y-%m)"
+            monthly["$key"]="$snapshot"
+
+        elif ((KEEP_YEARLY_YEARS == 0 || epoch >= cutoff_yearly)); then
+
+            key="$(date -d "@$epoch" +%Y)"
+            yearly["$key"]="$snapshot"
+        fi
+    done
+
+
+    for key in "${!daily[@]}"; do
+        snapshot="${daily[$key]}"
+        keep["$snapshot"]=1
+        reason["$snapshot"]="daily"
+    done
+
+    for key in "${!weekly[@]}"; do
+        snapshot="${weekly[$key]}"
+        keep["$snapshot"]=1
+        reason["$snapshot"]="weekly"
+    done
+
+    for key in "${!monthly[@]}"; do
+        snapshot="${monthly[$key]}"
+        keep["$snapshot"]=1
+        reason["$snapshot"]="monthly"
+    done
+
+    for key in "${!yearly[@]}"; do
+        snapshot="${yearly[$key]}"
+        keep["$snapshot"]=1
+        reason["$snapshot"]="yearly"
+    done
+
+
+    # -------------------------------------------------------------------------
+    # Wynik / usuwanie
+    # -------------------------------------------------------------------------
+
+    local delete_count=0
+
+    if ((apply)); then
+        check_destination
+    fi
+
+    log "Retention plan:"
+
+    for snapshot in "${snapshots[@]}"; do
+
+        if [[ -n "${keep[$snapshot]+x}" ]]; then
+
+            printf '  KEEP    %-30s %s\n' \
+                "$snapshot" \
+                "${reason[$snapshot]}"
+
+        else
+
+            ((delete_count += 1))
+
+            if ((apply)); then
+
+                printf '  DELETE  %s\n' "$snapshot"
+
+                # Snapshot musi nadal wyglądać jak timestamp Back In Time.
+                [[ "$snapshot" =~ $SNAPSHOT_REGEX ]] ||
+                    die "Refusing unsafe delete: $snapshot"
+
+                rm -rf --one-file-system -- "$DEST_ROOT/$snapshot" ||
+                    die "Cannot delete snapshot: $snapshot"
+
+            else
+
+                printf '  DELETE? %s    [dry-run]\n' "$snapshot"
+            fi
+        fi
+    done
+
+    if ((apply)); then
+        log "Retention complete. Deleted: $delete_count"
+    else
+        log "Retention dry-run. Would delete: $delete_count"
+    fi
+}
+
+
+forget_snapshot()
+{
+    local snapshot="${1:?snapshot required}"
+    local tmp status
+
+    [[ "$snapshot" =~ $SNAPSHOT_REGEX ]] ||
+        die "Invalid snapshot name"
+
+    tmp="$(mktemp "$SEEN_FILE.tmp.XXXXXX")" || die "Cannot create state temporary file"
+
+    if grep -Fxv -- "$snapshot" "$SEEN_FILE" > "$tmp"; then
+        :
+    else
+        status=$?
+        if ((status != 1)); then
+            rm -f -- "$tmp"
+            die "Cannot read seen snapshot database (grep exit $status)"
+        fi
+    fi
+    mv -fT -- "$tmp" "$SEEN_FILE" || die "Cannot replace seen snapshot database"
+
+    log "Forgot snapshot: $snapshot"
+}
+
+
+main()
+{
+    local command
+    for command in ssh rsync find date flock mountpoint sort grep \
+        mktemp mv rm mkdir touch tee cat; do
+        require "$command"
+    done
+
+    validate_config
+
+    mkdir -p -- "$STATE_DIR"
+
+    touch "$LOG_FILE"
+
+    exec > >(tee -a "$LOG_FILE") 2>&1
+
+    # Jeden backup na raz.
+    exec 9>"$LOCK_FILE"
+
+    flock -n 9 ||
+        die "Another backupctl process is already running"
+
+    check_destination
+    init_seen_file
+
+    case "${1:-sync}" in
+
+        sync)
+            sync_snapshots
+
+            if ((RETENTION_ENABLED)); then
+                retention "$RETENTION_APPLY"
+            fi
+            ;;
+
+        retention)
+            if [[ "${2:-}" == "--apply" ]]; then
+                retention 1
+            else
+                retention 0
+            fi
+            ;;
+
+        forget)
+            forget_snapshot "${2:-}"
+            ;;
+
+        *)
+            cat <<EOF
+Usage:
+
+  backupctl sync
+      Pull new snapshots and then run retention.
+
+  backupctl retention
+      Show retention plan only.
+
+  backupctl retention --apply
+      Apply retention immediately.
+
+  backupctl forget SNAPSHOT
+      Forget that a snapshot has already been transferred.
+      Useful if you deliberately want to re-import it.
+EOF
+            exit 1
+            ;;
+    esac
+}
+
+
+# Pozwala wczytać funkcje do testów bez uruchamiania backupu.
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi
