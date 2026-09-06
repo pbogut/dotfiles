@@ -1,0 +1,17 @@
+{
+  "id": "outputSelector",
+  "name": "Output Selector",
+  "description": "Select a single monitor or toggle multiple niri outputs independently.",
+  "version": "1.0.0",
+  "author": "Pawel Bogut",
+  "type": "composite",
+  "capabilities": ["daemon", "dankbar-widget"],
+  "components": {
+    "daemon": "./OutputSelectorDaemon.qml",
+    "widget": "./OutputSelectorWidget.qml"
+  },
+  "icon": "desktop_windows",
+  "requires_dms": ">=1.5.3",
+  "dependencies": ["niri"],
+  "permissions": ["process", "settings_read", "settings_write"]
+}
