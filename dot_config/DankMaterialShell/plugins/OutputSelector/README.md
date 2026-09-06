@@ -28,8 +28,8 @@ a remaining one. Failed operations show an error rather than retrying forever.
 The selection and full layout are not persisted. Output commands are temporary;
 resolution, scale, positioning, refresh rate, and niri configuration are not
 edited. Changes made through other display tools or a niri configuration reload
-are reflected in the widget. Single mode is enforced on selection and physical
-topology changes, not continuously against other tools.
+are reflected in the widget. Single mode is enforced on selection, cycling, and
+physical topology changes, not continuously against other tools.
 
 One shared daemon owns switching, so turning off the monitor hosting a widget
 does not interrupt its operation. Commands use argument arrays and fresh output
@@ -37,6 +37,31 @@ queries before changing a monitor. A confirmation timeout leaves the previous
 output enabled if the replacement never activates. If a cable disappears during
 the switch, the daemon attempts to restore a remaining output. Failed hardware
 activation cannot be guaranteed to recover automatically.
+
+## Keyboard cycling
+
+Bind this command to a keyboard shortcut:
+
+```sh
+dms ipc call output-selector cycle
+```
+
+It selects the next connected monitor in connector-name order, including disabled
+monitors, and wraps around at the end. It advances from the active monitor, or the
+focused active monitor when several are on. If focus is unavailable, it uses the
+first active monitor in that order. The command reads fresh output state rather
+than relying on a previous selection.
+
+Cycling works in either mode and saves Single mode after success. The next monitor
+is enabled and confirmed before the others are disabled. With one connected
+monitor, it keeps that monitor on or enables it; with none, it does nothing.
+
+`CYCLE_STARTED` means the request was accepted, not that switching has finished.
+Further requests return `BUSY` while a switch is running. `NIRI_REQUIRED` and
+`NOT_READY` mean the command is unavailable. Check
+`dms ipc call output-selector status` for completion and errors. The command also
+works when the widget is hidden or not placed in a bar, as long as the plugin is
+enabled.
 
 ## Validation
 

@@ -145,6 +145,14 @@ PluginComponent {
     }
 
     IpcHandler {
+        function cycle() : string {
+            if (!root.supported)
+                return "NIRI_REQUIRED";
+            if (!root.controller)
+                return "NOT_READY";
+            return root.controller.cycle() ? "CYCLE_STARTED" : "BUSY";
+        }
+
         function status() : string {
             return JSON.stringify(Object.assign({
                 "supported": root.supported

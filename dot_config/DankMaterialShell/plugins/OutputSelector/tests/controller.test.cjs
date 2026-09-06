@@ -281,3 +281,94 @@ test("a failed-but-applied switch retains the actually active output on hotplug"
     env.drain();
     assert.deepEqual(env.commands, [["DP-1", true], ["eDP-1", false], ["DP-2", false]]);
 });
+
+test("cycle visits disabled monitors in connector order and wraps around", () => {
+    const env = setup("single", [output("eDP-1"), output("DP-2", false), output("DP-1", false)]);
+    for (const name of ["DP-1", "DP-2", "eDP-1"]) {
+        assert.equal(env.controller.cycle(), true);
+        assert.deepEqual(env.commands.at(-1), [name, true]);
+        env.drain();
+        assert.deepEqual(env.snapshot.outputs.filter(item => item.enabled).map(item => item.name), [name]);
+    }
+    assert.deepEqual(env.commands, [
+        ["DP-1", true], ["eDP-1", false],
+        ["DP-2", true], ["DP-1", false],
+        ["eDP-1", true], ["DP-2", false]
+    ]);
+});
+
+test("cycle from multiple advances from focus and saves single mode after success", () => {
+    const env = setup("multiple", [output("eDP-1"), output("DP-1"), output("DP-2", false)]);
+    env.io.focused = () => "DP-1";
+    env.controller.cycle();
+    assert.deepEqual(env.saved, []);
+    assert.equal(env.snapshot.mode, "multiple");
+    env.drain();
+    assert.deepEqual(env.commands, [["DP-2", true], ["DP-1", false], ["eDP-1", false]]);
+    assert.deepEqual(env.saved, ["single"]);
+    assert.equal(env.snapshot.mode, "single");
+});
+
+test("cycle uses fresh inventory rather than stale selection or focus", () => {
+    const env = setup("single", [output("eDP-1"), output("DP-1", false)]);
+    env.outputs = {"eDP-1": output("eDP-1", false), "DP-1": output("DP-1"), "DP-2": output("DP-2", false)};
+    env.controller.cycle();
+    env.drain();
+    assert.deepEqual(env.commands, [["DP-2", true], ["DP-1", false]]);
+});
+
+test("cycle rejects overlapping requests even while the initial read is pending", () => {
+    const env = setup();
+    let completeRead;
+    const read = env.io.read;
+    env.io.read = done => { completeRead = done; };
+    assert.equal(env.controller.cycle(), true);
+    assert.equal(env.controller.cycle(), false);
+    assert.equal(env.controller.select("DP-1"), false);
+    env.io.read = read;
+    completeRead(null, copy(env.outputs));
+    env.drain();
+    assert.equal(env.snapshot.busy, false);
+    env.controller.dispose();
+    assert.equal(env.controller.cycle(), false);
+});
+
+test("cycle keeps a sole monitor on and remembers single mode", () => {
+    const env = setup("multiple", [output("eDP-1")]);
+    env.controller.cycle();
+    assert.deepEqual(env.commands, []);
+    assert.deepEqual(env.saved, ["single"]);
+});
+
+test("cycle enables a sole disabled monitor using fresh state", () => {
+    const env = setup("multiple", [output("eDP-1")]);
+    env.outputs["eDP-1"] = output("eDP-1", false);
+    env.controller.cycle();
+    env.drain();
+    assert.deepEqual(env.commands, [["eDP-1", true]]);
+    assert.deepEqual(env.saved, ["single"]);
+});
+
+test("cycle with no connected monitors does not change the mode or outputs", () => {
+    const env = setup("multiple", []);
+    env.controller.cycle();
+    assert.deepEqual(env.commands, []);
+    assert.deepEqual(env.saved, []);
+    assert.equal(env.snapshot.busy, false);
+    assert.equal(env.snapshot.error, "");
+});
+
+test("failed cycle activation keeps the current monitor and saved mode", () => {
+    const env = setup("multiple", [output("eDP-1"), output("DP-1", false)]);
+    env.io.change = (name, on, done) => {
+        env.commands.push([name, on]);
+        done("Activation failed");
+    };
+    env.controller.cycle();
+    env.drain();
+    assert.deepEqual(env.commands, [["DP-1", true]]);
+    assert.deepEqual(env.saved, []);
+    assert.equal(env.snapshot.mode, "multiple");
+    assert.equal(env.outputs["eDP-1"].current_mode, 0);
+    assert.equal(env.snapshot.error, "Activation failed");
+});

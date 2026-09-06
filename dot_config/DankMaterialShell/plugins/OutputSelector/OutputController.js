@@ -117,6 +117,19 @@ function createController(io, initialMode) {
                 return;
             }
 
+            if (current.kind === "cycle") {
+                var connected = names();
+                if (!connected.length) {
+                    finish("", false);
+                    return;
+                }
+                var live = active();
+                var focused = io.focused();
+                var from = enabled(focused) ? focused : (live[0] || "");
+                current.target = connected[(connected.indexOf(from) + 1) % connected.length];
+                current.kind = "single";
+            }
+
             if (current.waiting) {
                 var waiting = current.waiting;
                 if (waiting.on && !outputs[waiting.name]) {
@@ -213,6 +226,12 @@ function createController(io, initialMode) {
             if (disposed || job || !outputs[name])
                 return false;
             start(mode === "single" ? "single" : "toggle", name, !enabled(name), null, false);
+            return true;
+        },
+        cycle: function () {
+            if (disposed || job)
+                return false;
+            start("cycle", "", true, "single", false);
             return true;
         },
         setMode: function (value, screen) {
