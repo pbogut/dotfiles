@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# This is a wrapper script for lf that allows it to create image previews with
+# ueberzug. This works in concert with the lf configuration file and the
+# lf-cleaner script.
+
+set -e
+
+UB_PID=0
+UB_SOCKET=""
+UEBERZUGPP_TMPDIR="${UEBERZUGPP_TMPDIR:-${TMPDIR:-/tmp}}"
+export UEBERZUGPP_TMPDIR
+
+if [ "${HERDR_ENV:-}" = 1 ]; then
+    HERDR_GEOMETRY=$(
+        herdr pane layout --pane "$HERDR_PANE_ID" |
+            jq -r --arg pane_id "$HERDR_PANE_ID" '
+                .result.layout as $layout
+                | ($layout.panes[] | select(.pane_id == $pane_id).rect) as $pane
+                | [
+                    $pane.x,
+                    $pane.y,
+                    $pane.width,
+                    $pane.height,
+                    ($layout.area.x + $layout.area.width),
+                    ($layout.area.height + 1)
+                ]
+                | @tsv
+            '
+    )
+    read -r UB_PANE_X UB_PANE_Y UB_PANE_WIDTH UB_PANE_HEIGHT UB_CLIENT_WIDTH UB_CLIENT_HEIGHT <<EOF
+$HERDR_GEOMETRY
+EOF
+    export UB_PANE_X UB_PANE_Y UB_PANE_WIDTH UB_PANE_HEIGHT UB_CLIENT_WIDTH UB_CLIENT_HEIGHT
+fi
+
+cleanup() {
+    exec 3>&-
+    ueberzugpp cmd -s "$UB_SOCKET" -a exit
+}
+
+if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+    /usr/bin/lf "$@"
+else
+    [ ! -d "$HOME/.cache/lf" ] && mkdir -p "$HOME/.cache/lf"
+    UB_PID_FILE="$UEBERZUGPP_TMPDIR/.$(uuidgen)"
+    ueberzugpp layer --output wayland --silent --no-stdin --use-escape-codes --pid-file "$UB_PID_FILE"
+    UB_PID=$(cat "$UB_PID_FILE")
+    rm "$UB_PID_FILE"
+    UB_SOCKET="$UEBERZUGPP_TMPDIR/ueberzugpp-${UB_PID}.socket"
+    export UB_PID UB_SOCKET
+    trap cleanup HUP INT QUIT TERM EXIT
+    /usr/bin/lf "$@" 3>&-
+fi

@@ -1,4 +1,7 @@
 #!/bin/sh
+if [ ! -z "$UB_SOCKET" ]; then
+  ueberzugpp cmd -s "$UB_SOCKET" -a remove -i PREVIEW
+fi
 # if [ "$TERM_PROGRAM" = "WezTerm" ] && command -v kitty > /dev/null; then
 #    kitty +kitten icat --clear --stdin no --silent --transfer-mode file < /dev/null > /dev/tty
 # fi

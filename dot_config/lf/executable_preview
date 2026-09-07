@@ -1,14 +1,48 @@
 #!/bin/sh
 
 image() {
-    file=$1
-    w=$2
-    h=$3
-    # x=$4
-    # y=$5
-    # kitty +kitten icat --silent --stdin no --transfer-mode file --place "${w}x${h}@${x}x${y}" "$1" </dev/null >/dev/tty
-    # wezterm imgcat "$file" --width "$w" --height "$h" --position "$x,$y" < /dev/null > /dev/tty
-    chafa -f sixel -s "${w}x${h}" --animate off --polite on "$file"
+    if [ ! -z "$UB_SOCKET" ]; then
+        x=$4
+        y=$5
+        max_width=$(($2 - 1))
+        max_height=$3
+        if [ "${HERDR_ENV:-}" = 1 ] && [ "${UB_CLIENT_WIDTH:-0}" -gt 0 ] && [ "${UB_CLIENT_HEIGHT:-0}" -gt 0 ]; then
+            # The Wayland layer uses full-terminal pixels while its PTY reports pane cells.
+            x=$((((x + UB_PANE_X) * UB_PANE_WIDTH + UB_CLIENT_WIDTH / 2) / UB_CLIENT_WIDTH))
+            y=$((((y + UB_PANE_Y) * UB_PANE_HEIGHT + UB_CLIENT_HEIGHT / 2) / UB_CLIENT_HEIGHT))
+            max_width=$(((max_width * UB_PANE_WIDTH + UB_CLIENT_WIDTH / 2) / UB_CLIENT_WIDTH))
+            max_height=$(((max_height * UB_PANE_HEIGHT + UB_CLIENT_HEIGHT / 2) / UB_CLIENT_HEIGHT))
+        fi
+        ueberzugpp cmd \
+                -s "$UB_SOCKET" \
+                -a add \
+                -i PREVIEW \
+                -x "$x" \
+                -y "$y" \
+                --max-width "$max_width" \
+                --max-height "$max_height" \
+                -f "$1"
+        # HAS HERDR
+    elif [ ! -z "$HERDR_ENV" ]; then
+        file=$1
+        w=$2
+        h=$3
+        # x=$4
+        # y=$5
+        # kitty +kitten icat --silent --stdin no --transfer-mode file --place "${w}x${h}@${x}x${y}" "$1" </dev/null >/dev/tty
+        # wezterm imgcat "$file" --width "$w" --height "$h" --position "$x,$y" < /dev/null > /dev/tty
+        chafa -s "${w}x${h}" --animate off --polite on "$file"
+    else
+        file=$1
+        w=$2
+        h=$3
+        # x=$4
+        # y=$5
+        # kitty +kitten icat --silent --stdin no --transfer-mode file --place "${w}x${h}@${x}x${y}" "$1" </dev/null >/dev/tty
+        # wezterm imgcat "$file" --width "$w" --height "$h" --position "$x,$y" < /dev/null > /dev/tty
+        chafa -f sixel -s "${w}x${h}" --animate off --polite on "$file"
+     fi
+    # Disable lf's preview cache so revisiting an image redraws it.
     exit 1
 }
 
