@@ -53,6 +53,10 @@ PluginComponent {
         Quickshell.execDetached(["focus-or-exec", "Alacritty.herdr", "terminal", "-c", "herdr", "-e", "herdr"]);
     }
 
+    function refreshQuota() {
+        Quickshell.execDetached(["dms", "ipc", "call", "herdr-agents", "refreshQuota"]);
+    }
+
     function focusAgent(agent) {
         const paneId = agent?.pane_id || "";
         if (!paneId) {
@@ -72,9 +76,9 @@ PluginComponent {
         const resetAt = row?.resetAt || 0;
         if (resetAt <= 0)
             return "";
-        const ms = resetAt * 1000 - Date.now();
+        const ms = resetAt * 1000 - quotaNow;
         if (ms <= 0)
-            return "resets now";
+            return "reset passed";
         const minutes = Math.floor(ms / 60000);
         const hours = Math.floor(minutes / 60);
         const days = Math.floor(hours / 24);
@@ -85,11 +89,10 @@ PluginComponent {
         return "resets in " + Math.max(1, minutes) + "m";
     }
 
-    function quotaAgeText() {
-        const updatedAt = quotaData?.updatedAt || 0;
-        if (updatedAt <= 0)
+    function quotaAgeText(fetchedAt) {
+        if (!fetchedAt || fetchedAt <= 0)
             return "";
-        const age = Math.max(0, Math.floor(Date.now() / 1000) - updatedAt);
+        const age = Math.max(0, Math.floor(quotaNow / 1000) - fetchedAt);
         if (age < 60)
             return "just now";
         const minutes = Math.floor(age / 60);
@@ -119,13 +122,22 @@ PluginComponent {
         varName: "quota"
         defaultValue: ({
             "updatedAt": 0,
-            "cacheAgeSeconds": 0,
             "rows": []
         })
     }
 
     readonly property var quotaData: quota.value || ({})
     readonly property var quotaRows: quotaData.rows || []
+    readonly property bool quotaRefreshing: quotaData.refreshing === true
+    property real quotaNow: Date.now()
+
+    Timer {
+        interval: 30000
+        repeat: true
+        running: root.quotaRows.length > 0
+        triggeredOnStart: true
+        onTriggered: root.quotaNow = Date.now()
+    }
 
     onHasAgentsChanged: setVisibilityOverride(hasAgents)
     Component.onCompleted: setVisibilityOverride(hasAgents)
@@ -241,13 +253,38 @@ PluginComponent {
             headerText: "Herdr agents"
             showCloseButton: true
             headerActions: Component {
-                DankActionButton {
-                    iconName: "terminal"
-                    tooltipText: "Open Herdr"
-                    onClicked: {
-                        root.openHerdr();
-                        if (panel.closePopout)
-                            panel.closePopout();
+                Row {
+                    spacing: Theme.spacingXS
+
+                    DankActionButton {
+                        id: quotaRefreshButton
+
+                        iconName: "refresh"
+                        tooltipText: root.quotaRefreshing ? "Refreshing cached quota" : "Refresh quota"
+                        enabled: !root.quotaRefreshing
+                        onClicked: root.refreshQuota()
+
+                        RotationAnimator on rotation {
+                            from: 0
+                            to: 360
+                            duration: 1000
+                            loops: Animation.Infinite
+                            running: root.quotaRefreshing
+                            onRunningChanged: {
+                                if (!running)
+                                    quotaRefreshButton.rotation = 0;
+                            }
+                        }
+                    }
+
+                    DankActionButton {
+                        iconName: "terminal"
+                        tooltipText: "Open Herdr"
+                        onClicked: {
+                            root.openHerdr();
+                            if (panel.closePopout)
+                                panel.closePopout();
+                        }
                     }
                 }
             }
@@ -369,7 +406,7 @@ PluginComponent {
                         Column {
                             width: panelColumn.width
                             spacing: Theme.spacingS
-                            visible: root.quotaRows.length > 0
+                            visible: root.quotaRows.length > 0 || root.quotaRefreshing || !!root.quotaData.error
 
                             Row {
                                 width: parent.width - Theme.spacingM
@@ -394,11 +431,20 @@ PluginComponent {
                                 StyledText {
                                     id: quotaAgeLabel
 
-                                    text: root.quotaAgeText()
+                                    text: root.quotaData.updatedAt > 0 ? "oldest fetch " + root.quotaAgeText(root.quotaData.updatedAt) : ""
                                     visible: text !== ""
                                     font.pixelSize: Theme.fontSizeSmall
                                     color: Theme.surfaceVariantText
                                 }
+                            }
+
+                            StyledText {
+                                width: parent.width
+                                text: root.quotaData.error || ""
+                                visible: text !== ""
+                                font.pixelSize: Theme.fontSizeSmall
+                                color: Theme.warning
+                                wrapMode: Text.Wrap
                             }
 
                             Repeater {
@@ -461,8 +507,10 @@ PluginComponent {
 
                                     StyledText {
                                         width: parent.width
-                                        text: root.quotaResetText(quotaRow.modelData)
-                                        visible: text !== ""
+                                        text: {
+                                            const reset = root.quotaResetText(quotaRow.modelData);
+                                            return "Fetched " + root.quotaAgeText(quotaRow.modelData.fetchedAt) + (reset ? " | " + reset : "");
+                                        }
                                         font.pixelSize: Theme.fontSizeSmall
                                         color: Theme.surfaceVariantText
                                         elide: Text.ElideRight

@@ -1,7 +1,9 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.Common
 import qs.Modules.Plugins
+import "Quota.js" as Quota
 
 PluginComponent {
     id: root
@@ -21,15 +23,14 @@ PluginComponent {
     })
     readonly property string helperUrl: Qt.resolvedUrl("./herdr-agents.py").toString()
     readonly property string helperPath: decodeURIComponent(helperUrl.replace(/^file:\/\//, ""))
-    readonly property var emptyQuota: ({
-        "updatedAt": 0,
-        "cacheAgeSeconds": 0,
-        "rows": []
-    })
-    readonly property string quotaPath: {
-        const cacheHome = Quickshell.env("XDG_CACHE_HOME") || Quickshell.env("HOME") + "/.cache";
-        return cacheHome + "/opencode/quota-export.json";
-    }
+    property var quotaProviders: ({})
+    property var quotaData: ({})
+    property bool quotaRefreshing: false
+    property string quotaError: ""
+    property string quotaRefreshSource: "cache"
+    readonly property string quotaCacheHome: Quickshell.env("XDG_CACHE_HOME") || Quickshell.env("HOME") + "/.cache"
+    readonly property string quotaPath: quotaCacheHome + "/opencode/quota-export.json"
+    readonly property string quotaCliPath: quotaCacheHome + "/opencode/packages/@slkiser/opencode-quota@latest/node_modules/@slkiser/opencode-quota/dist/bin/opencode-quota.js"
 
     function publishStatus(status) {
         if (pluginService && pluginId)
@@ -37,74 +38,83 @@ PluginComponent {
     }
 
     function publishQuota(quota) {
+        quota.refreshing = quotaRefreshing;
+        quota.error = quotaError;
+        quota.refreshSource = quotaRefreshSource;
+        quotaData = quota;
         if (pluginService && pluginId)
             pluginService.setGlobalVar(pluginId, "quota", quota);
     }
 
     function parseQuota(text) {
-        if (!text || !text.trim()) {
-            publishQuota(emptyQuota);
-            return;
-        }
+        if (!text || !text.trim())
+            return null;
         try {
             const doc = JSON.parse(text);
-            const providers = doc.providers || {};
-            const rows = [];
-            for (const providerId in providers) {
-                const provider = providers[providerId];
-                if (!provider || (provider.status !== "ok" && provider.status !== "partial"))
-                    continue;
-                const entries = provider.entries || [];
-                for (let i = 0; i < entries.length; i++) {
-                    const entry = entries[i];
-                    if (!entry || entry.renderType !== "percent")
-                        continue;
-                    const remaining = Number(entry.percentRemaining);
-                    if (!isFinite(remaining))
-                        continue;
-                    rows.push({
-                        "providerId": providerId,
-                        "label": String(entry.name || providerId),
-                        "window": String(entry.window || ""),
-                        "percentRemaining": Math.max(0, Math.min(100, remaining)),
-                        "resetAt": Number(entry.resetAt || 0)
-                    });
-                }
+            const incoming = Quota.mergeProviders({}, doc?.providers);
+            if (!Object.keys(incoming).length)
+                return null;
+            const merged = Quota.mergeProviders(quotaProviders, incoming);
+            if (merged !== quotaProviders) {
+                quotaProviders = merged;
+                if (pluginService && pluginId)
+                    pluginService.savePluginState(pluginId, "quotaProviders", merged);
+                publishQuota(Quota.render(merged));
             }
-            const windowOrder = {
-                "5h": 0,
-                "Weekly": 1,
-                "Monthly": 2
-            };
-            rows.sort(function(a, b) {
-                if (a.providerId < b.providerId)
-                    return -1;
-                if (a.providerId > b.providerId)
-                    return 1;
-                const aRank = windowOrder[a.window] ?? 99;
-                const bRank = windowOrder[b.window] ?? 99;
-                if (aRank !== bRank)
-                    return aRank - bRank;
-                if (a.label < b.label)
-                    return -1;
-                if (a.label > b.label)
-                    return 1;
-                return 0;
-            });
-            publishQuota({
-                "updatedAt": Number(doc.exportedAt || 0),
-                "cacheAgeSeconds": Number(doc.cacheAgeSeconds || 0),
-                "rows": rows
-            });
+            return incoming;
         } catch (error) {
-            console.warn("Herdr Agents: invalid quota export:", error);
-            publishQuota(emptyQuota);
+            console.warn("Herdr Agents: invalid quota data:", error);
+            return null;
         }
+    }
+
+    function finishQuotaRefresh(error) {
+        quotaRefreshing = false;
+        quotaError = error;
+        publishQuota(Quota.render(quotaProviders));
+    }
+
+    function refreshQuota() {
+        if (quotaRefreshing || shuttingDown)
+            return false;
+        quotaRefreshing = true;
+        quotaError = "";
+        publishQuota(Quota.render(quotaProviders));
+        quotaPollTimer.restart();
+        let commandFinished = false;
+        Proc.runCommand(
+            null,
+            ["env", "--chdir", Quickshell.env("HOME"), "node", quotaCliPath, "show", "--json"],
+            (stdout, exitCode) => {
+                // Proc can report both the timeout and the subsequent process exit.
+                if (commandFinished || !root || root.shuttingDown)
+                    return;
+                commandFinished = true;
+                const incoming = exitCode === 0 ? root.parseQuota(stdout) : null;
+                if (incoming && Object.keys(root.quotaProviders).every(id => incoming[id])) {
+                    root.quotaRefreshSource = "cli";
+                    root.finishQuotaRefresh("");
+                    return;
+                }
+                root.quotaError = exitCode === 0 ? "CLI returned incomplete quota"
+                    : exitCode === 124 ? "Quota command timed out" : "Quota command failed";
+                root.quotaRefreshSource = incoming ? "cli+export" : "export";
+                quotaFile.reload();
+                // With preload disabled, a read starts only when text is requested.
+                quotaFile.text();
+            },
+            0,
+            30000
+        );
+        return true;
     }
 
     Component.onCompleted: {
         publishStatus(emptyStatus);
-        publishQuota(emptyQuota);
+        // Neither source may replace a newer snapshot retained from a previous run.
+        if (pluginService && pluginId)
+            quotaProviders = Quota.mergeProviders({}, pluginService.loadPluginState(pluginId, "quotaProviders", {}));
+        refreshQuota();
         helperProcess.running = true;
     }
     Component.onDestruction: shuttingDown = true
@@ -113,11 +123,33 @@ PluginComponent {
         id: quotaFile
 
         path: root.quotaPath
-        watchChanges: true
-        onLoaded: root.parseQuota(quotaFile.text())
-        onFileChanged: quotaFile.reload()
-        onLoadFailed: function (error) {
-            root.publishQuota(root.emptyQuota);
+        preload: false
+        printErrors: false
+        onLoaded: {
+            const incoming = root.parseQuota(quotaFile.text());
+            root.finishQuotaRefresh(incoming ? "" : root.quotaError + "; export has no usable quota");
+        }
+        onLoadFailed: root.finishQuotaRefresh(root.quotaError + "; export unavailable")
+    }
+
+    Timer {
+        id: quotaPollTimer
+
+        interval: 15 * 60 * 1000
+        repeat: true
+        running: true
+        onTriggered: root.refreshQuota()
+    }
+
+    IpcHandler {
+        target: "herdr-agents"
+
+        function refreshQuota(): string {
+            return root.refreshQuota() ? "REFRESH_STARTED" : "REFRESH_IN_PROGRESS";
+        }
+
+        function quota(): string {
+            return JSON.stringify(root.quotaData);
         }
     }
 
