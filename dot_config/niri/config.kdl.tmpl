@@ -312,10 +312,7 @@ layout {
 spawn-at-startup "niri-layout-czar"
 spawn-at-startup "niri-workspaces"
 spawn-at-startup "niri-wallpaper" "latest"
-spawn-at-startup "waybar"
-spawn-at-startup "at now + 2 minutes <<< 'pkill -USR2 -x waybar'"
-spawn-at-startup "hypridle"
-spawn-at-startup "hyprlock"
+spawn-at-startup "dms" "run"
 
 environment {
     ELECTRON_OZONE_PLATFORM_HINT "auto"
@@ -579,7 +576,15 @@ binds {
     Mod+Ctrl+D hotkey-overlay-title="Discord" { spawn "discord"; }
     Mod+Ctrl+G hotkey-overlay-title="ChatGPT" { spawn "chatgpt"; }
     Mod+Q hotkey-overlay-title="Quick Menu" { spawn "quick-menu"; }
-    Mod+apostrophe hotkey-overlay-title="CopyQ" { spawn "copyq-dmenu"; }
+    Mod+apostrophe hotkey-overlay-title="Clipboard Manager" {
+        spawn "dms" "ipc" "call" "clipboard" "toggle";
+    }
+    // {{ if eq .hostname "silverspoon" }}
+    Mod+F7 repeat=false hotkey-overlay-title="Toggle Screen" {
+        spawn "dms" "ipc" "call" "output-selector" "cycle";
+    }
+    // {{ end }}
+    XF86Display repeat=false { fullscreen-window; }
     Mod+Ctrl+K hotkey-overlay-title="Calendar" { spawn-sh "focus-or-exec --title khal terminal-float -t 'khal' -e khal interactive"; }
     Mod+Ctrl+N hotkey-overlay-title="Wi-Fi" { spawn-sh "focus-or-exec --title wlctl terminal-float -t 'wlctl' -e wlctl"; }
     Mod+Ctrl+B hotkey-overlay-title="Bluetooth" { spawn-sh "focus-or-exec --title bluetui terminal-float -t 'bluetui' -e bluetui"; }
