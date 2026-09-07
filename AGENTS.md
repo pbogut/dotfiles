@@ -13,10 +13,20 @@ another project or directory.
 
 - Edit files in this repository, not deployed files under `~/.config`,
   `~/.scripts`, `~/.local`, or other home-directory targets.
-- Do not inspect deployed files by default. Read the corresponding source file
-  in this repository instead.
-- Inspect a deployed target only when diagnosing a runtime/deployment problem
-  or verifying that `chezmoi apply` produced the expected result.
+- Read and validate the corresponding source file in this repository instead
+  of directly inspecting a deployed target.
+- Scoped chezmoi commands, including `chezmoi apply` and `chezmoi diff`, are
+  allowed against managed targets. They are the normal way to deploy and
+  compare target state.
+- Do not directly read, list, stat, search, execute, or otherwise inspect a
+  deployed target with filesystem tools such as Read, Glob, Grep, or shell
+  commands. This applies even during deployment and runtime verification.
+- If diagnosing a problem genuinely requires direct access to a deployed
+  target, explain the reason and ask the user for permission before accessing
+  it. General requests such as "implement", "test", "verify", or "continue"
+  do not grant that permission.
+- If the user rejects a deployed-target access request, do not retry the same
+  access through another tool or command.
 - Never fix a deployed target directly. Fix its source here and apply it again.
 - Preserve unrelated worktree changes. Other changes may belong to the user or
   another agent.
@@ -73,7 +83,7 @@ Multiple target paths may be passed to one `chezmoi apply` command. Prefer a
 scoped apply over an unqualified `chezmoi apply`, because the repository may
 contain unrelated unfinished changes.
 
-After applying, verify the deployed target only when useful:
+After applying, verify through chezmoi only when useful:
 
 ```sh
 chezmoi diff ~/.config/waybar/config
