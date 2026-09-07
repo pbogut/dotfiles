@@ -57,6 +57,14 @@ while test $# -gt 0; do
     esac
 done
 
+if [[ -z $host ]]; then
+    usage
+    echo ""
+    echo "Local syncthing:"
+    echo "http://localhost:8384"
+    exit 0
+fi
+
 port=$(get_free_port 9000) || exit 1
 
 echo "http://localhost:$port"
