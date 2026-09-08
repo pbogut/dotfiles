@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   eduvulcan
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   08/09/2026
+#=================================================
+chromium --app=https://eduvulcan.pl/ --profile-directory=Default
