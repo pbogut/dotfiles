@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   chat
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   09/09/2026
+#=================================================
+focus-or-exec '\.chat$' terminal -c chat -e opencode-launcher -p chat
