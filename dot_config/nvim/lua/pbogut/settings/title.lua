@@ -20,6 +20,16 @@ vim.api.nvim_create_autocmd('BufEnter', {
     else
       local nvim_addr = vim.v.servername or ''
       local addr = fn.substitute(nvim_addr, [[/run/user/[0-9]\+/nvim\.\(.*\)\.0]], [[\1]], 'g')
+      local runtime_dir = os.getenv('XDG_RUNTIME_DIR')
+      if not runtime_dir or runtime_dir == '' then
+        runtime_dir = '/run/user/' .. vim.uv.getuid()
+      end
+      local session, workspace = nvim_addr:match(
+        '^' .. vim.pesc(runtime_dir) .. '/herdr%-nvim/(%x+)/([%w_-]+)%.sock$'
+      )
+      if session and #session == 16 then
+        addr = 'H/' .. session .. '/' .. workspace
+      end
       -- force updat a sworkoround for zellij title not being updated properly
       o.titlestring = ""
       vim.schedule(function()
