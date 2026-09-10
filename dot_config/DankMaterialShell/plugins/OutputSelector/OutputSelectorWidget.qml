@@ -19,6 +19,11 @@ PluginComponent {
     readonly property var daemon: pluginService?.pluginDaemonInstances[pluginId] ?? null
 
     visible: showSelector
+    onBusyChanged: {
+        // Release the layer-shell keyboard grab before restoring application focus.
+        if (busy && snapshotData.preservingFocus)
+            closePopout();
+    }
     // Side sections use the size; the center section also checks root visibility.
     states: State {
         name: "hidden"

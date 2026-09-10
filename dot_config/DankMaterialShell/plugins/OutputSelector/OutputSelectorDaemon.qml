@@ -56,6 +56,38 @@ PluginComponent {
         }, 0, 3000);
     }
 
+    function readFocus(done) {
+        function readList(command, validate, callback) {
+            Proc.runCommand(null, ["niri", "msg", "-j", command], (stdout, exitCode) => {
+                if (exitCode !== 0) {
+                    done("Could not read niri " + command + ".");
+                    return;
+                }
+                let items;
+                try {
+                    items = JSON.parse(stdout);
+                    if (!Array.isArray(items) || !items.every(validate))
+                        throw new Error("Invalid focus data");
+                } catch (error) {
+                    done("Niri returned invalid " + command + " data.");
+                    return;
+                }
+                callback(items);
+            }, 0, 1500);
+        }
+
+        readList("workspaces", (item) => item && Number.isInteger(item.id)
+                 && typeof item.is_focused === "boolean"
+                 && (item.output === null || typeof item.output === "string")
+                 && (item.active_window_id === null || Number.isInteger(item.active_window_id)), (workspaces) => {
+            readList("windows", (item) => item && Number.isInteger(item.id)
+                     && typeof item.is_focused === "boolean"
+                     && (item.workspace_id === null || Number.isInteger(item.workspace_id)), (windows) => {
+                done(null, {workspaces: workspaces, windows: windows});
+            });
+        });
+    }
+
     function initialize() {
         if (controller || !supported || !pluginService || !pluginId)
             return ;
@@ -75,6 +107,13 @@ PluginComponent {
             },
             "read": (done) => {
                 return root.readOutputs(done);
+            },
+            "readFocus": (done) => {
+                return root.readFocus(done);
+            },
+            "focus": (workspaceId, windowId) => {
+                return windowId === null ? NiriService.switchToWorkspace(workspaceId)
+                                         : NiriService.focusWindow(windowId);
             },
             "later": (callback) => {
                 root.delayedStep = callback;

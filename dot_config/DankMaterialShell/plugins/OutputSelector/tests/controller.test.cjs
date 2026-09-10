@@ -23,6 +23,8 @@ function setup(mode = "multiple", initial = [output("eDP-1"), output("DP-1")]) {
         publish: value => { env.snapshot = copy(value); },
         saveMode: value => { env.saved.push(value); return true; },
         read: done => done(null, copy(env.outputs)),
+        readFocus: done => done(null, {workspaces: [], windows: []}),
+        focus: () => true,
         later: callback => env.queue.push(callback),
         change: (name, on, done) => {
             env.commands.push([name, on]);
@@ -371,4 +373,223 @@ test("failed cycle activation keeps the current monitor and saved mode", () => {
     assert.equal(env.snapshot.mode, "multiple");
     assert.equal(env.outputs["eDP-1"].current_mode, 0);
     assert.equal(env.snapshot.error, "Activation failed");
+});
+
+function withFocus(env, windowId = 42) {
+    env.focusState = {
+        workspaces: [{id: 7, output: "eDP-1", is_focused: true, active_window_id: windowId}],
+        windows: windowId === null ? [] : [{id: windowId, workspace_id: 7, is_focused: true}]
+    };
+    env.focusRequests = [];
+    env.io.readFocus = done => done(null, copy(env.focusState));
+    env.io.focus = (workspace, window) => {
+        env.focusRequests.push([workspace, window]);
+        env.focusState.workspaces.forEach(item => { item.is_focused = item.id === workspace; });
+        env.focusState.windows.forEach(item => { item.is_focused = item.id === window; });
+        return true;
+    };
+    const change = env.io.change;
+    env.io.change = (name, on, done) => {
+        // Activation and shutdown can both change focus. Migration changes indices,
+        // but the workspace and window IDs survive.
+        env.focusState.workspaces.forEach(item => {
+            item.is_focused = false;
+            if (!on && item.output === name)
+                item.output = Object.keys(env.outputs).find(other => other !== name && env.outputs[other].logical);
+        });
+        env.focusState.windows.forEach(item => { item.is_focused = false; });
+        change(name, on, done);
+    };
+    return env;
+}
+
+test("single switching restores the original window after migration, then verifies focus", () => {
+    const env = withFocus(setup("single", [output("eDP-1"), output("DP-1", false)]));
+    env.controller.select("DP-1");
+    assert.deepEqual(env.focusRequests, []);
+    env.drain();
+    assert.deepEqual(env.focusRequests, [[7, 42]]);
+    assert.equal(env.focusState.workspaces[0].output, "DP-1");
+    assert.equal(env.focusState.windows[0].is_focused, true);
+    assert.equal(env.snapshot.busy, false);
+    assert.equal(env.snapshot.error, "");
+});
+
+test("an empty workspace is restored by stable ID", () => {
+    const env = withFocus(setup("single", [output("eDP-1"), output("DP-1", false)]), null);
+    env.controller.cycle();
+    env.drain();
+    assert.deepEqual(env.focusRequests, [[7, null]]);
+    assert.equal(env.snapshot.error, "");
+});
+
+test("a window closed during switching falls back to its workspace", () => {
+    const env = withFocus(setup());
+    env.controller.setMode("single", "DP-1");
+    env.focusState.windows = [];
+    env.focusState.workspaces[0].active_window_id = null;
+    env.drain();
+    assert.deepEqual(env.focusRequests, [[7, null]]);
+    assert.deepEqual(env.saved, ["single"]);
+});
+
+test("a discarded empty workspace falls back to an empty workspace on the destination", () => {
+    const env = withFocus(setup(), null);
+    env.controller.setMode("single", "DP-1");
+    env.focusState.workspaces = [
+        {id: 8, output: "DP-1", is_focused: true, active_window_id: 50},
+        {id: 9, output: "DP-1", is_focused: false, active_window_id: null}
+    ];
+    env.drain();
+    assert.deepEqual(env.focusRequests, [[9, null]]);
+    assert.equal(env.snapshot.error, "");
+});
+
+test("rapid clicks and cycles cannot replace focus during capture, switching, or verification", () => {
+    const env = withFocus(setup("single", [output("eDP-1"), output("DP-1", false)]));
+    const readFocus = env.io.readFocus;
+    let capture;
+    env.io.readFocus = done => { capture = done; };
+    env.controller.cycle();
+    function rejectRequests() {
+        assert.equal(env.snapshot.busy, true);
+        assert.equal(env.snapshot.preservingFocus, true);
+        assert.equal(env.controller.cycle(), false);
+        assert.equal(env.controller.select("eDP-1"), false);
+        assert.equal(env.controller.setMode("multiple", "DP-1"), false);
+    }
+    rejectRequests();
+    assert.deepEqual(env.commands, []);
+    env.io.readFocus = readFocus;
+    capture(null, copy(env.focusState));
+    rejectRequests();
+
+    const focus = env.io.focus;
+    let applyFocus;
+    env.io.focus = (workspace, window) => {
+        env.focusRequests.push([workspace, window]);
+        applyFocus = () => focus(workspace, window);
+        return true;
+    };
+    while (!applyFocus) {
+        env.queue.shift()();
+        rejectRequests();
+    }
+    for (let i = 0; i < 4; i++) {
+        env.queue.shift()();
+        rejectRequests();
+    }
+    assert.deepEqual(env.focusRequests, [[7, 42]], "focus must be sent only once while it is pending");
+    applyFocus();
+    rejectRequests(); // Sending/applying focus alone does not release BUSY.
+    env.drain();
+    assert.equal(env.snapshot.busy, false);
+    assert.equal(env.snapshot.error, "");
+    assert.equal(env.focusState.windows[0].is_focused, true);
+});
+
+test("an immediate next cycle captures fresh focus despite a stale DMS output cache", () => {
+    const env = withFocus(setup("single", [output("eDP-1"), output("DP-1", false)]));
+    env.controller.cycle();
+    env.drain();
+    env.focusState.workspaces[0].active_window_id = 84;
+    env.focusState.windows = [{id: 84, workspace_id: 7, is_focused: true}];
+    assert.equal(env.io.focused(), "eDP-1", "simulate the cache lagging behind niri");
+    assert.equal(env.controller.cycle(), true);
+    env.drain();
+    assert.deepEqual(env.focusRequests, [[7, 42], [7, 84]]);
+    assert.equal(env.focusState.workspaces[0].output, "eDP-1");
+    assert.equal(env.snapshot.error, "");
+});
+
+test("cycle chooses its starting output from the fresh workspace instead of the DMS cache", () => {
+    const env = withFocus(setup("multiple", [output("eDP-1"), output("DP-1"), output("DP-2")]));
+    env.focusState.workspaces[0].output = "DP-1";
+    env.controller.cycle();
+    env.drain();
+    assert.deepEqual(env.snapshot.outputs.filter(item => item.enabled).map(item => item.name), ["DP-2"]);
+    assert.deepEqual(env.focusRequests, [[7, 42]]);
+});
+
+test("focus capture failure aborts before any monitor changes", () => {
+    const env = withFocus(setup());
+    env.io.readFocus = done => done("Could not read niri workspaces.");
+    env.controller.cycle();
+    assert.deepEqual(env.commands, []);
+    assert.deepEqual(env.focusRequests, []);
+    assert.equal(env.snapshot.busy, false);
+    assert.match(env.snapshot.error, /Could not read/);
+});
+
+test("focus restoration waits for workspace migration before sending an action", () => {
+    const env = withFocus(setup());
+    env.controller.setMode("single", "DP-1");
+    env.focusState.workspaces[0].output = "eDP-1";
+    env.queue.shift()();
+    assert.deepEqual(env.focusRequests, []);
+    assert.equal(env.snapshot.busy, true);
+    env.focusState.workspaces[0].output = "DP-1";
+    env.drain();
+    assert.deepEqual(env.focusRequests, [[7, 42]]);
+    assert.equal(env.snapshot.error, "");
+});
+
+test("unconfirmed focus times out without repeating actions or undoing a successful mode change", () => {
+    const env = withFocus(setup());
+    env.io.focus = (workspace, window) => { env.focusRequests.push([workspace, window]); return true; };
+    env.controller.setMode("single", "DP-1");
+    env.drain();
+    assert.deepEqual(env.focusRequests, [[7, 42]]);
+    assert.deepEqual(env.saved, ["single"]);
+    assert.equal(env.snapshot.mode, "single");
+    assert.equal(env.snapshot.busy, false);
+    assert.match(env.snapshot.error, /Outputs changed, but focus could not be restored.*Timed out/);
+});
+
+test("a focus socket failure is reported separately from a successful monitor switch", () => {
+    const env = withFocus(setup());
+    env.io.focus = () => false;
+    env.controller.setMode("single", "DP-1");
+    env.drain();
+    assert.deepEqual(env.saved, ["single"]);
+    assert.match(env.snapshot.error, /Outputs changed, but focus could not be restored.*send/);
+    assert.equal(env.snapshot.busy, false);
+});
+
+test("a failed activation never sends focus actions", () => {
+    const env = withFocus(setup("single", [output("eDP-1"), output("DP-1", false)]));
+    env.io.change = (_name, _on, done) => done("Activation failed");
+    env.controller.cycle();
+    env.drain();
+    assert.deepEqual(env.focusRequests, []);
+    assert.equal(env.snapshot.error, "Activation failed");
+});
+
+test("disposed controllers ignore an outstanding focus query", () => {
+    const env = withFocus(setup());
+    env.controller.setMode("single", "DP-1");
+    let complete;
+    env.io.readFocus = done => { complete = done; };
+    env.queue.shift()();
+    env.controller.dispose();
+    complete(null, copy(env.focusState));
+    assert.deepEqual(env.focusRequests, []);
+    assert.deepEqual(env.saved, []);
+});
+
+test("a stale restore retry cannot affect a newer switch", () => {
+    const env = withFocus(setup());
+    env.controller.setMode("single", "DP-1");
+    env.queue.shift()(); // Output confirmation sends focus and schedules verification.
+    const oldRetry = env.queue[0];
+    env.drain();
+    env.controller.cycle();
+    const requests = copy(env.focusRequests);
+    const commands = copy(env.commands);
+    oldRetry();
+    assert.deepEqual(env.focusRequests, requests);
+    assert.deepEqual(env.commands, commands);
+    env.drain();
+    assert.deepEqual(env.focusRequests, [[7, 42], [7, 42]]);
+    assert.equal(env.snapshot.error, "");
 });

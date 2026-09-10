@@ -34,6 +34,7 @@ function createController(io, initialMode) {
         io.publish({
             mode: mode,
             busy: job !== null,
+            preservingFocus: job !== null && (job.kind === "single" || job.kind === "cycle"),
             error: error,
             outputs: names().map(function (name) {
                 var output = outputs[name];
@@ -64,15 +65,90 @@ function createController(io, initialMode) {
 
     function start(kind, target, turnOn, nextMode, preserveError) {
         job = {kind: kind, target: target, turnOn: turnOn, nextMode: nextMode,
-            waiting: null, confirmed: false, deadline: io.now() + 15000};
+            waiting: null, confirmed: false, changed: false, focus: null,
+            deadline: io.now() + 15000};
         if (!preserveError)
             error = "";
         publish();
-        step();
+        var current = job;
+        if (kind !== "single" && kind !== "cycle") {
+            step();
+            return;
+        }
+        io.readFocus(function (message, state) {
+            if (disposed || job !== current)
+                return;
+            if (message) {
+                finish(message, false);
+                return;
+            }
+            var workspace = state.workspaces.find(function (item) { return item.is_focused; });
+            if (workspace)
+                current.focus = {workspace: workspace.id, window: workspace.active_window_id,
+                    output: workspace.output};
+            step();
+        });
     }
 
-    function finish(message, allowRecovery) {
+    function later(current, callback) {
+        io.later(function () {
+            if (!disposed && job === current)
+                callback();
+        });
+    }
+
+    function restoreFocus(current) {
+        io.readFocus(function (message, state) {
+            if (disposed || job !== current)
+                return;
+            function complete(failure) {
+                current.focusRestored = true;
+                finish("", true, failure ? "Outputs changed, but focus could not be restored. " + failure : "");
+            }
+            if (message) {
+                complete(message);
+                return;
+            }
+            var window = state.windows.find(function (item) { return item.id === current.focus.window; });
+            var workspaceId = window ? window.workspace_id : current.focus.workspace;
+            var workspace = state.workspaces.find(function (item) { return item.id === workspaceId; });
+            // Niri may discard an empty workspace when its output is disabled.
+            if (!workspace && !window)
+                workspace = state.workspaces.find(function (item) {
+                    return item.output === current.target && item.active_window_id === null;
+                });
+            if (workspace && workspace.output === current.target && workspace.is_focused
+                    && (!window || window.is_focused)) {
+                complete("");
+                return;
+            }
+            if (io.now() >= current.focusDeadline) {
+                complete("Timed out waiting for niri focus.");
+                return;
+            }
+            if (workspace && workspace.output === current.target) {
+                var request = JSON.stringify([workspace.id, window ? window.id : null]);
+                if (current.focusRequest !== request) {
+                    if (!io.focus(workspace.id, window ? window.id : null)) {
+                        complete("Could not send the focus request to niri.");
+                        return;
+                    }
+                    // Send once, then verify. Do not leave repeated focus actions queued.
+                    current.focusRequest = request;
+                }
+            }
+            later(current, function () { restoreFocus(current); });
+        });
+    }
+
+    function finish(message, allowRecovery, focusError) {
         var finished = job;
+        if (!message && finished.kind === "single" && finished.changed
+                && finished.focus && !finished.focusRestored) {
+            finished.focusDeadline = io.now() + 3000;
+            restoreFocus(finished);
+            return;
+        }
         if (message) {
             error = message;
         } else if (finished.kind === "single") {
@@ -83,6 +159,8 @@ function createController(io, initialMode) {
                     error = "Outputs changed, but the mode could not be saved.";
             }
         }
+        if (focusError)
+            error = error ? error + " " + focusError : focusError;
         if (mode === "single" && active().length
                 && (finished.kind === "recover" || !enabled(selected)))
             selected = fallback(active());
@@ -124,7 +202,7 @@ function createController(io, initialMode) {
                     return;
                 }
                 var live = active();
-                var focused = io.focused();
+                var focused = current.focus ? current.focus.output : io.focused();
                 var from = enabled(focused) ? focused : (live[0] || "");
                 current.target = connected[(connected.indexOf(from) + 1) % connected.length];
                 current.kind = "single";
@@ -137,7 +215,7 @@ function createController(io, initialMode) {
                     return;
                 }
                 if (enabled(waiting.name) !== waiting.on) {
-                    io.later(step);
+                    later(current, step);
                     return;
                 }
                 current.waiting = null;
@@ -179,11 +257,12 @@ function createController(io, initialMode) {
                 return;
             }
             current.waiting = {name: target, on: turnOn};
+            current.changed = true;
             io.change(target, turnOn, function (failure) {
                 if (disposed || job !== current)
                     return;
                 if (!failure) {
-                    io.later(step);
+                    later(current, step);
                     return;
                 }
                 // Refresh even on failure: a timed-out command may have taken effect.
