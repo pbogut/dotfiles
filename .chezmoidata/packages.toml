@@ -135,8 +135,9 @@ cargo = [
   "rtx-cli",
 ]
 cargo_git = [
-  "https://github.com/pbogut/enrichmail.git",
   "https://github.com/pbogut/cargo-workspace.git",
+  "https://github.com/pbogut/enrichmail.git",
+  "https://github.com/pbogut/epub-normalize.git",
 ]
 cargo_nightly = [
   "https://github.com/ilya-epifanov/betaflight-blackbox-splitter"
