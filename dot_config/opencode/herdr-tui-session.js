@@ -1,4 +1,8 @@
-// Report only the selected session. Herdr's screen detector remains the lifecycle authority.
+// installed by herdr
+// managed by herdr; reinstalling or updating the integration overwrites this file.
+// HERDR_INTEGRATION_ID=opencode-tui
+// HERDR_INTEGRATION_VERSION=11
+
 import net from "node:net";
 
 const SOURCE = "herdr:opencode";
@@ -6,7 +10,7 @@ const AGENT = "opencode";
 const ROUTE_POLL_INTERVAL_MS = 100;
 const SELECTION_RETRY_DELAYS_MS = [100, 400, 1_000];
 
-function reportSession(sessionID) {
+function requestOnce(sessionID) {
   const paneId = process.env.HERDR_PANE_ID;
   const socketPath = process.env.HERDR_SOCKET_PATH;
   if (!paneId || !socketPath) {
@@ -16,7 +20,7 @@ function reportSession(sessionID) {
   const socketEndpoint =
     process.platform === "win32" ? `\\\\.\\pipe\\${socketPath}` : socketPath;
   const request = {
-    id: `${SOURCE}:session:${Date.now()}:${Math.floor(Math.random() * 1_000_000)
+    id: `${SOURCE}:tui:${Date.now()}:${Math.floor(Math.random() * 1_000_000)
       .toString()
       .padStart(6, "0")}`,
     method: "pane.report_agent_session",
@@ -47,7 +51,7 @@ function reportSession(sessionID) {
 }
 
 export default {
-  id: "pbogut.herdr.opencode-session",
+  id: "herdr.opencode.session-selection",
   tui: async (api) => {
     if (
       process.env.HERDR_ENV !== "1" ||
@@ -86,7 +90,9 @@ export default {
       const reportingSessionID = sessionID;
       reportPending = true;
       try {
-        await reportSession(reportingSessionID);
+        await requestOnce(reportingSessionID);
+      } catch {
+        // Best-effort reporting retries below while the selected route remains active.
       } finally {
         reportPending = false;
       }

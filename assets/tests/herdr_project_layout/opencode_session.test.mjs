@@ -11,6 +11,13 @@ const source = await readFile(sourceUrl, "utf8");
 const pluginModule = await import(
   `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`
 );
+const stateSource = await readFile(
+  new URL("dot_config/opencode/plugins/herdr-agent-state.js", root),
+  "utf8"
+);
+const statePluginModule = await import(
+  `data:text/javascript;base64,${Buffer.from(stateSource).toString("base64")}`
+);
 
 const originalEnv = {
   HERDR_ENV: process.env.HERDR_ENV,
@@ -104,4 +111,42 @@ test("does not report a selected child session", async () => {
   tui.dispose();
 
   assert.equal(requests.length, 0);
+});
+
+test("reports lifecycle changes with the root session ID used by the shortcut", async () => {
+  const { socketPath, requests } = await socketServer();
+  process.env.HERDR_ENV = "1";
+  process.env.HERDR_PANE_ID = "w1:p1";
+  process.env.HERDR_SOCKET_PATH = socketPath;
+  const plugin = await statePluginModule.HerdrAgentStatePlugin();
+  const sessionID = "ses_resume_root";
+  const event = (type, properties) => plugin.event({ event: { type, properties } });
+
+  await plugin["chat.message"]({ sessionID });
+  await event("session.status", { sessionID, status: { type: "busy" } });
+  await event("session.created", { info: { id: "ses_child", parentID: sessionID } });
+  await event("session.status", { sessionID: "ses_child", status: { type: "idle" } });
+  await event("question.asked", { sessionID: "ses_child" });
+  await event("question.replied", { sessionID: "ses_child" });
+  await event("session.idle", { sessionID });
+
+  assert.deepEqual(
+    requests.map(({ params }) => params.state),
+    ["working", "working", "blocked", "working", "idle"]
+  );
+  let previousSeq = 0;
+  for (const { method, params } of requests) {
+    assert.equal(method, "pane.report_agent");
+    assert.equal(params.pane_id, "w1:p1");
+    assert.equal(params.source, "herdr:opencode");
+    assert.equal(params.agent, "opencode");
+    assert.equal(params.agent_session_id, sessionID);
+    assert.ok(params.seq > previousSeq);
+    previousSeq = params.seq;
+  }
+});
+
+test("does not enable lifecycle reporting outside Herdr", async () => {
+  delete process.env.HERDR_ENV;
+  assert.deepEqual(await statePluginModule.HerdrAgentStatePlugin(), {});
 });
