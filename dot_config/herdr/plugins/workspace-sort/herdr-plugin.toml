@@ -2,7 +2,7 @@ id = "pbogut.workspace-sort"
 name = "Workspace Sort"
 version = "0.1.0"
 min_herdr_version = "0.8.2"
-description = "Sort sidebar workspaces by name"
+description = "Sort workspaces by branch date and group matching features"
 platforms = ["linux"]
 
 [[startup]]
@@ -10,4 +10,14 @@ command = ["python3", "sort-workspaces.py"]
 
 [[events]]
 on = "workspace.created"
+command = ["python3", "sort-workspaces.py"]
+
+[[actions]]
+id = "sort"
+title = "Sort workspaces by branch date and feature"
+contexts = ["global"]
+command = ["python3", "sort-workspaces.py"]
+
+[[events]]
+on = "workspace.renamed"
 command = ["python3", "sort-workspaces.py"]

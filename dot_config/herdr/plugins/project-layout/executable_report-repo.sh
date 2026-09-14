@@ -45,7 +45,10 @@ report_workspace() {
   "$herdr" workspace report-metadata "$workspace_id" \
     --source "$source_id" \
     --token "project=$project" \
-    "${feature_arg[@]}" >/dev/null
+    "${feature_arg[@]}" >/dev/null || return
+
+  # Metadata updates are not available as Herdr plugin event hooks.
+  "$herdr" plugin action invoke pbogut.workspace-sort.sort >/dev/null || true
 }
 
 report_one() {

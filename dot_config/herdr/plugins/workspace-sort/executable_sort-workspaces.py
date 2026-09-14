@@ -2,9 +2,11 @@
 
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
+from datetime import date
 from typing import Never
 
 
@@ -26,25 +28,27 @@ try:
 except (OSError, subprocess.SubprocessError, json.JSONDecodeError, KeyError) as error:
     fail(f"cannot list workspaces: {error}")
 
-# Herdr worktrees must remain beside their source workspace. Treat each repo
-# group as one sortable item and preserve its existing internal order.
-groups = {}
-for workspace in workspaces:
-    worktree = workspace.get("worktree")
-    key = (
-        ("repo", worktree["repo_key"])
-        if worktree and worktree.get("repo_key")
-        else ("workspace", workspace["workspace_id"])
-    )
-    groups.setdefault(key, []).append(workspace)
 
-ordered_groups = sorted(
-    groups.values(),
-    key=lambda group: (group[0]["label"].casefold(), group[0]["workspace_id"]),
-)
+def base_order(workspace):
+    branch_date = date.min
+    match = re.search(r"(?:^|/)(\d{4}-\d{2}-\d{2})-[^/]+$", workspace["label"])
+    if match:
+        try:
+            branch_date = date.fromisoformat(match[1])
+        except ValueError:
+            pass
+    return branch_date, workspace["label"].casefold(), workspace["workspace_id"]
+
+
+# Each feature takes the position of its first entry in the date-based order.
+groups = {}
+for workspace in sorted(workspaces, key=base_order):
+    feature = workspace.get("tokens", {}).get("feature", "").casefold()
+    key = ("feature", feature) if feature else ("workspace", workspace["workspace_id"])
+    groups.setdefault(key, []).append(workspace)
 sorted_ids = [
     workspace["workspace_id"]
-    for group in ordered_groups
+    for group in groups.values()
     for workspace in group
 ]
 current_ids = [workspace["workspace_id"] for workspace in workspaces]
