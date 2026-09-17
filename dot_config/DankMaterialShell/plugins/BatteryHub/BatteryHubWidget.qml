@@ -78,10 +78,36 @@ PluginComponent {
     readonly property var peripheralDevices: Array.isArray(peripheralData.devices)
         ? peripheralData.devices
         : []
+    readonly property var peripheralBarDevices: Array.isArray(peripheralData.barDevices)
+        ? peripheralData.barDevices
+        : peripheralDevices
+    readonly property var peripheralPanelDevices: {
+        const entries = [];
+        for (const device of peripheralDevices) {
+            if (!device.group) {
+                entries.push(device);
+                continue;
+            }
+            let entry = entries.find(item => item.group === device.group);
+            if (!entry) {
+                const summary = peripheralBarDevices.find(item => item.group === device.group);
+                entry = Object.assign({}, summary || device, {
+                    "name": String(device.name).replace(/ slot \d+$/, ""),
+                    "slotDetails": []
+                });
+                entries.push(entry);
+            }
+            entry.slotDetails.push(device.status === "Waiting for battery data"
+                ? device.status
+                : device.status + ": " + (typeof device.percentage === "number"
+                    ? device.percentage + "%" : "Unknown"));
+        }
+        return entries;
+    }
     readonly property bool peripheralRefreshing: peripheralData.refreshing === true
     readonly property bool peripheralHasError: String(peripheralData.error || "") !== ""
     readonly property bool refreshBusy: conservationBusy || peripheralRefreshing
-    readonly property bool showPrimaryBarItem: primaryBatteryAvailable || peripheralDevices.length === 0
+    readonly property bool showPrimaryBarItem: primaryBatteryAvailable || peripheralBarDevices.length === 0
 
     readonly property string batteryTimeText: {
         if (showTimeOnlyOnBattery && BatteryService.isPluggedIn)
@@ -200,7 +226,8 @@ PluginComponent {
     function peripheralBatteryColor(device) {
         if (device.charging)
             return Theme.primary;
-        if (device.lowThreshold > 0 && device.percentage <= device.lowThreshold)
+        if (typeof device.percentage === "number"
+                && device.lowThreshold > 0 && device.percentage <= device.lowThreshold)
             return Theme.error;
         return Theme.widgetIconColor;
     }
@@ -584,7 +611,7 @@ PluginComponent {
             }
 
             Repeater {
-                model: root.peripheralDevices
+                model: root.peripheralBarDevices
 
                 delegate: Row {
                     id: horizontalPeripheralBattery
@@ -672,7 +699,7 @@ PluginComponent {
             }
 
             Repeater {
-                model: root.peripheralDevices
+                model: root.peripheralBarDevices
 
                 delegate: Column {
                     id: verticalPeripheralBattery
@@ -733,8 +760,8 @@ PluginComponent {
 
             readonly property string timeInfoText: {
                 if (!root.primaryBatteryAvailable) {
-                    if (root.peripheralDevices.length > 0)
-                        return root.peripheralDevices.length + " peripheral battery device(s)";
+                    if (root.peripheralPanelDevices.length > 0)
+                        return root.peripheralPanelDevices.length + " peripheral battery device(s)";
                     return "No batteries detected";
                 }
                 const time = root.formatPrimaryBatteryTime();
@@ -1072,7 +1099,7 @@ PluginComponent {
 
                     Repeater {
                         model: ScriptModel {
-                            values: root.peripheralDevices
+                            values: root.peripheralPanelDevices
                         }
 
                         delegate: StyledRect {
@@ -1082,7 +1109,7 @@ PluginComponent {
                             readonly property string typeIcon: root.peripheralTypeIcon(modelData.type)
 
                             width: parent.width
-                            height: 64
+                            height: Math.max(64, peripheralDetails.implicitHeight + Theme.spacingM * 2)
                             radius: Theme.cornerRadius
                             color: Theme.nestedSurface
                             border.width: 0
@@ -1120,6 +1147,8 @@ PluginComponent {
                                 }
 
                                 Column {
+                                    id: peripheralDetails
+
                                     anchors.verticalCenter: parent.verticalCenter
                                     width: parent.width
                                         - peripheralTypeBadge.width
@@ -1138,13 +1167,33 @@ PluginComponent {
 
                                     StyledText {
                                         width: parent.width
-                                        text: String(peripheralBatteryRow.modelData.type || "device")
+                                        visible: !peripheralBatteryRow.modelData.slotDetails
+                                        text: peripheralBatteryRow.modelData.status
+                                            || (String(peripheralBatteryRow.modelData.type || "device")
                                             + (peripheralBatteryRow.modelData.charging
                                                 ? " | Charging"
-                                                : " | On battery")
+                                                : " | On battery"))
                                         font.pixelSize: Theme.fontSizeSmall
                                         color: Theme.surfaceTextMedium
                                         elide: Text.ElideRight
+                                    }
+
+                                    Flow {
+                                        width: parent.width
+                                        visible: !!peripheralBatteryRow.modelData.slotDetails
+                                        spacing: Theme.spacingS
+
+                                        Repeater {
+                                            model: peripheralBatteryRow.modelData.slotDetails || []
+
+                                            delegate: StyledText {
+                                                required property string modelData
+
+                                                text: modelData
+                                                font.pixelSize: Theme.fontSizeSmall
+                                                color: Theme.surfaceTextMedium
+                                            }
+                                        }
                                     }
                                 }
 
@@ -1152,7 +1201,9 @@ PluginComponent {
                                     id: peripheralPercent
 
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: peripheralBatteryRow.modelData.percentage + "%"
+                                    text: typeof peripheralBatteryRow.modelData.percentage === "number"
+                                        ? peripheralBatteryRow.modelData.percentage + "%"
+                                        : "Unknown"
                                     font.pixelSize: Theme.fontSizeMedium
                                     font.weight: Font.Bold
                                     color: root.peripheralBatteryColor(peripheralBatteryRow.modelData)

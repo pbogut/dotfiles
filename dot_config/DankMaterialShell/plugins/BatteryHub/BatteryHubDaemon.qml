@@ -11,6 +11,14 @@ PluginComponent {
     readonly property string disabledOutput: "Battery conservation mode is currently disabled."
     readonly property string asusHelperUrl: Qt.resolvedUrl("./asus-rog-mouse-battery.py").toString()
     readonly property string asusHelperPath: decodeURIComponent(asusHelperUrl.replace(/^file:\/\//, ""))
+    readonly property string zmkHelperUrl: Qt.resolvedUrl("./zmk-battery.py").toString()
+    readonly property string zmkHelperPath: decodeURIComponent(zmkHelperUrl.replace(/^file:\/\//, ""))
+    property var zmkState: ({"available": false, "devices": [], "barDevices": [], "error": ""})
+    property var zmkPaths: []
+    property bool zmkDiscovering: false
+    property bool zmkRestartPending: false
+    property bool shuttingDown: false
+    property double zmkUpdatedAt: 0
 
     property bool availabilityKnown: false
     property bool commandAvailable: false
@@ -95,6 +103,8 @@ PluginComponent {
             errors.push(razerErrorText);
         if (asusErrorText)
             errors.push(asusErrorText);
+        if (zmkState.error)
+            errors.push(zmkState.error);
         return errors.join(" ");
     }
 
@@ -104,12 +114,84 @@ PluginComponent {
 
         pluginService.setGlobalVar(pluginId, "peripheralBatteries", {
             "available": (razerAvailabilityKnown && razerCommandAvailable)
-                || (asusAvailabilityKnown && asusDeviceAvailable),
-            "devices": razerDevices.concat(asusDevices),
-            "refreshing": razerCheckingAvailability || razerRefreshing || asusRefreshing,
+                || (asusAvailabilityKnown && asusDeviceAvailable) || zmkState.available,
+            "devices": razerDevices.concat(asusDevices, zmkState.devices),
+            "barDevices": razerDevices.concat(asusDevices, zmkState.barDevices),
+            "refreshing": razerCheckingAvailability || razerRefreshing || asusRefreshing || zmkDiscovering,
             "error": peripheralErrorText(),
-            "updatedAt": Math.max(razerUpdatedAt, asusUpdatedAt)
+            "updatedAt": Math.max(razerUpdatedAt, asusUpdatedAt, zmkUpdatedAt)
         });
+    }
+
+    function clearZmk(error) {
+        zmkState = {"available": false, "devices": [], "barDevices": [], "error": error};
+        publishPeripheralState();
+    }
+
+    function startZmkReader() {
+        zmkRestartPending = false;
+        if (shuttingDown || zmkPaths.length === 0)
+            return;
+        zmkReader.command = [zmkHelperPath, "watch"].concat(zmkPaths);
+        zmkReader.running = true;
+    }
+
+    function discoverZmk() {
+        if (zmkDiscovering || zmkRestartPending || shuttingDown)
+            return false;
+        zmkDiscovering = true;
+        publishPeripheralState();
+        Proc.runCommand("batteryHub.discoverZmk", [zmkHelperPath, "discover"], (stdout, exitCode) => {
+            if (root.shuttingDown)
+                return;
+            root.zmkDiscovering = false;
+            let paths = null;
+            try {
+                paths = JSON.parse(stdout);
+            } catch (error) {}
+            if (exitCode !== 0 || !Array.isArray(paths) || !paths.every(path => typeof path === "string")) {
+                root.zmkState = Object.assign({}, root.zmkState, {"error": "Could not discover ZMK dongles."});
+                root.publishPeripheralState();
+                return;
+            }
+            root.zmkPaths = paths;
+            const devices = root.zmkState.devices.filter(device => paths.includes(device.group));
+            root.zmkState = {
+                "available": devices.length > 0,
+                "devices": devices,
+                "barDevices": root.zmkState.barDevices.filter(device => paths.includes(device.group)),
+                "error": ""
+            };
+            root.publishPeripheralState();
+            if (zmkReader.running) {
+                root.zmkRestartPending = true;
+                zmkReader.running = false;
+            } else {
+                root.startZmkReader();
+            }
+        }, 0, 10000);
+        return true;
+    }
+
+    function acceptZmkState(state) {
+        // A reopened port initially emits a waiting row. Keep its previous
+        // snapshot until it reports slots, but never retain disconnected ports.
+        const waitingGroups = state.devices.filter(device => device.status === "Waiting for battery data")
+            .map(device => device.group);
+        const previous = zmkState;
+        let devices = [];
+        for (const device of state.devices) {
+            const retained = waitingGroups.includes(device.group)
+                ? previous.devices.filter(old => old.group === device.group) : [];
+            devices = devices.concat(retained.length > 0 ? retained : [device]);
+        }
+        state.devices = devices;
+        state.barDevices = state.barDevices.concat(
+            previous.barDevices.filter(device => waitingGroups.includes(device.group))
+        );
+        zmkState = state;
+        zmkUpdatedAt = Date.now();
+        publishPeripheralState();
     }
 
     function parseRazerDevices(stdout) {
@@ -379,13 +461,14 @@ PluginComponent {
     function discoverPeripherals() {
         const razerStarted = checkRazerAvailability();
         const asusStarted = discoverAsus();
-        return razerStarted || asusStarted;
+        const zmkStarted = discoverZmk();
+        return razerStarted || asusStarted || zmkStarted;
     }
 
     function refreshPeripherals() {
         const razerStarted = refreshRazer();
         const asusStarted = refreshAsus();
-        return razerStarted || asusStarted;
+        return razerStarted || asusStarted || zmkState.available;
     }
 
     function drainRefreshQueue() {
@@ -550,6 +633,39 @@ PluginComponent {
         checkAvailability();
         discoverPeripherals();
     }
+    Component.onDestruction: shuttingDown = true
+
+    Process {
+        id: zmkReader
+
+        onExited: (exitCode, exitStatus) => {
+            if (root.shuttingDown)
+                return;
+            if (root.zmkRestartPending) {
+                Qt.callLater(() => root.startZmkReader());
+            } else {
+                root.clearZmk("ZMK battery reader stopped. Refresh to retry.");
+            }
+        }
+        stdout: SplitParser {
+            onRead: line => {
+                if (root.zmkRestartPending || root.shuttingDown)
+                    return;
+                try {
+                    const state = JSON.parse(line);
+                    if (typeof state.available !== "boolean" || !Array.isArray(state.devices)
+                            || !Array.isArray(state.barDevices) || typeof state.error !== "string")
+                        throw new Error("Invalid ZMK state");
+                    root.acceptZmkState(state);
+                } catch (error) {
+                    root.clearZmk("ZMK battery reader returned invalid data.");
+                }
+            }
+        }
+        stderr: SplitParser {
+            onRead: line => console.warn("Battery Hub ZMK:", line)
+        }
+    }
 
     Timer {
         interval: 900000
@@ -618,19 +734,23 @@ PluginComponent {
         }
 
         function refresh(): string {
-            if (!root.razerCommandAvailable && !root.asusDeviceAvailable)
+            if (!root.razerCommandAvailable && !root.asusDeviceAvailable && !root.zmkState.available)
                 return "UNAVAILABLE";
             return root.refreshPeripherals() ? "REFRESH_STARTED" : "REFRESH_QUEUED";
         }
 
         function status(): string {
-            if (!root.razerCommandAvailable && !root.asusDeviceAvailable)
-                return "UNAVAILABLE";
             const error = root.peripheralErrorText();
             if (error)
                 return "error\t" + error;
-            return (root.razerDevices.length + root.asusDevices.length)
+            if (!root.razerCommandAvailable && !root.asusDeviceAvailable && !root.zmkState.available)
+                return "UNAVAILABLE";
+            return (root.razerDevices.length + root.asusDevices.length + root.zmkState.devices.length)
                 + " battery device(s)";
+        }
+
+        function zmk(): string {
+            return JSON.stringify(root.zmkState);
         }
     }
 }
