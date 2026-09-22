@@ -1,3 +1,4 @@
+---@type LazyPluginSpec
 return {
   enabled = false,
   'folke/flash.nvim',
