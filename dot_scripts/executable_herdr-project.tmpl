@@ -67,12 +67,17 @@ create_worktree() {
     project_base_path=$(find_project_path "$project")
     project_base_name=${project_base_path##"$PROJECTS/"}
 
-    name=$(zenity --entry \
-        --title="New dated worktree" \
-        --text="$project_base_name\n\nNew branch name:" \
-        --entry-text="" \
-        --ok-label="Create" \
-        --cancel-label="Cancel")
+    if [[ ${TERM:-dumb} == dumb ]]; then
+        name=$(zenity --entry \
+            --title="New dated worktree" \
+            --text="$project_base_name\n\nNew branch name:" \
+            --entry-text="" \
+            --ok-label="Create" \
+            --cancel-label="Cancel")
+    else
+        printf '%s\n\n' "$project_base_name" > /dev/tty
+        IFS= read -r -p 'New branch name: ' name < /dev/tty || exit 1
+    fi
 
     [[ -n $name ]] || exit 1
     name=${name// /-}
