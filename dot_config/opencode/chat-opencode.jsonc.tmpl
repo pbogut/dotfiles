@@ -6,7 +6,18 @@
       "type": "local",
       "command": ["npx", "-y", "mcp-remote", "https://mcp.linear.app/mcp"],
       "enabled": true
-    }
+    },
+    "personal-calendar": {
+      "type": "remote",
+      "url": "https://mcp.pbogut.me/calendar",
+      "enabled": true
+    },
+    "gitlab": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-remote@0.14.2", "https://gitlab.com/api/v4/mcp"],
+      "enabled": true,
+      "timeout": 60000
+    },
   },
   "agent": {
     "build": {
@@ -17,7 +28,7 @@
     },
     "chat": {
       "mode": "primary",
-      "model": "opencode-go/deepseek-v4-pro",
+      "model": "openai/gpt-5.6-luna",
       "variant": "medium",
       "description": "General chat agent with web access only",
       "permission": {
@@ -36,6 +47,9 @@
   "provider": {{ include (joinPath .chezmoi.homeDir ".config/opencode/providers.json") }},
   "permission": {{ include (joinPath .chezmoi.homeDir ".config/opencode/permission.jsonc") }},
   "plugin": [
+    ["@plannotator/opencode@latest", {
+      "workflow": "user-managed",
+    }],
     "@slkiser/opencode-quota@latest"
   ]
 }

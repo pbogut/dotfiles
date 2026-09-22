@@ -102,7 +102,7 @@ if [[ -n ${HERDR_PANE_ID:-} ]]; then
 fi
 
 # ensure --port is always provided
-if ! array_contains "--port" "${params[@]}"; then
+if ! array_contains "--port" "${params[@]}" && ! array_contains "auth" "${params[@]}"; then
   params+=("--port")
 fi
 echo opencode "${params[@]}"

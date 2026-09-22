@@ -6,19 +6,28 @@
       "type": "local",
       "command": ["npx", "-y", "mcp-remote", "https://mcp.linear.app/mcp"],
       "enabled": true
-    }
+    },
+    "gitlab": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-remote@0.14.2", "https://gitlab.com/api/v4/mcp"],
+      "enabled": true,
+      "timeout": 60000
+    },
   },
   "agent": {
     "build": {
-      "model": "openai/gpt-5.6-sol"
+      "model": "openai/gpt-6-astra"
     },
     "plan": {
-      "model": "openai/gpt-5.6-sol"
+      "model": "openai/gpt-6-astra"
     }
   },
   "provider": {{ include (joinPath .chezmoi.homeDir ".config/opencode/providers.json") }},
   "permission": {{ include (joinPath .chezmoi.homeDir ".config/opencode/permission.jsonc") }},
   "plugin": [
+    ["@plannotator/opencode@latest", {
+      "workflow": "user-managed",
+    }],
     "@slkiser/opencode-quota@latest"
   ]
 }
