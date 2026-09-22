@@ -119,7 +119,7 @@ run() {
   # shellcheck disable=2294 # this is the way
   if ! eval "$@"; then
     DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-"unix:path=/run/user/$(id -u)/bus"} \
-      dunstify -i error "Network sync error while running: $*"
+      notify-send -i error "Network Sync Error" "$*"
   fi
 
   rm "$lockfile"
