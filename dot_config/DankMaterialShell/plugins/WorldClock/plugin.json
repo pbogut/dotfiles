@@ -1,0 +1,17 @@
+{
+  "id": "worldClock",
+  "name": "World Clock",
+  "description": "London and Dubai clocks with a local-time travel slider",
+  "version": "1.0.0",
+  "author": "Pawel Bogut",
+  "type": "composite",
+  "capabilities": ["daemon", "dankbar-widget"],
+  "components": {
+    "daemon": "./WorldClockDaemon.qml",
+    "widget": "./WorldClockWidget.qml"
+  },
+  "icon": "public",
+  "requires_dms": ">=1.5.0",
+  "dependencies": ["python3"],
+  "permissions": ["process", "settings_read", "settings_write"]
+}
