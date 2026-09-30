@@ -1,12 +1,18 @@
 import importlib.util
+import io
+import json
+import os
 import unittest
+from contextlib import redirect_stdout
 from datetime import datetime, timezone
 from pathlib import Path
+from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
 
 SOURCE = Path(__file__).resolve().parents[3] / "dot_config/DankMaterialShell/plugins/WorldClock/executable_world-clock.py"
 spec = importlib.util.spec_from_file_location("world_clock", SOURCE)
+assert spec is not None and spec.loader is not None
 clock = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(clock)
 
@@ -65,6 +71,50 @@ class WorldClockTests(unittest.TestCase):
         for minutes in range(0, 1440, 15):
             value = f"{minutes // 60:02}:{minutes % 60:02}"
             self.assertEqual(self.at("2026-09-28T12:00:00+00:00", value)["localTime"], value)
+
+    def cli_at(self, tick, wall_time="2026-09-30T06:36:59.980+00:00"):
+        timestamp = datetime.fromisoformat(tick).timestamp()
+        output = io.StringIO()
+        with (
+            patch.object(clock, "datetime", wraps=datetime) as mocked_datetime,
+            patch.dict(os.environ, {"TZ": "Europe/Warsaw"}),
+            patch("sys.argv", [str(SOURCE), "--timestamp", str(timestamp)]),
+            redirect_stdout(output),
+        ):
+            mocked_datetime.now.return_value = datetime.fromisoformat(wall_time)
+            self.assertEqual(clock.main(), 0)
+            mocked_datetime.now.assert_not_called()
+        return json.loads(output.getvalue())
+
+    def test_tick_timestamp_wins_over_early_wall_clock(self):
+        result = self.cli_at("2026-09-30T06:37:00+00:00")
+        self.assertEqual(result["localTime"], "08:37")
+        self.assertEqual(result["london"]["time"], "07:37")
+        self.assertEqual(result["dubai"]["time"], "10:37")
+
+    def test_tick_timestamp_crosses_local_midnight(self):
+        result = self.cli_at("2026-09-30T22:00:00+00:00")
+        self.assertEqual(result["localDate"], "2026-10-01")
+        self.assertEqual(result["localTime"], "00:00")
+        self.assertEqual(result["london"]["time"], "23:00")
+        self.assertEqual(result["london"]["dayOffset"], -1)
+        self.assertEqual(result["dubai"]["time"], "02:00")
+
+    def test_tick_timestamp_at_uk_dst_boundaries(self):
+        for tick, expected, zone in (
+            ("2026-03-29T00:59:00+00:00", "00:59", "GMT"),
+            ("2026-03-29T01:00:00+00:00", "02:00", "BST"),
+            ("2026-10-25T00:59:00+00:00", "01:59", "BST"),
+            ("2026-10-25T01:00:00+00:00", "01:00", "GMT"),
+        ):
+            with self.subTest(tick=tick):
+                result = self.cli_at(tick)
+                self.assertEqual(result["london"]["time"], expected)
+                self.assertEqual(result["london"]["zone"], zone)
+
+    def test_zero_timestamp_is_not_treated_as_missing(self):
+        result = self.cli_at("1970-01-01T00:00:00+00:00")
+        self.assertEqual(result["localDate"], "1970-01-01")
 
 
 if __name__ == "__main__":

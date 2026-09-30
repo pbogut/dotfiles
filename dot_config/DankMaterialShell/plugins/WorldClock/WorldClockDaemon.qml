@@ -24,7 +24,9 @@ PluginComponent {
             return;
         }
         refreshing = true;
-        Proc.runCommand(null, ["python3", helperPath], (stdout, exitCode) => {
+        // A SystemClock tick can arrive early; convert its date, not Python's wall clock.
+        const timestamp = String(minuteClock.date.getTime() / 1000);
+        Proc.runCommand(null, ["python3", helperPath, "--timestamp", timestamp], (stdout, exitCode) => {
             let data;
             try {
                 data = JSON.parse(stdout);
@@ -48,6 +50,7 @@ PluginComponent {
     Component.onCompleted: refresh()
 
     SystemClock {
+        id: minuteClock
         precision: SystemClock.Minutes
         onDateChanged: root.refresh()
     }
@@ -55,7 +58,9 @@ PluginComponent {
     Connections {
         target: SessionService
         function onSessionResumed() {
-            root.refresh();
+            // Re-read the clock before onDateChanged requests the new snapshot.
+            minuteClock.enabled = false;
+            minuteClock.enabled = true;
         }
     }
 

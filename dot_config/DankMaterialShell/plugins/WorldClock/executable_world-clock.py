@@ -53,12 +53,15 @@ def snapshot(local_time=None, *, now=None, zone=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--time", help="Local HH:MM today; omit for live time")
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument("--time", help="Local HH:MM today; omit for live time")
+    source.add_argument("--timestamp", type=float, help="Clock tick as Unix seconds")
     args = parser.parse_args()
     try:
-        print(json.dumps(snapshot(args.time)))
+        now = datetime.fromtimestamp(args.timestamp, timezone.utc) if args.timestamp is not None else None
+        print(json.dumps(snapshot(args.time, now=now)))
         return 0
-    except (ValueError, OSError, KeyError) as error:
+    except (ValueError, OverflowError, OSError, KeyError) as error:
         print(json.dumps({"error": str(error)}))
         return 1
 

@@ -23,8 +23,10 @@ DankBar layout editor after enabling it in Plugins.
 
 The local clock uses Quickshell's second-resolution `SystemClock`. The Python
 helper is not run on each second. The daemon refreshes on minute changes and
-after resume, sharing one live snapshot across bar instances. Panel previews
-are debounced and discard stale responses when a newer time is selected.
+after resume, sharing one live snapshot across bar instances. It passes the
+minute clock's timestamp to Python, so an early timer event cannot sample the
+previous minute. Panel previews are debounced and discard stale responses when
+a newer time is selected.
 
 ## Validation
 
