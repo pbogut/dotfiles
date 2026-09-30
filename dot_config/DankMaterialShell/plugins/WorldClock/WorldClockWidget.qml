@@ -1,6 +1,8 @@
 import QtQuick
+import Quickshell
 import qs.Common
 import qs.Modules.Plugins
+import qs.Services
 import qs.Widgets
 
 PluginComponent {
@@ -9,6 +11,7 @@ PluginComponent {
     layerNamespacePlugin: "world-clock"
     popoutWidth: 420
 
+    readonly property string localTime: Qt.formatTime(localClock.date, "hh:mm:ss")
     readonly property var liveData: snapshot.value || ({})
     readonly property bool showLondon: pluginData.showLondon !== false
     readonly property bool showDubai: pluginData.showDubai === true
@@ -32,15 +35,37 @@ PluginComponent {
         defaultValue: ({})
     }
 
+    SystemClock {
+        id: localClock
+        precision: SystemClock.Seconds
+    }
+
+    Connections {
+        target: SessionService
+        function onSessionResumed() {
+            localClock.enabled = false;
+            localClock.enabled = true;
+        }
+    }
+
     horizontalBarPill: Component {
         Row {
             spacing: Theme.spacingS
 
             DankIcon {
-                visible: root.barClocks.length === 0
-                name: "public"
+                anchors.verticalCenter: parent.verticalCenter
+                name: "schedule"
                 size: root.iconSize
                 color: Theme.widgetIconColor
+            }
+
+            NumericText {
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.localTime
+                reserveText: "00:00:00"
+                width: reservedWidth
+                font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
+                color: Theme.widgetTextColor
             }
 
             Repeater {
@@ -48,6 +73,7 @@ PluginComponent {
 
                 StyledText {
                     required property var modelData
+                    anchors.verticalCenter: parent.verticalCenter
                     text: modelData.flag + " " + modelData.time
                     font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
                     color: Theme.widgetTextColor
@@ -61,10 +87,20 @@ PluginComponent {
             spacing: Theme.spacingXS
 
             DankIcon {
-                visible: root.barClocks.length === 0
-                name: "public"
+                anchors.horizontalCenter: parent.horizontalCenter
+                name: "schedule"
                 size: root.iconSize
                 color: Theme.widgetIconColor
+            }
+
+            NumericText {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: root.localTime.replace(/:/g, "\n")
+                reserveText: "00"
+                width: reservedWidth
+                horizontalAlignment: Text.AlignHCenter
+                font.pixelSize: Theme.barTextSize(root.barThickness, root.barConfig?.fontScale, root.barConfig?.maximizeWidgetText)
+                color: Theme.widgetTextColor
             }
 
             Repeater {

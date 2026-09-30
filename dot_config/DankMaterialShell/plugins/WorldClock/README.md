@@ -1,11 +1,15 @@
 # World Clock
 
-Personal DMS plugin for London and Dubai. Add **World Clock** in the DankBar
-layout editor after enabling it in Plugins.
+Personal DMS plugin for local time, London and Dubai. Add **World Clock** in the
+DankBar layout editor after enabling it in Plugins.
 
-- London is shown in the bar by default. Each city's **Show in bar** switch
-  is independent and saved in DMS plugin settings.
-- With neither city selected, a globe icon keeps the panel accessible.
+- A clock icon and local 24-hour `HH:mm:ss` time are always visible in the bar.
+  Fixed-width digits keep the clock steady as seconds tick. Vertical bars stack
+  the hours, minutes and seconds below the icon.
+- London is shown beside local time by default. Each city's **Show in bar**
+  switch is independent and saved in DMS plugin settings.
+- World clocks use `HH:mm`. With neither city selected, only the local clock is
+  shown. Clicking still opens the same World Clock panel.
 - The panel always shows both cities, with flags, dates and timezone labels.
 - Enter a local `HH:MM` or drag the slider in 15-minute steps to preview today.
   Typing supports exact minutes, including times after the slider's 23:45 end.
@@ -17,9 +21,10 @@ layout editor after enabling it in Plugins.
   repeated during a clock change, the preview uses the first occurrence and
   displays a note.
 
-The daemon refreshes on minute changes and after resume, sharing one live
-snapshot across bar instances. Panel previews are debounced and discard stale
-responses when a newer time is selected.
+The local clock uses Quickshell's second-resolution `SystemClock`. The Python
+helper is not run on each second. The daemon refreshes on minute changes and
+after resume, sharing one live snapshot across bar instances. Panel previews
+are debounced and discard stale responses when a newer time is selected.
 
 ## Validation
 
