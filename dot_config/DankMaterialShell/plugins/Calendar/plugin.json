@@ -1,0 +1,14 @@
+{
+  "id": "calendar",
+  "name": "Calendar",
+  "description": "Local date and a shortcut to the built-in DankDash calendar",
+  "version": "1.0.0",
+  "author": "Pawel Bogut",
+  "type": "widget",
+  "capabilities": ["dankbar-widget"],
+  "component": "./CalendarWidget.qml",
+  "icon": "calendar_month",
+  "requires_dms": ">=1.5.0",
+  "dependencies": [],
+  "permissions": []
+}
