@@ -189,16 +189,17 @@ while :; do # in case something crashes we want to restart it
   __configure_external_access
   __reload_dns
 
-  docker events | while read line; do
-    echo $line | grep 'network \(connect\|disconnect\)' | sed 's,.*network \(disconnect\|connect\).*container=\([0-9a-z]*\)\,.*,\1 \2,' | (read action hash
-      hash=$(echo $hash |sed 's,^\(.\{12\}\).*,\1,')
-      if [[ $action == "connect" ]]; then
-        __connect $hash
-      elif [[ $action == "disconnect" ]]; then
-        __disconnet $hash
-      fi
-      __configure_external_access
-      __reload_dns
-    )
+  docker events --filter type=network --filter event=connect --filter event=disconnect \
+    --format '{{.Action}} {{index .Actor.Attributes "container"}}' | while read -r action hash; do
+    [[ $action == "connect" || $action == "disconnect" ]] || continue
+    [[ $hash =~ ^[0-9a-f]{64}$ ]] || continue
+    hash=${hash:0:12}
+    if [[ $action == "connect" ]]; then
+      __connect "$hash"
+    else
+      __disconnet "$hash"
+    fi
+    __configure_external_access
+    __reload_dns
   done
 done
