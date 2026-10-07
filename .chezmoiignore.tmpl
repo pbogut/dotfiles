@@ -24,6 +24,7 @@ etc
 {{ end }}
 {{ if not ( eq .chezmoi.hostname "silverspoon" ) }}
 **/*_silverspoon_*
+.config/pipewire/pipewire.conf.d/redeye-streaming.conf
 {{ end }}
 {{ if not ( eq .chezmoi.hostname "redeye" ) }}
 **/*_redeye_*

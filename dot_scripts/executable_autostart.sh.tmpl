@@ -30,6 +30,7 @@ demonize kdeconnect-file-watch kdeconnect-file-watch
 wlsunset.sh on
 
 # {{- if eq .chezmoi.hostname "redeye" }} redeye [[[
+demonize vban-mini vban-mini
 # I dont want to talk about it
 optical=$(pactl list sinks | grep 'Name: alsa_output.pci-0000_05_00' | sed 's,.*Name: ,,')
 pactl set-default-sink "$optical"
