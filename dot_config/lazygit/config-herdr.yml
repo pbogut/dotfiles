@@ -19,5 +19,5 @@ customCommands:
     command: 'herdr-vim {{ .SelectedCommitFile.Name | quote }}'
   - key: 'o'
     description: 'Open file'
-    context: 'staging'
+    context: 'normal'
     command: 'herdr-vim {{ .SelectedFile.Name | quote }}'

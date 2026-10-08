@@ -214,7 +214,7 @@ customCommands:
     output: terminal
   - key: 'o'
     description: 'Open file'
-    context: 'staging'
+    context: 'normal'
     command: 'nvim {{ .SelectedFile.Name }}'
     output: terminal
   - key: 'p'
@@ -224,8 +224,8 @@ customCommands:
     output: terminal
 # contexts: status, files, localBranches, remotes, remoteBranches,
 #           tags, commits, reflogCommits, subCommits, commitFiles,
-#           stash, normal, merging, patchBuilding, staging, menu,
-#           credentials, confirmation, search, commitMessage,
+#           stash, normal, normalSecondary, mergeConflicts, menu,
+#           confirmation, prompt, search, commitMessage, worktrees,
 #           submodules, suggestions, cmdLog
 services: {}
 notARepository: prompt
