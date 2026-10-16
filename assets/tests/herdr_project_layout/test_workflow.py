@@ -28,8 +28,9 @@ PLUGIN_LINK_HOOK = ROOT / "run_onchange_after_link-herdr-plugins.sh.tmpl"
 
 
 class FakeHerdrApi:
-    def __init__(self, socket_path):
+    def __init__(self, socket_path, log=None):
         self.socket_path = str(socket_path)
+        self.log = log
         self.requests = []
         self.server = socket.socket(socket.AF_UNIX)
         self.server.bind(self.socket_path)
@@ -62,6 +63,9 @@ class FakeHerdrApi:
                     continue
                 request = json.loads(input_bytes.split(b"\n", 1)[0])
                 self.requests.append(request)
+                if self.log is not None:
+                    with self.log.open("a", encoding="utf-8") as log:
+                        log.write(json.dumps(["api", request["method"]]) + "\n")
                 response = {
                     "id": request["id"],
                     "result": {
@@ -226,6 +230,34 @@ class HerdrWorkflowTest(unittest.TestCase):
             ],
         )
 
+    def test_new_shell_focuses_after_reordering_unless_no_focus(self):
+        self.env["FAKE_HERDR_TABS"] = json.dumps(
+            {"result": {"tabs": [
+                {"tab_id": "custom-tab", "label": "logs", "number": 1}
+            ]}}
+        )
+        for focus in (True, False):
+            with self.subTest(focus=focus):
+                self.log.unlink(missing_ok=True)
+                api_path = self.temp / f"layout-{focus}.sock"
+                self.env["HERDR_SOCKET_PATH"] = str(api_path)
+                args = [] if focus else ["--no-focus"]
+
+                with FakeHerdrApi(api_path, log=self.log) as api:
+                    result = self.run_script(SELECTOR, "shell", *args)
+
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(api.requests[0]["method"], "layout.apply")
+                self.assertEqual(api.requests[0]["params"]["focus"], focus)
+                actions = [
+                    call for call in self.calls()
+                    if call[0] == "api" or call[:2] == ["tab", "focus"]
+                ]
+                expected = [["api", "layout.apply"], ["api", "tab.move"]]
+                if focus:
+                    expected.append(["tab", "focus", "new-tab"])
+                self.assertEqual(actions, expected)
+
     def test_numeric_alias_and_no_focus_keep_existing_tab(self):
         self.env["FAKE_HERDR_TABS"] = json.dumps(
             {
@@ -281,6 +313,7 @@ class HerdrWorkflowTest(unittest.TestCase):
 
         with FakeHerdrApi(api_path) as api:
             first = self.run_script(SELECTOR, "nvim")
+            self.assertIn(["tab", "focus", "new-tab"], self.calls())
             self.env["FAKE_HERDR_TABS"] = json.dumps(
                 {
                     "result": {

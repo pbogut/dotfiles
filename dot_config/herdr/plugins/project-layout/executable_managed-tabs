@@ -293,7 +293,7 @@ process_matches_role() {
 }
 
 apply_role() {
-	local target_kind=$1 target_id=$2 root params command_json focus_json
+	local target_kind=$1 target_id=$2 root params command_json focus_json response
 
 	resolve_role_cwd || return
 
@@ -322,7 +322,8 @@ apply_role() {
         {workspace_id: $target_id}
       end
     ') || return 1
-	herdr_api_request layout.apply "$params" >/dev/null
+	response=$(herdr_api_request layout.apply "$params") || return 1
+	tab_id=$(jq -er '.result.layout.tab_id | select(type == "string" and length > 0)' <<<"$response")
 }
 
 tabs=$("$herdr" tab list --workspace "$workspace_id") || exit 1
@@ -373,6 +374,7 @@ if [[ -n $tab_id ]]; then
 		apply_role tab "$tab_id" || exit 1
 		tabs=$("$herdr" tab list --workspace "$workspace_id") || exit 1
 		sort_tabs "$tabs" || echo "Could not reorder Herdr tabs" >&2
+		focus_managed_tab "$tab_id"
 		exit
 	fi
 
@@ -409,3 +411,4 @@ fi
 
 tabs=$("$herdr" tab list --workspace "$workspace_id") || exit 1
 sort_tabs "$tabs" || echo "Could not reorder Herdr tabs" >&2
+focus_managed_tab "$tab_id"
