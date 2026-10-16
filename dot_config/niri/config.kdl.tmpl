@@ -458,6 +458,7 @@ window-rule {
     match app-id="webcord"
     match app-id="ferdium"
     match app-id="Alacritty.mutt"
+    match app-id="Alacritty.chat"
     match app-id=r#"^(.*\-meet\.google\.com__).*$"#
     match app-id=r#"^(.*\-[a-z0-9]+\.zoom\.us__).*$"#
     match app-id=r#"^(.*\-chatgpt\.com__).*$"#
@@ -486,6 +487,7 @@ window-rule {
     match app-id="Flowbladesinglerender" title="Flowblade Batch Render"
     match app-id="omacalc"
     match app-id=r#"^ueberzugpp_.*$"#
+    match app-id="org.localsend.localsend_app"
     open-floating true
 }
 window-rule {
@@ -576,12 +578,13 @@ binds {
     Mod+Ctrl+F hotkey-overlay-title="Ferdium" { spawn "focus-or-exec" "ferdium" "ferdium"; }
     Mod+Ctrl+D hotkey-overlay-title="Discord" { spawn "discord"; }
     Mod+Ctrl+G hotkey-overlay-title="ChatGPT" { spawn "chatgpt"; }
+    Mod+Ctrl+O hotkey-overlay-title="OpenCode Chat" { spawn "chat"; }
     Mod+Q hotkey-overlay-title="Quick Menu" { spawn "quick-menu"; }
     Mod+apostrophe hotkey-overlay-title="Clipboard Manager" {
         spawn "dms" "ipc" "call" "clipboard" "toggle";
     }
     // {{ if eq .hostname "silverspoon" }}
-    Mod+F7 repeat=false hotkey-overlay-title="Toggle Screen" {
+    Mod+F7 repeat=false allow-when-locked=true hotkey-overlay-title="Toggle Screen" {
         spawn "dms" "ipc" "call" "output-selector" "cycle";
     }
     // {{ end }}
@@ -632,10 +635,10 @@ binds {
     Mod+Down  { focus-window-down; }
     Mod+Up    { focus-window-up; }
     Mod+Right { focus-column-right; }
-    Mod+H     hotkey-overlay-title="Focus left (or switch monitor)" { spawn "niri-focus" "left"; }
-    Mod+J     hotkey-overlay-title="Focus down (or switch workspace)" { spawn "niri-focus" "down"; }
-    Mod+K     hotkey-overlay-title="Focus up (or switch workspace)" { spawn "niri-focus" "up"; }
-    Mod+L     hotkey-overlay-title="Focus right (or switch monitor)" { spawn "niri-focus" "right"; }
+    Mod+H     hotkey-overlay-title="Focus left" { spawn "niri-focus" "left"; }
+    Mod+J     hotkey-overlay-title="Focus down (or switch workspace)" { spawn "niri-focus" "down" "--switch-workspace"; }
+    Mod+K     hotkey-overlay-title="Focus up (or switch workspace)" { spawn "niri-focus" "up" "--switch-workspace"; }
+    Mod+L     hotkey-overlay-title="Focus right" { spawn "niri-focus" "right"; }
 
     Mod+Shift+Left  { move-column-left-or-to-monitor-left; }
     Mod+Shift+Down  { move-window-down-or-to-workspace-down; }
@@ -798,7 +801,7 @@ binds {
     Mod+C { center-column; }
 
     Mod+Ctrl+C hotkey-overlay-title="Focus or open Herdr" {
-        spawn "focus-or-exec" r#"^Alacritty\.herdr$"# "herdr-project";
+        spawn "focus-or-exec" r#"^Alacritty\.herdr$"# "terminal" "-c" "herdr" "-e" "herdr";
     }
 
     // Finer width adjustments.
