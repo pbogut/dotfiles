@@ -18,7 +18,6 @@ if pgrep -f wf-record; then
 fi
 
 mkdir -p "$HOME/Videos/screenrecords"
-# wl-screenrec --geometry "$(slurp)" -f "$filename"
 (
     refresh_waybar &
     filename="$HOME/Videos/screenrecords/screenrecord_from_$(date +%Y-%m-%d_%H-%M-%S).mp4"
