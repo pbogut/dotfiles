@@ -16,6 +16,18 @@ local function mk_tmp_dir()
 end
 
 M.setup = function()
+  command('PdfSave', function(opt)
+    local file_name = opt.args
+    vim.fn.jobstart({ 'mdtopdf', vim.fn.expand('%'), file_name }, {
+      detach = true,
+      on_exit = function(_, code)
+        if code == 0 then
+          vim.fn.jobstart({ 'okular', file_name })
+        end
+      end,
+    })
+  end, { nargs = 1, bang = true, complete = 'file' })
+
   command('PdfPreview', function()
     if not vim.b.mdpdf_file then
       local dirname = mk_tmp_dir()
