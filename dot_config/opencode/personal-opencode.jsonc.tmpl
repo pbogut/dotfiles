@@ -1,6 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
+    "chrome-devtools": {
+      "type": "local",
+      "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
+      "enabled": true
+    },
     "linear": {
       "type": "local",
       "command": ["npx", "-y", "mcp-remote", "https://mcp.linear.app/mcp"],
