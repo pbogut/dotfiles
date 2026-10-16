@@ -28,7 +28,7 @@
     },
     "chat": {
       "mode": "primary",
-      "model": "openai/gpt-5.6-luna",
+      "model": "openai/gpt-6.1-sol",
       "variant": "medium",
       "description": "General chat agent with web access only",
       "permission": {
@@ -48,7 +48,7 @@
   "permission": {{ include (joinPath .chezmoi.homeDir ".config/opencode/permission.jsonc") }},
   "plugin": [
     ["@plannotator/opencode@latest", {
-      "workflow": "user-managed",
+      "workflow": "manual",
     }],
     "@slkiser/opencode-quota@latest"
   ]

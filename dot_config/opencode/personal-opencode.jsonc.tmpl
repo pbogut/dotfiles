@@ -20,17 +20,17 @@
   },
   "agent": {
     "build": {
-      "model": "openai/gpt-6-astra"
+      "model": "openai/gpt-6.1-sol"
     },
     "plan": {
-      "model": "openai/gpt-6-astra"
+      "model": "openai/gpt-6.1-sol"
     }
   },
   "provider": {{ include (joinPath .chezmoi.homeDir ".config/opencode/providers.json") }},
   "permission": {{ include (joinPath .chezmoi.homeDir ".config/opencode/permission.jsonc") }},
   "plugin": [
     ["@plannotator/opencode@latest", {
-      "workflow": "user-managed",
+      "workflow": "manual",
     }],
     "@slkiser/opencode-quota@latest"
   ]
