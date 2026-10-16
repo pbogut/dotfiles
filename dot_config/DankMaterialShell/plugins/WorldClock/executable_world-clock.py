@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""London and Dubai times, optionally for a local wall time today."""
+"""London, Dubai and Warsaw times, optionally for a local wall time today."""
 
 import argparse
 import json
@@ -40,7 +40,11 @@ def snapshot(local_time=None, *, now=None, zone=None):
         "note": note,
         "error": "",
     }
-    for key, name in (("london", "Europe/London"), ("dubai", "Asia/Dubai")):
+    for key, name in (
+        ("london", "Europe/London"),
+        ("dubai", "Asia/Dubai"),
+        ("warsaw", "Europe/Warsaw"),
+    ):
         converted = selected.astimezone(ZoneInfo(name))
         result[key] = {
             "time": converted.strftime("%H:%M"),

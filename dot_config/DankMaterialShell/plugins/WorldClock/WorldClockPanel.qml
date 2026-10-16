@@ -9,6 +9,7 @@ PopoutComponent {
     property var liveData: ({})
     property bool showLondon: true
     property bool showDubai: false
+    property bool showWarsaw: false
     property bool previewing: false
     property string selectedTime: ""
     property var previewData: ({})
@@ -111,12 +112,16 @@ PopoutComponent {
         spacing: Theme.spacingS
 
         Repeater {
-            model: ["london", "dubai"]
+            model: [
+                {city: "london", label: "🇬🇧 London", shown: panel.showLondon},
+                {city: "warsaw", label: "🇵🇱 Warsaw", shown: panel.showWarsaw},
+                {city: "dubai", label: "🇦🇪 Dubai", shown: panel.showDubai}
+            ]
 
             StyledRect {
                 id: cityCard
-                required property string modelData
-                readonly property var clock: panel.displayData[modelData]
+                required property var modelData
+                readonly property var clock: panel.displayData[modelData.city]
                 width: parent.width
                 height: 100
                 radius: Theme.cornerRadius
@@ -126,7 +131,7 @@ PopoutComponent {
                     anchors.left: parent.left
                     anchors.top: parent.top
                     anchors.margins: Theme.spacingM
-                    text: cityCard.modelData === "london" ? "🇬🇧 London" : "🇦🇪 Dubai"
+                    text: cityCard.modelData.label
                     font.pixelSize: Theme.fontSizeLarge
                     font.weight: Font.Medium
                 }
@@ -160,8 +165,8 @@ PopoutComponent {
                     anchors.bottomMargin: Theme.spacingXS
                     height: 32
                     text: "Show in bar"
-                    checked: cityCard.modelData === "london" ? panel.showLondon : panel.showDubai
-                    onToggled: checked => panel.barVisibilityChanged(cityCard.modelData, checked)
+                    checked: cityCard.modelData.shown
+                    onToggled: checked => panel.barVisibilityChanged(cityCard.modelData.city, checked)
                 }
             }
         }

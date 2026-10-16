@@ -1,22 +1,27 @@
 # World Clock
 
-Personal DMS plugin for local time, London and Dubai. Add **World Clock** in the
-DankBar layout editor after enabling it in Plugins.
+Personal DMS plugin for local time, London, Dubai and Warsaw. Add **World Clock**
+in the DankBar layout editor after enabling it in Plugins.
 
 - A clock icon and local 24-hour `HH:mm:ss` time are always visible in the bar.
   Fixed-width digits keep the clock steady as seconds tick. Vertical bars stack
   the hours, minutes and seconds below the icon.
 - London is shown beside local time by default. Each city's **Show in bar**
-  switch is independent and saved in DMS plugin settings.
-- World clocks use `HH:mm`. With neither city selected, only the local clock is
+  switch is independent and saved in DMS plugin settings. Dubai and Warsaw
+  start hidden in the bar.
+- World clocks use `HH:mm`. With no cities selected, only the local clock is
   shown. Clicking still opens the same World Clock panel.
-- The panel always shows both cities, with flags, dates and timezone labels.
+- The panel always shows all three cities, with flags, dates and timezone labels.
+- Both the panel and bar keep the city order London, Warsaw, Dubai. Local time
+  stays first on the bar.
+- Warsaw uses `Europe/Warsaw`, including Polish daylight-saving rules, even when
+  your computer's local timezone is set to the UK or another destination.
 - Enter a local `HH:MM` or drag the slider in 15-minute steps to preview today.
   Typing supports exact minutes, including times after the slider's 23:45 end.
 - The panel clocks show the preview; the bar clocks always show live time.
 - **Now** and reopening the panel return to live time.
 - Day labels identify previous-day and next-day results. Python's system
-  timezone database handles UK daylight saving and the local timezone.
+  timezone database handles daylight saving for each city and the local timezone.
 - A local time skipped by a clock change shows an error. For a local time
   repeated during a clock change, the preview uses the first occurrence and
   displays a note.
@@ -27,6 +32,10 @@ after resume, sharing one live snapshot across bar instances. It passes the
 minute clock's timestamp to Python, so an early timer event cannot sample the
 previous minute. Panel previews are debounced and discard stale responses when
 a newer time is selected.
+
+The widget loads its panel with a fresh URL. DMS's plugin reload only bypasses
+the cache for the top-level widget; a static panel reference can retain old
+properties and make a newer widget fail to load.
 
 ## Validation
 

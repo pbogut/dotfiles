@@ -1,7 +1,7 @@
 {
   "id": "worldClock",
   "name": "World Clock",
-  "description": "London and Dubai clocks with a local-time travel slider",
+  "description": "Local time, London, Dubai and Warsaw clocks with a time-travel slider",
   "version": "1.0.0",
   "author": "Pawel Bogut",
   "type": "composite",

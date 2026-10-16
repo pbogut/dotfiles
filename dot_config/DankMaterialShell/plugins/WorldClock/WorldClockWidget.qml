@@ -15,18 +15,22 @@ PluginComponent {
     readonly property var liveData: snapshot.value || ({})
     readonly property bool showLondon: pluginData.showLondon !== false
     readonly property bool showDubai: pluginData.showDubai === true
+    readonly property bool showWarsaw: pluginData.showWarsaw === true
     readonly property var barClocks: {
         const clocks = [];
         if (showLondon)
             clocks.push({flag: "🇬🇧", time: liveData.london?.time || "--:--"});
+        if (showWarsaw)
+            clocks.push({flag: "🇵🇱", time: liveData.warsaw?.time || "--:--"});
         if (showDubai)
             clocks.push({flag: "🇦🇪", time: liveData.dubai?.time || "--:--"});
         return clocks;
     }
 
     function setBarVisibility(city, enabled) {
-        if (pluginService)
-            pluginService.savePluginData(pluginId, city === "london" ? "showLondon" : "showDubai", enabled);
+        const setting = {london: "showLondon", dubai: "showDubai", warsaw: "showWarsaw"}[city];
+        if (pluginService && setting)
+            pluginService.savePluginData(pluginId, setting, enabled);
     }
 
     PluginGlobalVar {
@@ -128,11 +132,32 @@ PluginComponent {
     }
 
     popoutContent: Component {
-        WorldClockPanel {
-            liveData: root.liveData
-            showLondon: root.showLondon
-            showDubai: root.showDubai
-            onBarVisibilityChanged: (city, enabled) => root.setBarVisibility(city, enabled)
+        PopoutComponent {
+            id: popout
+
+            Loader {
+                id: panelLoader
+                width: parent.width
+                // DMS busts the widget's cache on reload, but not its QML dependencies.
+                // Load the panel by a fresh URL so its properties and contents match.
+                source: Qt.resolvedUrl("./WorldClockPanel.qml").toString() + "?t=" + Date.now()
+
+                onLoaded: {
+                    item.liveData = Qt.binding(() => root.liveData);
+                    item.showLondon = Qt.binding(() => root.showLondon);
+                    item.showDubai = Qt.binding(() => root.showDubai);
+                    item.showWarsaw = Qt.binding(() => root.showWarsaw);
+                    item.closePopout = Qt.binding(() => popout.closePopout);
+                    item.parentPopout = Qt.binding(() => popout.parentPopout);
+                }
+            }
+
+            Connections {
+                target: panelLoader.item
+                function onBarVisibilityChanged(city, enabled) {
+                    root.setBarVisibility(city, enabled);
+                }
+            }
         }
     }
 }

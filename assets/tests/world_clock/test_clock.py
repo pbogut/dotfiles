@@ -43,6 +43,25 @@ class WorldClockTests(unittest.TestCase):
         self.assertEqual(late["dubai"]["dayOffset"], 1)
         self.assertEqual(late["dubai"]["date"], "2026-09-29")
 
+    def test_warsaw_from_uk_local_time(self):
+        for month, abbreviation in ((1, "CET"), (7, "CEST")):
+            with self.subTest(month=month):
+                result = clock.snapshot(
+                    "18:30",
+                    now=datetime(2026, month, 15, 10, tzinfo=timezone.utc),
+                    zone=ZoneInfo("Europe/London"),
+                )
+                self.assertEqual(result["localTime"], "18:30")
+                self.assertEqual(result["london"]["time"], "18:30")
+                self.assertEqual(result["warsaw"]["time"], "19:30")
+                self.assertEqual(result["warsaw"]["zone"], abbreviation)
+
+    def test_warsaw_preview_next_day_from_uk(self):
+        result = self.at("2026-09-28T12:00:00+00:00", "23:45", "Europe/London")
+        self.assertEqual(result["warsaw"]["time"], "00:45")
+        self.assertEqual(result["warsaw"]["date"], "2026-09-29")
+        self.assertEqual(result["warsaw"]["dayOffset"], 1)
+
     def test_today_uses_local_date_not_utc_date(self):
         result = self.at("2026-09-28T23:30:00+00:00", "00:15", "Asia/Tokyo")
         self.assertEqual(result["localDate"], "2026-09-29")
@@ -100,17 +119,19 @@ class WorldClockTests(unittest.TestCase):
         self.assertEqual(result["london"]["dayOffset"], -1)
         self.assertEqual(result["dubai"]["time"], "02:00")
 
-    def test_tick_timestamp_at_uk_dst_boundaries(self):
-        for tick, expected, zone in (
-            ("2026-03-29T00:59:00+00:00", "00:59", "GMT"),
-            ("2026-03-29T01:00:00+00:00", "02:00", "BST"),
-            ("2026-10-25T00:59:00+00:00", "01:59", "BST"),
-            ("2026-10-25T01:00:00+00:00", "01:00", "GMT"),
+    def test_tick_timestamp_at_european_dst_boundaries(self):
+        for tick, expected, zone, warsaw_time, warsaw_zone in (
+            ("2026-03-29T00:59:00+00:00", "00:59", "GMT", "01:59", "CET"),
+            ("2026-03-29T01:00:00+00:00", "02:00", "BST", "03:00", "CEST"),
+            ("2026-10-25T00:59:00+00:00", "01:59", "BST", "02:59", "CEST"),
+            ("2026-10-25T01:00:00+00:00", "01:00", "GMT", "02:00", "CET"),
         ):
             with self.subTest(tick=tick):
                 result = self.cli_at(tick)
                 self.assertEqual(result["london"]["time"], expected)
                 self.assertEqual(result["london"]["zone"], zone)
+                self.assertEqual(result["warsaw"]["time"], warsaw_time)
+                self.assertEqual(result["warsaw"]["zone"], warsaw_zone)
 
     def test_zero_timestamp_is_not_treated_as_missing(self):
         result = self.cli_at("1970-01-01T00:00:00+00:00")
