@@ -19,7 +19,6 @@ function rerun() {
 # {{- if .personal }} {{"{{{"}} - personal
 rerun gamemode "{{ .home }}/.scripts/sway/gamemode.sh --watch"
 demonize kdeconnect kdeconnect-indicator
-demonize nextcloud "nextcloud --background"
 demonize syncthing syncthing
 # {{"}}}"}} - personal {{- end }}
 
