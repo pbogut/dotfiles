@@ -11,6 +11,8 @@ if [[ "$1" == "focus" ]]; then
         --class=brave-personal \
         --user-data-dir="$HOME/.config/BraveSoftware/Personal/" \
         --profile-directory=Personal \
+        --remote-debugging-address=127.0.0.1 \
+        --remote-debugging-port=9223 \
         "$@"
 else
     brave \
@@ -18,5 +20,7 @@ else
         --class=brave-personal \
         --user-data-dir="$HOME/.config/BraveSoftware/Personal/" \
         --profile-directory=Personal \
+        --remote-debugging-address=127.0.0.1 \
+        --remote-debugging-port=9223 \
         "$@"
 fi

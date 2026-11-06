@@ -10,6 +10,8 @@ if [[ -z "$*" ]]; then
         --class=brave-work \
         --user-data-dir="$HOME/.config/BraveSoftware/Work/" \
         --profile-directory=Work \
+        --remote-debugging-address=127.0.0.1 \
+        --remote-debugging-port=9224 \
         "$@"
 else
     brave \
@@ -17,5 +19,7 @@ else
         --class=brave-work \
         --user-data-dir="$HOME/.config/BraveSoftware/Work/" \
         --profile-directory=Work \
+        --remote-debugging-address=127.0.0.1 \
+        --remote-debugging-port=9224 \
         "$@"
 fi

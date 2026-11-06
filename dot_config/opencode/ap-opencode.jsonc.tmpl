@@ -23,10 +23,28 @@
       "enabled": true,
       "timeout": 60000
     },
+    "browser-work": {
+      "type": "local",
+      "command": [
+        "npx", "-y", "@playwright/mcp@latest",
+        "--cdp-endpoint=http://127.0.0.1:9224",
+        "--output-dir=/tmp/pbogut/opencode/playwright/work"
+      ],
+      "enabled": true
+    },
+    "browser-personal": {
+      "type": "local",
+      "command": [
+        "npx", "-y", "@playwright/mcp@latest",
+        "--cdp-endpoint=http://127.0.0.1:9223",
+        "--output-dir=/tmp/pbogut/opencode/playwright/personal"
+      ],
+      "enabled": true
+    },
   },
   "agent": {
     "build": {
-      "model": "openai/gpt-6.1-sol"
+      "model": "openai/gpt-6-astra"
     },
     "plan": {
       "model": "openai/gpt-6-astra"
