@@ -1,0 +1,16 @@
+{
+  "toast": {
+    "show": false
+  },
+  "sidebar": {
+    "show": true,
+    "sessionTokens": true
+  },
+  "words": {
+    "percent": "remaining",
+    "sessionTokens": "tree"
+  },
+  "system": {
+    "exportFile": true
+  }
+}

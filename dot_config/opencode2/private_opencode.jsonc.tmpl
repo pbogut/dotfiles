@@ -1,0 +1,71 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agents": {
+    "build": { "model": "openai/gpt-6-astra" },
+    "plan": { "model": "openai/gpt-6-astra" }
+  },
+  "providers": {
+    "ollama": {
+      "settings": {{ (include "dot_config/opencode/providers.json" | fromJson).ollama.options | toJson }},
+      "models": {{ (include "dot_config/opencode/providers.json" | fromJson).ollama.models | toJson }}
+    }
+  },
+  // Keep the shared permission rules encrypted in chezmoi. V2 normalizes this
+  // legacy field, including bash -> shell and task -> subagent.
+  "permission": {{ include (joinPath .chezmoi.homeDir ".config/opencode/permission.jsonc") }},
+  "skills": ["{{ .chezmoi.homeDir }}/.config/opencode/skills"],
+  "mcp": {
+    "servers": {
+      "chrome-devtools": {
+        "type": "local",
+        "command": ["npx", "-y", "chrome-devtools-mcp@latest"]
+      },
+      "gtm": {
+        "type": "remote",
+        "url": "https://gtm-mcp.stape.ai/mcp"
+      },
+      "linear": {
+        "type": "local",
+        "command": ["npx", "-y", "mcp-remote", "https://mcp.linear.app/mcp"]
+      },
+      "gitlab": {
+        "type": "local",
+        "command": ["npx", "-y", "mcp-remote@0.14.2", "https://gitlab.com/api/v4/mcp"],
+        "timeout": { "startup": 60000, "catalog": 60000, "execution": 60000 }
+      },
+      "browser-work": {
+        "type": "local",
+        "command": [
+          "npx", "-y", "@playwright/mcp@latest",
+          "--cdp-endpoint=http://127.0.0.1:9224",
+          "--output-dir=/tmp/pbogut/opencode2/playwright/work"
+        ]
+      },
+      "browser-personal": {
+        "type": "local",
+        "command": [
+          "npx", "-y", "@playwright/mcp@latest",
+          "--cdp-endpoint=http://127.0.0.1:9223",
+          "--output-dir=/tmp/pbogut/opencode2/playwright/personal"
+        ]
+      }
+    }
+  },
+  "plugins": [
+    { "package": "@plannotator/opencode@latest", "options": { "workflow": "manual" } },
+    "@slkiser/opencode-quota@latest",
+    "{{ .chezmoi.homeDir }}/.local/share/opencode2/plugins/lsp-builds/4a17bc8379e572ab104ec26b55f92ee9b51dce37-{{ include "assets/opencode2-lsp/sidebar.patch" | sha256sum }}"
+  ],
+  "lsp": {
+    "php intelephense": {
+      "command": ["intelephense", "--stdio"],
+      "extensions": [".php"]
+    },
+    "typescript": { "command": ["typescript-language-server", "--stdio"] },
+    "pyright": { "command": ["pyright-langserver", "--stdio"] },
+    "bash": { "command": ["bash-language-server", "start"] },
+    "lua": { "command": ["lua-language-server"], "extensions": [".lua"] },
+    "gopls": { "command": ["gopls"] },
+    "rust": { "command": ["rust-analyzer"] }
+  }
+}

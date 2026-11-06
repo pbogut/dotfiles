@@ -1,0 +1,642 @@
+diff --git a/index.ts b/index.ts
+index 41c0d2e..ccd16c7 100644
+--- a/index.ts
++++ b/index.ts
+@@ -8,6 +8,7 @@ import { resolveSettings } from "./src/config.ts"
+ import { afterTool } from "./src/diagnostics.ts"
+ import { LspManager } from "./src/manager.ts"
+ import { lspTool } from "./src/tool.ts"
++import { LspStatus } from "./src/status.ts"
+ 
+ export default {
+   id: "opencode-v2-lsp-support",
+@@ -15,15 +16,17 @@ export default {
+     const root: string = ctx.location.directory
+     const settings = resolveSettings(root, ctx.options ?? {})
+     if (settings.debug) console.error(`[lsp] servers: ${settings.servers.map((server) => server.id).join(", ") || "none"}`)
+-    if (settings.servers.length === 0) return
+-
+-    const manager = new LspManager(settings, root)
+-    const tools = await ctx.tool.transform((editor: any) => editor.add(lspTool(manager, root)))
+-    const hook = await ctx.tool.hook("execute.after", afterTool(manager, root, settings.diagnostics))
++    const manager = new LspManager(settings, root, () => {
++      void rpc.events.emit("changed", {}).catch(() => {})
++    })
++    const rpc = await ctx.rpc.register(LspStatus, { list: async () => manager.status() })
++    const tools = settings.servers.length ? await ctx.tool.transform((editor: any) => editor.add(lspTool(manager, root))) : undefined
++    const hook = settings.servers.length ? await ctx.tool.hook("execute.after", afterTool(manager, root, settings.diagnostics)) : undefined
+     return async () => {
+-      await hook.dispose()
+-      await tools.dispose()
++      await hook?.dispose()
++      await tools?.dispose()
+       await manager.shutdown()
++      await rpc.dispose()
+     }
+   },
+ }
+diff --git a/package.json b/package.json
+index e74e00c..7e01644 100644
+--- a/package.json
++++ b/package.json
+@@ -3,9 +3,12 @@
+   "private": true,
+   "type": "module",
+   "exports": {
+-    ".": "./index.ts"
++    ".": "./index.ts",
++    "./tui": "./tui.tsx",
++    "./rpc": "./src/status.ts"
+   },
+   "scripts": {
+-    "test": "node test-opencode-lsp.js"
++    "test": "node test-opencode-lsp.js && node --test test-status-view.js",
++    "test:sidebar": "bun --preload @opentui/solid/preload test-sidebar.tsx"
+   }
+ }
+diff --git a/src/client.ts b/src/client.ts
+index dd857f9..37ae4df 100644
+--- a/src/client.ts
++++ b/src/client.ts
+@@ -46,7 +46,7 @@ export interface ClientOptions {
+   readonly onDiagnostics: (uri: string, diagnostics: Diagnostic[], version: number | undefined) => void
+   /** Called for every message from the server. Diagnostics waits use it to tell when the server is busy. */
+   readonly onActivity: () => void
+-  readonly onExit: () => void
++  readonly onExit: (error?: string) => void
+   readonly debug: boolean
+ }
+ 
+@@ -288,7 +288,7 @@ export class LspClient {
+     this.#child = undefined
+     this.#rejectPending(new Error(`${this.id}: server exited (${code ?? signal})`))
+     if (!this.#stopping && this.#options.debug) console.error(`[lsp:${this.id}] exited (${code ?? signal})`)
+-    this.#options.onExit()
++    this.#options.onExit(!this.#stopping && (code !== 0 || signal) ? `Server exited (${code ?? signal})` : undefined)
+   }
+ }
+ 
+diff --git a/src/manager.ts b/src/manager.ts
+index 326ca14..0a4aee8 100644
+--- a/src/manager.ts
++++ b/src/manager.ts
+@@ -6,6 +6,7 @@ import { abortable } from "./cancellation.ts"
+ import { BUILTIN_ROOTS, languageIdForExtension } from "./catalog.ts"
+ import { LspClient, LspError, errorMessage, type Diagnostic } from "./client.ts"
+ import type { ServerConfig, Settings } from "./config.ts"
++import type { ServerStatus } from "./status.ts"
+ 
+ // After the first fresh push, a server that stays quiet this long is done publishing for now.
+ const SETTLE_MS = 300
+@@ -128,10 +129,24 @@ export class LspManager {
+   readonly #listeners = new Map<string, Set<() => void>>()
+   readonly #queues = new Map<string, Promise<void>>()
+   #closed = false
++  readonly #status = new Map<string, ServerStatus>()
++  readonly #onStatus: () => void
+ 
+-  constructor(settings: Settings, root: string) {
++  constructor(settings: Settings, root: string, onStatus = () => {}) {
+     this.#settings = settings
+     this.#root = root
++    this.#onStatus = onStatus
++  }
++
++  status(): ServerStatus[] {
++    return [...this.#status.values()].map((entry) => ({ ...entry })).sort((a, b) => a.id.localeCompare(b.id))
++  }
++
++  #setStatus(key: string, value?: ServerStatus): void {
++    if (this.#closed) return
++    if (value) this.#status.set(key, value)
++    else this.#status.delete(key)
++    this.#onStatus()
+   }
+ 
+   serversFor(file: string): ServerConfig[] {
+@@ -379,6 +394,7 @@ export class LspManager {
+     current.opened.clear()
+     current.warmed = false
+     this.#published.delete(key)
++    this.#setStatus(key, { id: key, root, status: "starting" })
+     const client = new LspClient({
+       id: key,
+       command: server.command,
+@@ -390,21 +406,26 @@ export class LspManager {
+       requestTimeoutMs: this.#settings.requestTimeoutMs,
+       onDiagnostics: (uri, diagnostics, version) => this.#store(key, uri, diagnostics, version),
+       onActivity: () => this.#notify(key),
+-      onExit: () => {
+-        if (current.client === client) current.client = undefined
++      onExit: (error) => {
++        if (current.client !== client) return
++        current.client = undefined
++        this.#setStatus(key, error ? { id: key, root, status: "error", error } : undefined)
+       },
+       debug: this.#settings.debug,
+     })
+     current.starting = client
+       .start()
+       .then(() => {
++        if (!client.running) throw new Error(`${key}: server exited during initialization`)
+         current.client = client
++        this.#setStatus(key, { id: key, root, status: "running" })
+         this.#log(`${key} started`)
+         return client
+       })
+       .catch(async (error) => {
+         // A server that cannot start stays off for this instance instead of costing every edit a retry.
+         current.broken = errorMessage(error)
++        this.#setStatus(key, { id: key, root, status: "error", error: current.broken })
+         this.#log(current.broken)
+         await client.stop()
+         throw error
+@@ -436,6 +457,8 @@ export class LspManager {
+ 
+   async shutdown(): Promise<void> {
+     this.#closed = true
++    this.#status.clear()
++    this.#onStatus()
+     const entries = [...this.#entries.values()]
+     this.#entries.clear()
+     await Promise.all(
+diff --git a/src/status-view.ts b/src/status-view.ts
+new file mode 100644
+index 0000000..51e3ac7
+--- /dev/null
++++ b/src/status-view.ts
+@@ -0,0 +1,49 @@
++import type { ServerStatus } from "./status.ts"
++
++export interface Location {
++  readonly directory: string
++  readonly workspaceID?: string
++}
++
++export interface StatusView {
++  readonly servers: ServerStatus[]
++  readonly loading: boolean
++  readonly unavailable: boolean
++}
++
++interface StatusClient {
++  list(input: object, options: { location: Location; signal: AbortSignal }): Promise<unknown>
++  events: { on(name: "changed", callback: (event: { location: Location }) => void): () => void }
++}
++
++// Subscribe before fetching. Abort obsolete requests so a slow response cannot
++// restore stale state after a newer event, session switch, or component disposal.
++export function watchStatus(rpc: StatusClient, location: Location, update: (view: StatusView) => void) {
++  let closed = false
++  let request: AbortController | undefined
++  update({ servers: [], loading: true, unavailable: false })
++  const refresh = async () => {
++    request?.abort()
++    const current = new AbortController()
++    request = current
++    try {
++      const servers = await rpc.list({}, { location, signal: current.signal }) as ServerStatus[]
++      if (!closed && request === current) update({ servers, loading: false, unavailable: false })
++    } catch {
++      if (!closed && request === current) update({ servers: [], loading: false, unavailable: true })
++    }
++  }
++  const unsubscribe = rpc.events.on("changed", (event) => {
++    if (event.location.directory !== location.directory || event.location.workspaceID !== location.workspaceID) return
++    void refresh()
++  })
++  void refresh()
++  return {
++    refresh,
++    dispose() {
++      closed = true
++      request?.abort()
++      unsubscribe()
++    },
++  }
++}
+diff --git a/src/status.ts b/src/status.ts
+new file mode 100644
+index 0000000..7b19a84
+--- /dev/null
++++ b/src/status.ts
+@@ -0,0 +1,31 @@
++export interface ServerStatus {
++  readonly id: string
++  readonly root: string
++  readonly status: "starting" | "running" | "error"
++  readonly error?: string
++}
++
++// A portable RPC definition, shared by the server and TUI without runtime dependencies.
++export const LspStatus = {
++  id: "opencode-v2-lsp-support.status",
++  methods: {
++    list: {
++      input: { type: "object", additionalProperties: false },
++      output: {
++        type: "array",
++        items: {
++          type: "object",
++          properties: {
++            id: { type: "string" },
++            root: { type: "string" },
++            status: { type: "string", enum: ["starting", "running", "error"] },
++            error: { type: "string" },
++          },
++          required: ["id", "root", "status"],
++          additionalProperties: false,
++        },
++      },
++    },
++  },
++  events: { changed: { schema: { type: "object", additionalProperties: false } } },
++} as const
+diff --git a/test-opencode-lsp.js b/test-opencode-lsp.js
+index 866c65c..a5c23f3 100755
+--- a/test-opencode-lsp.js
++++ b/test-opencode-lsp.js
+@@ -64,6 +64,8 @@ const handle = (message) => {
+     appendFileSync(process.env.FAKE_LOG, JSON.stringify({ method, uri, version: params?.textDocument?.version, id: params?.id, outside: text.includes("OUTSIDE"), text: params?.text }) + "\n")
+   }
+   switch (method) {
++    case "test/exit":
++      return process.exit(params.code)
+     case "initialize": {
+       const result = { capabilities: {
+         textDocumentSync: process.env.FAKE_SYNC ? JSON.parse(process.env.FAKE_SYNC) : { openClose: true, change: 1, save: { includeText: false } },
+@@ -145,9 +147,20 @@ async function start(root, options = {}) {
+   const tools = []
+   const hooks = []
+   const disposed = []
++  const statuses = []
++  let status
+   const ctx = {
+     location: { directory: root },
+     options,
++    rpc: {
++      register: async (_definition, handlers) => {
++        status = handlers.list
++        return {
++          events: { emit: async () => statuses.push(await status()) },
++          dispose: async () => disposed.push("rpc"),
++        }
++      },
++    },
+     tool: {
+       transform: async (callback) => {
+         callback({ add: (tool) => tools.push(tool) })
+@@ -171,7 +184,7 @@ async function start(root, options = {}) {
+   }
+   const lsp = tools.find((tool) => tool.name === "lsp")
+   const after = hooks.find((hook) => hook.name === "execute.after")?.callback
+-  return { tools, hooks, disposed, cleanup, lsp, after }
++  return { tools, hooks, disposed, cleanup, lsp, after, status, statuses }
+ }
+ 
+ const completed = (tool, input, result) => ({ tool, input, status: "completed", sessionID: "s", agent: "a", messageID: "m", id: "c", result })
+@@ -583,12 +596,13 @@ test("a server that cannot start leaves edits alone and makes the tool explain w
+   }
+ })
+ 
+-test("setup registers nothing without servers and cleans up what it registered", async () => {
++test("setup keeps status RPC without servers and cleans up all registrations", async () => {
+   const empty = await project({ off: { disabled: true } })
+   try {
+-    const { tools, hooks, cleanup } = await start(empty)
++    const { tools, hooks, cleanup, status } = await start(empty)
+     assert.equal(tools.length + hooks.length, 0)
+-    assert.equal(cleanup, undefined)
++    assert.deepEqual(await status(), [])
++    await cleanup()
+   } finally {
+     await rm(empty, { recursive: true, force: true })
+   }
+@@ -597,7 +611,7 @@ test("setup registers nothing without servers and cleans up what it registered",
+   try {
+     const { disposed, cleanup } = await start(root)
+     await cleanup()
+-    assert.deepEqual(disposed.sort(), ["execute.after", "tools"])
++    assert.deepEqual(disposed.sort(), ["execute.after", "rpc", "tools"])
+   } finally {
+     await rm(root, { recursive: true, force: true })
+   }
+@@ -891,6 +905,70 @@ test("settings follow OpenCode 2's config precedence and deep merge, then plugin
+   }
+ })
+ 
++test("status RPC reports lazy startup, running servers and shutdown; locations stay separate", async () => {
++  const root = await project(structuredClone(FAKE))
++  const otherRoot = await project(structuredClone(FAKE))
++  const first = await start(root)
++  const second = await start(otherRoot)
++  try {
++    assert.deepEqual(await first.status(), [])
++    assert.deepEqual(first.statuses, [])
++    await writeFile(join(root, "a.ts"), "ERROR\n")
++    const event = completed("write", { path: "a.ts" }, { content: "Written" })
++    await first.after(event)
++    assert.match(event.result.content, /LSP errors detected/)
++    assert.deepEqual(first.statuses.map((rows) => rows[0]?.status), ["starting", "running"])
++    assert.deepEqual(await first.status(), [{ id: "fake", root, status: "running" }])
++    assert.deepEqual(await second.status(), [])
++    await first.cleanup()
++    assert.deepEqual(await first.status(), [])
++    assert.deepEqual(first.statuses.at(-1), [])
++  } finally {
++    await second.cleanup()
++    await first.cleanup()
++    await rm(root, { recursive: true, force: true })
++    await rm(otherRoot, { recursive: true, force: true })
++  }
++})
++
++test("startup failures stay visible without registering unconfigured file types", async () => {
++  const root = await project({ missing: { command: [join(tmpdir(), "nonexistent-lsp-sidebar-server")], extensions: [".ts"] } })
++  const app = await start(root)
++  try {
++    await writeFile(join(root, "a.ts"), "test\n")
++    await app.after(completed("read", { path: "README.md" }, {}))
++    assert.deepEqual(await app.status(), [])
++    await app.after(completed("write", { path: "a.ts" }, { content: "Written" }))
++    assert.equal((await app.status())[0].status, "error")
++    assert.match((await app.status())[0].error, /cannot start/)
++    assert.deepEqual(app.statuses.map((rows) => rows[0]?.status), ["starting", "error"])
++  } finally {
++    await app.cleanup()
++    await rm(root, { recursive: true, force: true })
++  }
++})
++
++test("normal exits remove active servers; crashes stay visible and recover on next use", async () => {
++  for (const code of [0, 1]) {
++    const root = await project(structuredClone(FAKE))
++    const manager = new LspManager(resolveSettings(root, {}, { OPENCODE_CONFIG_DIR: join(root, "no-global") }), root)
++    try {
++      const file = join(root, "a.ts")
++      await writeFile(file, "fine\n")
++      const [{ client }] = await manager.sync(file)
++      assert.equal(manager.status()[0].status, "running")
++      await assert.rejects(client.request("test/exit", { code }))
++      if (code === 0) assert.deepEqual(manager.status(), [])
++      else assert.equal(manager.status()[0].status, "error")
++      await manager.sync(file)
++      assert.equal(manager.status()[0].status, "running")
++    } finally {
++      await manager.shutdown()
++      await rm(root, { recursive: true, force: true })
++    }
++  }
++})
++
+ let failed = 0
+ for (const { name, run } of cases) {
+   try {
+diff --git a/test-sidebar.tsx b/test-sidebar.tsx
+new file mode 100644
+index 0000000..04a69cf
+--- /dev/null
++++ b/test-sidebar.tsx
+@@ -0,0 +1,112 @@
++import assert from "node:assert/strict"
++import { createSignal } from "solid-js"
++import { createStore, unwrap } from "solid-js/store"
++import { RGBA } from "@opentui/core"
++import { testRender } from "@opentui/solid"
++import plugin from "./tui.tsx"
++
++let claim: any
++let updated: any
++let changed: any
++let subscriptions = 0
++let registrations = 0
++let unavailable = false
++let saved: { collapsed: boolean } | undefined
++const [session, setSession] = createSignal("first")
++const color = RGBA.fromHex("#ffffff")
++const servers = new Map<string, any[]>([["/first", []], ["/second", [{ id: "typescript", root: "/second", status: "starting" }]]])
++const ctx: any = {
++  storage: { store: (key: string, options: { initial: { collapsed: boolean } }) => {
++    assert.equal(key, "sidebar")
++    const [state, setState] = createStore(structuredClone(saved ?? options.initial))
++    return [state, async (update: (draft: { collapsed: boolean }) => void) => {
++      const draft = structuredClone(unwrap(state))
++      update(draft)
++      saved = structuredClone(draft)
++      setState(draft)
++    }]
++  } },
++  theme: { text: { base: color, muted: color, feedback: { error: { base: color }, success: { base: color } } } },
++  data: {
++    session: { get: (id: string) => ({ location: { directory: `/${id}` } }) },
++    on: (_name: string, handler: any) => { updated = handler; registrations++; return () => registrations-- },
++  },
++  client: { rpc: () => ({
++    list: async (_input: any, { location }: any) => {
++      if (unavailable) throw new Error("offline")
++      return servers.get(location.directory)
++    },
++    events: { on: (_name: string, handler: any) => { changed = handler; subscriptions++; return () => subscriptions-- } },
++  }) },
++  ui: { slot: (input: any) => { claim = input; return () => {} } },
++}
++plugin.setup(ctx)
++assert.equal(claim.append, "sidebar.content")
++let view = await testRender(() => claim.render({ get sessionID() { return session() } }), { width: 50, height: 12 })
++const frame = async () => { await new Promise((resolve) => setTimeout(resolve, 5)); await view.renderOnce(); return view.captureCharFrame() }
++try {
++  assert.match(await frame(), /▼ LSP[\s\S]*No active language servers/)
++  assert.doesNotMatch(await frame(), /\(\d+ active\)/)
++  await view.mockMouse.click(1, 0, 2)
++  assert.match(await frame(), /▼ LSP/)
++  await view.mockMouse.click(1, 0)
++  assert.match(await frame(), /▶ LSP \(0 active\)/)
++  assert.doesNotMatch(await frame(), /No active language servers/)
++  servers.set("/first", [{ id: "php intelephense", root: "/first", status: "running" }])
++  changed({ location: { directory: "/first" } })
++  assert.match(await frame(), /▶ LSP \(1 active\)/)
++  assert.doesNotMatch(await frame(), /intelephense/)
++  servers.get("/first")!.push(
++    { id: "typescript", root: "/first", status: "running" },
++    { id: "lua", root: "/first", status: "starting" },
++    { id: "pyright", root: "/first", status: "error" },
++  )
++  changed({ location: { directory: "/first" } })
++  assert.match(await frame(), /▶ LSP \(2 active\)/)
++  await view.mockMouse.click(1, 0)
++  const expanded = await frame()
++  assert.match(expanded, /▼ LSP[\s\S]*● php intelephense/)
++  assert.doesNotMatch(expanded, /\(\d+ active\)/)
++  assert.equal(subscriptions, 1)
++  await view.mockMouse.click(1, 0)
++  await frame()
++  setSession("second")
++  assert.match(await frame(), /▶ LSP \(0 active\)/)
++  await view.mockMouse.click(1, 0)
++  const second = await frame()
++  assert.match(second, /○ typescript \(starting\)/)
++  assert.doesNotMatch(second, /intelephense/)
++  assert.equal(subscriptions, 1)
++  servers.set("/second", [{ id: "typescript", root: "/second", status: "error", error: "crashed" }])
++  changed({ location: { directory: "/second" } })
++  assert.match(await frame(), /● typescript \(error\)/)
++  unavailable = true
++  updated()
++  assert.match(await frame(), /Server status unavailable/)
++  unavailable = false
++  servers.set("/second", [])
++  updated()
++  assert.match(await frame(), /No active language servers/)
++  await view.mockMouse.click(1, 0)
++  assert.match(await frame(), /▶ LSP \(0 active\)/)
++  assert.equal(saved?.collapsed, true)
++} finally {
++  view.renderer.destroy()
++}
++assert.equal(subscriptions, 0)
++assert.equal(registrations, 0)
++plugin.setup(ctx)
++view = await testRender(() => claim.render({ get sessionID() { return session() } }), { width: 50, height: 12 })
++try {
++  assert.match(await frame(), /▶ LSP \(0 active\)/)
++  assert.doesNotMatch(await frame(), /No active language servers/)
++  await view.mockMouse.click(1, 0)
++  assert.match(await frame(), /▼ LSP[\s\S]*No active language servers/)
++  assert.doesNotMatch(await frame(), /\(\d+ active\)/)
++  assert.equal(saved?.collapsed, false)
++} finally {
++  view.renderer.destroy()
++}
++assert.equal(subscriptions, 0)
++assert.equal(registrations, 0)
++console.log("Sidebar rendering, collapse persistence, live counts, project switching and cleanup passed")
+diff --git a/test-status-view.js b/test-status-view.js
+new file mode 100644
+index 0000000..83769d1
+--- /dev/null
++++ b/test-status-view.js
+@@ -0,0 +1,55 @@
++import assert from "node:assert/strict"
++import { test } from "node:test"
++import { watchStatus } from "./src/status-view.ts"
++
++test("sidebar filters locations, rejects stale snapshots, recovers from errors and unsubscribes", async () => {
++  const location = { directory: "/project", workspaceID: "first" }
++  const views = []
++  const calls = []
++  let event
++  let disposed = false
++  const rpc = {
++    list(input, options) {
++      return new Promise((resolve, reject) => calls.push({ input, options, resolve, reject }))
++    },
++    events: {
++      on(name, callback) {
++        assert.equal(name, "changed")
++        event = callback
++        return () => { disposed = true }
++      },
++    },
++  }
++  const watch = watchStatus(rpc, location, (view) => views.push(view))
++  const tick = () => new Promise((resolve) => setImmediate(resolve))
++  assert.deepEqual(views.at(-1), { servers: [], loading: true, unavailable: false })
++  assert.deepEqual(calls[0].options.location, location)
++  event({ location: { directory: "/another-project", workspaceID: "first" } })
++  event({ location: { directory: "/project", workspaceID: "second" } })
++  assert.equal(calls.length, 1)
++  event({ location })
++  assert.equal(calls.length, 2)
++  assert.equal(calls[0].options.signal.aborted, true)
++  const servers = [{ id: "php intelephense", root: "/project", status: "running" }]
++  calls[1].resolve(servers)
++  await tick()
++  calls[0].resolve([])
++  await tick()
++  assert.deepEqual(views.at(-1), { servers, loading: false, unavailable: false })
++  const refresh = watch.refresh()
++  calls[2].reject(new Error("RPC unavailable during reload"))
++  await refresh
++  assert.equal(views.at(-1).unavailable, true)
++  event({ location })
++  calls[3].resolve([])
++  await tick()
++  assert.deepEqual(views.at(-1), { servers: [], loading: false, unavailable: false })
++  event({ location })
++  const count = views.length
++  watch.dispose()
++  calls[4].resolve(servers)
++  await tick()
++  assert.equal(calls[4].options.signal.aborted, true)
++  assert.equal(disposed, true)
++  assert.equal(views.length, count)
++})
+diff --git a/tui.tsx b/tui.tsx
+new file mode 100644
+index 0000000..f9e5cd8
+--- /dev/null
++++ b/tui.tsx
+@@ -0,0 +1,63 @@
++import type { Context } from "@opencode/plugin/tui/context"
++import { createEffect, createSignal, For, onCleanup, Show } from "solid-js"
++import { LspStatus } from "./src/status.ts"
++import { watchStatus, type StatusView } from "./src/status-view.ts"
++
++function Sidebar(props: { context: Context; sessionID: string; collapsed: boolean; toggle: () => void }) {
++  const ctx = props.context
++  const [view, setView] = createSignal<StatusView>({ servers: [], loading: true, unavailable: false })
++  createEffect(() => {
++    const location = ctx.data.session.get(props.sessionID)?.location
++    if (!location) {
++      setView({ servers: [], loading: true, unavailable: false })
++      return
++    }
++    const status = watchStatus(ctx.client.rpc(LspStatus), location, setView)
++    const stop = ctx.data.on("plugin.updated", () => void status.refresh())
++    onCleanup(() => {
++      stop()
++      status.dispose()
++    })
++  })
++  return (
++    <box flexDirection="column" flexShrink={0}>
++      <box flexDirection="row" gap={1} onMouseUp={(event) => { if (event.button === 0) props.toggle() }}>
++        <text fg={ctx.theme.text.base}><b>{props.collapsed ? "▶" : "▼"} LSP</b></text>
++        <Show when={props.collapsed && !view().loading && !view().unavailable}>
++          <text fg={ctx.theme.text.muted}>({view().servers.filter((server) => server.status === "running").length} active)</text>
++        </Show>
++      </box>
++      <Show when={!props.collapsed}>
++        <Show when={!view().loading} fallback={<text fg={ctx.theme.text.muted}>Loading server status…</text>}>
++          <Show when={!view().unavailable} fallback={<text fg={ctx.theme.text.muted}>Server status unavailable</text>}>
++            <For each={view().servers} fallback={<text fg={ctx.theme.text.muted}>No active language servers</text>}>
++              {(server) => (
++                <box flexDirection="row" gap={1}>
++                  <text fg={server.status === "error" ? ctx.theme.text.feedback.error.base : server.status === "running" ? ctx.theme.text.feedback.success.base : ctx.theme.text.muted}>
++                    {server.status === "starting" ? "○" : "●"}
++                  </text>
++                  <text fg={ctx.theme.text.base}>
++                    {server.id}{server.status === "running" ? "" : ` (${server.status})`}
++                  </text>
++                </box>
++              )}
++            </For>
++          </Show>
++        </Show>
++      </Show>
++    </box>
++  )
++}
++
++export default {
++  id: "opencode-v2-lsp-support.tui",
++  setup(context: Context) {
++    const [sidebar, saveSidebar] = context.storage.store("sidebar", { initial: { collapsed: false } })
++    const toggle = () => void saveSidebar((draft) => { draft.collapsed = !draft.collapsed })
++      .catch((error) => console.error("Could not save LSP sidebar preference", error))
++    return context.ui.slot({
++      append: "sidebar.content",
++      render: (props) => <Sidebar context={context} sessionID={props.sessionID} collapsed={sidebar.collapsed} toggle={toggle} />,
++    })
++  },
++}

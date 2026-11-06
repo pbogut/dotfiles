@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Rerun on patch, rendered server config, or CLI config changes.
+# patch: {{ include "assets/opencode2-lsp/sidebar.patch" | sha256sum }}
+# config: {{ includeTemplate "dot_config/opencode2/private_opencode.jsonc.tmpl" . | sha256sum }}
+# cli: {{ include "dot_config/opencode2/private_cli.json" | sha256sum }}
+
+revision=4a17bc8379e572ab104ec26b55f92ee9b51dce37
+patch_hash={{ include "assets/opencode2-lsp/sidebar.patch" | sha256sum }}
+patch_file={{ joinPath .chezmoi.sourceDir "assets/opencode2-lsp/sidebar.patch" | quote }}
+root="${OPENCODE2_LSP_INSTALL_ROOT:-$HOME/.local/share/opencode2/plugins}"
+release="$root/lsp-builds/$revision-$patch_hash"
+link="$root/lsp"
+build=""
+link_stage=""
+
+cleanup() {
+	[[ -z "$build" ]] || rm -rf -- "$build"
+	[[ -z "$link_stage" ]] || rm -rf -- "$link_stage"
+	return 0
+}
+trap cleanup EXIT
+
+mkdir -p "$root/lsp-builds"
+exec 9>"$root/.lsp-install.lock"
+flock 9
+
+if [[ -e "$link" && ! -L "$link" ]]; then
+	printf 'Refusing to replace non-symlink plugin directory: %s\n' "$link" >&2
+	exit 1
+fi
+
+if [[ ! -f "$release/.ready" ]]; then
+	if [[ -e "$release" ]]; then
+		printf 'Incomplete plugin installation already exists: %s\n' "$release" >&2
+		exit 1
+	fi
+	node -e 'if (Number(process.versions.node.split(".")[0]) < 24) throw new Error("LSP plugin tests require Node.js 24 or newer")'
+	build=$(mktemp -d "$root/.lsp-build.XXXXXX")
+	git -C "$build" init --quiet
+	git -C "$build" fetch --quiet --depth=1 https://github.com/christensenjairus/opencode-v2-lsp-support.git "$revision"
+	git -C "$build" checkout --quiet --detach FETCH_HEAD
+	[[ $(git -C "$build" rev-parse HEAD) == "$revision" ]]
+	git -C "$build" apply --check "$patch_file"
+	git -C "$build" apply "$patch_file"
+	node "$build/test-opencode-lsp.js"
+	node --test "$build/test-status-view.js"
+	touch "$build/.ready"
+	mv -- "$build" "$release"
+	build=""
+	printf 'Prepared patched OpenCode 2 LSP plugin: %s\n' "$release"
+fi
+
+if [[ $(readlink -- "$link" || true) != "$release" ]]; then
+	link_stage=$(mktemp -d "$root/.lsp-link.XXXXXX")
+	ln -s "$release" "$link_stage/lsp"
+	mv -Tf -- "$link_stage/lsp" "$link"
+	printf 'Activated OpenCode 2 LSP sidebar plugin. Reload with oc2 reload.\n'
+fi

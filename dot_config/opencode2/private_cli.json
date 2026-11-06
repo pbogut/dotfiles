@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/v2/cli.json",
+  "theme": {
+    "name": "flexoki"
+  },
+  "keybinds": {
+    "messages.copy": "none",
+    "session.export": "<leader>y"
+  },
+  "diffs": {
+    "wrap": "word"
+  },
+  "session": {
+    "sidebar": "auto",
+    "scrollbar": false,
+    "thinking": "show"
+  },
+  "animations": true
+}
