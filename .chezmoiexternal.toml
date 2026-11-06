@@ -26,3 +26,16 @@
     type = "git-repo"
     url = "https://github.com/pbogut/mpvDLNA.git"
     refreshPeriod = "168h"
+
+# Herdr 0.9.5, OpenCode integration version 13. Update all three pins together.
+[".config/opencode/herdr-tui-session.js"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/herdrdev/herdr/2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01/src/integration/assets/opencode/herdr-tui-session.js"
+
+[".config/opencode/herdr-opencode/tui.js"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/herdrdev/herdr/2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01/src/integration/assets/opencode/tui.js"
+
+[".config/opencode/plugins/herdr-agent-state.js"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/herdrdev/herdr/2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01/src/integration/assets/opencode/herdr-agent-state.js"

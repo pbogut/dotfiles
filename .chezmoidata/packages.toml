@@ -149,7 +149,7 @@ mise = [
   "herdr",
   "node",
   "npm",
-  "opencode",
+  "opencode@2",
   "rust",
   "yarn",
 ]

@@ -1,4 +1,14 @@
 .config/DankMaterialShell/plugins/BatteryConservation
 .config/herdr/plugins/managed-tabs
 .config/herdr/plugins/repo-metadata
-.config/opencode/opencode.jsonc
+.config/opencode/ap-opencode.jsonc
+.config/opencode/personal-opencode.jsonc
+.config/opencode/chat-opencode.jsonc
+.config/opencode/plugins/temp-export.ts
+.config/opencode/opencode-quota/quota-toast.jsonc
+.config/opencode2/opencode.jsonc
+.config/opencode2/cli.json
+.config/opencode2/extensions/temp-export/package.json
+.config/opencode2/extensions/temp-export/transcript.ts
+.config/opencode2/extensions/temp-export/tui.ts
+.config/opencode2/opencode-quota/settings.jsonc

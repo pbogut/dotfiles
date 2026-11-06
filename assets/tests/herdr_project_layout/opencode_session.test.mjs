@@ -1,66 +1,55 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { mkdtemp, rm } from "node:fs/promises";
 import net from "node:net";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterEach, test } from "node:test";
 
-const root = new URL("../../../", import.meta.url);
-const sourceUrl = new URL("dot_config/opencode/herdr-tui-session.js", root);
-const source = await readFile(sourceUrl, "utf8");
-const pluginModule = await import(
+// Read chezmoi's pinned external source, never the installed plugin.
+const source = execFileSync("chezmoi", [
+  "--source", fileURLToPath(new URL("../../../", import.meta.url)),
+  "cat", join(homedir(), ".config/opencode/herdr-tui-session.js"),
+], { encoding: "utf8" });
+const { default: plugin } = await import(
   `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`
 );
-const stateSource = await readFile(
-  new URL("dot_config/opencode/plugins/herdr-agent-state.js", root),
-  "utf8"
+const originalEnv = Object.fromEntries(
+  ["HERDR_ENV", "HERDR_PANE_ID", "HERDR_SOCKET_PATH"].map((key) => [key, process.env[key]])
 );
-const statePluginModule = await import(
-  `data:text/javascript;base64,${Buffer.from(stateSource).toString("base64")}`
-);
-
-const originalEnv = {
-  HERDR_ENV: process.env.HERDR_ENV,
-  HERDR_PANE_ID: process.env.HERDR_PANE_ID,
-  HERDR_SOCKET_PATH: process.env.HERDR_SOCKET_PATH,
-};
 const cleanups = [];
 
 afterEach(async () => {
-  while (cleanups.length > 0) {
-    await cleanups.pop()();
-  }
-  for (const [name, value] of Object.entries(originalEnv)) {
-    if (value === undefined) {
-      delete process.env[name];
-    } else {
-      process.env[name] = value;
-    }
+  while (cleanups.length) await cleanups.pop()();
+  for (const [key, value] of Object.entries(originalEnv)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
   }
 });
 
-function fakeApi(session) {
-  let dispose = () => {};
-  return {
-    api: {
-      route: { current: { name: "session", params: { sessionID: session.id } } },
-      state: { session: { get: () => session } },
-      lifecycle: { onDispose: (handler) => (dispose = handler) },
-    },
-    dispose: () => dispose(),
-  };
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+async function waitFor(predicate) {
+  const deadline = Date.now() + 3_000;
+  while (!predicate()) {
+    if (Date.now() >= deadline) assert.fail("Timed out waiting for a Herdr report");
+    await sleep(10);
+  }
 }
 
-async function socketServer() {
-  const socketPath = join(tmpdir(), `herdr-opencode-${process.pid}-${Date.now()}.sock`);
+async function fixture({ status = "idle", permission, form } = {}) {
+  const directory = await mkdtemp(join(tmpdir(), "herdr-oc-"));
+  const socketPath = join(directory, "herdr.sock");
   const requests = [];
+  const sockets = new Set();
   const server = net.createServer((client) => {
+    sockets.add(client);
+    client.on("close", () => sockets.delete(client));
     let input = "";
     client.on("data", (chunk) => {
       input += chunk;
-      const newline = input.indexOf("\n");
-      if (newline === -1) return;
-      requests.push(JSON.parse(input.slice(0, newline)));
+      if (!input.includes("\n")) return;
+      requests.push(JSON.parse(input.slice(0, input.indexOf("\n"))));
       client.end('{"result":{}}\n');
     });
   });
@@ -68,85 +57,148 @@ async function socketServer() {
     server.once("error", reject);
     server.listen(socketPath, resolve);
   });
-  cleanups.push(
-    () => new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())))
-  );
-  return { socketPath, requests };
+  cleanups.push(async () => {
+    for (const socket of sockets) socket.destroy();
+    await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    await rm(directory, { recursive: true, force: true });
+  });
+  Object.assign(process.env, {
+    HERDR_ENV: "1", HERDR_PANE_ID: "w1:p1", HERDR_SOCKET_PATH: socketPath,
+  });
+
+  let route = { type: "session", sessionID: "root-a" };
+  let listener;
+  const sessions = new Map([
+    ["root-a", { id: "root-a" }],
+    ["child-a", { id: "child-a", parentID: "root-a" }],
+    ["root-b", { id: "root-b" }],
+  ]);
+  const statuses = new Map([["root-a", status]]);
+  const permissions = new Map(permission ? [["child-a", [{ id: permission }]]] : []);
+  const forms = new Map(form ? [["child-a", [{ id: form }]]] : []);
+  const api = {
+    ui: { router: { current: () => route } },
+    data: {
+      session: {
+        get: (id) => sessions.get(id),
+        family: (id) => [...sessions.values()].filter((session) => session.parentID === id).map((session) => session.id),
+        status: (id) => statuses.get(id) ?? "idle",
+        permission: { list: (id) => permissions.get(id) ?? [] },
+        form: { list: (id) => forms.get(id) ?? [] },
+      },
+      listen: (callback) => { listener = callback; return () => { listener = undefined; }; },
+    },
+  };
+  const dispose = plugin.setup(api);
+  cleanups.push(dispose);
+  return {
+    requests, sessions, statuses, permissions, forms,
+    emit: (type, data) => listener?.({ details: { type, data } }),
+    select: (sessionID) => { route = { type: "session", sessionID }; },
+    dispose,
+    states: () => requests.filter((request) => request.method === "pane.report_agent"),
+    selections: () => requests.filter((request) => request.method === "pane.report_agent_session"),
+  };
 }
 
-test("reports only the selected root session", async () => {
-  const { socketPath, requests } = await socketServer();
-  process.env.HERDR_ENV = "1";
-  process.env.HERDR_PANE_ID = "w1:p1";
-  process.env.HERDR_SOCKET_PATH = socketPath;
-  const tui = fakeApi({ id: "ses_exact_123" });
+async function expectState(app, state, after = 0) {
+  await waitFor(() => app.states().length > after && app.states().at(-1).params.state === state);
+}
 
-  await pluginModule.default.tui(tui.api);
-  tui.dispose();
-
-  assert.equal(requests.length, 1);
-  assert.deepEqual(requests[0], {
-    id: requests[0].id,
-    method: "pane.report_agent_session",
-    params: {
-      pane_id: "w1:p1",
-      source: "herdr:opencode",
-      agent: "opencode",
-      agent_session_id: "ses_exact_123",
-      session_start_source: "select",
-    },
+test("v2 reports the selected root and hydrates already-running and blocked sessions", async () => {
+  const app = await fixture({ status: "running", permission: "existing-permission" });
+  await expectState(app, "blocked");
+  assert.deepEqual(app.selections()[0].params, {
+    pane_id: "w1:p1", source: "herdr:opencode", agent: "opencode",
+    agent_session_id: "root-a", session_start_source: "select",
   });
-  assert.doesNotMatch(source, /method:\s*["']pane\.report_agent["']/);
+  const before = app.states().length;
+  app.permissions.clear();
+  await expectState(app, "working", before);
+  app.select("child-a");
+  await sleep(150);
+  assert.ok(app.requests.every(({ params }) => params.agent_session_id === "root-a"));
 });
 
-test("does not report a selected child session", async () => {
-  const { socketPath, requests } = await socketServer();
-  process.env.HERDR_ENV = "1";
-  process.env.HERDR_PANE_ID = "w1:p1";
-  process.env.HERDR_SOCKET_PATH = socketPath;
-  const tui = fakeApi({ id: "ses_child", parentID: "ses_root" });
-
-  await pluginModule.default.tui(tui.api);
-  await new Promise((resolve) => setTimeout(resolve, 125));
-  tui.dispose();
-
-  assert.equal(requests.length, 0);
-});
-
-test("reports lifecycle changes with the root session ID used by the shortcut", async () => {
-  const { socketPath, requests } = await socketServer();
-  process.env.HERDR_ENV = "1";
-  process.env.HERDR_PANE_ID = "w1:p1";
-  process.env.HERDR_SOCKET_PATH = socketPath;
-  const plugin = await statePluginModule.HerdrAgentStatePlugin();
-  const sessionID = "ses_resume_root";
-  const event = (type, properties) => plugin.event({ event: { type, properties } });
-
-  await plugin["chat.message"]({ sessionID });
-  await event("session.status", { sessionID, status: { type: "busy" } });
-  await event("session.created", { info: { id: "ses_child", parentID: sessionID } });
-  await event("session.status", { sessionID: "ses_child", status: { type: "idle" } });
-  await event("question.asked", { sessionID: "ses_child" });
-  await event("question.replied", { sessionID: "ses_child" });
-  await event("session.idle", { sessionID });
-
-  assert.deepEqual(
-    requests.map(({ params }) => params.state),
-    ["working", "working", "blocked", "working", "idle"]
-  );
-  let previousSeq = 0;
-  for (const { method, params } of requests) {
-    assert.equal(method, "pane.report_agent");
-    assert.equal(params.pane_id, "w1:p1");
+test("v2 lifecycle and child permission/form events report state under the resumable root ID", async () => {
+  const app = await fixture();
+  await expectState(app, "idle");
+  const emit = async (type, data, state) => {
+    const before = app.states().length;
+    app.emit(type, data);
+    await expectState(app, state, before);
+  };
+  await emit("session.execution.started", { sessionID: "root-a" }, "working");
+  await emit("permission.asked", { sessionID: "child-a", id: "permission-1" }, "blocked");
+  await emit("form.created", { form: { sessionID: "child-a", id: "form-1" } }, "blocked");
+  await emit("permission.replied", { sessionID: "child-a", requestID: "permission-1" }, "blocked");
+  await emit("form.replied", { sessionID: "child-a", id: "form-1" }, "working");
+  await emit("session.execution.succeeded", { sessionID: "root-a" }, "idle");
+  await emit("session.execution.failed", { sessionID: "root-a" }, "blocked");
+  await emit("session.execution.started", { sessionID: "root-a" }, "working");
+  await emit("session.execution.interrupted", { sessionID: "root-a" }, "idle");
+  let seq = 0;
+  for (const { params } of app.states()) {
+    assert.equal(params.agent_session_id, "root-a");
     assert.equal(params.source, "herdr:opencode");
     assert.equal(params.agent, "opencode");
-    assert.equal(params.agent_session_id, sessionID);
-    assert.ok(params.seq > previousSeq);
-    previousSeq = params.seq;
+    assert.equal(params.pane_id, "w1:p1");
+    assert.ok(params.seq > seq);
+    seq = params.seq;
   }
 });
 
-test("does not enable lifecycle reporting outside Herdr", async () => {
+test("other shared-server sessions cannot change this pane; selecting one updates its resume ID", async () => {
+  const app = await fixture();
+  await expectState(app, "idle");
+  app.emit("session.execution.started", { sessionID: "root-b" });
+  app.emit("permission.asked", { sessionID: "root-b", id: "other-permission" });
+  await sleep(150);
+  assert.ok(app.states().every(({ params }) => params.state === "idle" && params.agent_session_id === "root-a"));
+  const before = app.states().length;
+  app.statuses.set("root-b", "running");
+  app.select("root-b");
+  await expectState(app, "working", before);
+  assert.equal(app.selections().at(-1).params.agent_session_id, "root-b");
+  assert.equal(app.states().at(-1).params.agent_session_id, "root-b");
+});
+
+test("a reply received before cache hydration cannot resurrect a blocker", async () => {
+  const app = await fixture({ status: "running" });
+  await expectState(app, "working");
+  app.emit("permission.asked", { sessionID: "child-a", id: "late-permission" });
+  await expectState(app, "blocked");
+  app.permissions.set("child-a", [{ id: "late-permission" }]);
+  const before = app.states().length;
+  app.emit("permission.replied", { sessionID: "child-a", requestID: "late-permission" });
+  await expectState(app, "working", before);
+  await sleep(150);
+  assert.equal(app.states().at(-1).params.state, "working");
+});
+
+test("rapid A-to-B-to-A selection discards stale queued reports, and disposal stops reporting", async () => {
+  const app = await fixture();
+  await expectState(app, "idle");
+  const before = app.requests.length;
+  app.select("root-b");
+  app.emit("session.execution.started", { sessionID: "root-b" });
+  app.select("root-a");
+  app.emit("session.execution.started", { sessionID: "root-a" });
+  await expectState(app, "working");
+  assert.ok(app.requests.slice(before).every(({ params }) => params.agent_session_id === "root-a"));
+  app.dispose();
+  await sleep(30);
+  const stopped = app.requests.length;
+  app.select("root-b");
+  app.emit("session.execution.failed", { sessionID: "root-b" });
+  await sleep(150);
+  assert.equal(app.requests.length, stopped);
+});
+
+test("v2 reporting is inactive outside a Herdr pane", () => {
   delete process.env.HERDR_ENV;
-  assert.deepEqual(await statePluginModule.HerdrAgentStatePlugin(), {});
+  assert.equal(plugin.setup({}), undefined);
+  process.env.HERDR_ENV = "1";
+  delete process.env.HERDR_PANE_ID;
+  assert.equal(plugin.setup({}), undefined);
 });

@@ -4,13 +4,13 @@ set -euo pipefail
 
 # Rerun on patch, rendered server config, or CLI config changes.
 # patch: {{ include "assets/opencode2-lsp/sidebar.patch" | sha256sum }}
-# config: {{ includeTemplate "dot_config/opencode2/private_opencode.jsonc.tmpl" . | sha256sum }}
-# cli: {{ include "dot_config/opencode2/private_cli.json" | sha256sum }}
+# config: {{ includeTemplate "dot_config/opencode/private_opencode.jsonc.tmpl" . | sha256sum }}
+# cli: {{ include "dot_config/opencode/private_cli.json" | sha256sum }}
 
 revision=4a17bc8379e572ab104ec26b55f92ee9b51dce37
 patch_hash={{ include "assets/opencode2-lsp/sidebar.patch" | sha256sum }}
 patch_file={{ joinPath .chezmoi.sourceDir "assets/opencode2-lsp/sidebar.patch" | quote }}
-root="${OPENCODE2_LSP_INSTALL_ROOT:-$HOME/.local/share/opencode2/plugins}"
+root="${OPENCODE2_LSP_INSTALL_ROOT:-$HOME/.local/share/opencode/plugins}"
 release="$root/lsp-builds/$revision-$patch_hash"
 link="$root/lsp"
 build=""
@@ -57,5 +57,5 @@ if [[ $(readlink -- "$link" || true) != "$release" ]]; then
 	link_stage=$(mktemp -d "$root/.lsp-link.XXXXXX")
 	ln -s "$release" "$link_stage/lsp"
 	mv -Tf -- "$link_stage/lsp" "$link"
-	printf 'Activated OpenCode 2 LSP sidebar plugin. Reload with oc2 reload.\n'
+	printf 'Activated OpenCode 2 LSP sidebar plugin. Reload with opencode reload.\n'
 fi

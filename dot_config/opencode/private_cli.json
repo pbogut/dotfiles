@@ -17,7 +17,17 @@
         "toolDetails": false,
         "assistantMetadata": true
       }
-    }
+    },
+    {
+      "package": "file:///storage/projects/github.com/pbogut/opencode-pocket/master/packages/opencode-pocket-plugin/tui.js",
+      "options": {
+        "pocketUrls": [
+          "http://127.0.0.1:8787",
+          "http://127.0.0.1:8788"
+        ]
+      }
+    },
+    "./herdr-opencode"
   ],
   "diffs": {
     "wrap": "word"

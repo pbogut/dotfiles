@@ -4,4 +4,8 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   09/09/2026
 #=================================================
-focus-or-exec '\.chat$' terminal -c chat -e opencode-launcher -p chat
+if [[ $TERM == 'dumb' ]]; then
+  focus-or-exec '\.chat$' terminal -c chat -e opencode-launcher
+else
+  opencode-launcher
+fi

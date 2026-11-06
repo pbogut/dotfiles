@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import path from "node:path"
 import { test } from "node:test"
-import plugin from "../../../dot_config/opencode2/extensions/temp-export/tui.ts"
+import plugin from "../../../dot_config/opencode/extensions/temp-export/tui.ts"
 
 async function fixture(exitCode = 0) {
   const root = await mkdtemp(path.join(tmpdir(), "export test-"))

@@ -34,7 +34,7 @@
         "command": [
           "npx", "-y", "@playwright/mcp@latest",
           "--cdp-endpoint=http://127.0.0.1:9224",
-          "--output-dir=/tmp/pbogut/opencode2/playwright/work"
+          "--output-dir=/tmp/pbogut/opencode/playwright/work"
         ]
       },
       "browser-personal": {
@@ -42,7 +42,7 @@
         "command": [
           "npx", "-y", "@playwright/mcp@latest",
           "--cdp-endpoint=http://127.0.0.1:9223",
-          "--output-dir=/tmp/pbogut/opencode2/playwright/personal"
+          "--output-dir=/tmp/pbogut/opencode/playwright/personal"
         ]
       },
       "chats-ferdium": {
@@ -50,7 +50,7 @@
         "command": [
           "npx", "-y", "@playwright/mcp@latest",
           "--cdp-endpoint=http://127.0.0.1:9225",
-          "--output-dir=/tmp/pbogut/opencode2/playwright/ferdium"
+          "--output-dir=/tmp/pbogut/opencode/playwright/ferdium"
         ]
       }
     }
@@ -58,7 +58,7 @@
   "plugins": [
     { "package": "@plannotator/opencode@latest", "options": { "workflow": "manual" } },
     "@slkiser/opencode-quota@latest",
-    "{{ .chezmoi.homeDir }}/.local/share/opencode2/plugins/lsp-builds/4a17bc8379e572ab104ec26b55f92ee9b51dce37-{{ include "assets/opencode2-lsp/sidebar.patch" | sha256sum }}"
+    "{{ .chezmoi.homeDir }}/.local/share/opencode/plugins/lsp-builds/4a17bc8379e572ab104ec26b55f92ee9b51dce37-{{ include "assets/opencode2-lsp/sidebar.patch" | sha256sum }}"
   ],
   "lsp": {
     "php intelephense": {

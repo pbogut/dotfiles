@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { formatTranscript } from "../../../dot_config/opencode2/extensions/temp-export/transcript.ts"
+import { formatTranscript } from "../../../dot_config/opencode/extensions/temp-export/transcript.ts"
 
 const session = { id: "ses_export", title: "Custom export", time: { created: 0, updated: 200_000 } }
 const options = { timestamps: true, turnDuration: true, thinking: false, toolDetails: false, assistantMetadata: true }

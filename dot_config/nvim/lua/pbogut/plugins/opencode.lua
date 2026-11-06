@@ -2,7 +2,8 @@
 return {
   enabled = true,
   'nickjvandyke/opencode.nvim',
-  version = '*', -- Latest stable release
+  branch = 'main', -- OpenCode v2
+  version = false,
   keys = {
     { '<space>oa', '<plug>(opencode-ask)', desc = 'Ask OpenCode…', mode = { 'n', 'x' } },
     { '<space>os', '<plug>(opencode-select)', desc = 'Select OpenCode…', mode = { 'n', 'x' } },
@@ -15,7 +16,7 @@ return {
     local start = function()
       vim.cmd('belowright 15split')
       vim.cmd.enew()
-      vim.fn.termopen('opencode-launcher --port')
+      vim.fn.termopen('opencode-launcher')
       vim.cmd.wincmd('k')
     end
     if os.getenv('HERDR_ENV') == '1' then

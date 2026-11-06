@@ -1069,7 +1069,7 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.assertNotIn("workspace_id", layout["params"])
         self.assertEqual(
             layout["params"]["root"]["command"],
-            ["opencode-launcher", "--session", session_id, "--port"],
+            ["opencode-launcher", "--session", session_id],
         )
         self.assertEqual(layout["params"]["root"]["cwd"], str(workspace.resolve()))
         self.assertFalse(
@@ -1476,8 +1476,8 @@ class OpenCodeLauncherTest(unittest.TestCase):
         self.home = self.temp / "home"
         self.config_dir = self.home / ".config/opencode"
         self.config_dir.mkdir(parents=True)
-        self.profile_config = self.config_dir / "personal-opencode.jsonc"
-        self.profile_config.write_text("{}\n")
+        self.global_config = self.config_dir / "opencode.jsonc"
+        self.global_config.write_text('{"model":"openai/gpt-6-astra"}\n')
         self.log = self.temp / "opencode.json"
         bindir = self.temp / "bin"
         bindir.mkdir()
@@ -1495,7 +1495,15 @@ class OpenCodeLauncherTest(unittest.TestCase):
                     json.dump(
                         {
                             "argv": sys.argv[1:],
-                            "config": os.environ.get("OPENCODE_CONFIG"),
+                            "overrides": {
+                                name: os.environ.get(name)
+                                for name in (
+                                    "OPENCODE_CONFIG", "OPENCODE_CONFIG_DIR",
+                                    "OPENCODE_CONFIG_CONTENT", "OPENCODE_CLI_CONFIG_CONTENT",
+                                    "OPENCODE_DB",
+                                )
+                            },
+                            "xdg_data": os.environ.get("XDG_DATA_HOME"),
                         },
                         log,
                     )
@@ -1512,8 +1520,10 @@ class OpenCodeLauncherTest(unittest.TestCase):
                 import os
                 import sys
 
-                if sys.argv[1:] != ["which", "opencode"]:
+                if sys.argv[1:] != ["which", "opencode", "--tool", "opencode@2"]:
                     raise SystemExit(2)
+                if os.environ.get("FAKE_MISE_FAILURE"):
+                    raise SystemExit(1)
                 print(os.environ["FAKE_OPENCODE_BIN"])
                 """
             )
@@ -1527,33 +1537,55 @@ class OpenCodeLauncherTest(unittest.TestCase):
                 "FAKE_OPENCODE_LOG": str(self.log),
                 "HOME": str(self.home),
                 "PATH": f"{bindir}:{os.environ['PATH']}",
+                "OPENCODE_CONFIG": str(self.config_dir / "personal-opencode.jsonc"),
+                "OPENCODE_CONFIG_DIR": str(self.home / ".config/opencode2"),
+                "OPENCODE_CONFIG_CONTENT": "{}",
+                "OPENCODE_CLI_CONFIG_CONTENT": "{}",
+                "OPENCODE_DB": str(self.temp / "old.db"),
+                "XDG_DATA_HOME": str(self.home / ".local/share"),
             }
         )
         self.env.pop("HERDR_PANE_ID", None)
 
-    def test_profile_is_process_local_and_arguments_stay_separate(self):
+    def test_v2_uses_normal_config_and_preserves_arguments_without_a_profile(self):
         result = subprocess.run(
             [
                 "bash",
                 str(OPENCODE_LAUNCHER),
-                "--profile",
-                "personal",
                 "--session",
-                "ses_exact_123",
+                "ses exact;$value",
+                "--prompt",
+                "Keep these words together",
             ],
             check=False,
             capture_output=True,
             text=True,
             env=self.env,
+            cwd=self.home,
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
         launched = json.loads(self.log.read_text())
-        self.assertEqual(launched["config"], str(self.profile_config))
+        self.assertTrue(all(value is None for value in launched["overrides"].values()))
+        self.assertEqual(launched["xdg_data"], self.env["XDG_DATA_HOME"])
         self.assertEqual(
-            launched["argv"], ["--session", "ses_exact_123", "--port"]
+            launched["argv"],
+            ["--session", "ses exact;$value", "--prompt", "Keep these words together"],
         )
-        self.assertFalse((self.config_dir / "opencode.jsonc").exists())
+        self.assertEqual(self.global_config.read_text(), '{"model":"openai/gpt-6-astra"}\n')
+        self.assertEqual(list(self.config_dir.iterdir()), [self.global_config])
+
+    def test_missing_v2_does_not_fall_back_to_v1(self):
+        self.env["FAKE_MISE_FAILURE"] = "1"
+        result = subprocess.run(
+            ["bash", str(OPENCODE_LAUNCHER), "--version"],
+            check=False,
+            capture_output=True,
+            text=True,
+            env=self.env,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(self.log.exists())
 
 
 class TopologyLockTest(unittest.TestCase):

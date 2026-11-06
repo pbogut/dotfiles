@@ -264,7 +264,6 @@ set_opencode_command() {
 	if valid_session_id "$session_id"; then
 		command+=(--session "$session_id")
 	fi
-	command+=(--port)
 }
 
 process_matches_role() {

@@ -1,109 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-usage() {
-  echo "Ussage: ${0##*/} [OPTIONS]"
-  echo ""
-  echo "Options:"
-  echo "  -h, --help            display this help and exit"
-  echo "  -p, --profile         profile name"
-  echo "  -ls, --list-profiles  list available profiles"
+opencode_bin=$(mise which opencode --tool opencode@2)
 
-  exec "$(mise which opencode)" --help
-}
-
-profile=""
-params=()
-
-while test $# -gt 0; do
-  case "$1" in
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    --list-profiles|-ls)
-      (
-        find "$HOME/.config/opencode/" -name "*-opencode.jsonc"
-        # find "$HOME/.local/share/opencode/" -name "*-auth.json"
-      ) |
-      sed -E 's/.*\/([^-]+)-(opencode|auth)\.json/\1/' |
-      sort -u
-
-      exit 0
-      ;;
-    --profile|-p)
-      shift
-      profile="$1"
-      shift
-      ;;
-    *)
-      params+=("$1")
-      shift
-      ;;
-  esac
-done
-
-array_contains() {
-    local needle="$1"
-    shift
-
-    local item
-    for item in "$@"; do
-        if [[ "$item" == "$needle" ]]; then
-            return 0
-        fi
-    done
-
-    return 1
-}
-
-find_up() {
-  local name="$1"
-  local dir="$PWD"
-
-  while true; do
-    if [ -e "$dir/$name" ]; then
-      echo "$dir/$name"
-      return 0
-    fi
-
-    if [ "$dir" = "/" ]; then
-      return 1
-    fi
-
-    dir="$(dirname "$dir")"
-  done
-}
-
-if [ -z "$profile" ]; then
-  opencode_cfg=$(find_up ".opencoderc")
-  if [ -z "$opencode_cfg" ]; then
-    echo "Could not find .opencoderc file"
-    exit 1
-  fi
-  profile=$(cat "$opencode_cfg")
-fi
-
-echo "Profile: $profile"
-# touch "$HOME/.local/share/opencode/$profile-auth.json"
-# ln -f "$HOME/.local/share/opencode/$profile-auth.json" "$HOME/.local/share/opencode/auth.json"
-
-profile_config="$HOME/.config/opencode/$profile-opencode.jsonc"
-touch "$profile_config"
-export OPENCODE_CONFIG="$profile_config"
-
-# if timux rename window
-if [ -n "$TMUX" ]; then
-  tmux rename-window "opencode[$profile]"
-fi
-if [[ -n ${HERDR_PANE_ID:-} ]]; then
-  herdr pane report-metadata "$HERDR_PANE_ID" \
-    --source local:sidebar \
-    --token opencode_profile="$profile"
-fi
-
-# ensure --port is always provided
-if ! array_contains "--port" "${params[@]}" && ! array_contains "auth" "${params[@]}"; then
-  params+=("--port")
-fi
-echo opencode "${params[@]}"
-exec "$(mise which opencode)" "${params[@]}"
+# Use the standard v2 config and data, including when launched from an old session.
+exec env \
+  -u OPENCODE_CONFIG \
+  -u OPENCODE_CONFIG_DIR \
+  -u OPENCODE_CONFIG_CONTENT \
+  -u OPENCODE_CLI_CONFIG_CONTENT \
+  -u OPENCODE_DB \
+  "$opencode_bin" "$@"

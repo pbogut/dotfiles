@@ -22,7 +22,7 @@ From the chezmoi source directory:
 ```sh
 chezmoi apply --source-path \
   run_onchange_before_prepare-opencode2-lsp.sh.tmpl \
-  dot_config/opencode2/private_opencode.jsonc.tmpl
+  dot_config/opencode/private_opencode.jsonc.tmpl
 ```
 
 The before-hook hashes the patch, rendered server config, and CLI config. It
@@ -30,12 +30,12 @@ runs on the next apply that includes the hook when any hash changes. A normal
 full apply includes it; applying only a config file does not. It is not a file
 watcher.
 
-When also changing CLI settings, add `dot_config/opencode2/private_cli.json`
+When also changing CLI settings, add `dot_config/opencode/private_cli.json`
 to that scoped apply.
 
 The installer needs Git, Node.js 24+, and `flock`. It downloads the pinned
 revision, checks and applies the patch, and runs the dependency-free tests.
-Only a successful installation becomes `~/.local/share/opencode2/plugins/lsp`.
+Only a successful installation becomes `~/.local/share/opencode/plugins/lsp`.
 Versioned installations live under the adjacent `lsp-builds` directory. A
 config-only change reuses the existing build. Failed installations leave the
 previous symlink intact. Old builds are retained for rollback.
@@ -45,7 +45,7 @@ includes the patch checksum, so patch updates change the config too. This
 avoids OpenCode's directory watcher rejecting the `lsp` symlink or retaining
 a stale plugin after it is switched. The symlink remains a convenience alias.
 
-Run `oc2 reload` in the project afterward. Quit and reopen the TUI if it has
+Run `opencode reload` in the project afterward. Quit and reopen the TUI if it has
 not picked up the new sidebar part. The installer does not restart sessions.
 
 ## Update the patch
