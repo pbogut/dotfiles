@@ -1,0 +1,8 @@
+{
+  "name": "pbogut-opencode-temp-export",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tui": "./tui.ts"
+  }
+}

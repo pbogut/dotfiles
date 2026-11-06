@@ -4,9 +4,21 @@
     "name": "flexoki"
   },
   "keybinds": {
-    "messages.copy": "none",
-    "session.export": "<leader>y"
+    "messages.copy": "none"
   },
+  "plugins": [
+    {
+      "package": "./extensions/temp-export",
+      "options": {
+        "keybind": "<leader>y",
+        "timestamps": true,
+        "turnDuration": true,
+        "thinking": false,
+        "toolDetails": false,
+        "assistantMetadata": true
+      }
+    }
+  ],
   "diffs": {
     "wrap": "word"
   },
@@ -15,5 +27,8 @@
     "scrollbar": false,
     "thinking": "show"
   },
-  "animations": true
+  "animations": true,
+  "tabs": {
+    "mode": "auto"
+  }
 }
