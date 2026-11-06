@@ -394,7 +394,7 @@ index 866c65c..a5c23f3 100755
    try {
 diff --git a/test-sidebar.tsx b/test-sidebar.tsx
 new file mode 100644
-index 0000000..04a69cf
+index 0000000..0fa1f2b
 --- /dev/null
 +++ b/test-sidebar.tsx
 @@ -0,0 +1,112 @@
@@ -465,7 +465,7 @@ index 0000000..04a69cf
 +  assert.match(await frame(), /▶ LSP \(2 active\)/)
 +  await view.mockMouse.click(1, 0)
 +  const expanded = await frame()
-+  assert.match(expanded, /▼ LSP[\s\S]*● php intelephense/)
++  assert.match(expanded, /▼ LSP[\s\S]*• php intelephense/)
 +  assert.doesNotMatch(expanded, /\(\d+ active\)/)
 +  assert.equal(subscriptions, 1)
 +  await view.mockMouse.click(1, 0)
@@ -474,12 +474,12 @@ index 0000000..04a69cf
 +  assert.match(await frame(), /▶ LSP \(0 active\)/)
 +  await view.mockMouse.click(1, 0)
 +  const second = await frame()
-+  assert.match(second, /○ typescript \(starting\)/)
++  assert.match(second, /• typescript \(starting\)/)
 +  assert.doesNotMatch(second, /intelephense/)
 +  assert.equal(subscriptions, 1)
 +  servers.set("/second", [{ id: "typescript", root: "/second", status: "error", error: "crashed" }])
 +  changed({ location: { directory: "/second" } })
-+  assert.match(await frame(), /● typescript \(error\)/)
++  assert.match(await frame(), /• typescript \(error\)/)
 +  unavailable = true
 +  updated()
 +  assert.match(await frame(), /Server status unavailable/)
@@ -573,7 +573,7 @@ index 0000000..83769d1
 +})
 diff --git a/tui.tsx b/tui.tsx
 new file mode 100644
-index 0000000..f9e5cd8
+index 0000000..d8b8660
 --- /dev/null
 +++ b/tui.tsx
 @@ -0,0 +1,63 @@
@@ -613,7 +613,7 @@ index 0000000..f9e5cd8
 +              {(server) => (
 +                <box flexDirection="row" gap={1}>
 +                  <text fg={server.status === "error" ? ctx.theme.text.feedback.error.base : server.status === "running" ? ctx.theme.text.feedback.success.base : ctx.theme.text.muted}>
-+                    {server.status === "starting" ? "○" : "●"}
++                    •
 +                  </text>
 +                  <text fg={ctx.theme.text.base}>
 +                    {server.id}{server.status === "running" ? "" : ` (${server.status})`}
