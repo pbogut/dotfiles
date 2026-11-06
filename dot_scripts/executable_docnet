@@ -71,7 +71,7 @@ __notify_tailscale_route() {
   notification_id=$(runuser -u "$operator" -- env \
     XDG_RUNTIME_DIR="$runtime" \
     DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime/bus" \
-    dunstify -p "${replace[@]}" -u critical -t 0 -a docnet \
+    notify-send -p "${replace[@]}" -u critical -t 0 -a docnet \
     "Tailscale route approval required" \
     "Approve Docker subnet $subnet for redeye in the Tailscale admin console.") || return
   [[ $notification_id =~ ^[0-9]+$ ]] && printf '%s\n' "$notification_id" > "$notification_file"
@@ -91,7 +91,10 @@ __close_tailscale_notification() {
   runuser -u "$operator" -- env \
     XDG_RUNTIME_DIR="$runtime" \
     DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime/bus" \
-    dunstify -C "$notification_id" 2>/dev/null || true
+    gdbus call --session --dest org.freedesktop.Notifications \
+    --object-path /org/freedesktop/Notifications \
+    --method org.freedesktop.Notifications.CloseNotification "$notification_id" \
+    >/dev/null 2>&1 || true
   rm -f "$notification_file"
 }
 

@@ -6,9 +6,9 @@
 #=================================================
 file="$1"
 title=$(basename "$file" | yad --form --field=Title:text)
-notify_id=$(dunstify -p "Uploading file ...")
+notify_id=$(notify-send -p "Uploading file ...")
 if [[ $title != "" ]]; then
   youtubeuploader --title "$title" --privacy=unlisted --filename "$file" | while read -r msg; do
-    dunstify -r "$notify_id" "$msg"
+    notify-send -r "$notify_id" "$msg"
   done
 fi

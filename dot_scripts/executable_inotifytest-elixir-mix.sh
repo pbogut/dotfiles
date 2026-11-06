@@ -14,9 +14,9 @@ notification_id=0
 
 notify() {
   if [[ $notification_id -eq 0 ]]; then
-    notification_id=$(dunstify -p -I "$1" "$2" "$(date +'%H:%M:%S.%N')")
+    notification_id=$(notify-send -p -i "$1" "$2" "$(date +'%H:%M:%S.%N')")
   else
-    dunstify -r $notification_id -I "$1" "$2" "$(date +'%H:%M:%S.%N')"
+    notify-send -r $notification_id -i "$1" "$2" "$(date +'%H:%M:%S.%N')"
   fi
 }
 map_file_to_test() { file=$1

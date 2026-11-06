@@ -23,7 +23,7 @@ if [[ $selection == ":quick-new" ]]; then
                 sed -E 's/^@([a-z]+) /-l \1 /g' -i "$tmp"
                 sed -E 's/^@([a-z]+)$/-l \1/g' -i "$tmp"
                 result="$(xargs todo new < "$tmp")"
-                dunstify "$result"
+                notify-send "$result"
         fi
 elif [[ $selection == ":new" ]]; then
         terminal-float -e zsh -ic "todo new"

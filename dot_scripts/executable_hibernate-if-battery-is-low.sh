@@ -25,7 +25,7 @@ battery_level() {
 }
 
 notify() {
-  dunstify -I $icon \
+  notify-send -i "$icon" \
     "Low battery level ($battery%), please charge or system will be hibernated when battery level drops to $limit%"
 }
 
