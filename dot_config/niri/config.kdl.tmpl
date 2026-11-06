@@ -440,6 +440,12 @@ window-rule {
     open-on-workspace "work"
 }
 window-rule {
+    match app-id="google-chrome"
+    default-column-width { proportion 0.9; }
+    open-focused false
+    open-on-workspace "work"
+}
+window-rule {
     match app-id="Alacritty.project"
     open-on-workspace "code"
     default-column-width { proportion 0.9; }
