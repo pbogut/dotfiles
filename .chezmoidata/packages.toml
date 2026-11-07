@@ -43,7 +43,6 @@ pacman = [
   "mpv-mpris",
   "neomutt",
   "neovim",
-  "network-manager-applet",
   "ninja",
   "niri",
   "notmuch",
