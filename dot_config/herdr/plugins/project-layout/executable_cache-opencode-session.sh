@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+plugin_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source-path=SCRIPTDIR
+# shellcheck source=lib/runtime.sh
+source "$plugin_root/lib/runtime.sh"
+
 herdr=${HERDR_BIN_PATH:-herdr}
 source_id="plugin:${HERDR_PLUGIN_ID:-pbogut.project-layout}"
 
@@ -11,7 +16,7 @@ valid_session_id() {
 
 cache_pane() {
   local pane=$1
-  local workspace_id session_id current
+  local workspace_id session_id current tab_id label role session_key
 
   [[ $(jq -r '.agent_session.agent // empty' <<<"$pane") == opencode ]] || return 0
   [[ $(jq -r '.agent_session.source // empty' <<<"$pane") == herdr:opencode ]] || return 0
@@ -21,13 +26,19 @@ cache_pane() {
   session_id=$(jq -r '.agent_session.value // empty' <<<"$pane")
   [[ -n $workspace_id ]] && valid_session_id "$session_id" || return 0
 
+  tab_id=$(jq -r '.tab_id // empty' <<<"$pane")
+  [[ -n $tab_id ]] || return 0
+  label=$("$herdr" tab get "$tab_id" | jq -er '.result.tab.label') || return 1
+  role=$(herdr_opencode_role "$label") || return 0
+  session_key=opencode_session_${role#oc-}
+
   current=$("$herdr" workspace get "$workspace_id" 2>/dev/null |
-    jq -r '.result.workspace.tokens.opencode_session // empty') || return 1
+    jq -r --arg key "$session_key" '.result.workspace.tokens[$key] // empty') || return 1
   [[ $current == "$session_id" ]] && return
 
   "$herdr" workspace report-metadata "$workspace_id" \
-    --source "$source_id" \
-    --token "opencode_session=$session_id" >/dev/null
+    --source "$source_id:$role" \
+    --token "$session_key=$session_id" >/dev/null
 }
 
 cache_workspace() {

@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 
+herdr_opencode_role() {
+	local label=$1
+
+	case $label in
+	opencode) printf '%s\n' oc-1 ;;
+	*)
+		[[ $label =~ ^oc-[1-9][0-9]*$ ]] || return 1
+		printf '%s\n' "$label"
+		;;
+	esac
+}
+
 herdr_resolve_socket() {
 	local socket_path=${HERDR_SOCKET_PATH:-}
 	local herdr_bin=${HERDR_BIN_PATH:-herdr}

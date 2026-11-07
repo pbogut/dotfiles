@@ -33,7 +33,7 @@ The command opens an existing layout without changing it.
 Example `herdr-project.sh`:
 
 ```bash
-HERDR_TABS=(nvim dev opencode)
+HERDR_TABS=(nvim dev oc-1)
 HERDR_DEV_COMMAND=(make dev)
 HERDR_SETUP_VERSION=1
 
@@ -70,6 +70,30 @@ New and restarted managed command tabs start from the workspace root recorded
 when its initial pane was created. Project layouts refresh that root from their
 worktree path. Existing tabs are only focused, and restored shell tabs keep
 their saved working directory.
+
+OpenCode tabs use stable, workspace-local names: `oc-1`, `oc-2`, and so on.
+Each shortcut focuses its tab or creates it on demand:
+
+| Shortcut | Tab |
+| --- | --- |
+| `Alt+H` or `Ctrl+Alt+J` | `oc-1` |
+| `Ctrl+Alt+K` | `oc-2` |
+| `Ctrl+Alt+L` | `oc-3` |
+| `Ctrl+Alt+;` | `oc-4` |
+
+Selecting an existing OpenCode tab only focuses it, regardless of the process
+running inside. Creation and startup restoration handle launching OpenCode and
+sorting tabs.
+
+`HERDR_TABS` also accepts any positive `oc-N` slot. Closing a tab does not
+renumber the others. Each slot caches its own OpenCode session for reopening
+and restart restoration. Herdr restores native pane sessions itself; the
+startup hook uses the slot cache when no native session is available.
+Unmanaged OpenCode tabs do not overwrite these caches.
+
+The `opencode` role selects `oc-1`. An existing `opencode` tab is renamed on
+selection or startup. Only `oc-1` can use the workspace-wide `opencode_session`
+cache.
 
 Press `prefix+u` to open the project task picker. Each `herdr_task` receives a
 name followed by `--` and the command arguments. Add `--progress` before the

@@ -82,10 +82,28 @@ description = "select lazygit tab"
 # description = "select lazydocker tab"
 
 [[keys.command]]
-key = "alt+h"
+key = ["alt+h", "ctrl+alt+j"]
 type = "shell"
-command = "herdr-select-tab-or-new opencode"
-description = "select opencode tab"
+command = "herdr-select-tab-or-new oc-1"
+description = "select opencode tab 1"
+
+[[keys.command]]
+key = "ctrl+alt+k"
+type = "shell"
+command = "herdr-select-tab-or-new oc-2"
+description = "select opencode tab 2"
+
+[[keys.command]]
+key = "ctrl+alt+l"
+type = "shell"
+command = "herdr-select-tab-or-new oc-3"
+description = "select opencode tab 3"
+
+[[keys.command]]
+key = "ctrl+alt+semicolon"
+type = "shell"
+command = "herdr-select-tab-or-new oc-4"
+description = "select opencode tab 4"
 
 [[keys.command]]
 key = "prefix+ctrl+p"

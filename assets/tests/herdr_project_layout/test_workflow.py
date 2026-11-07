@@ -99,6 +99,10 @@ class HerdrWorkflowTest(unittest.TestCase):
 
                 if args[:2] == ["tab", "list"]:
                     print(os.environ["FAKE_HERDR_TABS"])
+                elif args[:2] == ["tab", "get"]:
+                    tabs = json.loads(os.environ["FAKE_HERDR_TABS"])["result"]["tabs"]
+                    tab = next((tab for tab in tabs if tab["tab_id"] == args[2]), None)
+                    print(json.dumps({"result": {"tab": tab}}))
                 elif args[:2] == ["pane", "list"]:
                     print(os.environ["FAKE_HERDR_PANES"])
                 elif args[:2] == ["pane", "process-info"]:
@@ -258,7 +262,7 @@ class HerdrWorkflowTest(unittest.TestCase):
                     expected.append(["tab", "focus", "new-tab"])
                 self.assertEqual(actions, expected)
 
-    def test_numeric_alias_and_no_focus_keep_existing_tab(self):
+    def test_no_focus_keeps_existing_tab(self):
         self.env["FAKE_HERDR_TABS"] = json.dumps(
             {
                 "result": {
@@ -269,12 +273,20 @@ class HerdrWorkflowTest(unittest.TestCase):
             }
         )
 
-        result = self.run_script(SELECTOR, "2", "--no-focus")
+        result = self.run_script(SELECTOR, "shell", "--no-focus")
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(
             self.calls(), [["tab", "list", "--workspace", "w1"]]
         )
+
+    def test_numeric_tab_roles_are_rejected(self):
+        for role in [str(n) for n in range(1, 11)]:
+            with self.subTest(role=role):
+                result = self.run_script(SELECTOR, role)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(f"Unsupported tab role: {role}", result.stderr)
+                self.assertEqual(self.calls(), [])
 
     def test_existing_nvim_tab_focuses_without_process_checks(self):
         self.env["FAKE_HERDR_TABS"] = json.dumps(
@@ -401,6 +413,7 @@ class HerdrWorkflowTest(unittest.TestCase):
     def test_session_cache_accepts_only_native_opencode_ids(self):
         valid_pane = {
             "pane_id": "p1",
+            "tab_id": "t1",
             "workspace_id": "w1",
                 "agent_session": {
                     "agent": "opencode",
@@ -410,6 +423,9 @@ class HerdrWorkflowTest(unittest.TestCase):
             },
         }
         env = self.env.copy()
+        env["FAKE_HERDR_TABS"] = json.dumps(
+            {"result": {"tabs": [{"tab_id": "t1", "label": "opencode"}]}}
+        )
         env["HERDR_PLUGIN_EVENT_JSON"] = json.dumps({"data": {"pane": valid_pane}})
 
         result = self.run_script(SESSION_CACHE, env=env)
@@ -418,15 +434,16 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.assertEqual(
             self.calls(),
             [
+                ["tab", "get", "t1"],
                 ["workspace", "get", "w1"],
                 [
                     "workspace",
                     "report-metadata",
                     "w1",
                     "--source",
-                    "plugin:pbogut.project-layout",
+                    "plugin:pbogut.project-layout:oc-1",
                     "--token",
-                    "opencode_session=ses exact;$value",
+                    "opencode_session_1=ses exact;$value",
                 ],
             ],
         )
@@ -448,6 +465,202 @@ class HerdrWorkflowTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(self.calls(), [])
+
+    def test_session_cache_isolates_slots_and_ignores_unmanaged_tabs(self):
+        labels = ["opencode", "oc-2", "oc-5", "oc-10", "shell", "9"]
+        tabs = [{"tab_id": f"t{n}", "label": label} for n, label in enumerate(labels)]
+        panes = [
+            {
+                "pane_id": f"p{n}", "tab_id": tab["tab_id"], "workspace_id": "w1",
+                "agent_session": {
+                    "agent": "opencode", "source": "herdr:opencode",
+                    "kind": "id", "value": f"session-{tab['label']}",
+                },
+            }
+            for n, tab in enumerate(tabs)
+        ]
+        self.env["FAKE_HERDR_TABS"] = json.dumps({"result": {"tabs": tabs}})
+        self.env["FAKE_HERDR_SNAPSHOT"] = json.dumps(
+            {"result": {"snapshot": {"panes": panes}}}
+        )
+
+        result = self.run_script(SESSION_CACHE, "--all")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        reports = [call for call in self.calls() if call[:2] == ["workspace", "report-metadata"]]
+        self.assertEqual(
+            [(call[4], call[6]) for call in reports],
+            [
+                ("plugin:pbogut.project-layout:oc-1", "opencode_session_1=session-opencode"),
+                ("plugin:pbogut.project-layout:oc-2", "opencode_session_2=session-oc-2"),
+                ("plugin:pbogut.project-layout:oc-5", "opencode_session_5=session-oc-5"),
+                ("plugin:pbogut.project-layout:oc-10", "opencode_session_10=session-oc-10"),
+            ],
+        )
+
+        # Simulate a restart with persisted metadata but no native pane sessions.
+        tokens = dict(call[6].split("=", 1) for call in reports)
+        self.env["FAKE_HERDR_WORKSPACE"] = json.dumps(
+            {"result": {"workspace": {"tokens": tokens}}}
+        )
+        for pane in panes:
+            del pane["agent_session"]
+        for tab in tabs:
+            tab["workspace_id"] = "w1"
+        self.env["FAKE_HERDR_PANES"] = json.dumps({"result": {"panes": panes}})
+        self.env["FAKE_HERDR_SNAPSHOT"] = json.dumps(
+            {"result": {"snapshot": {"tabs": tabs}}}
+        )
+        self.log.unlink()
+        with FakeHerdrApi(self.env["HERDR_SOCKET_PATH"]) as api:
+            result = self.run_script(SELECTOR, "--restore-all")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        layouts = [request["params"] for request in api.requests if request["method"] == "layout.apply"]
+        self.assertEqual(
+            [(layout["tab_label"], layout["root"]["command"]) for layout in layouts],
+            [
+                ("oc-1", ["opencode-launcher", "--session", "session-opencode"]),
+                ("oc-2", ["opencode-launcher", "--session", "session-oc-2"]),
+                ("oc-5", ["opencode-launcher", "--session", "session-oc-5"]),
+                ("oc-10", ["opencode-launcher", "--session", "session-oc-10"]),
+            ],
+        )
+        self.assertTrue(all(not layout["focus"] for layout in layouts))
+        self.assertFalse(any(call[:2] == ["tab", "focus"] for call in self.calls()))
+        moves = [request["params"]["tab_id"] for request in api.requests if request["method"] == "tab.move"]
+        self.assertEqual(moves[:len(tabs)], ["t4", "t0", "t1", "t2", "t3", "t5"])
+
+    def test_new_opencode_slots_never_inherit_another_slots_session(self):
+        self.env["FAKE_HERDR_WORKSPACE"] = json.dumps(
+            {"result": {"workspace": {"tokens": {
+                "opencode_session": "legacy-session",
+                "opencode_session_1": "first-session",
+                "opencode_session_2": "second-session",
+            }}}}
+        )
+        with FakeHerdrApi(self.env["HERDR_SOCKET_PATH"]) as api:
+            cases = (("oc-1", "first-session"), ("oc-2", "second-session"), ("oc-3", None), ("oc-4", None), ("oc-5", None))
+            for role, session in cases:
+                with self.subTest(role=role):
+                    result = self.run_script(SELECTOR, role)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    layout = next(request["params"] for request in reversed(api.requests) if request["method"] == "layout.apply")
+                    expected = ["opencode-launcher"] + (["--session", session] if session else [])
+                    self.assertEqual(layout["tab_label"], role)
+                    self.assertEqual(layout["root"]["command"], expected)
+
+            self.env["FAKE_HERDR_WORKSPACE"] = json.dumps(
+                {"result": {"workspace": {"tokens": {"opencode_session": "legacy-session"}}}}
+            )
+            for role, expected in (("oc-1", ["--session", "legacy-session"]), ("oc-2", [])):
+                result = self.run_script(SELECTOR, role)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(api.requests[-1]["params"]["root"]["command"], ["opencode-launcher", *expected])
+
+    def test_native_opencode_restore_preserves_panes_and_renames_opencode_tab(self):
+        tabs = [
+            {"workspace_id": "w1", "tab_id": "t1", "label": "opencode"},
+            {"workspace_id": "w1", "tab_id": "t2", "label": "oc-2"},
+            {"workspace_id": "w1", "tab_id": "t5", "label": "oc-5"},
+        ]
+        panes = [
+            {
+                "workspace_id": "w1", "tab_id": tab["tab_id"], "pane_id": f"p{n}",
+                "agent_session": {
+                    "agent": "opencode", "source": "herdr:opencode",
+                    "kind": "id", "value": f"native-{n}",
+                },
+            }
+            for n, tab in enumerate(tabs)
+        ]
+        self.env["FAKE_HERDR_TABS"] = json.dumps({"result": {"tabs": tabs}})
+        self.env["FAKE_HERDR_PANES"] = json.dumps({"result": {"panes": panes}})
+        self.env["FAKE_HERDR_SNAPSHOT"] = json.dumps({"result": {"snapshot": {"tabs": tabs}}})
+
+        result = self.run_script(SELECTOR, "--restore-all")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(["tab", "rename", "t1", "oc-1"], self.calls())
+        allowed = (["api", "snapshot"], ["tab", "list"], ["tab", "rename"], ["pane", "list"])
+        self.assertTrue(all(call[:2] in allowed for call in self.calls()))
+
+    def test_opencode_shortcuts_reuse_live_tabs_including_role_aliases(self):
+        self.env["FAKE_HERDR_PROCESS_INFO"] = json.dumps(
+            {"result": {"process_info": {"foreground_processes": [{"name": "opencode"}]}}}
+        )
+        self.env["FAKE_HERDR_PANES"] = json.dumps(
+            {"result": {"panes": [{"tab_id": "t1", "pane_id": "p1"}]}}
+        )
+        for role, label in (("oc-1", "opencode"), ("opencode", "oc-1"), ("oc-2", "oc-2")):
+            with self.subTest(role=role, label=label):
+                self.log.unlink(missing_ok=True)
+                self.env["FAKE_HERDR_TABS"] = json.dumps(
+                    {"result": {"tabs": [{"tab_id": "t1", "label": label}]}}
+                )
+                result = self.run_script(SELECTOR, role)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(self.calls()[-1], ["tab", "focus", "t1"])
+                if label == "opencode":
+                    self.assertIn(["tab", "rename", "t1", "oc-1"], self.calls())
+
+    def test_repeated_opencode_shortcuts_only_focus_existing_tabs(self):
+        tabs = [
+            {"tab_id": "editor", "label": "nvim"},
+            *[{"tab_id": f"t{n}", "label": f"oc-{n}"} for n in range(1, 6)],
+            {"tab_id": "logs", "label": "logs"},
+        ]
+        self.env["FAKE_HERDR_TABS"] = json.dumps({"result": {"tabs": tabs}})
+        self.env["FAKE_HERDR_PANES"] = json.dumps({"result": {"panes": [
+            {"tab_id": f"t{n}", "pane_id": f"p{n}", "workspace_id": "w1"}
+            for n in range(1, 6)
+        ]}})
+        with FakeHerdrApi(self.env["HERDR_SOCKET_PATH"]) as api:
+            for process in ("opencode.exe", "opencode", "zsh", None):
+                self.env["FAKE_HERDR_PROCESS_INFO"] = json.dumps(
+                    {"result": {"process_info": {"foreground_processes": (
+                        [{"name": process, "argv": [f"/bin/{process}"]}] if process else []
+                    )}}}
+                )
+                for n in range(1, 6):
+                    with self.subTest(process=process, slot=n):
+                        self.log.unlink(missing_ok=True)
+                        for _ in range(2):
+                            result = self.run_script(SELECTOR, f"oc-{n}")
+                            self.assertEqual(result.returncode, 0, result.stderr)
+                        self.assertEqual(self.calls(), [
+                            ["tab", "list", "--workspace", "w1"],
+                            ["tab", "focus", f"t{n}"],
+                        ] * 2)
+                        self.assertEqual(api.requests, [])
+
+            self.log.unlink()
+            result = self.run_script(SELECTOR, "oc-1", "--no-focus")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(self.calls(), [["tab", "list", "--workspace", "w1"]])
+            self.assertEqual(api.requests, [])
+
+    def test_restore_keeps_running_opencode_exe_without_native_session(self):
+        self.env["FAKE_HERDR_TABS"] = json.dumps(
+            {"result": {"tabs": [{"tab_id": "t2", "label": "oc-2"}]}}
+        )
+        self.env["FAKE_HERDR_PANES"] = json.dumps(
+            {"result": {"panes": [{"tab_id": "t2", "pane_id": "p2"}]}}
+        )
+        with FakeHerdrApi(self.env["HERDR_SOCKET_PATH"]) as api:
+            for process in (
+                {"name": "opencode.exe"},
+                {"name": "MainThread", "argv": ["/opt/opencode/bin/opencode.exe"]},
+            ):
+                with self.subTest(process=process):
+                    self.log.unlink(missing_ok=True)
+                    self.env["FAKE_HERDR_PROCESS_INFO"] = json.dumps(
+                        {"result": {"process_info": {"foreground_processes": [process]}}}
+                    )
+                    result = self.run_script(SELECTOR, "oc-2", "--restore", "--no-focus")
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(api.requests, [])
+                    self.assertFalse(any(call[:2] == ["tab", "focus"] for call in self.calls()))
 
     def test_initial_pane_event_records_workspace_root_without_querying_pane(self):
         workspace = self.temp / "non-git-workspace"
@@ -867,9 +1080,9 @@ class HerdrWorkflowTest(unittest.TestCase):
             "report-metadata",
             "w1",
             "--source",
-            "plugin:pbogut.project-layout",
+            "plugin:pbogut.project-layout:oc-1",
             "--token",
-            f"opencode_session={session_id}",
+            f"opencode_session_1={session_id}",
         ]
         rename = ["tab", "rename", "teardown-tab", "teardown"]
         closed_tabs = [
@@ -1017,7 +1230,7 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.assertIn("herdr plugin unlink pbogut.repo-metadata", hook)
         self.assertIn('plugins/project-layout" --enabled', hook)
 
-    def test_stale_opencode_tab_is_replaced_with_exact_session_argv(self):
+    def test_restore_opencode_tab_uses_exact_cached_session_argv(self):
         workspace = self.temp / "opencode-workspace"
         nested = workspace / "nested"
         nested.mkdir(parents=True)
@@ -1039,6 +1252,9 @@ class HerdrWorkflowTest(unittest.TestCase):
             }
         )
         session_id = "ses exact;$value"
+        self.env["FAKE_HERDR_WORKSPACE"] = json.dumps(
+            {"result": {"workspace": {"tokens": {"opencode_session_1": session_id}}}}
+        )
         self.env["FAKE_HERDR_PANES"] = json.dumps(
             {
                 "result": {
@@ -1048,12 +1264,6 @@ class HerdrWorkflowTest(unittest.TestCase):
                             "tab_id": "old-tab",
                             "workspace_id": "w1",
                             "cwd": str(nested),
-                            "agent_session": {
-                                "agent": "opencode",
-                                "source": "herdr:opencode",
-                                "kind": "id",
-                                "value": session_id,
-                            },
                         }
                     ]
                 }
@@ -1061,11 +1271,12 @@ class HerdrWorkflowTest(unittest.TestCase):
         )
 
         with FakeHerdrApi(api_path) as api:
-            result = self.run_script(SELECTOR, "opencode")
+            result = self.run_script(SELECTOR, "opencode", "--restore", "--no-focus")
 
         self.assertEqual(result.returncode, 0, result.stderr)
         layout = next(request for request in api.requests if request["method"] == "layout.apply")
         self.assertEqual(layout["params"]["tab_id"], "old-tab")
+        self.assertFalse(layout["params"]["focus"])
         self.assertNotIn("workspace_id", layout["params"])
         self.assertEqual(
             layout["params"]["root"]["command"],
@@ -1144,6 +1355,11 @@ class HerdrWorkflowTest(unittest.TestCase):
                 "authoritative",
                 "HERDR_TABS=(dev opencode)\n",
                 ["dev", "opencode"],
+            ),
+            (
+                "numbered_opencode",
+                "HERDR_TABS=(oc-1 oc-2 oc-10)\n",
+                ["oc-1", "oc-2", "oc-10"],
             ),
         )
 

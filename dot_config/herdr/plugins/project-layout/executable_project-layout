@@ -200,7 +200,7 @@ write_layout_template() {
 	# shellcheck disable=SC2016 # Template variables must remain literal.
 	printf '%s\n' \
 		'# Tabs to create whenever this worktree is opened through herdr-project.' \
-		'HERDR_TABS=(nvim dev opencode)' \
+		'HERDR_TABS=(nvim dev oc-1)' \
 		'' \
 		'# Use a Bash array. This command runs from the worktree root.' \
 		'HERDR_DEV_COMMAND=(make dev)' \
@@ -739,9 +739,11 @@ apply_layout_unlocked() {
 		case $role in
 		nvim | shell | shell-2 | dev | sql | rest | git | docker | opencode | shell-3) ;;
 		*)
-			echo "Unsupported project layout tab: $role" >&2
-			status=1
-			continue
+			if ! herdr_opencode_role "$role" >/dev/null; then
+				echo "Unsupported project layout tab: $role" >&2
+				status=1
+				continue
+			fi
 			;;
 		esac
 		[[ -z ${seen[$role]:-} ]] || continue
