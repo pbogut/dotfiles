@@ -60,10 +60,7 @@ $fileManager = lf-term
 # exec-once = $terminal
 # exec-once = nm-applet &
 # exec-once = waybar & hyprpaper & firefox
-exec-once = uwsm-app -- waybar
-exec-once = uwsm-app -- hypridle
-exec-once = uwsm-app -- hyprlock # start locked
-exec-once = uwsm-app -- systemctl --user start hyprpolkitagent
+exec-once = uwsm-app -- dms run
 exec-once = uwsm-app -- swaybg -i "$(find ~/Pictures/wallpaper -type f | shuf -n 1)"
 exec-once = hyprctl setcursor polar 10
 
@@ -294,7 +291,7 @@ bind = $mainMod, Y, exec, hypr-youtube toggle
 # Apps
 bind = $mainMod, semicolon, exec, $run_cmds
 bind = $mainMod SHIFT, semicolon, exec, $run_apps
-bind = $mainMod, apostrophe, exec, copyq-dmenu
+bind = $mainMod, apostrophe, exec, dms ipc call clipboard toggle
 bind = $mainMod, W, exec, hypr-windows
 bind = $mainMod CTRL, P, exec, tmux-project
 bind = $mainMod, Return, exec, $terminal
@@ -303,10 +300,18 @@ bind = $mainMod CTRL, K, exec, terminal-float -t "khal" -e khal interactive
 bind = $mainMod CTRL, F, exec, $(hyprctl dispatch "focuswindow class:ferdium") == "ok" || ferdium
 bind = $mainMod, T, exec, systray-dmenu
 bind = $mainMod, Q, exec, quick-menu
+bind = $mainMod CTRL, C, exec, focus-or-exec '^Alacritty\.herdr$' terminal -c herdr -e herdr
+bind = $mainMod CTRL, O, exec, chat
+bind = $mainMod CTRL, D, exec, discord
+bind = $mainMod CTRL, N, exec, if [ "$(hyprctl dispatch 'focuswindow title:^(wlctl)$')" != "ok" ]; then terminal-float -t wlctl -e wlctl; fi
+bind = $mainMod CTRL, B, exec, if [ "$(hyprctl dispatch 'focuswindow title:^(bluetui)$')" != "ok" ]; then terminal-float -t bluetui -e bluetui; fi
+bind = $mainMod ALT, L, exec, dms ipc call lock lock
+bind = $mainMod, O, exec, dms ipc call hypr toggleOverview
 
 # Screeenshots
 bind = Shift, Print, exec, screenshot fullscreen
 bind = , Print, exec, screenshot smart
+bind = ALT, Print, exec, screenshot windows
 bind = $mainMod, Print, exec, ~/.scripts/record.sh
 
 # Zoom
@@ -314,9 +319,6 @@ bind = $mainMod, mouse_down, exec, hyprctl -q keyword cursor:zoom_factor $(hyprc
 bind = $mainMod, mouse_up, exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 0.8}')
 bind = $mainMod, mouse:274, exec, hyprctl -q keyword cursor:zoom_factor 1
 bind = $mainMod SHIFT, mouse:273, exec, hyprpicker -a
-
-bind = $mainMod, D, exec, dunstctl context
-bind = $mainMod SHIFT, D, exec, dunstctl close
 
 # Move focus with mainMod + arrow keys
 bind = $mainMod, Left, movefocus, l
@@ -338,7 +340,7 @@ bind = $mainMod, N, workspace, m+1
 bind = $mainMod, P, workspace, m-1
 bind = $mainMod, C, workspace, emptym
 bind = $mainMod SHIFT, N, movetoworkspace, m+1
-bind = $mainMod SHIFT, P, movetoworkspace, m-1
+bind = $mainMod SHIFT, P, dpms, off
 bind = $mainMod SHIFT, C, movetoworkspace, emptym
 
 #{{ if eq .hostname "redeye" }}
@@ -352,6 +354,10 @@ bind = $mainMod , BACKSPACE, movecurrentworkspacetomonitor, 0
 #{{ end }}
 
 bind = $mainMod CTRL, J, swapactiveworkspaces, 0 1
+bind = $mainMod, comma, focusmonitor, l
+bind = $mainMod, period, focusmonitor, r
+bind = $mainMod CTRL, comma, movecurrentworkspacetomonitor, l
+bind = $mainMod CTRL, period, movecurrentworkspacetomonitor, r
 
 # Switch workspaces with mainMod + [0-9]
 
@@ -379,7 +385,7 @@ bind = $mainMod SHIFT, 9, movetoworkspace, 9
 bind = $mainMod SHIFT, 0, movetoworkspace, 10
 
 bind = $mainMod, G, exec, hypr-cyclespecial
-bind = $mainMod CTRL, G, exec, hypr-listspecial
+bind = $mainMod CTRL, G, exec, chatgpt
 bind = $mainMod SHIFT, G, movetoworkspace, special:magic
 
 bind = $mainMod CTRL, W, exec, hypr-sortworkspace
@@ -389,19 +395,20 @@ bindm = $mainMod, mouse:272, movewindow
 bindm = $mainMod, mouse:273, resizewindow
 
 # Laptop multimedia keys for volume and LCD brightness
-bindel = ,XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+; level="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print ($2 * 100)}')"; notify-send -r 999999999 "Volume: $level%" --hint="int:value:$level" -i audio-volume-high
-bindel = ,XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-; level="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print ($2 * 100)}')"; notify-send -r 999999999 "Volume: $level%" --hint="int:value:$level" -i audio-volume-high
+bindel = ,XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+
+bindel = ,XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
 bindel = ,XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
 bindel = SHIFT, XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
 bindel = ,XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
-bindel = ,XF86MonBrightnessUp, exec, brightnessctl -e1 -n2 set 5%+; level="$(brightnessctl -l -c backlight | grep Current | sed 's,.*(\(.*\)%)$,\1,')"; notify-send -r 999999998  "Brightness: ${level}%" --hint="int:value:$level" -i display
-bindel = ,XF86MonBrightnessDown, exec, brightnessctl -e1 -n2 set 5%-; level="$(brightnessctl -l -c backlight | grep Current | sed 's,.*(\(.*\)%)$,\1,')"; notify-send -r 999999998  "Brightness: ${level}%" --hint="int:value:$level" -i display
+bindel = ,XF86MonBrightnessUp, exec, brightnessctl -e1 -n2 set 5%+
+bindel = ,XF86MonBrightnessDown, exec, brightnessctl -e1 -n2 set 5%-
 
 # Requires playerctl
 bindl = , XF86AudioNext, exec, playerctl next
 bindl = , XF86AudioPause, exec, playerctl play-pause
 bindl = , XF86AudioPlay, exec, playerctl play-pause
 bindl = , XF86AudioPrev, exec, playerctl previous
+bindl = , XF86AudioStop, exec, playerctl stop
 
 #######################
 ### SUBMAPS / MENUS ###
@@ -410,7 +417,7 @@ bindl = , XF86AudioPrev, exec, playerctl previous
 $power = System: (l) lock, (e) exit, (r) reboot, (s) suspend, (p) poweroff, (b) backup and shutdown, (Esc) cancel
 bind = $mainMod CTRL, Q, submap, $power
 submap = $power
-bind = , L, exec, hyprlock
+bind = , L, exec, dms ipc call lock lock
 bind = , L, submap, reset
 bind = , E, exit
 bind = , E, submap, reset
