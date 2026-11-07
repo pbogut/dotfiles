@@ -578,7 +578,7 @@ binds {
     Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "terminal"; }
     Mod+semicolon hotkey-overlay-title="Run a command" { spawn "fuzzel-run"; }
     Mod+Shift+semicolon hotkey-overlay-title="Run an Application" { spawn "fuzzel"; }
-    Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn "hyprlock"; }
+    Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn "dms" "ipc" "call" "lock" "lock"; }
     Mod+Ctrl+P hotkey-overlay-title="Open project in Herdr" { spawn "herdr-project"; }
     Mod+B hotkey-overlay-title="Browser" { spawn "browser" "focus"; }
     Mod+Ctrl+F hotkey-overlay-title="Ferdium" { spawn "focus-or-exec" "ferdium" "ferdium"; }
@@ -700,8 +700,8 @@ binds {
     Mod+P              { focus-workspace-up; }
     Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
     Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
-    Mod+Ctrl+U         { move-column-to-workspace-down; }
-    Mod+Ctrl+I         { move-column-to-workspace-up; }
+    // Mod+Ctrl+U         { move-column-to-workspace-down; }
+    // Mod+Ctrl+I         { move-column-to-workspace-up; }
 
     // Alternatively, there are commands to move just a single window:
     // Mod+Ctrl+Page_Down { move-window-to-workspace-down; }
