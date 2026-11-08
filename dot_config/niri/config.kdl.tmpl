@@ -589,6 +589,8 @@ binds {
     Mod+apostrophe hotkey-overlay-title="Clipboard Manager" {
         spawn "dms" "ipc" "call" "clipboard" "toggle";
     }
+
+    XF86Launch6 hotkey-overlay-title="Transcribe" { spawn "hex" "dictation" "toggle"; }
     // {{ if eq .hostname "silverspoon" }}
     Mod+F7 repeat=false allow-when-locked=true hotkey-overlay-title="Toggle Screen" {
         spawn "dms" "ipc" "call" "output-selector" "cycle";

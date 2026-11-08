@@ -20,6 +20,7 @@ pacman = [
   "go",
   "grim",
   "gtk3-print-backends",
+  "hex-bin",
   "hypridle",
   "hyprland",
   "hyprlock",
