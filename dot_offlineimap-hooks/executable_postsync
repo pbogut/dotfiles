@@ -120,4 +120,3 @@ if [[ -f ~/.offlineimap-hooks/special-tags ]]; then
 fi
 
 notmuch tag -new -- tag:new #clear new tag
-pkill -RTMIN+25 -x waybar

@@ -81,7 +81,6 @@ if [[ $action == "kill" ]]; then
       >/dev/null 2>&1
   done) &
 
-  pkill -RTMIN+15 -x waybar
   kill $(ps -ef | grep 'shadowplay.sh' | grep bash | grep -v grep | awk '{print $2}') \
     >/dev/null 2>&1
 fi
@@ -103,8 +102,6 @@ if [[ $action == "fullscreen" ]]; then
     count=$(( count + 1 ))
     path="$HOME/Videos/ShadowPlay"
     # path="$HOME/Videos/ShadowPlay/$(echo $title | sed 's/[^A-Za-z0-9]/_/g')"
-
-    (sleep 1s; pkill -RTMIN+15 -x waybar) &
 
     mkdir -p "$path"
     wl-screenrec \

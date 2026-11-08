@@ -17,5 +17,3 @@ if [ "$hostname" == "silverspoon" ]; then # pc
 fi
 
 dbus-update-activation-environment --all
-killall waybar > /dev/null 2>&1
-waybar &

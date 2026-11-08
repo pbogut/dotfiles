@@ -77,7 +77,6 @@ pacman = [
   "tree-sitter-cli",
   "unclutter",
   "w3m",
-  "waybar",
   "wayfreeze",
   "wget",
   "which",
