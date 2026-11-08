@@ -12,7 +12,7 @@ case ${desktop,,} in
 	exec niri msg action "power-$action-monitors"
 	;;
 *hyprland*)
-	exec hyprctl dispatch dpms "$action"
+	exec hyprctl dispatch "hl.dsp.dpms({action = '$action'})"
 	;;
 *)
 	echo "Unsupported desktop: ${desktop:-unknown}" >&2

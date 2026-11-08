@@ -1,0 +1,565 @@
+-- https://wiki.hypr.land/configuring/
+
+hl.monitor({ output = '', mode = 'preferred', position = 'auto', scale = 1 })
+--{{ if eq .hostname "silverspoon" }}
+hl.monitor({ output = 'DP-1', mode = 'preferred', position = 'auto', scale = 1, mirror = 'eDP-1' })
+hl.monitor({ output = 'DP-2', mode = 'preferred', position = 'auto', scale = 1, mirror = 'eDP-1' })
+local effects = false
+--{{ end }}
+--{{ if eq .hostname "redeye" }}
+hl.monitor({ output = 'DP-1', mode = '1920x1080@144', position = '0x0', scale = 1 })
+hl.monitor({ output = 'DP-2', mode = '1920x1080@60', position = '1920x0', scale = 1 })
+local effects = true
+--{{ end }}
+
+hl.on('hyprland.start', function()
+  hl.exec_cmd('uwsm-app -- dms run')
+  hl.exec_cmd([[uwsm-app -- swaybg -i "$(find ~/Pictures/wallpaper -type f | shuf -n 1)"]])
+  hl.exec_cmd('hyprctl setcursor polar 10')
+end)
+
+hl.env('XCURSOR_SIZE', '24')
+hl.env('HYPRCURSOR_SIZE', '24')
+
+hl.config({
+  ecosystem = { no_donation_nag = true },
+  general = {
+    gaps_in = 3,
+    gaps_out = 5,
+    border_size = 2,
+    col = {
+      active_border = { colors = { 'rgba(33ccffee)', 'rgba(00ff99ee)' }, angle = 45 },
+      inactive_border = 'rgba(595959aa)',
+    },
+    resize_on_border = false,
+    allow_tearing = false,
+    layout = 'scrolling',
+  },
+  scrolling = {
+    -- Match the default and preset column widths in the Niri config.
+    column_width = 0.9,
+    explicit_column_widths = '0.5, 0.9',
+    fullscreen_on_one_column = true,
+    focus_fit_method = 1,
+    follow_focus = 1,
+    wrap_focus = false,
+    wrap_swapcol = false,
+    direction = 'right',
+  },
+  decoration = {
+    rounding = 10,
+    rounding_power = 2,
+    active_opacity = 1.0,
+    inactive_opacity = 1.0,
+    dim_special = 0.3,
+    shadow = {
+      enabled = effects,
+      range = 4,
+      render_power = 3,
+      color = 'rgba(1a1a1aee)',
+    },
+    blur = {
+      enabled = effects,
+      special = effects,
+      size = 3,
+      passes = 1,
+      vibrancy = 0.1696,
+    },
+  },
+  animations = { enabled = true },
+  dwindle = { force_split = 2, preserve_split = true },
+  master = { new_status = 'slave', mfact = 0.65 },
+  debug = { vfr = true },
+  misc = {
+    on_focus_under_fullscreen = 2,
+    force_default_wallpaper = -1,
+    disable_hyprland_logo = false,
+    focus_on_activate = true,
+    key_press_enables_dpms = true,
+    mouse_move_enables_dpms = true,
+  },
+  input = {
+    kb_layout = 'pl',
+    follow_mouse = 1,
+    sensitivity = 0,
+    touchpad = { natural_scroll = false },
+  },
+  binds = {
+    allow_pin_fullscreen = true,
+    allow_workspace_cycles = true,
+    movefocus_cycles_fullscreen = true,
+    scroll_event_delay = 150,
+    hide_special_on_workspace_change = true,
+  },
+})
+
+require(os.getenv('HOME') .. '/.config/themes/current/hyprland')
+
+hl.device({ name = 'epic-mouse-v1', sensitivity = -0.5 })
+hl.gesture({ fingers = 3, direction = 'horizontal', action = 'scroll_move' })
+hl.gesture({ fingers = 3, direction = 'vertical', action = 'workspace' })
+
+-- Animations
+hl.curve('easeOutQuint', { type = 'bezier', points = { { 0.23, 1 }, { 0.32, 1 } } })
+hl.curve('linear', { type = 'bezier', points = { { 0, 0 }, { 1, 1 } } })
+hl.curve('almostLinear', { type = 'bezier', points = { { 0.5, 0.5 }, { 0.75, 1 } } })
+hl.curve('quick', { type = 'bezier', points = { { 0.15, 0 }, { 0.1, 1 } } })
+
+hl.animation({ leaf = 'global', enabled = true, speed = 10, bezier = 'default' })
+hl.animation({ leaf = 'border', enabled = true, speed = 5.39, bezier = 'easeOutQuint' })
+hl.animation({ leaf = 'windows', enabled = true, speed = 4.79, bezier = 'easeOutQuint' })
+hl.animation({ leaf = 'windowsMove', enabled = true, speed = 3.5, bezier = 'easeOutQuint' })
+hl.animation({ leaf = 'windowsIn', enabled = true, speed = 4.1, bezier = 'easeOutQuint', style = 'popin 87%' })
+hl.animation({ leaf = 'windowsOut', enabled = true, speed = 1.49, bezier = 'linear', style = 'popin 87%' })
+hl.animation({ leaf = 'fadeIn', enabled = true, speed = 1.73, bezier = 'almostLinear' })
+hl.animation({ leaf = 'fadeOut', enabled = true, speed = 1.46, bezier = 'almostLinear' })
+hl.animation({ leaf = 'fade', enabled = true, speed = 3.03, bezier = 'quick' })
+hl.animation({ leaf = 'layers', enabled = true, speed = 3.81, bezier = 'easeOutQuint' })
+hl.animation({ leaf = 'layersIn', enabled = true, speed = 4, bezier = 'easeOutQuint', style = 'fade' })
+hl.animation({ leaf = 'layersOut', enabled = true, speed = 1.5, bezier = 'linear', style = 'fade' })
+hl.animation({ leaf = 'fadeLayersIn', enabled = true, speed = 1.79, bezier = 'almostLinear' })
+hl.animation({ leaf = 'fadeLayersOut', enabled = true, speed = 1.39, bezier = 'almostLinear' })
+-- Workspace entry and exit inherit this vertical slide.
+hl.animation({ leaf = 'workspaces', enabled = true, speed = 3.5, bezier = 'easeOutQuint', style = 'slidevert' })
+hl.animation({
+  leaf = 'specialWorkspaceIn',
+  enabled = true,
+  speed = 0.94,
+  bezier = 'almostLinear',
+  style = 'slidevert -100%',
+})
+hl.animation({
+  leaf = 'specialWorkspaceOut',
+  enabled = true,
+  speed = 0.94,
+  bezier = 'almostLinear',
+  style = 'slidevert -100%',
+})
+hl.animation({ leaf = 'zoomFactor', enabled = true, speed = 7, bezier = 'quick' })
+
+-- Keybindings
+local mod = 'SUPER'
+local dsp = hl.dsp
+
+hl.bind(mod .. ' + SHIFT + Q', dsp.window.close())
+hl.bind(mod .. ' + F', dsp.window.fullscreen({ mode = 'maximized' }))
+hl.bind(mod .. ' + SHIFT + F', dsp.window.fullscreen())
+hl.bind(mod .. ' + Z', dsp.window.fullscreen_state({ internal = 0, client = 2 }))
+hl.bind(mod .. ' + E', dsp.exec_cmd('lf-term'))
+hl.bind(mod .. ' + SPACE', dsp.exec_cmd('hypr-togglefloating'))
+hl.bind(mod .. ' + TAB', dsp.exec_cmd('hypr-togglefloatingfocus'))
+hl.bind(mod .. ' + S', dsp.layout('center'))
+hl.bind(mod .. ' + bracketleft', dsp.layout('consume_or_expel prev'))
+hl.bind(mod .. ' + bracketright', dsp.layout('consume_or_expel next'))
+hl.bind(mod .. ' + V', dsp.layout('colresize +conf'))
+hl.bind(mod .. ' + CTRL + Y', dsp.exec_cmd('hypr-youtube reset'))
+hl.bind(mod .. ' + Y', dsp.exec_cmd('hypr-youtube toggle'))
+
+-- Apps
+hl.bind(mod .. ' + semicolon', dsp.exec_cmd('fuzzel-run'))
+hl.bind(mod .. ' + SHIFT + semicolon', dsp.exec_cmd('fuzzel'))
+hl.bind(mod .. ' + apostrophe', dsp.exec_cmd('dms ipc call clipboard toggle'))
+hl.bind(mod .. ' + W', dsp.exec_cmd('hypr-windows'))
+hl.bind(mod .. ' + CTRL + P', dsp.exec_cmd('herdr-project'))
+hl.bind(mod .. ' + Return', dsp.exec_cmd('alacritty'))
+hl.bind(mod .. ' + B', dsp.exec_cmd('hypr-focusorexec vivaldi-personal browser'))
+hl.bind(mod .. ' + CTRL + K', dsp.exec_cmd([[terminal-float -t "khal" -e khal interactive]]))
+hl.bind(mod .. ' + CTRL + F', dsp.exec_cmd('hypr-focusorexec ferdium ferdium'))
+hl.bind(mod .. ' + T', dsp.exec_cmd('systray-dmenu'))
+hl.bind(mod .. ' + Q', dsp.exec_cmd('quick-menu'))
+hl.bind(mod .. ' + CTRL + C', dsp.exec_cmd([[focus-or-exec '^Alacritty\.herdr$' terminal -c herdr -e herdr]]))
+hl.bind(mod .. ' + CTRL + O', dsp.exec_cmd('chat'))
+hl.bind(mod .. ' + CTRL + I', dsp.exec_cmd('hex dictation toggle'))
+hl.bind(mod .. ' + CTRL + D', dsp.exec_cmd('discord'))
+hl.bind(mod .. ' + CTRL + N', dsp.exec_cmd('focus-or-exec --title wlctl terminal-float -t wlctl -e wlctl'))
+hl.bind(mod .. ' + CTRL + B', dsp.exec_cmd('focus-or-exec --title bluetui terminal-float -t bluetui -e bluetui'))
+hl.bind(mod .. ' + ALT + L', dsp.exec_cmd('dms ipc call lock lock'))
+hl.bind(mod .. ' + O', dsp.exec_cmd('dms ipc call hypr toggleOverview'))
+
+-- Screenshots
+hl.bind('SHIFT + Print', dsp.exec_cmd('screenshot fullscreen'))
+hl.bind('Print', dsp.exec_cmd('screenshot smart'))
+hl.bind('ALT + Print', dsp.exec_cmd('screenshot windows'))
+hl.bind(mod .. ' + Print', dsp.exec_cmd('~/.scripts/record.sh'))
+
+-- Zoom
+hl.bind(mod .. ' + mouse_down', function()
+  hl.config({ cursor = { zoom_factor = hl.get_config('cursor.zoom_factor') * 1.2 } })
+end)
+hl.bind(mod .. ' + mouse_up', function()
+  hl.config({ cursor = { zoom_factor = math.max(1, hl.get_config('cursor.zoom_factor') * 0.8) } })
+end)
+hl.bind(mod .. ' + mouse:274', function()
+  hl.config({ cursor = { zoom_factor = 1 } })
+end)
+hl.bind(mod .. ' + SHIFT + mouse:273', dsp.exec_cmd('hyprpicker -a'))
+
+-- H/J/K/L use hypr-focus for Neovim, tmux, Herdr and Hyprland navigation.
+hl.bind(mod .. ' + H', dsp.exec_cmd('hypr-focus left'))
+hl.bind(mod .. ' + J', dsp.exec_cmd('hypr-focus down --switch-workspace'))
+hl.bind(mod .. ' + K', dsp.exec_cmd('hypr-focus up --switch-workspace'))
+hl.bind(mod .. ' + L', dsp.exec_cmd('hypr-focus right'))
+
+hl.bind(mod .. ' + Left', dsp.focus({ direction = 'left' }))
+hl.bind(mod .. ' + Right', dsp.focus({ direction = 'right' }))
+hl.bind(mod .. ' + Up', dsp.focus({ direction = 'up' }))
+hl.bind(mod .. ' + Down', dsp.focus({ direction = 'down' }))
+
+hl.bind(mod .. ' + SHIFT + H', dsp.layout('swapcol l'))
+hl.bind(mod .. ' + SHIFT + J', dsp.window.move({ direction = 'down' }))
+hl.bind(mod .. ' + SHIFT + K', dsp.window.move({ direction = 'up' }))
+hl.bind(mod .. ' + SHIFT + L', dsp.layout('swapcol r'))
+
+hl.bind(mod .. ' + SHIFT + Left', dsp.layout('swapcol l'))
+hl.bind(mod .. ' + SHIFT + Right', dsp.layout('swapcol r'))
+hl.bind(mod .. ' + SHIFT + Up', dsp.window.move({ direction = 'up' }))
+hl.bind(mod .. ' + SHIFT + Down', dsp.window.move({ direction = 'down' }))
+hl.bind(mod .. ' + SHIFT + mouse_down', dsp.focus({ direction = 'right' }))
+hl.bind(mod .. ' + SHIFT + mouse_up', dsp.focus({ direction = 'left' }))
+
+-- Workspaces
+hl.bind(mod .. ' + N', dsp.focus({ workspace = 'm+1' }))
+hl.bind(mod .. ' + P', dsp.focus({ workspace = 'm-1' }))
+hl.bind(mod .. ' + Page_Down', dsp.focus({ workspace = 'm+1' }))
+hl.bind(mod .. ' + Page_Up', dsp.focus({ workspace = 'm-1' }))
+hl.bind(mod .. ' + C', dsp.focus({ workspace = 'emptym' }))
+hl.bind(mod .. ' + SHIFT + N', dsp.window.move({ workspace = 'm+1', follow = true }))
+hl.bind(mod .. ' + SHIFT + C', dsp.window.move({ workspace = 'emptym', follow = true }))
+hl.bind(mod .. ' + SHIFT + P', function()
+  hl.timer(function()
+    hl.dispatch(dsp.dpms({ action = 'off' }))
+  end, { timeout = 500, type = 'oneshot' })
+end)
+
+--{{ if eq .hostname "redeye" }}
+hl.bind(mod .. ' + CTRL + L', dsp.workspace.move({ monitor = 'DP-2' }))
+hl.bind(mod .. ' + CTRL + H', dsp.workspace.move({ monitor = 'DP-1' }))
+hl.bind(mod .. ' + BackSpace', dsp.workspace.move({ monitor = 'DP-1' }))
+--{{ else }}
+hl.bind(mod .. ' + CTRL + L', dsp.workspace.move({ monitor = 1 }))
+hl.bind(mod .. ' + CTRL + H', dsp.workspace.move({ monitor = 0 }))
+hl.bind(mod .. ' + BackSpace', dsp.workspace.move({ monitor = 0 }))
+--{{ end }}
+hl.bind(mod .. ' + CTRL + J', dsp.workspace.swap_monitors({ monitor1 = 0, monitor2 = 1 }))
+hl.bind(mod .. ' + comma', dsp.focus({ monitor = 'l' }))
+hl.bind(mod .. ' + period', dsp.focus({ monitor = 'r' }))
+hl.bind(mod .. ' + SHIFT + comma', function()
+  if hl.get_monitor('l') then
+    hl.dispatch(dsp.window.move({ monitor = 'l', follow = true }))
+  end
+end)
+hl.bind(mod .. ' + SHIFT + period', function()
+  if hl.get_monitor('r') then
+    hl.dispatch(dsp.window.move({ monitor = 'r', follow = true }))
+  end
+end)
+hl.bind(mod .. ' + CTRL + comma', dsp.workspace.move({ monitor = 'l' }))
+hl.bind(mod .. ' + CTRL + period', dsp.workspace.move({ monitor = 'r' }))
+
+hl.bind(mod .. ' + G', dsp.exec_cmd('hypr-cyclespecial'))
+hl.bind(mod .. ' + CTRL + G', dsp.exec_cmd('chatgpt'))
+hl.bind(mod .. ' + SHIFT + G', dsp.window.move({ workspace = 'special:magic', follow = true }))
+hl.bind(mod .. ' + CTRL + W', dsp.exec_cmd('hypr-sortworkspace'))
+
+hl.bind(mod .. ' + mouse:272', dsp.window.drag(), { mouse = true })
+hl.bind(mod .. ' + mouse:273', dsp.window.resize(), { mouse = true })
+
+-- Media keys
+for key, command in pairs({
+  XF86AudioRaiseVolume = 'wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+',
+  XF86AudioLowerVolume = 'wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-',
+  XF86AudioMute = 'wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle',
+  ['SHIFT + XF86AudioMute'] = 'wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle',
+  XF86AudioMicMute = 'wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle',
+  XF86MonBrightnessUp = 'brightnessctl -e1 -n2 set 5%+',
+  XF86MonBrightnessDown = 'brightnessctl -e1 -n2 set 5%-',
+}) do
+  hl.bind(key, dsp.exec_cmd(command), { locked = true, repeating = true })
+end
+for key, command in pairs({
+  XF86AudioNext = 'next',
+  XF86AudioPause = 'play-pause',
+  XF86AudioPlay = 'play-pause',
+  XF86AudioPrev = 'previous',
+  XF86AudioStop = 'stop',
+}) do
+  hl.bind(key, dsp.exec_cmd('playerctl ' .. command), { locked = true })
+end
+
+-- Submaps
+local power = 'System: (l) lock, (e) exit, (r) reboot, (s) suspend, (p) poweroff, (b) backup and shutdown, (Esc) cancel'
+hl.bind(mod .. ' + CTRL + Q', dsp.submap(power))
+hl.define_submap(power, 'reset', function()
+  hl.bind('L', dsp.exec_cmd('dms ipc call lock lock'))
+  hl.bind('E', dsp.exit())
+  hl.bind('R', dsp.exec_cmd('reboot'))
+  hl.bind('S', dsp.exec_cmd('systemctl suspend'))
+  hl.bind('P', dsp.exec_cmd('poweroff'))
+  hl.bind('B', dsp.exec_cmd('backintime backup & sleep 5s; backintime shutdown'))
+  hl.bind('Escape', dsp.submap('reset'))
+  hl.bind('catchall', dsp.submap('reset'))
+end)
+
+local resize = 'Resize: L: right / H: left / K: up / J: down / ESC: cancel'
+local resize_prompt
+local function clear_resize_prompt()
+  if resize_prompt then
+    resize_prompt:dismiss()
+    resize_prompt = nil
+  end
+end
+local function update_resize_prompt(submap)
+  clear_resize_prompt()
+  if submap == resize then
+    resize_prompt = hl.notification.create({
+      text = resize,
+      timeout = 5000,
+      icon = 'hint',
+    })
+    resize_prompt:pause()
+  end
+end
+hl.on('keybinds.submap', update_resize_prompt)
+hl.on('config.reloaded', function()
+  update_resize_prompt(hl.get_current_submap())
+end)
+hl.on('config.unload', clear_resize_prompt)
+
+hl.bind(mod .. ' + R', dsp.submap(resize))
+hl.define_submap(resize, function()
+  hl.bind('L', dsp.window.resize({ x = 10, y = 0, relative = true }), { repeating = true })
+  hl.bind('H', dsp.window.resize({ x = -10, y = 0, relative = true }), { repeating = true })
+  hl.bind('K', dsp.window.resize({ x = 0, y = -10, relative = true }), { repeating = true })
+  hl.bind('J', dsp.window.resize({ x = 0, y = 10, relative = true }), { repeating = true })
+  hl.bind('catchall', dsp.submap('reset'))
+  hl.bind('Escape', dsp.submap('reset'))
+end)
+
+-- Windows and workspaces
+--{{ if eq .hostname "redeye" }}
+hl.workspace_rule({ workspace = 'name:web', monitor = 'DP-1' })
+hl.workspace_rule({ workspace = 'name:code', monitor = 'DP-1' })
+hl.workspace_rule({ workspace = 'name:chat', monitor = 'DP-2' })
+hl.workspace_rule({ workspace = 'name:work', monitor = 'DP-2' })
+hl.workspace_rule({ workspace = 'name:media', monitor = 'DP-2' })
+--{{ end }}
+
+hl.window_rule({
+  name = 'terminal-column-width',
+  match = { class = 'Alacritty' },
+  scrolling_width = 0.5,
+})
+
+hl.window_rule({
+  name = 'vivaldi-personal',
+  match = { class = 'vivaldi-personal' },
+  workspace = 'name:web',
+  scrolling_width = 0.9,
+})
+hl.window_rule({
+  name = 'brave-personal',
+  match = { class = 'brave-personal' },
+  workspace = 'name:web',
+  scrolling_width = 0.9,
+})
+hl.window_rule({
+  name = 'alacritty-project',
+  match = { class = 'Alacritty.project' },
+  workspace = 'name:code',
+  scrolling_width = 0.9,
+})
+hl.window_rule({
+  name = 'alacritty-herdr',
+  match = { class = 'Alacritty.herdr' },
+  workspace = 'name:code',
+  scrolling_width = 0.9,
+})
+hl.window_rule({
+  name = 'alacritty-herdr-redeye',
+  match = { class = 'Alacritty.herdr.redeye' },
+  workspace = 'name:code',
+  scrolling_width = 0.9,
+})
+hl.window_rule({
+  name = 'ferdium',
+  match = { class = 'ferdium' },
+  workspace = 'name:chat',
+})
+hl.window_rule({
+  name = 'webcord',
+  match = { class = 'webcord' },
+  workspace = 'name:chat',
+})
+hl.window_rule({
+  name = 'webcord-capitalized',
+  match = { class = 'WebCord' },
+  workspace = 'name:chat',
+})
+hl.window_rule({
+  name = 'mutt',
+  match = { class = 'Alacritty.mutt' },
+  workspace = 'name:chat',
+})
+hl.window_rule({
+  name = 'alacritty-chat',
+  match = { class = 'Alacritty.chat' },
+  workspace = 'name:chat',
+})
+hl.window_rule({
+  name = 'google-meet',
+  match = { class = [[^.*-meet\.google\.com__.*$]] },
+  workspace = 'name:chat',
+})
+hl.window_rule({
+  name = 'zoom-webapp',
+  match = { class = [[^.*-[a-z0-9]+\.zoom\.us__.*$]] },
+  workspace = 'name:chat',
+})
+hl.window_rule({
+  name = 'chatgpt',
+  match = { class = [[^.*-chatgpt\.com__.*$]] },
+  workspace = 'name:chat',
+})
+hl.window_rule({
+  name = 'plannotator',
+  match = { class = [[^.*-localhost__-Plannotator.*$]] },
+  workspace = 'name:chat',
+})
+hl.window_rule({
+  name = 'youtube-webapp',
+  match = { class = [[^.*-www\.youtube\.com__.*$]] },
+  workspace = 'name:media',
+})
+hl.window_rule({
+  name = 'vivaldi-work',
+  match = { class = 'vivaldi-work' },
+  workspace = 'name:work',
+  scrolling_width = 0.9,
+})
+hl.window_rule({
+  name = 'brave-work',
+  match = { class = 'brave-work' },
+  workspace = 'name:work',
+  scrolling_width = 0.9,
+})
+hl.window_rule({
+  name = 'google-chrome',
+  match = { class = 'google-chrome' },
+  workspace = 'name:work silent',
+  scrolling_width = 0.9,
+  no_initial_focus = true,
+})
+hl.window_rule({
+  name = 'developer-tools',
+  match = { title = '.*Developer Tools.*' },
+  scrolling_width = 0.5,
+})
+hl.window_rule({
+  name = 'brave-work-devtools',
+  match = { class = 'brave-work', title = '.*DevTools.*' },
+  scrolling_width = 0.5,
+})
+hl.window_rule({
+  name = 'deezer',
+  match = { class = [[^(chrome-www\.deezer\.com__.*)$]] },
+  workspace = 'special:deezer',
+})
+hl.window_rule({
+  name = 'screensaver',
+  match = { class = 'Screensaver' },
+  fullscreen = true,
+})
+hl.window_rule({
+  name = 'khal-no-screen-share',
+  match = { title = 'khal' },
+  no_screen_share = true,
+})
+hl.window_rule({
+  name = 'sms-floating-window',
+  match = { class = 'org.kde.kdeconnect.sms' },
+  no_screen_share = true,
+  float = true,
+  move = '(monitor_w*0.25) 40',
+  size = '(monitor_w*0.5) 200',
+})
+hl.window_rule({
+  name = 'localsend-floating',
+  match = { class = 'localsend' },
+  float = true,
+  center = true,
+  size = '400 700',
+})
+hl.window_rule({
+  name = 'hyprland-share-picker',
+  match = { class = 'hyprland-share-picker' },
+  float = true,
+  center = true,
+})
+hl.window_rule({
+  name = 'bitwarden-vivaldi-extension',
+  match = { title = '.*Bitwarden - Vivaldi.*' },
+  float = true,
+  no_screen_share = true,
+})
+hl.window_rule({
+  name = 'browser-extension-popups',
+  match = { class = [[^(chrome|brave)-[a-z]+-(Default|Personal|Work)$]] },
+  float = true,
+  no_screen_share = true,
+})
+hl.window_rule({
+  name = 'alacritty-floating',
+  match = { class = 'Alacritty.floating' },
+  tag = '+floating',
+})
+hl.window_rule({
+  name = 'ghostty-floating',
+  match = { class = 'com.mitchellh.ghostty.floating' },
+  tag = '+floating',
+})
+hl.window_rule({
+  name = 'wezterm-floating',
+  match = { class = 'org.wezterm.floating' },
+  tag = '+floating',
+})
+hl.window_rule({
+  name = 'nextcloud-floating',
+  match = { class = 'com.nextcloud.desktopclient.nextcloud' },
+  tag = '+floating',
+})
+hl.window_rule({
+  name = 'floating-windows',
+  match = { tag = 'floating' },
+  float = true,
+  center = true,
+  size = '1200 700',
+})
+
+-- Ignore maximize requests from apps.
+hl.window_rule({
+  name = 'maximize-ignore',
+  match = { class = '.*' },
+  suppress_event = 'maximize',
+})
+hl.window_rule({
+  name = 'xwayland-fix',
+  match = { class = '^$', title = '^$', xwayland = true, float = true, fullscreen = false, pin = false },
+  no_focus = true,
+})
+
+-- Steam and games
+hl.window_rule({
+  name = 'steam-games',
+  match = { class = '^(steam_app_.*|cs2|gamescope)$' },
+  float = false,
+  fullscreen = true,
+  workspace = 'special:game',
+  monitor = 'DP-1',
+})
+hl.window_rule({
+  name = 'steam',
+  match = { class = 'steam' },
+  move = '0 0',
+  float = false,
+  workspace = 'name:steam',
+})

@@ -62,7 +62,7 @@ if [[ $mode == "title" ]]; then
             exec "$@"
         fi
     elif [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
-        hypr-focusorexec "$class" "$@"
+        hypr-focusorexec --title "$class" "$@"
     elif [[ $XDG_CURRENT_DESKTOP == "sway" ]]; then
         swaymsg '[title="'"$class"'"] focus' ||
             swaymsg '[title="'"$class"'"] focus' ||

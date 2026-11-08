@@ -9,5 +9,6 @@ address=$(hyprctl -j clients |
     fuzzel --dmenu --with-nth=2 --accept-nth=1)
 
 if [[ -n $address ]]; then
-  hyprctl dispatch focuswindow address:"$address"
+  selector=$(jq -rn --arg selector "address:$address" '$selector | @json')
+  hyprctl dispatch "hl.dsp.focus({window = $selector})"
 fi

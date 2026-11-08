@@ -4,6 +4,12 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   09/11/2025
 #=================================================
+toggle_special() {
+  local workspace
+  workspace=$(jq -rn --arg workspace "$1" '$workspace | @json')
+  hyprctl -q dispatch "hl.dsp.workspace.toggle_special($workspace)"
+}
+
 workspace_name=$(hyprctl activewindow -j | jq -r '.workspace.name')
 is_special_open=false
 if [[ $workspace_name =~ ^special: ]]; then
@@ -19,23 +25,23 @@ total_workspaces=$(wc -l <<< "$special_workspaces")
 
 if ! $is_special_open; then
   if [[ $total_workspaces -eq 0 ]]; then
-    hyprctl -q dispatch "togglespecialworkspace magic"
+    toggle_special magic
   else
-    hyprctl -q dispatch "togglespecialworkspace $(head -n1 <<< "${special_workspaces:-magic}")"
+    toggle_special "$(head -n1 <<< "${special_workspaces:-magic}")"
   fi
   exit 0
 fi
 
 if $is_special_open && [[ $total_workspaces -lt 2 ]]; then
-  hyprctl -q dispatch "togglespecialworkspace $workspace_name"
+  toggle_special "$workspace_name"
   exit 0
 fi
 
 next_workspace_name=$(sed "0,/$workspace_name/d" <<< "$special_workspaces" | head -n1)
 if [[ $next_workspace_name != "" ]]; then
-  hyprctl -q dispatch "togglespecialworkspace $next_workspace_name"
+  toggle_special "$next_workspace_name"
   exit 0
 else
-  hyprctl -q dispatch "togglespecialworkspace $workspace_name"
+  toggle_special "$workspace_name"
   exit 0
 fi

@@ -1,5 +1,5 @@
 #!/bin/bash
-hyprctl dispatch "togglefloating"
+hyprctl dispatch 'hl.dsp.window.float()'
 json=$(hyprctl activewindow -j)
 floating=$(echo "$json" | jq '.floating')
 # left=$(echo $json | jq '.at[0]')
@@ -19,6 +19,6 @@ left=$(( ((screen_w - width) / 2) + offset_x ))
 top=$(( ((screen_h - height) / 2) + offset_y ))
 
 if [[ $floating == "true" ]]; then
-    hyprctl dispatch "resizeactive exact $width $height"
-    hyprctl dispatch "moveactive exact $left $top"
+    hyprctl dispatch "hl.dsp.window.resize({x = $width, y = $height})"
+    hyprctl dispatch "hl.dsp.window.move({x = $left, y = $top})"
 fi

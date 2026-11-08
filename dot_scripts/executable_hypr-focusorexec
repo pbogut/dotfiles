@@ -4,10 +4,16 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   18/10/2025
 #=================================================
-class=$1
+field=class
+if [[ $1 == --title ]]; then
+  field=title
+  shift
+fi
+pattern=$1
 shift
 
-result=$(hyprctl dispatch "focuswindow class:${class}")
+selector=$(jq -rn --arg selector "$field:$pattern" '$selector | @json')
+result=$(hyprctl dispatch "hl.dsp.focus({window = $selector})")
 if [[ $result != "ok" ]]; then
   exec "$@"
 fi

@@ -14,10 +14,10 @@ fi
 yt_address=$(jq -r '.address' <<< "$youtube")
 
 if [[ $1 == "reset" ]]; then
-    hyprctl dispatch "movetoworkspace name:media,address:$yt_address"
-    hyprctl dispatch "focuswindow address:$yt_address"
+    hyprctl dispatch "hl.dsp.window.move({workspace = 'name:media', window = 'address:$yt_address', follow = true})"
+    hyprctl dispatch "hl.dsp.focus({window = 'address:$yt_address'})"
     if [[ $(jq -r '.floating' <<< "$youtube") == "true" ]]; then
-        hyprctl dispatch "togglefloating"
+        hyprctl dispatch 'hl.dsp.window.float()'
     fi
     exit 0
 fi
@@ -30,11 +30,12 @@ current_workspace=$(hyprctl activeworkspace -j | jq -r '.name')
 echo $current_workspace
 
 if [[ $yt_workspace != "$active_workspace" ]]; then
-    hyprctl dispatch "movetoworkspacesilent name:$active_workspace,address:$yt_address"
+    workspace=$(jq -rn --arg workspace "name:$active_workspace" '$workspace | @json')
+    hyprctl dispatch "hl.dsp.window.move({workspace = $workspace, window = 'address:$yt_address', follow = false})"
 else
     if [[ $1 == "toggle" ]]; then
         current_window_address=$(hyprctl activewindow -j | jq -r '.address')
-        hyprctl dispatch "focuswindow address:$yt_address"
+        hyprctl dispatch "hl.dsp.focus({window = 'address:$yt_address'})"
         floating=$(echo "$youtube" | jq '.floating')
         fullscreen=$(echo "$youtube" | jq '.fullscreen != 0')
         monitor="$(echo "$youtube" | jq '.monitor')"
@@ -54,18 +55,18 @@ else
         left=$(((screen_w + offset_x) - width - gap))
 
         if [[ $floating == "true" ]]; then
-            hyprctl dispatch "fullscreen 1"
+            hyprctl dispatch 'hl.dsp.window.fullscreen({mode = "maximized"})'
         else
-            hyprctl dispatch "togglefloating"
-            hyprctl dispatch "resizeactive exact $width $height"
-            hyprctl dispatch "moveactive exact $left $top"
+            hyprctl dispatch 'hl.dsp.window.float()'
+            hyprctl dispatch "hl.dsp.window.resize({x = $width, y = $height})"
+            hyprctl dispatch "hl.dsp.window.move({x = $left, y = $top})"
         fi
 
         if  [[ "$current_workspace" != "$yt_workspace" ]]; then
-            hyprctl dispatch "focuswindow address:$current_window_address"
+            hyprctl dispatch "hl.dsp.focus({window = 'address:$current_window_address'})"
         else
             if [[ $fullscreen == "true" ]]; then
-                hyprctl dispatch "focuswindow tiled"
+                hyprctl dispatch 'hl.dsp.focus({window = "tiled"})'
             fi
         fi
 

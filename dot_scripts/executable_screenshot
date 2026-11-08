@@ -93,9 +93,9 @@ fi
 if [[ $MODE == "windows" ]]; then
   if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
     # disable rounding from window screenshots
-    rounding="$(hyprctl getoption decoration:rounding -j | jq -r .int)"
-    hyprctl -q keyword decoration:rounding 0; sleep 0.2s
-    (sleep 0.2s; hyprctl keyword decoration:rounding "$rounding") &
+    rounding="$(hyprctl getoption decoration.rounding -j | jq -r .int)"
+    hyprctl -q eval 'hl.config({decoration = {rounding = 0}})'; sleep 0.2s
+    (sleep 0.2s; hyprctl eval "hl.config({decoration = {rounding = $rounding}})") &
   fi
 fi
 if [[ $PROCESSING == "slurp" ]]; then

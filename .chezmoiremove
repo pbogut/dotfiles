@@ -1,6 +1,10 @@
 .config/DankMaterialShell/plugins/BatteryConservation
 .config/herdr/plugins/managed-tabs
 .config/herdr/plugins/repo-metadata
+.config/hypr/hyprland.conf
+.config/themes/i3-solar/hyprland.conf
+.config/themes/solarized/hyprland.conf
+.config/themes/tokyo-night/hyprland.conf
 .config/opencode/ap-opencode.jsonc
 .config/opencode/personal-opencode.jsonc
 .config/opencode/chat-opencode.jsonc
@@ -12,3 +16,4 @@
 .config/opencode2/extensions/temp-export/transcript.ts
 .config/opencode2/extensions/temp-export/tui.ts
 .config/opencode2/opencode-quota/settings.jsonc
+.scripts/hypr-togglemfact
