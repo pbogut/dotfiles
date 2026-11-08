@@ -1,10 +1,11 @@
 local config = require('pbogut.config')
 local util = require('lspconfig/util')
 
-local root_dir = function(fname)
+local root_dir = function(bufnr, on_dir)
   local cwd = vim.fn.getcwd()
+  local fname = vim.api.nvim_buf_get_name(bufnr)
   local root = util.root_pattern('.luarc.json', '.git')(fname)
-  return root or cwd
+  on_dir(root or cwd)
 end
 
 local opts = {
