@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 #=================================================
-# name:   run_once_before_install-packages
+# name:   run_onchange_before_install-pacman
 # author: pbogut <pbogut@pbogut.me>
 # date:   06/03/2024
 #=================================================
+set -e
+
 # {{- if or (not .archlinux) (not .install_system_packages) }} [[[ Do not install
 exit 0
 # Do not install ]]] {{- end }}
@@ -11,56 +13,11 @@ echo "> Update pacman database..."
 echo "# pacman -Sy"
 sudo pacman -Sy
 
-export CARGO_NET_GIT_FETCH_WITH_CLI=true
-
-# if no paru installed then build it with cargo
-if ! paru --version; then
-    echo "> Installing paru dependencies ..."
-    echo "# sudo pacman -S rustup gcc cmake pkgconf fakeroot git"
-    sudo pacman -S rustup gcc cmake pkgconf fakeroot git
-    echo "> Installing paru ..."
-    rustup toolchain install stable
-    cargo install paru || cargo install --git https://github.com/Morganamilo/paru.git
-    "$HOME/.cargo/bin/paru" -S paru && cargo uninstall paru
-fi
-
 installed=$(pacman -Q | awk '{print $1}')
 should_install_pacman="{{ range .packages.pacman -}}{{ . }} {{ end }}"
-to_install_pacman=""
-
-# Loop through the packages to install and check if they are already installed
-for package in $should_install_pacman; do
-    if ! echo "$installed" | grep -q "^$package$"; then
-        to_install_pacman="$to_install_paru $package"
-    fi
-done
-
-if [[ $to_install_pacman != "" ]]; then
-    echo "To install: $to_install_pacman"
-    sudo pacman -S \
-        --needed \
-        $to_install_pacman
-fi
-
-should_install_paru="{{ range .packages.paru -}}{{ . }} {{ end }}"
-to_install_paru=""
-
-for package in $should_install_paru; do
-    if ! echo "$installed" | grep -q "^$package$"; then
-        to_install_paru="$to_install_paru $package"
-    fi
-done
-
-if [[ $to_install_paru != "" ]]; then
-    echo "To install: $to_install_paru"
-    paru -S \
-        --skipreview \
-        --needed \
-        $to_install_paru
-fi
-
 # {{- if eq .hostname "silverspoon" }} [[[ silverspoon
-should_install_pacman="{{ range .silverspoon.packages.paru -}}{{ . }} {{ end }}"
+should_install_pacman+="{{ range .silverspoon.packages.pacman -}}{{ . }} {{ end }}"
+# silverspoon ]]] {{- end }}
 to_install_pacman=""
 
 # Loop through the packages to install and check if they are already installed
@@ -76,22 +33,3 @@ if [[ $to_install_pacman != "" ]]; then
         --needed \
         $to_install_pacman
 fi
-
-should_install_paru="{{ range .silverspoon.packages.paru -}}{{ . }} {{ end }}"
-to_install_paru=""
-
-# Loop through the packages to install and check if they are already installed
-for package in $should_install_paru; do
-    if ! echo "$installed" | grep -q "^$package$"; then
-        to_install_paru="$to_install_paru $package"
-    fi
-done
-
-if [[ $to_install_paru != "" ]]; then
-    echo "To install: $to_install_paru"
-    paru -S \
-        --skipreview \
-        --needed \
-        $to_install_paru
-fi
-# silverspoon ]]] {{- end }}

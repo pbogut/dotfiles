@@ -1,4 +1,5 @@
 [silverspoon.packages]
-paru = [
+pacman = [
   "intel-media-driver",
 ]
+paru = []

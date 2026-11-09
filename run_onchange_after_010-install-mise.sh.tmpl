@@ -4,6 +4,8 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   29/08/2026
 #=================================================
+set -e
+
 {{ range .packages.mise -}}
 mise use -g {{ . }}
-{{ end }}
+{{ end -}}

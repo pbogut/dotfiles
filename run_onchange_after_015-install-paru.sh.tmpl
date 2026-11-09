@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Install AUR packages after mise and the managed paru configuration are ready.
+# paru.conf: {{ include "dot_config/paru/paru.conf" | sha256sum }}
+set -e
+
+# {{- if or (not .archlinux) (not .install_system_packages) }} [[[ Do not install
+exit 0
+# Do not install ]]] {{- end }}
+
+export CARGO_NET_GIT_FETCH_WITH_CLI=true
+mise_env=$(mise env --shell bash)
+eval "$mise_env"
+
+paru_bin=paru
+if ! paru --version; then
+    echo "> Installing paru with mise's Rust toolchain ..."
+    cargo install paru || cargo install --git https://github.com/Morganamilo/paru.git
+    paru_bin="${CARGO_HOME:-$HOME/.cargo}/bin/paru"
+fi
+
+installed=$(pacman -Q | awk '{print $1}')
+should_install_paru="{{ range .packages.paru -}}{{ . }} {{ end }}"
+# {{- if eq .hostname "silverspoon" }} [[[ silverspoon
+should_install_paru+="{{ range .silverspoon.packages.paru -}}{{ . }} {{ end }}"
+# silverspoon ]]] {{- end }}
+to_install_paru=""
+if [[ $paru_bin != paru ]]; then
+    to_install_paru="paru"
+fi
+
+for package in $should_install_paru; do
+    if ! echo "$installed" | grep -q "^$package$"; then
+        to_install_paru="$to_install_paru $package"
+    fi
+done
+
+if [[ $to_install_paru != "" ]]; then
+    echo "To install: $to_install_paru"
+    "$paru_bin" -Sy --pkgbuilds
+    "$paru_bin" -S \
+        --skipreview \
+        --needed \
+        $to_install_paru
+fi
+
+if [[ $paru_bin != paru ]]; then
+    cargo uninstall paru
+fi
