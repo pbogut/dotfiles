@@ -16,9 +16,10 @@ get_rectangles() {
   if [[ $XDG_CURRENT_DESKTOP == "niri" ]]; then
     niri msg -j outputs | jq '.[].logical' -c | jq -r '"\(.x),\(.y) \(.width)x\(.height)"'
   elif [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
-    local active_workspace=$(hyprctl --instance 0 monitors -j | jq -r '.[] | select(.focused == true) | .activeWorkspace.id')
-    hyprctl --instance 0 monitors -j | jq -r --arg ws "$active_workspace" '.[] | select(.activeWorkspace.id == ($ws | tonumber)) | "\(.x),\(.y) \((.width / .scale) | floor)x\((.height / .scale) | floor)"'
-    hyprctl --instance 0 clients -j | jq -r --arg ws "$active_workspace" '.[] | select(.workspace.id == ($ws | tonumber)) | "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'
+    local active_workspace
+    active_workspace=$(hyprctl --instance 0 monitors -j | jq -r '.[] | select(.focused == true) | .activeWorkspace.name')
+    hyprctl --instance 0 monitors -j | jq -r --arg ws "$active_workspace" '.[] | select(.activeWorkspace.name == $ws) | "\(.x),\(.y) \((.width / .scale) | floor)x\((.height / .scale) | floor)"'
+    hyprctl --instance 0 clients -j | jq -r --arg ws "$active_workspace" '.[] | select(.workspace.name == $ws) | "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'
   fi
 }
 
