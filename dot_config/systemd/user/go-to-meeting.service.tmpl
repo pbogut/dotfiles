@@ -1,0 +1,15 @@
+[Unit]
+Description=Run commands for Chromium microphone and camera capture
+After=pipewire.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+# Development build. After publication, use %h/.gocode/bin/go-to-meeting.
+ExecStart="{{ .projects }}/github.com/pbogut/go-to-meeting/master/bin/go-to-meeting" --config %h/.config/go-to-meeting.json
+Environment=PATH=%h/.scripts:%h/.gocode/bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical-session.target

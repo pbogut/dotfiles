@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+systemctl --user start go-to-meeting
+exec chromium \
+  --user-data-dir="${XDG_CONFIG_HOME:-$HOME/.config}/chromium-meeting" \
+  --profile-directory=Default \
+  --remote-debugging-address=127.0.0.1 \
+  --remote-debugging-port=9229 \
+  "$@"

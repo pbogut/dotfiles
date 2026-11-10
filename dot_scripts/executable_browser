@@ -24,13 +24,13 @@ elif [[ $url =~ ^https://open\.spotify\.com ]]; then
   $browser-personal "$@" &
 elif [[ $url =~ ^https://.*\.zoom\.us ]]; then
   shift
-  chromium --app="$url" --profile-directory=Default "$@" &
+  chromium-meeting --app="$url" "$@" &
 elif [[ $url =~ ^https://meet\.google\.com ]]; then
   shift
-  chromium --app="$url" --profile-directory=Default "$@" &
+  chromium-meeting --app="$url" "$@" &
 elif [[ $url =~ ^https://teams\.microsoft\.com ]]; then
   shift
-  chromium --app="$url" --profile-directory=Default "$@" &
+  chromium-meeting --app="$url" "$@" &
 elif [[ $url =~ ^https://.*\.richpanel\.com ]]; then
   $browser-work "$@" &
 elif [[ $url =~ ^https://gitlab\.com ]]; then

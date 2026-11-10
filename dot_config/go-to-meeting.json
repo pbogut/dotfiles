@@ -1,0 +1,6 @@
+{
+  "debugger_url": "http://127.0.0.1:9229",
+  "end_grace": "5s",
+  "on_start": ["notify-send", "meeting start"],
+  "on_end": ["notify-send", "meeting end"]
+}
