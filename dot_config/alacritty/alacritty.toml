@@ -32,6 +32,7 @@ alphabet = "jfkdls;ahgurieowpq"
 
 [[hints.enabled]]
 command = "xdg-open"
+hyperlinks = true
 post_processing = true
 regex = '''(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)//[a-zA-Z0-9,'+\.\-_/\?=&%:]+'''
 
