@@ -519,6 +519,11 @@ window-rule {
     match app-id="com.gabm.satty"
     open-floating true
 }
+window-rule {
+    match app-id="anomaly.hex"
+    open-floating false
+    default-column-width { proportion 0.5; }
+}
 
 // Open the Firefox picture-in-picture player as floating by default.
 window-rule {
@@ -593,7 +598,11 @@ binds {
         spawn "dms" "ipc" "call" "clipboard" "toggle";
     }
 
-    XF86Launch6 hotkey-overlay-title="Transcribe" { spawn "hex" "dictation" "toggle"; }
+    // F15 is reported as XF86Launch6.
+    XF86Launch6 hotkey-overlay-title="Transcribe" {
+        press { spawn "hex" "dictation" "start"; }
+        release { spawn "hex" "dictation" "stop"; }
+    }
     // {{ if eq .hostname "silverspoon" }}
     Mod+F7 repeat=false allow-when-locked=true hotkey-overlay-title="Toggle Screen" {
         spawn "dms" "ipc" "call" "output-selector" "cycle";
