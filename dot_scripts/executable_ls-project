@@ -31,11 +31,9 @@ while test $# -gt 0; do
 done
 
 (
-    find -L "$PROJECTS" \
-        -regextype egrep \
-        -maxdepth 5 -mindepth 2 \
-        -iregex '.*(\.git|\.bare)$' |
-        sed -E 's,/(\.git|\.bare)$,,'
+    fd -L -u --max-depth 6 --min-depth 2 '(\.bare|\.git)$' "$PROJECTS" |
+        sed -E 's,/(\.git|\.bare)/?$,,' |
+        sed -E 's,/$,,'
 ) |
     sort |
     uniq |
