@@ -4,8 +4,57 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   09/09/2026
 #=================================================
-if [[ $TERM == 'dumb' ]]; then
-  focus-or-exec '\.chat$' terminal -c chat -e opencode-launcher
-else
-  opencode-launcher
+set -euo pipefail
+
+if [[ ${TERM:-dumb} == 'dumb' ]]; then
+  exec focus-or-exec '\.chat$' terminal -c chat -e -- chat "$@"
 fi
+
+opencode_bin=$(mise which opencode --tool opencode@2)
+runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$UID}/opencode-chat"
+server_url='http://127.0.0.1:4097'
+
+# Serialize startup so simultaneous chat windows share one server and password.
+umask 077
+mkdir -p "$runtime_dir"
+exec 9>"$runtime_dir/start.lock"
+flock 9
+
+if [[ ! -s $runtime_dir/password ]]; then
+  openssl rand -hex 32 >"$runtime_dir/password"
+fi
+OPENCODE_PASSWORD=$(<"$runtime_dir/password")
+export OPENCODE_PASSWORD
+unset OPENCODE_CONFIG OPENCODE_CONFIG_DIR OPENCODE_CONFIG_CONTENT
+unset OPENCODE_CLI_CONFIG_CONTENT OPENCODE_DB
+
+server_ready() {
+  curl --silent --fail --max-time 1 --noproxy '*' \
+    --user "opencode:$OPENCODE_PASSWORD" "$server_url/api/info" >/dev/null
+}
+
+if ! server_ready; then
+  OPENCODE_DB=chat.db OPENCODE_CONFIG_CONTENT='{
+    "default_agent": "chat",
+    "agents": {
+      "chat": { "hidden": false },
+      "build": { "disabled": true },
+      "plan": { "disabled": true }
+    }
+  }' nohup setsid "$opencode_bin" serve --hostname 127.0.0.1 --port 4097 \
+    </dev/null >"$runtime_dir/server.log" 2>&1 9>&- &
+  server_pid=$!
+  deadline=$((SECONDS + 30))
+
+  until server_ready; do
+    if ! kill -0 "$server_pid" 2>/dev/null || ((SECONDS >= deadline)); then
+      kill "$server_pid" 2>/dev/null || true
+      printf 'Could not start the Chat server. See %s/server.log\n' "$runtime_dir" >&2
+      exit 1
+    fi
+    sleep 0.2
+  done
+fi
+
+exec 9>&-
+exec "$opencode_bin" --server "$server_url" "$@"
