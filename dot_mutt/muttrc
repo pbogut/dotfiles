@@ -112,7 +112,7 @@ set reverse_name
 
 # notmuch
 set nm_default_uri="notmuch://`echo $HOME`/Maildir" # path to the maildir
-set virtual_spoolfile=yes                           # enable virtual folders
+set virtual_spool_file=yes                          # open the first virtual mailbox on startup
 virtual-mailboxes \
     " Inbox"             "notmuch://?query=tag:inbox and NOT tag:archive and NOT tag:sendmail"                            \
     "   └ 🟍 Pined"        "notmuch://?query=tag:pin"                                                                       \
