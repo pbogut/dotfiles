@@ -1,0 +1,7 @@
+{
+  "agentTool": true,
+  "reviewAnalysis": {
+    "semanticDiff": true,
+    "callFlow": false
+  }
+}

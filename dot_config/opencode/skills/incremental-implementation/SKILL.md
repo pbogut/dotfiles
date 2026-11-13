@@ -38,9 +38,9 @@ For each slice:
 1. **Implement** the smallest complete piece of functionality
 2. **Test** — run the test suite (or write a test if none exists)
 3. **Verify** — confirm the slice works as expected (tests pass, build succeeds, manual check)
-3. **Ask for review** — ask for human review, you have to wait for acceptance before continuing
-4. **Commit** -- save your progress with a descriptive message (use semantic commit messages)
-5. **Move to the next slice** — carry forward, don't restart
+4. **Ask for review** using Plannotator as described in Human review. Wait for acceptance before continuing.
+5. **Commit** your progress with a descriptive semantic commit message.
+6. **Move to the next slice** and carry forward, don't restart.
 
 ## Slicing Strategies
 
@@ -210,6 +210,7 @@ After each increment, verify with the repository's own commands (see the test-dr
 - [ ] Type checking passes, where the stack has one (`npx tsc --noEmit`, `mypy`, ...)
 - [ ] Linting passes (the repository's lint command)
 - [ ] The new functionality works as expected
+- [ ] Plannotator feedback or approval is visible in chat and the user has accepted the increment
 - [ ] The change is committed with a descriptive message
 
 **Note:** Run each verification command after a change that could affect it. After a successful run, don't repeat the same command unless the code has changed since — re-running on unchanged code adds no information.
@@ -251,12 +252,20 @@ After completing all increments for a task:
 
 ## Human review
 
-At each checkpoint, give a short summary:
+At each checkpoint, first give a short summary:
 - What behaviour this increment adds.
 - Files added, removed, or moved, with reasons.
 - Existing behaviour changed or removed.
 - Any deviation from the agreement.
-- Always commit after review is accepted
+
+Then request review through Plannotator:
+
+1. Call the native `plannotator` tool with `{"action":"review","gate":true}`. Set `target` to the repository directory if it differs from the current session's directory. `gate: true` ensures that approval arrives even when the user leaves no annotations.
+2. End your turn after the tool returns. 
+3. Remain available to answer questions while the review is open. Do not make further changes, commit, or start the next slice while waiting. Do not poll, reopen the review.
+4. The plugin delivers feedback or approval later as a visible message in this conversation.
+5. Check feedback against the actual code. Address requested corrections, run the relevant checks, and request review again. Wait for acceptance before committing or moving to the next slice. An approval returned by Plannotator counts as acceptance; an error or cancellation does not.
+6. Always commit after review is accepted, then continue to the next slice.
 
 ## See Also
 
