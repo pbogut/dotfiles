@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Settings checksum: {{ includeTemplate "dot_config/hex.settings.json.tmpl" . | sha256sum }}
+
+hex settings apply "$HOME/.config/hex.settings.json"
