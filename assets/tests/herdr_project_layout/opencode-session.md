@@ -22,10 +22,19 @@ Reports retain `agent: opencode`, `source: herdr:opencode`, and the root session
 ID. The existing project-layout session cache uses those fields for reopening
 the correct conversation.
 
+The local TUI extension `extensions/herdr-subject` sends the selected root
+session's title as the pane token `opencode_subject`. The sidebar uses it instead
+of the terminal title, which includes OpenCode's `OC |` prefix. The extension
+tracks session switches and title changes through the TUI cache. It clears the
+token when leaving a session or unloading, and refreshes a 15-second expiry so a
+crashed TUI cannot leave stale metadata. Herdr limits token values to 80 characters
+and truncates them again to fit the sidebar.
+
 ## Tests
 
 ```sh
 node --test assets/tests/herdr_project_layout/opencode_session.test.mjs
+node --test assets/tests/herdr_project_layout/opencode_subject.test.mjs
 ```
 
 The tests require Node.js and chezmoi. They load the pinned external source with
@@ -34,6 +43,10 @@ network access to fetch the source; subsequent runs can use chezmoi's cache.
 They use a temporary Herdr socket and a simulated v2 client to check startup
 hydration, lifecycle events, child requests, session switching, shared-server
 isolation, stale cache updates, disposal, and operation outside Herdr.
+
+The subject tests load the local extension source and check title changes,
+session isolation, root attribution, cache hydration, retries, and cleanup
+against a temporary Herdr socket.
 
 ## Apply
 
@@ -51,4 +64,20 @@ chezmoi apply --parent-dirs \
 chezmoi apply ~/.config/opencode/tui.jsonc ~/.config/opencode/cli.json
 ```
 
-Quit and reopen the OpenCode TUI inside Herdr to load the integration.
+For the subject extension and sidebar layout:
+
+```sh
+chezmoi diff \
+  ~/.config/opencode/extensions/herdr-subject/package.json \
+  ~/.config/opencode/extensions/herdr-subject/tui.ts \
+  ~/.config/opencode/cli.json \
+  ~/.config/herdr/config.toml
+chezmoi apply --parent-dirs \
+  ~/.config/opencode/extensions/herdr-subject/package.json \
+  ~/.config/opencode/extensions/herdr-subject/tui.ts
+chezmoi apply ~/.config/opencode/cli.json ~/.config/herdr/config.toml
+herdr server reload-config
+```
+
+OpenCode reloads the plugin list when `cli.json` changes. Run `/reload` in a TUI
+if it needs a manual refresh.

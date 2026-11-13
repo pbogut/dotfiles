@@ -148,10 +148,13 @@ rows = [
     "state_icon",
     # "workspace",
     { token = "$project", fg = "#acb0d0", bold = true, dim = false },
-    { token = "$opencode_profile", fg = "#9d7cd8", bold = true, dim = true },
+    { token = "tab", fg = "#9d7cd8", bold = true, dim = true },
   ],
   [
     { token = "$feature", fg = "#9d7cd8", dim = false },
+  ],
+  [
+    { token = "$opencode_subject", fg = "#acb0d0", dim = false },
   ],
 ]
 

@@ -27,7 +27,8 @@
         ]
       }
     },
-    "./herdr-opencode"
+    "./herdr-opencode",
+    "./extensions/herdr-subject"
   ],
   "diffs": {
     "wrap": "word"

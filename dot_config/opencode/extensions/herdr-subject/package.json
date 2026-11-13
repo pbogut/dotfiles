@@ -1,0 +1,8 @@
+{
+  "name": "pbogut-opencode-herdr-subject",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tui": "./tui.ts"
+  }
+}
