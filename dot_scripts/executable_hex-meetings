@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+#=================================================
+# name:   hex-meetings
+# author: Pawel Bogut <pbogut@pbogut.me>
+# date:   13/11/2026
+#=================================================
+# Prompt before starting or stopping a Hex meeting recording.
+# Requires notify-send with action support, GNU timeout, and hex on PATH.
+# Configure go-to-meeting with absolute paths:
+#   "on_start": ["/path/to/examples/hex-meetings.sh", "start"],
+#   "on_end": ["/path/to/examples/hex-meetings.sh", "stop"]
+
+set -eu
+
+usage() {
+    printf 'Usage: %s start|stop\n' "$0" >&2
+    exit 2
+}
+
+[ "$#" -eq 1 ] || usage
+
+case "$1" in
+    start)
+        action=record
+        label='Record'
+        title='Meeting started'
+        body='Start recording this meeting with Hex?'
+        ;;
+    stop)
+        action=stop
+        label='Stop recording'
+        title='Meeting ended'
+        body='Stop the Hex meeting recording?'
+        ;;
+    *)
+        usage
+        ;;
+esac
+
+# Leave time for Hex within go-to-meeting's 30-second hook timeout.
+# GNU timeout also bounds the wait if the notification daemon ignores expiry.
+if selected=$(timeout --kill-after=1s 20s notify-send \
+    --app-name='Hex meetings' \
+    --expire-time=20000 \
+    --action="$action=$label" \
+    "$title" "$body"); then
+    if [ "$selected" = "$action" ]; then
+        exec hex meetings "$action"
+    fi
+else
+    status=$?
+    # Expiring without a selection is a normal outcome.
+    [ "$status" -eq 124 ] || exit "$status"
+fi
