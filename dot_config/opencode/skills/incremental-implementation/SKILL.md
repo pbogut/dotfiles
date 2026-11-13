@@ -252,7 +252,13 @@ After completing all increments for a task:
 
 ## Human review
 
-At each checkpoint, first give a short summary:
+Before reviewing changes or handing completed, verified work back to the user,
+call `switch_agent` with `{"agent":"plan"}`. Call it alone and wait until the
+next model turn before starting the review. Routine implementation checks stay
+in Build. If the switch is rejected, stay in the current mode and wait for the
+user's direction rather than retrying or starting the review.
+
+Once in Plan, give a short summary:
 - What behaviour this increment adds.
 - Files added, removed, or moved, with reasons.
 - Existing behaviour changed or removed.
@@ -264,8 +270,8 @@ Then request review through Plannotator:
 2. End your turn after the tool returns. 
 3. Remain available to answer questions while the review is open. Do not make further changes, commit, or start the next slice while waiting. Do not poll, reopen the review.
 4. The plugin delivers feedback or approval later as a visible message in this conversation.
-5. Check feedback against the actual code. Address requested corrections, run the relevant checks, and request review again. Wait for acceptance before committing or moving to the next slice. An approval returned by Plannotator counts as acceptance; an error or cancellation does not.
-6. Always commit after review is accepted, then continue to the next slice.
+5. Check feedback against the actual code and discuss it in Plan. Feedback, including requests for corrections, is not approval to implement and must not trigger a Build request. Only after the user explicitly approves implementation, call `switch_agent` with `{"agent":"build"}` as a standalone tool call. After it succeeds, continue on the next model turn without asking for another message. Address the approved corrections, run the relevant checks, switch back to Plan, and request review again. If the switch is rejected, stay in Plan and do not retry without a new explicit instruction.
+6. An approval returned by Plannotator counts as acceptance; an error or cancellation does not. Always commit after review is accepted, then continue to the next slice. Acceptance permits requesting Build through `switch_agent` to create the commit and continue any next already-agreed increment. After the final increment is committed, switch back to Plan.
 
 ## See Also
 

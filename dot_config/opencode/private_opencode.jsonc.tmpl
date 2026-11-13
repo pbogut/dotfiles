@@ -32,6 +32,10 @@
   // Keep the shared permission rules encrypted in chezmoi. V2 normalizes this
   // legacy field, including bash -> shell and task -> subagent.
   "permission": {{ include (joinPath .chezmoi.homeDir ".config/opencode/permission.jsonc") }},
+  "permissions": [
+    { "action": "switch_agent", "resource": "plan", "effect": "allow" },
+    { "action": "switch_agent", "resource": "build", "effect": "ask" }
+  ],
   "skills": ["{{ .chezmoi.homeDir }}/.config/opencode/skills"],
   "mcp": {
     "servers": {
