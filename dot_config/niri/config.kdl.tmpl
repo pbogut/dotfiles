@@ -489,6 +489,7 @@ window-rule {
     default-floating-position x=200 y=-20 relative-to="top-left"
 }
 window-rule {
+    match app-id="yad"
     match app-id="openshot" title="Preview"
     match app-id="openshot" title="Export Video"
     match app-id="Flowbladesinglerender" title="Flowblade Timeline Render"
@@ -656,8 +657,8 @@ binds {
     Mod+Up    { focus-window-up; }
     Mod+Right { focus-column-right; }
     Mod+H     hotkey-overlay-title="Focus left" { spawn "niri-focus" "left"; }
-    Mod+J     hotkey-overlay-title="Focus down (or switch workspace)" { spawn "niri-focus" "down" "--switch-workspace"; }
-    Mod+K     hotkey-overlay-title="Focus up (or switch workspace)" { spawn "niri-focus" "up" "--switch-workspace"; }
+    Mod+J     hotkey-overlay-title="Focus down (or switch workspace)" { spawn "niri-focus" "down" "--switch-workspace" "--skip-empty-named-workspaces"; }
+    Mod+K     hotkey-overlay-title="Focus up (or switch workspace)" { spawn "niri-focus" "up" "--switch-workspace" "--skip-empty-named-workspaces"; }
     Mod+L     hotkey-overlay-title="Focus right" { spawn "niri-focus" "right"; }
 
     Mod+Shift+Left  { move-column-left-or-to-monitor-left; }
@@ -710,8 +711,8 @@ binds {
 
     Mod+Page_Down      { focus-workspace-down; }
     Mod+Page_Up        { focus-workspace-up; }
-    Mod+N              { focus-workspace-down; }
-    Mod+P              { focus-workspace-up; }
+    Mod+N              { spawn "niri-focus" "next-workspace" "--skip-empty-named-workspaces"; }
+    Mod+P              { spawn "niri-focus" "prev-workspace" "--skip-empty-named-workspaces"; }
     Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
     Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
     // Mod+Ctrl+U         { move-column-to-workspace-down; }
