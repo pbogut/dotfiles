@@ -6,8 +6,17 @@
 #=================================================
 set -euo pipefail
 
-if [[ ${TERM:-dumb} == 'dumb' ]]; then
+if [[ ${TERM:-dumb} == 'dumb' && ${1:-} != 'pair' ]]; then
   exec focus-or-exec '\.chat$' terminal -c chat -e -- chat "$@"
+fi
+
+if [[ ${1:-} == 'pair' && $# -gt 1 ]]; then
+  if [[ $# -eq 2 && ($2 == '--help' || $2 == '-h') ]]; then
+    printf 'Usage: chat pair\nPair a phone with the Chat server on the same network.\n'
+    exit 0
+  fi
+  printf 'Usage: chat pair\n' >&2
+  exit 1
 fi
 
 opencode_bin=$(mise which opencode --tool opencode@2)
@@ -33,6 +42,24 @@ server_ready() {
     --user "opencode:$OPENCODE_PASSWORD" "$server_url/api/info" >/dev/null
 }
 
+# Upgrade an already-running localhost-only server when pairing is requested.
+if [[ ${1:-} == 'pair' ]] && server_ready &&
+  [[ -n $(ss -H -ltn 'src 127.0.0.1 and sport = :4097') ]]; then
+  server_pid=$(curl --silent --show-error --fail --max-time 5 --noproxy '*' \
+    --user "opencode:$OPENCODE_PASSWORD" "$server_url/api/info" |
+    jq -er '.pid | select(type == "number" and . > 1)')
+  printf 'Restarting the Chat server to allow mobile connections.\n' >&2
+  kill "$server_pid"
+  deadline=$((SECONDS + 30))
+  while kill -0 "$server_pid" 2>/dev/null; do
+    if ((SECONDS >= deadline)); then
+      printf 'Timed out waiting for the Chat server to stop.\n' >&2
+      exit 1
+    fi
+    sleep 0.2
+  done
+fi
+
 if ! server_ready; then
   OPENCODE_DB=chat.db OPENCODE_CONFIG_CONTENT='{
     "default_agent": "chat",
@@ -41,7 +68,7 @@ if ! server_ready; then
       "build": { "disabled": true },
       "plan": { "disabled": true }
     }
-  }' nohup setsid "$opencode_bin" serve --hostname 127.0.0.1 --port 4097 \
+  }' nohup setsid "$opencode_bin" serve --hostname 0.0.0.0 --port 4097 \
     </dev/null >"$runtime_dir/server.log" 2>&1 9>&- &
   server_pid=$!
   deadline=$((SECONDS + 30))
@@ -57,4 +84,26 @@ if ! server_ready; then
 fi
 
 exec 9>&-
+
+if [[ ${1:-} == 'pair' ]]; then
+  urls=$(curl --silent --show-error --fail --max-time 5 --noproxy '*' \
+    --user "opencode:$OPENCODE_PASSWORD" "$server_url/api/info" |
+    jq -ce '[.urls[] | select(test("^https?://(localhost|127\\.[0-9.]+|\\[::1\\]|0\\.0\\.0\\.0)(:|/|$)") | not)] | select(length > 0)') || {
+    printf 'No network address is available for Chat pairing. Check your network connection.\n' >&2
+    exit 1
+  }
+  pairing=$(curl --silent --show-error --fail --max-time 5 --noproxy '*' \
+    --user "opencode:$OPENCODE_PASSWORD" --request POST "$server_url/api/pair")
+  code=$(jq -er '.code | select(type == "string" and length > 0)' <<<"$pairing")
+  expires_in=$(jq -er '.expires_in' <<<"$pairing")
+  printf '\nOpen a link on your phone. It works once and expires in %s seconds.\n\n' "$expires_in"
+  jq -r --arg code "$code" '.[] | rtrimstr("/") + "/auth/connect/" + ($code | @uri)' <<<"$urls"
+  if command -v qrencode >/dev/null; then
+    printf '\n'
+    jq -nc --arg code "$code" --argjson urls "$urls" '{code: $code, urls: $urls}' |
+      qrencode -t UTF8
+  fi
+  exit 0
+fi
+
 exec "$opencode_bin" --server "$server_url" "$@"
