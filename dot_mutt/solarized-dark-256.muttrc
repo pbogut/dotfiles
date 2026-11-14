@@ -57,7 +57,7 @@ color index         color61         default        "~Q"                        #
 color index         color243        default        "~R"                        # read messages
 color index         color33         default        "~U"                        # unread messages
 color index         color33         default        "~U~$"                      # unread, unreferenced messages
-color index         color241        default        "~v"                        # messages part of a collapsed thread
+#color index         color241        default        "~v"                        # messages part of a collapsed thread
 color index         color241        default        "~P"                        # messages from me
 color index         color37         default        "~p!~F"                     # messages to me
 color index         color37         default        "~N~p!~F"                   # new messages to me
@@ -69,17 +69,17 @@ color index         color160        default        "~N~F"                      #
 color index         color160        default        "~N~F~p"                    # new flagged messages to me
 color index         color160        default        "~U~F~p"                    # new flagged messages to me
 color index         color235        color160        "~D"                        # deleted messages
-color index         color245        default        "~v~(!~N)"                  # collapsed thread with no unread
-color index         color136        default        "~v~(~N)"                   # collapsed thread with some unread
-color index         color64         default        "~N~v~(~N)"                 # collapsed thread with unread parent
+#color index         color245        default        "~v~(!~N)"                  # collapsed thread with no unread
+#color index         color136        default        "~v~(~N)"                   # collapsed thread with some unread
+#color index         color64         default        "~N~v~(~N)"                 # collapsed thread with unread parent
 # statusbg used to indicated flagged when foreground color shows other status
 # for collapsed thread
-color index         color160        color235        "~v~(~F)!~N"                # collapsed thread with flagged, no unread
-color index         color136        color235        "~v~(~F~N)"                 # collapsed thread with some unread & flagged
-color index         color64         color235        "~N~v~(~F~N)"               # collapsed thread with unread parent & flagged
-color index         color64         color235        "~N~v~(~F)"                 # collapsed thread with unread parent, no unread inside, but some flagged
-color index         color37         color235        "~v~(~p)"                   # collapsed thread with unread parent, no unread inside, some to me directly
-color index         color136        color160        "~v~(~D)"                   # thread with deleted (doesn't differentiate between all or partial)
+#color index         color160        color235        "~v~(~F)!~N"                # collapsed thread with flagged, no unread
+#color index         color136        color235        "~v~(~F~N)"                 # collapsed thread with some unread & flagged
+#color index         color64         color235        "~N~v~(~F~N)"               # collapsed thread with unread parent & flagged
+#color index         color64         color235        "~N~v~(~F)"                 # collapsed thread with unread parent, no unread inside, but some flagged
+#color index         color37         color235        "~v~(~p)"                   # collapsed thread with unread parent, no unread inside, some to me directly
+#color index         color136        color160        "~v~(~D)"                   # thread with deleted (doesn't differentiate between all or partial)
 #color index         color136        default        "~(~N)"                    # messages in threads with some unread
 #color index         color64         default        "~S"                       # superseded messages
 #color index         color160        default        "~T"                       # tagged messages
