@@ -103,5 +103,10 @@ if [[ $(hostname) == "redeye" ]]; then
     "$HOME/.offlineimap-hooks/archive" "$account"
 fi
 
+daysago=182
+todate=$(date --date="$daysago days ago" '+%Y-%m-%d')
+search="date:..$todate"
+notmuch tag +archive -- "$search" and tag:shopping
+
 # detect moved files and update database
 notmuch new
