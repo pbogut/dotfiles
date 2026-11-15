@@ -214,7 +214,7 @@ set_opencode_command() {
     .result.workspace.tokens |
     .[$key] // (if $role == "oc-1" then .opencode_session else null end) // empty
   ' <<<"$workspace")
-	command=(opencode-launcher)
+	command=(opencode)
 	if valid_session_id "$session_id"; then
 		command+=(--session "$session_id")
 	fi
@@ -231,7 +231,7 @@ process_matches_role() {
         any(.argv[]?; test("(^|/)(nvim|herdr-vim)$"))
       elif $role | test("^oc-[1-9][0-9]*$") then
         .name == "opencode" or .name == "opencode.exe" or
-        any(.argv[]?; test("(^|/)(opencode(\\.exe)?|opencode-launcher)$"))
+        any(.argv[]?; test("(^|/)opencode(\\.exe)?$"))
       elif $role == "dev" then
         any(.argv[]?; . == "start-dev")
       elif $role == "git" then

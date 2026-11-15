@@ -18,7 +18,6 @@ PROJECT_PLUGIN = ROOT / "dot_config/herdr/plugins/project-layout"
 RUNTIME = PROJECT_PLUGIN / "lib/runtime.sh"
 SELECTOR = PROJECT_PLUGIN / "executable_managed-tabs"
 HERDR_VIM = ROOT / "dot_scripts/executable_herdr-vim"
-OPENCODE_LAUNCHER = ROOT / "dot_scripts/executable_opencode-launcher"
 PROJECT_LAUNCHER = ROOT / "dot_scripts/executable_herdr-project.tmpl"
 SESSION_CACHE = PROJECT_PLUGIN / "executable_cache-opencode-session.sh"
 REPORT_REPO = PROJECT_PLUGIN / "executable_report-repo.sh"
@@ -520,10 +519,10 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.assertEqual(
             [(layout["tab_label"], layout["root"]["command"]) for layout in layouts],
             [
-                ("oc-1", ["opencode-launcher", "--session", "session-opencode"]),
-                ("oc-2", ["opencode-launcher", "--session", "session-oc-2"]),
-                ("oc-5", ["opencode-launcher", "--session", "session-oc-5"]),
-                ("oc-10", ["opencode-launcher", "--session", "session-oc-10"]),
+                ("oc-1", ["opencode", "--session", "session-opencode"]),
+                ("oc-2", ["opencode", "--session", "session-oc-2"]),
+                ("oc-5", ["opencode", "--session", "session-oc-5"]),
+                ("oc-10", ["opencode", "--session", "session-oc-10"]),
             ],
         )
         self.assertTrue(all(not layout["focus"] for layout in layouts))
@@ -546,7 +545,7 @@ class HerdrWorkflowTest(unittest.TestCase):
                     result = self.run_script(SELECTOR, role)
                     self.assertEqual(result.returncode, 0, result.stderr)
                     layout = next(request["params"] for request in reversed(api.requests) if request["method"] == "layout.apply")
-                    expected = ["opencode-launcher"] + (["--session", session] if session else [])
+                    expected = ["opencode"] + (["--session", session] if session else [])
                     self.assertEqual(layout["tab_label"], role)
                     self.assertEqual(layout["root"]["command"], expected)
 
@@ -556,7 +555,7 @@ class HerdrWorkflowTest(unittest.TestCase):
             for role, expected in (("oc-1", ["--session", "legacy-session"]), ("oc-2", [])):
                 result = self.run_script(SELECTOR, role)
                 self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertEqual(api.requests[-1]["params"]["root"]["command"], ["opencode-launcher", *expected])
+                self.assertEqual(api.requests[-1]["params"]["root"]["command"], ["opencode", *expected])
 
     def test_native_opencode_restore_preserves_panes_and_renames_opencode_tab(self):
         tabs = [
@@ -1280,7 +1279,7 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.assertNotIn("workspace_id", layout["params"])
         self.assertEqual(
             layout["params"]["root"]["command"],
-            ["opencode-launcher", "--session", session_id],
+            ["opencode", "--session", session_id],
         )
         self.assertEqual(layout["params"]["root"]["cwd"], str(workspace.resolve()))
         self.assertFalse(
@@ -1682,126 +1681,6 @@ class HerdrWorkflowTest(unittest.TestCase):
         self.assertFalse(
             any(call[:2] in (["pane", "run"], ["tab", "close"]) for call in self.calls())
         )
-
-
-class OpenCodeLauncherTest(unittest.TestCase):
-    def setUp(self):
-        self.tempdir = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tempdir.cleanup)
-        self.temp = Path(self.tempdir.name)
-        self.home = self.temp / "home"
-        self.config_dir = self.home / ".config/opencode"
-        self.config_dir.mkdir(parents=True)
-        self.global_config = self.config_dir / "opencode.jsonc"
-        self.global_config.write_text('{"model":"openai/gpt-6-astra"}\n')
-        self.log = self.temp / "opencode.json"
-        bindir = self.temp / "bin"
-        bindir.mkdir()
-
-        opencode = bindir / "opencode-real"
-        opencode.write_text(
-            textwrap.dedent(
-                """\
-                #!/usr/bin/env python3
-                import json
-                import os
-                import sys
-
-                with open(os.environ["FAKE_OPENCODE_LOG"], "w", encoding="utf-8") as log:
-                    json.dump(
-                        {
-                            "argv": sys.argv[1:],
-                            "overrides": {
-                                name: os.environ.get(name)
-                                for name in (
-                                    "OPENCODE_CONFIG", "OPENCODE_CONFIG_DIR",
-                                    "OPENCODE_CONFIG_CONTENT", "OPENCODE_CLI_CONFIG_CONTENT",
-                                    "OPENCODE_DB",
-                                )
-                            },
-                            "xdg_data": os.environ.get("XDG_DATA_HOME"),
-                        },
-                        log,
-                    )
-                """
-            )
-        )
-        opencode.chmod(0o755)
-
-        mise = bindir / "mise"
-        mise.write_text(
-            textwrap.dedent(
-                """\
-                #!/usr/bin/env python3
-                import os
-                import sys
-
-                if sys.argv[1:] != ["which", "opencode", "--tool", "opencode@2"]:
-                    raise SystemExit(2)
-                if os.environ.get("FAKE_MISE_FAILURE"):
-                    raise SystemExit(1)
-                print(os.environ["FAKE_OPENCODE_BIN"])
-                """
-            )
-        )
-        mise.chmod(0o755)
-
-        self.env = os.environ.copy()
-        self.env.update(
-            {
-                "FAKE_OPENCODE_BIN": str(opencode),
-                "FAKE_OPENCODE_LOG": str(self.log),
-                "HOME": str(self.home),
-                "PATH": f"{bindir}:{os.environ['PATH']}",
-                "OPENCODE_CONFIG": str(self.config_dir / "personal-opencode.jsonc"),
-                "OPENCODE_CONFIG_DIR": str(self.home / ".config/opencode2"),
-                "OPENCODE_CONFIG_CONTENT": "{}",
-                "OPENCODE_CLI_CONFIG_CONTENT": "{}",
-                "OPENCODE_DB": str(self.temp / "old.db"),
-                "XDG_DATA_HOME": str(self.home / ".local/share"),
-            }
-        )
-        self.env.pop("HERDR_PANE_ID", None)
-
-    def test_v2_uses_normal_config_and_preserves_arguments_without_a_profile(self):
-        result = subprocess.run(
-            [
-                "bash",
-                str(OPENCODE_LAUNCHER),
-                "--session",
-                "ses exact;$value",
-                "--prompt",
-                "Keep these words together",
-            ],
-            check=False,
-            capture_output=True,
-            text=True,
-            env=self.env,
-            cwd=self.home,
-        )
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        launched = json.loads(self.log.read_text())
-        self.assertTrue(all(value is None for value in launched["overrides"].values()))
-        self.assertEqual(launched["xdg_data"], self.env["XDG_DATA_HOME"])
-        self.assertEqual(
-            launched["argv"],
-            ["--session", "ses exact;$value", "--prompt", "Keep these words together"],
-        )
-        self.assertEqual(self.global_config.read_text(), '{"model":"openai/gpt-6-astra"}\n')
-        self.assertEqual(list(self.config_dir.iterdir()), [self.global_config])
-
-    def test_missing_v2_does_not_fall_back_to_v1(self):
-        self.env["FAKE_MISE_FAILURE"] = "1"
-        result = subprocess.run(
-            ["bash", str(OPENCODE_LAUNCHER), "--version"],
-            check=False,
-            capture_output=True,
-            text=True,
-            env=self.env,
-        )
-        self.assertNotEqual(result.returncode, 0)
-        self.assertFalse(self.log.exists())
 
 
 class TopologyLockTest(unittest.TestCase):

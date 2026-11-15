@@ -16,7 +16,7 @@ return {
     local start = function()
       vim.cmd('belowright 15split')
       vim.cmd.enew()
-      vim.fn.termopen('opencode-launcher')
+      vim.fn.termopen('opencode')
       vim.cmd.wincmd('k')
     end
     if os.getenv('HERDR_ENV') == '1' then

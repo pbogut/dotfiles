@@ -1,5 +1,5 @@
 alias time="\time -f '\nExecution time: %es'"
-alias oc="opencode-launcher"
+alias oc="opencode"
 alias tvi=tmux-vim
 alias tv=tmux-vim
 alias vit=tmux-vim

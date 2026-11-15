@@ -17,3 +17,5 @@
 .config/opencode2/extensions/temp-export/tui.ts
 .config/opencode2/opencode-quota/settings.jsonc
 .scripts/hypr-togglemfact
+.scripts/opencode
+.scripts/opencode-launcher
