@@ -108,7 +108,6 @@ paru = [
   "python-upnpclient",
   "udevil",
   "udisksvm",
-  "wkhtmltopdf-static",
   "wlctl-bin",
   "xcwd-git",
   "xdg-desktop-portal-termfilechooser-boydaihungst-git",

@@ -4,7 +4,10 @@
 # author: Pawel Bogut <https://pbogut.me>
 # date:   29/11/2020
 #=================================================
-# npm install -g readability-cli
+if ! command -v readable >/dev/null 2>&1; then
+    npm install -g readability-cli >&2 || exit 1
+fi
+
 url=$1
 dest=${2:-/Print}
 tmpdir=$(mktemp -d)
@@ -63,7 +66,7 @@ elif [[ $url =~ ^http ]]; then
     cat $filename.begin $filename.content $filename.end > $filename.html
 
     # google-chrome-stable --headless --disable-gpu --print-to-pdf $filename.html
-    wkhtmltopdf $filename.html $filename.pdf
+    chromium --headless --no-pdf-header-footer --print-to-pdf="$filename.pdf" "$filename.html"
     if [[ $? != 0 ]]; then
         echo "Can not convert to pdf :("
         exit 2
