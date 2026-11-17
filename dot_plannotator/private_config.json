@@ -3,5 +3,26 @@
   "reviewAnalysis": {
     "semanticDiff": true,
     "callFlow": false
+  },
+  "theme": {
+    "mode": "dark",
+    "light": "plannotator",
+    "dark": "plannotator-graphite"
+  },
+  "starAsk": {
+    "canStar": true,
+    "checkedAt": "2026-11-16T11:44:55.113Z",
+    "shownAt": "2026-11-16T11:51:10.618Z",
+    "surface": "review"
+  },
+  "diffOptions": {
+    "defaultDiffType": "uncommitted"
+  },
+  "updateCheck": true,
+  "autoUpdate": true,
+  "prompts": {
+    "review": {
+      "approved": "Code review completed — no changes requested. You can commit your changes now."
+    }
   }
 }
