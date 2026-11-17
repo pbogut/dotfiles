@@ -92,6 +92,13 @@ chezmoi diff ~/.config/waybar/config
 No output means the target matches the rendered source. Runtime services may
 still need an appropriate reload or restart after deployment.
 
+## Commit Scope
+
+Prefer one issue or independently useful change per commit. For example,
+adding a native project picker and adding vim-style navigation are usually
+better as separate commits. This is a preference, not a hard rule: keep
+tightly coupled changes together when splitting them would be awkward.
+
 ## Safety
 
 - Do not run `chezmoi update`; it pulls remote changes and applies broadly.
