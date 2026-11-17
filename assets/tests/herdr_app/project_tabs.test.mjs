@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { loadProjectConfig, projectConfig, projectOrder, projectTabs } from "../../../dot_config/herdr-app/mods/pbogut-tabs/project.js";
-import { commandFor } from "../../../dot_config/herdr-app/mods/pbogut-tabs/roles.js";
+import { loadProjectConfig, projectConfig, projectTabs } from "../../../dot_config/herdr-app/mods/pbogut-tabs/project.js";
+import { commandFor, compareTabs } from "../../../dot_config/herdr-app/mods/pbogut-tabs/roles.js";
 
 const defaults = "/config/herdr-app/herdr-project.json";
 const loadProjectTabs = async (...args) => (await loadProjectConfig(...args)).tabs;
@@ -123,8 +123,9 @@ test("malformed JSON and invalid roles identify the definition file", async () =
   }
 });
 
-test("configured order precedes other named and unnamed tabs", () => {
-  const tabs = ["nvim", "oc-1", "shell", "oc-10", "scratch"].map((name) => ({ name, named: name !== "scratch" }));
-  assert.deepEqual(tabs.sort((a, b) => projectOrder(a, b, ["oc-10", "shell", "nvim"])).map((tab) => tab.name),
-    ["oc-10", "shell", "nvim", "oc-1", "scratch"]);
+test("all named roles use the original fixed order with numeric OpenCode slots", () => {
+  const tabs = ["scratch", "shell-3", "oc-10", "opencode", "oc-2", "docker", "git", "rest", "sql", "dev",
+    "shell-2", "shell", "nvim"].map((name) => ({ name, named: name !== "scratch" }));
+  assert.deepEqual(tabs.sort(compareTabs).map((tab) => tab.name),
+    ["nvim", "shell", "shell-2", "dev", "sql", "rest", "git", "docker", "opencode", "oc-2", "oc-10", "shell-3", "scratch"]);
 });

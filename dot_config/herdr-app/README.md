@@ -68,10 +68,13 @@ focus the named tab in the current space, or create it and launch its program:
 | Ctrl+Alt+K / Ctrl+Alt+L / Ctrl+Alt+; | `oc-2` / `oc-3` / `oc-4` |
 
 These override Alt+H/J/K/L pane navigation in this layout. New tabs start in
-the space's configured folder. Creating one uses the project's configured tab
-order when available, followed by the remaining roles in the order above.
-Without a project definition, OpenCode slots sort numerically within that order.
-Repeated shortcuts only focus existing tabs. They preserve the running program
+the space's configured folder. Tabs use a fixed order:
+`nvim`, `shell`, `shell-2`, `dev`, `sql`, `rest`, `git`, `docker`, numbered
+`oc-N` slots, then `shell-3`. OpenCode slots sort numerically. Other tabs follow
+in their existing relative order. Loading the mod, opening or reloading a project,
+and named-tab shortcuts restore this order. Project definitions only choose which
+tabs open automatically.
+Repeated shortcuts reuse existing tabs. They preserve the running program
 and its working directory. Shortcuts retain the initial unnamed tab.
 Program-backed tabs replace the launcher's shell with `exec`. Exiting the
 program closes its pane, and the tab closes when its last pane exits.
@@ -209,19 +212,19 @@ project/
 ```
 
 The project picker reads the file on the selected machine when opening a project,
-including after Ctrl+Enter creates a dated worktree. `tabs` lists named roles in display order.
+including after Ctrl+Enter creates a dated worktree. `tabs` lists named roles to open.
+Its list order does not affect display order.
 A new space selects the first configured tab. Once creation finishes with a
 configured tab present, it removes the temporary initial shell if that tab is
 still unnamed and unsplit.
 
 Opening an existing space creates missing configured tabs and reuses those
 already running. It preserves existing tabs and the selected tab. Opening the
-project again reloads its definition. The named-tab shortcuts also respect the
-last applied project order, which the App persists across restarts.
+project again reloads its definition. Tabs always use the fixed role order above.
 
 Ctrl+Shift+P → **Reload project config** applies the definition again to the
 current space, using that space's machine and configured folder. It creates
-missing configured tabs, applies their order, and refreshes the sidebar name
+missing configured tabs, restores the fixed order, and refreshes the sidebar name
 for every open worktree sharing the project on that machine. Existing extra
 tabs and the selected tab are preserved. Reopening a project through the picker
 also refreshes its name.
@@ -394,12 +397,12 @@ image capture.
 The native test also copies `git-new-dated-worktree` and `git-wt` into its
 sandbox. It checks Ctrl+Enter, cancellation, dated branch names, the script's
 source-branch choice, opening the new space, and retrying after a Git error.
-It also checks shared JSON tab definitions, real Neovim launches, configured
-order, reusing running tabs, filling missing tabs, and correcting an invalid
+It also checks shared JSON tab definitions, real Neovim launches,
+fixed order, reusing running tabs, filling missing tabs, and correcting an invalid
 definition. Projects without a definition use the configurable fallback.
 Custom dev checks cover literal arguments, worktree-relative paths, fallback
 commands, running-tab reuse, reloading on recreation, and closing on failure.
-Manual reload checks cover the command palette, configured tab order, missing
+Manual reload checks cover the command palette, fixed tab order, missing
 dev tabs, and retaining the applied configuration after invalid edits.
 
 The remote-picker test connects two isolated cores through a local `--via`

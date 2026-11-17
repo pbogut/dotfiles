@@ -309,6 +309,7 @@ def main():
             dev_args = ["two words", "quote's", "$(touch must-not-exist)", "*", "", "line\nbreak"]
             dev_command = ["python3", "../dev fixture.py", *dev_args]
             configured_tabs = ["shell-2", "nvim", "shell", "dev"]
+            ordered_tabs = ["nvim", "shell", "shell-2", "dev"]
             project_config = {"tabs": configured_tabs, "dev": dev_command}
             definition.write_text(json.dumps(project_config))
             dated = app("do", "space.new", "--name", "Dated fixture", "--folder", str(repo / "other"))
@@ -327,7 +328,7 @@ def main():
 
             search("Dated fixture")
             key("Return")
-            wait(lambda: tab_names(repo / "other")[:4] == configured_tabs, "Existing space gets its JSON tabs in order")
+            wait(lambda: tab_names(repo / "other")[:4] == ordered_tabs, "Existing space gets its JSON tabs in fixed order")
             assert len(project_space(repo / "other")["tabs"]) == 5, "An existing space keeps its original tab"
             wait(lambda: dev_records(repo / "other"), "The configured dev command launches")
             assert dev_records(repo / "other") == [{"cwd": str(repo / "other"), "args": dev_args}]
@@ -345,7 +346,7 @@ def main():
             wait(lambda: "shell" not in tab_names(repo / "other"), "The configured shell closes")
             search("Dated fixture")
             key("Return")
-            wait(lambda: tab_names(repo / "other")[:4] == configured_tabs, "Reopening fills a missing configured tab")
+            wait(lambda: tab_names(repo / "other")[:4] == ordered_tabs, "Reopening fills a missing configured tab")
             assert editor_pid(repo / "other") == editor
             before = call("git", "-C", str(repo), "worktree", "list", "--porcelain")
 
@@ -368,9 +369,10 @@ def main():
             assert call("git", "-C", str(target), "branch", "--show-current") == name
             assert call("git", "-C", str(target), "rev-parse", "HEAD") == base, "Helper branches from origin/main"
             assert len([space for space in app("ls")["spaces"] if space["folder"] == str(target)]) == 1
-            wait(lambda: tab_names(target) == configured_tabs, "The new dated worktree uses the shared JSON definition")
-            assert app("status")["tab"] == project_space(target)["tabs"][0]["id"], "The first configured tab is selected"
-            nvim_tab = project_space(target)["tabs"][1]
+            wait(lambda: tab_names(target) == ordered_tabs, "The new dated worktree uses fixed tab order")
+            first_configured = next(tab for tab in project_space(target)["tabs"] if tab["name"] == configured_tabs[0])
+            assert app("status")["tab"] == first_configured["id"], "The first configured tab is selected"
+            nvim_tab = next(tab for tab in project_space(target)["tabs"] if tab["name"] == "nvim")
             nvim_terminal = nvim_tab["terminals"][0]["terminal"]
             wait(lambda: "NVIM" in call("hc", "read", nvim_terminal, "--lines", "0"), "The configured editor runs real Neovim")
             assert json.loads(call("hc", "get", nvim_terminal, "--json"))["cwd"] == str(target)
@@ -392,28 +394,31 @@ def main():
             assert tab_names(target).count("dev") == 1, "Repeated shortcuts create only one dev tab"
             definition.write_text(json.dumps(project_config))
             app("do", "pbogut-tabs.shell-3")
-            wait(lambda: tab_names(target) == [*configured_tabs, "shell-3"], "Named shortcuts preserve configured order")
+            wait(lambda: tab_names(target) == [*ordered_tabs, "shell-3"], "Named shortcuts preserve fixed order")
 
             selected = next(tab for tab in project_space(target)["tabs"] if tab["name"] == "shell-3")["id"]
             wait(lambda: app("status")["tab"] == selected, "The shortcut finishes selecting shell-3 before reload")
+            dev_tab = next(tab for tab in project_space(target)["tabs"] if tab["name"] == "dev")
+            app("do", "tab.move", "--id", dev_tab["id"], "--index", "1")
+            wait(lambda: tab_names(target)[0] == "dev", "The fixture starts with an old project-specific order")
             reloaded_tabs = ["dev", "shell", "nvim", "shell-2"]
             definition.write_text(json.dumps({
                 "name": "Reloaded project", "tabs": reloaded_tabs, "dev": [*dev_command, "manual reload"],
             }))
             search("reload project config", "ctrl+shift+p", "pbogut-palette")
             key("Return")
-            wait(lambda: tab_names(target) == [*reloaded_tabs, "shell-3"],
-                 "The palette reloads and reorders the current project's config")
+            wait(lambda: tab_names(target) == [*ordered_tabs, "shell-3"],
+                 "Reload restores fixed order regardless of the project's list order")
             assert app("status")["tab"] == selected, "Reload preserves the selected tab"
             assert len(dev_records(target)) == 2, "Reload keeps an already running dev command"
-            assert tab_names(repo / "other")[:4] == configured_tabs, "Sibling worktree tabs keep their own layout"
+            assert tab_names(repo / "other")[:4] == ordered_tabs, "Sibling worktree tabs keep fixed order"
             definition.write_text('{"name":"Invalid","tabs":["nvim"],"dev":[]}')
             app("do", "pbogut-tabs.reload-project")
             # A harmless following request runs only after reload has finished validating.
             app("do", "pbogut-tabs.shell-2")
             shell_two = next(tab for tab in project_space(target)["tabs"] if tab["name"] == "shell-2")["id"]
             wait(lambda: app("status")["tab"] == shell_two, "The reload queue remains usable after an error")
-            assert tab_names(target) == [*reloaded_tabs, "shell-3"], "Invalid config retains the applied order"
+            assert tab_names(target) == [*ordered_tabs, "shell-3"], "Invalid config retains fixed order"
             definition.write_text(json.dumps({
                 "name": "Reloaded project", "tabs": reloaded_tabs, "dev": [*dev_command, "manual reload"],
             }))
@@ -426,7 +431,7 @@ def main():
             assert dev_records(target)[-1]["args"] == [*dev_args, "manual reload"]
             definition.write_text(json.dumps(project_config))
             app("do", "pbogut-tabs.reload-project")
-            wait(lambda: tab_names(target) == [*configured_tabs, "shell-3"], "Reload restores the configured tab order")
+            wait(lambda: tab_names(target) == [*ordered_tabs, "shell-3"], "Reload preserves fixed tab order")
 
             dated_prompt()
             call("xdotool", "type", "--clearmodifiers", "bad..name")
@@ -446,7 +451,7 @@ def main():
             retry = repo / f"{call('date', '+%Y-%m-%d')}-retry-success"
             wait(lambda: any(space["folder"] == str(retry) and space["active"] for space in app("ls")["spaces"]),
                  "Correcting the branch name retries creation")
-            wait(lambda: tab_names(retry) == configured_tabs, "Sibling worktrees share the same definition")
+            wait(lambda: tab_names(retry) == ordered_tabs, "Sibling worktrees share the same definition")
 
             definition.write_text('{"tabs":["nvim","unknown-role"]}')
             dated_prompt()
@@ -459,7 +464,7 @@ def main():
             definition.write_text(json.dumps(project_config))
             search("invalid-definition")
             key("Return")
-            wait(lambda: tab_names(invalid)[:4] == configured_tabs, "Reopening reloads the corrected definition")
+            wait(lambda: tab_names(invalid)[:4] == ordered_tabs, "Reopening reloads the corrected definition")
             assert not app("status")["errors"], app("status")
             print("PASS: project pickers, fallback configuration, dated worktrees, JSON tabs, custom dev arguments/cwd/recreation/exit, and invalid-definition recovery.", flush=True)
         except Exception:

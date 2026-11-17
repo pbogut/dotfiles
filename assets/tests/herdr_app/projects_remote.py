@@ -130,9 +130,9 @@ def main():
             wait(lambda: loaded("fixture"), "Tab reloads remote projects")
             key("Return")
             wait(lambda: space("fixture", remote_repo) is not None, "Enter creates a remote space")
-            wait(lambda: [t["name"] for t in space("fixture", remote_repo)["tabs"]] == ["shell", "nvim"],
-                 "Remote fallback configuration creates its named tabs")
-            editor = space("fixture", remote_repo)["tabs"][1]["terminals"][0]["terminal"]
+            wait(lambda: [t["name"] for t in space("fixture", remote_repo)["tabs"]] == ["nvim", "shell"],
+                 "Remote fallback configuration creates its named tabs in fixed order")
+            editor = space("fixture", remote_repo)["tabs"][0]["terminals"][0]["terminal"]
             wait(lambda: "NVIM" in call("hc", "read", editor, "--lines", "0"), "Remote editor starts")
             assert space(None, remote_repo) is not None
             assert space("fixture", remote_repo)["active"]
@@ -146,7 +146,7 @@ def main():
             branch = f"{call('date', '+%Y-%m-%d', env=remote)}-remote-feature"
             worktree = remote_repo / branch
             wait(lambda: space("fixture", worktree) is not None, "The new worktree opens on its remote machine")
-            wait(lambda: [t["name"] for t in space("fixture", worktree)["tabs"]] == ["shell", "nvim"],
+            wait(lambda: [t["name"] for t in space("fixture", worktree)["tabs"]] == ["nvim", "shell"],
                  "The remote worktree uses the remote fallback tabs")
             assert call("git", "-C", str(worktree), "branch", "--show-current", env=remote) == branch
             assert space(None, worktree) is None

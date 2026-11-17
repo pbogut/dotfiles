@@ -1,7 +1,6 @@
-import { compareTabs, roleOf } from "./roles.js";
+import { roleOf } from "./roles.js";
 
 export const folderKey = (folder) => (folder ?? "").replace(/\/+$/, "") || "/";
-export const orderKey = (space) => `pbogut-tabs.order.${space}`;
 
 // Mods cannot import across directories. Match pbogut-projects/machines.js.
 export async function machinePaths(on, exec, local) {
@@ -57,12 +56,4 @@ export async function loadProjectConfig(folder, exec, readTextFile, defaultPath,
     }
   }
   return { tabs: [] };
-}
-
-export function projectOrder(a, b, roles) {
-  const rank = (tab) => {
-    const index = tab.named ? roles.indexOf(roleOf(tab.name)) : -1;
-    return index < 0 ? roles.length : index;
-  };
-  return rank(a) - rank(b) || compareTabs(a, b);
 }

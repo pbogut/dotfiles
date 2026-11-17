@@ -5,13 +5,13 @@ import vm from "node:vm";
 
 const root = new URL("../../../dot_config/herdr-app/mods/pbogut-tabs/", import.meta.url);
 
-async function fixture(checking = false) {
+async function fixture(checking = false, initialTabs = [{ id: "original", name: "1", named: false }]) {
   const calls = [], commands = [], operations = [], timers = [], reads = [];
   const files = new Map(), persisted = new Map();
   files.set("/config/herdr-app/herdr-project.json", '{"tabs":["nvim"]}');
   const failures = new Set();
   const spaces = [
-    { id: "one", active: true, folder: "/project one", tabs: [{ id: "original", name: "1", named: false }] },
+    { id: "one", active: true, folder: "/project one", tabs: initialTabs },
     { id: "two", active: false, folder: "/project two", tabs: [{ id: "other", name: "shell", named: true }] },
   ];
   let receive, serial = 0;
@@ -103,6 +103,16 @@ test("an existing role only focuses its tab in the requested space", async () =>
   assert.deepEqual(app.calls, [["tab.select", { id: "other" }]]);
 });
 
+test("loading the mod restores fixed order without changing existing tabs or selection", async () => {
+  const tabs = ["oc-10", "shell", "nvim", "oc-2"].map(name => ({ id: name, name, named: true }));
+  const app = await fixture(false, tabs);
+  app.spaces[0].selected = "oc-10";
+  app.flush();
+  assert.deepEqual(app.spaces[0].tabs.map(tab => tab.name), ["nvim", "shell", "oc-2", "oc-10"]);
+  assert.equal(app.spaces[0].selected, "oc-10");
+  assert.ok(app.calls.every(([name]) => name === "tab.move"));
+});
+
 test("rapid repeated requests create one tab and preserve the original terminal", async () => {
   const app = await fixture();
   for (let i = 0; i < 20; i++) await app.command("shell");
@@ -145,7 +155,10 @@ test("the opencode alias reuses its existing tab", async () => {
   const app = await fixture();
   app.spaces[0].tabs.push({ id: "old-agent", name: "opencode", named: true });
   await app.command("oc-1");
-  assert.deepEqual(app.calls.map(([name]) => name), ["tab.rename", "tab.select"]);
+  app.flush();
+  assert.deepEqual(app.spaces[0].tabs.map(tab => tab.name), ["oc-1", "1"]);
+  assert.equal(app.spaces[0].selected, "old-agent");
+  assert.ok(app.calls.every(([name]) => ["tab.rename", "tab.move", "tab.select"].includes(name)));
 });
 
 test("unknown roles, stale spaces and check mode never create tabs", async () => {
@@ -169,20 +182,21 @@ test("a project without a definition opens the fallback nvim tab", async () => {
   assert.equal(app.calls.filter(([name]) => name === "tab.new").length, 1);
 });
 
-test("a new project opens configured tabs in order, selects the first, and removes its bootstrap shell", async () => {
+test("a project opens only configured tabs in fixed order and later shortcuts use that same order", async () => {
   const app = await fixture();
   app.files.set("/new project/herdr-project.json", '{"tabs":["oc-2","shell","nvim"]}');
   const command = projectCommand({ folder: "/new project", label: "New" });
   for (let i = 0; i < 5; i++) await app.command(command);
   app.flush();
   const space = app.spaces.find((space) => space.folder === "/new project");
-  assert.deepEqual(space.tabs.map((tab) => tab.name), ["oc-2", "shell", "nvim"]);
-  assert.equal(space.selected, space.tabs[0].id);
+  assert.deepEqual(space.tabs.map((tab) => tab.name), ["nvim", "shell", "oc-2"]);
+  assert.equal(space.selected, space.tabs.find(tab => tab.name === "oc-2").id);
   assert.equal(app.calls.filter(([name]) => name === "space.new").length, 1);
   assert.equal(app.calls.filter(([name]) => name === "tab.new").length, 3);
   await app.command("oc-1");
   app.flush();
-  assert.deepEqual(space.tabs.map((tab) => tab.name), ["oc-2", "shell", "nvim", "oc-1"]);
+  assert.deepEqual(space.tabs.map((tab) => tab.name), ["nvim", "shell", "oc-1", "oc-2"]);
+  assert.equal(app.persisted.size, 0);
 });
 
 test("reopening a project fills missing tabs and preserves existing programs, extra tabs, and selection", async () => {
@@ -196,8 +210,8 @@ test("reopening a project fills missing tabs and preserves existing programs, ex
   app.flush();
   await app.command(command);
   app.flush();
-  assert.deepEqual(space.tabs.map((tab) => tab.name), ["shell", "nvim", "1"]);
-  assert.equal(space.tabs[1].id, "existing-editor");
+  assert.deepEqual(space.tabs.map((tab) => tab.name), ["nvim", "shell", "1"]);
+  assert.equal(space.tabs[0].id, "existing-editor");
   assert.equal(space.selected, "original");
   assert.equal(app.calls.filter(([name]) => name === "tab.new").length, 1);
   assert.equal(app.calls.filter(([name]) => name === "tab.close" || name === "space.new").length, 0);
@@ -260,8 +274,8 @@ test("manual reload applies fresh tabs and dev, refreshes labels, and preserves 
   app.files.set(path, '{"name":"Second","tabs":["dev","nvim"],"dev":["new-dev"]}');
   await app.command("reload-project");
   app.flush();
-  assert.deepEqual(space.tabs.map(tab => tab.name), ["dev", "nvim", "shell", "1"]);
-  assert.equal(space.tabs[0].id, dev.id);
+  assert.deepEqual(space.tabs.map(tab => tab.name), ["nvim", "shell", "dev", "1"]);
+  assert.equal(space.tabs[2].id, dev.id);
   assert.equal(space.selected, "original");
   assert.equal(creations(app).filter(tab => tab.name === "dev").length, 1);
   assert.ok(app.calls.every(([name]) => !["tab.close", "space.select", "tab.select"].includes(name)));
@@ -275,7 +289,7 @@ test("manual reload applies fresh tabs and dev, refreshes labels, and preserves 
   assert.deepEqual(creations(app).at(-1).argv, devArgv("new-dev"));
 });
 
-test("invalid reloads and picker reopens preserve the last applied order and never refresh labels", async () => {
+test("invalid reloads and picker reopens preserve existing tabs and never refresh labels", async () => {
   const app = await fixture();
   const space = app.spaces[0];
   const path = "/project one/herdr-project.json";
@@ -293,10 +307,26 @@ test("invalid reloads and picker reopens preserve the last applied order and nev
     await app.command(command);
     app.flush();
     assert.deepEqual(space.tabs, tabs);
-    assert.deepEqual(app.persisted.get("pbogut-tabs.order.one"), ["shell", "dev"]);
     assert.ok(app.calls.some(([name]) => name === "notify"));
     assert.ok(app.calls.every(([name]) => !name.startsWith("pbogut-spaces.") && !name.startsWith("tab.")));
   }
+});
+
+test("empty project definitions and stale saved orders cannot override fixed sorting", async () => {
+  const app = await fixture();
+  const space = app.spaces[0];
+  app.persisted.set("pbogut-tabs.order.one", ["oc-10", "shell", "nvim"]);
+  space.tabs = ["oc-10", "shell", "nvim"].map(name => ({ id: name, name, named: true }));
+  space.selected = "oc-10";
+  app.files.set("/project one/herdr-project.json", '{"tabs":[]}');
+  await app.command("reload-project");
+  app.flush();
+  assert.deepEqual(space.tabs.map(tab => tab.name), ["nvim", "shell", "oc-10"]);
+  assert.equal(space.selected, "oc-10");
+  assert.equal(creations(app).length, 0);
+  await app.command("oc-2");
+  app.flush();
+  assert.deepEqual(space.tabs.map(tab => tab.name), ["nvim", "shell", "oc-2", "oc-10"]);
 });
 
 test("manual reload reads the active machine and a folderless space reports an error", async () => {
@@ -385,7 +415,7 @@ test("the same project path on two machines creates separate spaces with remote 
   app.flush();
   const remote = app.spaces.find((space) => space.machine === "vps");
   assert.ok(remote);
-  assert.deepEqual(remote.tabs.map((tab) => tab.name), ["nvim", "git", "oc-1", "dev"]);
+  assert.deepEqual(remote.tabs.map((tab) => tab.name), ["nvim", "dev", "git", "oc-1"]);
   const tabs = creations(app).filter((tab) => tab.space === remote.id);
   assert.ok(tabs[0].argv.includes("HERDR_APP_HOME=/remote/app"));
   assert.ok(tabs[1].argv.includes("--use-config-file=/remote/home/.config/lazygit/config.yml,/remote/home/.config/lazygit/config-herdr-app.yml"));

@@ -1,12 +1,13 @@
 import { View, div } from "gpui-kit";
-import { appHome, checking, exec, home, nextCommand, notify, readTextFile, run, setShared, shared, spaces } from "herdr";
-import { commandFor, roleOf } from "./roles.js";
-import { folderKey, loadProjectConfig, machinePaths, orderKey, projectOrder } from "./project.js";
+import { appHome, checking, exec, home, nextCommand, notify, readTextFile, run, spaces } from "herdr";
+import { commandFor, compareTabs, roleOf } from "./roles.js";
+import { folderKey, loadProjectConfig, machinePaths } from "./project.js";
 
 export default class NamedTabs extends View {
   init(_props, cx) {
     this.queue = [];
     if (checking()) return;
+    for (const space of spaces()) this.sortTabs(space);
     cx.spawn(async (cx) => {
       for (;;) {
         const command = await nextCommand();
@@ -87,7 +88,7 @@ export default class NamedTabs extends View {
     if (!request.failed) run(`pbogut-spaces.reload@${encodeURIComponent(JSON.stringify({
       folder: space.folder, machine: space.machine ?? null,
     }))}`);
-    setShared(orderKey(space.id), config.tabs);
+    this.sortTabs(space);
     const layout = { initial: created && config.tabs.length ? space.tabs[0]?.id : null };
     this.queue.unshift(...config.tabs.map((role, index) => ({
       space: space.id, role, layout, config, paths: request.paths, last: index === config.tabs.length - 1,
@@ -96,13 +97,14 @@ export default class NamedTabs extends View {
     this.drain(cx);
   }
 
-  complete(request, space, tab, created) {
-    if (created || request.layout) {
-      const roles = shared(orderKey(space.id)) ?? [];
-      [...space.tabs].sort((a, b) => projectOrder(a, b, roles)).forEach((tab, index) => {
-        run("tab.move", { id: tab.id, index: index + 1 });
-      });
-    }
+  sortTabs(space) {
+    const tabs = [...space.tabs].sort(compareTabs);
+    if (tabs.every((tab, index) => tab.id === space.tabs[index].id)) return;
+    tabs.forEach((tab, index) => run("tab.move", { id: tab.id, index: index + 1 }));
+  }
+
+  complete(request, space, tab) {
+    this.sortTabs(space);
     if (request.layout) {
       const initial = space.tabs.find((tab) => tab.id === request.layout.initial && !tab.named && tab.panes === 1);
       if (initial && !request.layout.focused) {
@@ -118,7 +120,7 @@ export default class NamedTabs extends View {
   closeInitial(request, space) {
     if (!request.last || !request.layout?.initial || !space) return;
     const initial = space.tabs.find((tab) => tab.id === request.layout.initial && !tab.named && tab.panes === 1);
-    const roles = shared(orderKey(space.id)) ?? [];
+    const roles = request.config.tabs;
     if (initial && space.tabs.some((tab) => tab.named && roles.includes(roleOf(tab.name)))) {
       run("tab.close", { id: initial.id });
     }
@@ -170,7 +172,7 @@ export default class NamedTabs extends View {
       const tab = space.tabs.find((tab) => tab.named && roleOf(tab.name) === request.role);
       if (tab) {
         if (tab.name !== request.role) run("tab.rename", { id: tab.id, name: request.role });
-        this.complete(request, space, tab, false);
+        this.complete(request, space, tab);
         continue;
       }
       this.pending = request;
@@ -212,7 +214,7 @@ export default class NamedTabs extends View {
       const tab = space?.tabs.find((tab) => tab.named && roleOf(tab.name) === request.role);
       if (tab || !space) {
         this.pending = null;
-        if (tab) this.complete(request, space, tab, true);
+        if (tab) this.complete(request, space, tab);
         this.drain(cx);
       }
     }
