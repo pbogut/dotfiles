@@ -18,7 +18,17 @@ export function projectTabs(config) {
   return roles;
 }
 
-export async function loadProjectTabs(folder, exec, readTextFile, defaultPath) {
+export function projectConfig(config) {
+  const tabs = projectTabs(config);
+  if (config.dev === undefined) return { tabs };
+  if (!Array.isArray(config.dev) || !config.dev.length ||
+      config.dev.some((arg) => typeof arg !== "string" || arg.includes("\0")) || !config.dev[0]) {
+    throw new Error('"dev" must be a non-empty command array of strings.');
+  }
+  return { tabs, dev: config.dev };
+}
+
+export async function loadProjectConfig(folder, exec, readTextFile, defaultPath) {
   const paths = [];
   if (folder) {
     const common = await exec("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd: folder });
@@ -29,12 +39,12 @@ export async function loadProjectTabs(folder, exec, readTextFile, defaultPath) {
   for (const path of paths) {
     try {
       const text = await readTextFile(path);
-      if (text !== null) return projectTabs(JSON.parse(text));
+      if (text !== null) return projectConfig(JSON.parse(text));
     } catch (error) {
       throw new Error(`${path}: ${error.message ?? error}`);
     }
   }
-  return [];
+  return { tabs: [] };
 }
 
 export function projectOrder(a, b, roles) {

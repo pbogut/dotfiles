@@ -39,6 +39,15 @@ def main():
         shutil.copyfile(ROOT / f"dot_scripts/executable_{name}", scripts / name)
         (scripts / name).chmod(0o700)
     env["PATH"] = f"{scripts}:{env['PATH']}"
+    env["DEV_LOG"] = str(root / "dev.jsonl")
+    dev_script = scripts / "dev fixture.py"
+    dev_script.write_text(
+        "import json,os,sys\n"
+        "with open(os.environ['DEV_LOG'], 'a') as log:\n"
+        " log.write(json.dumps({'args': sys.argv[1:], 'cwd': os.getcwd()}) + '\\n')\n"
+        "print('DEV-READY', flush=True)\n"
+        "sys.exit(17 if input().strip() == 'fail' else 0)\n"
+    )
     projects = root / "projects root"
     existing = projects / "gitlab.com/assuredpharmacy/existing"
     new = projects / "github.com/pbogut/alpha project's directory"
@@ -93,6 +102,11 @@ def main():
 
     def key(*keys):
         call("xdotool", "key", "--clearmodifiers", "--delay", "80", *keys)
+
+    def dev_records(folder):
+        path = root / "dev.jsonl"
+        records = [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []
+        return [record for record in records if record["cwd"] == str(folder)]
 
     def search(query, shortcut="ctrl+alt+p", mod="pbogut-projects"):
         key(shortcut)
@@ -194,12 +208,14 @@ def main():
 
             defaults = root / "app/herdr-project.json"
             default_source = defaults.read_text()
-            defaults.write_text('{"tabs":["shell"]}')
+            defaults.write_text(json.dumps({"tabs": ["shell", "dev"], "dev": ["python3", str(dev_script), "fallback"]}))
             search(Path(scroll_paths[4]).name)
             key("Return")
-            wait(lambda: any(space["folder"] == scroll_paths[4] and [tab["name"] for tab in space["tabs"]] == ["shell"]
+            wait(lambda: any(space["folder"] == scroll_paths[4] and [tab["name"] for tab in space["tabs"]] == ["shell", "dev"]
                              for space in app("ls")["spaces"]),
                  "Editing the fallback definition changes the next project's default tabs")
+            wait(lambda: dev_records(scroll_paths[4]), "The fallback dev command launches")
+            assert dev_records(scroll_paths[4]) == [{"cwd": scroll_paths[4], "args": ["fallback"]}]
             defaults.write_text(default_source)
             call("xdotool", "windowsize", "--sync", window, "800", "600")
             search("custom space")
@@ -289,8 +305,12 @@ def main():
             call("git", "-C", str(repo), "config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
             call("git", "-C", str(repo), "worktree", "add", "-b", "other", str(repo / "other"), other)
             definition = repo / "herdr-project.json"
-            configured_tabs = ["shell-2", "nvim", "shell"]
-            definition.write_text(json.dumps({"tabs": configured_tabs}))
+            shutil.copyfile(dev_script, repo / dev_script.name)
+            dev_args = ["two words", "quote's", "$(touch must-not-exist)", "*", "", "line\nbreak"]
+            dev_command = ["python3", "../dev fixture.py", *dev_args]
+            configured_tabs = ["shell-2", "nvim", "shell", "dev"]
+            project_config = {"tabs": configured_tabs, "dev": dev_command}
+            definition.write_text(json.dumps(project_config))
             dated = app("do", "space.new", "--name", "Dated fixture", "--folder", str(repo / "other"))
             dated_pid = json.loads(call("hc", "get", dated["terminal"], "--json"))["pid"]
 
@@ -307,8 +327,11 @@ def main():
 
             search("Dated fixture")
             key("Return")
-            wait(lambda: tab_names(repo / "other")[:3] == configured_tabs, "Existing space gets its JSON tabs in order")
-            assert len(project_space(repo / "other")["tabs"]) == 4, "An existing space keeps its original tab"
+            wait(lambda: tab_names(repo / "other")[:4] == configured_tabs, "Existing space gets its JSON tabs in order")
+            assert len(project_space(repo / "other")["tabs"]) == 5, "An existing space keeps its original tab"
+            wait(lambda: dev_records(repo / "other"), "The configured dev command launches")
+            assert dev_records(repo / "other") == [{"cwd": str(repo / "other"), "args": dev_args}]
+            assert not (repo / "other/must-not-exist").exists(), "Arguments are not evaluated by a shell"
             assert app("status")["tab"] == dated["tab"], "Applying tabs preserves existing selection"
             assert json.loads(call("hc", "get", dated["terminal"], "--json"))["pid"] == dated_pid
             editor = editor_pid(repo / "other")
@@ -316,12 +339,13 @@ def main():
             key("Return")
             wait(lambda: not app("status")["overlays"], "Reopening an existing project finishes")
             assert editor_pid(repo / "other") == editor, "Reopening focuses the running editor instead of restarting it"
+            assert len(dev_records(repo / "other")) == 1, "Reopening reuses the running dev process"
             shell = next(tab for tab in project_space(repo / "other")["tabs"] if tab["name"] == "shell")
             app("do", "tab.close", "--id", shell["id"])
             wait(lambda: "shell" not in tab_names(repo / "other"), "The configured shell closes")
             search("Dated fixture")
             key("Return")
-            wait(lambda: tab_names(repo / "other")[:3] == configured_tabs, "Reopening fills a missing configured tab")
+            wait(lambda: tab_names(repo / "other")[:4] == configured_tabs, "Reopening fills a missing configured tab")
             assert editor_pid(repo / "other") == editor
             before = call("git", "-C", str(repo), "worktree", "list", "--porcelain")
 
@@ -350,6 +374,23 @@ def main():
             nvim_terminal = nvim_tab["terminals"][0]["terminal"]
             wait(lambda: "NVIM" in call("hc", "read", nvim_terminal, "--lines", "0"), "The configured editor runs real Neovim")
             assert json.loads(call("hc", "get", nvim_terminal, "--json"))["cwd"] == str(target)
+            wait(lambda: dev_records(target), "The dated worktree launches its own dev command")
+            assert dev_records(target) == [{"cwd": str(target), "args": dev_args}]
+            dev_tab = next(tab for tab in project_space(target)["tabs"] if tab["name"] == "dev")
+            dev_terminal = dev_tab["terminals"][0]["terminal"]
+            wait(lambda: "DEV-READY" in call("hc", "read", dev_terminal, "--lines", "10"), "Dev is ready")
+            definition.write_text(json.dumps({**project_config, "dev": [*dev_command, "refreshed"]}))
+            key("alt+semicolon")
+            wait(lambda: app("status")["tab"] == dev_tab["id"], "Alt+; focuses the existing dev tab")
+            assert len(dev_records(target)) == 1, "Changing the configuration does not restart an existing tab"
+            call("hc", "send", dev_terminal, "fail")
+            wait(lambda: "dev" not in tab_names(target), "A failed custom command closes its dev tab")
+            assert json.loads(call("hc", "get", dev_terminal, "--json"))["exit_code"] == 17
+            key(*(["alt+semicolon"] * 10))
+            wait(lambda: len(dev_records(target)) == 2, "Alt+; reloads the command when recreating dev")
+            assert dev_records(target)[1]["args"] == [*dev_args, "refreshed"]
+            assert tab_names(target).count("dev") == 1, "Repeated shortcuts create only one dev tab"
+            definition.write_text(json.dumps(project_config))
             app("do", "pbogut-tabs.shell-3")
             wait(lambda: tab_names(target) == [*configured_tabs, "shell-3"], "Named shortcuts preserve configured order")
 
@@ -381,12 +422,12 @@ def main():
             wait(lambda: project_space(invalid) is not None, "A bad definition still opens the project")
             assert len(project_space(invalid)["tabs"]) == 1
             assert tab_names(invalid) == ["1"], "Validation prevents a partial tab layout"
-            definition.write_text(json.dumps({"tabs": configured_tabs}))
+            definition.write_text(json.dumps(project_config))
             search("invalid-definition")
             key("Return")
-            wait(lambda: tab_names(invalid)[:3] == configured_tabs, "Reopening reloads the corrected definition")
+            wait(lambda: tab_names(invalid)[:4] == configured_tabs, "Reopening reloads the corrected definition")
             assert not app("status")["errors"], app("status")
-            print("PASS: project pickers, configurable fallback tabs, dated worktrees, shared JSON tabs, running-tab reuse, and invalid-definition recovery.", flush=True)
+            print("PASS: project pickers, fallback configuration, dated worktrees, JSON tabs, custom dev arguments/cwd/recreation/exit, and invalid-definition recovery.", flush=True)
         except Exception:
             print("Status:", app("status"), flush=True)
             print("Spaces:", app("ls"), flush=True)

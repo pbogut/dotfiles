@@ -1,7 +1,7 @@
 import { View, div } from "gpui-kit";
 import { appHome, checking, exec, home, nextCommand, notify, readTextFile, run, setShared, shared, spaces } from "herdr";
 import { commandFor, roleOf } from "./roles.js";
-import { folderKey, loadProjectTabs, orderKey, projectOrder } from "./project.js";
+import { folderKey, loadProjectConfig, orderKey, projectOrder } from "./project.js";
 
 export default class NamedTabs extends View {
   init(_props, cx) {
@@ -41,10 +41,10 @@ export default class NamedTabs extends View {
     cx.spawn(async (cx) => {
       const project = request.project;
       try {
-        request.roles = await loadProjectTabs(project.folder, exec, readTextFile, `${appHome()}/herdr-project.json`);
+        request.config = await loadProjectConfig(project.folder, exec, readTextFile, `${appHome()}/herdr-project.json`);
       } catch (error) {
-        request.roles = [];
-        notify({ title: "Could not load project tabs", body: String(error.message ?? error), level: "error" });
+        request.config = { tabs: [] };
+        notify({ title: "Could not load project configuration", body: String(error.message ?? error), level: "error" });
       }
       if (this.pending !== request) return;
       const existing = spaces().find((space) => project.id ? space.id === project.id
@@ -71,10 +71,11 @@ export default class NamedTabs extends View {
   }
 
   projectReady(request, space, created, cx) {
-    setShared(orderKey(space.id), request.roles);
-    const layout = { initial: created && request.roles.length ? space.tabs[0]?.id : null };
-    this.queue.unshift(...request.roles.map((role, index) => ({
-      space: space.id, role, layout, last: index === request.roles.length - 1,
+    const { config } = request;
+    setShared(orderKey(space.id), config.tabs);
+    const layout = { initial: created && config.tabs.length ? space.tabs[0]?.id : null };
+    this.queue.unshift(...config.tabs.map((role, index) => ({
+      space: space.id, role, layout, config, last: index === config.tabs.length - 1,
     })));
     this.pending = null;
     this.drain(cx);
@@ -119,6 +120,23 @@ export default class NamedTabs extends View {
     });
   }
 
+  loadDev(request, space, cx) {
+    request.loading = true;
+    cx.spawn(async (cx) => {
+      try {
+        request.config = await loadProjectConfig(space.folder, exec, readTextFile, `${appHome()}/herdr-project.json`);
+      } catch (error) {
+        notify({ title: "Could not load dev command", body: String(error.message ?? error), level: "error" });
+      }
+      if (this.pending !== request) return;
+      request.loading = false;
+      this.pending = null;
+      // Recheck the space and existing tabs after the asynchronous file read.
+      if (request.config) this.queue.unshift(request);
+      this.drain(cx);
+    });
+  }
+
   drain(cx) {
     while (!this.pending && this.queue.length) {
       const request = this.queue.shift();
@@ -136,12 +154,23 @@ export default class NamedTabs extends View {
         continue;
       }
       this.pending = request;
-      const argv = commandFor(request.role, space, appHome(), home());
-      run("tab.new", {
-        name: request.role, space: space.id, folder: space.folder || undefined, focus: false,
-        // Replace the App's keep-open shell so program exit closes the pane.
-        argv: argv ? ["exec", ...argv] : undefined,
-      });
+      if (request.role === "dev" && !space.machine && !request.config) {
+        this.loadDev(request, space, cx);
+        continue;
+      }
+      const argv = commandFor(request.role, space, appHome(), home(), request.config?.dev);
+      try {
+        run("tab.new", {
+          name: request.role, space: space.id, folder: space.folder || undefined, focus: false,
+          // Replace the App's keep-open shell so program exit closes the pane.
+          argv: argv ? ["exec", ...argv] : undefined,
+        });
+      } catch (error) {
+        this.pending = null;
+        this.closeInitial(request, space);
+        notify({ title: `Could not create ${request.role}`, body: String(error.message ?? error), level: "error" });
+        continue;
+      }
       // Creation talks to the core. Wait for the actual tab in spaces(), not a delay.
       this.timeout(request, request.role, cx);
     }
@@ -150,6 +179,7 @@ export default class NamedTabs extends View {
   render(cx) {
     if (this.pending) {
       const request = this.pending;
+      if (request.loading) return div().h(0);
       if (request.project) {
         const space = request.before && spaces().find((space) => !space.machine && !request.before.has(space.id) &&
           folderKey(space.folder) === folderKey(request.project.folder));

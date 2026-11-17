@@ -84,9 +84,11 @@ named `nvim` tab. The helper resolves that tab's terminal through `herdr-app ls`
 and receives `HERDR_APP_HOME` and `HERDR_APP_SPACE_ID` from the mod.
 The old TUI uses its existing helpers and separate socket directory.
 
-The `dev` role runs `make dev` when a Makefile exists, then closes without an
-Enter prompt. Project-specific dev commands, setup/teardown, tasks, and general
-command restoration are part of the remaining project-workflow migration.
+The `dev` role runs the command from `herdr-project.json`. When `dev` is omitted,
+it runs `make dev` if a `Makefile` exists, or exits immediately otherwise.
+The tab closes when the command exits, including on failure.
+Setup/teardown, tasks, and general command restoration are part of the remaining
+project-workflow migration.
 
 ## OpenCode sessions
 
@@ -221,10 +223,41 @@ The project's file takes precedence as a whole. An omitted `tabs` field or an
 explicit `"tabs": []` in that file keeps a shell. Both definitions are read
 afresh when opening a project.
 
-Invalid JSON, unknown roles, and duplicate roles produce an error with
+Invalid JSON, unknown roles, duplicate roles, and invalid dev commands produce an error with
 the file path and open the project with a shell rather than a partial layout.
-This version reads only the `tabs` field. Herdr TUI uses its existing
-`herdr-project.sh` definition.
+Herdr TUI uses its existing `herdr-project.sh` definition.
+
+### Dev commands
+
+Set `dev` to an executable and its arguments:
+
+```json
+{
+  "tabs": ["nvim", "dev", "shell"],
+  "dev": ["npm", "run", "dev"]
+}
+```
+
+The command runs from the space's configured project or worktree folder.
+Relative executable and argument paths resolve from that folder. Each array
+entry is one argument; spaces, quotes, `$`, and `*` are passed literally.
+For shell syntax or shell functions, invoke the shell explicitly:
+
+```json
+{
+  "dev": ["zsh", "-ic", "npm install && npm run dev"]
+}
+```
+
+Alt+; reads the current definition when creating a missing local `dev` tab,
+even if `tabs` does not include `dev`. A running tab is only focused.
+Close it and use Alt+; again to launch an edited command. Invalid definitions
+show their file path and leave the tab unopened so the configuration can be
+corrected and retried.
+
+The fallback file can also supply `dev`. A project file overrides the fallback
+as a whole, so omitting `dev` in a project file selects the default `make dev`
+behavior. Remote-space shortcuts keep the default command.
 
 ## Space initials
 
@@ -321,3 +354,5 @@ source-branch choice, opening the new space, and retrying after a Git error.
 It also checks shared JSON tab definitions, real Neovim launches, configured
 order, reusing running tabs, filling missing tabs, and correcting an invalid
 definition. Projects without a definition use the configurable fallback.
+Custom dev checks cover literal arguments, worktree-relative paths, fallback
+commands, running-tab reuse, reloading on recreation, and closing on failure.

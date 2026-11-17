@@ -1,8 +1,35 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { loadProjectTabs, projectOrder, projectTabs } from "../../../dot_config/herdr-app/mods/pbogut-tabs/project.js";
+import { loadProjectConfig, projectConfig, projectOrder, projectTabs } from "../../../dot_config/herdr-app/mods/pbogut-tabs/project.js";
+import { commandFor } from "../../../dot_config/herdr-app/mods/pbogut-tabs/roles.js";
 
 const defaults = "/config/herdr-app/herdr-project.json";
+const loadProjectTabs = async (...args) => (await loadProjectConfig(...args)).tabs;
+
+test("dev commands preserve argument boundaries and require an executable", () => {
+  const dev = ["npm", "run", "dev", "--", "argument with spaces", "$(touch should-not-run)", ""];
+  assert.deepEqual(projectConfig({ tabs: ["dev"], dev }), { tabs: ["dev"], dev });
+  assert.deepEqual(projectConfig({}), { tabs: [] });
+  for (const value of [null, "npm run dev", [], [""], [42], ["npm", null], ["npm", "bad\0arg"]]) {
+    assert.throws(() => projectConfig({ dev: value }), /"dev"/);
+  }
+  assert.deepEqual(commandFor("dev", { id: "one" }, "/app", "/home/test", dev),
+    ["env", "-u", "HERDR_ENV", "--", ...dev]);
+  assert.deepEqual(commandFor("dev", { id: "one" }, "/app", "/home/test"),
+    ["env", "-u", "HERDR_ENV", "--", "zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi"]);
+});
+
+test("dev follows whole-file fallback precedence and invalid commands identify the file", async () => {
+  const exec = async () => ({ code: 0, stdout: "/repo/.bare\n" });
+  const global = '{"tabs":["nvim"],"dev":["npm","run","dev"]}';
+  assert.deepEqual(await loadProjectConfig("/repo/main", exec,
+    async (path) => path === defaults ? global : null, defaults),
+  { tabs: ["nvim"], dev: ["npm", "run", "dev"] });
+  assert.deepEqual(await loadProjectConfig("/repo/main", exec,
+    async (path) => path === defaults ? global : '{"tabs":["dev"]}', defaults), { tabs: ["dev"] });
+  await assert.rejects(loadProjectConfig("/repo/main", exec,
+    async () => '{"dev":"npm run dev"}', defaults), /\/repo\/herdr-project\.json:.*"dev"/);
+});
 
 test("tabs normalize aliases and validate the whole declaration", () => {
   assert.deepEqual(projectTabs({ tabs: ["shell-2", "oc-12", "opencode", "nvim"] }),

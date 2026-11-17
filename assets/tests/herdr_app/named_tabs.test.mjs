@@ -6,7 +6,7 @@ import vm from "node:vm";
 const root = new URL("../../../dot_config/herdr-app/mods/pbogut-tabs/", import.meta.url);
 
 async function fixture(checking = false) {
-  const calls = [], commands = [], operations = [], timers = [];
+  const calls = [], commands = [], operations = [], timers = [], reads = [];
   const files = new Map(), persisted = new Map();
   files.set("/config/herdr-app/herdr-project.json", '{"tabs":["nvim"]}');
   const failures = new Set();
@@ -27,7 +27,10 @@ async function fixture(checking = false) {
     herdr: mock({
       checking: () => checking, spaces: () => structuredClone(spaces),
       exec: async (_name, _args, { cwd }) => ({ code: 0, stdout: `${cwd}/.bare\n` }),
-      readTextFile: async (path) => files.get(path) ?? null,
+      readTextFile: async (path) => {
+        reads.push(path);
+        return files.get(path) ?? null;
+      },
       shared: (key) => persisted.get(key),
       setShared: (key, value) => persisted.set(key, JSON.parse(JSON.stringify(value))),
       appHome: () => "/config/herdr-app", home: () => "/home/test",
@@ -51,8 +54,9 @@ async function fixture(checking = false) {
   const view = new main.namespace.default();
   view.init({}, cx);
   return {
-    calls, spaces, timers, files, failures,
+    calls, spaces, timers, files, failures, reads,
     roles: modules["./roles.js"].namespace,
+    render: () => view.render(cx),
     async command(value) {
       if (receive) {
         const resolve = receive;
@@ -238,4 +242,129 @@ test("a rejected space creation does not block the next project request", async 
   await app.command(projectCommand({ folder: "/next", label: "Next" }));
   app.flush();
   assert.ok(app.spaces.some((space) => space.folder === "/next"));
+});
+
+const creations = (app) => app.calls.filter(([name]) => name === "tab.new").map(([, args]) => args);
+const devArgv = (...args) => ["exec", "env", "-u", "HERDR_ENV", "--", ...args];
+
+test("project layouts use one validated dev configuration for the whole batch", async () => {
+  const app = await fixture();
+  const path = "/new/herdr-project.json";
+  app.files.set(path, '{"tabs":["shell","dev"],"dev":["npm","run","dev","--","two words"]}');
+  await app.command(projectCommand({ folder: "/new", label: "New" }));
+  app.files.set(path, '{"dev":["changed"]}');
+  app.flush();
+  const space = app.spaces.find((space) => space.folder === "/new");
+  assert.deepEqual(space.tabs.map((tab) => tab.name), ["shell", "dev"]);
+  assert.deepEqual(creations(app).find((tab) => tab.name === "dev").argv, devArgv("npm", "run", "dev", "--", "two words"));
+  assert.deepEqual(app.reads, [path]);
+});
+
+test("dev shortcuts reuse a running tab and reload the command only when recreating it", async () => {
+  const app = await fixture();
+  const path = "/project one/herdr-project.json";
+  app.files.set(path, '{"dev":["npm","run","dev"]}');
+  for (let i = 0; i < 10; i++) await app.command("dev");
+  app.flush();
+  assert.equal(creations(app).length, 1);
+  assert.deepEqual(creations(app)[0].argv, devArgv("npm", "run", "dev"));
+  assert.equal(creations(app)[0].folder, "/project one");
+  app.files.set(path, "{");
+  await app.command("dev");
+  app.flush();
+  assert.deepEqual(app.reads, [path], "Focusing a running dev does not read even a broken config");
+  assert.ok(app.calls.every(([name]) => name !== "notify"));
+  app.spaces[0].tabs = app.spaces[0].tabs.filter((tab) => tab.name !== "dev");
+  app.files.set(path, '{"dev":["./dev script","new argument"]}');
+  await app.command("dev");
+  app.flush();
+  assert.deepEqual(creations(app)[1].argv, devArgv("./dev script", "new argument"));
+});
+
+test("dev shortcuts use fallback commands, while a project file fully overrides them", async () => {
+  for (const override of [false, true]) {
+    const app = await fixture();
+    app.files.set("/config/herdr-app/herdr-project.json", '{"dev":["npm","run","dev"]}');
+    if (override) app.files.set("/project one/herdr-project.json", "{}");
+    await app.command("dev");
+    app.flush();
+    assert.deepEqual(creations(app)[0].argv, override
+      ? devArgv("zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi")
+      : devArgv("npm", "run", "dev"));
+  }
+});
+
+test("remote dev shortcuts keep the default command without reading local definitions", async () => {
+  const app = await fixture();
+  app.spaces[0].machine = "remote";
+  app.files.set("/project one/herdr-project.json", '{"dev":["local-only"]}');
+  await app.command("dev");
+  app.flush();
+  assert.deepEqual(app.reads, []);
+  assert.deepEqual(creations(app)[0].argv, devArgv("zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi"));
+});
+
+test("invalid dev configuration prevents partial project layouts and shortcut launches", async () => {
+  const app = await fixture();
+  app.files.set("/broken/herdr-project.json", '{"tabs":["nvim","dev"],"dev":[]}');
+  await app.command(projectCommand({ folder: "/broken", label: "Broken" }));
+  app.flush();
+  await app.command("dev");
+  app.flush();
+  assert.deepEqual(creations(app), []);
+  assert.equal(app.spaces.find((space) => space.folder === "/broken").tabs.length, 1);
+  assert.equal(app.calls.filter(([name]) => name === "notify").length, 2);
+  assert.match(app.calls.find(([name]) => name === "notify")[1].body, /\/broken\/herdr-project\.json:.*"dev"/);
+});
+
+test("dev configuration reads recheck tabs, closed spaces, and focus before launching", async () => {
+  for (const change of ["tab", "space", "focus"]) {
+    const app = await fixture();
+    let resolve;
+    app.files.set("/project one/herdr-project.json", new Promise((done) => { resolve = done; }));
+    await app.command("dev");
+    await app.command("dev");
+    if (change === "tab") app.spaces[0].tabs.push({ id: "external", name: "dev", named: true });
+    if (change === "space") app.spaces.shift();
+    if (change === "focus") {
+      app.spaces[0].active = false;
+      app.spaces[1].active = true;
+    }
+    app.render();
+    resolve('{"dev":["npm","run","dev"]}');
+    await new Promise(setImmediate);
+    app.flush();
+    assert.equal(creations(app).length, change === "focus" ? 1 : 0);
+    if (change === "tab") assert.equal(app.spaces[0].selected, "external");
+    if (change === "focus") {
+      assert.equal(creations(app)[0].space, "one");
+      assert.ok(app.calls.every(([name]) => name !== "tab.select"));
+    }
+  }
+});
+
+test("a failed dev read or rejected launch releases queued requests and permits retry", async () => {
+  for (const failure of ["read", "launch"]) {
+    const app = await fixture();
+    let resolve, reject;
+    const path = "/project one/herdr-project.json";
+    app.files.set(path, new Promise((done, fail) => { resolve = done; reject = fail; }));
+    await app.command("dev");
+    await app.command("shell");
+    if (failure === "read") reject(new Error("read failed"));
+    else {
+      app.failures.add("tab.new");
+      resolve('{"dev":["npm","run","dev"]}');
+    }
+    await new Promise(setImmediate);
+    app.failures.clear();
+    app.flush();
+    assert.ok(app.calls.some(([name]) => name === "notify"));
+    assert.ok(creations(app).every((tab) => tab.name !== "dev"));
+    if (failure === "read") assert.equal(creations(app)[0].name, "shell");
+    app.files.set(path, '{"dev":["npm","run","dev"]}');
+    await app.command("dev");
+    app.flush();
+    assert.equal(creations(app).at(-1).name, "dev");
+  }
 });

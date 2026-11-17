@@ -16,14 +16,15 @@ export function compareTabs(a, b) {
     ? Number(roleOf(a.name).slice(3)) - Number(roleOf(b.name).slice(3)) : 0);
 }
 
-export function commandFor(role, space, appHome, home) {
+export function commandFor(role, space, appHome, home, dev) {
   const context = ["env", `HERDR_APP_HOME=${appHome}`, `HERDR_APP_SPACE_ID=${space.id}`];
   if (role.startsWith("oc-")) return [...context, "herdr-app-opencode", "--start", role];
   switch (role) {
     case "nvim": return [...context, "herdr-app-vim", "--start"];
     case "shell": case "shell-2": case "shell-3": return undefined;
-    // Run without start-dev's Enter prompt; project-layout commands migrate separately.
-    case "dev": return ["env", "-u", "HERDR_ENV", "zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi"];
+    // Program-backed tabs close on exit, including the default make dev.
+    case "dev": return ["env", "-u", "HERDR_ENV", "--",
+      ...(dev ?? ["zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi"])];
     case "sql": return ["zsh", "-ic", "draft sql"];
     case "rest": return ["zsh", "-ic", "rest"];
     case "git": return [...context, "lazygit",
