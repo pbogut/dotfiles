@@ -1,0 +1,23 @@
+os:
+  edit: 'herdr-app-vim {{filename}}'
+  editAtLine: 'herdr-app-vim --line {{line}} {{filename}}'
+  editInTerminal: false
+  open: 'herdr-app-vim {{filename}}'
+
+customCommands:
+  - key: 'q'
+    description: 'Go back to nvim'
+    context: 'global'
+    command: 'herdr-app-vim --focus'
+  - key: 'o'
+    description: 'Open file'
+    context: 'files'
+    command: 'herdr-app-vim {{ .SelectedFile.Name | quote }}'
+  - key: 'o'
+    description: 'Open file'
+    context: 'commitFiles'
+    command: 'herdr-app-vim {{ .SelectedFile.Name | quote }}'
+  - key: 'o'
+    description: 'Open file'
+    context: 'normal'
+    command: 'herdr-app-vim {{ .SelectedFile.Name | quote }}'

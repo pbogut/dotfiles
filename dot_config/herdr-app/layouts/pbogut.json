@@ -100,6 +100,13 @@
           ]
         },
         {
+          "id": "named-tabs",
+          "type": "block",
+          "size": { "px": 0 },
+          "min": 0,
+          "content": { "mod": "pbogut-tabs" }
+        },
+        {
           "id": "prefix-anchor",
           "type": "block",
           "size": { "px": 0 },

@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+space=${HERDR_APP_SPACE_ID:-}
+if [[ -z $space ]]; then
+	echo "No Herdr App space was supplied" >&2
+	exit 1
+fi
+export HERDR_APP_HOME=${HERDR_APP_HOME:-${XDG_CONFIG_HOME:-$HOME/.config}/herdr-app}
+state_dir=${XDG_RUNTIME_DIR:-/run/user/$UID}/herdr-app-nvim
+
+umask 077
+mkdir -p -- "$state_dir"
+[[ -O $state_dir && ! -L $state_dir ]] || exit 1
+chmod 700 "$state_dir"
+
+socket_for() {
+	local key
+	read -r key _ < <(printf '%s\0%s\0%s\0' "$HERDR_APP_HOME" "$space" "$1" | sha256sum)
+	socket_path=$state_dir/${key:0:24}.sock
+}
+
+ready() {
+	local terminal
+	terminal=$(herdr-app ls | jq -er --arg space "$space" '
+		first(.spaces[] | select(.id == $space) | .tabs[] |
+			select(.name == "nvim") | .terminals[].terminal) // empty
+	') || return 1
+	socket_for "$terminal"
+	nvim --server "$socket_path" --remote-expr '1' >/dev/null 2>&1
+}
+
+focus_editor() {
+	herdr-app "do" "pbogut-tabs.nvim@$space" >/dev/null
+}
+
+case ${1:-} in
+--ping)
+	ready
+	exit
+	;;
+--focus)
+	focus_editor
+	exit
+	;;
+--start)
+	shift
+	if [[ -z ${HC_TERMINAL_ID:-} ]]; then
+		echo "No Herdr Core terminal was supplied" >&2
+		exit 1
+	fi
+	socket_for "$HC_TERMINAL_ID"
+	exec nvim --listen "$socket_path" "$@"
+	;;
+esac
+
+line=
+declare -a files=()
+while (($#)); do
+	case $1 in
+	--line)
+		if (($# < 2)) || [[ ! $2 =~ ^[0-9]+$ ]]; then
+			echo "--line requires a line number" >&2
+			exit 2
+		fi
+		line=$2
+		shift 2
+		;;
+	--)
+		shift
+		files+=("$@")
+		break
+		;;
+	*)
+		files+=("$1")
+		shift
+		;;
+	esac
+done
+if ((${#files[@]} == 0)); then
+	echo "No file to open" >&2
+	exit 2
+fi
+
+focus_editor
+for _ in {1..100}; do
+	ready && break
+	sleep 0.05
+done
+if ! ready; then
+	echo "Neovim did not start for Herdr App space $space" >&2
+	exit 1
+fi
+
+declare -a absolute_files=()
+for file in "${files[@]}"; do
+	absolute_files+=("$(realpath -m -- "$file")")
+done
+request=$(jq -cn --argjson line "${line:-null}" --args \
+	'{files: $ARGS.positional, line: $line}' -- "${absolute_files[@]}")
+vim_request=$(jq -Rn --arg request "$request" '$request')
+expression="luaeval('(function(request) for _, file in ipairs(request.files) do vim.fn.bufadd(file) end vim.cmd.drop({ args = { vim.fn.fnameescape(request.files[1]) } }) if request.line then vim.fn.cursor(request.line, 1) end return 1 end)(_A)', json_decode($vim_request))"
+nvim --server "$socket_path" --remote-expr "$expression" >/dev/null
+focus_editor

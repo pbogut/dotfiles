@@ -66,6 +66,20 @@
     "f2": "tab.rename",
     "shift-f2": "space.rename"
   },
+  "layout:pbogut": {
+    "alt-h": "pbogut-tabs.oc-1",
+    "alt-j": "pbogut-tabs.nvim",
+    "alt-k": "pbogut-tabs.shell",
+    "alt-l": "pbogut-tabs.shell-2",
+    "alt-;": "pbogut-tabs.dev",
+    "alt-m": "pbogut-tabs.sql",
+    "alt-,": "pbogut-tabs.rest",
+    "alt-.": "pbogut-tabs.git",
+    "ctrl-alt-j": "pbogut-tabs.oc-1",
+    "ctrl-alt-k": "pbogut-tabs.oc-2",
+    "ctrl-alt-l": "pbogut-tabs.oc-3",
+    "ctrl-alt-;": "pbogut-tabs.oc-4"
+  },
   "terminal": {
     "ctrl-backspace": "send:\u0017",
     "ctrl-left": "send:\u001bb",
