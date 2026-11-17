@@ -465,8 +465,80 @@ def main():
             search("invalid-definition")
             key("Return")
             wait(lambda: tab_names(invalid)[:4] == ordered_tabs, "Reopening reloads the corrected definition")
+
+            hook = repo / "setup's script.sh"
+            hook.write_text(
+                'printf "%s\\n" "$HERDR_PROJECT_DIR" "$HERDR_WORKTREE_DIR" "$PWD" >> "$HERDR_PROJECT_DIR/setup.log"\n'
+                'echo SETUP-READY\nread -r answer\n[[ $answer != fail ]] || exit 17\n'
+                'touch "$HERDR_WORKTREE_DIR/.setup-ready"\n')
+            setup_config = {"tabs": ["shell", "dev"], "dev": dev_command,
+                            "setup": {"version": 1, "script": hook.name}}
+            definition.write_text(json.dumps(setup_config))
+            dated_prompt()
+            call("xdotool", "type", "--clearmodifiers", "setup feature")
+            key("Return")
+            setup_tree = repo / f"{call('date', '+%Y-%m-%d')}-setup-feature"
+            wait(lambda: "setup" in tab_names(setup_tree), "A new project opens a visible setup tab first")
+
+            def setup_terminal():
+                tab = next(tab for tab in project_space(setup_tree)["tabs"] if tab["name"] == "setup")
+                terminal = tab["terminals"][0]["terminal"]
+                wait(lambda: "SETUP-READY" in call("hc", "read", terminal, "--lines", "20"),
+                     "Setup displays progress and waits for input")
+                return terminal
+
+            first_setup = setup_terminal()
+            assert "shell" not in tab_names(setup_tree) and "dev" not in tab_names(setup_tree)
+            assert (repo / "setup.log").read_text().splitlines() == [str(repo), str(setup_tree), str(setup_tree)]
+            search("setup-feature")
+            key("Return")
+            assert setup_terminal() == first_setup, "Reopening focuses the same running setup"
+            app("do", f"pbogut-tabs.shell-3@{dated['space']}")
+            wait(lambda: "shell-3" in tab_names(repo / "other"), "Interactive setup does not block other spaces")
+            call("hc", "send", first_setup, "fail")
+            wait(lambda: "Setup failed (exit 17)" in call("hc", "read", first_setup, "--lines", "20"),
+                 "Failed setup keeps its output visible")
+            assert "dev" not in tab_names(setup_tree)
+            search("setup-feature")
+            key("Return")
+            wait(lambda: any(tab["name"] == "setup" and tab["terminals"][0]["terminal"] != first_setup
+                             for tab in project_space(setup_tree)["tabs"]), "Reopening retries a failed setup")
+            second_setup = setup_terminal()
+            call("hc", "send", second_setup, "continue")
+            wait(lambda: "setup" not in tab_names(setup_tree) and "dev" in tab_names(setup_tree),
+                 "Success closes setup and opens configured tabs")
+            wait(lambda: dev_records(setup_tree), "Dev starts after successful setup")
+            assert (setup_tree / ".setup-ready").exists()
+            assert len((repo / "setup.log").read_text().splitlines()) == 6, "The failed run was not cached"
+
+            dev_tab = next(tab for tab in project_space(setup_tree)["tabs"] if tab["name"] == "dev")
+            app("do", "tab.close", "--id", dev_tab["id"])
+            wait(lambda: "dev" not in tab_names(setup_tree), "Dev closes before the next setup version")
+            before_setup = app("status")["tab"]
+            setup_config["setup"]["version"] = 2
+            definition.write_text(json.dumps(setup_config))
+            app("do", "pbogut-tabs.reload-project")
+            wait(lambda: "setup" in tab_names(setup_tree), "A new setup version runs before filling missing tabs")
+            version_two = setup_terminal()
+            assert "dev" not in tab_names(setup_tree)
+            call("hc", "send", version_two, "continue")
+            wait(lambda: "setup" not in tab_names(setup_tree) and len(dev_records(setup_tree)) == 2,
+                 "Version two completes and recreates dev")
+            assert app("status")["tab"] == before_setup, "Successful setup restores the previous tab"
+            dev_tab = next(tab for tab in project_space(setup_tree)["tabs"] if tab["name"] == "dev")
+            app("do", "tab.close", "--id", dev_tab["id"])
+            app("do", "window.close")
+            process.wait(timeout=5)
+            process = subprocess.Popen(["herdr-app"], env=env, stdout=log, stderr=log)
+            window = call("xdotool", "search", "--sync", "--pid", str(process.pid)).splitlines()[0]
+            app("do", "layout.switch", "--name", "pbogut")
+            app("do", "space.select", "--id", project_space(setup_tree)["id"])
+            app("do", "pbogut-tabs.reload-project")
+            wait(lambda: len(dev_records(setup_tree)) == 3, "Saved setup completion survives an App restart")
+            assert len((repo / "setup.log").read_text().splitlines()) == 9, "Successful versions run once"
+            assert "setup" not in tab_names(setup_tree)
             assert not app("status")["errors"], app("status")
-            print("PASS: project pickers, fallback configuration, dated worktrees, JSON tabs, custom dev arguments/cwd/recreation/exit, and invalid-definition recovery.", flush=True)
+            print("PASS: project pickers, JSON tabs/dev, interactive setup ordering, failure retry, versioning, and restart persistence.", flush=True)
         except Exception:
             print("Status:", app("status"), flush=True)
             print("Spaces:", app("ls"), flush=True)

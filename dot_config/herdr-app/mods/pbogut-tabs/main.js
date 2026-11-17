@@ -1,11 +1,13 @@
 import { View, div } from "gpui-kit";
-import { appHome, checking, exec, home, nextCommand, notify, readTextFile, run, spaces } from "herdr";
+import { appHome, checking, exec, home, nextCommand, notify, panes, readTextFile, run, spaces, terminals } from "herdr";
 import { commandFor, compareTabs, roleOf } from "./roles.js";
 import { folderKey, loadProjectConfig, machinePaths } from "./project.js";
 
 export default class NamedTabs extends View {
   init(_props, cx) {
     this.queue = [];
+    this.setups = new Map();
+    this.setupSerial = 0;
     if (checking()) return;
     for (const space of spaces()) this.sortTabs(space);
     cx.spawn(async (cx) => {
@@ -84,17 +86,125 @@ export default class NamedTabs extends View {
   }
 
   projectReady(request, space, created, cx) {
+    if (this.pending === request) this.pending = null;
+    if (!("initial" in request)) request.initial = created ? space.tabs[0]?.id : null;
+    if (!request.failed && request.config.setup && !request.setupDone) {
+      this.startSetup(request, space, cx);
+      this.drain(cx);
+      return;
+    }
     const { config } = request;
     if (!request.failed) run(`pbogut-spaces.reload@${encodeURIComponent(JSON.stringify({
       folder: space.folder, machine: space.machine ?? null,
     }))}`);
     this.sortTabs(space);
-    const layout = { initial: created && config.tabs.length ? space.tabs[0]?.id : null };
+    const layout = { initial: config.tabs.length ? request.initial : null };
     this.queue.unshift(...config.tabs.map((role, index) => ({
       space: space.id, role, layout, config, paths: request.paths, last: index === config.tabs.length - 1,
     })));
-    this.pending = null;
     this.drain(cx);
+  }
+
+  startSetup(request, space, cx) {
+    const previous = this.setups.get(space.id);
+    if (previous) {
+      if (previous.tab && space.active && !request.reload) run("tab.select", { id: previous.tab });
+      return;
+    }
+    const setup = request.config.setup;
+    const job = { request, space: space.id, token: `${space.id}:${Date.now()}:${++this.setupSerial}`,
+      previousTab: space.tabs.find(tab => tab.active)?.id };
+    job.args = [`${request.paths.appHome}/mods/pbogut-tabs/setup.sh`, "check", request.paths.appHome,
+      setup.directory, setup.script, job.token];
+    this.setups.set(space.id, job);
+    cx.spawn(async (cx) => {
+      try {
+        const result = await exec("bash", job.args, { cwd: space.folder, on: space.machine ?? null });
+        if (this.setups.get(space.id) !== job) return;
+        const current = spaces().find(candidate => candidate.id === space.id);
+        if (!current) { this.setups.delete(space.id); return; }
+        if (result.code === 0) { this.finishSetup(job, true, cx); return; }
+        if (result.code !== 75) throw new Error(result.stderr.trim() || `Setup check exited ${result.code}.`);
+        for (const tab of current.tabs) {
+          if (!tab.named || tab.name !== "setup" || tab.panes !== 1) continue;
+          const pane = panes().find(pane => pane.tab === tab.id);
+          const terminal = terminals().find(terminal => terminal.address === pane?.terminal);
+          const labels = terminal?.labels;
+          if (!labels?.["pbogut.setup"]) continue;
+          if (labels["pbogut.setup.state"] === "failed") run("tab.close", { id: tab.id });
+          else if (labels["pbogut.setup.state"] === "running") {
+            job.token = labels["pbogut.setup"];
+            job.tab = tab.id;
+            job.restart = labels["pbogut.setup.hash"] !== result.stdout.trim();
+            if (current.active) run("tab.select", { id: tab.id });
+            return;
+          }
+        }
+        job.before = new Set(current.tabs.map(tab => tab.id));
+        run("tab.new", { name: "setup", space: space.id, folder: space.folder, focus: false,
+          argv: ["exec", "bash", job.args[0], "run", ...job.args.slice(2)] });
+        cx.timer.after(15000, (cx) => {
+          if (this.setups.get(space.id) === job && !job.tab) {
+            this.finishSetup(job, false, cx, "The setup terminal did not appear.");
+          }
+        });
+        cx.notify();
+      } catch (error) {
+        this.finishSetup(job, false, cx, String(error.message ?? error));
+      }
+    });
+  }
+
+  finishSetup(job, success, cx, detail = "See the setup tab. Reopen the project or reload its config to retry.") {
+    if (this.setups.get(job.space) !== job) return;
+    this.setups.delete(job.space);
+    const space = spaces().find(space => space.id === job.space);
+    if (!space) return;
+    if (!success) {
+      notify({ title: "Project setup failed", body: `${space.folder}\n${detail}`, level: "error" });
+      return;
+    }
+    if (job.restart) {
+      this.startSetup(job.request, space, cx);
+      return;
+    }
+    if (space.active && job.focused &&
+        space.tabs.some(tab => tab.id === job.previousTab)) run("tab.select", { id: job.previousTab });
+    job.request.setupDone = true;
+    this.projectReady(job.request, space, false, cx);
+  }
+
+  updateSetups(cx) {
+    for (const job of this.setups.values()) {
+      const space = spaces().find(space => space.id === job.space);
+      if (!space) { this.setups.delete(job.space); continue; }
+      const setupTab = space.tabs.find(tab => tab.id === job.tab);
+      if (setupTab) job.focused = space.active && setupTab.active;
+      const terminal = terminals().find(terminal => terminal.labels?.["pbogut.setup"] === job.token);
+      const state = terminal?.labels?.["pbogut.setup.state"];
+      if (state === "success" || state === "failed") {
+        this.finishSetup(job, state === "success", cx);
+        continue;
+      }
+      if (!job.tab && job.before) {
+        const tab = space.tabs.find(tab => !job.before.has(tab.id) && tab.named && tab.name === "setup");
+        if (tab) {
+          job.tab = tab.id;
+          if (space.active) run("tab.select", { id: tab.id });
+        }
+      }
+      if (job.tab && !space.tabs.some(tab => tab.id === job.tab) && !job.checking) {
+        job.checking = true;
+        cx.spawn(async (cx) => {
+          try {
+            const result = await exec("bash", job.args, { cwd: space.folder, on: space.machine ?? null });
+            this.finishSetup(job, result.code === 0, cx, "Setup was interrupted. Reopen the project to retry.");
+          } catch (error) {
+            this.finishSetup(job, false, cx, String(error.message ?? error));
+          }
+        });
+      }
+    }
   }
 
   sortTabs(space) {
@@ -200,6 +310,7 @@ export default class NamedTabs extends View {
   }
 
   render(cx) {
+    this.updateSetups(cx);
     if (this.pending) {
       const request = this.pending;
       if (request.loading) return div().h(0);

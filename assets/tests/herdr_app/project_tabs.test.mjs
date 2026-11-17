@@ -6,6 +6,27 @@ import { commandFor, compareTabs } from "../../../dot_config/herdr-app/mods/pbog
 const defaults = "/config/herdr-app/herdr-project.json";
 const loadProjectTabs = async (...args) => (await loadProjectConfig(...args)).tabs;
 
+test("setup requires a script and resolves from the selected definition", async () => {
+  const setup = { script: "scripts/setup project's.sh" };
+  assert.deepEqual(projectConfig({ setup }), { tabs: [], setup });
+  for (const version of [1, 0, 1.5, "1", null]) {
+    assert.deepEqual(projectConfig({ setup: { ...setup, version } }), { tabs: [], setup });
+  }
+  for (const value of [null, [], "setup.sh", {}, { version: 1 },
+    { script: "" }, { script: "  " }, { script: 42 }, { script: "bad\0path" }]) {
+    assert.throws(() => projectConfig({ setup: value }), /"setup"/);
+  }
+  const exec = async () => ({ code: 0, stdout: "/repo/.bare\n" });
+  for (const local of [true, false]) {
+    const config = await loadProjectConfig("/repo/main", exec,
+      async (path) => path === (local ? "/repo/herdr-project.json" : defaults) ? JSON.stringify({ setup }) : null, defaults);
+    assert.deepEqual(config.setup, { ...setup, directory: local ? "/repo" : "/config/herdr-app" });
+  }
+  await assert.rejects(loadProjectConfig("/repo/main", exec,
+    async () => '{"tabs":["nvim"],"setup":{"script":""}}', defaults),
+  /\/repo\/herdr-project\.json:.*"setup"/);
+});
+
 test("dev commands preserve argument boundaries and require an executable", () => {
   const dev = ["npm", "run", "dev", "--", "argument with spaces", "$(touch should-not-run)", ""];
   assert.deepEqual(projectConfig({ tabs: ["dev"], dev }), { tabs: ["dev"], dev });
@@ -51,7 +72,7 @@ test("loads the definition beside .bare from a worktree with spaces in its path"
   };
   const read = async (path) => {
     assert.equal(path, "/projects/project one/herdr-project.json");
-    return '{"tabs":["oc-2","nvim"],"setup":{"version":1,"script":"setup.sh"}}';
+    return '{"tabs":["oc-2","nvim"],"setup":{"script":"setup.sh"}}';
   };
   assert.deepEqual(await loadProjectTabs("/projects/project one/feature/subdir", exec, read, defaults), ["oc-2", "nvim"]);
   assert.deepEqual(calls, [["git", ["rev-parse", "--path-format=absolute", "--git-common-dir"],

@@ -94,7 +94,7 @@ The old TUI uses its existing helpers and separate socket directory.
 The `dev` role runs the command from `herdr-project.json`. When `dev` is omitted,
 it runs `make dev` if a `Makefile` exists, or exits immediately otherwise.
 The tab closes when the command exits, including on failure.
-Setup/teardown, tasks, and general command restoration are part of the remaining
+Teardown, tasks, and general command restoration are part of the remaining
 project-workflow migration.
 
 ## OpenCode sessions
@@ -254,7 +254,7 @@ The project's file takes precedence as a whole. An omitted `tabs` field or an
 explicit `"tabs": []` in that file keeps a shell. Both definitions are read
 afresh when opening a project.
 
-Invalid JSON, unknown roles, duplicate roles, and invalid dev commands produce an error with
+Invalid JSON, unknown roles, duplicate roles, and invalid dev or setup fields produce an error with
 the file path. A new project opens with a shell rather than a partial layout.
 Herdr TUI uses its existing `herdr-project.sh` definition.
 
@@ -289,6 +289,48 @@ corrected and retried.
 The fallback file can also supply `dev`. A project file overrides the fallback
 as a whole, so omitting `dev` in a project file selects the default `make dev`
 behavior. Remote tabs use their own machine's paths and configuration.
+
+### Setup hooks
+
+Add a setup script to the project definition:
+
+```json
+{
+  "tabs": ["nvim", "dev"],
+  "setup": {
+    "script": "herdr-setup.sh"
+  }
+}
+```
+
+Opening the project or choosing **Reload project config** runs setup before
+creating missing configured tabs. A visible `setup` tab shows live output and
+accepts input. Other spaces remain usable while it runs. Reopening a project
+with setup already running focuses that terminal.
+
+Bash runs the script from the worktree root. Relative script paths resolve
+beside the JSON file. The script receives `HERDR_PROJECT_DIR`, the directory
+containing that file, and `HERDR_WORKTREE_DIR`, the worktree root. A fallback
+definition can also supply setup; its script resolves beside the fallback file.
+Remote projects run setup on their own machine.
+
+After a successful run, the setup tab closes and configured tabs open.
+Existing tabs keep their programs. If setup fails, its output stays visible
+until the tab is closed or Enter is pressed. Fix the script, then reopen the
+project or reload its config to retry. Retrying replaces the managed failed
+setup tab. Renamed or split tabs are preserved.
+
+Completion is saved only after exit status zero, once per worktree and SHA-256
+hash of the script's contents. Editing the script triggers setup on the next
+open or reload, unless that content already succeeded for the worktree.
+Only the configured script is hashed, including for remote projects.
+Recreating a worktree at the same path also runs setup again. Records live under
+`HERDR_APP_HOME/state/project-setup` on the worktree's machine and survive App
+restarts. Concurrent launches share a worktree lock so they cannot run the same
+successful hash twice.
+
+The old `version` field is ignored. Version-based completion records require one
+fresh run per worktree to save the script's hash.
 
 ## Space labels
 
@@ -356,6 +398,8 @@ node --experimental-vm-modules --test assets/tests/herdr_app/space_initials.test
 node --test assets/tests/herdr_app/projects.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/project_machines.test.mjs
 node --test assets/tests/herdr_app/project_tabs.test.mjs
+python3 -B assets/tests/herdr_app/setup_test.py
+shellcheck dot_config/herdr-app/mods/pbogut-tabs/setup.sh
 node --test assets/tests/herdr_app/worktrees.test.mjs
 node --test assets/tests/herdr_app/opencode_session.test.mjs
 node --test assets/tests/herdr_app/opencode_rpc.test.mjs

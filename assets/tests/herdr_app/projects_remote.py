@@ -57,6 +57,15 @@ def main():
         (config.parents[2] / "herdr-project.json").write_text('{"tabs":["shell","nvim"]}')
     local_repo = Path(local["HOME"]) / "projects/team/repo"
     remote_repo = Path(remote["HOME"]) / "projects/team/repo"
+    remote_app = Path(remote["HERDR_APP_HOME"])
+    setup_runner = remote_app / "mods/pbogut-tabs/setup.sh"
+    setup_runner.parent.mkdir(parents=True)
+    shutil.copyfile(ROOT / "dot_config/herdr-app/mods/pbogut-tabs/setup.sh", setup_runner)
+    (remote_app / "setup fixture.sh").write_text(
+        'printf "%s\\n" "$HERDR_PROJECT_DIR" "$HERDR_WORKTREE_DIR" "$PWD" >> "$HERDR_PROJECT_DIR/setup.log"\n')
+    (remote_app / "herdr-project.json").write_text(json.dumps({
+        "tabs": ["shell", "nvim"], "setup": {"version": 1, "script": "setup fixture.sh"},
+    }))
 
     def call(*args, env=local):
         result = subprocess.run(args, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=20)
@@ -136,6 +145,9 @@ def main():
             wait(lambda: "NVIM" in call("hc", "read", editor, "--lines", "0"), "Remote editor starts")
             assert space(None, remote_repo) is not None
             assert space("fixture", remote_repo)["active"]
+            assert (remote_app / "setup.log").read_text().splitlines() == [
+                str(remote_app), str(remote_repo), str(remote_repo),
+            ], "The remote fallback setup runs with the remote config and working directory"
             key("ctrl+alt+p")
             wait(lambda: loaded("fixture"), "Reopening defaults to the active remote machine")
             assert state()["folders"].count(str(remote_repo)) == 1
@@ -150,6 +162,9 @@ def main():
                  "The remote worktree uses the remote fallback tabs")
             assert call("git", "-C", str(worktree), "branch", "--show-current", env=remote) == branch
             assert space(None, worktree) is None
+            assert (remote_app / "setup.log").read_text().splitlines()[3:] == [
+                str(remote_app), str(worktree), str(worktree),
+            ], "A sibling worktree runs its own setup on the remote machine"
             key("ctrl+alt+p")
             wait(lambda: loaded("fixture"), "The new worktree stays on the selected machine")
             # An invalid remote setting stays an error on that machine.
@@ -161,7 +176,7 @@ def main():
             wait(lambda: loaded("fixture") and state().get("error"), "Remote errors stay visible")
             assert str(local_repo) not in state()["folders"]
             assert not app("status")["errors"], app("status")
-            print("PASS: native Tab/Shift+Tab, query preservation, remote discovery, creation, tabs, dated worktrees, focus and errors.", flush=True)
+            print("PASS: native machine picker, remote discovery, tabs, fallback setup, dated worktrees, focus and errors.", flush=True)
     except Exception:
         if process and process.poll() is None:
             print("Status:", app("status"), flush=True)

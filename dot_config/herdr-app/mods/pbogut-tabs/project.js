@@ -31,12 +31,23 @@ export function projectTabs(config) {
 
 export function projectConfig(config) {
   const tabs = projectTabs(config);
-  if (config.dev === undefined) return { tabs };
-  if (!Array.isArray(config.dev) || !config.dev.length ||
+  const result = { tabs };
+  if (config.dev !== undefined) {
+    if (!Array.isArray(config.dev) || !config.dev.length ||
       config.dev.some((arg) => typeof arg !== "string" || arg.includes("\0")) || !config.dev[0]) {
-    throw new Error('"dev" must be a non-empty command array of strings.');
+      throw new Error('"dev" must be a non-empty command array of strings.');
+    }
+    result.dev = config.dev;
   }
-  return { tabs, dev: config.dev };
+  if (config.setup !== undefined) {
+    const setup = config.setup;
+    if (!setup || typeof setup !== "object" || Array.isArray(setup) ||
+        typeof setup.script !== "string" || !setup.script.trim() || setup.script.includes("\0")) {
+      throw new Error('"setup" requires a non-empty "script" path.');
+    }
+    result.setup = { script: setup.script };
+  }
+  return result;
 }
 
 export async function loadProjectConfig(folder, exec, readTextFile, defaultPath, on = null) {
@@ -50,7 +61,11 @@ export async function loadProjectConfig(folder, exec, readTextFile, defaultPath,
   for (const path of paths) {
     try {
       const text = await readTextFile(path, { on });
-      if (text !== null) return projectConfig(JSON.parse(text));
+      if (text !== null) {
+        const config = projectConfig(JSON.parse(text));
+        if (config.setup) config.setup.directory = path.slice(0, path.lastIndexOf("/")) || "/";
+        return config;
+      }
     } catch (error) {
       throw new Error(`${path}: ${error.message ?? error}`);
     }

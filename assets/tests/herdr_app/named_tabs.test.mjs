@@ -4,12 +4,14 @@ import { test } from "node:test";
 import vm from "node:vm";
 
 const root = new URL("../../../dot_config/herdr-app/mods/pbogut-tabs/", import.meta.url);
+const setupHash = "a".repeat(64);
 
 async function fixture(checking = false, initialTabs = [{ id: "original", name: "1", named: false }]) {
   const calls = [], commands = [], operations = [], timers = [], reads = [];
   const files = new Map(), persisted = new Map();
   files.set("/config/herdr-app/herdr-project.json", '{"tabs":["nvim"]}');
   const failures = new Set();
+  const native = [], executions = [], setupChecks = new Map();
   const spaces = [
     { id: "one", active: true, folder: "/project one", tabs: initialTabs },
     { id: "two", active: false, folder: "/project two", tabs: [{ id: "other", name: "shell", named: true }] },
@@ -25,9 +27,15 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
   const modules = {
     "gpui-kit": mock({ View: class {}, div: () => element }),
     herdr: mock({
-      checking: () => checking, spaces: () => structuredClone(spaces),
-      exec: async (name, _args, { cwd }) => ({ code: 0,
-        stdout: name === "sh" ? "/remote/home\n/remote/app\n" : `${cwd}/.bare\n` }),
+      checking: () => checking, spaces: () => structuredClone(spaces), terminals: () => structuredClone(native),
+      panes: () => spaces.flatMap(space => space.tabs.filter(tab => tab.terminal)
+        .map(tab => ({ tab: tab.id, terminal: tab.terminal }))),
+      exec: async (name, args, options) => {
+        executions.push([name, [...args], { ...options }]);
+        if (name === "bash") return setupChecks.get(`${options.on ?? ""}:${options.cwd}`)
+          ?? { code: 75, stdout: `${setupHash}\n`, stderr: "" };
+        return { code: 0, stdout: name === "sh" ? "/remote/home\n/remote/app\n" : `${options.cwd}/.bare\n` };
+      },
       readTextFile: async (path, { on }) => {
         reads.push(path);
         return files.get(on ? `${on}:${path}` : path) ?? null;
@@ -55,7 +63,7 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
   const view = new main.namespace.default();
   view.init({}, cx);
   return {
-    calls, spaces, timers, files, failures, reads, persisted,
+    calls, spaces, timers, files, failures, reads, persisted, native, executions, setupChecks,
     roles: modules["./roles.js"].namespace,
     render: () => view.render(cx),
     async command(value) {
@@ -78,7 +86,14 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
             spaces.forEach((space) => { space.active = space.id === args.id; });
           } else if (name === "tab.new") {
             if (failures.has(args.name)) continue;
-            spaces.find((space) => space.id === args.space).tabs.push({ id: `new-${++serial}`, name: args.name, named: true });
+            const tab = { id: `new-${++serial}`, name: args.name, named: true, panes: 1 };
+            if (args.name === "setup") {
+              tab.terminal = `terminal-${serial}`;
+              native.push({ address: tab.terminal, labels: {
+                "pbogut.setup": args.argv.at(-1), "pbogut.setup.hash": setupHash, "pbogut.setup.state": "running",
+              } });
+            }
+            spaces.find((space) => space.id === args.space).tabs.push(tab);
           } else {
             const space = spaces.find((space) => space.tabs.some((tab) => tab.id === args.id));
             const index = space.tabs.findIndex((tab) => tab.id === args.id);
@@ -87,6 +102,7 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
             if (name === "tab.close") space.tabs.splice(index, 1);
             if (name === "tab.select") {
               spaces.forEach((candidate) => { candidate.active = candidate === space; });
+              space.tabs.forEach(tab => { tab.active = tab.id === args.id; });
               space.selected = args.id;
             }
           }
@@ -492,4 +508,155 @@ test("a failed dev read or rejected launch releases queued requests and permits 
     app.flush();
     assert.equal(creations(app).at(-1).name, "dev");
   }
+});
+
+const withSetup = () => JSON.stringify({
+  tabs: ["shell", "dev"], dev: ["custom-dev"], setup: { script: "setup's script.sh" },
+});
+const settle = async (app) => {
+  app.flush();
+  await new Promise(setImmediate);
+  app.flush();
+};
+function setupResult(app, space, state) {
+  const tab = space.tabs.find(tab => tab.name === "setup");
+  app.native.find(terminal => terminal.address === tab.terminal).labels["pbogut.setup.state"] = state;
+  if (state === "success") space.tabs = space.tabs.filter(candidate => candidate !== tab);
+  app.render();
+  app.flush();
+}
+
+test("setup gates a new project's tabs while other spaces remain usable", async () => {
+  const app = await fixture();
+  app.files.set("/new/herdr-project.json", withSetup());
+  const command = projectCommand({ folder: "/new" });
+  await app.command(command);
+  await settle(app);
+  const space = app.spaces.find(space => space.folder === "/new");
+  assert.deepEqual(space.tabs.map(tab => tab.name), ["1", "setup"]);
+  await app.command(command);
+  await settle(app);
+  assert.equal(creations(app).filter(tab => tab.name === "setup").length, 1);
+  await app.command("shell-3@two");
+  app.flush();
+  assert.equal(app.spaces[1].active, true);
+  setupResult(app, space, "success");
+  assert.deepEqual(space.tabs.map(tab => tab.name), ["shell", "dev"]);
+  assert.equal(app.spaces[1].active, true, "Finishing setup never steals another space's focus");
+});
+
+test("failed setup keeps its output and retry replaces only the managed failed tab", async () => {
+  const app = await fixture();
+  const space = app.spaces[0];
+  space.tabs.push({ id: "user-setup", name: "setup", named: true, panes: 1 });
+  app.files.set("/project one/herdr-project.json", withSetup());
+  await app.command("reload-project");
+  await settle(app);
+  const managed = space.tabs.find(tab => tab.name === "setup" && tab.terminal);
+  app.native[0].labels["pbogut.setup.state"] = "failed";
+  app.render();
+  app.flush();
+  assert.ok(space.tabs.includes(managed));
+  assert.ok(!space.tabs.some(tab => tab.name === "dev"));
+  await app.command("reload-project");
+  await settle(app);
+  assert.ok(space.tabs.some(tab => tab.id === "user-setup"));
+  assert.ok(!space.tabs.some(tab => tab.id === managed.id));
+  assert.equal(creations(app).filter(tab => tab.name === "setup").length, 2);
+});
+
+test("saved setup completion skips the setup tab and remote checks use remote paths", async () => {
+  const app = await fixture();
+  app.spaces[0].machine = "vps";
+  app.files.set("vps:/project one/herdr-project.json", withSetup());
+  app.setupChecks.set("vps:/project one", { code: 0 });
+  await app.command("reload-project");
+  await settle(app);
+  assert.deepEqual(creations(app).map(tab => tab.name), ["shell", "dev"]);
+  const check = app.executions.find(([name]) => name === "bash");
+  assert.deepEqual(check[1].slice(0, 5), ["/remote/app/mods/pbogut-tabs/setup.sh", "check",
+    "/remote/app", "/project one", "setup's script.sh"]);
+  assert.deepEqual(check[2], { cwd: "/project one", on: "vps" });
+});
+
+test("closing a project during the setup check prevents a stale launch", async () => {
+  const app = await fixture();
+  let resolve;
+  app.files.set("/project one/herdr-project.json", withSetup());
+  app.setupChecks.set(":/project one", new Promise(done => { resolve = done; }));
+  await app.command("reload-project");
+  app.spaces.shift();
+  app.render();
+  resolve({ code: 75, stderr: "" });
+  await settle(app);
+  assert.deepEqual(creations(app), []);
+});
+
+test("closing setup before success prevents the layout and leaves retry available", async () => {
+  const app = await fixture();
+  app.files.set("/project one/herdr-project.json", withSetup());
+  await app.command("reload-project");
+  await settle(app);
+  app.spaces[0].tabs = app.spaces[0].tabs.filter(tab => tab.name !== "setup");
+  app.render();
+  await settle(app);
+  assert.ok(!creations(app).some(tab => tab.name === "dev"));
+  assert.match(app.calls.find(([name]) => name === "notify")[1].body, /interrupted/);
+  await app.command("reload-project");
+  await settle(app);
+  assert.equal(creations(app).filter(tab => tab.name === "setup").length, 2);
+});
+
+test("successful setup returns to the previous tab unless the user changed selection", async () => {
+  for (const changed of [false, true]) {
+    const app = await fixture();
+    const space = app.spaces[0];
+    space.tabs[0].active = true;
+    space.selected = "original";
+    app.files.set("/project one/herdr-project.json", withSetup());
+    await app.command("reload-project");
+    await settle(app);
+    assert.equal(space.tabs.find(tab => tab.name === "setup").id, space.selected);
+    if (changed) {
+      await app.command("shell-3");
+      app.flush();
+    }
+    const expected = changed ? space.selected : "original";
+    setupResult(app, space, "success");
+    assert.equal(space.selected, expected);
+  }
+});
+
+test("reopening adopts a live setup and rechecks changed or legacy hashes after it finishes", async () => {
+  for (const hash of [setupHash, "b".repeat(64), null]) {
+    const app = await fixture(false, [
+      { id: "original", name: "1", named: false },
+      { id: "surviving", name: "setup", named: true, panes: 1, terminal: "surviving-terminal" },
+    ]);
+    app.native.push({ address: "surviving-terminal", labels: {
+      "pbogut.setup": "old-attempt", "pbogut.setup.state": "running",
+      ...(hash ? { "pbogut.setup.hash": hash } : { "pbogut.setup.version": "1" }),
+    } });
+    app.files.set("/project one/herdr-project.json", withSetup());
+    await app.command("reload-project");
+    await settle(app);
+    assert.deepEqual(creations(app), [], "Do not start another hook while the previous one runs");
+    setupResult(app, app.spaces[0], "success");
+    await settle(app);
+    assert.deepEqual(creations(app).map(tab => tab.name), hash === setupHash ? ["shell", "dev"] : ["setup"]);
+  }
+});
+
+test("an unreadable setup script reports the check failure and permits retry", async () => {
+  const app = await fixture();
+  app.files.set("/project one/herdr-project.json", withSetup());
+  app.setupChecks.set(":/project one", { code: 1, stderr: "setup's script.sh: No such file or directory" });
+  await app.command("reload-project");
+  await settle(app);
+  assert.deepEqual(creations(app), []);
+  assert.match(app.calls.find(([name]) => name === "notify")[1].body, /No such file or directory/);
+  app.setupChecks.clear();
+  await app.command("reload-project");
+  await settle(app);
+  assert.deepEqual(creations(app).map(tab => tab.name), ["setup"]);
 });
