@@ -13,8 +13,13 @@ Terminal text matches Alacritty's 12 pt at 16 px.
 | Ctrl+G | Bottom shortcut bar |
 | Alt+Esc | Copy mode |
 | Alt+O | Space/tab picker |
+| Ctrl+Alt+P | Project picker |
+| Ctrl+Shift+P | Command palette |
 | Alt+T | Toggle sidebar |
 | Alt+P / Alt+N | Previous / next tab |
+
+All three pickers accept Ctrl+J to move down and Ctrl+K to move up while
+their search field is focused. Up/Down also work; Enter selects a result.
 
 Ctrl+G opens a full-width overlay above the tabs in the terminal area.
 It covers the bottom of the terminal without resizing it. Shortcuts use
@@ -82,6 +87,47 @@ The `dev` role runs `make dev` when a Makefile exists, then closes without an
 Enter prompt. Trusted `herdr-project.sh` commands, project setup/teardown, and
 restart restoration are part of the remaining project-workflow migration.
 
+## Projects
+
+Ctrl+Alt+P opens the native `pbogut-projects` popup. Open spaces come first,
+followed by projects from `ls-project -f` in its recent-first order. Local
+projects already open appear once. Type to search names, full paths, or
+directory aliases; multiple search words can match different parts of a path.
+Use Up/Down or Ctrl+J/K and Enter, or click a row. Escape closes the picker.
+
+Selecting an open space focuses it. Selecting a project creates a local space
+in that directory with its compact project label and an initial shell.
+Space matching uses its configured folder, so changing a terminal's working
+directory does not cause duplicate spaces. Existing custom space names are shown.
+
+`mods/pbogut-projects/projects.json.tmpl` gets the project root and directory
+aliases from chezmoi. The mod reads the rendered JSON and runs the existing
+`ls-project` script through the App's `exec()` API. Space creation and selection
+use native `run()` commands.
+
+The results use a native virtual list with 48 px rows. It builds the visible
+rows and a small buffer, rather than every discovered project. Mouse selection
+uses each space ID or project folder, so scrolling and filtering do not change
+which project a click opens.
+
+## Customized built-in pickers
+
+`mods/pbogut-picker` copies Herdr App 0.1.16's `mods/picker`.
+`mods/pbogut-palette` copies its `frame/palette` as a regular native mod.
+Alt+O and Ctrl+Shift+K open the customized picker; Ctrl+Shift+P opens the
+customized palette. The palette's "Go to space or tab…" entry opens
+`pbogut-picker` too.
+
+Both copies add Ctrl+J/K to the existing arrow-key handling. The space/tab
+picker wraps at the ends; the palette stops at the ends, matching their
+original behavior. The palette has its own recent-command history.
+
+Chezmoi manages these copies because Herdr rewrites shipped mods and frame
+screens on startup. After a Herdr upgrade, compare the copies with the new
+shipped versions and merge relevant changes. Keep the navigation aliases,
+the palette's `pbogut-picker` target, and its local command icon path.
+Shared icons still come from Herdr's `mods/workspace-chrome`.
+
 ## Checks
 
 Run from the chezmoi source directory:
@@ -90,11 +136,17 @@ Run from the chezmoi source directory:
 herdr-app check dot_config/herdr-app/mods/pbogut-keys
 herdr-app check dot_config/herdr-app/mods/pbogut-copy
 herdr-app check dot_config/herdr-app/mods/pbogut-tabs
+herdr-app check dot_config/herdr-app/mods/pbogut-projects
+herdr-app check dot_config/herdr-app/mods/pbogut-picker
+herdr-app check dot_config/herdr-app/mods/pbogut-palette
 node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
+node --test assets/tests/herdr_app/projects.test.mjs
 python3 assets/tests/herdr_app/keyboard.py
 python3 assets/tests/herdr_app/named_tabs.py
 python3 assets/tests/herdr_app/editor.py
+python3 assets/tests/herdr_app/projects.py
+python3 assets/tests/herdr_app/projects.py --profile
 ```
 
 The keyboard test requires Xvfb, xdotool, xclip, and Python's Pillow package with
@@ -109,3 +161,13 @@ actual SQL, main-editor, and scratch Neovim processes running together,
 lazygit file opening, and closing tabs on exit. The editor test uses headless
 Neovim servers to check terminal-specific sockets and named-tab routing,
 including when an old space-wide lock is still held.
+The project-picker test copies the source `ls-project` script into its sandbox
+and checks discovery among 600 projects, alias search, and opening or focusing
+native spaces.
+It also checks Ctrl+J/K with focused search inputs in all three pickers,
+Enter selection, scrolling, virtual-row clicks, and the palette's link to the
+customized picker. `--profile` instruments only the sandbox copy and measures
+three unfiltered openings. It reports command execution, JavaScript rendering,
+and time from initialization to native layout, and asserts that each lazy row
+batch stays small. The screenshot timing also includes keyboard injection and
+image capture.
