@@ -73,8 +73,8 @@
                   "radius": 0,
                   "background": "background",
                   "lone": false,
-                  "border": { "width": 0, "color": "border" },
-                  "focus": { "width": 0, "color": "accent" }
+                  "border": { "width": 1, "color": "border" },
+                  "focus": { "width": 1, "color": "accent" }
                 }
               }
             },
