@@ -4,6 +4,10 @@ Chezmoi manages these files. The `pbogut` layout uses bottom tabs and gapless
 panes with square 1 px borders when split. The focused pane uses the accent color.
 Terminal text matches Alacritty's 12 pt at 16 px.
 
+Chezmoi selects `pbogut` for the next app launch. `modify_shared.json` sets
+the `layout` key in Herdr's `shared.json`, preserving the other saved state.
+Choosing another layout in the app lasts until the next chezmoi apply.
+
 ## Keys
 
 `keys.json` keeps the app's standard shortcuts and adds:

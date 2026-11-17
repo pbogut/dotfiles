@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+
+import json
+import sys
+
+
+raw = sys.stdin.read()
+state = json.loads(raw) if raw.strip() else {}
+if state.get("layout") != "pbogut":
+    state["layout"] = "pbogut"
+    raw = json.dumps(state, ensure_ascii=False, separators=(",", ":"))
+sys.stdout.write(raw)
