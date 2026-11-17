@@ -145,21 +145,30 @@ Tests can override the port with the mod's `port` prop and the helper's
 ## Projects
 
 Ctrl+Alt+P opens the native `pbogut-projects` popup. Open spaces come first,
-followed by projects from `ls-project -f` in its recent-first order. Local
-projects already open appear once. Type to search names, full paths, or
-directory aliases; multiple search words can match different parts of a path.
+followed by projects from `ls-project -f` in its recent-first order.
+The header shows the selected machine, initially the active space's machine.
+Tab cycles through this computer and connected machines; Shift+Tab cycles backwards.
+Each switch reloads that machine's projects and open spaces, keeps the search text,
+and resets the selection. Late responses from previous loads are ignored.
+Projects already open on that machine appear once. Type to search names, full
+paths, or directory aliases; multiple search words can match different parts of a path.
 Use Up/Down or Ctrl+J/K and Enter, or click a row. Escape closes the picker.
 
-Selecting an open space focuses it. Selecting a project creates a local space
-in that directory with its compact project label. Its shared project definition
+Selecting an open space focuses it. Selecting a project creates a space on the
+selected machine in that directory with its compact project label. Its shared project definition
 supplies the tabs; without one, the App's fallback definition opens `nvim`.
 Space matching uses its configured folder, so changing a terminal's working
-directory does not cause duplicate spaces. Existing custom space names are shown.
+directory does not cause duplicate spaces. Matching includes the machine, so
+identical paths on different hosts stay separate. Existing custom space names are shown.
 
 `mods/pbogut-projects/projects.json.tmpl` gets the project root and directory
-aliases from chezmoi. The mod reads the rendered JSON and runs the existing
-`ls-project` script through the App's `exec()` API. Space creation and selection
-use native `run()` commands.
+aliases from chezmoi. The mod reads that machine's rendered JSON and runs its
+`ls-project` script through the App's `exec()` API. Remote machines need those
+settings and the helper scripts deployed there. Remote paths use that core's
+`HOME` and `HERDR_APP_HOME`, falling back to `$XDG_CONFIG_HOME/herdr-app` or
+`~/.config/herdr-app`. Lookup failures stay visible under the selected machine;
+they never fall back to local results. Space creation and selection use native
+`run()` commands.
 
 The results use a native virtual list with 48 px rows. It builds the visible
 rows and a small buffer, rather than every discovered project. Mouse selection
@@ -174,7 +183,8 @@ branch. On success, the picker opens a space in the new worktree.
 Escape or Cancel closes the prompt; creation errors stay in the prompt so
 the name can be corrected and retried.
 
-This action uses local `.bare` repositories. Repository paths containing
+This action uses `.bare` repositories on the displayed machine, including its
+`git-new-dated-worktree` and `git-wt` helpers. Repository paths containing
 whitespace are rejected because the existing `git-wt` helper splits its
 worktree listing on whitespace. The picker verifies that the script created
 a new registered worktree, since its final path output can mask Git failures.
@@ -198,8 +208,8 @@ project/
 }
 ```
 
-The project picker reads the file when opening a local project, including after
-Ctrl+Enter creates a dated worktree. `tabs` lists named roles in display order.
+The project picker reads the file on the selected machine when opening a project,
+including after Ctrl+Enter creates a dated worktree. `tabs` lists named roles in display order.
 A new space selects the first configured tab. Once creation finishes with a
 configured tab present, it removes the temporary initial shell if that tab is
 still unnamed and unsplit.
@@ -214,7 +224,8 @@ Supported roles are `nvim`, `shell`, `shell-2`, `shell-3`, `dev`, `sql`, `rest`,
 Each role uses its existing launcher and the space's configured folder.
 
 When the project has no shared definition, the picker reads
-`~/.config/herdr-app/herdr-project.json`, or the same file under `HERDR_APP_HOME`.
+`~/.config/herdr-app/herdr-project.json` on that machine, or the same file under
+`HERDR_APP_HOME`.
 Chezmoi supplies this fallback:
 
 ```json
@@ -254,15 +265,15 @@ For shell syntax or shell functions, invoke the shell explicitly:
 }
 ```
 
-Alt+; reads the current definition when creating a missing local `dev` tab,
-even if `tabs` does not include `dev`. A running tab is only focused.
+Alt+; reads the current definition on the space's machine when creating a missing
+`dev` tab, even if `tabs` does not include `dev`. A running tab is only focused.
 Close it and use Alt+; again to launch an edited command. Invalid definitions
 show their file path and leave the tab unopened so the configuration can be
 corrected and retried.
 
 The fallback file can also supply `dev`. A project file overrides the fallback
 as a whole, so omitting `dev` in a project file selects the default `make dev`
-behavior. Remote-space shortcuts keep the default command.
+behavior. Remote tabs use their own machine's paths and configuration.
 
 ## Space labels
 
@@ -326,6 +337,7 @@ node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/space_initials.test.mjs
 node --test assets/tests/herdr_app/projects.test.mjs
+node --experimental-vm-modules --test assets/tests/herdr_app/project_machines.test.mjs
 node --test assets/tests/herdr_app/project_tabs.test.mjs
 node --test assets/tests/herdr_app/worktrees.test.mjs
 node --test assets/tests/herdr_app/opencode_session.test.mjs
@@ -335,6 +347,7 @@ python3 assets/tests/herdr_app/named_tabs.py
 python3 assets/tests/herdr_app/opencode_sessions.py
 python3 assets/tests/herdr_app/editor.py
 python3 assets/tests/herdr_app/projects.py
+python3 assets/tests/herdr_app/projects_remote.py
 python3 assets/tests/herdr_app/projects.py --profile
 ```
 
@@ -372,3 +385,9 @@ order, reusing running tabs, filling missing tabs, and correcting an invalid
 definition. Projects without a definition use the configurable fallback.
 Custom dev checks cover literal arguments, worktree-relative paths, fallback
 commands, running-tab reuse, reloading on recreation, and closing on failure.
+
+The remote-picker test connects two isolated cores through a local `--via`
+transport. It checks native Tab/Shift+Tab with a focused search input, machine
+scoping, remote configuration and editor startup, and visible lookup failures.
+It also creates a dated remote worktree through the source helpers and verifies
+that the new space and its tabs stay on that machine.

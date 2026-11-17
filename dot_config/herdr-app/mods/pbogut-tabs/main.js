@@ -1,7 +1,7 @@
 import { View, div } from "gpui-kit";
 import { appHome, checking, exec, home, nextCommand, notify, readTextFile, run, setShared, shared, spaces } from "herdr";
 import { commandFor, roleOf } from "./roles.js";
-import { folderKey, loadProjectConfig, orderKey, projectOrder } from "./project.js";
+import { folderKey, loadProjectConfig, machinePaths, orderKey, projectOrder } from "./project.js";
 
 export default class NamedTabs extends View {
   init(_props, cx) {
@@ -10,13 +10,19 @@ export default class NamedTabs extends View {
     cx.spawn(async (cx) => {
       for (;;) {
         const command = await nextCommand();
-        if (command.startsWith("project@")) {
+        if (command === "reload-project" || command.startsWith("project@")) {
           try {
-            const project = JSON.parse(decodeURIComponent(command.slice(8)));
-            if (!project.folder?.startsWith("/")) continue;
+            const reload = command === "reload-project";
+            const project = reload ? spaces().find((space) => space.active)
+              : JSON.parse(decodeURIComponent(command.slice(8)));
+            if (!project?.folder?.startsWith("/")) {
+              if (reload) notify({ title: "Could not reload project config", body: "The active space has no project folder.", level: "error" });
+              continue;
+            }
             if (![this.pending, ...this.queue].some((request) => request?.project &&
+                (request.project.machine ?? null) === (project.machine ?? null) &&
                 folderKey(request.project.folder) === folderKey(project.folder))) {
-              this.queue.push({ project });
+              this.queue.push({ project, reload });
             }
             this.drain(cx);
           } catch (error) {
@@ -41,24 +47,30 @@ export default class NamedTabs extends View {
     cx.spawn(async (cx) => {
       const project = request.project;
       try {
-        request.config = await loadProjectConfig(project.folder, exec, readTextFile, `${appHome()}/herdr-project.json`);
+        request.paths = await machinePaths(project.machine, exec, { home: home(), appHome: appHome() });
+        request.config = await loadProjectConfig(project.folder, exec, readTextFile,
+          `${request.paths.appHome}/herdr-project.json`, project.machine);
       } catch (error) {
+        request.failed = true;
         request.config = { tabs: [] };
         notify({ title: "Could not load project configuration", body: String(error.message ?? error), level: "error" });
       }
       if (this.pending !== request) return;
       const existing = spaces().find((space) => project.id ? space.id === project.id
-        : !space.machine && folderKey(space.folder) === folderKey(project.folder));
+        : (space.machine ?? null) === (project.machine ?? null) && folderKey(space.folder) === folderKey(project.folder));
       if (existing) {
-        run("space.select", { id: existing.id });
-        this.projectReady(request, existing, false, cx);
+        if (!request.reload) run("space.select", { id: existing.id });
+        if (request.failed) {
+          this.pending = null;
+          this.drain(cx);
+        } else this.projectReady(request, existing, false, cx);
       } else if (project.id) {
         this.pending = null;
         this.drain(cx);
       } else {
         request.before = new Set(spaces().map((space) => space.id));
         try {
-          run("space.new", { name: project.label, folder: project.folder, machine: "" });
+          run("space.new", { name: project.label, folder: project.folder, machine: project.machine ?? "" });
           this.timeout(request, project.label || project.folder, cx);
           cx.notify();
         } catch (error) {
@@ -72,10 +84,13 @@ export default class NamedTabs extends View {
 
   projectReady(request, space, created, cx) {
     const { config } = request;
+    if (!request.failed) run(`pbogut-spaces.reload@${encodeURIComponent(JSON.stringify({
+      folder: space.folder, machine: space.machine ?? null,
+    }))}`);
     setShared(orderKey(space.id), config.tabs);
     const layout = { initial: created && config.tabs.length ? space.tabs[0]?.id : null };
     this.queue.unshift(...config.tabs.map((role, index) => ({
-      space: space.id, role, layout, config, last: index === config.tabs.length - 1,
+      space: space.id, role, layout, config, paths: request.paths, last: index === config.tabs.length - 1,
     })));
     this.pending = null;
     this.drain(cx);
@@ -120,19 +135,24 @@ export default class NamedTabs extends View {
     });
   }
 
-  loadDev(request, space, cx) {
+  loadSettings(request, space, cx) {
     request.loading = true;
     cx.spawn(async (cx) => {
       try {
-        request.config = await loadProjectConfig(space.folder, exec, readTextFile, `${appHome()}/herdr-project.json`);
+        const paths = await machinePaths(space.machine, exec, { home: home(), appHome: appHome() });
+        if (request.role === "dev") {
+          request.config = await loadProjectConfig(space.folder, exec, readTextFile,
+            `${paths.appHome}/herdr-project.json`, space.machine);
+        }
+        request.paths = paths;
       } catch (error) {
-        notify({ title: "Could not load dev command", body: String(error.message ?? error), level: "error" });
+        notify({ title: "Could not load tab configuration", body: String(error.message ?? error), level: "error" });
       }
       if (this.pending !== request) return;
       request.loading = false;
       this.pending = null;
       // Recheck the space and existing tabs after the asynchronous file read.
-      if (request.config) this.queue.unshift(request);
+      if (request.paths) this.queue.unshift(request);
       this.drain(cx);
     });
   }
@@ -154,11 +174,12 @@ export default class NamedTabs extends View {
         continue;
       }
       this.pending = request;
-      if (request.role === "dev" && !space.machine && !request.config) {
-        this.loadDev(request, space, cx);
+      if (!request.paths && (space.machine || request.role === "dev")) {
+        this.loadSettings(request, space, cx);
         continue;
       }
-      const argv = commandFor(request.role, space, appHome(), home(), request.config?.dev);
+      const paths = request.paths ?? { appHome: appHome(), home: home() };
+      const argv = commandFor(request.role, space, paths.appHome, paths.home, request.config?.dev);
       try {
         run("tab.new", {
           name: request.role, space: space.id, folder: space.folder || undefined, focus: false,
@@ -181,7 +202,8 @@ export default class NamedTabs extends View {
       const request = this.pending;
       if (request.loading) return div().h(0);
       if (request.project) {
-        const space = request.before && spaces().find((space) => !space.machine && !request.before.has(space.id) &&
+        const space = request.before && spaces().find((space) => (space.machine ?? null) === (request.project.machine ?? null) &&
+          !request.before.has(space.id) &&
           folderKey(space.folder) === folderKey(request.project.folder));
         if (space) this.projectReady(request, space, true, cx);
         return div().h(0);

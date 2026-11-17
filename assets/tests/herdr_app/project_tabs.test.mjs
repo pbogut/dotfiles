@@ -55,7 +55,24 @@ test("loads the definition beside .bare from a worktree with spaces in its path"
   };
   assert.deepEqual(await loadProjectTabs("/projects/project one/feature/subdir", exec, read, defaults), ["oc-2", "nvim"]);
   assert.deepEqual(calls, [["git", ["rev-parse", "--path-format=absolute", "--git-common-dir"],
-    { cwd: "/projects/project one/feature/subdir" }]]);
+    { cwd: "/projects/project one/feature/subdir", on: null }]]);
+});
+
+test("remote definitions and fallback are read on the requested machine", async () => {
+  const calls = [];
+  const exec = async (...args) => {
+    calls.push(args);
+    return { code: 0, stdout: "/repo/.bare\n" };
+  };
+  const reads = [];
+  const read = async (path, options) => {
+    reads.push([path, options]);
+    return path === defaults ? '{"tabs":["dev"],"dev":["remote-dev"]}' : null;
+  };
+  assert.deepEqual(await loadProjectConfig("/repo/main", exec, read, defaults, "vps"),
+    { tabs: ["dev"], dev: ["remote-dev"] });
+  assert.equal(calls[0][2].on, "vps");
+  assert.deepEqual(reads, [["/repo/herdr-project.json", { on: "vps" }], [defaults, { on: "vps" }]]);
 });
 
 test("missing project definitions, regular repositories, and non-Git folders use the configurable fallback", async () => {

@@ -9,17 +9,17 @@ export function projectLabel(folder, config) {
     : config.aliases?.[part] ? `${config.aliases[part]}󰿟` : `${part}/`).join("");
 }
 
-export function projectRows(spaces, projects, config, query = "") {
-  const open = spaces.map((space) => ({
+export function projectRows(spaces, projects, config, query = "", machine = null) {
+  const open = spaces.filter((space) => (space.machine ?? null) === machine).map((space) => ({
     id: space.id, folder: space.folder, machine: space.machine, active: space.active,
     label: space.named || !space.folder ? space.name : projectLabel(space.folder, config),
   }));
-  const seen = new Set(open.filter((row) => !row.machine && row.folder).map((row) => folderKey(row.folder)));
+  const seen = new Set(open.filter((row) => row.folder).map((row) => folderKey(row.folder)));
   const rows = [...open];
   for (const folder of projects) {
     if (!folder.startsWith("/") || seen.has(folderKey(folder))) continue;
     seen.add(folderKey(folder));
-    rows.push({ folder, machine: null, label: projectLabel(folder, config) });
+    rows.push({ folder, machine, label: projectLabel(folder, config) });
   }
   const words = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
   return rows.filter((row) => words.every((word) =>
@@ -28,14 +28,15 @@ export function projectRows(spaces, projects, config, query = "") {
 }
 
 export function openProject(row, spaces) {
+  const machine = row.machine ?? null;
   const existing = row.id ? spaces.find((space) => space.id === row.id)
-    : spaces.find((space) => !space.machine && folderKey(space.folder) === folderKey(row.folder));
+    : spaces.find((space) => (space.machine ?? null) === machine && folderKey(space.folder) === folderKey(row.folder));
   if (existing) {
-    if (existing.machine || !existing.folder?.startsWith("/")) return ["space.select", { id: existing.id }];
+    if (!existing.folder?.startsWith("/")) return ["space.select", { id: existing.id }];
     return [`pbogut-tabs.project@${encodeURIComponent(JSON.stringify({
-      id: existing.id, folder: existing.folder, label: row.label,
+      id: existing.id, folder: existing.folder, label: row.label, machine,
     }))}`];
   }
   if (row.id) return null; // A space closed while the picker was open.
-  return [`pbogut-tabs.project@${encodeURIComponent(JSON.stringify({ folder: row.folder, label: row.label }))}`];
+  return [`pbogut-tabs.project@${encodeURIComponent(JSON.stringify({ folder: row.folder, label: row.label, machine }))}`];
 }

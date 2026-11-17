@@ -17,7 +17,9 @@ export function compareTabs(a, b) {
 }
 
 export function commandFor(role, space, appHome, home, dev) {
-  const context = ["env", `HERDR_APP_HOME=${appHome}`, `HERDR_APP_SPACE_ID=${space.id}`];
+  // The remote core's labels use its own IDs, without the App's machine prefix.
+  const id = space.machine && space.id.startsWith(`${space.machine}/`) ? space.id.slice(space.machine.length + 1) : space.id;
+  const context = ["env", `HERDR_APP_HOME=${appHome}`, `HERDR_APP_SPACE_ID=${id}`];
   if (role.startsWith("oc-")) return [...context, "herdr-app-opencode", "--start", role];
   switch (role) {
     case "nvim": return [...context, "herdr-app-vim", "--start"];

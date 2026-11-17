@@ -15,14 +15,18 @@ test("labels compact directory segments and retain the project name", () => {
   assert.equal(projectLabel("/elsewhere/my-pbogut/repo", config), "/elsewhere/my-pbogut/repo");
 });
 
-test("open spaces precede recent projects, deduplicated by local folder", () => {
+test("open spaces and discovered projects are scoped to one machine and deduplicated", () => {
   const spaces = [
     { id: "one", name: "My project", named: true, folder: `${path}/`, machine: null },
     { id: "remote", name: "Remote", named: true, folder: "/projects/remote", machine: "vps" },
   ];
   const rows = projectRows(spaces, [path, "/projects/new", "/projects/new/", "/projects/remote"], config);
-  assert.deepEqual(rows.map((row) => row.label), ["My project", "Remote", "new", "remote"]);
-  assert.deepEqual(openProject(rows[1], spaces), ["space.select", { id: "remote" }]);
+  assert.deepEqual(rows.map((row) => row.label), ["My project", "new", "remote"]);
+  const remote = projectRows(spaces, ["/projects/remote", path], config, "", "vps");
+  assert.deepEqual(remote.map((row) => row.label), ["Remote", "gh󰿟pb󰿟project with spaces"]);
+  assert.deepEqual(projectRequest(openProject(remote[0], spaces)),
+    { id: "remote", folder: "/projects/remote", label: "Remote", machine: "vps" });
+  assert.equal(projectRequest(openProject(remote[1], spaces)).machine, "vps");
 });
 
 test("search accepts aliases, full paths, custom names and multiple words", () => {
@@ -36,8 +40,8 @@ test("search accepts aliases, full paths, custom names and multiple words", () =
 test("opening rechecks live space state and never matches another machine's path", () => {
   const [row] = projectRows([], [path], config);
   assert.deepEqual(projectRequest(openProject(row, [{ id: "remote", folder: path, machine: "vps" }])),
-    { label: "gh󰿟pb󰿟project with spaces", folder: path });
+    { label: "gh󰿟pb󰿟project with spaces", folder: path, machine: null });
   assert.deepEqual(projectRequest(openProject(row, [{ id: "created-since-open", folder: `${path}/`, machine: null }])),
-    { id: "created-since-open", label: "gh󰿟pb󰿟project with spaces", folder: `${path}/` });
+    { id: "created-since-open", label: "gh󰿟pb󰿟project with spaces", folder: `${path}/`, machine: null });
   assert.equal(openProject({ ...row, id: "closed-space" }, []), null);
 });

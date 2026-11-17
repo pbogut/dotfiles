@@ -1,6 +1,7 @@
 import { View, div } from "gpui-kit";
 import { v_flex, h_flex, InputState, Input, v_virtual_list, VirtualListScrollHandle, Scrollbar } from "gpui-base";
-import { appHome, checking, closeOverlay, exec, home, props, readTextFile, run, settings, spaces, theme } from "herdr";
+import { appHome, checking, closeOverlay, exec, home, machines, props, readTextFile, run, settings, spaces, theme } from "herdr";
+import { machinePaths, pickerMachines } from "./machines.js";
 import { openProject, projectLabel, projectRows } from "./projects.js";
 import { createDatedWorktree } from "./worktrees.js";
 
@@ -8,6 +9,7 @@ export default class Projects extends View {
   init(_props, cx) {
     this.config = { root: "", aliases: {} };
     this.projects = [];
+    this.machine = spaces().find((space) => space.active)?.machine ?? null;
     this.query = "";
     this.at = 0;
     this.scroll = VirtualListScrollHandle.new();
@@ -26,18 +28,47 @@ export default class Projects extends View {
     });
     this.branchInput = InputState.new({ placeholder: "New branch name…" });
     this.branchInput.on("submit", (_event, cx) => this.createWorktree(cx));
+    // Override the native input's Tab action while the project list is shown.
+    cx.bind_keys([
+      { keystroke: "tab", action: "project-machine-next", context: "ProjectPicker > Input" },
+      { keystroke: "shift-tab", action: "project-machine-prev", context: "ProjectPicker > Input" },
+    ]);
     this.input.focus();
     if (checking()) return;
+    this.load(cx);
+  }
+
+  cycleMachine(backwards, cx) {
+    const choices = pickerMachines(machines(), this.machine);
+    const index = choices.indexOf(this.machine);
+    this.machine = choices[(index + (backwards ? choices.length - 1 : 1)) % choices.length];
+    this.load(cx);
+  }
+
+  load(cx) {
+    const request = this.request = {};
+    const on = this.machine;
+    this.config = { root: "", aliases: {} };
+    this.projects = [];
+    this.error = null;
+    this.at = 0;
+    this.scroll.scroll_to_item(0);
     this.loading = true;
+    cx.notify();
     cx.spawn(async (cx) => {
       try {
-        const raw = await readTextFile(`${appHome()}/mods/pbogut-projects/projects.json`);
+        const paths = await machinePaths(on, exec, { home: home(), appHome: appHome() });
+        const raw = await readTextFile(`${paths.appHome}/mods/pbogut-projects/projects.json`, { on });
         if (raw === null) throw new Error("Project settings are missing.");
-        this.config = JSON.parse(raw);
-        const result = await exec("env", [`PROJECTS=${this.config.root}`, `${home()}/.scripts/ls-project`, "-f"]);
+        const config = JSON.parse(raw);
+        if (!config.root?.startsWith("/")) throw new Error("Project root must be an absolute path.");
+        const result = await exec("env", [`PROJECTS=${config.root}`, `${paths.home}/.scripts/ls-project`, "-f"], { on });
         if (result.code !== 0) throw new Error(result.stderr.trim() || "ls-project failed.");
+        if (this.request !== request || this.opened) return;
+        this.config = config;
         this.projects = result.stdout.split("\n").filter(Boolean);
       } catch (error) {
+        if (this.request !== request || this.opened) return;
         this.error = String(error.message ?? error);
       }
       this.loading = false;
@@ -46,7 +77,7 @@ export default class Projects extends View {
   }
 
   rows() {
-    return projectRows(spaces(), this.projects, this.config, this.query);
+    return projectRows(spaces(), this.projects, this.config, this.query, this.machine);
   }
 
   close() {
@@ -79,9 +110,11 @@ export default class Projects extends View {
     cx.notify();
     cx.spawn(async (cx) => {
       try {
+        const machine = this.worktree.machine ?? null;
+        const paths = await machinePaths(machine, exec, { home: home(), appHome: appHome() });
         const folder = await createDatedWorktree(this.worktree, name, exec,
-          `${home()}/.scripts/git-new-dated-worktree`);
-        if (!this.opened) this.open({ folder, label: projectLabel(folder, this.config) });
+          `${paths.home}/.scripts/git-new-dated-worktree`);
+        if (!this.opened) this.open({ folder, machine, label: projectLabel(folder, this.config) });
       } catch (error) {
         this.worktreeError = String(error.message ?? error);
       }
@@ -102,7 +135,7 @@ export default class Projects extends View {
         cx.stop_propagation();
         this.close();
       })
-      .child(div().font_semibold().text_size(15).child("New dated worktree"))
+      .child(div().font_semibold().text_size(15).child(`New dated worktree · ${this.machine ?? "This computer"}`))
       .child(div().text_color(t.muted).truncate().child(this.worktree.folder || this.worktree.label))
       .child(Input.new(this.branchInput).h(36).px(10).items_center()
         .rounded(8).border(1).border_color(t.accent).bg(t.background))
@@ -121,9 +154,22 @@ export default class Projects extends View {
       Math.max(48, window.viewport_size().height / settings().zoom * 0.7 - 160));
     this.at = Math.max(0, Math.min(this.at, rows.length - 1));
     return v_flex()
-      .id("projects").track_focus(this.handle).w_full().min_h(0).p(18).gap(10)
+      .id("projects").track_focus(this.handle).key_context("ProjectPicker").w_full().min_h(0).p(18).gap(10)
       .bg(t.popover).text_size(13).text_color(t.foreground)
+      .on_action("project-machine-next", (_event, cx) => {
+        cx.stop_propagation();
+        this.cycleMachine(false, cx);
+      })
+      .on_action("project-machine-prev", (_event, cx) => {
+        cx.stop_propagation();
+        this.cycleMachine(true, cx);
+      })
       .on_key_down((event, cx) => {
+        if (event.keystroke === "tab" || event.keystroke === "shift-tab") {
+          cx.stop_propagation();
+          this.cycleMachine(event.keystroke === "shift-tab", cx);
+          return;
+        }
         const key = event.keystroke === "ctrl-j" ? "down" : event.keystroke === "ctrl-k" ? "up" : event.key;
         if (key === "escape") {
           cx.stop_propagation();
@@ -136,7 +182,7 @@ export default class Projects extends View {
         cx.notify();
       })
       .child(h_flex().items_center().justify_between().flex_none()
-        .child(div().text_size(15).font_semibold().child("Projects"))
+        .child(div().flex_1().min_w(0).truncate().text_size(15).font_semibold().child(`Projects · ${this.machine ?? "This computer"}`))
         .child(div().text_size(11).text_color(t.dim).child(this.loading ? "Loading projects…" : `${rows.length} result${rows.length === 1 ? "" : "s"}`)))
       .child(Input.new(this.input).h(36).flex_none().px(10).items_center()
         .rounded(8).border(1).border_color(t.accent).bg(t.background).text_color(t.foreground))
@@ -157,6 +203,6 @@ export default class Projects extends View {
             .on_item_click((key) => this.open(this.rows().find((row) => (row.id ?? row.folder) === key)))
           : div().p(10).text_color(t.dim).child(this.loading ? "Loading projects…" : "No matching projects."))
         .when(Boolean(rows.length), (el) => el.child(Scrollbar.vertical("project-list").absolute().inset_0())))
-      .child(div().flex_none().text_size(11).text_color(t.dim).child("↑↓ / Ctrl+J/K choose · Enter open · Ctrl+Enter worktree · Esc close"));
+      .child(div().flex_none().text_size(11).text_color(t.dim).child("Tab / Shift+Tab machine · ↑↓ / Ctrl+J/K choose · Enter open · Ctrl+Enter worktree · Esc close"));
   }
 }

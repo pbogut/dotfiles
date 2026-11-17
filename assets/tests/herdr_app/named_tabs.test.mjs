@@ -26,10 +26,11 @@ async function fixture(checking = false) {
     "gpui-kit": mock({ View: class {}, div: () => element }),
     herdr: mock({
       checking: () => checking, spaces: () => structuredClone(spaces),
-      exec: async (_name, _args, { cwd }) => ({ code: 0, stdout: `${cwd}/.bare\n` }),
-      readTextFile: async (path) => {
+      exec: async (name, _args, { cwd }) => ({ code: 0,
+        stdout: name === "sh" ? "/remote/home\n/remote/app\n" : `${cwd}/.bare\n` }),
+      readTextFile: async (path, { on }) => {
         reads.push(path);
-        return files.get(path) ?? null;
+        return files.get(on ? `${on}:${path}` : path) ?? null;
       },
       shared: (key) => persisted.get(key),
       setShared: (key, value) => persisted.set(key, JSON.parse(JSON.stringify(value))),
@@ -39,9 +40,9 @@ async function fixture(checking = false) {
         : new Promise((resolve) => { receive = resolve; }),
       run: (name, args) => {
         if (failures.has(name)) throw new Error(`${name} unavailable`);
-        const operation = [name, JSON.parse(JSON.stringify(args))];
+        const operation = [name, JSON.parse(JSON.stringify(args ?? {}))];
         calls.push(operation);
-        operations.push(operation);
+        if (!name.startsWith("pbogut-spaces.")) operations.push(operation);
       },
     }),
     "./roles.js": new vm.SourceTextModule(await readFile(new URL("roles.js", root), "utf8"), { context }),
@@ -54,7 +55,7 @@ async function fixture(checking = false) {
   const view = new main.namespace.default();
   view.init({}, cx);
   return {
-    calls, spaces, timers, files, failures, reads,
+    calls, spaces, timers, files, failures, reads, persisted,
     roles: modules["./roles.js"].namespace,
     render: () => view.render(cx),
     async command(value) {
@@ -70,8 +71,8 @@ async function fixture(checking = false) {
         for (const [name, args] of operations.splice(0)) {
           if (name === "space.new") {
             spaces.forEach((space) => { space.active = false; });
-            const id = `space-${++serial}`;
-            spaces.push({ id, folder: args.folder, name: args.name, active: true,
+            const id = `${args.machine ? `${args.machine}/` : ""}space-${++serial}`;
+            spaces.push({ id, folder: args.folder, name: args.name, machine: args.machine || null, active: true,
               tabs: [{ id: `${id}-initial`, name: "1", named: false, panes: 1 }] });
           } else if (name === "space.select") {
             spaces.forEach((space) => { space.active = space.id === args.id; });
@@ -294,14 +295,40 @@ test("dev shortcuts use fallback commands, while a project file fully overrides 
   }
 });
 
-test("remote dev shortcuts keep the default command without reading local definitions", async () => {
+test("remote dev shortcuts read their own definitions and ignore local definitions", async () => {
   const app = await fixture();
   app.spaces[0].machine = "remote";
   app.files.set("/project one/herdr-project.json", '{"dev":["local-only"]}');
+  app.files.set("remote:/project one/herdr-project.json", '{"dev":["remote-dev"]}');
   await app.command("dev");
   app.flush();
-  assert.deepEqual(app.reads, []);
-  assert.deepEqual(creations(app)[0].argv, devArgv("zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi"));
+  assert.deepEqual(app.reads, ["/project one/herdr-project.json"]);
+  assert.deepEqual(creations(app)[0].argv, devArgv("remote-dev"));
+});
+
+test("the same project path on two machines creates separate spaces with remote paths and config", async () => {
+  const app = await fixture();
+  app.files.set("vps:/project one/herdr-project.json", '{"tabs":["nvim","git","oc-1","dev"],"dev":["remote-dev"]}');
+  await app.command(projectCommand({ folder: "/project one", label: "Local" }));
+  await app.command(projectCommand({ folder: "/project one", label: "Remote", machine: "vps" }));
+  app.flush();
+  // The queued remote configuration is asynchronous.
+  await new Promise(setImmediate);
+  app.flush();
+  const remote = app.spaces.find((space) => space.machine === "vps");
+  assert.ok(remote);
+  assert.deepEqual(remote.tabs.map((tab) => tab.name), ["nvim", "git", "oc-1", "dev"]);
+  const tabs = creations(app).filter((tab) => tab.space === remote.id);
+  assert.ok(tabs[0].argv.includes("HERDR_APP_HOME=/remote/app"));
+  assert.ok(tabs[1].argv.includes("--use-config-file=/remote/home/.config/lazygit/config.yml,/remote/home/.config/lazygit/config-herdr-app.yml"));
+  assert.ok(tabs[2].argv.includes("HERDR_APP_HOME=/remote/app"));
+  assert.ok(tabs[2].argv.includes(`HERDR_APP_SPACE_ID=${remote.id.slice(4)}`));
+  assert.deepEqual(tabs[3].argv, devArgv("remote-dev"));
+  assert.equal(app.spaces.filter((space) => space.folder === "/project one").length, 2);
+  const before = creations(app).length;
+  await app.command(projectCommand({ folder: "/project one", machine: "vps" }));
+  app.flush();
+  assert.equal(creations(app).length, before);
 });
 
 test("invalid dev configuration prevents partial project layouts and shortcut launches", async () => {

@@ -26,12 +26,18 @@ function fixture(overrides = {}) {
 test("uses the existing helper from the .bare root and normalizes spaces", async () => {
   const f = fixture();
   assert.equal(await createDatedWorktree(row, "new branch", f.exec, script), folder);
-  assert.deepEqual(f.calls[0], ["git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd: row.folder }]);
-  assert.deepEqual(f.calls[2], [script, ["new-branch"], { cwd: root, timeout: 600_000 }]);
+  assert.deepEqual(f.calls[0], ["git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd: row.folder, on: null }]);
+  assert.deepEqual(f.calls[2], [script, ["new-branch"], { cwd: root, on: null, timeout: 600_000 }]);
 });
 
-test("does not run the helper for an empty name, remote space, or ordinary repo", async () => {
-  for (const [target, name] of [[row, "   "], [{ ...row, machine: "vps" }, "branch"], [{}, "branch"]]) {
+test("remote worktrees run every lookup and the helper on their machine", async () => {
+  const f = fixture();
+  assert.equal(await createDatedWorktree({ ...row, machine: "vps" }, "new branch", f.exec, script), folder);
+  assert.ok(f.calls.every((call) => call[2].on === "vps"));
+});
+
+test("does not run the helper for an empty name, missing folder, or ordinary repo", async () => {
+  for (const [target, name] of [[row, "   "], [{}, "branch"]]) {
     const f = fixture();
     await assert.rejects(createDatedWorktree(target, name, f.exec, script));
     assert.equal(f.calls.length, 0);
