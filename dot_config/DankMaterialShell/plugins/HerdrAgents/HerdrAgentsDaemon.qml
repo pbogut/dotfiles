@@ -19,10 +19,12 @@ PluginComponent {
             "idle": 0,
             "unknown": 0
         }),
-        "groups": []
+        "groups": [],
+        "app_connected": false
     })
     readonly property string helperUrl: Qt.resolvedUrl("./herdr-agents.py").toString()
     readonly property string helperPath: decodeURIComponent(helperUrl.replace(/^file:\/\//, ""))
+    property var agentStatus: emptyStatus
     property var quotaProviders: ({})
     property var quotaData: ({})
     property bool quotaRefreshing: false
@@ -33,6 +35,7 @@ PluginComponent {
     readonly property string quotaCliPath: quotaCacheHome + "/opencode/packages/@slkiser/opencode-quota@latest/node_modules/@slkiser/opencode-quota/dist/bin/opencode-quota.js"
 
     function publishStatus(status) {
+        agentStatus = status;
         if (pluginService && pluginId)
             pluginService.setGlobalVar(pluginId, "status", status);
     }
@@ -150,6 +153,10 @@ PluginComponent {
 
         function quota(): string {
             return JSON.stringify(root.quotaData);
+        }
+
+        function status(): string {
+            return JSON.stringify(root.agentStatus);
         }
     }
 

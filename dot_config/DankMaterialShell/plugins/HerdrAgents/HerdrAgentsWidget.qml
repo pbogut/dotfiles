@@ -49,7 +49,12 @@ PluginComponent {
         return "\u25cf";
     }
 
-    function openHerdr() {
+    function openHerdr(source = "") {
+        const hasAppAgents = (statusData.groups || []).some(group => group.agents.some(agent => agent.source === "herdr-app"));
+        if (source === "herdr-app" || (!source && hasAppAgents)) {
+            Quickshell.execDetached(["focus-or-exec", "herdr-app", "herdr-app"]);
+            return;
+        }
         Quickshell.execDetached(["focus-or-exec", "Alacritty.herdr", "terminal", "-c", "herdr", "-e", "herdr"]);
     }
 
@@ -58,9 +63,24 @@ PluginComponent {
     }
 
     function focusAgent(agent) {
+        if (agent?.source === "herdr-app") {
+            const terminalId = agent.terminal_id || "";
+            if (!terminalId) {
+                openHerdr("herdr-app");
+                return;
+            }
+            Proc.runCommand(
+                null,
+                ["herdr-app", "do", "agent.focus", "--terminal", terminalId],
+                () => root.openHerdr("herdr-app"),
+                0,
+                5000
+            );
+            return;
+        }
         const paneId = agent?.pane_id || "";
         if (!paneId) {
-            openHerdr();
+            openHerdr("herdr");
             return;
         }
         Quickshell.execDetached([
@@ -233,6 +253,7 @@ PluginComponent {
 
             function agentMeta(agent) {
                 const parts = [String(agent.agent || "agent")];
+                parts.push(agent.source === "herdr-app" ? "App" : "TUI");
                 let project = String(agent.project || agent.workspace || "");
                 const feature = String(agent.feature || "");
                 if (feature)

@@ -107,6 +107,13 @@
           "content": { "mod": "pbogut-tabs" }
         },
         {
+          "id": "agent-status",
+          "type": "block",
+          "size": { "px": 0 },
+          "min": 0,
+          "content": { "mod": "pbogut-agent-status" }
+        },
+        {
           "id": "prefix-anchor",
           "type": "block",
           "size": { "px": 0 },

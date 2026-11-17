@@ -115,6 +115,26 @@ it automatically. The App launcher clears inherited old-Herdr pane variables;
 OpenCode running in Herdr TUI continues using the existing official integration,
 title reporting, and workspace-local session caches.
 
+## DMS agent status
+
+The `pbogut-agent-status` controller stays loaded in the `pbogut` layout.
+Herdr refreshes it when its native agent list changes. It sends agent addresses,
+displayed statuses and focus flags to the DMS Herdr Agents helper over a persistent
+connection to `127.0.0.1:47653`.
+
+It sends a snapshot on connection and whenever those values change. It makes no
+CLI calls or periodic status queries. This gives the widget Herdr App's
+finished-but-unseen `done` state and its focused-agent badge and sorting.
+The helper still gets agent titles and terminal lifecycle events from `hc`.
+
+Closing the app or unloading the controller closes the connection. The widget
+then uses core status with no focused app agent. If DMS restarts, the controller
+reconnects and sends its current snapshot. Connection failures retry after two
+seconds; a connected, unchanged app sends nothing.
+
+Tests can override the port with the mod's `port` prop and the helper's
+`HERDR_AGENTS_PORT` environment variable.
+
 ## Projects
 
 Ctrl+Alt+P opens the native `pbogut-projects` popup. Open spaces come first,
@@ -193,6 +213,10 @@ herdr-app check dot_config/herdr-app/mods/pbogut-tabs
 herdr-app check dot_config/herdr-app/mods/pbogut-projects
 herdr-app check dot_config/herdr-app/mods/pbogut-picker
 herdr-app check dot_config/herdr-app/mods/pbogut-palette
+herdr-app check dot_config/herdr-app/mods/pbogut-agent-status
+node --experimental-vm-modules --test assets/tests/herdr_agents/push.test.mjs
+python3 -B assets/tests/herdr_agents/agents_test.py
+python3 -B assets/tests/herdr_agents/push.py
 herdr-app check dot_config/herdr-app/mods/pbogut-spaces
 node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
