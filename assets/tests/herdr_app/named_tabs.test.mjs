@@ -8,6 +8,7 @@ const root = new URL("../../../dot_config/herdr-app/mods/pbogut-tabs/", import.m
 async function fixture(checking = false) {
   const calls = [], commands = [], operations = [], timers = [];
   const files = new Map(), persisted = new Map();
+  files.set("/config/herdr-app/herdr-project.json", '{"tabs":["nvim"]}');
   const failures = new Set();
   const spaces = [
     { id: "one", active: true, folder: "/project one", tabs: [{ id: "original", name: "1", named: false }] },
@@ -152,6 +153,16 @@ test("unknown roles, stale spaces and check mode never create tabs", async () =>
 });
 
 const projectCommand = (project) => `project@${encodeURIComponent(JSON.stringify(project))}`;
+
+test("a project without a definition opens the fallback nvim tab", async () => {
+  const app = await fixture();
+  await app.command(projectCommand({ folder: "/no-config", label: "Default" }));
+  app.flush();
+  const space = app.spaces.find((space) => space.folder === "/no-config");
+  assert.deepEqual(space.tabs.map((tab) => tab.name), ["nvim"]);
+  assert.equal(space.selected, space.tabs[0].id);
+  assert.equal(app.calls.filter(([name]) => name === "tab.new").length, 1);
+});
 
 test("a new project opens configured tabs in order, selects the first, and removes its bootstrap shell", async () => {
   const app = await fixture();

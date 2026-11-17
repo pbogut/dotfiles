@@ -18,19 +18,23 @@ export function projectTabs(config) {
   return roles;
 }
 
-export async function loadProjectTabs(folder, exec, readTextFile) {
-  if (!folder) return [];
-  const common = await exec("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd: folder });
-  if (common.code !== 0) return [];
-  const directory = common.stdout.trim();
-  if (!directory.endsWith("/.bare")) return [];
-  const path = `${directory.slice(0, -6)}/herdr-project.json`;
-  try {
-    const text = await readTextFile(path);
-    return text === null ? [] : projectTabs(JSON.parse(text));
-  } catch (error) {
-    throw new Error(`${path}: ${error.message ?? error}`);
+export async function loadProjectTabs(folder, exec, readTextFile, defaultPath) {
+  const paths = [];
+  if (folder) {
+    const common = await exec("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd: folder });
+    const directory = common.code === 0 ? common.stdout.trim() : "";
+    if (directory.endsWith("/.bare")) paths.push(`${directory.slice(0, -6)}/herdr-project.json`);
   }
+  if (defaultPath) paths.push(defaultPath);
+  for (const path of paths) {
+    try {
+      const text = await readTextFile(path);
+      if (text !== null) return projectTabs(JSON.parse(text));
+    } catch (error) {
+      throw new Error(`${path}: ${error.message ?? error}`);
+    }
+  }
+  return [];
 }
 
 export function projectOrder(a, b, roles) {

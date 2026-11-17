@@ -146,7 +146,7 @@ Use Up/Down or Ctrl+J/K and Enter, or click a row. Escape closes the picker.
 
 Selecting an open space focuses it. Selecting a project creates a local space
 in that directory with its compact project label. Its shared project definition
-supplies the tabs; without one, the space starts with a shell.
+supplies the tabs; without one, the App's fallback definition opens `nvim`.
 Space matching uses its configured folder, so changing a terminal's working
 directory does not cause duplicate spaces. Existing custom space names are shown.
 
@@ -206,8 +206,22 @@ Supported roles are `nvim`, `shell`, `shell-2`, `shell-3`, `dev`, `sql`, `rest`,
 `git`, `docker`, and positive numbered `oc-N` slots. `opencode` aliases `oc-1`.
 Each role uses its existing launcher and the space's configured folder.
 
-A missing file, an omitted `tabs` field, or an empty array uses the default
-shell. Invalid JSON, unknown roles, and duplicate roles produce an error with
+When the project has no shared definition, the picker reads
+`~/.config/herdr-app/herdr-project.json`, or the same file under `HERDR_APP_HOME`.
+Chezmoi supplies this fallback:
+
+```json
+{
+  "tabs": ["nvim"]
+}
+```
+
+The fallback also applies to ordinary Git repositories and non-Git folders.
+The project's file takes precedence as a whole. An omitted `tabs` field or an
+explicit `"tabs": []` in that file keeps a shell. Both definitions are read
+afresh when opening a project.
+
+Invalid JSON, unknown roles, and duplicate roles produce an error with
 the file path and open the project with a shell rather than a partial layout.
 This version reads only the `tabs` field. Herdr TUI uses its existing
 `herdr-project.sh` definition.
@@ -306,4 +320,4 @@ sandbox. It checks Ctrl+Enter, cancellation, dated branch names, the script's
 source-branch choice, opening the new space, and retrying after a Git error.
 It also checks shared JSON tab definitions, real Neovim launches, configured
 order, reusing running tabs, filling missing tabs, and correcting an invalid
-definition.
+definition. Projects without a definition use the configurable fallback.

@@ -41,7 +41,7 @@ export default class NamedTabs extends View {
     cx.spawn(async (cx) => {
       const project = request.project;
       try {
-        request.roles = await loadProjectTabs(project.folder, exec, readTextFile);
+        request.roles = await loadProjectTabs(project.folder, exec, readTextFile, `${appHome()}/herdr-project.json`);
       } catch (error) {
         request.roles = [];
         notify({ title: "Could not load project tabs", body: String(error.message ?? error), level: "error" });

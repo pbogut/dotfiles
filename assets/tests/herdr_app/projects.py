@@ -149,6 +149,9 @@ def main():
             opened = next(space for space in app("ls")["spaces"] if space["folder"] == str(new))
             assert opened["name"] == "gh󰿟pb󰿟alpha project's directory", opened
             assert app("status")["space"] == opened["id"]
+            wait(lambda: any(space["id"] == opened["id"] and [tab["name"] for tab in space["tabs"]] == ["nvim"]
+                             for space in app("ls")["spaces"]),
+                 "A project without a definition opens the default Neovim tab")
             search("GL AP existing")
             key("Return")
             wait(lambda: app("status")["space"] == original["space"], "Aliases find and focus the existing space")
@@ -188,6 +191,16 @@ def main():
             call("xdotool", "mousemove", "--window", window, "850", str((min(ys) + max(ys)) // 2), "click", "1")
             wait(lambda: any(space["folder"] == scroll_paths[-2] and space["active"] for space in app("ls")["spaces"]),
                  "Clicking a virtual row opens its project after scrolling")
+
+            defaults = root / "app/herdr-project.json"
+            default_source = defaults.read_text()
+            defaults.write_text('{"tabs":["shell"]}')
+            search(Path(scroll_paths[4]).name)
+            key("Return")
+            wait(lambda: any(space["folder"] == scroll_paths[4] and [tab["name"] for tab in space["tabs"]] == ["shell"]
+                             for space in app("ls")["spaces"]),
+                 "Editing the fallback definition changes the next project's default tabs")
+            defaults.write_text(default_source)
             call("xdotool", "windowsize", "--sync", window, "800", "600")
             search("custom space")
             wait(lambda: visible_row("resized"), "Picker rows are visible in a smaller window")
@@ -373,7 +386,7 @@ def main():
             key("Return")
             wait(lambda: tab_names(invalid)[:3] == configured_tabs, "Reopening reloads the corrected definition")
             assert not app("status")["errors"], app("status")
-            print("PASS: project pickers, dated worktrees, shared JSON tabs, configured order, running-tab reuse, and invalid-definition recovery.", flush=True)
+            print("PASS: project pickers, configurable fallback tabs, dated worktrees, shared JSON tabs, running-tab reuse, and invalid-definition recovery.", flush=True)
         except Exception:
             print("Status:", app("status"), flush=True)
             print("Spaces:", app("ls"), flush=True)
