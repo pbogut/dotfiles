@@ -5,7 +5,7 @@
 
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, ScrollHandle } from "gpui-base";
-import { spaces, machines, panes, run, openOverlay, exec, hc, readTextFile, theme, shared, setShared, watchFolder, window, layout } from "herdr";
+import { spaces, machines, panes, run, openOverlay, exec, hc, readTextFile, theme, shared, setShared, watchFolder, window, layout, checking, nextCommand, notify } from "herdr";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -79,7 +79,8 @@ export default class Spaces extends View {
     this.ready = {}; // machine -> its layout was readable at the last look
     this.at = {}; // space -> its where() at the last look
     this.watching = new Map(); // local repos' pending folder watches
-    this.projects = new Map(); // configured machine/folder -> { name, checked }
+    this.projects = new Map(); // configured machine/folder -> { name, root }
+    this.projectReloads = new Set();
     // Spaces made while this runs wait (at most a moment) for their git, so a
     // worktree appears under its repo instead of jumping there.
     this.shown = new Set(spaces().map((s) => s.id));
@@ -99,12 +100,23 @@ export default class Spaces extends View {
     cx.timer.every(15000, cx => this.refreshMachines(cx));
     // Refresh only when the refs could have changed (see `due`).
     cx.timer.every(250, (cx) => this.checkNew(cx));
+    if (!checking()) cx.spawn(async cx => {
+      for (;;) {
+        const command = await nextCommand();
+        if (!command.startsWith("reload@")) continue;
+        try {
+          const project = JSON.parse(decodeURIComponent(command.slice(7)));
+          if (!project.folder?.startsWith("/")) continue;
+          this.projectReloads.add(projectKey(project));
+          this.refreshProjects(spaces(), cx);
+        } catch {}
+      }
+    });
   }
 
   checkNew(cx) {
     const now = Date.now();
     const sp = spaces();
-    this.refreshProjects(sp, cx);
     for (const s of sp) if (!this.shown.has(s.id)) this.born[s.id] ??= now;
     const due = this.due(now, sp, panes());
     if (due.size) this.refreshGit(due, cx);
@@ -114,11 +126,10 @@ export default class Spaces extends View {
   // Names and initials belong to the configured project, independent of terminal cd.
   refreshProjects(sp, cx) {
     if (this.refreshingProjects) return;
-    const now = Date.now();
     const keys = new Set(sp.filter(s => s.folder).map(projectKey));
     for (const key of this.projects.keys()) if (!keys.has(key)) this.projects.delete(key);
-    const due = [...keys].filter(key => !this.projects.has(key)
-      || (window().active && now - this.projects.get(key).checked > FALLBACK));
+    for (const key of this.projectReloads) if (!keys.has(key)) this.projectReloads.delete(key);
+    const due = [...keys].filter(key => !this.projects.has(key) || this.projectReloads.has(key));
     if (!due.length) return;
     this.refreshingProjects = true;
     cx.spawn(async cx => {
@@ -127,22 +138,30 @@ export default class Spaces extends View {
         while (next < due.length) {
           const key = due[next++];
           const [on, cwd] = JSON.parse(key);
-          const entry = { ...this.projects.get(key), checked: now };
+          const reload = this.projectReloads.delete(key);
+          const entry = { ...this.projects.get(key) };
           try {
             const r = await exec("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd, on });
-            if (r.code === 0 || /not a git repository/i.test(r.stderr)) {
-              const common = r.code === 0 ? r.stdout.replace(/\n$/, "") : "";
-              entry.name = projectName(common, cwd);
-              const root = (common || cwd).replace(/\/+$/, "").replace(/\/\.(git|bare)$/, "");
-              try {
-                const config = JSON.parse(await readTextFile(`${root}/herdr-project.json`, { on }));
-                if (typeof config?.name === "string" && config.name.trim()) entry.name = config.name.trim();
-              } catch {
-                // An unreadable or invalid optional label falls back to the repository name.
+            if (r.code !== 0 && !/not a git repository/i.test(r.stderr)) throw new Error(r.stderr || "Could not find project root.");
+            const common = r.code === 0 ? r.stdout.replace(/\n$/, "") : "";
+            const fallback = projectName(common, cwd);
+            entry.root = (common || cwd).replace(/\/+$/, "").replace(/\/\.(git|bare)$/, "");
+            entry.name ??= fallback;
+            const path = `${entry.root}/herdr-project.json`;
+            try {
+              const config = JSON.parse(await readTextFile(path, { on }));
+              entry.name = typeof config?.name === "string" && config.name.trim() ? config.name.trim() : fallback;
+            } catch (error) {
+              throw new Error(`${path}: ${error.message ?? error}`);
+            }
+            if (reload) {
+              for (const [otherKey, other] of this.projects) {
+                if (JSON.parse(otherKey)[0] === on && other.root === entry.root) other.name = entry.name;
               }
             }
-          } catch {
-            // Keep the last name if the machine is unavailable; retry later.
+          } catch (error) {
+            // Keep the last name until an explicit reload succeeds.
+            if (reload) notify({ title: "Could not reload project name", body: String(error.message ?? error), level: "error" });
           }
           this.projects.set(key, entry);
         }
@@ -560,11 +579,12 @@ export default class Spaces extends View {
       .child(div().absolute().right(5).text_color(tone(t, w.status)).child(glyph(w.status))));
   }
 
-  render() {
+  render(cx) {
     const t = theme();
     const collapsed = narrow();
     const palette = ["ansi6", "ansi3", "ansi4", "ansi5", "ansi2", "ansi1"];
     const sp = spaces();
+    this.refreshProjects(sp, cx);
     const ids = new Set(sp.map(p => p.id));
     const kept = Object.fromEntries(Object.entries(shared("space.colors") ?? {}).filter(([id]) => ids.has(id)));
     let changed = Object.keys(kept).length !== Object.keys(shared("space.colors") ?? {}).length;

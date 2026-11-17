@@ -29,7 +29,8 @@ function element() {
 const text = el => typeof el === "string" ? [el] : el.nodes.flatMap(text);
 
 async function fixture(spaces, exec, readTextFile = async () => null) {
-  const tasks = [];
+  const tasks = [], notices = [];
+  let receive;
   const state = { now: 100_000, panes: [] };
   const context = vm.createContext({
     Date: { now: () => state.now },
@@ -48,18 +49,28 @@ async function fixture(spaces, exec, readTextFile = async () => null) {
       window: () => ({ active: true }), layout: () => ({}),
       run() {}, openOverlay() {}, theme: () => ({}), shared: () => null, setShared() {},
       hc: async () => ({ code: 0, stdout: '{"machines":[]}' }), exec, readTextFile, watchFolder() {},
+      checking: () => false, notify: message => notices.push(message),
+      nextCommand: () => new Promise(resolve => { receive = resolve; }),
     }),
   };
   const main = new vm.SourceTextModule(await readFile(source, "utf8"), { context });
   await main.link(name => modules[name]);
   await main.evaluate();
-  const cx = { spawn: callback => tasks.push(callback(cx)), notify() {}, timer: { every() {} } };
+  const cx = { spawn: callback => tasks.push(callback(cx)),
+    notify: () => view.refreshProjects(spaces, cx), timer: { every() {} } };
   const view = new main.namespace.default();
   view.init({}, cx);
+  tasks.pop(); // The command listener stays alive for the lifetime of the mod.
   view.watch = () => {}; // Filesystem watches aren't needed to test the rendered letters.
   return {
-    state, view,
+    state, view, notices,
+    reload: async (space) => {
+      receive(`reload@${encodeURIComponent(JSON.stringify(space))}`);
+      await new Promise(setImmediate);
+      while (tasks.length) await Promise.all(tasks.splice(0));
+    },
     refresh: async () => {
+      view.refreshProjects(spaces, cx);
       view.checkNew(cx);
       while (tasks.length) await Promise.all(tasks.splice(0));
     },
@@ -121,6 +132,8 @@ test("real Git worktrees use the project name and initial, independently of labe
   await writeFile(join(feature, "herdr-project.json"), '{"name":"Wrong worktree override"}');
   app.state.now += 60_001;
   await app.refresh();
+  assert.deepEqual(app.row(spaces[1]), ["P", "pms"], "Saving a config does not refresh its label");
+  await app.reload(spaces[1]);
   for (const space of spaces.slice(0, 3)) assert.deepEqual(app.row(space), ["D", "Dispensary"]);
   assert.deepEqual(app.row(spaces[1], branchInfo), ["D", "Dispensary", "feature"]);
   assert.equal((await git(feature, "symbolic-ref", "--short", "HEAD")).stdout.trim(), "2026-11-17-feature");
@@ -131,11 +144,13 @@ test("real Git worktrees use the project name and initial, independently of labe
   await writeFile(join(notes, "herdr-project.json"), '{"name":"Research"}');
   app.state.now += 60_001;
   await app.refresh();
+  await app.reload(spaces[0]);
+  await app.reload(spaces[5]);
   for (const i of [0, 3, 4]) assert.deepEqual(app.row(spaces[i]), ["S", "Site"]);
   assert.deepEqual(app.row(spaces[5]), ["R", "Research"]);
 });
 
-test("lookups distinguish machines, share folder caches and retry temporary failures", async () => {
+test("lookups distinguish machines, share folder caches and retry only on explicit reload", async () => {
   const folder = "/projects/gitlab.com/team/pms/branch";
   const spaces = [
     { id: "local", name: "gl/team/pms/branch", folder },
@@ -167,11 +182,14 @@ test("lookups distinguish machines, share folder caches and retry temporary fail
   offline = true;
   app.state.now += 60_001;
   await app.refresh();
+  assert.equal(calls.length, 2, "Elapsed time never rereads project config or resolves its root");
+  await app.reload(spaces[2]);
   assert.equal(app.row(spaces[2])[0], "R", "Retain the remote's last known initial");
   offline = false;
   app.state.now += 60_001;
   await app.refresh();
-  assert.equal(calls.length, 6, "Retry after a temporary failure");
+  await app.reload(spaces[2]);
+  assert.equal(calls.length, 4, "Retry only the requested machine after a temporary failure");
   spaces.splice(0, 3);
   await app.refresh();
   assert.equal(app.view.projects.size, 0, "Closed spaces release their cached entries");
@@ -197,16 +215,52 @@ test("optional names fall back safely and branch shortening changes display text
     const info = Object.freeze({ name: ".bare", branch: raw, ahead: 2, behind: 1 });
     assert.deepEqual(app.row(space, info), ["P", "Pharmacy", shown, "↑2", "↓1"]);
   }
+  definition = "{";
+  await app.reload(space);
+  assert.deepEqual(app.row(space), ["P", "Pharmacy"], "A failed reload retains the last valid name");
+  assert.match(app.notices.at(-1).body, /\/repo\/herdr-project.json/);
   for (const invalid of [null, "{", "null", "[]", "{}", '{"name":42}', '{"name":""}', '{"name":"  "}']) {
     definition = invalid;
     app.state.now += 60_001;
     await app.refresh();
+    await app.reload(space);
     assert.deepEqual(app.row(space), ["R", "repo"]);
   }
   definition = '{"name":"New name"}';
   app.state.now += 60_001;
   await app.refresh();
+  await app.reload(space);
   assert.deepEqual(app.row(space), ["N", "New name"]);
   assert.equal(space.name, "gl/ap/pms/2026-11-17-fix-stock");
   assert.equal(space.folder, "/repo/main");
+});
+
+test("a reload arriving during initial reads runs afterwards and updates only siblings on the same machine", async () => {
+  const spaces = [
+    { id: "one", folder: "/repo/main" },
+    { id: "two", folder: "/repo/feature" },
+    { id: "remote", folder: "/repo/main", machine: "remote" },
+  ];
+  let release, definition = '{"name":"Before"}';
+  const gate = new Promise(resolve => { release = resolve; });
+  const reads = [];
+  const app = await fixture(spaces, async () => ({ code: 0, stdout: "/repo/.bare\n" }),
+    async (_path, { on }) => {
+      reads.push(on);
+      const snapshot = definition;
+      await gate;
+      return snapshot;
+    });
+  app.view.refreshGit = () => {};
+  const loading = app.refresh();
+  await new Promise(setImmediate);
+  definition = '{"name":"After"}';
+  const reloading = app.reload(spaces[0]);
+  release();
+  await Promise.all([loading, reloading]);
+  assert.deepEqual(spaces.map(space => app.row(space)[1]), ["After", "After", "Before"]);
+  const count = reads.length;
+  app.state.now += 600_000;
+  await app.refresh();
+  assert.equal(reads.length, count, "Time and rendering cause no config reads");
 });

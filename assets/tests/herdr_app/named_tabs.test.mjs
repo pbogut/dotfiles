@@ -248,6 +248,74 @@ test("a rejected space creation does not block the next project request", async 
 const creations = (app) => app.calls.filter(([name]) => name === "tab.new").map(([, args]) => args);
 const devArgv = (...args) => ["exec", "env", "-u", "HERDR_ENV", "--", ...args];
 
+test("manual reload applies fresh tabs and dev, refreshes labels, and preserves running tabs and selection", async () => {
+  const app = await fixture();
+  const space = app.spaces[0];
+  space.selected = "original";
+  const path = "/project one/herdr-project.json";
+  app.files.set(path, '{"name":"First","tabs":["shell","dev"],"dev":["old-dev"]}');
+  await app.command("reload-project");
+  app.flush();
+  const dev = space.tabs.find(tab => tab.name === "dev");
+  app.files.set(path, '{"name":"Second","tabs":["dev","nvim"],"dev":["new-dev"]}');
+  await app.command("reload-project");
+  app.flush();
+  assert.deepEqual(space.tabs.map(tab => tab.name), ["dev", "nvim", "shell", "1"]);
+  assert.equal(space.tabs[0].id, dev.id);
+  assert.equal(space.selected, "original");
+  assert.equal(creations(app).filter(tab => tab.name === "dev").length, 1);
+  assert.ok(app.calls.every(([name]) => !["tab.close", "space.select", "tab.select"].includes(name)));
+  const updates = app.calls.filter(([name]) => name.startsWith("pbogut-spaces.reload@"));
+  assert.equal(updates.length, 2);
+  assert.deepEqual(JSON.parse(decodeURIComponent(updates[1][0].split("@")[1])),
+    { folder: space.folder, machine: null });
+  space.tabs = space.tabs.filter(tab => tab.id !== dev.id);
+  await app.command("reload-project");
+  app.flush();
+  assert.deepEqual(creations(app).at(-1).argv, devArgv("new-dev"));
+});
+
+test("invalid reloads and picker reopens preserve the last applied order and never refresh labels", async () => {
+  const app = await fixture();
+  const space = app.spaces[0];
+  const path = "/project one/herdr-project.json";
+  app.files.set(path, '{"tabs":["shell","dev"],"dev":["valid"]}');
+  await app.command("reload-project");
+  app.flush();
+  const tabs = structuredClone(space.tabs);
+  for (const [command, source] of [
+    ["reload-project", "{"],
+    ["reload-project", '{"name":"Wrong","tabs":["nvim"],"dev":[]}'],
+    [projectCommand({ id: space.id, folder: space.folder }), '{"tabs":["unknown"]}'],
+  ]) {
+    app.calls.length = 0;
+    app.files.set(path, source);
+    await app.command(command);
+    app.flush();
+    assert.deepEqual(space.tabs, tabs);
+    assert.deepEqual(app.persisted.get("pbogut-tabs.order.one"), ["shell", "dev"]);
+    assert.ok(app.calls.some(([name]) => name === "notify"));
+    assert.ok(app.calls.every(([name]) => !name.startsWith("pbogut-spaces.") && !name.startsWith("tab.")));
+  }
+});
+
+test("manual reload reads the active machine and a folderless space reports an error", async () => {
+  const app = await fixture();
+  app.spaces[0].machine = "remote";
+  app.files.set("/project one/herdr-project.json", '{"tabs":["nvim"]}');
+  app.files.set("remote:/project one/herdr-project.json", '{"tabs":["dev"],"dev":["remote-dev"]}');
+  await app.command("reload-project");
+  app.flush();
+  assert.deepEqual(creations(app).map(tab => tab.name), ["dev"]);
+  assert.deepEqual(creations(app)[0].argv, devArgv("remote-dev"));
+  const update = app.calls.find(([name]) => name.startsWith("pbogut-spaces.reload@"))[0];
+  assert.equal(JSON.parse(decodeURIComponent(update.split("@")[1])).machine, "remote");
+  app.calls.length = 0;
+  delete app.spaces[0].folder;
+  await app.command("reload-project");
+  assert.deepEqual(app.calls.map(([name]) => name), ["notify"]);
+});
+
 test("project layouts use one validated dev configuration for the whole batch", async () => {
   const app = await fixture();
   const path = "/new/herdr-project.json";

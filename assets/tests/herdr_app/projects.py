@@ -394,6 +394,40 @@ def main():
             app("do", "pbogut-tabs.shell-3")
             wait(lambda: tab_names(target) == [*configured_tabs, "shell-3"], "Named shortcuts preserve configured order")
 
+            selected = next(tab for tab in project_space(target)["tabs"] if tab["name"] == "shell-3")["id"]
+            wait(lambda: app("status")["tab"] == selected, "The shortcut finishes selecting shell-3 before reload")
+            reloaded_tabs = ["dev", "shell", "nvim", "shell-2"]
+            definition.write_text(json.dumps({
+                "name": "Reloaded project", "tabs": reloaded_tabs, "dev": [*dev_command, "manual reload"],
+            }))
+            search("reload project config", "ctrl+shift+p", "pbogut-palette")
+            key("Return")
+            wait(lambda: tab_names(target) == [*reloaded_tabs, "shell-3"],
+                 "The palette reloads and reorders the current project's config")
+            assert app("status")["tab"] == selected, "Reload preserves the selected tab"
+            assert len(dev_records(target)) == 2, "Reload keeps an already running dev command"
+            assert tab_names(repo / "other")[:4] == configured_tabs, "Sibling worktree tabs keep their own layout"
+            definition.write_text('{"name":"Invalid","tabs":["nvim"],"dev":[]}')
+            app("do", "pbogut-tabs.reload-project")
+            # A harmless following request runs only after reload has finished validating.
+            app("do", "pbogut-tabs.shell-2")
+            shell_two = next(tab for tab in project_space(target)["tabs"] if tab["name"] == "shell-2")["id"]
+            wait(lambda: app("status")["tab"] == shell_two, "The reload queue remains usable after an error")
+            assert tab_names(target) == [*reloaded_tabs, "shell-3"], "Invalid config retains the applied order"
+            definition.write_text(json.dumps({
+                "name": "Reloaded project", "tabs": reloaded_tabs, "dev": [*dev_command, "manual reload"],
+            }))
+            dev_tab = next(tab for tab in project_space(target)["tabs"] if tab["name"] == "dev")
+            app("do", "tab.close", "--id", dev_tab["id"])
+            wait(lambda: "dev" not in tab_names(target), "Dev closes before applying its new command")
+            search("reload project config", "ctrl+shift+p", "pbogut-palette")
+            key("Return")
+            wait(lambda: len(dev_records(target)) == 3, "Reload recreates missing dev with the new command")
+            assert dev_records(target)[-1]["args"] == [*dev_args, "manual reload"]
+            definition.write_text(json.dumps(project_config))
+            app("do", "pbogut-tabs.reload-project")
+            wait(lambda: tab_names(target) == [*configured_tabs, "shell-3"], "Reload restores the configured tab order")
+
             dated_prompt()
             call("xdotool", "type", "--clearmodifiers", "bad..name")
             key("Return")

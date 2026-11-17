@@ -219,6 +219,18 @@ already running. It preserves existing tabs and the selected tab. Opening the
 project again reloads its definition. The named-tab shortcuts also respect the
 last applied project order, which the App persists across restarts.
 
+Ctrl+Shift+P → **Reload project config** applies the definition again to the
+current space, using that space's machine and configured folder. It creates
+missing configured tabs, applies their order, and refreshes the sidebar name
+for every open worktree sharing the project on that machine. Existing extra
+tabs and the selected tab are preserved. Reopening a project through the picker
+also refreshes its name.
+
+The updated `dev` command takes effect when a missing dev tab is created.
+A running dev tab continues until closed; reload or Alt+; then starts it with
+the new command. Invalid configuration reports its file path and preserves
+the existing space's last applied layout and name.
+
 Supported roles are `nvim`, `shell`, `shell-2`, `shell-3`, `dev`, `sql`, `rest`,
 `git`, `docker`, and positive numbered `oc-N` slots. `opencode` aliases `oc-1`.
 Each role uses its existing launcher and the space's configured folder.
@@ -240,7 +252,7 @@ explicit `"tabs": []` in that file keeps a shell. Both definitions are read
 afresh when opening a project.
 
 Invalid JSON, unknown roles, duplicate roles, and invalid dev commands produce an error with
-the file path and open the project with a shell rather than a partial layout.
+the file path. A new project opens with a shell rather than a partial layout.
 Herdr TUI uses its existing `herdr-project.sh` definition.
 
 ### Dev commands
@@ -284,8 +296,8 @@ folder. Git's common directory identifies the repository across worktrees:
 Set `"name": "PMS"` in the shared `herdr-project.json` beside `.bare` to override
 the label and its initial for every worktree. Regular repositories read the file
 beside `.git`; non-Git folders read it from the configured folder.
-An absent, blank, or non-string `name`, or invalid JSON, falls back to the repository
-or folder name.
+An absent, blank, or non-string `name` falls back to the repository or folder name.
+Invalid JSON uses that fallback on initial load; a failed reload keeps the last name.
 Folders outside Git use the folder name; a space without a folder uses its name.
 
 The right side shows the terminal's current branch, with a leading `YYYY-MM-DD-`
@@ -294,8 +306,10 @@ the branch to see its full name, or over the project to see its configured folde
 These are display labels. Space names, folder paths, IDs, and Git branch names
 retain their original values for pickers, named tabs, and session restoration.
 
-Lookups are cached by machine and configured folder and refreshed once a minute
-while the window is active, including edits to `name`. After upgrading Herdr,
+Lookups are cached by machine and configured folder. Names are read when a
+folder first appears, when reopening it through the project picker, or with
+**Reload project config**. Project configuration has no timer-based checks or
+file watchers. After upgrading Herdr,
 merge changes from the shipped Spaces mod into this copy, keeping the
 configured-folder lookup, optional name, and shortened branch display.
 
@@ -385,6 +399,8 @@ order, reusing running tabs, filling missing tabs, and correcting an invalid
 definition. Projects without a definition use the configurable fallback.
 Custom dev checks cover literal arguments, worktree-relative paths, fallback
 commands, running-tab reuse, reloading on recreation, and closing on failure.
+Manual reload checks cover the command palette, configured tab order, missing
+dev tabs, and retaining the applied configuration after invalid edits.
 
 The remote-picker test connects two isolated cores through a local `--via`
 transport. It checks native Tab/Shift+Tab with a focused search input, machine
