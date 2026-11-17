@@ -15,14 +15,18 @@ export default class Shortcuts extends View {
       for (;;) {
         const command = await nextCommand();
         if (command === `closed-${this.overlay}`) this.overlay = null;
-        if (command !== "toggle") continue;
-        if (this.overlay) closeOverlay(this.overlay);
-        else this.open();
+        if (command !== "toggle" && command !== "copy") continue;
+        const mod = command === "copy" ? "pbogut-copy" : "pbogut-keys";
+        if (this.overlay) {
+          closeOverlay(this.overlay);
+          if (this.mod === mod) continue;
+        }
+        this.open(mod);
       }
     });
   }
 
-  open() {
+  open(mod) {
     if (!this.width) return;
     const viewport = window.viewport_size();
     const zoom = settings().zoom ?? 1;
@@ -30,10 +34,11 @@ export default class Shortcuts extends View {
     const index = work.children.findIndex((node) => node.id === "prefix-anchor");
     const below = work.children.slice(index + 1)
       .reduce((height, node) => height + (node.hidden ? 0 : node.size?.px ?? 0), 0);
+    this.mod = mod;
     this.overlay = openOverlay({
-      mod: "pbogut-keys", kind: "window", frame: "none",
-      width: this.width / zoom, height: 36,
-      at: { x: viewport.width - this.width, y: viewport.height - (below + 36) * zoom },
+      mod, kind: "window", frame: "none",
+      width: 1, height: 1, at: { x: 0, y: 0 },
+      props: { left: (viewport.width - this.width) / zoom, bottom: below },
     });
   }
 
@@ -62,23 +67,27 @@ export default class Shortcuts extends View {
         .on_size_change((size) => { this.width = size.width; });
     }
     const t = theme();
-    const keycap = (key) => h_flex().h(22).min_w(22).px(5).justify_center()
+    const keycap = (key) => h_flex().h(22).min_w(22).px(5).justify_center().flex_shrink_0()
       .border_1().rounded(4).border_color(t.border).bg(t.surface)
       .text_color(t.accent).text_size(12).child(key);
-    const hint = (key, label) => h_flex().gap(6)
+    const hint = (key, label) => h_flex().gap(6).flex_shrink_0()
       .child(keycap(key)).child(div().child(label));
-    return h_flex().id("shortcuts").track_focus(this.handle).w_full().h(36)
+    const bar = h_flex().id("shortcuts").track_focus(this.handle).h(36)
       .overflow_hidden().on_key_down((event, cx) => this.onKey(event, cx))
       .on_mouse_down("left", (_event, cx) => cx.stop_propagation())
       .on_mouse_down_out(() => this.dismiss())
-      .items_center().px(12).gap(24)
+      .items_center().px(12).gap(24).whitespace_nowrap()
       .bg(t.popover).border_t_1().border_color(t.border)
       .text_color(t.foreground).text_size(13)
-      .child(keycap("Ctrl+G"))
-      .child(hint("v", "split right"))
-      .child(hint("s", "split down"))
-      .child(hint("c", "new tab"))
-      .child(div().flex_1())
+      .child(h_flex().flex_1().min_w(0).gap(24).overflow_hidden()
+        .child(keycap("Ctrl+G"))
+        .child(hint("v", "split right"))
+        .child(hint("s", "split down"))
+        .child(hint("c", "new tab")))
       .child(hint("Esc", "cancel"));
+    // Native relative positioning follows resizes without reopening the overlay.
+    return div().id("shortcuts-overlay").relative().size_full()
+      .on_mouse_down("left", (_event, cx) => cx.stop_propagation())
+      .child(bar.absolute().left(props()?.left ?? 0).right(0).bottom(props()?.bottom ?? 0));
   }
 }

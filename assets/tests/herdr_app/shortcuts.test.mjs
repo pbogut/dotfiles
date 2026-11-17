@@ -8,7 +8,7 @@ const root = new URL("../../../dot_config/herdr-app/mods/pbogut-keys/", import.m
 async function fixture(name = "pbogut-keys", checking = false, overlay = true) {
   const calls = [];
   const tasks = [];
-  const terminal = { address: "test/t1", selection: null };
+  const terminal = { address: "test/t1", rows: 24, cols: 80, selection: null };
   const focus = { pane: "test-pane", terminal: terminal.address };
   const config = { zoom: 1 };
   const context = vm.createContext({
@@ -17,12 +17,22 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true) {
   const element = new Proxy({}, { get: () => () => element });
   let view;
   let resolveCommand;
+  const commands = [];
+  function sendCommand(command) {
+    if (resolveCommand) {
+      const resolve = resolveCommand;
+      resolveCommand = null;
+      resolve(command);
+    } else commands.push(command);
+  }
   const host = {
     checking: () => checking,
     closeOverlay: () => { calls.push(["close"]); view.close?.(); },
     focused: () => focus,
+    panes: () => [{ terminal: terminal.address, scroll: null }],
     hc: async (args) => { calls.push(["hc", ...args]); return { code: 0 }; },
-    nextCommand: () => new Promise((resolve) => { resolveCommand = resolve; }),
+    nextCommand: () => commands.length ? Promise.resolve(commands.shift())
+      : new Promise((resolve) => { resolveCommand = resolve; }),
     notify: (args) => calls.push(["notify", args]),
     layout: () => ({
       children: [{ id: "work", children: [
@@ -30,11 +40,12 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true) {
         { id: "tabs", size: { px: 42 } }, { id: "status", size: { px: 28 } },
       ] }],
     }),
-    openOverlay: (spec) => { calls.push(["open", spec]); return "test-overlay"; },
+    openOverlay: (spec) => { calls.push(["open", spec]); return `${spec.mod}-overlay`; },
     props: () => overlay ? { overlay: "test-overlay" } : null,
     settings: () => config,
     run: (name, args) => {
       calls.push([name, args]);
+      if (name === "pbogut-copy.selection-ready") sendCommand("selection-ready");
       if (name === "terminal.select") {
         const at = args.at === "cursor" ? { row: 10, col: 5 } : args.at;
         terminal.selection = { start: { ...at }, end: { ...at } };
@@ -70,15 +81,17 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true) {
   };
   view = new main.namespace.default();
   view.init({}, cx);
+  await new Promise(setImmediate);
   calls.length = 0;
   tasks.length = 0;
   return {
     view, terminal, focus, config, calls, tasks,
     command: async (command) => {
-      resolveCommand(command);
+      sendCommand(command);
       await new Promise(setImmediate);
     },
     key: (keystroke) => view.onKey({ keystroke }, cx),
+    settle: () => new Promise(setImmediate),
     setChecking: (value) => { checking = value; },
   };
 }
@@ -118,42 +131,83 @@ test("the zero-height anchor toggles a frameless overlay without resizing the la
     const [name, spec] = app.calls.at(-1);
     assert.equal(name, "open");
     assert.equal(spec.frame, "none");
-    assert.equal(spec.width * zoom, app.view.width);
-    assert.equal(spec.height, 36);
-    assert.equal(spec.at.x + spec.width * zoom, 1280);
-    assert.equal(spec.at.y + (spec.height + 42 + 28) * zoom, 800);
+    assert.equal(spec.width, 1, "The native overlay must follow the viewport width");
+    assert.equal(spec.height, 1, "The native overlay must follow the viewport height");
+    assert.equal(spec.at.x, 0);
+    assert.equal(spec.at.y, 0);
+    assert.ok(Math.abs(spec.props.left - 269) < 0.001);
+    assert.equal(spec.props.bottom, 70);
     await app.command("toggle");
     assert.equal(app.calls.at(-1)[0], "close");
-    await app.command("closed-test-overlay");
+    await app.command(`closed-${app.view.overlay}`);
     assert.equal(app.view.overlay, null);
   }
   assert.ok(app.calls.every(([name]) => name === "open" || name === "close"));
 });
 
-test("copy cursor collapses only after the host reports the new endpoint", async () => {
+test("copy mode uses the bottom overlay and replaces prefix mode without stale cleanup closing it", async () => {
+  const app = await fixture("pbogut-keys", false, false);
+  app.view.width = 1011;
+  await app.command("toggle");
+  const prefix = app.view.overlay;
+  await app.command("copy");
+  assert.equal(app.calls.at(-2)[0], "close");
+  const [name, spec] = app.calls.at(-1);
+  assert.equal(name, "open");
+  assert.equal(spec.mod, "pbogut-copy");
+  assert.equal(spec.height, 1);
+  assert.equal(spec.width, 1);
+  assert.equal(spec.frame, "none");
+  assert.equal(spec.props.bottom, 70);
+  const copy = app.view.overlay;
+  await app.command(`closed-${prefix}`);
+  assert.equal(app.view.overlay, copy, "Late prefix cleanup must not forget the open copy overlay");
+  await app.command("copy");
+  assert.equal(app.calls.at(-1)[0], "close");
+  await app.command(`closed-${copy}`);
+  assert.equal(app.view.overlay, null);
+});
+
+test("copy cursor moves without extending a range until selection starts", async () => {
   const app = await fixture("pbogut-copy");
   app.key("h");
   app.view.render();
-  assert.deepEqual(app.terminal.selection.start, { row: 10, col: 5 });
-  app.terminal.selection.end = { row: 10, col: 4 };
-  app.view.render();
+  assert.deepEqual(app.terminal.selection.start, { row: 10, col: 4 });
+  assert.deepEqual(app.terminal.selection.start, app.terminal.selection.end);
+  assert.ok(app.calls.every(([name]) => name !== "terminal.adjust_selection"));
+  await app.settle();
   assert.deepEqual(app.terminal.selection.start, { row: 10, col: 4 });
   app.key("v");
+  await app.settle();
   app.key("l");
   app.terminal.selection.end = { row: 10, col: 8 };
-  app.view.render();
+  await app.settle();
   assert.deepEqual(app.terminal.selection.start, { row: 10, col: 4 });
   app.key("y");
-  assert.deepEqual(app.calls.slice(-4).map(([name]) => name),
-    ["terminal.copy", "close", "terminal.clear_selection", "terminal.scroll"]);
+  assert.deepEqual(app.calls.slice(-5).map(([name]) => name),
+    ["terminal.copy", "close", "terminal.clear_selection", "terminal.scroll", "pbogut-keys.closed-test-overlay"]);
   assert.equal(app.terminal.selection, null);
 });
 
-test("Escape cleans up copy mode, including when the host closes the popup", async () => {
+test("Escape cleans up copy mode, including when the host closes the overlay", async () => {
   const app = await fixture("pbogut-copy");
   app.view.close();
   assert.equal(app.terminal.selection, null);
-  assert.equal(app.calls.at(-1)[1].terminal, "test/t1");
+  assert.equal(app.calls.find(([name]) => name === "terminal.scroll")[1].terminal, "test/t1");
+});
+
+test("closing during movement discards pending selection and copy actions", async () => {
+  for (const close of [(app) => app.key("escape"), (app) => app.view.close()]) {
+    const app = await fixture("pbogut-copy");
+    app.key("h");
+    app.key("y");
+    close(app);
+    const count = app.calls.length;
+    await app.settle();
+    assert.equal(app.calls.length, count);
+    assert.equal(app.terminal.selection, null);
+    assert.ok(app.calls.every(([name]) => name !== "terminal.copy"));
+  }
 });
 
 test("checking a mod never changes the terminal on cleanup", async () => {
@@ -163,9 +217,9 @@ test("checking a mod never changes the terminal on cleanup", async () => {
   assert.deepEqual(app.calls, []);
 });
 
-test("Alt+Esc opens copy mode and Ctrl+G toggles the bottom overlay", async () => {
+test("Alt+Esc and Ctrl+G use the same bottom overlay controller", async () => {
   const keys = JSON.parse(await readFile(new URL("../../keys.json", root), "utf8"));
-  assert.equal(keys.global["alt-escape"], "mod.open:pbogut-copy");
+  assert.equal(keys.global["alt-escape"], "pbogut-keys.copy");
   assert.equal(keys.global["ctrl-g"], "pbogut-keys.toggle");
   assert.equal(keys["mod:pbogut-keys"], undefined);
 });

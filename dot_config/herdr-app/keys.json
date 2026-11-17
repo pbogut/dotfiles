@@ -9,7 +9,7 @@
     "alt-7": "space.select:7",
     "alt-8": "space.select:8",
     "alt-9": "space.select:9",
-    "alt-escape": "mod.open:pbogut-copy",
+    "alt-escape": "pbogut-keys.copy",
     "alt-h": "pane.go:left",
     "alt-j": "pane.go:down",
     "alt-k": "pane.go:up",

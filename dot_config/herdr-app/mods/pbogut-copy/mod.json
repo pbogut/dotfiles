@@ -1,10 +1,4 @@
 {
   "place": "none",
-  "title": "Copy mode",
-  "overlay": {
-    "kind": "popup",
-    "at": "top",
-    "offset": 40,
-    "width": 580
-  }
+  "title": "Copy mode"
 }
