@@ -64,10 +64,11 @@ focus the named tab in the current space, or create it and launch its program:
 | Ctrl+Alt+K / Ctrl+Alt+L / Ctrl+Alt+; | `oc-2` / `oc-3` / `oc-4` |
 
 These override Alt+H/J/K/L pane navigation in this layout. New tabs start in
-the space's configured folder. Creating one orders managed tabs as above,
-with OpenCode slots in numeric order, then other tabs in their existing order.
+the space's configured folder. Creating one uses the project's configured tab
+order when available, followed by the remaining roles in the order above.
+Without a project definition, OpenCode slots sort numerically within that order.
 Repeated shortcuts only focus existing tabs. They preserve the running program
-and its working directory. The initial unnamed tab is retained.
+and its working directory. Shortcuts retain the initial unnamed tab.
 Program-backed tabs replace the launcher's shell with `exec`. Exiting the
 program closes its pane, and the tab closes when its last pane exits.
 The shortcut creates a fresh tab the next time it is used.
@@ -84,8 +85,8 @@ and receives `HERDR_APP_HOME` and `HERDR_APP_SPACE_ID` from the mod.
 The old TUI uses its existing helpers and separate socket directory.
 
 The `dev` role runs `make dev` when a Makefile exists, then closes without an
-Enter prompt. Trusted `herdr-project.sh` commands, project setup/teardown, and
-restart restoration are part of the remaining project-workflow migration.
+Enter prompt. Project-specific dev commands, setup/teardown, tasks, and general
+command restoration are part of the remaining project-workflow migration.
 
 ## OpenCode sessions
 
@@ -144,7 +145,8 @@ directory aliases; multiple search words can match different parts of a path.
 Use Up/Down or Ctrl+J/K and Enter, or click a row. Escape closes the picker.
 
 Selecting an open space focuses it. Selecting a project creates a local space
-in that directory with its compact project label and an initial shell.
+in that directory with its compact project label. Its shared project definition
+supplies the tabs; without one, the space starts with a shell.
 Space matching uses its configured folder, so changing a terminal's working
 directory does not cause duplicate spaces. Existing custom space names are shown.
 
@@ -170,6 +172,45 @@ This action uses local `.bare` repositories. Repository paths containing
 whitespace are rejected because the existing `git-wt` helper splits its
 worktree listing on whitespace. The picker verifies that the script created
 a new registered worktree, since its final path output can mask Git failures.
+
+### Project tab definitions
+
+Put `herdr-project.json` beside `.bare` so sibling worktrees share it:
+
+```text
+project/
+  .bare/
+  herdr-project.json
+  main/
+  feature/
+```
+
+```json
+{
+  "tabs": ["nvim", "dev", "oc-1", "oc-2", "shell"]
+}
+```
+
+The project picker reads the file when opening a local project, including after
+Ctrl+Enter creates a dated worktree. `tabs` lists named roles in display order.
+A new space selects the first configured tab. Once creation finishes with a
+configured tab present, it removes the temporary initial shell if that tab is
+still unnamed and unsplit.
+
+Opening an existing space creates missing configured tabs and reuses those
+already running. It preserves existing tabs and the selected tab. Opening the
+project again reloads its definition. The named-tab shortcuts also respect the
+last applied project order, which the App persists across restarts.
+
+Supported roles are `nvim`, `shell`, `shell-2`, `shell-3`, `dev`, `sql`, `rest`,
+`git`, `docker`, and positive numbered `oc-N` slots. `opencode` aliases `oc-1`.
+Each role uses its existing launcher and the space's configured folder.
+
+A missing file, an omitted `tabs` field, or an empty array uses the default
+shell. Invalid JSON, unknown roles, and duplicate roles produce an error with
+the file path and open the project with a shell rather than a partial layout.
+This version reads only the `tabs` field. Herdr TUI uses its existing
+`herdr-project.sh` definition.
 
 ## Space initials
 
@@ -222,6 +263,7 @@ node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/space_initials.test.mjs
 node --test assets/tests/herdr_app/projects.test.mjs
+node --test assets/tests/herdr_app/project_tabs.test.mjs
 node --test assets/tests/herdr_app/worktrees.test.mjs
 node --test assets/tests/herdr_app/opencode_session.test.mjs
 node --test assets/tests/herdr_app/opencode_rpc.test.mjs
@@ -262,3 +304,6 @@ image capture.
 The native test also copies `git-new-dated-worktree` and `git-wt` into its
 sandbox. It checks Ctrl+Enter, cancellation, dated branch names, the script's
 source-branch choice, opening the new space, and retrying after a Git error.
+It also checks shared JSON tab definitions, real Neovim launches, configured
+order, reusing running tabs, filling missing tabs, and correcting an invalid
+definition.

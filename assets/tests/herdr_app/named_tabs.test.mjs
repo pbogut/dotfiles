@@ -7,6 +7,8 @@ const root = new URL("../../../dot_config/herdr-app/mods/pbogut-tabs/", import.m
 
 async function fixture(checking = false) {
   const calls = [], commands = [], operations = [], timers = [];
+  const files = new Map(), persisted = new Map();
+  const failures = new Set();
   const spaces = [
     { id: "one", active: true, folder: "/project one", tabs: [{ id: "original", name: "1", named: false }] },
     { id: "two", active: false, folder: "/project two", tabs: [{ id: "other", name: "shell", named: true }] },
@@ -23,26 +25,32 @@ async function fixture(checking = false) {
     "gpui-kit": mock({ View: class {}, div: () => element }),
     herdr: mock({
       checking: () => checking, spaces: () => structuredClone(spaces),
+      exec: async (_name, _args, { cwd }) => ({ code: 0, stdout: `${cwd}/.bare\n` }),
+      readTextFile: async (path) => files.get(path) ?? null,
+      shared: (key) => persisted.get(key),
+      setShared: (key, value) => persisted.set(key, JSON.parse(JSON.stringify(value))),
       appHome: () => "/config/herdr-app", home: () => "/home/test",
       notify: (args) => calls.push(["notify", args]),
       nextCommand: () => commands.length ? Promise.resolve(commands.shift())
         : new Promise((resolve) => { receive = resolve; }),
       run: (name, args) => {
+        if (failures.has(name)) throw new Error(`${name} unavailable`);
         const operation = [name, JSON.parse(JSON.stringify(args))];
         calls.push(operation);
         operations.push(operation);
       },
     }),
     "./roles.js": new vm.SourceTextModule(await readFile(new URL("roles.js", root), "utf8"), { context }),
+    "./project.js": new vm.SourceTextModule(await readFile(new URL("project.js", root), "utf8"), { context }),
   };
   const main = new vm.SourceTextModule(await readFile(new URL("main.js", root), "utf8"), { context });
   await main.link((name) => modules[name]);
   await main.evaluate();
-  const cx = { spawn: (fn) => fn(cx), timer: { after: (_ms, fn) => timers.push(fn) } };
+  const cx = { spawn: (fn) => fn(cx), notify: () => view.render(cx), timer: { after: (_ms, fn) => timers.push(fn) } };
   const view = new main.namespace.default();
   view.init({}, cx);
   return {
-    calls, spaces, timers,
+    calls, spaces, timers, files, failures,
     roles: modules["./roles.js"].namespace,
     async command(value) {
       if (receive) {
@@ -55,13 +63,22 @@ async function fixture(checking = false) {
     flush() {
       while (operations.length) {
         for (const [name, args] of operations.splice(0)) {
-          if (name === "tab.new") {
+          if (name === "space.new") {
+            spaces.forEach((space) => { space.active = false; });
+            const id = `space-${++serial}`;
+            spaces.push({ id, folder: args.folder, name: args.name, active: true,
+              tabs: [{ id: `${id}-initial`, name: "1", named: false, panes: 1 }] });
+          } else if (name === "space.select") {
+            spaces.forEach((space) => { space.active = space.id === args.id; });
+          } else if (name === "tab.new") {
+            if (failures.has(args.name)) continue;
             spaces.find((space) => space.id === args.space).tabs.push({ id: `new-${++serial}`, name: args.name, named: true });
           } else {
             const space = spaces.find((space) => space.tabs.some((tab) => tab.id === args.id));
             const index = space.tabs.findIndex((tab) => tab.id === args.id);
             if (name === "tab.move") space.tabs.splice(args.index - 1, 0, ...space.tabs.splice(index, 1));
             if (name === "tab.rename") space.tabs[index].name = args.name;
+            if (name === "tab.close") space.tabs.splice(index, 1);
             if (name === "tab.select") {
               spaces.forEach((candidate) => { candidate.active = candidate === space; });
               space.selected = args.id;
@@ -132,4 +149,82 @@ test("unknown roles, stale spaces and check mode never create tabs", async () =>
   const check = await fixture(true);
   await check.command("nvim");
   assert.deepEqual(check.calls, []);
+});
+
+const projectCommand = (project) => `project@${encodeURIComponent(JSON.stringify(project))}`;
+
+test("a new project opens configured tabs in order, selects the first, and removes its bootstrap shell", async () => {
+  const app = await fixture();
+  app.files.set("/new project/herdr-project.json", '{"tabs":["oc-2","shell","nvim"]}');
+  const command = projectCommand({ folder: "/new project", label: "New" });
+  for (let i = 0; i < 5; i++) await app.command(command);
+  app.flush();
+  const space = app.spaces.find((space) => space.folder === "/new project");
+  assert.deepEqual(space.tabs.map((tab) => tab.name), ["oc-2", "shell", "nvim"]);
+  assert.equal(space.selected, space.tabs[0].id);
+  assert.equal(app.calls.filter(([name]) => name === "space.new").length, 1);
+  assert.equal(app.calls.filter(([name]) => name === "tab.new").length, 3);
+  await app.command("oc-1");
+  app.flush();
+  assert.deepEqual(space.tabs.map((tab) => tab.name), ["oc-2", "shell", "nvim", "oc-1"]);
+});
+
+test("reopening a project fills missing tabs and preserves existing programs, extra tabs, and selection", async () => {
+  const app = await fixture();
+  const space = app.spaces[0];
+  space.tabs.push({ id: "existing-editor", name: "nvim", named: true });
+  space.selected = "original";
+  app.files.set("/project one/herdr-project.json", '{"tabs":["shell","nvim"]}');
+  const command = projectCommand({ id: "one", folder: "/project one", label: "Existing" });
+  await app.command(command);
+  app.flush();
+  await app.command(command);
+  app.flush();
+  assert.deepEqual(space.tabs.map((tab) => tab.name), ["shell", "nvim", "1"]);
+  assert.equal(space.tabs[1].id, "existing-editor");
+  assert.equal(space.selected, "original");
+  assert.equal(app.calls.filter(([name]) => name === "tab.new").length, 1);
+  assert.equal(app.calls.filter(([name]) => name === "tab.close" || name === "space.new").length, 0);
+});
+
+test("invalid project definitions report their path and open just a default shell", async () => {
+  const app = await fixture();
+  app.files.set("/broken/herdr-project.json", '{"tabs":["nvim","oops"]}');
+  await app.command(projectCommand({ folder: "/broken", label: "Broken" }));
+  app.flush();
+  assert.equal(app.calls.filter(([name]) => name === "tab.new").length, 0);
+  assert.equal(app.spaces.find((space) => space.folder === "/broken").tabs.length, 1);
+  assert.match(app.calls.find(([name]) => name === "notify")[1].body, /\/broken\/herdr-project\.json:.*oops/);
+});
+
+test("a stale project selection does not recreate a closed space", async () => {
+  const app = await fixture();
+  await app.command(projectCommand({ id: "closed", folder: "/gone", label: "Gone" }));
+  app.flush();
+  assert.deepEqual(app.calls, []);
+});
+
+test("the bootstrap shell stays until layout creation finishes, including a failed last tab", async () => {
+  const app = await fixture();
+  app.files.set("/new/herdr-project.json", '{"tabs":["shell","nvim"]}');
+  app.failures.add("nvim");
+  await app.command(projectCommand({ folder: "/new", label: "New" }));
+  app.flush();
+  const space = app.spaces.find((space) => space.folder === "/new");
+  assert.deepEqual(space.tabs.map((tab) => tab.name), ["shell", "1"]);
+  app.timers.at(-1)();
+  app.flush();
+  assert.deepEqual(space.tabs.map((tab) => tab.name), ["shell"]);
+});
+
+test("a rejected space creation does not block the next project request", async () => {
+  const app = await fixture();
+  app.failures.add("space.new");
+  await app.command(projectCommand({ folder: "/failed", label: "Failed" }));
+  app.flush();
+  assert.match(app.calls.find(([name]) => name === "notify")[1].body, /space.new unavailable/);
+  app.failures.clear();
+  await app.command(projectCommand({ folder: "/next", label: "Next" }));
+  app.flush();
+  assert.ok(app.spaces.some((space) => space.folder === "/next"));
 });

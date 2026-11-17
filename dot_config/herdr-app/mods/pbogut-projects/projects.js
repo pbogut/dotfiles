@@ -30,7 +30,12 @@ export function projectRows(spaces, projects, config, query = "") {
 export function openProject(row, spaces) {
   const existing = row.id ? spaces.find((space) => space.id === row.id)
     : spaces.find((space) => !space.machine && folderKey(space.folder) === folderKey(row.folder));
-  if (existing) return ["space.select", { id: existing.id }];
+  if (existing) {
+    if (existing.machine || !existing.folder?.startsWith("/")) return ["space.select", { id: existing.id }];
+    return [`pbogut-tabs.project@${encodeURIComponent(JSON.stringify({
+      id: existing.id, folder: existing.folder, label: row.label,
+    }))}`];
+  }
   if (row.id) return null; // A space closed while the picker was open.
-  return ["space.new", { name: row.label, folder: row.folder, machine: "" }];
+  return [`pbogut-tabs.project@${encodeURIComponent(JSON.stringify({ folder: row.folder, label: row.label }))}`];
 }

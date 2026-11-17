@@ -35,7 +35,7 @@ def main():
     (root / "app/shared.json").write_text(json.dumps({"frame.welcomed": "skipped"}))
     scripts = root / "home/.scripts"
     scripts.mkdir()
-    for name in ("ls-project", "git-new-dated-worktree", "git-wt"):
+    for name in ("ls-project", "git-new-dated-worktree", "git-wt", "herdr-app-vim"):
         shutil.copyfile(ROOT / f"dot_scripts/executable_{name}", scripts / name)
         (scripts / name).chmod(0o700)
     env["PATH"] = f"{scripts}:{env['PATH']}"
@@ -275,7 +275,41 @@ def main():
             call("git", "-C", str(repo), "config", "remote.origin.url", str(root / "unused-origin"))
             call("git", "-C", str(repo), "config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
             call("git", "-C", str(repo), "worktree", "add", "-b", "other", str(repo / "other"), other)
-            app("do", "space.new", "--name", "Dated fixture", "--folder", str(repo / "other"))
+            definition = repo / "herdr-project.json"
+            configured_tabs = ["shell-2", "nvim", "shell"]
+            definition.write_text(json.dumps({"tabs": configured_tabs}))
+            dated = app("do", "space.new", "--name", "Dated fixture", "--folder", str(repo / "other"))
+            dated_pid = json.loads(call("hc", "get", dated["terminal"], "--json"))["pid"]
+
+            def project_space(folder):
+                return next((space for space in app("ls")["spaces"] if space["folder"] == str(folder)), None)
+
+            def tab_names(folder):
+                space = project_space(folder)
+                return [tab["name"] for tab in space["tabs"]] if space else []
+
+            def editor_pid(folder):
+                tab = next(tab for tab in project_space(folder)["tabs"] if tab["name"] == "nvim")
+                return json.loads(call("hc", "get", tab["terminals"][0]["terminal"], "--json"))["pid"]
+
+            search("Dated fixture")
+            key("Return")
+            wait(lambda: tab_names(repo / "other")[:3] == configured_tabs, "Existing space gets its JSON tabs in order")
+            assert len(project_space(repo / "other")["tabs"]) == 4, "An existing space keeps its original tab"
+            assert app("status")["tab"] == dated["tab"], "Applying tabs preserves existing selection"
+            assert json.loads(call("hc", "get", dated["terminal"], "--json"))["pid"] == dated_pid
+            editor = editor_pid(repo / "other")
+            search("Dated fixture")
+            key("Return")
+            wait(lambda: not app("status")["overlays"], "Reopening an existing project finishes")
+            assert editor_pid(repo / "other") == editor, "Reopening focuses the running editor instead of restarting it"
+            shell = next(tab for tab in project_space(repo / "other")["tabs"] if tab["name"] == "shell")
+            app("do", "tab.close", "--id", shell["id"])
+            wait(lambda: "shell" not in tab_names(repo / "other"), "The configured shell closes")
+            search("Dated fixture")
+            key("Return")
+            wait(lambda: tab_names(repo / "other")[:3] == configured_tabs, "Reopening fills a missing configured tab")
+            assert editor_pid(repo / "other") == editor
             before = call("git", "-C", str(repo), "worktree", "list", "--porcelain")
 
             def dated_prompt():
@@ -297,6 +331,14 @@ def main():
             assert call("git", "-C", str(target), "branch", "--show-current") == name
             assert call("git", "-C", str(target), "rev-parse", "HEAD") == base, "Helper branches from origin/main"
             assert len([space for space in app("ls")["spaces"] if space["folder"] == str(target)]) == 1
+            wait(lambda: tab_names(target) == configured_tabs, "The new dated worktree uses the shared JSON definition")
+            assert app("status")["tab"] == project_space(target)["tabs"][0]["id"], "The first configured tab is selected"
+            nvim_tab = project_space(target)["tabs"][1]
+            nvim_terminal = nvim_tab["terminals"][0]["terminal"]
+            wait(lambda: "NVIM" in call("hc", "read", nvim_terminal, "--lines", "0"), "The configured editor runs real Neovim")
+            assert json.loads(call("hc", "get", nvim_terminal, "--json"))["cwd"] == str(target)
+            app("do", "pbogut-tabs.shell-3")
+            wait(lambda: tab_names(target) == [*configured_tabs, "shell-3"], "Named shortcuts preserve configured order")
 
             dated_prompt()
             call("xdotool", "type", "--clearmodifiers", "bad..name")
@@ -316,8 +358,22 @@ def main():
             retry = repo / f"{call('date', '+%Y-%m-%d')}-retry-success"
             wait(lambda: any(space["folder"] == str(retry) and space["active"] for space in app("ls")["spaces"]),
                  "Correcting the branch name retries creation")
+            wait(lambda: tab_names(retry) == configured_tabs, "Sibling worktrees share the same definition")
+
+            definition.write_text('{"tabs":["nvim","unknown-role"]}')
+            dated_prompt()
+            call("xdotool", "type", "--clearmodifiers", "invalid definition")
+            key("Return")
+            invalid = repo / f"{call('date', '+%Y-%m-%d')}-invalid-definition"
+            wait(lambda: project_space(invalid) is not None, "A bad definition still opens the project")
+            assert len(project_space(invalid)["tabs"]) == 1
+            assert tab_names(invalid) == ["1"], "Validation prevents a partial tab layout"
+            definition.write_text(json.dumps({"tabs": configured_tabs}))
+            search("invalid-definition")
+            key("Return")
+            wait(lambda: tab_names(invalid)[:3] == configured_tabs, "Reopening reloads the corrected definition")
             assert not app("status")["errors"], app("status")
-            print("PASS: 600-project picker, Ctrl+J/K, scrolling, mouse selection, and Ctrl+Enter dated worktrees with the real helpers.", flush=True)
+            print("PASS: project pickers, dated worktrees, shared JSON tabs, configured order, running-tab reuse, and invalid-definition recovery.", flush=True)
         except Exception:
             print("Status:", app("status"), flush=True)
             print("Spaces:", app("ls"), flush=True)
