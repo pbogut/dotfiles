@@ -19,6 +19,9 @@
   ctq (tap-hold-next 250 ' rctl)
   tab (tap-hold-next 250 tab (layer-toggle prog))
   bsl (tap-hold-next 250 \ (layer-toggle prog))
+  ;; Press together for F15; hold either alone for normal repeat after 100 ms.
+  j15 (tap-hold-next-press 100 j (layer-next j-held) :timeout-button j)
+  k15 (tap-hold-next-press 100 k (layer-next k-held) :timeout-button k)
 )
 
 
@@ -36,11 +39,32 @@
   esc        f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  ins prnt del
   grv        1    2    3    4    5    6    7    8    9    0    -    =    bspc
   @tab       q    w    e    r    t    y    u    i    o    p    @bsl ]    ret
-  @ces       a    s    d    f    g    h    j    k    l    ;    @ctq \
+  @ces       a    s    d    f    g    h    @j15 @k15 l    ;    @ctq \
   @lsh  102d z    x    c    v    b    n    m    ,    .    /    @rsh
   lctl  lmet lalt            spc                ralt rctl left up down right
 )
 
+
+;; These layers handle one key, then return to the underlying layer.
+;; Non-chord keys emit the pending letter before their normal action.
+;; F15 stays down until the second key is released.
+(deflayer j-held
+  #(j esc)  #(j f1)   #(j f2)   #(j f3)   #(j f4)   #(j f5)   #(j f6)   #(j f7)   #(j f8)   #(j f9)   #(j f10)  #(j f11)  #(j f12)  #(j ins) #(j prnt) #(j del)
+  #(j grv)  #(j 1)    #(j 2)    #(j 3)    #(j 4)    #(j 5)    #(j 6)    #(j 7)    #(j 8)    #(j 9)    #(j 0)    #(j -)    #(j =)    #(j bspc)
+  #(j @tab) #(j q)    #(j w)    #(j e)    #(j r)    #(j t)    #(j y)    #(j u)    #(j i)    #(j o)    #(j p)    #(j @bsl) #(j ])    #(j ret)
+  #(j @ces) #(j a)    #(j s)    #(j d)    #(j f)    #(j g)    #(j h)    #(j j)    f15       #(j l)    #(j ;)    #(j @ctq) #(j \\)
+  #(j @lsh) #(j 102d) #(j z)    #(j x)    #(j c)    #(j v)    #(j b)    #(j n)    #(j m)    #(j ,)    #(j .)    #(j /)    #(j @rsh)
+  #(j lctl) #(j lmet) #(j lalt)                     #(j spc)                      #(j ralt) #(j rctl) #(j left) #(j up)   #(j down) #(j right)
+)
+
+(deflayer k-held
+  #(k esc)  #(k f1)   #(k f2)   #(k f3)   #(k f4)   #(k f5)   #(k f6)   #(k f7)   #(k f8)   #(k f9)   #(k f10)  #(k f11)  #(k f12)  #(k ins) #(k prnt) #(k del)
+  #(k grv)  #(k 1)    #(k 2)    #(k 3)    #(k 4)    #(k 5)    #(k 6)    #(k 7)    #(k 8)    #(k 9)    #(k 0)    #(k -)    #(k =)    #(k bspc)
+  #(k @tab) #(k q)    #(k w)    #(k e)    #(k r)    #(k t)    #(k y)    #(k u)    #(k i)    #(k o)    #(k p)    #(k @bsl) #(k ])    #(k ret)
+  #(k @ces) #(k a)    #(k s)    #(k d)    #(k f)    #(k g)    #(k h)    f15       #(k k)    #(k l)    #(k ;)    #(k @ctq) #(k \\)
+  #(k @lsh) #(k 102d) #(k z)    #(k x)    #(k c)    #(k v)    #(k b)    #(k n)    #(k m)    #(k ,)    #(k .)    #(k /)    #(k @rsh)
+  #(k lctl) #(k lmet) #(k lalt)                     #(k spc)                      #(k ralt) #(k rctl) #(k left) #(k up)   #(k down) #(k right)
+)
 
 (deflayer prog
   esc        f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  ins prnt del
