@@ -4,3 +4,5 @@ __pycache__
 *.pyi
 .luarc.json
 .st*
+dot_config/herdr-app/mods/**/gpui-kit.d.ts
+dot_config/herdr-app/mods/**/jsconfig.json
