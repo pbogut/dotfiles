@@ -40,6 +40,7 @@
   },
   "animations": true,
   "tabs": {
-    "mode": "auto"
-  }
+    "mode": "off"
+  },
+  "highlights": true
 }
