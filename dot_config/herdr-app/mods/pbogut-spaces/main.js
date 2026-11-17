@@ -1,11 +1,11 @@
-// Workspace spaces: stable colored avatars, worktrees under their checkout,
-// grouped by machine when more than one is known. After a space's name, the repo
-// its first terminal is in now, only where unusual: branch, ahead/behind. Agent state lives in the agents list, not here. Click to
-// switch, right-click for its menu, drag to reorder.
+// Workspace spaces: project names and initials, worktrees under their checkout,
+// grouped by machine when more than one is known. The right side shows the
+// terminal's current branch without its date prefix, plus ahead/behind counts.
+// Click to switch, right-click for its menu, drag to reorder.
 
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, ScrollHandle } from "gpui-base";
-import { spaces, machines, panes, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout } from "herdr";
+import { spaces, machines, panes, run, openOverlay, exec, hc, readTextFile, theme, shared, setShared, watchFolder, window, layout } from "herdr";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -35,10 +35,9 @@ const where = (s, ps) => JSON.stringify([s.machine ?? null, place(s, ps)]);
 const base = (path) => path.replace(/\/+$/, "").split("/").pop();
 const projectKey = (s) => JSON.stringify([s.machine ?? null, s.folder]);
 
-function projectLetter(common, folder, fallback = "") {
+function projectName(common, folder, fallback = "") {
   const repo = common.replace(/\/+$/, "").replace(/\/\.(git|bare)$/, "");
-  const name = repo ? base(repo).replace(/\.git$/, "") : base(folder || "") || fallback;
-  return [...name][0]?.toUpperCase() ?? "?";
+  return repo ? base(repo).replace(/\.git$/, "") : base(folder || "") || fallback;
 }
 
 // Changes made outside Herdr (an editor's save, a commit in another app): looked
@@ -80,7 +79,7 @@ export default class Spaces extends View {
     this.ready = {}; // machine -> its layout was readable at the last look
     this.at = {}; // space -> its where() at the last look
     this.watching = new Map(); // local repos' pending folder watches
-    this.projects = new Map(); // configured machine/folder -> { letter, checked }
+    this.projects = new Map(); // configured machine/folder -> { name, checked }
     // Spaces made while this runs wait (at most a moment) for their git, so a
     // worktree appears under its repo instead of jumping there.
     this.shown = new Set(spaces().map((s) => s.id));
@@ -112,7 +111,7 @@ export default class Spaces extends View {
     if (sp.some((s) => !this.shown.has(s.id)) || this.orderingDue(now)) cx.notify();
   }
 
-  // Initials belong to the configured project, independent of terminal cd.
+  // Names and initials belong to the configured project, independent of terminal cd.
   refreshProjects(sp, cx) {
     if (this.refreshingProjects) return;
     const now = Date.now();
@@ -131,10 +130,19 @@ export default class Spaces extends View {
           const entry = { ...this.projects.get(key), checked: now };
           try {
             const r = await exec("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd, on });
-            if (r.code === 0) entry.letter = projectLetter(r.stdout.replace(/\n$/, ""), cwd);
-            else if (/not a git repository/i.test(r.stderr)) entry.letter = projectLetter("", cwd);
+            if (r.code === 0 || /not a git repository/i.test(r.stderr)) {
+              const common = r.code === 0 ? r.stdout.replace(/\n$/, "") : "";
+              entry.name = projectName(common, cwd);
+              const root = (common || cwd).replace(/\/+$/, "").replace(/\/\.(git|bare)$/, "");
+              try {
+                const config = JSON.parse(await readTextFile(`${root}/herdr-project.json`, { on }));
+                if (typeof config?.name === "string" && config.name.trim()) entry.name = config.name.trim();
+              } catch {
+                // An unreadable or invalid optional label falls back to the repository name.
+              }
+            }
           } catch {
-            // Keep the last letter if the machine is unavailable; retry later.
+            // Keep the last name if the machine is unavailable; retry later.
           }
           this.projects.set(key, entry);
         }
@@ -460,31 +468,26 @@ export default class Spaces extends View {
     });
   }
 
-  // Only what's unusual, after the name: "herdr \u00b7 spike \u21912 \u21931". The repo or
-  // branch goes when the name already says it (a worktree is named after its branch),
-  // and master/main go: nearly every space is on one. When the row is full, it
-  // and the name both start from their text's width and give way in proportion.
-  gitTail(g, tree, name, t) {
-    const raw = g.branch ?? "detached";
-    const same = (a) => a.toLowerCase() === name.toLowerCase();
-    const branch = same(raw) || raw === "master" || raw === "main" ? "" : raw;
-    const repo = tree || same(g.name) ? "" : g.name;
-    const where = [repo, branch].filter(Boolean).join(" \u00b7 ");
+  // The full Git branch remains available on hover; only its display is shortened.
+  gitTail(g, t) {
+    const raw = g.branch ?? "(detached)";
+    const branch = raw.replace(/^\d{4}-\d{2}-\d{2}-(?=.)/, "");
     return h_flex()
       .flex_auto()
-      .min_w(where ? SIDE_MIN : 0)
+      .min_w(SIDE_MIN)
       .gap(5)
       .justify_end()
       .items_center()
       .text_size(11.5)
       .text_color(t.dim)
-      .when(Boolean(where), (el) => el.child(div().min_w(0).truncate().child(where)))
+      .child(div().min_w(0).truncate().tooltip(raw).child(branch))
       .when(g.ahead > 0, (el) => el.child(div().flex_none().text_color(t.ansi2).child(`\u2191${g.ahead}`)))
       .when(g.behind > 0, (el) => el.child(div().flex_none().text_color(t.ansi1).child(`\u2193${g.behind}`)));
   }
 
   row({ w, i, g, tree }, t) {
     const on = w.active;
+    const name = this.projects.get(projectKey(w))?.name ?? projectName("", w.folder, w.name);
     const fromIndex = this.pressed === null ? -1 : spaces().findIndex(s => s.id === this.pressed);
     const colors = shared("space.colors") ?? {};
     const color = colors[w.id] ?? "ansi6";
@@ -535,9 +538,9 @@ export default class Spaces extends View {
           .items_center()
           .when(Boolean(tree), el => el.pl(22).child(svg("mods/workspace-chrome/branch.svg").size(13).flex_none().text_color(t.dim)))
           .when(!tree, el => el.child(h_flex().size(18).flex_none().rounded(5).bg(fill).items_center().justify_center().text_size(10.5).font_bold().text_color("#ffffff")
-            .child(this.projects.get(projectKey(w))?.letter ?? projectLetter("", w.folder, w.name))))
-          .child(div().flex_initial().min_w(SIDE_MIN).truncate().text_color(t.foreground).child(w.name))
-          .child(g ? this.gitTail(g, tree, w.name, t) : div().flex_1()),
+            .child([...name][0]?.toUpperCase() ?? "?")))
+          .child(div().flex_initial().min_w(SIDE_MIN).truncate().tooltip(w.folder || w.name).text_color(t.foreground).child(name))
+          .child(g ? this.gitTail(g, t) : div().flex_1()),
       );
   }
 

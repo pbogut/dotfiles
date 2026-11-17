@@ -28,7 +28,7 @@ function element() {
 }
 const text = el => typeof el === "string" ? [el] : el.nodes.flatMap(text);
 
-async function fixture(spaces, exec) {
+async function fixture(spaces, exec, readTextFile = async () => null) {
   const tasks = [];
   const state = { now: 100_000, panes: [] };
   const context = vm.createContext({
@@ -47,7 +47,7 @@ async function fixture(spaces, exec) {
       spaces: () => spaces, panes: () => state.panes, machines: () => [],
       window: () => ({ active: true }), layout: () => ({}),
       run() {}, openOverlay() {}, theme: () => ({}), shared: () => null, setShared() {},
-      hc: async () => ({ code: 0, stdout: '{"machines":[]}' }), exec, watchFolder() {},
+      hc: async () => ({ code: 0, stdout: '{"machines":[]}' }), exec, readTextFile, watchFolder() {},
     }),
   };
   const main = new vm.SourceTextModule(await readFile(source, "utf8"), { context });
@@ -63,11 +63,11 @@ async function fixture(spaces, exec) {
       view.checkNew(cx);
       while (tasks.length) await Promise.all(tasks.splice(0));
     },
-    row: space => text(view.row({ w: space, i: 0, g: null, tree: null }, {})),
+    row: (space, g = null) => text(view.row({ w: space, i: 0, g, tree: null }, {})),
   };
 }
 
-test("real Git worktrees use the repository initial, independently of labels and terminal cd", async t => {
+test("real Git worktrees use the project name and initial, independently of labels and terminal cd", async t => {
   const root = await mkdtemp("/tmp/opencode/herdr-space-initials-");
   t.after(() => rm(root, { recursive: true, force: true }));
   const normal = join(root, "website");
@@ -84,7 +84,7 @@ test("real Git worktrees use the repository initial, independently of labels and
   const main = join(project, "main");
   const feature = join(project, "2026-11-17-feature");
   await git(project, "worktree", "add", main, "main");
-  await git(project, "worktree", "add", feature, "feature");
+  await git(project, "worktree", "add", "-b", "2026-11-17-feature", feature, "feature");
   const notes = join(root, "notes");
   await mkdir(notes);
   const spaces = [main, feature, project, normal, normalWorktree, notes].map((folder, i) => ({
@@ -99,20 +99,40 @@ test("real Git worktrees use the repository initial, independently of labels and
     } catch (error) {
       return { code: error.code, stdout: error.stdout, stderr: error.stderr };
     }
-  });
+  }, path => readFile(path, "utf8").catch(error => {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }));
   await app.refresh();
-  for (const [i, letter] of ["P", "P", "P", "W", "W", "N"].entries()) {
-    assert.deepEqual(app.row(spaces[i]), [letter, spaces[i].name]);
+  for (const [i, name] of ["pms", "pms", "pms", "website", "website", "notes"].entries()) {
+    assert.deepEqual(app.row(spaces[i]), [name[0].toUpperCase(), name]);
   }
+  const branchInfo = app.view.git[JSON.stringify([null, feature])];
+  assert.deepEqual(app.row(spaces[1], branchInfo), ["P", "pms", "feature"]);
+  assert.equal(branchInfo.branch, "2026-11-17-feature");
   // Even a fresh lookup after cd into another repo must retain the configured project.
   app.state.panes = [{ tab: "tab0", terminal: "t0", cwd: normal }];
   app.state.now += 60_001;
   spaces[0].name = "a custom name";
   await app.refresh();
-  assert.deepEqual(app.row(spaces[0]), ["P", "a custom name"]);
+  assert.deepEqual(app.row(spaces[0]), ["P", "pms"]);
+  assert.equal(spaces[0].name, "a custom name");
+  await writeFile(join(project, "herdr-project.json"), '{"name":" Dispensary ","tabs":["nvim"]}');
+  await writeFile(join(feature, "herdr-project.json"), '{"name":"Wrong worktree override"}');
+  app.state.now += 60_001;
+  await app.refresh();
+  for (const space of spaces.slice(0, 3)) assert.deepEqual(app.row(space), ["D", "Dispensary"]);
+  assert.deepEqual(app.row(spaces[1], branchInfo), ["D", "Dispensary", "feature"]);
+  assert.equal((await git(feature, "symbolic-ref", "--short", "HEAD")).stdout.trim(), "2026-11-17-feature");
   spaces[0].folder = normal;
   await app.refresh();
-  assert.deepEqual(app.row(spaces[0]), ["W", "a custom name"]);
+  assert.deepEqual(app.row(spaces[0]), ["W", "website"]);
+  await writeFile(join(normal, "herdr-project.json"), '{"name":"Site"}');
+  await writeFile(join(notes, "herdr-project.json"), '{"name":"Research"}');
+  app.state.now += 60_001;
+  await app.refresh();
+  for (const i of [0, 3, 4]) assert.deepEqual(app.row(spaces[i]), ["S", "Site"]);
+  assert.deepEqual(app.row(spaces[5]), ["R", "Research"]);
 });
 
 test("lookups distinguish machines, share folder caches and retry temporary failures", async () => {
@@ -124,18 +144,24 @@ test("lookups distinguish machines, share folder caches and retry temporary fail
     { id: "no-folder", name: "scratch" },
   ];
   const calls = [];
+  const reads = [];
   let offline = false;
   const app = await fixture(spaces, async (_bin, args, options) => {
     if (!args.includes("--git-common-dir")) return { code: 1, stdout: "", stderr: "not a git repository" };
     calls.push(options);
     if (offline && options.on) throw new Error("offline");
     return { code: 0, stdout: options.on ? "/repos/remote.git\n" : "/repos/pms/.bare\n" };
+  }, async (path, { on }) => {
+    reads.push([path, on]);
+    return on ? '{"name":"Remote project"}' : null;
   });
   // Exercise only the icon lookup to count its requests separately from git status.
   app.view.refreshGit = () => {};
   await app.refresh();
   assert.equal(calls.length, 2);
   assert.deepEqual(spaces.map(s => app.row(s)[0]), ["P", "P", "R", "S"]);
+  assert.deepEqual(app.row(spaces[2]), ["R", "Remote project"]);
+  assert.deepEqual(reads, [["/repos/pms/herdr-project.json", null], ["/repos/remote.git/herdr-project.json", "work"]]);
   await app.refresh();
   assert.equal(calls.length, 2, "Do not launch git on every 250ms tick");
   offline = true;
@@ -149,4 +175,38 @@ test("lookups distinguish machines, share folder caches and retry temporary fail
   spaces.splice(0, 3);
   await app.refresh();
   assert.equal(app.view.projects.size, 0, "Closed spaces release their cached entries");
+});
+
+test("optional names fall back safely and branch shortening changes display text only", async () => {
+  const space = Object.freeze({ id: "pms", name: "gl/ap/pms/2026-11-17-fix-stock", folder: "/repo/main" });
+  let definition = '{"name":" Pharmacy "}';
+  const app = await fixture([space],
+    async () => ({ code: 0, stdout: "/repo/.bare\n" }),
+    async path => {
+      assert.equal(path, "/repo/herdr-project.json");
+      return definition;
+    });
+  app.view.refreshGit = () => {};
+  await app.refresh();
+  for (const [raw, shown] of [
+    ["2026-11-17-fix-stock", "fix-stock"],
+    ["main", "main"], ["master", "master"], ["(detached)", "(detached)"],
+    ["feature/2026-11-17-report", "feature/2026-11-17-report"],
+    ["2026-11-17-", "2026-11-17-"],
+  ]) {
+    const info = Object.freeze({ name: ".bare", branch: raw, ahead: 2, behind: 1 });
+    assert.deepEqual(app.row(space, info), ["P", "Pharmacy", shown, "↑2", "↓1"]);
+  }
+  for (const invalid of [null, "{", "null", "[]", "{}", '{"name":42}', '{"name":""}', '{"name":"  "}']) {
+    definition = invalid;
+    app.state.now += 60_001;
+    await app.refresh();
+    assert.deepEqual(app.row(space), ["R", "repo"]);
+  }
+  definition = '{"name":"New name"}';
+  app.state.now += 60_001;
+  await app.refresh();
+  assert.deepEqual(app.row(space), ["N", "New name"]);
+  assert.equal(space.name, "gl/ap/pms/2026-11-17-fix-stock");
+  assert.equal(space.folder, "/repo/main");
 });

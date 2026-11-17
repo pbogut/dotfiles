@@ -193,6 +193,7 @@ project/
 
 ```json
 {
+  "name": "PMS",
   "tabs": ["nvim", "dev", "oc-1", "oc-2", "shell"]
 }
 ```
@@ -263,18 +264,29 @@ The fallback file can also supply `dev`. A project file overrides the fallback
 as a whole, so omitting `dev` in a project file selects the default `make dev`
 behavior. Remote-space shortcuts keep the default command.
 
-## Space initials
+## Space labels
 
 The `pbogut` layout uses `mods/pbogut-spaces`, a copy of Herdr App 0.1.16's
-Spaces sidebar. Letter tiles use the repository name from the space's configured
+Spaces sidebar. Labels and letter tiles use the project name from the space's configured
 folder. Git's common directory identifies the repository across worktrees:
-`gitlab.com/assuredpharmacy/pms/.bare` gives `P`, as does `pms/.git`.
-The shortened display name and a terminal's current directory do not affect it.
+`gitlab.com/assuredpharmacy/pms/.bare` gives `pms` and `P`, as does `pms/.git`.
+Set `"name": "PMS"` in the shared `herdr-project.json` beside `.bare` to override
+the label and its initial for every worktree. Regular repositories read the file
+beside `.git`; non-Git folders read it from the configured folder.
+An absent, blank, or non-string `name`, or invalid JSON, falls back to the repository
+or folder name.
 Folders outside Git use the folder name; a space without a folder uses its name.
 
+The right side shows the terminal's current branch, with a leading `YYYY-MM-DD-`
+removed, and ahead/behind counts. `main` and `master` are shown too. Hover over
+the branch to see its full name, or over the project to see its configured folder.
+These are display labels. Space names, folder paths, IDs, and Git branch names
+retain their original values for pickers, named tabs, and session restoration.
+
 Lookups are cached by machine and configured folder and refreshed once a minute
-while the window is active. After upgrading Herdr, merge changes from the shipped
-Spaces mod into this copy, keeping the configured-folder lookup and tile letter.
+while the window is active, including edits to `name`. After upgrading Herdr,
+merge changes from the shipped Spaces mod into this copy, keeping the
+configured-folder lookup, optional name, and shortened branch display.
 
 ## Customized built-in pickers
 
