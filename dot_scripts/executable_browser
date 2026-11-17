@@ -39,6 +39,8 @@ elif [[ $url =~ ^https://pms\.* ]]; then
   $browser-work "$@" &
 elif [[ $url =~ ^https://local\.* ]]; then
   $browser-work "$@" &
+elif [[ $url =~ ^https?://plannotator\.localhost ]]; then
+  plannotator-webapp "$@" &
 elif [[ $url =~ ^https?://.*\.local ]]; then
   $browser-work "$@" &
 elif [[ $url =~ ^https?://.*\.test ]]; then
