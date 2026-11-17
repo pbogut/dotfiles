@@ -1,9 +1,13 @@
 import type { Context } from "@opencode/plugin/tui/context"
 import net from "node:net"
+import { trackSession } from "./app-session.js"
 
 export default {
   id: "pbogut.herdr-subject",
   setup(ctx: Context) {
+    if (process.env.HC_TERMINAL_ID && process.env.HERDR_ENV !== "1") {
+      return trackSession(ctx)
+    }
     const paneID = process.env.HERDR_PANE_ID
     const socketPath = process.env.HERDR_SOCKET_PATH
     if (process.env.HERDR_ENV !== "1" || !paneID || !socketPath) return

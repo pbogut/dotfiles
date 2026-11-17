@@ -100,6 +100,9 @@ test("creation is serialized and OpenCode slots sort numerically", async () => {
   const editor = app.calls.find(([name, args]) => name === "tab.new" && args.name === "nvim")[1];
   assert.equal(editor.folder, "/project one");
   assert.deepEqual(editor.argv, ["exec", "env", "HERDR_APP_HOME=/config/herdr-app", "HERDR_APP_SPACE_ID=one", "herdr-app-vim", "--start"]);
+  const opencode = app.calls.find(([name, args]) => name === "tab.new" && args.name === "oc-2")[1];
+  assert.deepEqual(opencode.argv, ["exec", "env", "HERDR_APP_HOME=/config/herdr-app", "HERDR_APP_SPACE_ID=one",
+    "herdr-app-opencode", "--start", "oc-2"]);
 });
 
 test("a space switch during creation does not redirect the new tab or steal focus", async () => {

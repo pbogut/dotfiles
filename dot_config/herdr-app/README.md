@@ -87,6 +87,34 @@ The `dev` role runs `make dev` when a Makefile exists, then closes without an
 Enter prompt. Trusted `herdr-project.sh` commands, project setup/teardown, and
 restart restoration are part of the remaining project-workflow migration.
 
+## OpenCode sessions
+
+Each space's `oc-1`, `oc-2`, and other numbered OpenCode tabs remembers its own
+selected root conversation. The local OpenCode `herdr-subject` TUI extension
+records selections in the core's `pbogut-opencode` document, keyed by space ID
+and slot name. Document version checks preserve concurrent updates from other
+tabs. Child sessions resolve to their root; visiting Home retains the last
+conversation. Unmanaged tabs do not write this cache.
+
+Named tabs launch through `herdr-app-opencode`. It resumes the slot with
+`opencode --session <id>`, or starts without a session when the slot is new.
+Normal exit closes the tab. Its shortcut recreates it with the saved conversation.
+Closing and reopening the App window reconnects to surviving processes.
+
+For a lost process or a reboot, core recovery first creates a replacement shell
+in the same terminal. `~/.zshrc.d/herdr-app-opencode.zsh` checks once at that
+shell's first prompt. It verifies the root process ID, terminal labels, saved
+slot owner, and current tab name, then replaces the shell with OpenCode in the
+original project folder. The tab ID, terminal ID, splits, and focus survive.
+This automatic recovery requires Zsh to remain the core's recovery shell.
+Renamed tabs and nested shells do not trigger restoration.
+
+Run `/reload` in already-open named OpenCode tabs after applying the extension.
+It can register their selected conversation without closing them. New tabs load
+it automatically. The App launcher clears inherited old-Herdr pane variables;
+OpenCode running in Herdr TUI continues using the existing official integration,
+title reporting, and workspace-local session caches.
+
 ## Projects
 
 Ctrl+Alt+P opens the native `pbogut-projects` popup. Open spaces come first,
@@ -156,8 +184,11 @@ node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
 node --test assets/tests/herdr_app/projects.test.mjs
 node --test assets/tests/herdr_app/worktrees.test.mjs
+node --test assets/tests/herdr_app/opencode_session.test.mjs
+node --test assets/tests/herdr_app/opencode_rpc.test.mjs
 python3 assets/tests/herdr_app/keyboard.py
 python3 assets/tests/herdr_app/named_tabs.py
+python3 assets/tests/herdr_app/opencode_sessions.py
 python3 assets/tests/herdr_app/editor.py
 python3 assets/tests/herdr_app/projects.py
 python3 assets/tests/herdr_app/projects.py --profile
@@ -175,6 +206,10 @@ actual SQL, main-editor, and scratch Neovim processes running together,
 lazygit file opening, and closing tabs on exit. The editor test uses headless
 Neovim servers to check terminal-specific sockets and named-tab routing,
 including when an old space-wide lock is still held.
+The OpenCode test runs the real App/core and local TUI extension with a small
+session-cache fixture instead of an OpenCode account. It checks separate slots,
+root selection, normal exit/reopening, window reconnection, process loss,
+durable core-shutdown recovery, and adoption of existing named tabs.
 The project-picker test copies the source `ls-project` script into its sandbox
 and checks discovery among 600 projects, alias search, and opening or focusing
 native spaces.

@@ -32,7 +32,8 @@ async function fixture(t, failures = 0) {
     })
   })
   await new Promise((resolve) => server.listen(socketPath, resolve))
-  const env = { HERDR_ENV: "1", HERDR_PANE_ID: "w1:p1", HERDR_SOCKET_PATH: socketPath }
+  // A legacy Herdr pane can itself be inside a core terminal.
+  const env = { HERDR_ENV: "1", HERDR_PANE_ID: "w1:p1", HERDR_SOCKET_PATH: socketPath, HC_TERMINAL_ID: "t999" }
   const previous = Object.fromEntries(Object.keys(env).map((key) => [key, process.env[key]]))
   Object.assign(process.env, env)
   const sessions = new Map([

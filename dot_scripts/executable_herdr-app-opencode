@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+module=${XDG_CONFIG_HOME:-$HOME/.config}/opencode/extensions/herdr-subject/app-session.js
+if [[ ${1:-} == --recover ]]; then
+	exec node "$module" recover "${2:-}"
+fi
+
+[[ ${1:-} == --start && -n ${HERDR_APP_SPACE_ID:-} && -n ${2:-} ]] || exit 2
+session=$(node "$module" prepare "$HERDR_APP_SPACE_ID" "$2")
+# App terminals may inherit the environment that launched the desktop.
+unset HERDR_ENV HERDR_PANE_ID HERDR_SOCKET_PATH HERDR_TAB_ID HERDR_WORKSPACE_ID
+if [[ -n $session ]]; then
+	exec opencode --session "$session"
+fi
+exec opencode

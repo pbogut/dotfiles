@@ -40,9 +40,11 @@ def main():
     settings_path.write_text(json.dumps(settings))
     (root / "app/shared.json").write_text(json.dumps({"frame.welcomed": "skipped"}))
     (root / "home/.zshrc").write_text("# Suppress the first-run wizard in this test home.\n")
-    for name in ("herdr-app-vim",):
+    for name in ("herdr-app-vim", "herdr-app-opencode"):
         shutil.copyfile(ROOT / f"dot_scripts/executable_{name}", bindir / name)
         (bindir / name).chmod(0o700)
+    shutil.copytree(ROOT / "dot_config/opencode/extensions/herdr-subject",
+                    root / "config/opencode/extensions/herdr-subject")
     fixture = bindir / "role-fixture"
     fixture.write_text(
         "#!/usr/bin/env python3\n"

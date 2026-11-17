@@ -18,7 +18,7 @@ export function compareTabs(a, b) {
 
 export function commandFor(role, space, appHome, home) {
   const context = ["env", `HERDR_APP_HOME=${appHome}`, `HERDR_APP_SPACE_ID=${space.id}`];
-  if (role.startsWith("oc-")) return ["opencode"];
+  if (role.startsWith("oc-")) return [...context, "herdr-app-opencode", "--start", role];
   switch (role) {
     case "nvim": return [...context, "herdr-app-vim", "--start"];
     case "shell": case "shell-2": case "shell-3": return undefined;

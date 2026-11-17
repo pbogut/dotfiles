@@ -30,11 +30,19 @@ token when leaving a session or unloading, and refreshes a 15-second expiry so a
 crashed TUI cannot leave stale metadata. Herdr limits token values to 80 characters
 and truncates them again to fit the sidebar.
 
+Inside Herdr App, the same local extension uses `HC_TERMINAL_ID` to track
+the selected root conversation for a named `oc-N` tab. It uses the core's
+`pbogut-opencode` document and terminal labels. Herdr TUI keeps the existing
+socket transport and slot caches, including when it runs inside an App terminal.
+See `dot_config/herdr-app/README.md` for launch and recovery behavior.
+
 ## Tests
 
 ```sh
 node --test assets/tests/herdr_project_layout/opencode_session.test.mjs
 node --test assets/tests/herdr_project_layout/opencode_subject.test.mjs
+node --test assets/tests/herdr_app/opencode_session.test.mjs
+python3 assets/tests/herdr_app/opencode_sessions.py
 ```
 
 The tests require Node.js and chezmoi. They load the pinned external source with
@@ -69,11 +77,13 @@ For the subject extension and sidebar layout:
 ```sh
 chezmoi diff \
   ~/.config/opencode/extensions/herdr-subject/package.json \
+  ~/.config/opencode/extensions/herdr-subject/app-session.js \
   ~/.config/opencode/extensions/herdr-subject/tui.ts \
   ~/.config/opencode/cli.json \
   ~/.config/herdr/config.toml
 chezmoi apply --parent-dirs \
   ~/.config/opencode/extensions/herdr-subject/package.json \
+  ~/.config/opencode/extensions/herdr-subject/app-session.js \
   ~/.config/opencode/extensions/herdr-subject/tui.ts
 chezmoi apply ~/.config/opencode/cli.json ~/.config/herdr/config.toml
 herdr server reload-config
