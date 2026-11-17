@@ -1,7 +1,8 @@
 import { View, div } from "gpui-kit";
 import { v_flex, h_flex, InputState, Input, v_virtual_list, VirtualListScrollHandle, Scrollbar } from "gpui-base";
 import { appHome, checking, closeOverlay, exec, home, props, readTextFile, run, settings, spaces, theme } from "herdr";
-import { openProject, projectRows } from "./projects.js";
+import { openProject, projectLabel, projectRows } from "./projects.js";
+import { createDatedWorktree } from "./worktrees.js";
 
 export default class Projects extends View {
   init(_props, cx) {
@@ -18,7 +19,13 @@ export default class Projects extends View {
       this.scroll.scroll_to_item(0);
       cx.notify();
     });
-    this.input.on("submit", () => this.open(this.rows()[this.at]));
+    this.input.on("submit", (event, cx) => {
+      const row = this.rows()[this.at];
+      if (event.secondary) this.newWorktree(row, cx);
+      else this.open(row);
+    });
+    this.branchInput = InputState.new({ placeholder: "New branch name…" });
+    this.branchInput.on("submit", (_event, cx) => this.createWorktree(cx));
     this.input.focus();
     if (checking()) return;
     this.loading = true;
@@ -55,7 +62,59 @@ export default class Projects extends View {
     run(...command);
   }
 
+  newWorktree(row, cx) {
+    if (!row || this.opened) return;
+    this.worktree = row;
+    this.worktreeError = null;
+    this.branchInput.set_value("");
+    this.branchInput.focus();
+    cx.notify();
+  }
+
+  createWorktree(cx) {
+    if (this.creating || this.opened) return;
+    const name = this.branchInput.value();
+    this.creating = true;
+    this.worktreeError = null;
+    cx.notify();
+    cx.spawn(async (cx) => {
+      try {
+        const folder = await createDatedWorktree(this.worktree, name, exec,
+          `${home()}/.scripts/git-new-dated-worktree`);
+        if (!this.opened) this.open({ folder, label: projectLabel(folder, this.config) });
+      } catch (error) {
+        this.worktreeError = String(error.message ?? error);
+      }
+      this.creating = false;
+      if (!this.opened) cx.notify();
+    });
+  }
+
+  renderWorktree() {
+    const t = theme();
+    const button = (id, text, action) => div().id(id).px(12).py(7).rounded(7)
+      .bg(t.raised).border(1).border_color(t.input).cursor_pointer()
+      .hover((style) => style.bg(t.hover)).on_click(action).child(text);
+    return v_flex().id("dated-worktree").track_focus(this.handle).w_full().p(18).gap(12)
+      .bg(t.popover).text_color(t.foreground).text_size(13)
+      .on_key_down((event, cx) => {
+        if (event.key !== "escape") return;
+        cx.stop_propagation();
+        this.close();
+      })
+      .child(div().font_semibold().text_size(15).child("New dated worktree"))
+      .child(div().text_color(t.muted).truncate().child(this.worktree.folder || this.worktree.label))
+      .child(Input.new(this.branchInput).h(36).px(10).items_center()
+        .rounded(8).border(1).border_color(t.accent).bg(t.background))
+      .child(div().text_size(11).text_color(t.dim).child("The script adds today's date. Spaces in the name become hyphens."))
+      .when(Boolean(this.worktreeError), (el) => el.child(div().text_color(t.blocked).child(this.worktreeError)))
+      .child(h_flex().justify_end().gap(8)
+        .child(button("worktree-cancel", "Cancel", () => this.close()))
+        .child(button("worktree-create", this.creating ? "Creating…" : "Create", (_event, cx) => this.createWorktree(cx))));
+  }
+
   render() {
+    if (this.worktree) return this.renderWorktree();
     const t = theme();
     const rows = this.rows();
     const height = Math.min(336, Math.max(48, rows.length * 48),
@@ -98,6 +157,6 @@ export default class Projects extends View {
             .on_item_click((key) => this.open(this.rows().find((row) => (row.id ?? row.folder) === key)))
           : div().p(10).text_color(t.dim).child(this.loading ? "Loading projects…" : "No matching projects."))
         .when(Boolean(rows.length), (el) => el.child(Scrollbar.vertical("project-list").absolute().inset_0())))
-      .child(div().flex_none().text_size(11).text_color(t.dim).child("↑↓ / Ctrl+J/K choose · Enter open · Esc close"));
+      .child(div().flex_none().text_size(11).text_color(t.dim).child("↑↓ / Ctrl+J/K choose · Enter open · Ctrl+Enter worktree · Esc close"));
   }
 }

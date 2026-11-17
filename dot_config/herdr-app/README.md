@@ -110,6 +110,19 @@ rows and a small buffer, rather than every discovered project. Mouse selection
 uses each space ID or project folder, so scrolling and filtering do not change
 which project a click opens.
 
+Ctrl+Enter opens a native "New dated worktree" name prompt for the selected
+project. Enter or Create runs `~/.scripts/git-new-dated-worktree` from the
+repository's `.bare` root, with spaces in the name changed to hyphens, just
+like `herdr-project`. The existing script chooses the date prefix and source
+branch. On success, the picker opens a space in the new worktree.
+Escape or Cancel closes the prompt; creation errors stay in the prompt so
+the name can be corrected and retried.
+
+This action uses local `.bare` repositories. Repository paths containing
+whitespace are rejected because the existing `git-wt` helper splits its
+worktree listing on whitespace. The picker verifies that the script created
+a new registered worktree, since its final path output can mask Git failures.
+
 ## Customized built-in pickers
 
 `mods/pbogut-picker` copies Herdr App 0.1.16's `mods/picker`.
@@ -142,6 +155,7 @@ herdr-app check dot_config/herdr-app/mods/pbogut-palette
 node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
 node --test assets/tests/herdr_app/projects.test.mjs
+node --test assets/tests/herdr_app/worktrees.test.mjs
 python3 assets/tests/herdr_app/keyboard.py
 python3 assets/tests/herdr_app/named_tabs.py
 python3 assets/tests/herdr_app/editor.py
@@ -171,3 +185,6 @@ three unfiltered openings. It reports command execution, JavaScript rendering,
 and time from initialization to native layout, and asserts that each lazy row
 batch stays small. The screenshot timing also includes keyboard injection and
 image capture.
+The native test also copies `git-new-dated-worktree` and `git-wt` into its
+sandbox. It checks Ctrl+Enter, cancellation, dated branch names, the script's
+source-branch choice, opening the new space, and retrying after a Git error.

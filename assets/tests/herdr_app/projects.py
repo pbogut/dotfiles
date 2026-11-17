@@ -35,8 +35,10 @@ def main():
     (root / "app/shared.json").write_text(json.dumps({"frame.welcomed": "skipped"}))
     scripts = root / "home/.scripts"
     scripts.mkdir()
-    shutil.copyfile(ROOT / "dot_scripts/executable_ls-project", scripts / "ls-project")
-    (scripts / "ls-project").chmod(0o700)
+    for name in ("ls-project", "git-new-dated-worktree", "git-wt"):
+        shutil.copyfile(ROOT / f"dot_scripts/executable_{name}", scripts / name)
+        (scripts / name).chmod(0o700)
+    env["PATH"] = f"{scripts}:{env['PATH']}"
     projects = root / "projects root"
     existing = projects / "gitlab.com/assuredpharmacy/existing"
     new = projects / "github.com/pbogut/alpha project's directory"
@@ -55,7 +57,7 @@ def main():
         source = source.replace('        const result = await exec(', '        const execStart = Date.now();\n        const result = await exec(', 1)
         source = source.replace('        this.projects =', '        console.log("PICKER_PROFILE " + JSON.stringify({ phase: "exec", ms: Date.now() - execStart }));\n        this.projects =', 1)
         source = source.replace('  render() {', '  render() {\n    const renderStart = Date.now();', 1)
-        source = source.replace('    return v_flex()', '    const root = v_flex()', 1)
+        source = source.replace('    return v_flex()\n      .id("projects")', '    const root = v_flex()\n      .id("projects")', 1)
         source = source.replace('(range) => rows.slice(range.start, range.end)', '''(range) => (
           console.log("PICKER_PROFILE " + JSON.stringify({ phase: "visible", total: rows.length, count: range.end - range.start })),
           rows.slice(range.start, range.end))''', 1)
@@ -255,8 +257,67 @@ def main():
             key("Return")
             wait(lambda: "pbogut-picker" in app("status")["overlays"], "Palette opens the customized Go to…")
             key("Escape")
+
+            # Real dated-worktree helpers, with a checkout newer than origin/main.
+            repo = root / "dated-repo"
+            call("git", "init", "--bare", "--initial-branch=main", str(repo / ".bare"))
+            (repo / ".git").write_text("gitdir: ./.bare\n")
+            tree = subprocess.check_output(["git", "-C", str(repo), "mktree"], input="", env=env, text=True).strip()
+
+            def commit(message, *args):
+                return call("git", "-C", str(repo), "-c", "user.name=Picker Test", "-c", "user.email=picker@example.invalid",
+                            "commit-tree", tree, "-m", message, *args)
+
+            base = commit("Base")
+            other = commit("Other checkout", "-p", base)
+            call("git", "-C", str(repo), "update-ref", "refs/heads/main", base)
+            call("git", "-C", str(repo), "update-ref", "refs/remotes/origin/main", base)
+            call("git", "-C", str(repo), "config", "remote.origin.url", str(root / "unused-origin"))
+            call("git", "-C", str(repo), "config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
+            call("git", "-C", str(repo), "worktree", "add", "-b", "other", str(repo / "other"), other)
+            app("do", "space.new", "--name", "Dated fixture", "--folder", str(repo / "other"))
+            before = call("git", "-C", str(repo), "worktree", "list", "--porcelain")
+
+            def dated_prompt():
+                search("Dated fixture")
+                key("ctrl+Return")
+                assert "pbogut-projects" in app("status")["overlays"], "Ctrl+Enter keeps the native prompt open"
+
+            dated_prompt()
+            call("herdr-app", "shot", str(root / "dated-prompt.png"))
+            key("Escape")
+            assert call("git", "-C", str(repo), "worktree", "list", "--porcelain") == before, "Cancel creates no worktree"
+            dated_prompt()
+            name = f"{call('date', '+%Y-%m-%d')}-native-feature"
+            target = repo / name
+            call("xdotool", "type", "--clearmodifiers", "native feature")
+            key("Return", "Return")
+            wait(lambda: any(space["folder"] == str(target) and space["active"] for space in app("ls")["spaces"]),
+                 "Enter creates the dated worktree and opens its space")
+            assert call("git", "-C", str(target), "branch", "--show-current") == name
+            assert call("git", "-C", str(target), "rev-parse", "HEAD") == base, "Helper branches from origin/main"
+            assert len([space for space in app("ls")["spaces"] if space["folder"] == str(target)]) == 1
+
+            dated_prompt()
+            call("xdotool", "type", "--clearmodifiers", "bad..name")
+            key("Return")
+
+            def worktree_error():
+                call("herdr-app", "shot", str(root / "dated-error.png"))
+                with Image.open(root / "dated-error.png") as image:
+                    colors = dict((rgb, count) for count, rgb in image.convert("RGB").crop((300, 40, 980, 500)).getcolors(680 * 460))
+                    return colors.get(ImageColor.getrgb("#f7768e"), 0) > 25
+
+            wait(worktree_error, "The helper's Git failure appears in the native prompt")
+            assert not (repo / f"{call('date', '+%Y-%m-%d')}-bad..name").exists()
+            key("ctrl+a")
+            call("xdotool", "type", "--clearmodifiers", "retry success")
+            key("Return")
+            retry = repo / f"{call('date', '+%Y-%m-%d')}-retry-success"
+            wait(lambda: any(space["folder"] == str(retry) and space["active"] for space in app("ls")["spaces"]),
+                 "Correcting the branch name retries creation")
             assert not app("status")["errors"], app("status")
-            print("PASS: project discovery/reuse, Ctrl+J/K in all three pickers, typing, Enter, scrolling, resizing, cancellation, and mouse selection.", flush=True)
+            print("PASS: 600-project picker, Ctrl+J/K, scrolling, mouse selection, and Ctrl+Enter dated worktrees with the real helpers.", flush=True)
         except Exception:
             print("Status:", app("status"), flush=True)
             print("Spaces:", app("ls"), flush=True)
