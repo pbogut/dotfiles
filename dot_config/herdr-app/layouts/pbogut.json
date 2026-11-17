@@ -33,7 +33,7 @@
               "type": "block",
               "size": { "weight": 1 },
               "min": 90,
-              "content": { "mod": "spaces" }
+              "content": { "mod": "pbogut-spaces" }
             },
             {
               "id": "agents",

@@ -151,6 +151,19 @@ whitespace are rejected because the existing `git-wt` helper splits its
 worktree listing on whitespace. The picker verifies that the script created
 a new registered worktree, since its final path output can mask Git failures.
 
+## Space initials
+
+The `pbogut` layout uses `mods/pbogut-spaces`, a copy of Herdr App 0.1.16's
+Spaces sidebar. Letter tiles use the repository name from the space's configured
+folder. Git's common directory identifies the repository across worktrees:
+`gitlab.com/assuredpharmacy/pms/.bare` gives `P`, as does `pms/.git`.
+The shortened display name and a terminal's current directory do not affect it.
+Folders outside Git use the folder name; a space without a folder uses its name.
+
+Lookups are cached by machine and configured folder and refreshed once a minute
+while the window is active. After upgrading Herdr, merge changes from the shipped
+Spaces mod into this copy, keeping the configured-folder lookup and tile letter.
+
 ## Customized built-in pickers
 
 `mods/pbogut-picker` copies Herdr App 0.1.16's `mods/picker`.
@@ -180,8 +193,10 @@ herdr-app check dot_config/herdr-app/mods/pbogut-tabs
 herdr-app check dot_config/herdr-app/mods/pbogut-projects
 herdr-app check dot_config/herdr-app/mods/pbogut-picker
 herdr-app check dot_config/herdr-app/mods/pbogut-palette
+herdr-app check dot_config/herdr-app/mods/pbogut-spaces
 node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
+node --experimental-vm-modules --test assets/tests/herdr_app/space_initials.test.mjs
 node --test assets/tests/herdr_app/projects.test.mjs
 node --test assets/tests/herdr_app/worktrees.test.mjs
 node --test assets/tests/herdr_app/opencode_session.test.mjs
