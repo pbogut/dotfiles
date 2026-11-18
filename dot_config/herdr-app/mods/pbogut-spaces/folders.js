@@ -5,6 +5,7 @@ export const folderNames = (config) => [...config.folders, config.fallback];
 export const ASSIGNMENTS = "pbogut.folders.assignments";
 export const assignmentKey = (machine, directory) => directory
   ? JSON.stringify([machine ?? null, directory.replace(/\/+$/, "")]) : null;
+export const spaceAssignmentKey = (machine, id) => JSON.stringify([machine ?? null, "space", id]);
 
 export function parseFolders(text) {
   if (text === null) return DEFAULT_FOLDERS;

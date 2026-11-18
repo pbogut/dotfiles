@@ -35,7 +35,7 @@ Prefix bindings live in `mods/pbogut-keys/bindings.js`.
 | --- | --- |
 | c | New tab |
 | v / s | Split right / down |
-| x | Close project with teardown |
+| x | Close project with teardown, or normally close an ordinary space |
 | Escape / Ctrl+G | Cancel |
 
 Alt+Esc opens copy mode directly. Its hints use a single row in the same bottom
@@ -92,8 +92,9 @@ named `nvim` tab. The helper resolves that tab's terminal through `herdr-app ls`
 and receives `HERDR_APP_HOME` and `HERDR_APP_SPACE_ID` from the mod.
 The old TUI uses its existing helpers and separate socket directory.
 
-The `dev` role runs the command from `herdr-project.json`. When `dev` is omitted,
-it runs `make dev` if a `Makefile` exists, or exits immediately otherwise.
+In a project, the `dev` role runs the command from `herdr-project.json`.
+When `dev` is omitted, or in an ordinary space, it runs `make dev` if a
+`Makefile` exists, or exits immediately otherwise.
 The tab closes when the command exits, including on failure.
 Teardown, tasks, and general command restoration are part of the remaining
 project-workflow migration.
@@ -148,22 +149,35 @@ Tests can override the port with the mod's `port` prop and the helper's
 
 ## Projects
 
-Ctrl+Alt+P opens the native `pbogut-projects` popup. Open spaces come first,
+Ctrl+Alt+P opens the native `pbogut-projects` popup. Open projects come first,
 followed by projects from `ls-project -f` in its recent-first order.
 The header shows the selected machine, initially the active space's machine.
 Tab cycles through this computer and connected machines; Shift+Tab cycles backwards.
-Each switch reloads that machine's projects and open spaces, keeps the search text,
+Each switch reloads that machine's discovered and open projects, keeps the search text,
 and resets the selection. Late responses from previous loads are ignored.
 Projects already open on that machine appear once. Type to search names, full
 paths, or directory aliases; multiple search words can match different parts of a path.
 Use Up/Down or Ctrl+J/K and Enter, or click a row. Escape closes the picker.
 
-Selecting an open space focuses it. Selecting a project creates a space on the
+Selecting an open project focuses it. Selecting a project creates a space on the
 selected machine in that directory with its compact project label. Its shared project definition
 supplies the tabs; without one, the App's fallback definition opens `nvim`.
-Space matching uses its configured folder, so changing a terminal's working
+Project matching uses its configured folder, so changing a terminal's working
 directory does not cause duplicate spaces. Matching includes the machine, so
 identical paths on different hosts stay separate. Existing custom space names are shown.
+
+Only spaces created through this picker are projects, including its dated
+worktree action. The controller records their exact space IDs in Herdr's
+shared state under `pbogut.projects.spaces`. These markers survive App restarts.
+Existing unmarked spaces stay ordinary; there is no automatic conversion.
+The picker ignores ordinary spaces, even in a discovered project's directory.
+Such a project has no open badge, and selecting it creates a separate project
+space. Ordinary spaces remain available through the sidebar and Go to picker.
+
+All `herdr-project.json` behavior applies only to marked projects: names,
+initial tabs, dev overrides, setup, teardown, and explicit config reloads.
+Ordinary spaces retain their native names and Git branches. Named-tab shortcuts
+still work there without reading either the project or fallback definition.
 
 `mods/pbogut-projects/projects.json.tmpl` gets the project root and directory
 aliases from chezmoi. The mod reads that machine's rendered JSON and runs its
@@ -171,8 +185,10 @@ aliases from chezmoi. The mod reads that machine's rendered JSON and runs its
 settings and the helper scripts deployed there. Remote paths use that core's
 `HOME` and `HERDR_APP_HOME`, falling back to `$XDG_CONFIG_HOME/herdr-app` or
 `~/.config/herdr-app`. Lookup failures stay visible under the selected machine;
-they never fall back to local results. Space creation and selection use native
-`run()` commands.
+they never fall back to local results. Creation calls the local
+`herdr-app do space.new` API with the target machine and `HERDR_APP_HOME`.
+Its response identifies the exact space to mark, even if another space opens
+in the same directory concurrently. Selection uses the native `run()` command.
 
 The results use a native virtual list with 48 px rows. It builds the visible
 rows and a small buffer, rather than every discovered project. Mouse selection
@@ -219,12 +235,12 @@ A new space selects the first configured tab. Once creation finishes with a
 configured tab present, it removes the temporary initial shell if that tab is
 still unnamed and unsplit.
 
-Opening an existing space creates missing configured tabs and reuses those
+Opening an existing project creates missing configured tabs and reuses those
 already running. It preserves existing tabs and the selected tab. Opening the
 project again reloads its definition. Tabs always use the fixed role order above.
 
 Ctrl+Shift+P → **Reload project config** applies the definition again to the
-current space, using that space's machine and configured folder. It creates
+current project, using that space's machine and configured folder. It creates
 missing configured tabs, restores the fixed order, and refreshes the sidebar name
 for every open worktree sharing the project on that machine. Existing extra
 tabs and the selected tab are preserved. Reopening a project through the picker
@@ -250,7 +266,8 @@ Chezmoi supplies this fallback:
 }
 ```
 
-The fallback also applies to ordinary Git repositories and non-Git folders.
+For marked projects, the fallback also applies to regular Git repositories
+and non-Git folders.
 The project's file takes precedence as a whole. An omitted `tabs` field or an
 explicit `"tabs": []` in that file keeps a shell. Both definitions are read
 afresh when opening a project.
@@ -348,7 +365,9 @@ Add a teardown script to the project definition:
 
 Press Ctrl+G, then x, or open the command palette with Ctrl+Shift+P and choose
 **Close project**.
-The action reads the current definition and runs teardown in a visible,
+In an ordinary space, this uses Herdr's normal close confirmation and never
+reads project configuration. In a project, the action reads the current
+definition and runs teardown in a visible,
 interactive `teardown` tab. It closes the other tabs in that space before
 starting the script. Repeating the action while teardown runs focuses that tab.
 Named-tab shortcuts can still create and focus tabs during teardown.
@@ -375,11 +394,13 @@ the teardown script does so.
 ## Space labels
 
 The `pbogut` layout uses `mods/pbogut-spaces`, a copy of Herdr App 0.1.16's
-Spaces sidebar. Labels and letter tiles use the project name from the space's configured
-folder. Git's common directory identifies the repository across worktrees:
+Spaces sidebar. Ordinary spaces use Herdr's native name, which follows the
+current directory unless explicitly renamed. Marked projects use the project
+name from their configured folder for labels and letter tiles.
+Git's common directory identifies the repository across worktrees:
 `gitlab.com/assuredpharmacy/pms/.bare` gives `pms` and `P`, as does `pms/.git`.
 Set `"name": "PMS"` in the shared `herdr-project.json` beside `.bare` to override
-the label and its initial for every worktree. Regular repositories read the file
+the label and its initial for marked project worktrees. Regular repositories read the file
 beside `.git`; non-Git folders read it from the configured folder.
 An absent, blank, or non-string `name` falls back to the repository or folder name.
 Invalid JSON uses that fallback on initial load; a failed reload keeps the last name.
@@ -392,7 +413,7 @@ These are display labels. Space names, folder paths, IDs, and Git branch names
 retain their original values for pickers, named tabs, and session restoration.
 
 Lookups are cached by machine and configured folder. Names are read when a
-folder first appears, when reopening it through the project picker, or with
+marked project first appears, when reopening it through the project picker, or with
 **Reload project config**. Project configuration has no timer-based checks or
 file watchers. After upgrading Herdr,
 merge changes from the shipped Spaces mod into this copy, keeping the
@@ -400,7 +421,7 @@ configured-folder lookup, optional name, and shortened branch display.
 
 ## Space folders
 
-The Spaces sidebar groups projects into `work`, `personal`, and `other` within
+The Spaces sidebar groups all spaces into `work`, `personal`, and `other` within
 each machine. It uses the folding-folder design from
 [Bruno-Tome/herdr-folders](https://github.com/Bruno-Tome/herdr-folders) alongside
 the custom project labels above.
@@ -423,6 +444,7 @@ Matching uses the shared repository root resolved from the space's configured
 folder. All worktrees of a `.bare` or regular Git repository follow that root,
 even when a worktree lives elsewhere. Non-Git spaces use their configured folder.
 Changing a terminal's directory does not change its group.
+Initial folder matching and worktree nesting are independent of the project marker.
 
 Config changes load within five seconds. Invalid edits retain the previous
 configuration and show an error indicator beside Spaces. Tests use synthetic
@@ -435,20 +457,27 @@ restarts. Native space order follows folder order, so Alt+1…9 and previous/nex
 space shortcuts include collapsed spaces in that order. Switching to a hidden
 space expands its folder and machine and scrolls its row into view.
 
-Drag a space onto a folder header to assign its whole repository to that folder.
+Drag a space onto a folder header to assign it to that folder.
+An ordinary space moves independently, even when a project uses the same directory.
+A marked project moves together with its marked worktrees on that machine;
+ordinary spaces in that repository stay in their own groups.
 The header highlights when it can accept the drop. Use the empty-folder toggle
 to reveal a destination with no spaces. Drops stay within the source machine;
 dragging between space rows reorders only within their existing folder.
 
 Manual assignments override path rules, including an explicit move to `other`.
-Herdr's shared state keeps them under `pbogut.folders.assignments`, keyed by
-machine and Git common directory, such as `/repos/project/.bare` or `.git`.
-All existing and future worktrees of that repository inherit the assignment.
-Non-Git spaces use their configured directory. Assignments survive closing
-spaces and restarting the App.
+Herdr's shared state keeps them under `pbogut.folders.assignments`.
+Project assignments use machine and Git common directory, such as
+`/repos/project/.bare` or `.git`. Non-Git projects use their configured directory.
+Existing and future marked project worktrees inherit that assignment.
+Ordinary assignments use machine, the `space` tag, and space ID.
+They survive App restarts, but a newly created ordinary space uses the folder
+rules again, even at the same path.
 
-Right-click an assigned space and choose **Use matching rules** to clear the
-repository's assignment on that machine. The menu keeps Herdr's rename,
+Right-click an assigned space and choose **Use matching rules** to clear its
+assignment. For an ordinary space, this resets only that space. For a project,
+it resets the repository's marked projects on that machine.
+The menu keeps Herdr's rename,
 worktree, and close actions. Its space-only implementation is in
 `mods/pbogut-spaces/menu.js`, based on Herdr 0.1.16's menu.
 
@@ -528,7 +557,9 @@ root selection, normal exit/reopening, window reconnection, process loss,
 durable core-shutdown recovery, and adoption of existing named tabs.
 The project-picker test copies the source `ls-project` script into its sandbox
 and checks discovery among 600 projects, alias search, and opening or focusing
-native spaces.
+marked projects. It also checks that ordinary spaces are absent from the picker,
+do not produce open badges, and can share a directory with a separate project.
+Project markers survive a restart without converting ordinary spaces.
 It also checks Ctrl+J/K with focused search inputs in all three pickers,
 Enter selection, scrolling, virtual-row clicks, and the palette's link to the
 customized picker. `--profile` instruments only the sandbox copy and measures

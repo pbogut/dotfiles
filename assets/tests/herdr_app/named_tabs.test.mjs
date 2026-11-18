@@ -6,7 +6,7 @@ import vm from "node:vm";
 const root = new URL("../../../dot_config/herdr-app/mods/pbogut-tabs/", import.meta.url);
 const setupHash = "a".repeat(64);
 
-async function fixture(checking = false, initialTabs = [{ id: "original", name: "1", named: false }]) {
+async function fixture(checking = false, initialTabs = [{ id: "original", name: "1", named: false }], marked = true) {
   const calls = [], commands = [], operations = [], timers = [], reads = [];
   const files = new Map(), persisted = new Map();
   files.set("/config/herdr-app/herdr-project.json", '{"tabs":["nvim"]}');
@@ -16,6 +16,8 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
     { id: "one", active: true, folder: "/project one", tabs: initialTabs },
     { id: "two", active: false, folder: "/project two", tabs: [{ id: "other", name: "shell", named: true }] },
   ];
+  if (marked) persisted.set("pbogut.projects.spaces", { one: true, two: true });
+  const creation = {};
   let receive, serial = 0;
   const context = vm.createContext({});
   const element = { h: () => element };
@@ -44,6 +46,16 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
         .map(tab => ({ tab: tab.id, terminal: tab.terminal }))),
       exec: async (name, args, options) => {
         executions.push([name, [...args], { ...options }]);
+        if (name === "env") {
+          assert.deepEqual([...args.slice(0, 4)], ["HERDR_APP_HOME=/config/herdr-app", "herdr-app", "do", "space.new"]);
+          if (failures.has("space.new")) throw new Error("space.new unavailable");
+          const options = JSON.parse(args[4]);
+          const id = `${options.machine ? `${options.machine}/` : ""}space-${++serial}`;
+          calls.push(["space.new", options]);
+          operations.push(["space.new", options, id]);
+          creation.beforeReturn?.();
+          return creation.reply ?? { code: 0, stdout: JSON.stringify({ space: id }), stderr: "" };
+        }
         if (name === "bash") return setupChecks.get(`${options.on ?? ""}:${options.cwd}`)
           ?? { code: 75, stdout: `${setupHash}\n`, stderr: "" };
         return { code: 0, stdout: name === "sh" ? "/remote/home\n/remote/app\n" : `${options.cwd}/.bare\n` };
@@ -73,12 +85,16 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
   await main.link((name) => modules[name]);
   await main.evaluate();
   const cx = { spawn: (fn) => fn(cx), notify: () => view.render(cx), timer: { after: (_ms, fn) => timers.push(fn) } };
-  const view = new main.namespace.default();
+  let view = new main.namespace.default();
   view.init({}, cx);
   return {
-    calls, spaces, timers, files, failures, reads, persisted, native, executions, setupChecks, coreResults, sends,
+    calls, spaces, timers, files, failures, reads, persisted, native, executions, setupChecks, coreResults, sends, creation,
     roles: modules["./roles.js"].namespace,
     render: () => view.render(cx),
+    restart() {
+      view = new main.namespace.default();
+      view.init({}, cx);
+    },
     async command(value) {
       if (receive) {
         const resolve = receive;
@@ -89,10 +105,10 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
     },
     flush() {
       while (operations.length) {
-        for (const [name, args] of operations.splice(0)) {
+        for (const [name, args, created] of operations.splice(0)) {
           if (name === "space.new") {
             spaces.forEach((space) => { space.active = false; });
-            const id = `${args.machine ? `${args.machine}/` : ""}space-${++serial}`;
+            const id = created;
             spaces.push({ id, folder: args.folder, name: args.name, machine: args.machine || null, active: true,
               tabs: [{ id: `${id}-initial`, name: "1", named: false, panes: 1 }] });
           } else if (name === "space.select") {
@@ -205,6 +221,83 @@ test("unknown roles, stale spaces and check mode never create tabs", async () =>
 
 const projectCommand = (project) => `project@${encodeURIComponent(JSON.stringify(project))}`;
 
+test("ordinary spaces ignore project definitions and keep manual tool shortcuts and normal close", async () => {
+  for (const machine of [null, "vps"]) {
+    const app = await fixture(false, undefined, false);
+    const space = app.spaces[0];
+    space.machine = machine;
+    const config = JSON.stringify({
+      name: "Must not apply", tabs: ["sql"], dev: ["must-not-run"],
+      setup: { script: "setup.sh" }, teardown: { script: "teardown.sh" },
+    });
+    for (const path of ["/project one/herdr-project.json", "/config/herdr-app/herdr-project.json", "/remote/app/herdr-project.json"]) {
+      app.files.set(machine ? `${machine}:${path}` : path, config);
+    }
+    app.render();
+    assert.deepEqual(app.calls, []);
+    await app.command("reload-project");
+    await app.command(projectCommand({ id: space.id, folder: space.folder, machine }));
+    await app.command("dev");
+    await settle(app);
+    await app.command("nvim");
+    await settle(app);
+    assert.deepEqual(app.reads, [], "Neither project nor global herdr-project.json is read");
+    assert.deepEqual(creations(app).map(tab => tab.name), ["dev", "nvim"]);
+    assert.deepEqual(creations(app)[0].argv, devArgv("zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi"));
+    assert.equal(app.persisted.has("pbogut.projects.spaces"), false);
+    app.calls.length = 0;
+    await app.command("close-project");
+    assert.deepEqual(app.calls, [["space.close", { id: space.id }]]);
+    assert.deepEqual(app.reads, []);
+    assert.ok(app.executions.every(([name]) => name !== "bash"), "No setup or teardown runs");
+  }
+});
+
+test("only the CLI's returned space ID becomes a project, even beside ordinary spaces in the same folder", async () => {
+  const app = await fixture(false, undefined, false);
+  const ordinary = app.spaces[0];
+  const originalTabs = structuredClone(ordinary.tabs);
+  app.creation.beforeReturn = () => {
+    app.spaces.unshift({ id: "concurrent", folder: ordinary.folder, machine: null, tabs: [] });
+  };
+  await app.command(projectCommand({ folder: ordinary.folder, label: "Project" }));
+  app.flush();
+  const project = app.spaces.find(space => space.id.startsWith("space-"));
+  assert.deepEqual(app.persisted.get("pbogut.projects.spaces"), { [project.id]: true });
+  assert.deepEqual(ordinary.tabs, originalTabs);
+  assert.deepEqual(project.tabs.map(tab => tab.name), ["nvim"]);
+  assert.equal(app.spaces.find(space => space.id === "concurrent").tabs.length, 0);
+  app.restart();
+  await app.command(projectCommand({ folder: ordinary.folder }));
+  app.flush();
+  assert.equal(app.calls.filter(([name]) => name === "space.new").length, 1, "A marked project is reused after a controller reload");
+  assert.equal(project.active, true);
+  app.spaces.splice(app.spaces.indexOf(project), 1);
+  app.spaces.push({ id: "replacement", folder: ordinary.folder, tabs: [] });
+  await app.command(projectCommand({ folder: ordinary.folder }));
+  app.flush();
+  assert.equal(app.calls.filter(([name]) => name === "space.new").length, 2);
+  assert.equal(app.persisted.get("pbogut.projects.spaces").replacement, undefined);
+  assert.equal(app.persisted.get("pbogut.projects.spaces").concurrent, undefined);
+});
+
+test("failed or incomplete CLI replies never infer a project ID from a directory", async () => {
+  for (const reply of [
+    { code: 1, stderr: "creation failed" },
+    { code: 0, stdout: "{}" },
+    { code: 0, stdout: "invalid JSON" },
+  ]) {
+    const app = await fixture(false, undefined, false);
+    app.creation.reply = reply;
+    await app.command(projectCommand({ folder: "/project one" }));
+    app.flush();
+    assert.equal(app.persisted.has("pbogut.projects.spaces"), false);
+    assert.deepEqual(creations(app), []);
+    assert.ok(app.calls.some(([name]) => name === "notify"));
+    assert.equal(app.calls.filter(([name]) => name === "space.new").length, 1, "No automatic retry");
+  }
+});
+
 test("a project without a definition opens the fallback nvim tab", async () => {
   const app = await fixture();
   await app.command(projectCommand({ folder: "/no-config", label: "Default" }));
@@ -229,7 +322,7 @@ test("a project opens only configured tabs in fixed order and later shortcuts us
   await app.command("oc-1");
   app.flush();
   assert.deepEqual(space.tabs.map((tab) => tab.name), ["nvim", "shell", "oc-1", "oc-2"]);
-  assert.equal(app.persisted.size, 0);
+  assert.equal(app.persisted.get("pbogut.projects.spaces")[space.id], true);
 });
 
 test("reopening a project fills missing tabs and preserves existing programs, extra tabs, and selection", async () => {

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import vm from "node:vm";
-import { ASSIGNMENTS, assignmentKey, matchFolder, orderFolders, parseFolders } from "../../../dot_config/herdr-app/mods/pbogut-spaces/folders.js";
+import { ASSIGNMENTS, assignmentKey, spaceAssignmentKey, matchFolder, orderFolders, parseFolders } from "../../../dot_config/herdr-app/mods/pbogut-spaces/folders.js";
 
 const config = parseFolders(await readFile(new URL("fixtures/folders.json", import.meta.url), "utf8"));
 
@@ -213,7 +213,7 @@ test("invalid edited config keeps the last rules, then a corrected config change
   assert.equal(app.view.folderFor(space), "other");
 });
 
-test("manual assignments follow a repository across worktrees and reopened spaces, separately per machine", async () => {
+test("project assignments follow a repository across marked worktrees and reopened projects, separately per machine", async () => {
   const root = "/code/gitlab.com/example-work/app";
   const spaces = [
     { id: "main", folder: `${root}/main` },
@@ -221,16 +221,18 @@ test("manual assignments follow a repository across worktrees and reopened space
     { id: "remote", folder: `${root}/main`, machine: "server" },
   ];
   const app = await sidebar(spaces);
+  app.shared.set("pbogut.projects.spaces", { main: true, linked: true, remote: true });
   for (const s of spaces) app.view.projects.set(JSON.stringify([s.machine ?? null, s.folder]), {
-    root, directory: `${root}/.bare`,
+    root, directory: `${root}/.bare`, nameLoaded: true,
   });
   app.view.assignFolder(spaces[1], "other", app.cx);
   await app.flush();
   assert.deepEqual(spaces.map(s => app.view.folderFor(s)), ["other", "other", "work"]);
   assert.equal(app.shared.get(ASSIGNMENTS)[assignmentKey(null, `${root}/.bare/`)], "other");
   spaces.splice(0, 2, { id: "new-space", folder: "/another/worktree" });
+  app.shared.set("pbogut.projects.spaces", { "new-space": true, remote: true });
   const reopened = await sidebar(spaces, app.storage, app.shared);
-  reopened.view.projects.set(JSON.stringify([null, spaces[0].folder]), { root, directory: `${root}/.bare` });
+  reopened.view.projects.set(JSON.stringify([null, spaces[0].folder]), { root, directory: `${root}/.bare`, nameLoaded: true });
   assert.equal(reopened.view.folderFor(spaces[0]), "other");
   reopened.view.assignFolder(spaces[0], "personal", reopened.cx);
   await reopened.flush();
@@ -242,6 +244,7 @@ test("manual assignments follow a repository across worktrees and reopened space
 test("an early drop resolves the common directory; a failed remote lookup never writes an assignment", async () => {
   const space = { id: "linked", folder: "/temporary/worktree", machine: "server" };
   const app = await sidebar([space]);
+  app.shared.set("pbogut.projects.spaces", { linked: true });
   const calls = [];
   app.state.exec = async (_command, args, options) => {
     calls.push({ args, options });
@@ -260,7 +263,7 @@ test("an early drop resolves the common directory; a failed remote lookup never 
   assert.match(app.state.notices.at(-1).body, /offline/);
 });
 
-test("folder-header drops move the whole repository but reject drops across machines", async () => {
+test("project folder-header drops move marked worktrees but reject drops across machines", async () => {
   const root = "/repos/gitlab.com/example-work/app";
   const spaces = [
     { id: "main", name: "app", folder: `${root}/main`, active: true },
@@ -268,10 +271,11 @@ test("folder-header drops move the whole repository but reject drops across mach
     { id: "remote", name: "remote", folder: `${root}/main`, machine: "server" },
   ];
   const app = await sidebar(spaces);
+  app.shared.set("pbogut.projects.spaces", { main: true, linked: true, remote: true });
   app.view.showEmptyFolders = true;
   app.state.remote = app.view.machines = [{ name: "server", state: "connected" }];
   for (const s of spaces) app.view.projects.set(JSON.stringify([s.machine ?? null, s.folder]), {
-    root, directory: `${root}/.bare`,
+    root, directory: `${root}/.bare`, nameLoaded: true,
   });
   let tree = app.view.render(app.cx);
   find(tree, "space-linked").attrs["on_mouse_down:left"]();
@@ -302,8 +306,9 @@ test("Use matching rules resets all local worktrees while retaining remote assig
     { id: "remote", folder: `${root}/main`, machine: "server" },
   ];
   const app = await sidebar(spaces);
+  app.shared.set("pbogut.projects.spaces", { main: true, linked: true, remote: true });
   for (const s of spaces) app.view.projects.set(JSON.stringify([s.machine ?? null, s.folder]), {
-    root, directory: `${root}/.bare`,
+    root, directory: `${root}/.bare`, nameLoaded: true,
   });
   const local = assignmentKey(null, `${root}/.bare`), remote = assignmentKey("server", `${root}/.bare`);
   app.shared.set(ASSIGNMENTS, { [local]: "other", [remote]: "personal" });
@@ -329,6 +334,7 @@ test("Use matching rules resets all local worktrees while retaining remote assig
 test("an in-flight drop is discarded if its space closes before repository resolution", async () => {
   const spaces = [{ id: "closing", folder: "/temporary/worktree" }];
   const app = await sidebar(spaces);
+  app.shared.set("pbogut.projects.spaces", { closing: true });
   let release;
   app.state.exec = () => new Promise(resolve => { release = resolve; });
   app.view.assignFolder(spaces[0], "personal", app.cx);
@@ -336,4 +342,82 @@ test("an in-flight drop is discarded if its space closes before repository resol
   release({ code: 0, stdout: "/repo/.git\n" });
   await app.flush();
   assert.equal(app.shared.has(ASSIGNMENTS), false);
+});
+
+test("dragging ordinary spaces and marked projects in the same repository uses separate assignments", async () => {
+  const root = "/repos/gitlab.com/example-work/app";
+  const project = { id: "project", name: "app", folder: `${root}/main`, active: true };
+  const linked = { id: "linked", name: "feature", folder: "/elsewhere/task" };
+  const ordinary = { id: "ordinary", name: "scratch", folder: project.folder };
+  const sibling = { id: "sibling", name: "another scratch", folder: linked.folder };
+  const spaces = [project, linked, ordinary, sibling];
+  const app = await sidebar(spaces);
+  app.shared.set("pbogut.projects.spaces", { project: true, linked: true });
+  app.view.showEmptyFolders = true;
+  for (const space of spaces) app.view.projects.set(JSON.stringify([null, space.folder]), {
+    root, directory: `${root}/.bare`, nameLoaded: true,
+  });
+  const groups = () => [project, linked, ordinary, sibling].map(space => app.view.folderFor(space));
+  assert.deepEqual(groups(), ["work", "work", "work", "work"]);
+  let tree = app.view.render(app.cx);
+  find(tree, "space-ordinary").attrs["on_mouse_down:left"]();
+  find(tree, 'folder-[null,"personal"]').attrs["on_mouse_up:left"](null, app.cx);
+  await app.flush();
+  assert.deepEqual(groups(), ["work", "work", "personal", "work"]);
+  assert.equal(app.shared.get(ASSIGNMENTS)[spaceAssignmentKey(null, ordinary.id)], "personal");
+  assert.equal(app.shared.get(ASSIGNMENTS)[assignmentKey(null, `${root}/.bare`)], undefined);
+  tree = app.view.render(app.cx);
+  find(tree, "space-project").attrs["on_mouse_down:left"]();
+  find(tree, 'folder-[null,"other"]').attrs["on_mouse_up:left"](null, app.cx);
+  await app.flush();
+  assert.deepEqual(groups(), ["other", "other", "personal", "work"]);
+  assert.equal(app.shared.get(ASSIGNMENTS)[assignmentKey(null, `${root}/.bare`)], "other");
+});
+
+test("ordinary assignments survive reloads but never transfer to a recreated space or another machine", async () => {
+  const folder = "/repos/gitlab.com/example-work/app";
+  const ordinary = { id: "scratch", name: "scratch", folder, machine: "server" };
+  const peer = { id: "peer", name: "peer", folder, machine: "server" };
+  const local = { id: "scratch", name: "local", folder };
+  const spaces = [ordinary, peer, local];
+  const app = await sidebar(spaces);
+  app.state.exec = async () => { throw new Error("offline"); };
+  app.view.assignFolder(ordinary, "other", app.cx);
+  await app.flush();
+  assert.deepEqual(spaces.map(space => app.view.folderFor(space)), ["other", "work", "work"]);
+  assert.deepEqual(app.state.notices, [], "An ordinary move needs no remote Git lookup");
+  const reopened = await sidebar(spaces, app.storage, app.shared);
+  assert.equal(reopened.view.folderFor(ordinary), "other");
+  spaces.splice(0, 1, { ...ordinary, id: "new-scratch" });
+  assert.equal(reopened.view.folderFor(spaces[0]), "work", "A new ordinary space follows the initial directory rules");
+});
+
+test("Use matching rules resets only the selected assignment scope", async () => {
+  const root = "/repos/gitlab.com/example-work/app";
+  const project = { id: "project", folder: `${root}/main` };
+  const linked = { id: "linked", folder: `${root}/feature` };
+  const ordinary = { id: "ordinary", folder: project.folder };
+  const peer = { id: "peer", folder: project.folder };
+  const spaces = [project, linked, ordinary, peer];
+  const app = await sidebar(spaces);
+  app.shared.set("pbogut.projects.spaces", { project: true, linked: true });
+  for (const space of spaces) app.view.projects.set(JSON.stringify([null, space.folder]), {
+    root, directory: `${root}/.bare`, nameLoaded: true,
+  });
+  app.view.assignFolder(project, "personal", app.cx);
+  app.view.assignFolder(ordinary, "other", app.cx);
+  app.view.assignFolder(peer, "personal", app.cx);
+  await app.flush();
+  app.view.menu(ordinary);
+  const ordinaryMenu = app.popup();
+  await app.flush();
+  assert.equal(ordinaryMenu.popup.items()[0][0], "Use matching rules");
+  ordinaryMenu.popup.choose(0);
+  assert.deepEqual(spaces.map(space => app.view.folderFor(space)), ["personal", "personal", "work", "personal"]);
+  app.view.menu(project);
+  const projectMenu = app.popup();
+  await app.flush();
+  projectMenu.popup.choose(0);
+  assert.deepEqual(spaces.map(space => app.view.folderFor(space)), ["work", "work", "work", "personal"]);
+  assert.deepEqual(Object.keys(app.shared.get(ASSIGNMENTS)), [spaceAssignmentKey(null, peer.id)]);
 });

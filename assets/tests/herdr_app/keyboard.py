@@ -311,8 +311,12 @@ def main():
 
             closing_space = app("status")["space"]
             key("ctrl+g", "x")
+            wait_for(lambda: "confirm" in app("status")["overlays"],
+                     "Prefix+x uses normal close confirmation for an ordinary space")
+            assert any(space["id"] == closing_space for space in app("ls")["spaces"])
+            key("Return")
             wait_for(lambda: all(space["id"] != closing_space for space in app("ls")["spaces"]),
-                     "Prefix+x closes the current project")
+                     "Confirming closes the ordinary space")
             assert not bar_open()
             assert not app("status")["errors"], app("status")
             print("PASS: whole-line copying and rapid reversals, live overlay resizing, c/v/s/x actions, restored typing, and clipboard copy.", flush=True)

@@ -58,6 +58,12 @@ def main():
     (root / "app/mods/pbogut-projects/projects.json").write_text(json.dumps({
         "root": str(projects), "aliases": {"github.com": "gh", "pbogut": "pb", "gitlab.com": "gl", "assuredpharmacy": "ap"},
     }))
+    # Observe the actual rendered picker rows in this disposable copy.
+    mod = root / "app/mods/pbogut-projects/main.js"
+    mod.write_text(mod.read_text().replace("  render() {", """  render() {
+    if (this.query) console.log("PICKER_ROWS " + JSON.stringify({
+      query: this.query, loading: this.loading, rows: this.rows(),
+    }));"""))
     if args.profile:
         # Instrument only the disposable copy, keeping profiling out of the live mod.
         mod = root / "app/mods/pbogut-projects/main.js"
@@ -113,6 +119,14 @@ def main():
         wait(lambda: mod in app("status")["overlays"], f"{shortcut} opens {mod}")
         call("xdotool", "type", "--clearmodifiers", "--delay", "20", query)
 
+    def picker_state():
+        records = [line.split("PICKER_ROWS ", 1)[1] for line in (root / "app.log").read_text().splitlines()
+                   if "PICKER_ROWS " in line]
+        return json.JSONDecoder().raw_decode(records[-1])[0] if records else {}
+
+    def marked():
+        return json.loads((root / "app/shared.json").read_text()).get("pbogut.projects.spaces", {})
+
     def visible_row(name, color="#283457"):
         path = root / f"{name}.png"
         call("herdr-app", "shot", str(path))
@@ -167,14 +181,31 @@ def main():
                              for space in app("ls")["spaces"]),
                  "A project without a definition opens the default Neovim tab")
             search("GL AP existing")
+            wait(lambda: picker_state().get("query") == "GL AP existing" and not picker_state().get("loading"),
+                 "Existing directory appears in the loaded picker")
+            assert len(picker_state()["rows"]) == 1 and "id" not in picker_state()["rows"][0], \
+                "An ordinary space does not give its directory an open badge"
             key("Return")
-            wait(lambda: app("status")["space"] == original["space"], "Aliases find and focus the existing space")
-            assert len(app("ls")["spaces"]) == 2
+            wait(lambda: len(app("ls")["spaces"]) == 3, "The picker opens a separate project beside the ordinary space")
+            existing_project = next(space for space in app("ls")["spaces"]
+                                    if space["folder"] == str(existing) and space["id"] != original["space"])
+            wait(lambda: marked().get(existing_project["id"]) is True, "Only the new project receives its marker")
+            assert original["space"] not in marked()
+            assert app("status")["space"] == existing_project["id"]
             assert json.loads(call("hc", "get", original["terminal"], "--json"))["pid"] == original_pid
+            search("Custom space")
+            wait(lambda: picker_state().get("query") == "Custom space" and not picker_state().get("loading"),
+                 "Search finishes for an ordinary space's custom name")
+            assert picker_state()["rows"] == [], "Ordinary spaces are absent from the project picker"
+            key("Escape")
+            search("GL AP existing")
+            key("Return")
+            wait(lambda: not app("status")["overlays"], "Reopening a marked project finishes")
+            assert app("status")["space"] == existing_project["id"] and len(app("ls")["spaces"]) == 3
             search("not-a-project")
             key("Return")
             assert "pbogut-projects" in app("status")["overlays"]
-            assert len(app("ls")["spaces"]) == 2
+            assert len(app("ls")["spaces"]) == 3
             key("Escape")
             wait(lambda: not app("status")["overlays"], "Escape closes the picker")
             listed = subprocess.check_output(["bash", str(ROOT / "dot_scripts/executable_ls-project"), "-f"],
@@ -218,10 +249,10 @@ def main():
             assert dev_records(scroll_paths[4]) == [{"cwd": scroll_paths[4], "args": ["fallback"]}]
             defaults.write_text(default_source)
             call("xdotool", "windowsize", "--sync", window, "800", "600")
-            search("custom space")
+            search("GL AP existing")
             wait(lambda: visible_row("resized"), "Picker rows are visible in a smaller window")
             call("xdotool", "mousemove", "--window", window, "400", "160", "click", "1")
-            wait(lambda: app("status")["space"] == original["space"], "Click focuses an existing space")
+            wait(lambda: app("status")["space"] == existing_project["id"], "Click focuses an existing project")
             call("xdotool", "windowsize", "--sync", window, "1280", "800")
             call("xdotool", "mousemove", "--window", window, "20", "700")
 
@@ -312,11 +343,14 @@ def main():
             ordered_tabs = ["nvim", "shell", "shell-2", "dev"]
             project_config = {"tabs": configured_tabs, "dev": dev_command}
             definition.write_text(json.dumps(project_config))
-            dated = app("do", "space.new", "--name", "Dated fixture", "--folder", str(repo / "other"))
-            dated_pid = json.loads(call("hc", "get", dated["terminal"], "--json"))["pid"]
+            ordinary_dated = app("do", "space.new", "--name", "Ordinary dated space", "--folder", str(repo / "other"))
+            dated_pid = json.loads(call("hc", "get", ordinary_dated["terminal"], "--json"))["pid"]
+            (root / "app/mods/pbogut-projects/projects.json").write_text(json.dumps({"root": str(root), "aliases": {}}))
 
             def project_space(folder):
-                return next((space for space in app("ls")["spaces"] if space["folder"] == str(folder)), None)
+                projects = marked()
+                return next((space for space in app("ls")["spaces"]
+                             if space["folder"] == str(folder) and projects.get(space["id"]) is True), None)
 
             def tab_names(folder):
                 space = project_space(folder)
@@ -326,15 +360,18 @@ def main():
                 tab = next(tab for tab in project_space(folder)["tabs"] if tab["name"] == "nvim")
                 return json.loads(call("hc", "get", tab["terminals"][0]["terminal"], "--json"))["pid"]
 
-            search("Dated fixture")
+            search("dated-repo/other")
             key("Return")
-            wait(lambda: tab_names(repo / "other")[:4] == ordered_tabs, "Existing space gets its JSON tabs in fixed order")
-            assert len(project_space(repo / "other")["tabs"]) == 5, "An existing space keeps its original tab"
+            wait(lambda: tab_names(repo / "other") == ordered_tabs, "A separate project gets its JSON tabs in fixed order")
+            dated = {"space": project_space(repo / "other")["id"]}
+            app("do", "space.rename", "--id", dated["space"], "--name", "Dated fixture")
             wait(lambda: dev_records(repo / "other"), "The configured dev command launches")
             assert dev_records(repo / "other") == [{"cwd": str(repo / "other"), "args": dev_args}]
             assert not (repo / "other/must-not-exist").exists(), "Arguments are not evaluated by a shell"
-            assert app("status")["tab"] == dated["tab"], "Applying tabs preserves existing selection"
-            assert json.loads(call("hc", "get", dated["terminal"], "--json"))["pid"] == dated_pid
+            ordinary = next(space for space in app("ls")["spaces"] if space["id"] == ordinary_dated["space"])
+            assert len(ordinary["tabs"]) == 1 and ordinary["tabs"][0]["id"] == ordinary_dated["tab"]
+            assert ordinary["id"] not in marked()
+            assert json.loads(call("hc", "get", ordinary_dated["terminal"], "--json"))["pid"] == dated_pid
             editor = editor_pid(repo / "other")
             search("Dated fixture")
             key("Return")
@@ -531,6 +568,8 @@ def main():
             process = subprocess.Popen(["herdr-app"], env=env, stdout=log, stderr=log)
             window = call("xdotool", "search", "--sync", "--pid", str(process.pid)).splitlines()[0]
             app("do", "layout.switch", "--name", "pbogut")
+            assert original["space"] not in marked() and ordinary_dated["space"] not in marked()
+            assert marked().get(existing_project["id"]) is True
             app("do", "space.select", "--id", project_space(setup_tree)["id"])
             app("do", "pbogut-tabs.reload-project")
             wait(lambda: len(dev_records(setup_tree)) == 3, "Saved setup completion survives an App restart")
@@ -593,7 +632,10 @@ def main():
             cleanup.write_text(
                 'printf "%s\\n" "$HERDR_PROJECT_DIR" "$HERDR_WORKTREE_DIR" "$PWD" >> "$HERDR_PROJECT_DIR/teardown.log"\n'
                 'rm -rf -- "$HERDR_WORKTREE_DIR"\n')
-            app("do", "space.new", "--folder", str(setup_tree))
+            search("setup-feature")
+            key("Return")
+            wait(lambda: project_space(setup_tree) is not None and "dev" in tab_names(setup_tree),
+                 "Reopening through the picker creates a marked project after restart")
             app("do", "pbogut-tabs.close-project")
             wait(lambda: project_space(setup_tree) is None and not setup_tree.exists(),
                  "Teardown can remove the worktree and still close the space")

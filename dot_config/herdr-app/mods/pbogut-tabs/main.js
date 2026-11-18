@@ -1,7 +1,7 @@
 import { View, div } from "gpui-kit";
-import { appHome, checking, exec, home, nextCommand, notify, panes, readTextFile, run, spaces, terminals } from "herdr";
+import { appHome, checking, exec, home, nextCommand, notify, panes, readTextFile, run, setShared, shared, spaces, terminals } from "herdr";
 import { commandFor, compareTabs, roleOf } from "./roles.js";
-import { folderKey, loadProjectConfig, machinePaths } from "./project.js";
+import { PROJECT_SPACES, isProject, folderKey, loadProjectConfig, machinePaths } from "./project.js";
 import ProjectClose from "./close.js";
 
 export default class NamedTabs extends View {
@@ -20,6 +20,12 @@ export default class NamedTabs extends View {
             const reload = command === "reload-project";
             const project = reload ? spaces().find((space) => space.active)
               : JSON.parse(decodeURIComponent(command.slice(8)));
+            if (reload || project?.id) {
+              if (!isProject(project, shared(PROJECT_SPACES))) {
+                if (reload) notify({ title: "Could not reload project config", body: "The active space is not a project.", level: "info" });
+                continue;
+              }
+            }
             if (!project?.folder?.startsWith("/")) {
               if (reload) notify({ title: "Could not reload project config", body: "The active space has no project folder.", level: "error" });
               continue;
@@ -56,6 +62,11 @@ export default class NamedTabs extends View {
   openProject(request, cx) {
     cx.spawn(async (cx) => {
       const project = request.project;
+      if (project.id && !spaces().some(space => space.id === project.id && isProject(space, shared(PROJECT_SPACES)))) {
+        this.pending = null;
+        this.drain(cx);
+        return;
+      }
       try {
         request.paths = await machinePaths(project.machine, exec, { home: home(), appHome: appHome() });
         request.config = await loadProjectConfig(project.folder, exec, readTextFile,
@@ -66,8 +77,8 @@ export default class NamedTabs extends View {
         notify({ title: "Could not load project configuration", body: String(error.message ?? error), level: "error" });
       }
       if (this.pending !== request) return;
-      const existing = spaces().find((space) => project.id ? space.id === project.id
-        : (space.machine ?? null) === (project.machine ?? null) && folderKey(space.folder) === folderKey(project.folder));
+      const existing = spaces().find((space) => isProject(space, shared(PROJECT_SPACES)) && (project.id ? space.id === project.id
+        : (space.machine ?? null) === (project.machine ?? null) && folderKey(space.folder) === folderKey(project.folder)));
       if (existing) {
         if (!request.reload) run("space.select", { id: existing.id });
         if (request.failed) {
@@ -78,9 +89,17 @@ export default class NamedTabs extends View {
         this.pending = null;
         this.drain(cx);
       } else {
-        request.before = new Set(spaces().map((space) => space.id));
         try {
-          run("space.new", { name: project.label, folder: project.folder, machine: project.machine ?? "" });
+          // run() returns no ID. Use the app's response so another space created
+          // in the same directory cannot accidentally receive the project marker.
+          const result = await exec("env", [`HERDR_APP_HOME=${appHome()}`, "herdr-app", "do", "space.new", JSON.stringify({
+            name: project.label, folder: project.folder, machine: project.machine ?? "",
+          })]);
+          if (result.code !== 0) throw new Error(result.stderr?.trim() || result.stdout?.trim() || "Could not create the project space.");
+          const { space } = JSON.parse(result.stdout);
+          if (typeof space !== "string" || !space) throw new Error("Space creation returned no space ID.");
+          if (this.pending !== request) return;
+          request.created = space;
           this.timeout(request, project.label || project.folder, cx);
           cx.notify();
         } catch (error) {
@@ -94,6 +113,8 @@ export default class NamedTabs extends View {
 
   projectReady(request, space, created, cx) {
     if (this.pending === request) this.pending = null;
+    if (created) setShared(PROJECT_SPACES, { ...(shared(PROJECT_SPACES) ?? {}), [space.id]: true });
+    if (!isProject(space, shared(PROJECT_SPACES))) { this.drain(cx); return; }
     if (this.closer.busy(space.id)) { this.drain(cx); return; }
     if (!("initial" in request)) request.initial = created ? space.tabs[0]?.id : null;
     if (!request.failed && request.config.setup && !request.setupDone) {
@@ -260,7 +281,7 @@ export default class NamedTabs extends View {
     cx.spawn(async (cx) => {
       try {
         const paths = await machinePaths(space.machine, exec, { home: home(), appHome: appHome() });
-        if (request.role === "dev") {
+        if (request.role === "dev" && isProject(space, shared(PROJECT_SPACES))) {
           request.config = await loadProjectConfig(space.folder, exec, readTextFile,
             `${paths.appHome}/herdr-project.json`, space.machine);
         }
@@ -294,7 +315,7 @@ export default class NamedTabs extends View {
         continue;
       }
       this.pending = request;
-      if (!request.paths && (space.machine || request.role === "dev")) {
+      if (!request.paths && (space.machine || (request.role === "dev" && isProject(space, shared(PROJECT_SPACES))))) {
         this.loadSettings(request, space, cx);
         continue;
       }
@@ -324,8 +345,8 @@ export default class NamedTabs extends View {
       const request = this.pending;
       if (request.loading) return div().h(0);
       if (request.project) {
-        const space = request.before && spaces().find((space) => (space.machine ?? null) === (request.project.machine ?? null) &&
-          !request.before.has(space.id) &&
+        const space = request.created && spaces().find((space) => space.id === request.created &&
+          (space.machine ?? null) === (request.project.machine ?? null) &&
           folderKey(space.folder) === folderKey(request.project.folder));
         if (space) this.projectReady(request, space, true, cx);
         return div().h(0);

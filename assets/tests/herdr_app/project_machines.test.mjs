@@ -18,6 +18,7 @@ async function fixture(active = null) {
     { id: "vps/one", folder: "/remote/repo", machine: "vps", active: active === "vps" },
   ];
   const machines = [{ name: null, layout: "ready" }, { name: "vps", layout: "ready" }];
+  const marked = { local: true, "vps/one": true };
   const input = () => ({ on() {}, focus() {}, value: () => "", set_value() {} });
   const mock = (values) => new vm.SyntheticModule(Object.keys(values), function () {
     for (const [key, value] of Object.entries(values)) this.setExport(key, value);
@@ -30,6 +31,7 @@ async function fixture(active = null) {
       appHome: () => "/local/app", home: () => "/local/home", checking: () => false,
       spaces: () => spaces, machines: () => machines, props: () => ({ overlay: "picker" }),
       closeOverlay() {}, run: (...args) => commands.push(plain(args)), theme() {}, settings() {},
+      shared: key => key === "pbogut.projects.spaces" ? marked : null,
       exec: async (name, args, options) => {
         calls.push(plain([name, args, options]));
         if (name === "sh") return ok("/remote/home\n/remote/app\n");
@@ -51,7 +53,7 @@ async function fixture(active = null) {
   const view = new main.namespace.default();
   view.init({}, cx);
   await settle();
-  return { view, cx, calls, reads, commands, requests, spaces, machines,
+  return { view, cx, calls, reads, commands, requests, spaces, machines, marked,
     async cycle(backwards = false) { view.cycleMachine(backwards, cx); await settle(); } };
 }
 
@@ -122,4 +124,19 @@ test("a failed remote lookup clears local results and keeps its machine and erro
   assert.match(app.view.error, /remote unavailable/);
   assert.equal(app.view.loading, false);
   assert.ok(app.view.rows().every((row) => row.machine === "vps"));
+});
+
+test("the picker reads project markers for both its rows and its open action", async () => {
+  const app = await fixture("vps");
+  delete app.marked["vps/one"];
+  app.requests[0].resolve(ok("/remote/repo\n"));
+  await settle();
+  const rows = plain(app.view.rows());
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].id, undefined);
+  app.view.open(rows[0]);
+  const project = JSON.parse(decodeURIComponent(app.commands[0][0].split("@")[1]));
+  assert.equal(project.folder, "/remote/repo");
+  assert.equal(project.machine, "vps");
+  assert.equal(project.id, undefined);
 });

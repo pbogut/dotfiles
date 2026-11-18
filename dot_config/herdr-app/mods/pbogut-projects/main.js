@@ -1,6 +1,6 @@
 import { View, div } from "gpui-kit";
 import { v_flex, h_flex, InputState, Input, v_virtual_list, VirtualListScrollHandle, Scrollbar } from "gpui-base";
-import { appHome, checking, closeOverlay, exec, home, machines, props, readTextFile, run, settings, spaces, theme } from "herdr";
+import { appHome, checking, closeOverlay, exec, home, machines, props, readTextFile, run, settings, shared, spaces, theme } from "herdr";
 import { machinePaths, pickerMachines } from "./machines.js";
 import { openProject, projectLabel, projectRows } from "./projects.js";
 import { createDatedWorktree } from "./worktrees.js";
@@ -14,7 +14,7 @@ export default class Projects extends View {
     this.at = 0;
     this.scroll = VirtualListScrollHandle.new();
     this.handle = cx.focus_handle();
-    this.input = InputState.new({ placeholder: "Find a project or open space…" });
+    this.input = InputState.new({ placeholder: "Find a project…" });
     this.input.on("change", (_e, cx) => {
       this.query = this.input.value();
       this.at = 0;
@@ -77,7 +77,7 @@ export default class Projects extends View {
   }
 
   rows() {
-    return projectRows(spaces(), this.projects, this.config, this.query, this.machine);
+    return projectRows(spaces(), this.projects, this.config, this.query, this.machine, shared("pbogut.projects.spaces"));
   }
 
   close() {
@@ -87,7 +87,7 @@ export default class Projects extends View {
 
   open(row) {
     if (!row || this.opened) return;
-    const command = openProject(row, spaces());
+    const command = openProject(row, spaces(), shared("pbogut.projects.spaces"));
     if (!command) return;
     this.close();
     run(...command);

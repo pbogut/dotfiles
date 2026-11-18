@@ -1,5 +1,5 @@
-import { appHome, exec, hc, home, notify, panes, readTextFile, run, spaces, terminals } from "herdr";
-import { loadProjectConfig, machinePaths } from "./project.js";
+import { appHome, exec, hc, home, notify, panes, readTextFile, run, shared, spaces, terminals } from "herdr";
+import { PROJECT_SPACES, isProject, loadProjectConfig, machinePaths } from "./project.js";
 
 export default class ProjectClose {
   constructor() {
@@ -25,6 +25,10 @@ export default class ProjectClose {
   }
 
   close(space, setupPending, cx) {
+    if (!isProject(space, shared(PROJECT_SPACES))) {
+      run("space.close", { id: space.id });
+      return;
+    }
     const previous = this.jobs.get(space.id);
     if (previous) { this.focus(previous, space); return; }
     const setup = this.hook(space, "setup", "running");

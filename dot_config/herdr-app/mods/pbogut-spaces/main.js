@@ -6,7 +6,7 @@
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, ScrollHandle } from "gpui-base";
 import { spaces, machines, panes, run, openOverlay, exec, hc, appHome, readTextFile, theme, shared, setShared, watchFolder, window, layout, checking, nextCommand, notify, props } from "herdr";
-import { ASSIGNMENTS, assignmentKey, DEFAULT_FOLDERS, folderNames, parseFolders, matchFolder, orderFolders } from "./folders.js";
+import { ASSIGNMENTS, assignmentKey, spaceAssignmentKey, DEFAULT_FOLDERS, folderNames, parseFolders, matchFolder, orderFolders } from "./folders.js";
 import SpaceMenu from "./menu.js";
 
 function find(node, id) {
@@ -36,6 +36,7 @@ const railCell = (el) => h_flex().flex_none().justify_center().child(el);
 const where = (s, ps) => JSON.stringify([s.machine ?? null, place(s, ps)]);
 const base = (path) => path.replace(/\/+$/, "").split("/").pop();
 const projectKey = (s) => JSON.stringify([s.machine ?? null, s.folder]);
+const isProject = (s) => shared("pbogut.projects.spaces")?.[s.id] === true;
 
 function projectName(common, folder, fallback = "") {
   const repo = common.replace(/\/+$/, "").replace(/\/\.(git|bare)$/, "");
@@ -152,34 +153,36 @@ export default class Spaces extends View {
   }
 
   folderKey(space) {
-    return assignmentKey(space.machine, this.projects.get(projectKey(space))?.directory);
+    return isProject(space) ? assignmentKey(space.machine, this.projects.get(projectKey(space))?.directory)
+      : spaceAssignmentKey(space.machine, space.id);
   }
 
   assignFolder(space, folder, cx) {
-    if (!folderNames(this.folderConfig).includes(folder) || !space.folder) return;
+    const project = isProject(space);
+    if (!folderNames(this.folderConfig).includes(folder) || (project && !space.folder)) return;
     cx.spawn(async cx => {
       try {
-        let directory = this.projects.get(projectKey(space))?.directory;
-        if (!directory) {
+        let key = this.folderKey(space);
+        if (project && !key) {
           const result = await exec("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], {
             cwd: space.folder, on: space.machine ?? null,
           });
           if (result.code !== 0 && !/not a git repository/i.test(result.stderr)) {
             throw new Error(result.stderr || "Could not find project root.");
           }
-          directory = (result.code === 0 ? result.stdout.replace(/\n$/, "") : space.folder).replace(/\/+$/, "");
+          const directory = (result.code === 0 ? result.stdout.replace(/\n$/, "") : space.folder).replace(/\/+$/, "");
           if (!directory) throw new Error("Could not find project root.");
+          key = assignmentKey(space.machine, directory);
           this.projectReloads.add(projectKey(space));
         }
-        // A drop that finishes after its space closed or changed directories is stale.
-        if (!spaces().some(s => s.id === space.id && projectKey(s) === projectKey(space))) return;
-        const key = assignmentKey(space.machine, directory);
+        // A drop that finishes after its space closed or changed identity is stale.
+        if (!spaces().some(s => s.id === space.id && projectKey(s) === projectKey(space) && isProject(s) === project)) return;
         setShared(ASSIGNMENTS, { ...(shared(ASSIGNMENTS) ?? {}), [key]: folder });
         this.foldersFolded.delete(JSON.stringify([space.machine ?? null, folder]));
         localStorage.setItem("pbogut.folders.folded", JSON.stringify([...this.foldersFolded]));
         cx.notify();
       } catch (error) {
-        notify({ title: "Could not move project", body: String(error.message ?? error), level: "error" });
+        notify({ title: "Could not move space", body: String(error.message ?? error), level: "error" });
       }
     });
   }
@@ -193,13 +196,16 @@ export default class Spaces extends View {
     if (sp.some((s) => !this.shown.has(s.id)) || this.orderingDue(now)) cx.notify();
   }
 
-  // Names and initials belong to the configured project, independent of terminal cd.
+  // Every space needs its Git root for folder matching. Only marked projects
+  // read names from herdr-project.json; ordinary spaces keep Herdr's live name.
   refreshProjects(sp, cx) {
     if (this.refreshingProjects) return;
     const keys = new Set(sp.filter(s => s.folder).map(projectKey));
+    const projectKeys = new Set(sp.filter(s => s.folder && isProject(s)).map(projectKey));
     for (const key of this.projects.keys()) if (!keys.has(key)) this.projects.delete(key);
     for (const key of this.projectReloads) if (!keys.has(key)) this.projectReloads.delete(key);
-    const due = [...keys].filter(key => !this.projects.has(key) || this.projectReloads.has(key));
+    const due = [...keys].filter(key => !this.projects.has(key) || this.projectReloads.has(key)
+      || (projectKeys.has(key) && !this.projects.get(key).nameLoaded));
     if (!due.length) return;
     this.refreshingProjects = true;
     cx.spawn(async cx => {
@@ -209,7 +215,7 @@ export default class Spaces extends View {
           const key = due[next++];
           const [on, cwd] = JSON.parse(key);
           const reload = this.projectReloads.delete(key);
-          const entry = { ...this.projects.get(key) };
+          const entry = { ...this.projects.get(key), nameLoaded: projectKeys.has(key) };
           try {
             const r = await exec("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], { cwd, on });
             if (r.code !== 0 && !/not a git repository/i.test(r.stderr)) throw new Error(r.stderr || "Could not find project root.");
@@ -218,12 +224,14 @@ export default class Spaces extends View {
             entry.directory = (common || cwd).replace(/\/+$/, "");
             entry.root = (common || cwd).replace(/\/+$/, "").replace(/\/\.(git|bare)$/, "");
             entry.name ??= fallback;
-            const path = `${entry.root}/herdr-project.json`;
-            try {
-              const config = JSON.parse(await readTextFile(path, { on }));
-              entry.name = typeof config?.name === "string" && config.name.trim() ? config.name.trim() : fallback;
-            } catch (error) {
-              throw new Error(`${path}: ${error.message ?? error}`);
+            if (entry.nameLoaded) {
+              const path = `${entry.root}/herdr-project.json`;
+              try {
+                const config = JSON.parse(await readTextFile(path, { on }));
+                entry.name = typeof config?.name === "string" && config.name.trim() ? config.name.trim() : fallback;
+              } catch (error) {
+                throw new Error(`${path}: ${error.message ?? error}`);
+              }
             }
             if (reload) {
               for (const [otherKey, other] of this.projects) {
@@ -652,7 +660,7 @@ export default class Spaces extends View {
 
   row({ w, i, g, tree }, t) {
     const on = w.active;
-    const name = this.projects.get(projectKey(w))?.name ?? projectName("", w.folder, w.name);
+    const name = isProject(w) ? this.projects.get(projectKey(w))?.name ?? projectName("", w.folder, w.name) : w.name;
     const fromIndex = this.pressed === null ? -1 : spaces().findIndex(s => s.id === this.pressed);
     const colors = shared("space.colors") ?? {};
     const color = colors[w.id] ?? "ansi6";

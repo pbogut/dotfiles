@@ -9,8 +9,8 @@ export function projectLabel(folder, config) {
     : config.aliases?.[part] ? `${config.aliases[part]}󰿟` : `${part}/`).join("");
 }
 
-export function projectRows(spaces, projects, config, query = "", machine = null) {
-  const open = spaces.filter((space) => (space.machine ?? null) === machine).map((space) => ({
+export function projectRows(spaces, projects, config, query = "", machine = null, marked = {}) {
+  const open = spaces.filter((space) => marked?.[space.id] === true && (space.machine ?? null) === machine).map((space) => ({
     id: space.id, folder: space.folder, machine: space.machine, active: space.active,
     label: space.named || !space.folder ? space.name : projectLabel(space.folder, config),
   }));
@@ -27,10 +27,11 @@ export function projectRows(spaces, projects, config, query = "", machine = null
       .toLowerCase().includes(word)));
 }
 
-export function openProject(row, spaces) {
+export function openProject(row, spaces, marked = {}) {
   const machine = row.machine ?? null;
-  const existing = row.id ? spaces.find((space) => space.id === row.id)
-    : spaces.find((space) => (space.machine ?? null) === machine && folderKey(space.folder) === folderKey(row.folder));
+  const projects = spaces.filter((space) => marked?.[space.id] === true);
+  const existing = row.id ? projects.find((space) => space.id === row.id)
+    : projects.find((space) => (space.machine ?? null) === machine && folderKey(space.folder) === folderKey(row.folder));
   if (existing) {
     if (!existing.folder?.startsWith("/")) return ["space.select", { id: existing.id }];
     return [`pbogut-tabs.project@${encodeURIComponent(JSON.stringify({

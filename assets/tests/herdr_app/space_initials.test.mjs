@@ -28,7 +28,7 @@ function element() {
 }
 const text = el => typeof el === "string" ? [el] : el.nodes.flatMap(text);
 
-async function fixture(spaces, exec, readTextFile = async () => null) {
+async function fixture(spaces, exec, readTextFile = async () => null, marked = Object.fromEntries(spaces.map(space => [space.id, true]))) {
   const tasks = [], notices = [];
   let receive;
   const state = { now: 100_000, panes: [] };
@@ -47,7 +47,8 @@ async function fixture(spaces, exec, readTextFile = async () => null) {
     herdr: mock({
       spaces: () => spaces, panes: () => state.panes, machines: () => [],
       window: () => ({ active: true }), layout: () => ({}),
-      run() {}, openOverlay() {}, theme: () => ({}), shared: () => null, setShared() {},
+      run() {}, openOverlay() {}, theme: () => ({}),
+      shared: key => key === "pbogut.projects.spaces" ? marked : null, setShared() {},
       hc: async () => ({ code: 0, stdout: '{"machines":[]}' }), exec, appHome: () => "/app",
       readTextFile: (path, options) => path === "/app/folders.json" ? Promise.resolve(null) : readTextFile(path, options),
       watchFolder() {},
@@ -70,7 +71,7 @@ async function fixture(spaces, exec, readTextFile = async () => null) {
   tasks.pop(); // The command listener stays alive for the lifetime of the mod.
   view.watch = () => {}; // Filesystem watches aren't needed to test the rendered letters.
   return {
-    state, view, notices,
+    state, view, notices, marked,
     reload: async (space) => {
       receive(`reload@${encodeURIComponent(JSON.stringify(space))}`);
       await new Promise(setImmediate);
@@ -276,4 +277,38 @@ test("a reload arriving during initial reads runs afterwards and updates only si
   app.state.now += 600_000;
   await app.refresh();
   assert.equal(reads.length, count, "Time and rendering cause no config reads");
+});
+
+test("ordinary spaces keep stock names and branches while sharing initial folder grouping with projects", async () => {
+  const folder = "/repos/gitlab.com/example-work/app/main";
+  const ordinary = { id: "ordinary", folder, name: "main", tabs: [{ id: "terminal" }] };
+  const project = { id: "project", folder, name: "Picker label" };
+  const spaces = [ordinary];
+  const reads = [];
+  const app = await fixture(spaces, async (_bin, args) => args.includes("--git-common-dir")
+    ? { code: 0, stdout: "/repos/gitlab.com/example-work/app/.bare\n" }
+    : { code: 1, stderr: "not a git repository", stdout: "" },
+  async path => { reads.push(path); return '{"name":"Configured project name"}'; }, {});
+  app.view.refreshGit = () => {};
+  app.view.folderConfig = JSON.parse(await readFile(new URL("fixtures/folders.json", import.meta.url), "utf8"));
+  await app.refresh();
+  assert.deepEqual(reads, []);
+  assert.deepEqual(app.row(ordinary, { branch: "main" }), ["M", "main", "main"]);
+  assert.equal(app.view.folderFor(ordinary), "work");
+  await app.reload(ordinary);
+  assert.deepEqual(reads, [], "An ordinary space cannot load a name through a reload command either");
+  spaces.push(project);
+  app.marked.project = true;
+  await app.refresh();
+  assert.equal(reads.length, 1, "A newly marked project loads its name even if the root was already cached");
+  assert.deepEqual(app.row(project), ["C", "Configured project name"]);
+  assert.deepEqual(app.row(ordinary), ["M", "main"], "Sharing a directory cache cannot leak project names");
+  assert.equal(app.view.folderFor(project), app.view.folderFor(ordinary));
+  assert.notEqual(app.view.folderKey(project), app.view.folderKey(ordinary));
+  ordinary.name = "notes";
+  app.state.panes = [{ tab: "terminal", cwd: "/notes" }];
+  await app.refresh();
+  assert.deepEqual(app.row(ordinary, { branch: "different" }), ["N", "notes", "different"]);
+  ordinary.name = "My scratch space";
+  assert.deepEqual(app.row(ordinary), ["M", "My scratch space"]);
 });

@@ -1,5 +1,7 @@
 import { roleOf } from "./roles.js";
 
+export const PROJECT_SPACES = "pbogut.projects.spaces";
+export const isProject = (space, marked) => marked?.[space?.id] === true;
 export const folderKey = (folder) => (folder ?? "").replace(/\/+$/, "") || "/";
 
 // Mods cannot import across directories. Match pbogut-projects/machines.js.

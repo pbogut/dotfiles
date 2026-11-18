@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+from urllib.parse import quote
 
 from PIL import Image, ImageColor
 
@@ -41,6 +42,17 @@ def main():
     def app(*args):
         return json.loads(call("herdr-app", *args))
 
+    def open_project(name, folder):
+        before = {space["id"] for space in app("ls")["spaces"]}
+        request = quote(json.dumps({"label": name, "folder": str(folder)}), safe="")
+        app("do", f"pbogut-tabs.project@{request}")
+        def created():
+            marked = json.loads((root / "app/shared.json").read_text()).get("pbogut.projects.spaces", {})
+            return next((space["id"] for space in app("ls")["spaces"]
+                         if space["id"] not in before and space["folder"] == str(folder) and marked.get(space["id"])), None)
+        wait(created, "The project controller creates and marks its space")
+        return created()
+
     def wait(check, message):
         deadline = time.monotonic() + 15
         while time.monotonic() < deadline:
@@ -63,7 +75,21 @@ def main():
         selected = ImageColor.getrgb("#283457")
         with Image.open(path) as image:
             image = image.convert("RGB")
-            return next((y for y in range(80, 350) if image.getpixel((10, y)) == selected), None)
+            return next((y for y in range(80, 650) if image.getpixel((10, y)) == selected), None)
+
+    def row_top(space):
+        app("do", "space.select", "--id", space)
+        return selected_top("selected-row")
+
+    def assignments():
+        return json.loads((root / "app/shared.json").read_text()).get("pbogut.folders.assignments", {})
+
+    def assignment_key(*parts):
+        return json.dumps(parts, separators=(",", ":"))
+
+    def drag_to_other(space, other_spaces):
+        target = min(row_top(other) for other in other_spaces) - 14
+        drag(row_top(space) + 10, target)
 
     notes = root / "notes"
     personal = root / "repos/github.com/example-personal/dotfiles"
@@ -91,7 +117,8 @@ def main():
             app("do", "layout.switch", "--name", "pbogut")
             opened = {}
             for name, folder in [("Notes", notes), ("Dotfiles", personal), ("Main name", main_tree), ("Feature name", outside)]:
-                opened[str(folder)] = app("do", "space.new", "--name", name, "--folder", str(folder))["space"]
+                opened[str(folder)] = open_project(name, folder) if folder in (main_tree, outside) else \
+                    app("do", "space.new", "--name", name, "--folder", str(folder))["space"]
             wait(lambda: [s["folder"] for s in app("ls")["spaces"]] == expected, "Core space order matches work, personal, other")
             for number, folder in enumerate(expected, 1):
                 key(f"alt+{number}")
@@ -149,11 +176,15 @@ def main():
             wait(lambda: len(app("ls")["spaces"]) == 2, "Close both worktree spaces")
             for folder in (main_tree, outside):
                 old = opened[str(folder)]
-                opened[str(folder)] = app("do", "space.new", "--name", "Restored space", "--folder", str(folder))["space"]
+                opened[str(folder)] = open_project("Restored space", folder)
                 assert opened[str(folder)] != old
             app("do", "space.select", "--id", opened[str(main_tree)])
             wait(lambda: (selected_top("recreated-spaces") or 0) > 150,
                  "Recreated worktree spaces inherit the repository's manual group")
+            # Preserve their current sibling order, which can settle differently
+            # as each new project's Git lookup completes.
+            expected = [space["folder"] for space in app("ls")["spaces"]
+                        if space["folder"] in (str(main_tree), str(outside))] + [str(personal), str(notes)]
             top = selected_top("before-reset")
             call("xdotool", "mousemove", "100", str(top + 10), "click", "3")
             wait(lambda: "pbogut-spaces" in app("status")["overlays"], "The space context menu opens")
@@ -171,8 +202,54 @@ def main():
             app("do", "space.select", "--id", opened[str(notes)])
             wait(lambda: selected_top("non-git-moved") == notes_before - 28,
                  "Moving the non-Git directory into other hides its now-empty personal header")
+
+            # Ordinary spaces initially match the same root, but their moves are individual.
+            scratch = app("do", "space.new", "--folder", str(main_tree))
+            peer = app("do", "space.new", "--folder", str(main_tree))
+            call("hc", "send", scratch["terminal"], f"cd {notes}")
+            wait(lambda: next(s for s in app("ls")["spaces"] if s["id"] == scratch["space"])["name"] == notes.name,
+                 "The ordinary space's stock name follows its live directory")
+            project_key = assignment_key(None, str(project / ".bare"))
+            scratch_key = assignment_key(None, "space", scratch["space"])
+            drag_to_other(scratch["space"], [opened[str(notes)], opened[str(personal)]])
+            wait(lambda: assignments().get(scratch_key) == "other", "An ordinary drop records only its space ID")
+            assert project_key not in assignments(), "The ordinary drop must not move the repository"
+            assert row_top(opened[str(main_tree)]) < row_top(scratch["space"])
+            assert row_top(opened[str(outside)]) < row_top(scratch["space"])
+            assert row_top(peer["space"]) < row_top(scratch["space"])
+            work_spaces = {opened[str(main_tree)], opened[str(outside)], peer["space"]}
+            app("do", "window.close")
+            process.wait(timeout=5)
+            process = subprocess.Popen(["herdr-app"], env=env, stdout=log, stderr=log)
+            window = call("xdotool", "search", "--sync", "--pid", str(process.pid)).splitlines()[0]
+            call("xdotool", "windowfocus", window)
+            app("do", "layout.switch", "--name", "pbogut")
+            wait(lambda: {s["id"] for s in app("ls")["spaces"][:3]} == work_spaces,
+                 "The ordinary space's individual group survives restart")
+            assert assignments().get(scratch_key) == "other"
+            assert project_key not in assignments()
+
+            # Moving a project leaves an unassigned ordinary peer in its original group.
+            drag_to_other(opened[str(main_tree)], [scratch["space"], opened[str(notes)], opened[str(personal)]])
+            wait(lambda: assignments().get(project_key) == "other", "The project still records a repository assignment")
+            wait(lambda: app("ls")["spaces"][0]["id"] == peer["space"],
+                 "The ordinary peer stays in work while both marked project worktrees move")
+            assert row_top(peer["space"]) < row_top(opened[str(main_tree)])
+            assert row_top(peer["space"]) < row_top(opened[str(outside)])
+            fresh = app("do", "space.new", "--folder", str(main_tree))
+            wait(lambda: {s["id"] for s in app("ls")["spaces"][:2]} == {peer["space"], fresh["space"]},
+                 "A new ordinary space follows folder rules rather than the project's assignment")
+
+            top = row_top(scratch["space"])
+            call("xdotool", "mousemove", "100", str(top + 10), "click", "3")
+            wait(lambda: "pbogut-spaces" in app("status")["overlays"], "The ordinary space's menu opens")
+            key("Return")
+            wait(lambda: scratch_key not in assignments(), "Reset clears only the ordinary space's assignment")
+            assert assignments().get(project_key) == "other"
+            wait(lambda: {s["id"] for s in app("ls")["spaces"][:3]} == {peer["space"], fresh["space"], scratch["space"]},
+                 "Reset restores the ordinary space's opening-folder group without moving projects")
             assert not app("status")["errors"], app("status")
-            print("PASS: grouping, shortcuts, fold/reveal, config reload, drag assignment, restart/recreation persistence, and menu reset.", flush=True)
+            print("PASS: grouping, navigation, project and per-space drag isolation, restart/recreation persistence, and scoped reset.", flush=True)
         except Exception:
             print("Status:", app("status"), flush=True)
             call("herdr-app", "shot", str(root / "failure.png"))
