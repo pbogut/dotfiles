@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export HERDR_APP_HOME=${HERDR_APP_HOME:-${XDG_CONFIG_HOME:-$HOME/.config}/herdr-app}
+: "${PROJECTS:?PROJECTS must point to the project root}"
+
+compact_project() {
+    sed -e ''{{ range $full, $short := .dir_aliases }} -e 's,{{ $full }}/,{{ $short }}󰿟,g'{{ end }}
+}
+
+expand_project() {
+    sed -e ''{{ range $full, $short := .dir_aliases }} -e 's,{{ $short }}󰿟,{{ $full }}/,g'{{ end }}
+}
+
+open_projects() {
+    local snapshot
+    snapshot=$(herdr-app ls 2> /dev/null) || return 0
+    [[ -f $HERDR_APP_HOME/shared.json ]] || return 0
+    jq -r --slurpfile shared "$HERDR_APP_HOME/shared.json" '
+        .spaces[] |
+        select((.machine == null or .machine == "") and
+            $shared[0]["pbogut.projects.spaces"][.id] == true) |
+        .folder // empty
+    ' <<< "$snapshot"
+}
+
+project_rows() {
+    local prefix=$1 path
+    while IFS= read -r path; do
+        [[ -n $path ]] || continue
+        printf '%s %s\n' "$prefix" "${path#"$PROJECTS/"}"
+    done
+}
+
+all_projects() {
+    {
+        open_projects | project_rows '󰳆'
+        ls-project -f | project_rows ' '
+    } | compact_project | awk '!seen[substr($0, 3)]++'
+}
+
+create_worktree() {
+    local base=$PWD name before after output folder
+    while [[ ! -d $base/.bare ]]; do
+        if [[ $base == / ]]; then
+            echo "Dated worktrees require a .bare repository" >&2
+            return 1
+        fi
+        base=$(dirname "$base")
+    done
+    if [[ $base =~ [[:space:]] ]]; then
+        echo "The git-wt helper does not support whitespace in repository paths" >&2
+        return 1
+    fi
+    if [[ ${TERM:-dumb} == dumb ]]; then
+        name=$(zenity --entry --title="New dated worktree" \
+            --text="${base#"$PROJECTS/"}\n\nNew branch name:" \
+            --entry-text="" --ok-label="Create" --cancel-label="Cancel") || exit 0
+    else
+        printf '%s\n\n' "${base#"$PROJECTS/"}" > /dev/tty
+        IFS= read -r -p 'New branch name: ' name < /dev/tty || exit 0
+    fi
+    [[ -n $name ]] || exit 0
+    name=${name// /-}
+    cd "$base"
+    before=$(git worktree list --porcelain)
+    output=$(git new-dated-worktree "$name")
+    folder=$(tail -n 1 <<< "$output")
+    after=$(git worktree list --porcelain)
+    # git-new-dated-worktree prints a path even when git wt fails.
+    if [[ -z $folder ]] || grep -Fxq "worktree $folder" <<< "$before" ||
+        ! grep -Fxq "worktree $folder" <<< "$after"; then
+        echo "The script did not create a new worktree" >&2
+        return 1
+    fi
+    cd "$folder"
+}
+
+ensure_app() {
+    if herdr-app status > /dev/null 2>&1; then
+        return
+    fi
+    nohup herdr-app > /dev/null 2>&1 &
+    for _ in {1..100}; do
+        if herdr-app status > /dev/null 2>&1; then
+            return
+        fi
+        sleep 0.1
+    done
+    echo "Herdr App did not start" >&2
+    return 1
+}
+
+new_worktree=false
+if [[ ${TERM:-dumb} == dumb ]]; then
+    status=0
+    selection=$(all_projects |
+        sed "s|$|\x00icon\x1f${ICONS:-}/git.svg|" |
+        fuzzel --dmenu --no-sort --search "${1:-}" --cache /dev/null) || status=$?
+    case $status in
+    0) ;;
+    1) exit 0 ;;
+    10) new_worktree=true ;;
+    *) exit "$status" ;;
+    esac
+else
+    status=0
+    selection=$(all_projects | fzf --expect=ctrl-n,enter -q "${1:-}" --height=100%) || status=$?
+    case $status in
+    0) ;;
+    1 | 130) exit 0 ;;
+    *) exit "$status" ;;
+    esac
+    [[ ${selection%%$'\n'*} != ctrl-n ]] || new_worktree=true
+    selection=${selection#*$'\n'}
+fi
+[[ -n $selection ]] || exit 0
+project=$(printf '%s\n' "${selection:2}" | expand_project)
+[[ $project == /* ]] || project=$PROJECTS/$project
+cd "$project"
+if $new_worktree; then
+    create_worktree
+fi
+touch -h "$PWD"
+label=$(compact_project <<< "${PWD#"$PROJECTS/"}")
+request=$(jq -rn --arg folder "$PWD" --arg label "$label" \
+    '{folder: $folder, label: $label, machine: null} | tojson | @uri')
+ensure_app
+herdr-app "do" "pbogut-tabs.project@$request" > /dev/null
+nohup focus-or-exec '^herdr-app$' herdr-app > /dev/null 2>&1 &

@@ -160,14 +160,14 @@ hl.bind(mod .. ' + semicolon', dsp.exec_cmd('fuzzel-run'))
 hl.bind(mod .. ' + SHIFT + semicolon', dsp.exec_cmd('fuzzel'))
 hl.bind(mod .. ' + apostrophe', dsp.exec_cmd('dms ipc call clipboard toggle'))
 hl.bind(mod .. ' + W', dsp.exec_cmd('hypr-windows'))
-hl.bind(mod .. ' + CTRL + P', dsp.exec_cmd('herdr-project'))
+hl.bind(mod .. ' + CTRL + P', dsp.exec_cmd('herdr-app-project'))
 hl.bind(mod .. ' + Return', dsp.exec_cmd('alacritty'))
 hl.bind(mod .. ' + B', dsp.exec_cmd('hypr-focusorexec vivaldi-personal browser'))
 hl.bind(mod .. ' + CTRL + K', dsp.exec_cmd([[terminal-float -t "khal" -e khal interactive]]))
 hl.bind(mod .. ' + CTRL + F', dsp.exec_cmd('hypr-focusorexec ferdium ferdium'))
 hl.bind(mod .. ' + T', dsp.exec_cmd('systray-dmenu'))
 hl.bind(mod .. ' + Q', dsp.exec_cmd('quick-menu'))
-hl.bind(mod .. ' + CTRL + C', dsp.exec_cmd([[focus-or-exec '^Alacritty\.herdr$' terminal -c herdr -e herdr]]))
+hl.bind(mod .. ' + CTRL + C', dsp.exec_cmd([[focus-or-exec '^herdr-app$' herdr-app]]))
 hl.bind(mod .. ' + CTRL + O', dsp.exec_cmd('chat'))
 hl.bind(mod .. ' + CTRL + I', dsp.exec_cmd('fix-grammar --primary'))
 -- F15 is reported as XF86Launch6.
@@ -368,6 +368,12 @@ hl.window_rule({
 hl.window_rule({
   name = 'alacritty-project',
   match = { class = 'Alacritty.project' },
+  workspace = 'name:code',
+  scrolling_width = 0.9,
+})
+hl.window_rule({
+  name = 'herdr-app',
+  match = { class = 'herdr-app' },
   workspace = 'name:code',
   scrolling_width = 0.9,
 })
