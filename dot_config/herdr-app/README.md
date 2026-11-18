@@ -332,6 +332,44 @@ successful hash twice.
 The old `version` field is ignored. Version-based completion records require one
 fresh run per worktree to save the script's hash.
 
+### Teardown hooks
+
+Add a teardown script to the project definition:
+
+```json
+{
+  "tabs": ["nvim", "dev"],
+  "teardown": {
+    "script": "herdr-teardown.sh"
+  }
+}
+```
+
+Open the command palette with Ctrl+Shift+P and choose **Close project**.
+The action reads the current definition and runs teardown in a visible,
+interactive `teardown` tab. It closes the other tabs in that space before
+starting the script. Repeating the action while teardown runs focuses that tab.
+Named-tab shortcuts can still create and focus tabs during teardown.
+
+Bash runs the script from the worktree root. Relative script paths resolve
+beside the JSON file. `HERDR_PROJECT_DIR` is that file's directory;
+`HERDR_WORKTREE_DIR` is the worktree root. Fallback hooks resolve beside the
+fallback JSON, and remote projects run teardown on their own machine.
+
+Exit status zero closes the requested space and ends its terminals. A failed
+or cancelled teardown leaves the space open; the earlier tabs have already
+closed. Failure output stays visible until Enter is pressed or the tab is
+closed. Fix the script and choose
+**Close project** again to retry. Retrying closes the other tabs, including
+the failed teardown tab, before running the script. Finish or close any running
+setup tab before requesting project closure.
+
+Teardown runs on every explicit **Close project** request, without a completion
+cache. A project without a teardown hook closes immediately. Closing an
+individual tab, using Herdr's built-in **Close space**, or quitting the window
+does not run teardown. Closing a space does not remove its worktree unless
+the teardown script does so.
+
 ## Space labels
 
 The `pbogut` layout uses `mods/pbogut-spaces`, a copy of Herdr App 0.1.16's
@@ -400,6 +438,8 @@ node --experimental-vm-modules --test assets/tests/herdr_app/project_machines.te
 node --test assets/tests/herdr_app/project_tabs.test.mjs
 python3 -B assets/tests/herdr_app/setup_test.py
 shellcheck dot_config/herdr-app/mods/pbogut-tabs/setup.sh
+python3 -B assets/tests/herdr_app/teardown_test.py
+shellcheck dot_config/herdr-app/mods/pbogut-tabs/teardown.sh
 node --test assets/tests/herdr_app/worktrees.test.mjs
 node --test assets/tests/herdr_app/opencode_session.test.mjs
 node --test assets/tests/herdr_app/opencode_rpc.test.mjs
@@ -448,9 +488,13 @@ Custom dev checks cover literal arguments, worktree-relative paths, fallback
 commands, running-tab reuse, reloading on recreation, and closing on failure.
 Manual reload checks cover the command palette, fixed tab order, missing
 dev tabs, and retaining the applied configuration after invalid edits.
+Hook checks cover hash-based setup, interactive teardown failure and retry,
+closing other tabs before teardown, named-tab shortcuts during teardown,
+closing the requested space while another stays focused, and worktree removal.
 
 The remote-picker test connects two isolated cores through a local `--via`
 transport. It checks native Tab/Shift+Tab with a focused search input, machine
 scoping, remote configuration and editor startup, and visible lookup failures.
 It also creates a dated remote worktree through the source helpers and verifies
-that the new space and its tabs stay on that machine.
+that the new space and its tabs stay on that machine. Setup and teardown use
+that machine's fallback definition and worktree directory.

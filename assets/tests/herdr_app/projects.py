@@ -472,7 +472,7 @@ def main():
                 'echo SETUP-READY\nread -r answer\n[[ $answer != fail ]] || exit 17\n'
                 'touch "$HERDR_WORKTREE_DIR/.setup-ready"\n')
             setup_config = {"tabs": ["shell", "dev"], "dev": dev_command,
-                            "setup": {"version": 1, "script": hook.name}}
+                            "setup": {"script": hook.name}}
             definition.write_text(json.dumps(setup_config))
             dated_prompt()
             call("xdotool", "type", "--clearmodifiers", "setup feature")
@@ -513,17 +513,16 @@ def main():
 
             dev_tab = next(tab for tab in project_space(setup_tree)["tabs"] if tab["name"] == "dev")
             app("do", "tab.close", "--id", dev_tab["id"])
-            wait(lambda: "dev" not in tab_names(setup_tree), "Dev closes before the next setup version")
+            wait(lambda: "dev" not in tab_names(setup_tree), "Dev closes before changing setup")
             before_setup = app("status")["tab"]
-            setup_config["setup"]["version"] = 2
-            definition.write_text(json.dumps(setup_config))
+            hook.write_text(hook.read_text() + "# Changed setup content.\n")
             app("do", "pbogut-tabs.reload-project")
-            wait(lambda: "setup" in tab_names(setup_tree), "A new setup version runs before filling missing tabs")
-            version_two = setup_terminal()
+            wait(lambda: "setup" in tab_names(setup_tree), "Changed setup content runs before filling missing tabs")
+            changed_setup = setup_terminal()
             assert "dev" not in tab_names(setup_tree)
-            call("hc", "send", version_two, "continue")
+            call("hc", "send", changed_setup, "continue")
             wait(lambda: "setup" not in tab_names(setup_tree) and len(dev_records(setup_tree)) == 2,
-                 "Version two completes and recreates dev")
+                 "Changed setup completes and recreates dev")
             assert app("status")["tab"] == before_setup, "Successful setup restores the previous tab"
             dev_tab = next(tab for tab in project_space(setup_tree)["tabs"] if tab["name"] == "dev")
             app("do", "tab.close", "--id", dev_tab["id"])
@@ -535,10 +534,72 @@ def main():
             app("do", "space.select", "--id", project_space(setup_tree)["id"])
             app("do", "pbogut-tabs.reload-project")
             wait(lambda: len(dev_records(setup_tree)) == 3, "Saved setup completion survives an App restart")
-            assert len((repo / "setup.log").read_text().splitlines()) == 9, "Successful versions run once"
+            assert len((repo / "setup.log").read_text().splitlines()) == 9, "Successful script hashes run once"
             assert "setup" not in tab_names(setup_tree)
+
+            cleanup = repo / "teardown's script.sh"
+            original_tabs = {tab["id"] for tab in project_space(setup_tree)["tabs"]}
+            running_dev = next(tab for tab in project_space(setup_tree)["tabs"] if tab["name"] == "dev")
+            dev_terminal = running_dev["terminals"][0]["terminal"]
+            cleanup.write_text(
+                'printf "%s\\n" "$HERDR_PROJECT_DIR" "$HERDR_WORKTREE_DIR" "$PWD" >> "$HERDR_PROJECT_DIR/teardown.log"\n'
+                f'hc get {json.dumps(dev_terminal)} --json > "$HERDR_PROJECT_DIR/before-teardown.json"\n'
+                'echo TEARDOWN-READY\nread -r answer\n[[ $answer != fail ]] || exit 17\n')
+            setup_config["teardown"] = {"script": cleanup.name}
+            definition.write_text(json.dumps(setup_config))
+            call("xdotool", "windowfocus", window)
+            search("close project", "ctrl+shift+p", "pbogut-palette")
+            key("Return")
+            wait(lambda: "teardown" in tab_names(setup_tree), "Close project opens the interactive teardown tab")
+
+            def teardown_terminal():
+                tab = next(tab for tab in project_space(setup_tree)["tabs"] if tab["name"] == "teardown")
+                terminal = tab["terminals"][0]["terminal"]
+                wait(lambda: "TEARDOWN-READY" in call("hc", "read", terminal, "--lines", "20"), "Teardown accepts input")
+                return terminal
+
+            first_teardown = teardown_terminal()
+            for _ in range(5):
+                app("do", "pbogut-tabs.close-project")
+            assert tab_names(setup_tree).count("teardown") == 1
+            assert (repo / "teardown.log").read_text().splitlines() == [str(repo), str(setup_tree), str(setup_tree)]
+            assert original_tabs.isdisjoint({tab["id"] for tab in project_space(setup_tree)["tabs"]})
+            assert json.loads((repo / "before-teardown.json").read_text())["state"] == "finished", \
+                "Other tabs and their programs close before the teardown script starts"
+            key("alt+k")
+            wait(lambda: "shell" in tab_names(setup_tree), "Named-tab shortcuts create tabs during teardown")
+            shell = next(tab for tab in project_space(setup_tree)["tabs"] if tab["name"] == "shell")
+            key("alt+l")
+            wait(lambda: "shell-2" in tab_names(setup_tree), "Another named tab can open during teardown")
+            key("alt+k")
+            wait(lambda: app("status")["tab"] == shell["id"], "Named-tab shortcuts focus existing tabs during teardown")
+            call("hc", "send", first_teardown, "fail")
+            wait(lambda: "Teardown failed (exit 17)" in call("hc", "read", first_teardown, "--lines", "20"),
+                 "Failed teardown remains visible")
+            assert {"shell", "shell-2", "teardown"}.issubset(tab_names(setup_tree))
+            search("close project", "ctrl+shift+p", "pbogut-palette")
+            key("Return")
+            wait(lambda: any(tab["name"] == "teardown" and tab["terminals"][0]["terminal"] != first_teardown
+                             for tab in project_space(setup_tree)["tabs"]), "Close project retries a failed teardown")
+            second_teardown = teardown_terminal()
+            assert tab_names(setup_tree) == ["teardown"], "Retry closes the failed tab and newly opened tabs before running"
+            app("do", "space.select", "--id", dated["space"])
+            call("hc", "send", second_teardown, "continue")
+            wait(lambda: project_space(setup_tree) is None, "Successful teardown closes its original project space")
+            assert app("status")["space"] == dated["space"], "Finishing teardown preserves another space's focus"
+            assert json.loads(call("hc", "get", dev_terminal, "--json"))["state"] == "finished"
+
+            # Every explicit close runs teardown again, including cleanup that removes the worktree.
+            cleanup.write_text(
+                'printf "%s\\n" "$HERDR_PROJECT_DIR" "$HERDR_WORKTREE_DIR" "$PWD" >> "$HERDR_PROJECT_DIR/teardown.log"\n'
+                'rm -rf -- "$HERDR_WORKTREE_DIR"\n')
+            app("do", "space.new", "--folder", str(setup_tree))
+            app("do", "pbogut-tabs.close-project")
+            wait(lambda: project_space(setup_tree) is None and not setup_tree.exists(),
+                 "Teardown can remove the worktree and still close the space")
+            assert len((repo / "teardown.log").read_text().splitlines()) == 9
             assert not app("status")["errors"], app("status")
-            print("PASS: project pickers, JSON tabs/dev, interactive setup ordering, failure retry, versioning, and restart persistence.", flush=True)
+            print("PASS: project pickers, JSON tabs/dev, hash-based setup, and interactive teardown retry, close, focus, and worktree cleanup.", flush=True)
         except Exception:
             print("Status:", app("status"), flush=True)
             print("Spaces:", app("ls"), flush=True)

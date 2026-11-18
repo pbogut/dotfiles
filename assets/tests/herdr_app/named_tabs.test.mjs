@@ -11,7 +11,7 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
   const files = new Map(), persisted = new Map();
   files.set("/config/herdr-app/herdr-project.json", '{"tabs":["nvim"]}');
   const failures = new Set();
-  const native = [], executions = [], setupChecks = new Map();
+  const native = [], executions = [], setupChecks = new Map(), coreResults = new Map(), sends = [];
   const spaces = [
     { id: "one", active: true, folder: "/project one", tabs: initialTabs },
     { id: "two", active: false, folder: "/project two", tabs: [{ id: "other", name: "shell", named: true }] },
@@ -28,6 +28,18 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
     "gpui-kit": mock({ View: class {}, div: () => element }),
     herdr: mock({
       checking: () => checking, spaces: () => structuredClone(spaces), terminals: () => structuredClone(native),
+      hc: async (args) => {
+        if (args[0] === "send") {
+          sends.push({ terminal: args[1], command: args[2], spaces: structuredClone(spaces) });
+          const terminal = native.find(terminal => terminal.address === args[1]);
+          if (terminal) terminal.labels = {
+            "pbogut.teardown": args[2].match(/'([^']+)'$/)[1], "pbogut.teardown.state": "running",
+          };
+          return { code: 0, stdout: "" };
+        }
+        return { code: 0, stdout: JSON.stringify(coreResults.get(args[1]) ??
+          native.find(terminal => terminal.address === args[1])) };
+      },
       panes: () => spaces.flatMap(space => space.tabs.filter(tab => tab.terminal)
         .map(tab => ({ tab: tab.id, terminal: tab.terminal }))),
       exec: async (name, args, options) => {
@@ -55,6 +67,7 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
     }),
     "./roles.js": new vm.SourceTextModule(await readFile(new URL("roles.js", root), "utf8"), { context }),
     "./project.js": new vm.SourceTextModule(await readFile(new URL("project.js", root), "utf8"), { context }),
+    "./close.js": new vm.SourceTextModule(await readFile(new URL("close.js", root), "utf8"), { context }),
   };
   const main = new vm.SourceTextModule(await readFile(new URL("main.js", root), "utf8"), { context });
   await main.link((name) => modules[name]);
@@ -63,7 +76,7 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
   const view = new main.namespace.default();
   view.init({}, cx);
   return {
-    calls, spaces, timers, files, failures, reads, persisted, native, executions, setupChecks,
+    calls, spaces, timers, files, failures, reads, persisted, native, executions, setupChecks, coreResults, sends,
     roles: modules["./roles.js"].namespace,
     render: () => view.render(cx),
     async command(value) {
@@ -84,13 +97,17 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
               tabs: [{ id: `${id}-initial`, name: "1", named: false, panes: 1 }] });
           } else if (name === "space.select") {
             spaces.forEach((space) => { space.active = space.id === args.id; });
+          } else if (name === "space.close") {
+            const index = spaces.findIndex(space => space.id === args.id);
+            if (index >= 0) spaces.splice(index, 1);
           } else if (name === "tab.new") {
             if (failures.has(args.name)) continue;
             const tab = { id: `new-${++serial}`, name: args.name, named: true, panes: 1 };
-            if (args.name === "setup") {
+            if (args.name === "setup" || args.name === "teardown") {
               tab.terminal = `terminal-${serial}`;
-              native.push({ address: tab.terminal, labels: {
-                "pbogut.setup": args.argv.at(-1), "pbogut.setup.hash": setupHash, "pbogut.setup.state": "running",
+              native.push({ address: tab.terminal, labels: args.name === "teardown" ? {} : {
+                [`pbogut.${args.name}`]: args.argv.at(-1), "pbogut.setup.hash": setupHash,
+                [`pbogut.${args.name}.state`]: "running",
               } });
             }
             spaces.find((space) => space.id === args.space).tabs.push(tab);
@@ -659,4 +676,201 @@ test("an unreadable setup script reports the check failure and permits retry", a
   await app.command("reload-project");
   await settle(app);
   assert.deepEqual(creations(app).map(tab => tab.name), ["setup"]);
+});
+
+const withTeardown = (script = "cleanup's script.sh") => JSON.stringify({ tabs: ["dev"], teardown: { script } });
+function teardownResult(app, space, state) {
+  const tab = space.tabs.find(tab => tab.name === "teardown" && tab.terminal);
+  app.native.find(terminal => terminal.address === tab.terminal).labels["pbogut.teardown.state"] = state;
+  if (state === "success") space.tabs = space.tabs.filter(candidate => candidate !== tab);
+  app.render();
+  app.flush();
+}
+
+test("Close project without a teardown closes only the requested space", async () => {
+  const app = await fixture();
+  await app.command("close-project@two");
+  app.flush();
+  assert.deepEqual(app.spaces.map(space => space.id), ["one"]);
+  assert.deepEqual(creations(app), []);
+  assert.deepEqual(app.calls, [["space.close", { id: "two", confirmed: true }]]);
+});
+
+test("teardown runs only on explicit close and success closes its original space", async () => {
+  const app = await fixture();
+  const space = app.spaces[0];
+  app.files.set("/project one/herdr-project.json", withTeardown());
+  await app.command("reload-project");
+  app.flush();
+  assert.ok(creations(app).every(tab => tab.name !== "teardown"));
+  for (let i = 0; i < 5; i++) await app.command("close-project");
+  await settle(app);
+  assert.deepEqual(app.sends[0].spaces[0].tabs.map(tab => tab.name), ["teardown"]);
+  assert.deepEqual(app.sends[0].spaces[1].tabs.map(tab => tab.id), ["other"]);
+  assert.equal(creations(app).filter(tab => tab.name === "teardown").length, 1);
+  await app.command("reload-project");
+  await app.command("nvim");
+  app.flush();
+  const editor = space.tabs.find(tab => tab.name === "nvim");
+  assert.ok(editor, "Named-tab shortcuts can launch programs during teardown");
+  assert.equal(space.selected, editor.id);
+  await app.command("shell");
+  app.flush();
+  await app.command("nvim");
+  app.flush();
+  assert.equal(space.selected, editor.id, "Existing named tabs can be focused during teardown");
+  assert.equal(creations(app).filter(tab => tab.name === "nvim").length, 1);
+  await app.command("shell@two");
+  app.flush();
+  teardownResult(app, space, "success");
+  assert.deepEqual(app.spaces.map(space => space.id), ["two"]);
+  assert.equal(app.spaces[0].active, true);
+});
+
+test("teardown closes all previous tabs before its script and retries after failure", async () => {
+  const app = await fixture();
+  const space = app.spaces[0];
+  space.tabs.push({ id: "user-teardown", name: "teardown", named: true, panes: 1 });
+  app.files.set("/project one/herdr-project.json", withTeardown());
+  await app.command("close-project");
+  await settle(app);
+  const first = space.tabs.find(tab => tab.name === "teardown" && tab.terminal);
+  teardownResult(app, space, "failed");
+  assert.ok(app.spaces.includes(space));
+  assert.ok(space.tabs.includes(first));
+  assert.deepEqual(space.tabs.map(tab => tab.id), [first.id]);
+  assert.deepEqual(app.sends[0].spaces[0].tabs.map(tab => tab.id), [first.id]);
+  app.files.set("/project one/herdr-project.json", withTeardown("fixed.sh"));
+  await app.command("close-project");
+  await settle(app);
+  assert.ok(!space.tabs.some(tab => tab.id === "user-teardown"));
+  assert.ok(!space.tabs.some(tab => tab.id === first.id));
+  assert.match(app.sends.at(-1).command, /'fixed.sh'/);
+  teardownResult(app, space, "success");
+  assert.ok(!app.spaces.includes(space));
+});
+
+test("invalid close configuration leaves the space intact and can be corrected", async () => {
+  const app = await fixture();
+  app.files.set("/project one/herdr-project.json", '{"teardown":{}}');
+  await app.command("close-project");
+  app.flush();
+  assert.equal(app.spaces.length, 2);
+  assert.deepEqual(creations(app), []);
+  assert.match(app.calls.find(([name]) => name === "notify")[1].body, /\/project one\/herdr-project\.json:.*teardown/);
+  app.files.set("/project one/herdr-project.json", "{}");
+  await app.command("close-project");
+  app.flush();
+  assert.deepEqual(app.spaces.map(space => space.id), ["two"]);
+});
+
+test("a rejected sibling-tab close prevents teardown from starting and permits retry", async () => {
+  const app = await fixture();
+  app.files.set("/project one/herdr-project.json", withTeardown());
+  app.failures.add("tab.close");
+  await app.command("close-project");
+  await settle(app);
+  assert.deepEqual(app.sends, []);
+  assert.ok(app.spaces[0].tabs.some(tab => tab.id === "original"));
+  assert.match(app.calls.find(([name]) => name === "notify")[1].body, /tab.close unavailable/);
+  app.failures.clear();
+  await app.command("close-project");
+  await settle(app);
+  assert.equal(app.sends.length, 1);
+  assert.deepEqual(app.sends[0].spaces[0].tabs.map(tab => tab.name), ["teardown"]);
+});
+
+test("remote teardown uses its own fallback paths and project overrides remain authoritative", async () => {
+  for (const override of [true, false]) {
+    const app = await fixture();
+    app.spaces[0].machine = "vps";
+    app.files.set("vps:/remote/app/herdr-project.json", withTeardown());
+    app.files.set("/project one/herdr-project.json", withTeardown("local-only"));
+    if (override) app.files.set("vps:/project one/herdr-project.json", "{}");
+    await app.command("close-project");
+    await settle(app);
+    if (override) assert.deepEqual(creations(app), []);
+    else assert.ok(app.sends[0].command.startsWith(
+      "'exec' 'bash' '/remote/app/mods/pbogut-tabs/teardown.sh' '/remote/app' 'cleanup'\\''s script.sh' "));
+  }
+});
+
+test("delayed close reads keep their original target and ignore an already closed space", async () => {
+  for (const removed of [true, false]) {
+    const app = await fixture();
+    let resolve;
+    app.files.set("/project one/herdr-project.json", new Promise(done => { resolve = done; }));
+    await app.command("close-project");
+    app.spaces[0].active = false;
+    app.spaces[1].active = true;
+    if (removed) app.spaces.shift();
+    app.render();
+    resolve(withTeardown());
+    await settle(app);
+    assert.equal(creations(app).length, removed ? 0 : 1);
+    assert.ok(app.calls.every(([name]) => name !== "tab.select"));
+    if (!removed) assert.equal(creations(app)[0].space, "one");
+  }
+});
+
+test("closing the teardown tab keeps the space, while a late success still closes it", async () => {
+  for (const success of [true, false]) {
+    const app = await fixture();
+    const space = app.spaces[0];
+    app.files.set("/project one/herdr-project.json", withTeardown());
+    await app.command("close-project");
+    await settle(app);
+    const tab = space.tabs.find(tab => tab.name === "teardown");
+    space.tabs = space.tabs.filter(candidate => candidate !== tab);
+    if (success) app.coreResults.set(tab.terminal, { labels: { "pbogut.teardown.state": "success" } });
+    app.render();
+    await settle(app);
+    assert.equal(app.spaces.includes(space), !success);
+    if (!success) {
+      assert.match(app.calls.find(([name]) => name === "notify")[1].body, /interrupted/);
+      await app.command("close-project");
+      await settle(app);
+      assert.equal(creations(app).length, 2);
+    }
+  }
+});
+
+test("Close project adopts surviving teardown and waits for a running setup", async () => {
+  for (const kind of ["setup", "teardown"]) {
+    const app = await fixture(false, [
+      { id: "original", name: "1", named: false },
+      { id: "survivor", name: kind, named: true, panes: 1, terminal: "survivor-terminal" },
+    ]);
+    app.native.push({ address: "survivor-terminal", labels: {
+      [`pbogut.${kind}`]: "old-attempt", [`pbogut.${kind}.state`]: "running",
+    } });
+    await app.command("close-project");
+    await settle(app);
+    assert.deepEqual(app.reads, []);
+    assert.deepEqual(creations(app), []);
+    if (kind === "teardown") {
+      teardownResult(app, app.spaces[0], "success");
+      assert.deepEqual(app.spaces.map(space => space.id), ["two"]);
+    } else assert.ok(app.calls.some(([name, args]) => name === "notify" && /setup is running/.test(args.title)));
+  }
+});
+
+test("fast teardown is identified by its pane before any labels reach the App", async () => {
+  const app = await fixture();
+  const space = app.spaces[0];
+  space.machine = "vps";
+  app.files.set("vps:/project one/herdr-project.json", withTeardown());
+  app.failures.add("teardown");
+  await app.command("close-project");
+  app.flush();
+  const tab = { id: "fast", name: "teardown", named: true, panes: 1, terminal: "vps/fast-terminal" };
+  space.tabs.push(tab);
+  app.render();
+  app.flush();
+  space.tabs = space.tabs.filter(candidate => candidate !== tab);
+  app.coreResults.set(tab.terminal, { labels: { "pbogut.teardown.state": "success" } });
+  app.render();
+  await settle(app);
+  assert.deepEqual(app.spaces.map(space => space.id), ["two"]);
+  assert.ok(app.calls.every(([name]) => name !== "notify"));
 });

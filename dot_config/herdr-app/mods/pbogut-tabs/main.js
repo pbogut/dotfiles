@@ -2,12 +2,14 @@ import { View, div } from "gpui-kit";
 import { appHome, checking, exec, home, nextCommand, notify, panes, readTextFile, run, spaces, terminals } from "herdr";
 import { commandFor, compareTabs, roleOf } from "./roles.js";
 import { folderKey, loadProjectConfig, machinePaths } from "./project.js";
+import ProjectClose from "./close.js";
 
 export default class NamedTabs extends View {
   init(_props, cx) {
     this.queue = [];
     this.setups = new Map();
     this.setupSerial = 0;
+    this.closer = new ProjectClose();
     if (checking()) return;
     for (const space of spaces()) this.sortTabs(space);
     cx.spawn(async (cx) => {
@@ -34,6 +36,11 @@ export default class NamedTabs extends View {
           continue;
         }
         const [name, target, extra] = command.split("@");
+        if (name === "close-project" && extra === undefined) {
+          const space = spaces().find(space => target === undefined ? space.active : space.id === target);
+          if (space) this.closer.close(space, this.setups.has(space.id), cx);
+          continue;
+        }
         const role = roleOf(name);
         if (!role || extra !== undefined) continue;
         const space = target === undefined ? spaces().find((space) => space.active)?.id : target;
@@ -87,6 +94,7 @@ export default class NamedTabs extends View {
 
   projectReady(request, space, created, cx) {
     if (this.pending === request) this.pending = null;
+    if (this.closer.busy(space.id)) { this.drain(cx); return; }
     if (!("initial" in request)) request.initial = created ? space.tabs[0]?.id : null;
     if (!request.failed && request.config.setup && !request.setupDone) {
       this.startSetup(request, space, cx);
@@ -310,6 +318,7 @@ export default class NamedTabs extends View {
   }
 
   render(cx) {
+    this.closer.update(cx);
     this.updateSetups(cx);
     if (this.pending) {
       const request = this.pending;

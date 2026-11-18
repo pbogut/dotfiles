@@ -6,6 +6,23 @@ import { commandFor, compareTabs } from "../../../dot_config/herdr-app/mods/pbog
 const defaults = "/config/herdr-app/herdr-project.json";
 const loadProjectTabs = async (...args) => (await loadProjectConfig(...args)).tabs;
 
+test("teardown validates its script and follows whole-file fallback precedence", async () => {
+  const teardown = { script: "scripts/cleanup project's.sh" };
+  assert.deepEqual(projectConfig({ teardown }), { tabs: [], teardown });
+  for (const value of [null, [], "cleanup.sh", {}, { script: "" }, { script: " " },
+    { script: 1 }, { script: "bad\0path" }]) assert.throws(() => projectConfig({ teardown: value }), /"teardown"/);
+  const exec = async () => ({ code: 0, stdout: "/repo/.bare\n" });
+  for (const local of [true, false]) {
+    const config = await loadProjectConfig("/repo/main", exec,
+      async (path) => path === (local ? "/repo/herdr-project.json" : defaults) ? JSON.stringify({ teardown }) : null, defaults);
+    assert.deepEqual(config.teardown, { ...teardown, directory: local ? "/repo" : "/config/herdr-app" });
+  }
+  assert.deepEqual(await loadProjectConfig("/repo/main", exec,
+    async (path) => path === defaults ? JSON.stringify({ teardown }) : "{}", defaults), { tabs: [] });
+  await assert.rejects(loadProjectConfig("/repo/main", exec,
+    async () => '{"teardown":{}}', defaults), /\/repo\/herdr-project\.json:.*"teardown"/);
+});
+
 test("setup requires a script and resolves from the selected definition", async () => {
   const setup = { script: "scripts/setup project's.sh" };
   assert.deepEqual(projectConfig({ setup }), { tabs: [], setup });

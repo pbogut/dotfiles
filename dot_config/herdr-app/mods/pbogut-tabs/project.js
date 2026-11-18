@@ -47,6 +47,14 @@ export function projectConfig(config) {
     }
     result.setup = { script: setup.script };
   }
+  if (config.teardown !== undefined) {
+    const teardown = config.teardown;
+    if (!teardown || typeof teardown !== "object" || Array.isArray(teardown) ||
+        typeof teardown.script !== "string" || !teardown.script.trim() || teardown.script.includes("\0")) {
+      throw new Error('"teardown" requires a non-empty "script" path.');
+    }
+    result.teardown = { script: teardown.script };
+  }
   return result;
 }
 
@@ -63,7 +71,9 @@ export async function loadProjectConfig(folder, exec, readTextFile, defaultPath,
       const text = await readTextFile(path, { on });
       if (text !== null) {
         const config = projectConfig(JSON.parse(text));
-        if (config.setup) config.setup.directory = path.slice(0, path.lastIndexOf("/")) || "/";
+        for (const hook of ["setup", "teardown"]) {
+          if (config[hook]) config[hook].directory = path.slice(0, path.lastIndexOf("/")) || "/";
+        }
         return config;
       }
     } catch (error) {

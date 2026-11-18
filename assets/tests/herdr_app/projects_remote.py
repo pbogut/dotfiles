@@ -61,10 +61,14 @@ def main():
     setup_runner = remote_app / "mods/pbogut-tabs/setup.sh"
     setup_runner.parent.mkdir(parents=True)
     shutil.copyfile(ROOT / "dot_config/herdr-app/mods/pbogut-tabs/setup.sh", setup_runner)
+    shutil.copyfile(ROOT / "dot_config/herdr-app/mods/pbogut-tabs/teardown.sh", setup_runner.with_name("teardown.sh"))
     (remote_app / "setup fixture.sh").write_text(
         'printf "%s\\n" "$HERDR_PROJECT_DIR" "$HERDR_WORKTREE_DIR" "$PWD" >> "$HERDR_PROJECT_DIR/setup.log"\n')
+    (remote_app / "teardown fixture.sh").write_text(
+        'printf "%s\\n" "$HERDR_PROJECT_DIR" "$HERDR_WORKTREE_DIR" "$PWD" >> "$HERDR_PROJECT_DIR/teardown.log"\n')
     (remote_app / "herdr-project.json").write_text(json.dumps({
-        "tabs": ["shell", "nvim"], "setup": {"version": 1, "script": "setup fixture.sh"},
+        "tabs": ["shell", "nvim"], "setup": {"script": "setup fixture.sh"},
+        "teardown": {"script": "teardown fixture.sh"},
     }))
 
     def call(*args, env=local):
@@ -175,8 +179,15 @@ def main():
             key("Tab")
             wait(lambda: loaded("fixture") and state().get("error"), "Remote errors stay visible")
             assert str(local_repo) not in state()["folders"]
+            key("Escape")
+            app("do", f"pbogut-tabs.close-project@{space('fixture', worktree)['id']}")
+            wait(lambda: space("fixture", worktree) is None, "Remote teardown closes only its own worktree space")
+            assert (remote_app / "teardown.log").read_text().splitlines() == [
+                str(remote_app), str(worktree), str(worktree),
+            ], "Remote teardown uses the remote fallback and worktree directory"
+            assert space("fixture", remote_repo) and space(None, remote_repo) and space(None, local_repo)
             assert not app("status")["errors"], app("status")
-            print("PASS: native machine picker, remote discovery, tabs, fallback setup, dated worktrees, focus and errors.", flush=True)
+            print("PASS: native machine picker, remote tabs, setup/teardown, dated worktrees, focus and errors.", flush=True)
     except Exception:
         if process and process.poll() is None:
             print("Status:", app("status"), flush=True)
