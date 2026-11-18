@@ -54,20 +54,28 @@ async function sidebar(list, sort) {
   }, { context });
   const modules = {
     "gpui-kit": mock({ View: class {}, div: element, svg: element, image: element }),
-    "gpui-base": mock({ v_flex: element, h_flex: element }),
+    "gpui-base": mock({
+      v_flex: element, h_flex: element, InputState: {}, Input: {},
+      v_virtual_list: element, VirtualListScrollHandle: {},
+    }),
     herdr: mock({
       agents: () => state.agents, terminals: () => state.terminals, panes: () => state.panes,
       focused: () => ({}), spaces: () => state.spaces, theme: () => ({}), props: () => state.props,
       window: () => ({}), layout: () => ({ id: "sidebar", size: { px: state.width } }),
       shared: key => shared.get(key), setShared: (key, value) => shared.set(key, value),
       setAgentOrder: addresses => { state.order = Array.from(addresses); },
+      checking: () => true, nextCommand() {}, settings: () => ({ zoom: 1 }),
       run: (command, args) => state.commands.push([command, args]),
       openOverlay: options => state.overlays.push(options), closeOverlay() {},
     }),
   };
-  const main = new vm.SourceTextModule(await readFile(new URL(
-    "../../../dot_config/herdr-app/mods/pbogut-agents/main.js", import.meta.url), "utf8"), { context });
-  await main.link(name => modules[name]);
+  const source = new URL("../../../dot_config/herdr-app/mods/pbogut-agents/main.js", import.meta.url);
+  const appearance = new vm.SourceTextModule(await readFile(new URL("appearance.js", source), "utf8"), { context });
+  await appearance.link(name => modules[name]);
+  const picker = new vm.SourceTextModule(await readFile(new URL("picker.js", source), "utf8"), { context });
+  await picker.link(name => name === "./appearance.js" ? appearance : modules[name]);
+  const main = new vm.SourceTextModule(await readFile(source, "utf8"), { context });
+  await main.link(name => name === "./appearance.js" ? appearance : name === "./picker.js" ? picker : modules[name]);
   await main.evaluate();
   const cx = { timer: { every() {} }, notify() {}, stop_propagation() {} };
   const view = new main.namespace.default();
@@ -84,10 +92,12 @@ test("existing sort selection, pinned agents, and priority navigation survive th
   ]);
   assert.deepEqual(app.rows(), ["pinned", "ag-pin", "sec-4", "ag-blocked", "sec-2", "ag-working", "sec-1", "ag-idle"]);
   assert.deepEqual(app.state.order, ["pin", "blocked", "working", "idle"]);
+  assert.deepEqual(Array.from(app.shared.get("pbogut.agents.rows"), row => row.address), app.state.order);
   assert.equal(app.shared.has("agents.sort"), false);
   app.shared.set("agents.sort", "grouped");
   assert.deepEqual(app.rows(), ["pinned", "ag-pin", "sp-work", "ag-idle", "sp-personal", "ag-working", "sp-work", "ag-blocked"]);
   assert.equal(app.shared.get("agents.sort"), "grouped");
+  assert.deepEqual(Array.from(app.shared.get("pbogut.agents.rows"), row => row.address), app.state.order);
   find(app.render(), "ag-working").attrs.on_click[0]();
   assert.deepEqual(JSON.parse(JSON.stringify(app.state.commands)), [["pane.focus", { pane: "pane-working" }]]);
 });
@@ -116,16 +126,47 @@ test("Folder + priority nests nonempty priority sections in configured folder or
     folder("personal"), section("personal", 4), "ag-personal-blocked",
   ]);
   assert.deepEqual(app.state.order, ["pin", "server/blocked", "work-done", "work-busy", "work-idle", "personal-blocked"]);
+  const snapshot = app.shared.get("pbogut.agents.rows");
+  assert.deepEqual(Array.from(snapshot, row => row.address), app.state.order);
   const order = [...app.state.order];
   find(app.render(), folder("work")).attrs.on_click[0](null, app.cx);
   assert.deepEqual(app.rows(), ["pinned", "ag-pin", folder("work"), folder("personal"), section("personal", 4), "ag-personal-blocked"]);
   assert.deepEqual(app.state.order, order, "Folding keeps agents reachable through next/previous");
+  assert.equal(app.shared.get("pbogut.agents.rows"), snapshot, "Folding neither hides picker rows nor republishes unchanged data");
   find(app.render(), folder("work")).attrs.on_click[0](null, app.cx);
   find(app.render(), section("work", 4)).attrs.on_click[0](null, app.cx);
   assert.equal(app.rows().includes("ag-server/blocked"), false);
   assert.equal(app.rows().includes("ag-personal-blocked"), true, "Same priority in another folder folds independently");
   app.state.width = 44;
   assert.deepEqual(app.rows(), order.map(address => `ag-${address}`), "The rail uses the same agent order");
+});
+
+test("published picker rows include remote project metadata and live children, with pinned children only once", async () => {
+  const app = await sidebar([
+    agent("server/parent", "api", "working"),
+    agent("server/pinned", "api", "idle", { pinned: true }),
+  ], "folder-priority");
+  app.state.spaces[0].folder = "/srv/repos/api/feature";
+  app.state.spaces[0].machine = "server";
+  app.state.terminals = [
+    { address: "server/pinned", parent: "server/parent", state: "live", status: "idle" },
+    { address: "server/child", parent: "server/parent", state: "live", status: "working",
+      program: { icon: "icons/claude.svg", tint: true } },
+    { address: "server/grandchild", parent: "server/pinned", state: "live", status: "working" },
+  ];
+  resolved(app, [{ id: "api", name: "API", branch: "2026-11-18-feature", folder: "work" }]);
+  app.render();
+  let rows = app.shared.get("pbogut.agents.rows");
+  assert.deepEqual(Array.from(rows, row => row.address), ["server/pinned", "server/grandchild", "server/parent", "server/child"]);
+  assert.deepEqual(JSON.parse(JSON.stringify(rows[3])), {
+    address: "server/child", parent: "server/parent", depth: 1, name: "API", branch: "2026-11-18-feature",
+    folder: "work", machine: "server", path: "/srv/repos/api/feature",
+    program: { icon: "icons/claude.svg", tint: true }, status: "working", compact: true,
+  });
+  app.state.terminals[1].state = "exited";
+  app.render();
+  rows = app.shared.get("pbogut.agents.rows");
+  assert.deepEqual(Array.from(rows, row => row.address), ["server/pinned", "server/grandchild", "server/parent"]);
 });
 
 test("agents follow changed assignments, renamed folders, and unresolved spaces without reading folder rules", async () => {

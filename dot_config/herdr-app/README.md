@@ -17,13 +17,14 @@ Choosing another layout in the app lasts until the next chezmoi apply.
 | Ctrl+G | Bottom shortcut bar |
 | Alt+Esc | Copy mode |
 | Alt+O | Spaces picker in sidebar order |
+| Alt+I | Agents picker in sidebar order |
 | Ctrl+Shift+K | Go to space/tab/agent picker |
 | Ctrl+Alt+P | Project picker |
 | Ctrl+Shift+P | Command palette |
 | Alt+T | Toggle sidebar |
 | Alt+P / Alt+N | Previous / next tab |
 
-All four pickers accept Ctrl+J to move down and Ctrl+K to move up while
+All five pickers accept Ctrl+J to move down and Ctrl+K to move up while
 their search field is focused. Up/Down also work; Enter selects a result.
 
 Ctrl+G opens a full-width overlay over the tab bar, above the status bar.
@@ -518,6 +519,26 @@ Project config reloads update the labels through the shared Spaces snapshot.
 Grouped-by-space headers also use the resolved name. In the narrow rail, hover
 over an agent's number for its project and full branch.
 
+## Agents picker
+
+Alt+I opens `mods/pbogut-agents/picker.js`. It follows the Agents sidebar's
+current sort, including pinned agents and agents in folded groups. Sub-agents
+follow their parent; pinned sub-agents appear only once.
+The first line shows the project name and shortened branch. The second shows
+the computer, folder category, and full configured path, as in the Spaces picker.
+
+Icons, status indicators, and the working spinner use the sidebar's shared
+`appearance.js` renderer. Status changes update the open picker.
+The current agent starts selected. Search matches project, branch, computer,
+category, path, agent program, and terminal address without reordering results.
+Arrow keys and Ctrl+J/K wrap at either end. Enter or a click focuses the selected
+agent; Escape closes the picker. Selection follows the same agent when the
+sidebar order changes.
+
+The sidebar publishes its resolved rows under `pbogut.agents.rows`, before
+folding. Closed agents are omitted. New agents remain reachable at the end
+until the sidebar resolves their order.
+
 ## Spaces picker
 
 Alt+O opens `mods/pbogut-space-picker`. It lists one row per open space in
@@ -567,6 +588,7 @@ herdr-app check dot_config/herdr-app/mods/pbogut-palette
 herdr-app check dot_config/herdr-app/mods/pbogut-agent-status
 herdr-app check dot_config/herdr-app/mods/pbogut-agents
 node --experimental-vm-modules --test assets/tests/herdr_app/agents.test.mjs
+node --experimental-vm-modules --test assets/tests/herdr_app/agent_picker.test.mjs
 python3 -B assets/tests/herdr_app/agents.py
 node --experimental-vm-modules --test assets/tests/herdr_agents/push.test.mjs
 python3 -B assets/tests/herdr_agents/agents_test.py

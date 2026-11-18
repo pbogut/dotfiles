@@ -3,9 +3,11 @@
 // Agents in grouped or priority views; parents take their most urgent sub-agent's place.
 // Uses Spaces' project labels and branches, and adds a Folder + priority view.
 
-import { View, div, image, svg } from "gpui-kit";
+import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { agents, terminals, focused, spaces, run, theme, shared, setShared, setAgentOrder, openOverlay, closeOverlay, props, window, layout } from "herdr";
+import { agents, terminals, focused, spaces, run, theme, shared, setShared, setAgentOrder, openOverlay, closeOverlay, props, window, layout, checking, nextCommand } from "herdr";
+import { icon, status } from "./appearance.js";
+import AgentPicker, { openPicker } from "./picker.js";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -52,14 +54,12 @@ function duration(ms) {
   return h < 24 ? `${h}h` : `${Math.floor(h / 24)}d`;
 }
 
-// The agent's icon from the app's program table: a one-color glyph or a picture.
-function icon(p, size, color) {
-  if (!p?.icon) return null;
-  return p.tint ? svg(p.icon).size(size).flex_none().text_color(color) : image(p.icon).w(size).h(size).flex_none();
-}
-
 export default class Agents extends View {
   init(_props, cx) {
+    if (props()?.picker) {
+      this.picker = new AgentPicker(props(), cx);
+      return;
+    }
     if (props()?.sortMenu) return;
     this.folded = new Set();
     // Each agent's last state and when it changed (ms), kept across restarts.
@@ -70,6 +70,9 @@ export default class Agents extends View {
     if (!this.pendingPins.length) localStorage.removeItem("pins");
     this.migratingPins = new Set();
     cx.timer.every(30000, (cx) => cx.notify());
+    if (!checking()) cx.spawn(async () => {
+      for (;;) if (await nextCommand() === "picker") openPicker();
+    });
   }
 
   // Stamps agents whose state changed. Done and idle count as one: looking at a
@@ -182,21 +185,11 @@ export default class Agents extends View {
         .when(l === "└" || l === "├", el => el.border_b(1.5).rounded_bl(6))))
       .when(Boolean(pic), el => el.child(div().mr(8).child(pic)))
       .child(div().flex_1().truncate().text_color(on ? t.foreground : t.muted).child(k.name || k.template || k.program?.name || k.address))
-      .child(this.status(t, { status: st }, compact));
-  }
-
-  // compact: a ! for blocked where a header already says "Needs you".
-  status(t, a, compact = false) {
-    const color = t[a.status] ?? t.dim;
-    if (a.status === "working") return svg("mods/workspace-chrome/spinner.svg").size(12).mx(1).flex_none().text_color(t.working).spin(900);
-    if (a.status === "blocked" && compact) return div().size(14).flex_none().rounded(4).bg(t.blocked + "26").text_size(10.5).font_bold().text_color(t.blocked).flex().items_center().justify_center().child("!");
-    if (a.status === "blocked") return div().flex_none().px(6).h(18).rounded(5).bg(t.blocked + "26").text_size(10.5).font_semibold().text_color(t.blocked).flex().items_center().child("Needs you");
-    // Idle: a ring; done: a dot.
-    if (a.status === "idle") return div().size(7).mx(3).flex_none().rounded(4).border(1.5).border_color(t.idle ?? t.dim);
-    return div().size(7).mx(3).flex_none().rounded(4).bg(a.status === "done" ? color : t.dim + "00");
+      .child(status(t, { status: st }, compact));
   }
 
   render(cx) {
+    if (this.picker) return this.picker.render();
     const t = theme();
     if (props()?.sortMenu) return this.sortMenu(t);
     const collapsed = narrow();
@@ -233,6 +226,30 @@ export default class Agents extends View {
     }
     list = [...pinned, ...rest];
     setAgentOrder(list.map((a) => a.address));
+
+    // Publish the picker order before folding. A pinned child appears once, at the top.
+    const roots = new Set(list.map(a => a.address));
+    const spaceById = new Map(sp.map(s => [s.id, s]));
+    const published = new Set();
+    const snapshot = list.flatMap(a => {
+      const space = spaceById.get(a.space);
+      const row = {
+        address: a.address, name: nameOf(a), branch: branchOf(a), folder: folderOf(a),
+        machine: space?.machine ?? null, path: space?.folder ?? "",
+        program: a.program, status: a.status, compact: byPriority && !a.pinned, depth: 0,
+      };
+      return [row, ...this.tree(all, a.address).filter(s => !roots.has(s.t.address)).map(s => ({
+        ...row, address: s.t.address, parent: s.t.parent, depth: s.lines.length,
+        program: s.t.program, status: kidStatus(s.t, this.listed), compact: byPriority,
+      }))];
+    }).filter(row => {
+      if (published.has(row.address)) return false;
+      published.add(row.address);
+      return true;
+    });
+    if (JSON.stringify(shared("pbogut.agents.rows")) !== JSON.stringify(snapshot)) {
+      setShared("pbogut.agents.rows", snapshot);
+    }
 
     const withKids = (a, i) => {
       const subs = collapsed ? [] : this.tree(all, a.address);
@@ -285,7 +302,7 @@ export default class Agents extends View {
           .hover((s) => s.bg(t.hover))
           .on_click(() => run("pane.focus", { pane: a.pane }))
           .child(div().flex_1().min_w(0).whitespace_nowrap().text_right().text_color(t.muted).child(String(i + 1)))
-          .child(h_flex().w(14).flex_none().items_center().justify_center().child(this.status(t, a, true)));
+          .child(h_flex().w(14).flex_none().items_center().justify_center().child(status(t, a, true)));
       }
       const when = this.since(a);
       const idle = a.status === "idle" && !a.focused;
@@ -338,7 +355,7 @@ export default class Agents extends View {
         .when(subs.length > 0, el => el.child(fold(a, subs)))
         .when(this.hovered === a.address, el => el.child(pin))
         .when(this.hovered !== a.address && Boolean(when), el => el.child(div().flex_none().text_size(11).text_color(t.dim).child(duration(now - when))))
-        .child(this.status(t, a, byPriority && !isPinned));
+        .child(status(t, a, byPriority && !isPinned));
     };
 
     // Folder mode nests priority sections under each folder. Pins stay above them.
@@ -386,7 +403,7 @@ export default class Agents extends View {
         .when(byPriority || !open, (el) => el.child(div().text_color(t.dim).child(String(g.members.length))))
         .child(div().flex_1())
         .when(!open, (el) => el
-          .when((!byPriority || Boolean(g.sections)) && Boolean(top), (el) => el.child(this.status(t, { status: top }, true)))
+          .when((!byPriority || Boolean(g.sections)) && Boolean(top), (el) => el.child(status(t, { status: top }, true)))
           .child(svg("mods/workspace-chrome/chevron-right.svg").size(11).flex_none().text_color(t.dim)))
         .when(Boolean(g.sections) && open, el => el.child(svg("mods/workspace-chrome/chevron-down.svg").size(11).flex_none().text_color(t.dim)));
     };

@@ -29,6 +29,7 @@ def main():
                GIT_COMMITTER_NAME="Test", GIT_COMMITTER_EMAIL="test@example.com")
     for mod in ["pbogut-spaces", "pbogut-agents"]:
         shutil.copytree(SOURCE / "mods" / mod, root / "app/mods" / mod)
+    shutil.copyfile(SOURCE / "keys.json", root / "app/keys.json")
     (root / "app/layouts").mkdir()
     layout = json.loads((SOURCE / "layouts/pbogut.json").read_text())
     sidebar = layout["children"][0]
@@ -70,16 +71,24 @@ export default class Projects extends View {
     # Observe the real render's grouping only in the disposable copy.
     main_js = root / "app/mods/pbogut-agents/main.js"
     main_js.write_text(main_js.read_text().replace("    const drawGroup =", """
-    const snapshot = JSON.stringify(groups.map(g => ({
+    const testSnapshot = JSON.stringify(groups.map(g => ({
       label: g.label, members: g.members.map(a => a.address),
       labels: g.members.map(a => ({ address: a.address, name: nameOf(a), branch: branchOf(a) })),
       sections: g.sections?.map(s => ({ label: s.label, members: s.members.map(a => a.address) })),
     })));
-    if (snapshot !== this.testSnapshot) {
-      console.log("AGENT_GROUPS " + snapshot);
-      this.testSnapshot = snapshot;
+    if (testSnapshot !== this.testSnapshot) {
+      console.log("AGENT_GROUPS " + testSnapshot);
+      this.testSnapshot = testSnapshot;
     }
     const drawGroup ="""))
+    picker_js = root / "app/mods/pbogut-agents/picker.js"
+    picker_js.write_text(picker_js.read_text().replace("    const height =", """
+    const snapshot = JSON.stringify({ query: this.query, selected: this.selected, rows });
+    if (snapshot !== this.testSnapshot) {
+      console.log("AGENT_PICKER " + snapshot);
+      this.testSnapshot = snapshot;
+    }
+    const height ="""))
 
     def call(*args):
         return subprocess.check_output(args, env=env, text=True, stderr=subprocess.STDOUT, timeout=15).strip()
@@ -106,6 +115,18 @@ export default class Projects extends View {
 
     def labels():
         return {a["address"]: a for g in groups() for a in g["labels"]}
+
+    def picker_state():
+        records = [line.split("AGENT_PICKER ", 1)[1] for line in (root / "app.log").read_text().splitlines()
+                   if "AGENT_PICKER " in line]
+        return json.JSONDecoder().raw_decode(records[-1])[0] if records else {}
+
+    def key(*keys):
+        call("xdotool", "key", "--clearmodifiers", "--delay", "80", *keys)
+
+    def open_picker():
+        key("alt+i")
+        wait(lambda: "pbogut-agents" in app("status")["overlays"], "Alt+I opens the agent picker")
 
     call("git", "-C", str(root / "work"), "init", "-b", "2026-11-18-feature")
     call("git", "-C", str(root / "work"), "commit", "--allow-empty", "-m", "Fixture")
@@ -174,8 +195,37 @@ export default class Projects extends View {
                 wait(lambda: app("status")["agent"] == address, "Navigation follows folder/priority order")
             writer.write("working\n")
             wait(lambda: sections().get("work", {}).get("Working") == [blocked], "A status change moves its section")
+            open_picker()
+            wait(lambda: picker_state().get("selected") == busy, "The picker starts on the current agent")
+            assert [row["address"] for row in picker_state()["rows"]] == [pinned, blocked, idle, busy]
+            work_row = next(row for row in picker_state()["rows"] if row["address"] == blocked)
+            assert work_row["name"] == "PMS" and work_row["branch"] == "2026-11-18-feature"
+            assert work_row["path"] == str(root / "work") and work_row["folder"] == "work"
+            assert work_row["machine"] is None and work_row["status"] == "working"
+            call("herdr-app", "shot", str(root / "agent-picker.png"))
+            writer.write("blocked\n")
+            wait(lambda: any(row["address"] == blocked and row["status"] == "blocked"
+                             for row in picker_state().get("rows", [])), "The open picker updates agent statuses")
+            assert picker_state()["selected"] == busy
+            key("ctrl+j", "Return")
+            wait(lambda: not app("status")["overlays"] and app("status")["agent"] == pinned,
+                 "Ctrl+J wraps to the first agent and Enter focuses it")
+            open_picker()
+            call("xdotool", "type", "--clearmodifiers", "PMS work")
+            wait(lambda: picker_state().get("query") == "PMS work", "Search accepts project and folder words")
+            assert [row["address"] for row in picker_state()["rows"]] == [blocked, idle]
+            key("ctrl+k", "Return")
+            wait(lambda: not app("status")["overlays"] and app("status")["agent"] == idle,
+                 "Ctrl+K wraps through the filtered agents")
+            open_picker()
+            call("xdotool", "type", "--clearmodifiers", "no-agent-matches")
+            wait(lambda: picker_state().get("rows") == [], "No matching agents leaves an empty picker")
+            key("ctrl+j", "Return")
+            assert "pbogut-agents" in app("status")["overlays"]
+            key("Escape")
+            wait(lambda: not app("status")["overlays"], "Escape closes the picker")
             assert not app("status")["errors"], app("status")
-            print("PASS: folder/priority rendering, project/branch labels and reload, pins, status changes, and navigation.", flush=True)
+            print("PASS: sidebar order, project labels, and Alt+I picker search, metadata, live status, and agent focus.", flush=True)
         except Exception:
             print((root / "app.log").read_text()[-6000:], flush=True)
             print("Status:", app("status"), flush=True)
