@@ -258,19 +258,23 @@ test("queued word motions use fresh text and preserve the visual selection ancho
   assert.deepEqual(app.terminal.selection, { start: { row: 0, col: 4 }, end: { row: 0, col: 4 } });
 });
 
-test("word cursor scrolling reads retained history without painting a selection range", async () => {
+test("incomplete older history still supports word movement in retained rows", async () => {
   const app = await fixture("pbogut-copy");
   app.pane.scroll = { total: 50, len: 24, offset: 26 };
   app.terminal.selection = { start: { row: 26, col: 0 }, end: { row: 26, col: 0 } };
   app.readTerminal(async (args) => {
     assert.deepEqual([...args], ["read", "test/t1", "--json", "--lines", "26"]);
-    return { code: 0, stdout: JSON.stringify({ text: Array(50).fill("one two").join("\n"), complete: true }) };
+    return { code: 0, stdout: JSON.stringify({ text: Array(50).fill("one two").join("\n"), complete: false, how: "history" }) };
   });
   app.key("b");
   await app.settle();
   assert.deepEqual(app.terminal.selection, { start: { row: 25, col: 4 }, end: { row: 25, col: 4 } });
   assert.equal(app.calls.find(([name]) => name === "terminal.scroll")[1].lines, -1);
   assert.ok(app.calls.every(([name]) => name !== "terminal.adjust_selection"));
+  for (const key of ["v", "e", "y"]) app.key(key);
+  await app.settle();
+  assert.ok(app.calls.some(([name]) => name === "terminal.copy"));
+  assert.ok(app.calls.every(([name]) => name !== "notify"));
 });
 
 test("whole-line selections ignore word motions like other horizontal motions", async () => {
@@ -279,7 +283,7 @@ test("whole-line selections ignore word motions like other horizontal motions", 
   await app.settle();
   const before = structuredClone(app.terminal.selection);
   app.calls.length = 0;
-  for (const key of ["w", "e", "b"]) app.key(key);
+  for (const key of ["w", "e", "b", "shift-w", "shift-e", "shift-b", "^", "shift-6"]) app.key(key);
   assert.deepEqual(app.terminal.selection, before);
   assert.deepEqual(app.calls, []);
 });
@@ -298,6 +302,64 @@ test("closing during a word read discards pending motion and copy", async () => 
     assert.equal(app.calls.length, count);
     assert.equal(app.terminal.selection, null);
   }
+});
+
+test("caret and shifted word keys share the selection queue", async () => {
+  for (const caret of ["^", "shift-6"]) {
+    const app = await fixture("pbogut-copy");
+    app.terminal.selection = { start: { row: 0, col: 0 }, end: { row: 0, col: 0 } };
+    app.readTerminal(async () => ({
+      code: 0, stdout: JSON.stringify({ text: "  src/foo.js  https://a.b/x?q=1", complete: true }),
+    }));
+    for (const key of [caret, "v", "shift-E"]) app.key(key);
+    await app.settle();
+    assert.deepEqual(app.terminal.selection, { start: { row: 0, col: 2 }, end: { row: 0, col: 11 } });
+    for (const key of ["v", "shift-w", "v", "shift-e", "shift-b", "shift-b"]) app.key(key);
+    await app.settle();
+    assert.deepEqual(app.terminal.selection, { start: { row: 0, col: 14 }, end: { row: 0, col: 2 } });
+  }
+});
+
+test("half-page motions preserve columns, extend v, and clamp at history boundaries", async () => {
+  for (const rows of [24, 25, 1]) {
+    const app = await fixture("pbogut-copy");
+    app.terminal.rows = rows;
+    app.pane.scroll = { total: 80, len: rows, offset: 0 };
+    const half = Math.max(1, Math.floor(rows / 2));
+    app.key("ctrl-d");
+    await app.settle();
+    assert.deepEqual(app.terminal.selection, { start: { row: 10 + half, col: 5 }, end: { row: 10 + half, col: 5 } });
+    assert.ok(app.calls.every(([name]) => name !== "terminal.adjust_selection"));
+    for (const key of ["ctrl-u", "v", "ctrl-d"]) app.key(key);
+    await app.settle();
+    assert.deepEqual(app.terminal.selection, { start: { row: 10, col: 5 }, end: { row: 10 + half, col: 5 } });
+    app.key("ctrl-u");
+    await app.settle();
+    assert.deepEqual(app.terminal.selection, { start: { row: 10, col: 5 }, end: { row: 10, col: 5 } });
+    app.key("v");
+    await app.settle();
+    for (const [row, key, expected] of [[0, "ctrl-u", 0], [79, "ctrl-d", 79]]) {
+      app.terminal.selection = { start: { row, col: 5 }, end: { row, col: 5 } };
+      app.key(key);
+      await app.settle();
+      assert.deepEqual(app.terminal.selection, { start: { row: expected, col: 5 }, end: { row: expected, col: 5 } });
+    }
+  }
+});
+
+test("half-page line selections stay whole when reversing across the anchor", async () => {
+  const app = await fixture("pbogut-copy");
+  app.pane.scroll = { total: 80, len: 24, offset: 0 };
+  app.terminal.selection = { start: { row: 20, col: 5 }, end: { row: 20, col: 5 } };
+  for (const key of ["shift-v", "ctrl-d"]) app.key(key);
+  await app.settle();
+  assert.deepEqual(app.terminal.selection, { start: { row: 20, col: 0 }, end: { row: 32, col: 79 } });
+  for (const key of ["ctrl-u", "ctrl-u"]) app.key(key);
+  await app.settle();
+  assert.deepEqual(app.terminal.selection, { start: { row: 20, col: 79 }, end: { row: 8, col: 0 } });
+  for (const key of ["ctrl-d", "ctrl-d"]) app.key(key);
+  await app.settle();
+  assert.deepEqual(app.terminal.selection, { start: { row: 20, col: 0 }, end: { row: 32, col: 79 } });
 });
 
 test("failed word reads report the error, discard queued copy, and release the key queue", async () => {

@@ -58,12 +58,16 @@ start or stop selection with `v`, and select lines with `V`.
 punctuation forms separate runs. Word motions extend `v` selections and cross
 lines and scrollback. They read fresh terminal text through Core, so queued
 motions and copying wait for each word move to finish.
+Older output marked incomplete by Core does not block movement in retained history.
+`W`, `E`, and `B` use whitespace-separated words, keeping paths and URLs together.
 Before selection starts, movement highlights only the copy cursor's cell.
 Line selection includes indentation and keeps whole lines when moving with
 `j` / `k`, including when reversing direction. Horizontal motions leave the
 selected lines intact.
-`0` and `$` move to line edges. `gg` and `G` move to the history edges.
-Ctrl+B and Ctrl+F move a page up or down.
+`0` and `$` move to line edges. `^` moves to the first non-whitespace character
+on the current terminal row. `gg` and `G` move to the history edges.
+Ctrl+U and Ctrl+D move half a page up or down, preserving the column.
+Ctrl+B and Ctrl+F move a full page. Both extend `v` and `V` selections.
 `y` copies and exits. Escape cancels. Exiting clears the
 selection and returns to the live screen.
 

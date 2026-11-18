@@ -225,7 +225,8 @@ def main():
                     (["k", "j"], 2, 2), (["j", "k"], 2, 2),
                     (["j", "k", "k"], 1, 2), (["k", "j", "j"], 2, 3),
                     (["k", "k", "j"], 1, 2), (["k", "k", "k"], 0, 2),
-                    (["j", "j"], 2, 4), (["h", "l", "0", "dollar", "w", "e", "b"], 2, 2),
+                    (["j", "j"], 2, 4),
+                    (["h", "l", "0", "dollar", "w", "e", "b", "shift+w", "shift+e", "shift+b", "asciicircum"], 2, 2),
                     (["g", "g"], 0, 2), (["ctrl+b"], 0, 2), (["ctrl+f", "ctrl+b"], 0, 2),
                 ]] + [
                     (["k", "shift+v"], 1, 1),
@@ -242,7 +243,8 @@ def main():
                     wait_for(lambda: not app("status")["overlays"], "Line-copy mode closes")
                     assert clipboard() == "\n".join(lines[first:last + 1]), (delay, keys, repr(clipboard()))
 
-            words = ["one_two...  three four", "  next words", "", "café e\u0301 界面 👩‍💻 fin"]
+            words = ["one_two...  three four", "  next words", "", "café e\u0301 界面 👩‍💻 fin",
+                     "  src/foo.js  https://a.b/x?q=1"]
             screen = "\033[2J\033[3J\033[H" + "\r\n".join(words) + "\033[H"
             terminal = app("do", "tab.new", "--name", "word-copy-test", "--argv", json.dumps([
                 "python3", "-u", "-c", f"import sys; sys.stdout.write({screen!r}); sys.stdout.flush(); input()",
@@ -261,6 +263,14 @@ def main():
                     (["j", "j", "j", "w", "w", "v", "e"], "界面"),
                     (["j", "j", "j", "w", "w", "w"], "👩‍💻"),
                     (["j", "j", "j", "w", "w", "w", "w", "v", "e"], "fin"),
+                    (["v", "shift+e"], "one_two..."),
+                    (["shift+w", "v", "shift+e"], "three"),
+                    (["shift+w", "shift+b", "v", "shift+e"], "one_two..."),
+                    (["j", "shift+6"], "n"),
+                    (["j", "dollar", "asciicircum", "v", "e"], "next"),
+                    (["j", "v", "asciicircum"], "  n"),
+                    (["j", "j", "j", "j", "asciicircum", "v", "shift+e"], "src/foo.js"),
+                    (["j", "j", "j", "j", "asciicircum", "shift+w", "v", "shift+e"], "https://a.b/x?q=1"),
                 ]:
                     key("alt+Escape")
                     wait_for(lambda: "pbogut-copy" in app("status")["overlays"], "Word-copy mode opens")
@@ -269,7 +279,7 @@ def main():
                     assert clipboard() == expected, (delay, moves, repr(clipboard()), expected)
             key("alt+Escape")
             wait_for(lambda: "pbogut-copy" in app("status")["overlays"], "Word cursor opens")
-            cursor_motion(["Home", "w", "e", "b"] * 10)
+            cursor_motion(["Home", "w", "e", "b", "shift+w", "shift+e", "shift+b", "asciicircum"] * 5)
             call("herdr-app", "shot", str(root / "word-copy.png"))
             key("Escape")
 
@@ -277,17 +287,19 @@ def main():
             long_word = "x" * (cols + 4)
             screen = "\033[2J\033[3J\033[H" + long_word + " tail\r\n" + "z" * cols + "\r\nend"
             terminal = app("do", "tab.new", "--name", "word-wrap-test", "--argv", json.dumps([
-                "python3", "-u", "-c", f"import sys; sys.stdout.write({screen!r}); sys.stdout.flush(); input()",
+                "python3", "-u", "-c",
+                f"import sys; print('WRAP-READY', flush=True); input(); sys.stdout.write({screen!r}); sys.stdout.flush(); input()",
             ]))["terminal"]
-            wait_for(lambda: "tail" in call("hc", "read", terminal, "--lines", "0"), "Wrapped words ready")
+            wait_for(lambda: "WRAP-READY" in call("hc", "read", terminal, "--lines", "0"), "Wrapped program ready")
             wait_for(lambda: terminal_ready(terminal), "Wrapped terminal available")
-            # Native clipboard copying inserts a newline between physical rows.
-            copied_word = long_word[:cols] + "\n" + long_word[cols:]
+            # Print after attachment: replay can turn soft wraps into hard breaks.
+            key("Return")
+            wait_for(lambda: "tail" in call("hc", "read", terminal, "--lines", "0"), "Wrapped words ready")
             for moves, expected in [
-                (["v", "e"], copied_word),
+                (["v", "e"], long_word),
                 (["w", "v", "e"], "tail"),
                 (["w", "w", "w", "v", "e"], "end"),
-                (["w", "b", "v", "e"], copied_word),
+                (["w", "b", "v", "e"], long_word),
             ]:
                 key("alt+Escape")
                 wait_for(lambda: "pbogut-copy" in app("status")["overlays"], "Wrapped copy opens")
@@ -320,25 +332,79 @@ def main():
             wait_for(lambda: history[-1] in call("hc", "read", terminal, "--lines", "0"), "History fixture ready")
             wait_for(lambda: terminal_ready(terminal), "History terminal available")
             rows = json.loads(call("hc", "get", terminal, "--json"))["rows"]
+            half = max(1, rows // 2)
             key("alt+Escape", "g", "g")
-            cursor_motion(["ctrl+f", "ctrl+b", "j", "k"] * 8)
+            cursor_motion(["ctrl+f", "ctrl+b", "ctrl+d", "ctrl+u", "j", "k"] * 8)
             key("Escape")
             for keys, row in [
                 (["g", "g"], 0),
                 (["g", "g", "ctrl+f"], rows),
                 (["g", "g", "ctrl+f", "ctrl+b"], 0),
                 (["g", "g", "k", "j"], 1),
+                (["g", "g", "ctrl+d"], half),
+                (["g", "g", "ctrl+f", "ctrl+u"], rows - half),
+                (["g", "g", "ctrl+d", "ctrl+u"], 0),
+                (["g", "g", "ctrl+u"], 0),
             ]:
                 key("alt+Escape")
                 call("xdotool", "key", "--clearmodifiers", "--delay", "0", *keys, "shift+v", "y")
                 wait_for(lambda: not app("status")["overlays"], "History copy closes")
                 assert clipboard() == history[row], (keys, repr(clipboard()))
+            for moves, expected in [
+                (["l", "l", "v", "ctrl+d"], "\n".join([history[0][2:], *history[1:half], history[half][:3]])),
+                (["ctrl+f", "l", "l", "v", "ctrl+u"],
+                 "\n".join([history[rows - half][2:], *history[rows - half + 1:rows], history[rows][:3]])),
+                (["ctrl+d", "shift+v", "ctrl+d", "ctrl+u", "ctrl+u"], "\n".join(history[:half + 1])),
+                (["ctrl+d", "shift+v", "ctrl+u", "ctrl+d", "ctrl+d"], "\n".join(history[half:2 * half + 1])),
+            ]:
+                key("alt+Escape")
+                wait_for(lambda: "pbogut-copy" in app("status")["overlays"], "Half-page selection opens")
+                call("xdotool", "key", "--clearmodifiers", "--delay", "0", "Home", *moves, "y")
+                wait_for(lambda: not app("status")["overlays"], "Half-page selection closes")
+                assert clipboard() == expected, (moves, repr(clipboard()), expected)
             for moves in [["g", "g", "w"], ["g", "g", "ctrl+f", "w"], ["g", "g", "w", "b", "w"]]:
                 key("alt+Escape")
                 wait_for(lambda: "pbogut-copy" in app("status")["overlays"], "History word copy opens")
                 call("xdotool", "key", "--clearmodifiers", "--delay", "0", *moves, "v", "e", "y")
                 wait_for(lambda: not app("status")["overlays"], "History word copy closes")
                 assert clipboard() == "history", (moves, repr(clipboard()))
+
+            # Core can mark retained history incomplete after earlier output was
+            # discarded, especially when soft wraps outnumber its logical lines.
+            # Wait for the pane before printing so Core and App use the same width.
+            program = (
+                "import os,sys\n"
+                "print('HISTORY-READY', flush=True); input()\n"
+                "cols = os.get_terminal_size().columns\n"
+                "lines = [f'{i:03d} retained word' for i in range(120)]\n"
+                "lines += ['wrapped.' + 'x' * (cols + 4) + ' final', '  last words']\n"
+                "sys.stdout.write('discarded\\r\\n' * 3000 + '\\033[2J\\033[3J\\033[H' + '\\r\\n'.join(lines))\n"
+                "sys.stdout.flush(); input()\n"
+            )
+            terminal = app("do", "tab.new", "--name", "incomplete-history-test", "--argv",
+                           json.dumps(["python3", "-u", "-c", program]))["terminal"]
+            wait_for(lambda: "HISTORY-READY" in call("hc", "read", terminal, "--lines", "0"),
+                     "Incomplete-history program ready")
+            wait_for(lambda: terminal_ready(terminal), "Incomplete-history terminal available")
+            cols = json.loads(call("hc", "get", terminal, "--json"))["cols"]
+            key("Return")
+            wait_for(lambda: "last words" in call("hc", "read", terminal, "--lines", "0"),
+                     "Incomplete-history output ready")
+            result = json.loads(call("hc", "read", terminal, "--lines", "10000", "--json"))
+            assert result["how"] == "history" and not result["complete"], result.keys()
+            wrapped = "wrapped." + "x" * (cols + 4)
+            for moves, expected in [
+                (["Home", "w", "v", "e"], "retained"),
+                (["Home", "ctrl+f", "w", "v", "e"], "retained"),
+                (["shift+g", "b", "v", "e"], "words"),
+                (["shift+g", "asciicircum", "v", "shift+e"], "last"),
+                (["Home", *["j"] * 120, "v", "shift+e"], wrapped),
+            ]:
+                key("alt+Escape")
+                wait_for(lambda: "pbogut-copy" in app("status")["overlays"], "Incomplete-history copy opens")
+                call("xdotool", "key", "--clearmodifiers", "--delay", "0", *moves, "y")
+                wait_for(lambda: not app("status")["overlays"], "Incomplete-history copy closes")
+                assert clipboard() == expected, (moves, repr(clipboard()), expected)
 
             # Read actual bytes to catch focus leaks that command/state checks miss.
             raw = app("do", "tab.new", "--name", "focus-test", "--argv", json.dumps([
@@ -400,7 +466,7 @@ def main():
                      "Confirming closes the ordinary space")
             assert not bar_open()
             assert not app("status")["errors"], app("status")
-            print("PASS: word motions, Unicode, wrapping, history, whole-line copying and rapid reversals, live overlay resizing, c/v/s/x actions, restored typing, and clipboard copy.", flush=True)
+            print("PASS: word/WORD motions, first nonblank, half-page movement, Unicode, wrapping, history, whole-line copying and rapid reversals, live overlay resizing, c/v/s/x actions, restored typing, and clipboard copy.", flush=True)
         except Exception:
             print((root / "app.log").read_text()[-8000:], flush=True)
             try:

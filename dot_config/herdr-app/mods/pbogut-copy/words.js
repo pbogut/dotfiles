@@ -17,7 +17,9 @@ function cellWidth(glyph) {
 // cell positions, keeping a word together across wraps but not hard newlines.
 export function wordTarget(text, cols, rows, at, motion) {
   const words = [];
-  let row = 0;
+  const whitespaceOnly = ["W", "E", "B"].includes(motion);
+  motion = motion.toLowerCase();
+  let row = 0, lineEnd = 0;
   for (const line of text.split("\n")) {
     let col = 0, previous = 0, word;
     if (!line && row < rows) words.push({ start: row * cols, end: row * cols, empty: true });
@@ -25,8 +27,12 @@ export function wordTarget(text, cols, rows, at, motion) {
       const width = cellWidth(glyph);
       if (col + width > cols) { row++; col = 0; }
       if (row >= rows) break;
-      const kind = /^\s/u.test(glyph) ? 0 : /^[\p{L}\p{N}_]/u.test(glyph) ? 1 : 2;
+      const kind = /^\s/u.test(glyph) ? 0 : whitespaceOnly || /^[\p{L}\p{N}_]/u.test(glyph) ? 1 : 2;
       const cell = row * cols + col;
+      if (motion === "^" && row === at.row) {
+        if (kind) return { row, col };
+        lineEnd = col;
+      }
       if (kind) {
         if (kind !== previous) {
           word = { start: cell, end: cell };
@@ -39,6 +45,7 @@ export function wordTarget(text, cols, rows, at, motion) {
     row++;
     if (row >= rows) break;
   }
+  if (motion === "^") return { row: at.row, col: lineEnd };
   const cell = at.row * cols + at.col;
   let target;
   if (motion === "b") {

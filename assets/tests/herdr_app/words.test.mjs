@@ -56,3 +56,29 @@ test("motions stay bounded and never reverse at the ends or in unused screen row
   assert.deepEqual(wordTarget("one", 20, 10, { row: 9, col: 10 }, "b"), { row: 0, col: 0 });
   assert.deepEqual(wordTarget("one\noutside", 20, 1, { row: 0, col: 0 }, "w"), { row: 0, col: 2 });
 });
+
+test("W/E/B treat paths, URLs, and punctuation as whitespace-delimited words", () => {
+  const text = "src/foo.js  https://a.b/x?q=1  next";
+  for (const [motion, col, expected] of [
+    ["W", 0, 12], ["W", 3, 12], ["W", 12, 31], ["W", 29, 31],
+    ["E", 0, 9], ["E", 9, 28], ["E", 12, 28], ["E", 29, 34],
+    ["B", 9, 0], ["B", 12, 0], ["B", 28, 12], ["B", 31, 12],
+  ]) {
+    assert.deepEqual(wordTarget(text, 80, 24, { row: 0, col }, motion),
+      { row: 0, col: expected }, `${motion} at ${col}`);
+  }
+  assert.deepEqual(wordTarget("a/b.c\n\n  d/e", 4, 10, { row: 0, col: 0 }, "E"), { row: 1, col: 0 });
+  assert.deepEqual(wordTarget("a/b.c\n\n  d/e", 4, 10, { row: 1, col: 0 }, "W"), { row: 2, col: 0 });
+  assert.deepEqual(wordTarget("a/b.c\n\n  d/e", 4, 10, { row: 3, col: 2 }, "B"), { row: 2, col: 0 });
+});
+
+test("^ finds the first nonblank cell on the current physical row", () => {
+  const text = "  one\n    界面\n\n   ";
+  for (const [row, col, expected] of [
+    [0, 0, 2], [0, 15, 2], [1, 0, 4], [1, 15, 4], [2, 5, 0], [3, 5, 2], [9, 5, 0],
+  ]) {
+    assert.deepEqual(wordTarget(text, 20, 10, { row, col }, "^"), { row, col: expected });
+  }
+  assert.deepEqual(wordTarget("abcdefghij  next", 5, 10, { row: 1, col: 4 }, "^"), { row: 1, col: 0 });
+  assert.deepEqual(wordTarget("abcdefghij  next", 5, 10, { row: 2, col: 4 }, "^"), { row: 2, col: 2 });
+});

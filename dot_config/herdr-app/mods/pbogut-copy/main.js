@@ -10,9 +10,22 @@ const directions = {
   l: "right",
   "ctrl-b": "page_up",
   "ctrl-f": "page_down",
+  "ctrl-u": "half_page_up",
+  "ctrl-d": "half_page_down",
   home: "home", "shift-g": "end", end: "end",
   "0": "line_start", "$": "line_end", "shift-4": "line_end",
 };
+
+const textMotions = {
+  w: "w", e: "e", b: "b",
+  "shift-w": "W", "shift-e": "E", "shift-b": "B",
+  "^": "^", "shift-6": "^",
+};
+
+function verticalStep(direction, rows) {
+  const half = Math.max(1, Math.floor(rows / 2));
+  return { up: -1, down: 1, page_up: -rows, page_down: rows, half_page_up: -half, half_page_down: half }[direction];
+}
 
 export default class CopyMode extends View {
   init(_props, cx) {
@@ -88,7 +101,7 @@ export default class CopyMode extends View {
     } else if (direction === "line_start" || direction === "line_end") {
       col = direction === "line_start" ? 0 : lastCol;
     } else {
-      const step = { up: -1, down: 1, page_up: -terminal.rows, page_down: terminal.rows }[direction];
+      const step = verticalStep(direction, terminal.rows);
       row = Math.max(0, Math.min(lastRow, row + step));
     }
     this.selectCursor({ row, col }, scroll);
@@ -119,7 +132,8 @@ export default class CopyMode extends View {
         if (this.closed) return;
         if (result.code !== 0) throw new Error(result.stderr.trim() || "Could not read terminal text.");
         const content = JSON.parse(result.stdout);
-        if (!content.complete) throw new Error("Terminal text is incomplete.");
+        // complete also describes discarded older output, not the usability of
+        // the retained screen/history returned for the copy cursor.
         const current = terminals().find((terminal) => terminal.address === this.terminal);
         const view = panes().find((pane) => pane.terminal === this.terminal)?.scroll;
         if (!current?.selection) return;
@@ -128,7 +142,7 @@ export default class CopyMode extends View {
           return;
         }
         const from = { ...current.selection.end };
-        const at = wordTarget(content.text, cols, total, from, key);
+        const at = wordTarget(content.text, cols, total, from, textMotions[key]);
         if (this.selecting) {
           const adjust = (direction) => run("terminal.adjust_selection", { terminal: this.terminal, direction });
           const distance = Math.abs(at.row - from.row);
@@ -166,11 +180,11 @@ export default class CopyMode extends View {
       anchor(this.lineDirection);
       adjust(direction);
     } else {
-      const step = { up: -1, down: 1, page_up: -1, page_down: 1 }[direction];
+      const step = verticalStep(direction, terminal.rows);
       // Horizontal motions cannot turn a whole-line selection into a partial one.
       if (!step) return;
       const row = terminal.selection.end.row;
-      const target = Math.max(0, row + step * (direction.startsWith("page_") ? terminal.rows : 1));
+      const target = Math.max(0, row + step);
       const side = Math.sign(target - this.lineAnchor) || this.lineDirection;
       let count = Math.abs(target - row);
       if (side !== this.lineDirection) {
@@ -218,7 +232,7 @@ export default class CopyMode extends View {
     }
     const direction = key === "g" && this.lastKey === "g" ? "home" : directions[key];
     this.lastKey = key;
-    if (["w", "e", "b"].includes(key)) {
+    if (textMotions[key]) {
       if (this.lineAnchor === null) this.moveWord(key, cx);
       return;
     }
@@ -228,8 +242,16 @@ export default class CopyMode extends View {
       cx.notify();
       return;
     }
-    if (this.selecting) run("terminal.adjust_selection", { terminal: this.terminal, direction });
-    else this.moveCursor(direction);
+    if (this.selecting) {
+      if (direction.startsWith("half_page_")) {
+        const terminal = terminals().find((terminal) => terminal.address === this.terminal);
+        if (!terminal?.selection) return;
+        const step = verticalStep(direction, terminal.rows);
+        for (let i = 0; i < Math.abs(step); i++) {
+          run("terminal.adjust_selection", { terminal: this.terminal, direction: step < 0 ? "up" : "down" });
+        }
+      } else run("terminal.adjust_selection", { terminal: this.terminal, direction });
+    } else this.moveCursor(direction);
     this.waitForSelection();
     cx.notify();
   }
@@ -253,13 +275,13 @@ export default class CopyMode extends View {
         .child(div().flex_shrink_0().font_semibold().text_color(t.accent)
           .child(this.selecting ? "Copy · selecting" : "Copy mode"))
         .child(hint(["hjkl"], "move"))
-        .child(hint(["w", "e", "b"], "words"))
+        .child(hint(["w/e/b", "W/E/B"], "words"))
         .child(hint(["v"], "select"))
         .child(hint(["V"], "lines"))
-        .child(hint(["0", "$"], "line edges"))
+        .child(hint(["0", "^", "$"], "line"))
+        .child(hint(["Ctrl+U/D"], "half page"))
         .child(hint(["gg", "G"], "history edges"))
-        .child(hint(["Ctrl+B"], "page up"))
-        .child(hint(["Ctrl+F"], "page down")))
+        .child(hint(["Ctrl+B/F"], "page")))
       .child(h_flex().flex_shrink_0().gap(24)
         .child(hint(["y"], "copy"))
         .child(hint(["Esc"], "cancel")));
