@@ -1,6 +1,7 @@
 import { View, div } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { checking, closeOverlay, focused, nextCommand, panes, props, run, terminals, theme } from "herdr";
+import { checking, closeOverlay, focused, hc, nextCommand, notify, panes, props, run, terminals, theme } from "herdr";
+import { wordTarget } from "./words.js";
 
 const directions = {
   h: "left",
@@ -90,6 +91,10 @@ export default class CopyMode extends View {
       const step = { up: -1, down: 1, page_up: -terminal.rows, page_down: terminal.rows }[direction];
       row = Math.max(0, Math.min(lastRow, row + step));
     }
+    this.selectCursor({ row, col }, scroll);
+  }
+
+  selectCursor({ row, col }, scroll) {
     // Replace the single cell directly so no intermediate range can be painted.
     run("terminal.select", { terminal: this.terminal, at: { row, col } });
     if (scroll) {
@@ -98,6 +103,54 @@ export default class CopyMode extends View {
         run("terminal.scroll", { terminal: this.terminal, lines: offset - scroll.offset });
       }
     }
+  }
+
+  moveWord(key, cx) {
+    const terminal = terminals().find((terminal) => terminal.address === this.terminal);
+    if (!terminal?.selection) return;
+    const scroll = panes().find((pane) => pane.terminal === this.terminal)?.scroll;
+    const total = scroll?.total ?? terminal.rows;
+    const { rows, cols } = terminal;
+    this.waiting = true;
+    cx.spawn(async (cx) => {
+      let moved = false;
+      try {
+        const result = await hc(["read", this.terminal, "--json", "--lines", String(Math.max(0, total - rows))]);
+        if (this.closed) return;
+        if (result.code !== 0) throw new Error(result.stderr.trim() || "Could not read terminal text.");
+        const content = JSON.parse(result.stdout);
+        if (!content.complete) throw new Error("Terminal text is incomplete.");
+        const current = terminals().find((terminal) => terminal.address === this.terminal);
+        const view = panes().find((pane) => pane.terminal === this.terminal)?.scroll;
+        if (!current?.selection) return;
+        if (current.cols !== cols || current.rows !== rows || (view?.total ?? rows) !== total) {
+          this.keys.unshift(key);
+          return;
+        }
+        const from = { ...current.selection.end };
+        const at = wordTarget(content.text, cols, total, from, key);
+        if (this.selecting) {
+          const adjust = (direction) => run("terminal.adjust_selection", { terminal: this.terminal, direction });
+          const distance = Math.abs(at.row - from.row);
+          for (let i = 0; i < Math.floor(distance / rows); i++) adjust(at.row < from.row ? "page_up" : "page_down");
+          for (let i = 0; i < distance % rows; i++) adjust(at.row < from.row ? "up" : "down");
+          for (let i = 0; i < Math.abs(at.col - from.col); i++) adjust(at.col < from.col ? "left" : "right");
+        } else this.selectCursor(at, view);
+        moved = true;
+        this.waitForSelection();
+      } catch (error) {
+        if (!this.closed) {
+          this.keys = [];
+          notify({ title: "Could not move by word", body: String(error.message ?? error), level: "error" });
+        }
+      } finally {
+        if (!moved) this.waiting = false;
+        if (!this.closed) {
+          this.drainKeys(cx);
+          cx.notify();
+        }
+      }
+    });
   }
 
   moveLines(direction) {
@@ -165,6 +218,10 @@ export default class CopyMode extends View {
     }
     const direction = key === "g" && this.lastKey === "g" ? "home" : directions[key];
     this.lastKey = key;
+    if (["w", "e", "b"].includes(key)) {
+      if (this.lineAnchor === null) this.moveWord(key, cx);
+      return;
+    }
     if (!direction) return;
     if (this.lineAnchor !== null) {
       if (this.moveLines(direction)) this.waitForSelection();
@@ -196,6 +253,7 @@ export default class CopyMode extends View {
         .child(div().flex_shrink_0().font_semibold().text_color(t.accent)
           .child(this.selecting ? "Copy · selecting" : "Copy mode"))
         .child(hint(["hjkl"], "move"))
+        .child(hint(["w", "e", "b"], "words"))
         .child(hint(["v"], "select"))
         .child(hint(["V"], "lines"))
         .child(hint(["0", "$"], "line edges"))

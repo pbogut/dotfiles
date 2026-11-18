@@ -53,6 +53,11 @@ the other. Both follow window resizing while open, preserving copy selection.
 Copy mode uses the app's terminal selection.
 Move with `hjkl`,
 start or stop selection with `v`, and select lines with `V`.
+`w` moves to the next word start, `e` to the current or next word end, and
+`b` to the previous word start. Letters, numbers, and underscores form words;
+punctuation forms separate runs. Word motions extend `v` selections and cross
+lines and scrollback. They read fresh terminal text through Core, so queued
+motions and copying wait for each word move to finish.
 Before selection starts, movement highlights only the copy cursor's cell.
 Line selection includes indentation and keeps whole lines when moving with
 `j` / `k`, including when reversing direction. Horizontal motions leave the
@@ -595,6 +600,7 @@ python3 -B assets/tests/herdr_agents/agents_test.py
 python3 -B assets/tests/herdr_agents/push.py
 herdr-app check dot_config/herdr-app/mods/pbogut-spaces
 node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
+node --test assets/tests/herdr_app/words.test.mjs
 node --test assets/tests/herdr_app/send_ctrl_g.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/space_initials.test.mjs

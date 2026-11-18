@@ -11,6 +11,8 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true, e
   const terminal = { address: "test/t1", rows: 24, cols: 80, selection: null };
   const focus = { pane: "test-pane", terminal: terminal.address };
   const config = { zoom: 1 };
+  const pane = { terminal: terminal.address, scroll: null };
+  let readTerminal = async () => ({ code: 0, stdout: JSON.stringify({ text: "", complete: true }) });
   const layout = JSON.parse(await readFile(new URL("../../layouts/pbogut.json", root), "utf8"));
   const context = vm.createContext({
     window: { viewport_size: () => ({ width: 1280, height: 800 }) },
@@ -31,7 +33,8 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true, e
     checking: () => checking,
     closeOverlay: () => { calls.push(["close"]); view.close?.(); },
     focused: () => focus,
-    panes: () => [{ terminal: terminal.address, scroll: null }],
+    panes: () => [pane],
+    hc: async (args) => { calls.push(["hc", args]); return readTerminal(args); },
     exec: async (command, args, options) => { calls.push(["exec", command, ...args]); return exec(command, args, options); },
     nextCommand: () => commands.length ? Promise.resolve(commands.shift())
       : new Promise((resolve) => { resolveCommand = resolve; }),
@@ -48,6 +51,22 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true, e
         terminal.selection = { start: { ...at }, end: { ...at } };
       }
       if (name === "terminal.clear_selection") terminal.selection = null;
+      if (name === "terminal.adjust_selection") {
+        const end = terminal.selection.end;
+        const lastRow = (pane.scroll?.total ?? terminal.rows) - 1;
+        const direction = args.direction;
+        if (direction === "line_end") end.col = terminal.cols - 1;
+        else if (direction === "line_start") end.col = 0;
+        else if (direction === "left" || direction === "right") {
+          const cell = Math.max(0, Math.min((lastRow + 1) * terminal.cols - 1,
+            end.row * terminal.cols + end.col + (direction === "left" ? -1 : 1)));
+          end.row = Math.floor(cell / terminal.cols);
+          end.col = cell % terminal.cols;
+        } else {
+          const step = { up: -1, down: 1, page_up: -terminal.rows, page_down: terminal.rows }[direction];
+          end.row = Math.max(0, Math.min(lastRow, end.row + step));
+        }
+      }
     },
     terminals: () => [terminal],
     theme: () => ({}),
@@ -62,6 +81,7 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true, e
     "gpui-kit": mock({ View: class {}, div: () => element }),
     "gpui-base": mock({ v_flex: () => element, h_flex: () => element }),
     "./bindings.js": new vm.SourceTextModule(await readFile(new URL("bindings.js", root), "utf8"), { context }),
+    "./words.js": new vm.SourceTextModule(await readFile(new URL("../pbogut-copy/words.js", root), "utf8"), { context }),
   };
   const main = new vm.SourceTextModule(await readFile(new URL(`../${name}/main.js`, root), "utf8"), { context });
   await main.link((name) => {
@@ -82,7 +102,7 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true, e
   calls.length = 0;
   tasks.length = 0;
   return {
-    view, terminal, focus, config, calls, tasks,
+    view, terminal, pane, focus, config, calls, tasks,
     command: async (command) => {
       sendCommand(command);
       await new Promise(setImmediate);
@@ -90,6 +110,7 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true, e
     key: (keystroke) => view.onKey({ keystroke }, cx),
     settle: () => new Promise(setImmediate),
     setChecking: (value) => { checking = value; },
+    readTerminal: (read) => { readTerminal = read; },
   };
 }
 
@@ -218,6 +239,92 @@ test("Escape cleans up copy mode, including when the host closes the overlay", a
   app.view.close();
   assert.equal(app.terminal.selection, null);
   assert.equal(app.calls.find(([name]) => name === "terminal.scroll")[1].terminal, "test/t1");
+});
+
+test("queued word motions use fresh text and preserve the visual selection anchor", async () => {
+  const app = await fixture("pbogut-copy");
+  app.terminal.selection = { start: { row: 0, col: 0 }, end: { row: 0, col: 0 } };
+  app.readTerminal(async () => ({ code: 0, stdout: JSON.stringify({ text: "one two... three", complete: true }) }));
+  for (const key of ["w", "v", "e", "e"]) app.key(key);
+  await app.settle();
+  assert.deepEqual(app.terminal.selection, { start: { row: 0, col: 4 }, end: { row: 0, col: 9 } });
+  app.key("b");
+  await app.settle();
+  assert.deepEqual(app.terminal.selection, { start: { row: 0, col: 4 }, end: { row: 0, col: 7 } });
+  assert.equal(app.calls.filter(([name]) => name === "hc").length, 4);
+  app.key("v");
+  app.key("b");
+  await app.settle();
+  assert.deepEqual(app.terminal.selection, { start: { row: 0, col: 4 }, end: { row: 0, col: 4 } });
+});
+
+test("word cursor scrolling reads retained history without painting a selection range", async () => {
+  const app = await fixture("pbogut-copy");
+  app.pane.scroll = { total: 50, len: 24, offset: 26 };
+  app.terminal.selection = { start: { row: 26, col: 0 }, end: { row: 26, col: 0 } };
+  app.readTerminal(async (args) => {
+    assert.deepEqual([...args], ["read", "test/t1", "--json", "--lines", "26"]);
+    return { code: 0, stdout: JSON.stringify({ text: Array(50).fill("one two").join("\n"), complete: true }) };
+  });
+  app.key("b");
+  await app.settle();
+  assert.deepEqual(app.terminal.selection, { start: { row: 25, col: 4 }, end: { row: 25, col: 4 } });
+  assert.equal(app.calls.find(([name]) => name === "terminal.scroll")[1].lines, -1);
+  assert.ok(app.calls.every(([name]) => name !== "terminal.adjust_selection"));
+});
+
+test("whole-line selections ignore word motions like other horizontal motions", async () => {
+  const app = await fixture("pbogut-copy");
+  app.key("shift-v");
+  await app.settle();
+  const before = structuredClone(app.terminal.selection);
+  app.calls.length = 0;
+  for (const key of ["w", "e", "b"]) app.key(key);
+  assert.deepEqual(app.terminal.selection, before);
+  assert.deepEqual(app.calls, []);
+});
+
+test("closing during a word read discards pending motion and copy", async () => {
+  for (const close of [(app) => app.key("escape"), (app) => app.view.close()]) {
+    const app = await fixture("pbogut-copy");
+    let finish;
+    app.readTerminal(() => new Promise((resolve) => { finish = resolve; }));
+    app.key("w");
+    app.key("y");
+    close(app);
+    const count = app.calls.length;
+    finish({ code: 0, stdout: JSON.stringify({ text: "one two", complete: true }) });
+    await app.settle();
+    assert.equal(app.calls.length, count);
+    assert.equal(app.terminal.selection, null);
+  }
+});
+
+test("failed word reads report the error, discard queued copy, and release the key queue", async () => {
+  const app = await fixture("pbogut-copy");
+  app.readTerminal(async () => { throw new Error("Disconnected"); });
+  app.key("w");
+  app.key("y");
+  await app.settle();
+  assert.equal(app.calls.at(-1)[1].body, "Disconnected");
+  assert.ok(app.calls.every(([name]) => name !== "terminal.copy"));
+  app.key("h");
+  await app.settle();
+  assert.equal(app.terminal.selection.end.col, 4);
+});
+
+test("resizing during a word read retries against the new grid", async () => {
+  const app = await fixture("pbogut-copy");
+  app.terminal.selection = { start: { row: 0, col: 0 }, end: { row: 0, col: 0 } };
+  let reads = 0;
+  app.readTerminal(async () => {
+    if (++reads === 1) app.terminal.cols = 5;
+    return { code: 0, stdout: JSON.stringify({ text: "abcdef gh", complete: true }) };
+  });
+  app.key("e");
+  await app.settle();
+  assert.equal(reads, 2);
+  assert.deepEqual(app.terminal.selection, { start: { row: 1, col: 0 }, end: { row: 1, col: 0 } });
 });
 
 test("closing during movement discards pending selection and copy actions", async () => {
