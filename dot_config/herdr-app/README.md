@@ -368,7 +368,9 @@ Press Ctrl+G, then x, or open the command palette with Ctrl+Shift+P and choose
 **Close project**.
 In an ordinary space, this uses Herdr's normal close confirmation and never
 reads project configuration. In a project, the action reads the current
-definition and runs teardown in a visible,
+definition and asks **Close project?**. If teardown is configured, the dialog
+says it will run before the project closes. Cancel or Esc leaves the project
+and its tabs open. Confirm runs teardown in a visible,
 interactive `teardown` tab. It closes the other tabs in that space before
 starting the script. Repeating the action while teardown runs focuses that tab.
 Named-tab shortcuts can still create and focus tabs during teardown.
@@ -387,7 +389,7 @@ the failed teardown tab, before running the script. Finish or close any running
 setup tab before requesting project closure.
 
 Teardown runs on every explicit **Close project** request, without a completion
-cache. A project without a teardown hook closes immediately. Closing an
+cache. A project without a teardown hook closes after confirmation. Closing an
 individual tab, using Herdr's built-in **Close space**, or quitting the window
 does not run teardown. Closing a space does not remove its worktree unless
 the teardown script does so.

@@ -1,4 +1,4 @@
-import { appHome, exec, hc, home, notify, panes, readTextFile, run, shared, spaces, terminals } from "herdr";
+import { appHome, exec, hc, home, notify, openOverlay, panes, readTextFile, run, shared, spaces, terminals } from "herdr";
 import { PROJECT_SPACES, isProject, loadProjectConfig, machinePaths } from "./project.js";
 
 export default class ProjectClose {
@@ -24,7 +24,7 @@ export default class ProjectClose {
     if (job?.tab && space.active && space.tabs.some(tab => tab.id === job.tab)) run("tab.select", { id: job.tab });
   }
 
-  close(space, setupPending, cx) {
+  close(space, setupPending, cx, confirmed = false) {
     if (!isProject(space, shared(PROJECT_SPACES))) {
       run("space.close", { id: space.id });
       return;
@@ -56,6 +56,15 @@ export default class ProjectClose {
         if (this.jobs.get(space.id) !== job) return;
         const current = spaces().find(candidate => candidate.id === space.id);
         if (!current) { this.jobs.delete(space.id); return; }
+        if (!confirmed) {
+          openOverlay({ mod: "confirm", kind: "dialog", width: 380, height: config.teardown ? 170 : 150, props: {
+            title: "Close project?",
+            detail: config.teardown ? "The configured teardown will run before the project closes." : "",
+            command: { name: `pbogut-tabs.close-project@${space.id}@confirmed` },
+          } });
+          this.jobs.delete(space.id);
+          return;
+        }
         if (!config.teardown) { this.finish(job, true, cx); return; }
         job.before = new Set(current.tabs.map(tab => tab.id));
         job.argv = ["exec", "bash", `${paths.appHome}/mods/pbogut-tabs/teardown.sh`,

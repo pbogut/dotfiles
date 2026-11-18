@@ -42,9 +42,9 @@ export default class NamedTabs extends View {
           continue;
         }
         const [name, target, extra] = command.split("@");
-        if (name === "close-project" && extra === undefined) {
+        if (name === "close-project" && (extra === undefined || extra === "confirmed")) {
           const space = spaces().find(space => target === undefined ? space.active : space.id === target);
-          if (space) this.closer.close(space, this.setups.has(space.id), cx);
+          if (space) this.closer.close(space, this.setups.has(space.id), cx, extra === "confirmed");
           continue;
         }
         const role = roleOf(name);

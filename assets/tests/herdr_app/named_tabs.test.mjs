@@ -7,7 +7,7 @@ const root = new URL("../../../dot_config/herdr-app/mods/pbogut-tabs/", import.m
 const setupHash = "a".repeat(64);
 
 async function fixture(checking = false, initialTabs = [{ id: "original", name: "1", named: false }], marked = true) {
-  const calls = [], commands = [], operations = [], timers = [], reads = [];
+  const calls = [], commands = [], operations = [], timers = [], reads = [], overlays = [];
   const files = new Map(), persisted = new Map();
   files.set("/config/herdr-app/herdr-project.json", '{"tabs":["nvim"]}');
   const failures = new Set();
@@ -68,6 +68,7 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
       setShared: (key, value) => persisted.set(key, JSON.parse(JSON.stringify(value))),
       appHome: () => "/config/herdr-app", home: () => "/home/test",
       notify: (args) => calls.push(["notify", args]),
+      openOverlay: (args) => overlays.push(JSON.parse(JSON.stringify(args))),
       nextCommand: () => commands.length ? Promise.resolve(commands.shift())
         : new Promise((resolve) => { receive = resolve; }),
       run: (name, args) => {
@@ -88,9 +89,14 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
   let view = new main.namespace.default();
   view.init({}, cx);
   return {
-    calls, spaces, timers, files, failures, reads, persisted, native, executions, setupChecks, coreResults, sends, creation,
+    calls, spaces, timers, files, reads, overlays, failures, persisted, native, executions, setupChecks, coreResults, sends, creation,
     roles: modules["./roles.js"].namespace,
     render: () => view.render(cx),
+    async confirm() {
+      const overlay = overlays.pop();
+      assert.equal(overlay?.mod, "confirm");
+      await this.command(overlay.props.command.name.replace(/^pbogut-tabs\./, ""));
+    },
     restart() {
       view = new main.namespace.default();
       view.init({}, cx);
@@ -783,10 +789,66 @@ function teardownResult(app, space, state) {
 test("Close project without a teardown closes only the requested space", async () => {
   const app = await fixture();
   await app.command("close-project@two");
+  assert.deepEqual(app.calls, []);
+  assert.equal(app.overlays.at(-1).props.title, "Close project?");
+  assert.equal(app.overlays.at(-1).props.detail, "");
+  await app.confirm();
   app.flush();
   assert.deepEqual(app.spaces.map(space => space.id), ["one"]);
   assert.deepEqual(creations(app), []);
   assert.deepEqual(app.calls, [["space.close", { id: "two", confirmed: true }]]);
+});
+
+test("project confirmation leaves tabs untouched until accepted and can be cancelled and reopened", async () => {
+  for (const teardown of [false, true]) {
+    const app = await fixture();
+    app.files.set("/project one/herdr-project.json", teardown ? withTeardown() : "{}");
+    const before = structuredClone(app.spaces);
+    await app.command("close-project");
+    await settle(app);
+    assert.deepEqual(app.spaces, before);
+    assert.deepEqual(app.calls, []);
+    assert.deepEqual(app.sends, []);
+    const prompt = app.overlays.pop();
+    assert.equal(prompt.props.title, "Close project?");
+    assert.equal(prompt.props.detail, teardown ? "The configured teardown will run before the project closes." : "");
+    // Cancel/Esc dismisses the native overlay without running its command.
+    await app.command("close-project");
+    await app.confirm();
+    await settle(app);
+    if (teardown) assert.equal(app.sends.length, 1);
+    else assert.deepEqual(app.spaces.map(space => space.id), ["two"]);
+  }
+});
+
+test("confirmation keeps its project target after a space switch and ignores a closed target", async () => {
+  for (const removed of [false, true]) {
+    const app = await fixture();
+    await app.command("close-project");
+    app.spaces[0].active = false;
+    app.spaces[1].active = true;
+    if (removed) app.spaces.shift();
+    app.render();
+    await app.confirm();
+    await settle(app);
+    assert.deepEqual(app.spaces.map(space => space.id), ["two"]);
+    assert.equal(app.spaces[0].active, true);
+    assert.equal(app.calls.filter(([name]) => name === "space.close").length, removed ? 0 : 1);
+  }
+});
+
+test("confirming a project close rechecks setup before touching tabs", async () => {
+  const app = await fixture();
+  await app.command("close-project");
+  app.spaces[0].tabs.push({ id: "setup", name: "setup", named: true, terminal: "setup-terminal" });
+  app.native.push({ address: "setup-terminal", labels: {
+    "pbogut.setup": "new-setup", "pbogut.setup.state": "running",
+  } });
+  await app.confirm();
+  await settle(app);
+  assert.equal(app.spaces.length, 2);
+  assert.ok(app.calls.some(([name, args]) => name === "notify" && args.title === "Project setup is running"));
+  assert.ok(app.calls.every(([name]) => name !== "space.close" && name !== "tab.close"));
 });
 
 test("teardown runs only on explicit close and success closes its original space", async () => {
@@ -797,6 +859,7 @@ test("teardown runs only on explicit close and success closes its original space
   app.flush();
   assert.ok(creations(app).every(tab => tab.name !== "teardown"));
   for (let i = 0; i < 5; i++) await app.command("close-project");
+  await app.confirm();
   await settle(app);
   assert.deepEqual(app.sends[0].spaces[0].tabs.map(tab => tab.name), ["teardown"]);
   assert.deepEqual(app.sends[0].spaces[1].tabs.map(tab => tab.id), ["other"]);
@@ -826,6 +889,7 @@ test("teardown closes all previous tabs before its script and retries after fail
   space.tabs.push({ id: "user-teardown", name: "teardown", named: true, panes: 1 });
   app.files.set("/project one/herdr-project.json", withTeardown());
   await app.command("close-project");
+  await app.confirm();
   await settle(app);
   const first = space.tabs.find(tab => tab.name === "teardown" && tab.terminal);
   teardownResult(app, space, "failed");
@@ -835,6 +899,7 @@ test("teardown closes all previous tabs before its script and retries after fail
   assert.deepEqual(app.sends[0].spaces[0].tabs.map(tab => tab.id), [first.id]);
   app.files.set("/project one/herdr-project.json", withTeardown("fixed.sh"));
   await app.command("close-project");
+  await app.confirm();
   await settle(app);
   assert.ok(!space.tabs.some(tab => tab.id === "user-teardown"));
   assert.ok(!space.tabs.some(tab => tab.id === first.id));
@@ -853,6 +918,7 @@ test("invalid close configuration leaves the space intact and can be corrected",
   assert.match(app.calls.find(([name]) => name === "notify")[1].body, /\/project one\/herdr-project\.json:.*teardown/);
   app.files.set("/project one/herdr-project.json", "{}");
   await app.command("close-project");
+  await app.confirm();
   app.flush();
   assert.deepEqual(app.spaces.map(space => space.id), ["two"]);
 });
@@ -862,12 +928,14 @@ test("a rejected sibling-tab close prevents teardown from starting and permits r
   app.files.set("/project one/herdr-project.json", withTeardown());
   app.failures.add("tab.close");
   await app.command("close-project");
+  await app.confirm();
   await settle(app);
   assert.deepEqual(app.sends, []);
   assert.ok(app.spaces[0].tabs.some(tab => tab.id === "original"));
   assert.match(app.calls.find(([name]) => name === "notify")[1].body, /tab.close unavailable/);
   app.failures.clear();
   await app.command("close-project");
+  await app.confirm();
   await settle(app);
   assert.equal(app.sends.length, 1);
   assert.deepEqual(app.sends[0].spaces[0].tabs.map(tab => tab.name), ["teardown"]);
@@ -881,6 +949,7 @@ test("remote teardown uses its own fallback paths and project overrides remain a
     app.files.set("/project one/herdr-project.json", withTeardown("local-only"));
     if (override) app.files.set("vps:/project one/herdr-project.json", "{}");
     await app.command("close-project");
+    await app.confirm();
     await settle(app);
     if (override) assert.deepEqual(creations(app), []);
     else assert.ok(app.sends[0].command.startsWith(
@@ -900,6 +969,10 @@ test("delayed close reads keep their original target and ignore an already close
     app.render();
     resolve(withTeardown());
     await settle(app);
+    if (!removed) {
+      await app.confirm();
+      await settle(app);
+    }
     assert.equal(creations(app).length, removed ? 0 : 1);
     assert.ok(app.calls.every(([name]) => name !== "tab.select"));
     if (!removed) assert.equal(creations(app)[0].space, "one");
@@ -912,6 +985,7 @@ test("closing the teardown tab keeps the space, while a late success still close
     const space = app.spaces[0];
     app.files.set("/project one/herdr-project.json", withTeardown());
     await app.command("close-project");
+    await app.confirm();
     await settle(app);
     const tab = space.tabs.find(tab => tab.name === "teardown");
     space.tabs = space.tabs.filter(candidate => candidate !== tab);
@@ -922,6 +996,7 @@ test("closing the teardown tab keeps the space, while a late success still close
     if (!success) {
       assert.match(app.calls.find(([name]) => name === "notify")[1].body, /interrupted/);
       await app.command("close-project");
+      await app.confirm();
       await settle(app);
       assert.equal(creations(app).length, 2);
     }
@@ -955,6 +1030,7 @@ test("fast teardown is identified by its pane before any labels reach the App", 
   app.files.set("vps:/project one/herdr-project.json", withTeardown());
   app.failures.add("teardown");
   await app.command("close-project");
+  await app.confirm();
   app.flush();
   const tab = { id: "fast", name: "teardown", named: true, panes: 1, terminal: "vps/fast-terminal" };
   space.tabs.push(tab);

@@ -181,6 +181,9 @@ def main():
             assert str(local_repo) not in state()["folders"]
             key("Escape")
             app("do", f"pbogut-tabs.close-project@{space('fixture', worktree)['id']}")
+            wait(lambda: "confirm" in app("status")["overlays"], "Remote project asks before teardown")
+            assert space("fixture", worktree) is not None
+            key("Return")
             wait(lambda: space("fixture", worktree) is None, "Remote teardown closes only its own worktree space")
             assert (remote_app / "teardown.log").read_text().splitlines() == [
                 str(remote_app), str(worktree), str(worktree),

@@ -589,6 +589,18 @@ def main():
             call("xdotool", "windowfocus", window)
             search("close project", "ctrl+shift+p", "pbogut-palette")
             key("Return")
+            wait(lambda: "confirm" in app("status")["overlays"], "Close project asks before teardown")
+            call("herdr-app", "shot", str(root / "close-project-teardown.png"))
+            assert {tab["id"] for tab in project_space(setup_tree)["tabs"]} == original_tabs
+            assert not (repo / "teardown.log").exists()
+            key("Escape")
+            wait(lambda: not app("status")["overlays"], "Escape cancels project closure")
+            assert {tab["id"] for tab in project_space(setup_tree)["tabs"]} == original_tabs
+            for _ in range(3):
+                app("do", "pbogut-tabs.close-project")
+            wait(lambda: "confirm" in app("status")["overlays"], "Project confirmation reopens after cancellation")
+            assert app("status")["overlays"].count("confirm") == 1
+            key("Return")
             wait(lambda: "teardown" in tab_names(setup_tree), "Close project opens the interactive teardown tab")
 
             def teardown_terminal():
@@ -618,6 +630,8 @@ def main():
             assert {"shell", "shell-2", "teardown"}.issubset(tab_names(setup_tree))
             search("close project", "ctrl+shift+p", "pbogut-palette")
             key("Return")
+            wait(lambda: "confirm" in app("status")["overlays"], "Retry asks before running teardown again")
+            key("Return")
             wait(lambda: any(tab["name"] == "teardown" and tab["terminals"][0]["terminal"] != first_teardown
                              for tab in project_space(setup_tree)["tabs"]), "Close project retries a failed teardown")
             second_teardown = teardown_terminal()
@@ -637,9 +651,23 @@ def main():
             wait(lambda: project_space(setup_tree) is not None and "dev" in tab_names(setup_tree),
                  "Reopening through the picker creates a marked project after restart")
             app("do", "pbogut-tabs.close-project")
+            wait(lambda: "confirm" in app("status")["overlays"], "Reopened project asks before cleanup")
+            key("Return")
             wait(lambda: project_space(setup_tree) is None and not setup_tree.exists(),
                  "Teardown can remove the worktree and still close the space")
             assert len((repo / "teardown.log").read_text().splitlines()) == 9
+            app("do", f"pbogut-tabs.close-project@{existing_project['id']}")
+            wait(lambda: "confirm" in app("status")["overlays"], "Projects without teardown also ask before closing")
+            call("herdr-app", "shot", str(root / "close-project-no-teardown.png"))
+            assert project_space(existing) is not None
+            key("Escape")
+            wait(lambda: not app("status")["overlays"], "Escape preserves a project without teardown")
+            assert project_space(existing) is not None
+            app("do", f"pbogut-tabs.close-project@{existing_project['id']}")
+            wait(lambda: "confirm" in app("status")["overlays"], "Project without teardown can be closed after cancellation")
+            key("Return")
+            wait(lambda: project_space(existing) is None, "Confirmation closes the project without teardown")
+            assert any(space["id"] == original["space"] for space in app("ls")["spaces"])
             assert not app("status")["errors"], app("status")
             print("PASS: project pickers, JSON tabs/dev, hash-based setup, and interactive teardown retry, close, focus, and worktree cleanup.", flush=True)
         except Exception:
