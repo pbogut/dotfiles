@@ -1,4 +1,4 @@
-"""Check folder ordering and keyboard navigation in an isolated Herdr window."""
+"""Check folder navigation, drag assignments, persistence, and reset in an isolated Herdr window."""
 
 import json
 import os
@@ -51,6 +51,11 @@ def main():
 
     def key(*keys):
         call("xdotool", "key", "--clearmodifiers", "--delay", "80", *keys)
+
+    def drag(source_y, target_y):
+        call("xdotool", "mousemove", "100", str(source_y), "mousedown", "1")
+        call("xdotool", "mousemove", "100", str(target_y))
+        call("xdotool", "mouseup", "1")
 
     def selected_top(name):
         path = root / f"{name}.png"
@@ -126,8 +131,48 @@ def main():
             wait(lambda: selected_top("empty-hidden-again") == before, "The toggle hides empty folders again")
             names = {space["folder"]: space["name"] for space in app("ls")["spaces"]}
             assert names[str(main_tree)] == "Main name" and names[str(outside)] == "Feature name"
+            drag(120, 239)
+            moved_order = [str(personal), str(main_tree), str(outside), str(notes)]
+            wait(lambda: [s["folder"] for s in app("ls")["spaces"]] == moved_order,
+                 "Dropping one worktree onto other moves both siblings")
+            call("herdr-app", "shot", str(root / "manual-other.png"))
+
+            app("do", "window.close")
+            process.wait(timeout=5)
+            process = subprocess.Popen(["herdr-app"], env=env, stdout=log, stderr=log)
+            window = call("xdotool", "search", "--sync", "--pid", str(process.pid)).splitlines()[0]
+            call("xdotool", "windowfocus", window)
+            app("do", "layout.switch", "--name", "pbogut")
+            wait(lambda: [s["folder"] for s in app("ls")["spaces"]] == moved_order, "Manual assignments survive App restart")
+            for folder in (main_tree, outside):
+                app("do", "space.close", json.dumps({"id": opened[str(folder)], "confirmed": True}))
+            wait(lambda: len(app("ls")["spaces"]) == 2, "Close both worktree spaces")
+            for folder in (main_tree, outside):
+                old = opened[str(folder)]
+                opened[str(folder)] = app("do", "space.new", "--name", "Restored space", "--folder", str(folder))["space"]
+                assert opened[str(folder)] != old
+            app("do", "space.select", "--id", opened[str(main_tree)])
+            wait(lambda: (selected_top("recreated-spaces") or 0) > 150,
+                 "Recreated worktree spaces inherit the repository's manual group")
+            top = selected_top("before-reset")
+            call("xdotool", "mousemove", "100", str(top + 10), "click", "3")
+            wait(lambda: "pbogut-spaces" in app("status")["overlays"], "The space context menu opens")
+            call("herdr-app", "shot", str(root / "reset-menu.png"))
+            key("Return")
+            wait(lambda: [s["folder"] for s in app("ls")["spaces"]] == expected,
+                 "Use matching rules restores both worktrees to work")
+            wait(lambda: not app("status")["overlays"], "Reset closes the menu")
+
+            # The same gesture works for a directory that is not a Git checkout.
+            app("do", "space.select", "--id", opened[str(notes)])
+            notes_before = selected_top("non-git-notes-before")
+            app("do", "space.select", "--id", opened[str(personal)])
+            drag(selected_top("non-git-source") + 10, 239)
+            app("do", "space.select", "--id", opened[str(notes)])
+            wait(lambda: selected_top("non-git-moved") == notes_before - 28,
+                 "Moving the non-Git directory into other hides its now-empty personal header")
             assert not app("status")["errors"], app("status")
-            print("PASS: repository-root grouping, native shortcuts, fold/reveal, config reload, and persistent empty-folder toggle.", flush=True)
+            print("PASS: grouping, shortcuts, fold/reveal, config reload, drag assignment, restart/recreation persistence, and menu reset.", flush=True)
         except Exception:
             print("Status:", app("status"), flush=True)
             call("herdr-app", "shot", str(root / "failure.png"))

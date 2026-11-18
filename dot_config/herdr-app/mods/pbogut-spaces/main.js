@@ -5,8 +5,9 @@
 
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, ScrollHandle } from "gpui-base";
-import { spaces, machines, panes, run, openOverlay, exec, hc, appHome, readTextFile, theme, shared, setShared, watchFolder, window, layout, checking, nextCommand, notify } from "herdr";
-import { DEFAULT_FOLDERS, folderNames, parseFolders, matchFolder, orderFolders } from "./folders.js";
+import { spaces, machines, panes, run, openOverlay, exec, hc, appHome, readTextFile, theme, shared, setShared, watchFolder, window, layout, checking, nextCommand, notify, props } from "herdr";
+import { ASSIGNMENTS, assignmentKey, DEFAULT_FOLDERS, folderNames, parseFolders, matchFolder, orderFolders } from "./folders.js";
+import SpaceMenu from "./menu.js";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -72,6 +73,10 @@ export function tone(t, status) {
 
 export default class Spaces extends View {
   init(_props, cx) {
+    if (props()?.spaceMenu) {
+      this.popup = new SpaceMenu(props(), cx);
+      return;
+    }
     this.git = {}; // where() -> { name, branch, ahead, behind, repo, linked }, null: not a repo
     this.checked = {}; // where() -> when it was last looked at
     this.unsure = new Set(); // where()s git couldn't answer for (a machine away)
@@ -80,7 +85,7 @@ export default class Spaces extends View {
     this.ready = {}; // machine -> its layout was readable at the last look
     this.at = {}; // space -> its where() at the last look
     this.watching = new Map(); // local repos' pending folder watches
-    this.projects = new Map(); // configured machine/folder -> { name, root }
+    this.projects = new Map(); // configured machine/folder -> { name, root, directory }
     this.projectReloads = new Set();
     // Spaces made while this runs wait (at most a moment) for their git, so a
     // worktree appears under its repo instead of jumping there.
@@ -88,6 +93,7 @@ export default class Spaces extends View {
     this.born = {};
     this.pressed = null;
     this.over = null;
+    this.overFolder = null;
     this.scroll = ScrollHandle.new(); // the list's position: the active space is brought into view through it
     this.activeAt = -1; // the active space's place among the list's children (headers and rows), -1 when not drawn
     this.machines = [];
@@ -140,7 +146,42 @@ export default class Spaces extends View {
   }
 
   folderFor(space) {
+    const chosen = (shared(ASSIGNMENTS) ?? {})[this.folderKey(space)];
+    if (folderNames(this.folderConfig).includes(chosen)) return chosen;
     return matchFolder(this.projects.get(projectKey(space))?.root ?? space.folder, this.folderConfig);
+  }
+
+  folderKey(space) {
+    return assignmentKey(space.machine, this.projects.get(projectKey(space))?.directory);
+  }
+
+  assignFolder(space, folder, cx) {
+    if (!folderNames(this.folderConfig).includes(folder) || !space.folder) return;
+    cx.spawn(async cx => {
+      try {
+        let directory = this.projects.get(projectKey(space))?.directory;
+        if (!directory) {
+          const result = await exec("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], {
+            cwd: space.folder, on: space.machine ?? null,
+          });
+          if (result.code !== 0 && !/not a git repository/i.test(result.stderr)) {
+            throw new Error(result.stderr || "Could not find project root.");
+          }
+          directory = (result.code === 0 ? result.stdout.replace(/\n$/, "") : space.folder).replace(/\/+$/, "");
+          if (!directory) throw new Error("Could not find project root.");
+          this.projectReloads.add(projectKey(space));
+        }
+        // A drop that finishes after its space closed or changed directories is stale.
+        if (!spaces().some(s => s.id === space.id && projectKey(s) === projectKey(space))) return;
+        const key = assignmentKey(space.machine, directory);
+        setShared(ASSIGNMENTS, { ...(shared(ASSIGNMENTS) ?? {}), [key]: folder });
+        this.foldersFolded.delete(JSON.stringify([space.machine ?? null, folder]));
+        localStorage.setItem("pbogut.folders.folded", JSON.stringify([...this.foldersFolded]));
+        cx.notify();
+      } catch (error) {
+        notify({ title: "Could not move project", body: String(error.message ?? error), level: "error" });
+      }
+    });
   }
 
   checkNew(cx) {
@@ -174,6 +215,7 @@ export default class Spaces extends View {
             if (r.code !== 0 && !/not a git repository/i.test(r.stderr)) throw new Error(r.stderr || "Could not find project root.");
             const common = r.code === 0 ? r.stdout.replace(/\n$/, "") : "";
             const fallback = projectName(common, cwd);
+            entry.directory = (common || cwd).replace(/\/+$/, "");
             entry.root = (common || cwd).replace(/\/+$/, "").replace(/\/\.(git|bare)$/, "");
             entry.name ??= fallback;
             const path = `${entry.root}/herdr-project.json`;
@@ -385,7 +427,8 @@ export default class Spaces extends View {
 
   menu(w) {
     // A popup is as tall as its items; height is only the most.
-    openOverlay({ mod: "menu", kind: "popup", width: 200, height: 260, props: { tab: "space", target: { id: w.id } } });
+    openOverlay({ mod: "pbogut-spaces", kind: "popup", width: 240, height: 300,
+      props: { spaceMenu: { id: w.id, folderKey: this.folderKey(w) } } });
   }
 
   orderingDue(now) {
@@ -456,15 +499,37 @@ export default class Spaces extends View {
       if (!mine.length && !this.showEmptyFolders) continue;
       const id = JSON.stringify([machine, folder]);
       const folded = this.foldersFolded.has(id);
+      const target = this.pressed !== null && this.overFolder === id;
       const header = h_flex().id(`folder-${id}`).h(24).flex_none().mt(4)
         .px(collapsed ? 0 : 8).gap(7).items_center().rounded(6)
         .text_size(11).font_semibold().text_color(t.muted)
-        .cursor_pointer().hover(el => el.bg(t.hover))
+        .cursor_pointer()
+        .when(target, el => el.bg(t.selected).border(1).border_color(t.accent))
+        .when(!target, el => el.hover(s => s.bg(t.hover)))
         .tooltip(`${folder} (${mine.length})`)
         .when(collapsed, el => el.w(RAIL_CELL).justify_center())
-        .on_click((_event, cx) => {
-          folded ? this.foldersFolded.delete(id) : this.foldersFolded.add(id);
-          localStorage.setItem("pbogut.folders.folded", JSON.stringify([...this.foldersFolded]));
+        .on_mouse_move((_event, cx) => {
+          const source = spaces().find(s => s.id === this.pressed);
+          const over = source && (source.machine ?? null) === machine ? id : null;
+          if (this.pressed !== null && (this.overFolder !== over || this.over !== null)) {
+            this.overFolder = over;
+            this.over = null;
+            cx.notify();
+          }
+        })
+        .on_mouse_up("left", (_event, cx) => {
+          cx.stop_propagation();
+          const from = this.pressed;
+          const source = spaces().find(s => s.id === from);
+          this.pressed = null;
+          this.over = null;
+          this.overFolder = null;
+          if (from !== null) {
+            if (source && (source.machine ?? null) === machine) this.assignFolder(source, folder, cx);
+          } else {
+            folded ? this.foldersFolded.delete(id) : this.foldersFolded.add(id);
+            localStorage.setItem("pbogut.folders.folded", JSON.stringify([...this.foldersFolded]));
+          }
           cx.notify();
         })
         .child(svg("mods/workspace-chrome/folder.svg").size(12).flex_none())
@@ -611,12 +676,15 @@ export default class Spaces extends View {
       .on_mouse_down("left", () => {
         this.pressed = w.id;
         this.over = w.id;
+        this.overFolder = null;
       })
       .on_mouse_move((_e, cx) => {
         const source = spaces().find(s => s.id === this.pressed);
-        const over = source && (source.machine ?? null) === (w.machine ?? null) ? w.id : null;
-        if (this.pressed !== null && this.over !== over) {
+        const over = source && (source.machine ?? null) === (w.machine ?? null)
+          && this.folderFor(source) === this.folderFor(w) ? w.id : null;
+        if (this.pressed !== null && (this.over !== over || this.overFolder !== null)) {
           this.over = over;
+          this.overFolder = null;
           cx.notify();
         }
       })
@@ -625,6 +693,7 @@ export default class Spaces extends View {
         const over = this.over;
         this.pressed = null;
         this.over = null;
+        this.overFolder = null;
         if (from !== null && over === w.id && from !== w.id) {
           const index = spaces().findIndex(s => s.id === w.id);
           if (index !== -1) run("space.move", { id: from, index: index + 1 });
@@ -661,6 +730,7 @@ export default class Spaces extends View {
   }
 
   render(cx) {
+    if (this.popup) return this.popup.render(cx);
     const t = theme();
     const collapsed = narrow();
     const palette = ["ansi6", "ansi3", "ansi4", "ansi5", "ansi2", "ansi1"];
@@ -705,7 +775,7 @@ export default class Spaces extends View {
       .child(v_flex().flex_1().min_h(0).px(collapsed ? 0 : 8).pb(14).overflow_y_scrollbar().mode("always").track_scroll(this.scroll)
         // A block above (another mod's) growing, or the window resizing, shrinks this list and can push the active space out.
         .on_size_change((_size, cx) => { if (this.activeAt >= 0) { this.scroll.scroll_to_item(this.activeAt); cx.notify(); } })
-        .on_mouse_up("left", (_e, cx) => { this.pressed = null; cx.notify(); })
+        .on_mouse_up("left", (_e, cx) => { this.pressed = null; this.over = null; this.overFolder = null; cx.notify(); })
         .children(list));
   }
 }

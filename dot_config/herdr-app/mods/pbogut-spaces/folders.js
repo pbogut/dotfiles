@@ -2,6 +2,9 @@
 // sequence of directory components anywhere, independent of a machine's home.
 export const DEFAULT_FOLDERS = { folders: ["work", "personal"], fallback: "other", rules: [] };
 export const folderNames = (config) => [...config.folders, config.fallback];
+export const ASSIGNMENTS = "pbogut.folders.assignments";
+export const assignmentKey = (machine, directory) => directory
+  ? JSON.stringify([machine ?? null, directory.replace(/\/+$/, "")]) : null;
 
 export function parseFolders(text) {
   if (text === null) return DEFAULT_FOLDERS;

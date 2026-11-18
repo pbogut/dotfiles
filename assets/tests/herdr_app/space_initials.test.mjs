@@ -52,13 +52,16 @@ async function fixture(spaces, exec, readTextFile = async () => null) {
       readTextFile: (path, options) => path === "/app/folders.json" ? Promise.resolve(null) : readTextFile(path, options),
       watchFolder() {},
       checking: () => false, notify: message => notices.push(message),
+      props: () => ({}), keys: () => [], closeOverlay() {},
       nextCommand: () => new Promise(resolve => { receive = resolve; }),
     }),
   };
   const folders = new vm.SourceTextModule(await readFile(new URL("folders.js", source), "utf8"), { context });
   await folders.link(() => {});
+  const menu = new vm.SourceTextModule(await readFile(new URL("menu.js", source), "utf8"), { context });
+  await menu.link(name => name === "./folders.js" ? folders : modules[name]);
   const main = new vm.SourceTextModule(await readFile(source, "utf8"), { context });
-  await main.link(name => name === "./folders.js" ? folders : modules[name]);
+  await main.link(name => name === "./folders.js" ? folders : name === "./menu.js" ? menu : modules[name]);
   await main.evaluate();
   const cx = { spawn: callback => tasks.push(callback(cx)),
     notify: () => view.refreshProjects(spaces, cx), timer: { every() {} } };

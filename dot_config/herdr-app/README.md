@@ -435,6 +435,23 @@ restarts. Native space order follows folder order, so Alt+1…9 and previous/nex
 space shortcuts include collapsed spaces in that order. Switching to a hidden
 space expands its folder and machine and scrolls its row into view.
 
+Drag a space onto a folder header to assign its whole repository to that folder.
+The header highlights when it can accept the drop. Use the empty-folder toggle
+to reveal a destination with no spaces. Drops stay within the source machine;
+dragging between space rows reorders only within their existing folder.
+
+Manual assignments override path rules, including an explicit move to `other`.
+Herdr's shared state keeps them under `pbogut.folders.assignments`, keyed by
+machine and Git common directory, such as `/repos/project/.bare` or `.git`.
+All existing and future worktrees of that repository inherit the assignment.
+Non-Git spaces use their configured directory. Assignments survive closing
+spaces and restarting the App.
+
+Right-click an assigned space and choose **Use matching rules** to clear the
+repository's assignment on that machine. The menu keeps Herdr's rename,
+worktree, and close actions. Its space-only implementation is in
+`mods/pbogut-spaces/menu.js`, based on Herdr 0.1.16's menu.
+
 ## Customized built-in pickers
 
 `mods/pbogut-picker` copies Herdr App 0.1.16's `mods/picker`.
