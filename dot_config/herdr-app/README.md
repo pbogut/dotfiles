@@ -37,7 +37,13 @@ Prefix bindings live in `mods/pbogut-keys/bindings.js`.
 | c | New tab |
 | v / s | Split right / down |
 | x | Close project with teardown, or normally close an ordinary space |
-| Escape / Ctrl+G | Cancel |
+| Ctrl+G | Send Ctrl+G to the focused terminal |
+| Escape | Cancel |
+
+Double Ctrl+G uses `mods/pbogut-keys/send-ctrl-g.mjs`, a Node helper that sends
+through Core's attach stream without the `hc keys` quiet-period delay. It reads
+the terminal's keyboard mode, preserves its size, and runs outside the shortcut
+loop so repeated presses stay responsive. Remote terminals use the local Core's relay.
 
 Alt+Esc opens copy mode directly. Its hints use a single row in the same bottom
 overlay. Copy and cancel stay visible on the right; the other hints clip when
@@ -567,6 +573,7 @@ python3 -B assets/tests/herdr_agents/agents_test.py
 python3 -B assets/tests/herdr_agents/push.py
 herdr-app check dot_config/herdr-app/mods/pbogut-spaces
 node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
+node --test assets/tests/herdr_app/send_ctrl_g.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/space_initials.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/space_folders.test.mjs
@@ -583,6 +590,7 @@ node --test assets/tests/herdr_app/worktrees.test.mjs
 node --test assets/tests/herdr_app/opencode_session.test.mjs
 node --test assets/tests/herdr_app/opencode_rpc.test.mjs
 python3 assets/tests/herdr_app/keyboard.py
+python3 assets/tests/herdr_app/prefix_input.py
 python3 assets/tests/herdr_app/named_tabs.py
 python3 assets/tests/herdr_app/opencode_sessions.py
 python3 assets/tests/herdr_app/editor.py

@@ -170,7 +170,7 @@ def main():
             key("Escape")
             wait_for(lambda: not bar_open(), "Escape cancels prefix mode")
             key("ctrl+g", "ctrl+g")
-            wait_for(lambda: not bar_open(), "Ctrl+G toggles the bar off")
+            wait_for(lambda: not bar_open(), "A second Ctrl+G closes the bar")
 
             # An exact known screen and a waiting program make clipboard checks deterministic.
             copy = app("do", "tab.new", "--name", "copy-test", "--argv", json.dumps([
@@ -280,6 +280,8 @@ def main():
             key("Escape", "a")
             wait_for(lambda: "BYTE:61" in call("hc", "read", terminal, "--lines", "0"), "Escape restores typing")
             key("ctrl+g", "ctrl+g", "b")
+            wait_for(lambda: "BYTE:07" in call("hc", "read", terminal, "--lines", "0"),
+                     "Double Ctrl+G sends a literal Ctrl+G to the terminal")
             wait_for(lambda: "BYTE:62" in call("hc", "read", terminal, "--lines", "0"), "Double Ctrl+G restores typing")
             key("ctrl+g")
             wait_for(bar_open, "Bar reopens before outside click")
@@ -292,7 +294,8 @@ def main():
             key("alt+Escape", "alt+Escape", "e")
             wait_for(lambda: "BYTE:65" in call("hc", "read", terminal, "--lines", "0"), "Copy toggle restores typing")
             output = call("hc", "read", terminal, "--lines", "0")
-            assert all("BYTE:" + byte not in output for byte in ("07", "1b", "7a")), output
+            assert output.count("BYTE:07") == 1, output
+            assert all("BYTE:" + byte not in output for byte in ("1b", "7a")), output
             assert "RESIZE:" not in output, output
             assert not bar_open()
 

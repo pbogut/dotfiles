@@ -1,6 +1,6 @@
 import { View, div } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { checking, closeOverlay, layout, nextCommand, openOverlay, props, run, settings, theme } from "herdr";
+import { appHome, checking, closeOverlay, exec, focused, layout, nextCommand, notify, openOverlay, props, run, settings, theme } from "herdr";
 import { prefixBindings } from "./bindings.js";
 
 export default class Shortcuts extends View {
@@ -11,7 +11,7 @@ export default class Shortcuts extends View {
       this.handle.focus();
       return;
     }
-    cx.spawn(async () => {
+    cx.spawn(async (cx) => {
       for (;;) {
         const command = await nextCommand();
         if (command === `closed-${this.overlay}`) this.overlay = null;
@@ -19,7 +19,21 @@ export default class Shortcuts extends View {
         const mod = command === "copy" ? "pbogut-copy" : "pbogut-keys";
         if (this.overlay) {
           closeOverlay(this.overlay);
-          if (this.mod === mod) continue;
+          this.overlay = null;
+          if (this.mod === mod) {
+            const terminal = command === "toggle" && focused()?.terminal;
+            if (terminal) cx.spawn(async () => {
+              try {
+                const result = await exec("node", [
+                  `${appHome()}/mods/pbogut-keys/send-ctrl-g.mjs`, terminal, settings().core || "hc",
+                ], { timeout: 3000 });
+                if (result.code !== 0) throw new Error(result.stderr.trim() || "The terminal rejected the key.");
+              } catch (error) {
+                notify({ title: "Could not send Ctrl+G", body: String(error.message ?? error), level: "error" });
+              }
+            });
+            continue;
+          }
         }
         this.open(mod);
       }
@@ -80,7 +94,7 @@ export default class Shortcuts extends View {
       .bg(t.popover).border_t_1().border_color(t.border)
       .text_color(t.foreground).text_size(13)
       .child(h_flex().flex_1().min_w(0).gap(24).overflow_hidden()
-        .child(keycap("Ctrl+G"))
+        .child(hint("Ctrl+G", "send Ctrl+G"))
         .child(hint("v", "split right"))
         .child(hint("s", "split down"))
         .child(hint("c", "new tab"))

@@ -5,7 +5,7 @@ import vm from "node:vm";
 
 const root = new URL("../../../dot_config/herdr-app/mods/pbogut-keys/", import.meta.url);
 
-async function fixture(name = "pbogut-keys", checking = false, overlay = true) {
+async function fixture(name = "pbogut-keys", checking = false, overlay = true, exec = async () => ({ code: 0 })) {
   const calls = [];
   const tasks = [];
   const terminal = { address: "test/t1", rows: 24, cols: 80, selection: null };
@@ -27,11 +27,12 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true) {
     } else commands.push(command);
   }
   const host = {
+    appHome: () => "/app",
     checking: () => checking,
     closeOverlay: () => { calls.push(["close"]); view.close?.(); },
     focused: () => focus,
     panes: () => [{ terminal: terminal.address, scroll: null }],
-    hc: async (args) => { calls.push(["hc", ...args]); return { code: 0 }; },
+    exec: async (command, args, options) => { calls.push(["exec", command, ...args]); return exec(command, args, options); },
     nextCommand: () => commands.length ? Promise.resolve(commands.shift())
       : new Promise((resolve) => { resolveCommand = resolve; }),
     notify: (args) => calls.push(["notify", args]),
@@ -119,7 +120,7 @@ test("removed prefix shortcuts do nothing, including navigation, copy, and numbe
   assert.deepEqual(app.calls.map(([name]) => name), ["close", "pbogut-keys.closed-test-overlay"]);
 });
 
-test("the zero-height anchor toggles a frameless overlay without resizing the layout", async () => {
+test("the prefix overlay closes before a second Ctrl+G sends the key to the focused terminal", async () => {
   const app = await fixture("pbogut-keys", false, false);
   for (const zoom of [1, 1.1]) {
     app.config.zoom = zoom;
@@ -134,12 +135,37 @@ test("the zero-height anchor toggles a frameless overlay without resizing the la
     assert.equal(spec.at.y, 0);
     assert.ok(Math.abs(spec.props.left - 269) < 0.001);
     assert.equal(spec.props.bottom, 28, "The menu covers the tabs above the status bar");
+    const overlay = app.view.overlay;
     await app.command("toggle");
-    assert.equal(app.calls.at(-1)[0], "close");
-    await app.command(`closed-${app.view.overlay}`);
+    assert.deepEqual(app.calls.slice(-2), [
+      ["close"], ["exec", "node", "/app/mods/pbogut-keys/send-ctrl-g.mjs", "test/t1", "hc"],
+    ]);
+    await app.command(`closed-${overlay}`);
     assert.equal(app.view.overlay, null);
   }
-  assert.ok(app.calls.every(([name]) => name === "open" || name === "close"));
+  assert.ok(app.calls.every(([name]) => ["open", "close", "exec"].includes(name)));
+});
+
+test("pending Ctrl+G delivery never blocks repeated prefixes or copy mode", async () => {
+  const pending = [];
+  const app = await fixture("pbogut-keys", false, false, () => new Promise(resolve => pending.push(resolve)));
+  app.view.width = 1011;
+  for (let i = 0; i < 4; i++) {
+    await app.command("toggle");
+    assert.ok(app.view.overlay);
+    await app.command("toggle");
+    assert.equal(app.view.overlay, null);
+  }
+  assert.equal(pending.length, 4);
+  await app.command("copy");
+  assert.equal(app.calls.at(-1)[1].mod, "pbogut-copy");
+  app.focus.terminal = "another/t2";
+  pending[0]({ code: 1, stderr: "Connection lost" });
+  for (const resolve of pending.slice(1)) resolve({ code: 0 });
+  await Promise.all(app.tasks);
+  assert.equal(app.calls.filter(([name]) => name === "exec").length, 4, "Failed delivery is never retried");
+  assert.ok(app.calls.filter(([name]) => name === "exec").every(call => call[3] === "test/t1"));
+  assert.equal(app.calls.at(-1)[1].body, "Connection lost");
 });
 
 test("copy mode uses the bottom overlay and replaces prefix mode without stale cleanup closing it", async () => {
@@ -163,6 +189,7 @@ test("copy mode uses the bottom overlay and replaces prefix mode without stale c
   assert.equal(app.calls.at(-1)[0], "close");
   await app.command(`closed-${copy}`);
   assert.equal(app.view.overlay, null);
+  assert.ok(app.calls.every(([name]) => name !== "exec"), "Switching to copy mode and toggling it off sends no key");
 });
 
 test("copy cursor moves without extending a range until selection starts", async () => {
