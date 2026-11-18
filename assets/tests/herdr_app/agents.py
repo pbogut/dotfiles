@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+from urllib.parse import quote
 
 SOURCE = Path(__file__).resolve().parents[3] / "dot_config/herdr-app"
 
@@ -22,16 +23,20 @@ def main():
         (root / name).mkdir(mode=0o700)
         env[key] = str(root / name)
     env.update(HERDR_APP_HOME=str(root / "app"), HC_SESSION="agents-test",
-               HERDR_TELEMETRY="0", SHELL="/bin/sh", MANGOHUD="0")
+               HERDR_TELEMETRY="0", SHELL="/bin/sh", MANGOHUD="0",
+               GIT_CONFIG_GLOBAL="/dev/null", GIT_CONFIG_NOSYSTEM="1",
+               GIT_AUTHOR_NAME="Test", GIT_AUTHOR_EMAIL="test@example.com",
+               GIT_COMMITTER_NAME="Test", GIT_COMMITTER_EMAIL="test@example.com")
     for mod in ["pbogut-spaces", "pbogut-agents"]:
         shutil.copytree(SOURCE / "mods" / mod, root / "app/mods" / mod)
     (root / "app/layouts").mkdir()
     layout = json.loads((SOURCE / "layouts/pbogut.json").read_text())
     sidebar = layout["children"][0]
-    sidebar["size"]["px"] = 340
     sidebar["children"] = [sidebar["children"][1]]
     sidebar["children"][0]["children"][0]["size"] = {"px": 180}
     layout["children"][1] = {"id": "main", "type": "block", "content": {"tab": "active"}}
+    layout["children"].append({"id": "test-projects", "type": "block", "size": {"px": 0}, "min": 0,
+                               "content": {"mod": "test-projects"}})
     (root / "app/layouts/test.json").write_text(json.dumps(layout))
     (root / "app/settings.json").write_text(json.dumps({
         "core": shutil.which("hc"), "telemetry": False, "sounds": {"enabled": False},
@@ -41,6 +46,23 @@ def main():
     }))
     for name in ["work", "personal"]:
         (root / name).mkdir()
+    (root / "work/herdr-project.json").write_text(json.dumps({"name": "Pharmacy"}))
+    # Mark the fixture as a project, as the project picker would.
+    controller = root / "app/mods/test-projects"
+    controller.mkdir()
+    (controller / "main.js").write_text("""
+import { View, div } from "gpui-kit";
+import { spaces, shared, setShared } from "herdr";
+export default class Projects extends View {
+  render() {
+    const marked = Object.fromEntries(spaces().filter(s => s.folder === """ + json.dumps(str(root / "work")) + """)
+      .map(s => [s.id, true]));
+    if (JSON.stringify(shared("pbogut.projects.spaces")) !== JSON.stringify(marked))
+      setShared("pbogut.projects.spaces", marked);
+    return div().h(0);
+  }
+}
+""")
     (root / "app/folders.json").write_text(json.dumps({
         "folders": ["work", "personal"], "fallback": "other",
         "rules": [{"path": str(root / name), "folder": name} for name in ["work", "personal"]],
@@ -50,6 +72,7 @@ def main():
     main_js.write_text(main_js.read_text().replace("    const drawGroup =", """
     const snapshot = JSON.stringify(groups.map(g => ({
       label: g.label, members: g.members.map(a => a.address),
+      labels: g.members.map(a => ({ address: a.address, name: nameOf(a), branch: branchOf(a) })),
       sections: g.sections?.map(s => ({ label: s.label, members: s.members.map(a => a.address) })),
     })));
     if (snapshot !== this.testSnapshot) {
@@ -81,6 +104,11 @@ def main():
         return {g["label"]: {s["label"]: s["members"] for s in g.get("sections", [])}
                 for g in groups() if "sections" in g}
 
+    def labels():
+        return {a["address"]: a for g in groups() for a in g["labels"]}
+
+    call("git", "-C", str(root / "work"), "init", "-b", "2026-11-18-feature")
+    call("git", "-C", str(root / "work"), "commit", "--allow-empty", "-m", "Fixture")
     writers = []
 
     def agent(name, status):
@@ -131,7 +159,15 @@ def main():
                                        "personal": {"Working": [busy]}}, "Folders contain their priority sections")
             assert [g["label"] for g in groups()] == ["Pinned", "work", "personal"]
             assert groups()[0]["members"] == [pinned]
+            wait(lambda: labels().get(blocked) == {
+                "address": blocked, "name": "Pharmacy", "branch": "2026-11-18-feature",
+            }, "Agents inherit the actual project name and branch resolved by Spaces")
+            assert labels()[busy]["name"] == "Notes" and labels()[busy]["branch"] == ""
             call("herdr-app", "shot", str(root / "folder-priority.png"))
+            (root / "work/herdr-project.json").write_text(json.dumps({"name": "PMS"}))
+            app("do", "pbogut-spaces.reload@" + quote(json.dumps({"folder": str(root / "work")}), safe=""))
+            wait(lambda: labels().get(blocked, {}).get("name") == "PMS", "Project config reload updates agent labels")
+            call("herdr-app", "shot", str(root / "project-labels.png"))
             app("do", "agent.focus", "--terminal", pinned)
             for address in [blocked, idle, busy]:
                 app("do", "agent.next")
@@ -139,7 +175,7 @@ def main():
             writer.write("working\n")
             wait(lambda: sections().get("work", {}).get("Working") == [blocked], "A status change moves its section")
             assert not app("status")["errors"], app("status")
-            print("PASS: folder/priority rendering, pins, status changes, and native next-agent order.", flush=True)
+            print("PASS: folder/priority rendering, project/branch labels and reload, pins, status changes, and navigation.", flush=True)
         except Exception:
             print((root / "app.log").read_text()[-6000:], flush=True)
             print("Status:", app("status"), flush=True)

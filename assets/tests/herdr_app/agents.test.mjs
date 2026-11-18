@@ -23,6 +23,14 @@ function find(el, id) {
   }
 }
 
+function text(el) {
+  return typeof el === "string" ? el : (el?.nodes ?? []).map(text).filter(Boolean).join(" ");
+}
+
+function tooltips(el) {
+  return [...(el?.attrs?.tooltip ?? []), ...(el?.nodes ?? []).flatMap(tooltips)];
+}
+
 function agent(address, space, status, extra = {}) {
   return { address, space, status, space_name: space, pane: `pane-${address}`, tab: `tab-${address}`,
     seq: 0, program: { name: "OpenCode", key: "opencode", agent: true }, ...extra };
@@ -172,4 +180,73 @@ test("the sort menu opts into Folder + priority and can return to the existing m
   assert.equal(app.shared.get("agents.sort"), "folder-priority");
   find(app.render(), "sort-priority").attrs.on_click[0]();
   assert.equal(app.shared.get("agents.sort"), "priority");
+});
+
+test("all sort modes show project and per-worktree branch on one line without tab names", async () => {
+  const app = await sidebar([
+    agent("one", "raw-main", "working"),
+    agent("two", "raw-feature", "blocked"),
+    agent("server/three", "raw-remote", "idle", { pinned: true }),
+  ]);
+  resolved(app, [
+    { id: "raw-main", name: "PMS", branch: "main", folder: "work" },
+    { id: "raw-feature", name: "PMS", branch: "2026-11-18-feature-branch", folder: "work" },
+    { id: "raw-remote", name: "Remote API", branch: "master", folder: "work" },
+  ]);
+  for (const sort of ["priority", "grouped", "folder-priority"]) {
+    app.shared.set("agents.sort", sort);
+    const tree = app.render();
+    assert.match(text(find(tree, "ag-one")), /PMS · main/);
+    assert.match(text(find(tree, "ag-two")), /PMS · feature-branch/);
+    assert.match(text(find(tree, "ag-server/three")), /Remote API · master server/);
+    assert.equal(find(tree, "ag-two").attrs.h[0], 30);
+    assert.ok(tooltips(find(tree, "ag-two")).includes("2026-11-18-feature-branch"));
+    assert.doesNotMatch(text(find(tree, "ag-two")), /raw-feature|2026-11-18|oc-1/);
+    if (sort === "grouped") assert.match(text(find(tree, "sp-raw-feature")), /^PMS/);
+  }
+  assert.equal(app.state.agents[1].space_name, "raw-feature", "Only the display label changes");
+  app.state.width = 44;
+  assert.equal(find(app.render(), "ag-two").attrs.tooltip[0], "PMS · 2026-11-18-feature-branch");
+});
+
+test("labels follow refreshed shared data and fall back to the native name while a space resolves", async () => {
+  const app = await sidebar([agent("one", "scratch", "idle")], "folder-priority");
+  let row = find(app.render(), "ag-one");
+  assert.match(text(row), /^scratch /);
+  assert.doesNotMatch(text(row), /·/);
+  resolved(app, [{ id: "scratch", name: "Project name", branch: "main", folder: "personal" }]);
+  assert.match(text(find(app.render(), "ag-one")), /^Project name · main/);
+  app.shared.set("pbogut.spaces.rows", [{ id: "scratch", name: "Renamed", branch: "2026-11-19-fix", folder: "personal" }]);
+  assert.match(text(find(app.render(), "ag-one")), /^Renamed · fix/);
+  app.shared.set("pbogut.spaces.rows", [{ id: "scratch", name: "Non-Git project", branch: "", folder: "personal" }]);
+  row = find(app.render(), "ag-one");
+  assert.match(text(row), /^Non-Git project /);
+  assert.doesNotMatch(text(row), /·|main|fix/);
+});
+
+test("matching project labels keep separate focus targets without adding titles or tab numbers", async () => {
+  const app = await sidebar([
+    agent("one", "space", "working", { tab: "split", title: "✦ Fix login" }),
+    agent("two", "space", "working", { tab: "split", title: "[ ! ] Review login" }),
+  ]);
+  resolved(app, [{ id: "space", name: "API", branch: "fix", folder: "work" }]);
+  app.state.spaces[0].tabs = [{ id: "split", name: "oc-1", named: true }];
+  for (const address of ["one", "two"]) {
+    const row = find(app.render(), `ag-${address}`);
+    assert.match(text(row), /^API · fix/);
+    assert.doesNotMatch(text(row), /Fix login|Review login|oc-1/);
+    assert.deepEqual(tooltips(row), ["API", "fix"]);
+    row.attrs.on_click[0]();
+    assert.equal(app.state.commands.at(-1)[1].pane, `pane-${address}`);
+  }
+  app.state.agents = [agent("one", "first", "idle"), agent("two", "second", "idle")];
+  app.state.spaces = [{ id: "first", tabs: [{ id: "tab-one", name: "1", named: true }] },
+    { id: "second", tabs: [{ id: "tab-two", name: "2", named: true }] }];
+  resolved(app, [{ id: "first", name: "API", branch: "main", folder: "work" },
+    { id: "second", name: "API", branch: "main", folder: "work" }]);
+  for (const address of ["one", "two"]) {
+    const row = find(app.render(), `ag-${address}`);
+    assert.equal(text(row), "API · main <1m");
+    assert.equal(row.attrs.h[0], 30);
+  }
 });

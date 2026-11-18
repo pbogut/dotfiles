@@ -504,6 +504,14 @@ and fallback from `pbogut.spaces.folders`. Manual moves and folder configuration
 changes follow Spaces. A new space uses the fallback folder until Spaces resolves it.
 After a Herdr upgrade, merge changes from the shipped Agents mod into this copy.
 
+In every sort view, agent rows show only the space's resolved project name and
+branch on one line. Ordinary spaces keep their native name.
+The branch uses the same date-prefix shortening as Spaces; hover over it
+to see the full name. Non-Git spaces omit the branch.
+Project config reloads update the labels through the shared Spaces snapshot.
+Grouped-by-space headers also use the resolved name. In the narrow rail, hover
+over an agent's number for its project and full branch.
+
 ## Spaces picker
 
 Alt+O opens `mods/pbogut-space-picker`. It lists one row per open space in
