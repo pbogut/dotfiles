@@ -655,8 +655,12 @@ export default class Spaces extends View {
     };
   }
 
-  // Give the picker the sidebar's resolved order and labels, before folding.
+  // Give the picker and agents the sidebar's resolved order and labels, before folding.
   publishRows(rows, t) {
+    const folders = { names: folderNames(this.folderConfig), fallback: this.folderConfig.fallback };
+    if (JSON.stringify(shared("pbogut.spaces.folders")) !== JSON.stringify(folders)) {
+      setShared("pbogut.spaces.folders", folders);
+    }
     const remote = [...new Set(rows.map(r => r.w.machine).filter(Boolean))].sort();
     const snapshot = [null, ...remote].flatMap(machine =>
       rows.filter(r => (r.w.machine ?? null) === machine).map(({ w, g, tree }) => ({

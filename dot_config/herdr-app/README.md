@@ -484,6 +484,26 @@ The menu keeps Herdr's rename,
 worktree, and close actions. Its space-only implementation is in
 `mods/pbogut-spaces/menu.js`, based on Herdr 0.1.16's menu.
 
+## Agents folders and priority
+
+The `pbogut` layout uses `mods/pbogut-agents`, based on Herdr App 0.1.16's
+Agents sidebar. Open the sort menu beside Agents and choose **Folder + priority**.
+The existing sort selection stays selected until you choose the new view.
+Priority remains the default when no sort is saved.
+
+Each folder contains its nonempty **Needs you**, **Done**, **Working**, and
+**Idle** sections, in that order. Click a folder or section header to fold it.
+Pinned agents appear above the folders. Agents on different machines share their
+folder's section; remote rows show the machine name.
+Sub-agent urgency can move its parent into Needs you, as in the native priority
+view. Previous/next agent navigation follows the displayed order, including
+agents in folded groups.
+
+The sidebar reads resolved assignments from `pbogut.spaces.rows` and folder order
+and fallback from `pbogut.spaces.folders`. Manual moves and folder configuration
+changes follow Spaces. A new space uses the fallback folder until Spaces resolves it.
+After a Herdr upgrade, merge changes from the shipped Agents mod into this copy.
+
 ## Spaces picker
 
 Alt+O opens `mods/pbogut-space-picker`. It lists one row per open space in
@@ -531,6 +551,9 @@ herdr-app check dot_config/herdr-app/mods/pbogut-picker
 herdr-app check dot_config/herdr-app/mods/pbogut-space-picker
 herdr-app check dot_config/herdr-app/mods/pbogut-palette
 herdr-app check dot_config/herdr-app/mods/pbogut-agent-status
+herdr-app check dot_config/herdr-app/mods/pbogut-agents
+node --experimental-vm-modules --test assets/tests/herdr_app/agents.test.mjs
+python3 -B assets/tests/herdr_app/agents.py
 node --experimental-vm-modules --test assets/tests/herdr_agents/push.test.mjs
 python3 -B assets/tests/herdr_agents/agents_test.py
 python3 -B assets/tests/herdr_agents/push.py

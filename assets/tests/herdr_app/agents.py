@@ -1,0 +1,161 @@
+"""Check the folder/priority sidebar with real status-reporting terminals in an isolated app."""
+
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import tempfile
+import time
+
+SOURCE = Path(__file__).resolve().parents[3] / "dot_config/herdr-app"
+
+
+def main():
+    root = Path(tempfile.mkdtemp(prefix="herdr-agents-", dir="/tmp/opencode"))
+    print(f"Agents sandbox: {root}", flush=True)
+    env = {key: value for key, value in os.environ.items()
+           if not key.startswith(("HC_", "HERDR_", "GIT_"))
+           and key not in ("WAYLAND_DISPLAY", "DBUS_SESSION_BUS_ADDRESS", "ZDOTDIR")}
+    for key, name in [("HOME", "home"), ("XDG_CONFIG_HOME", "config"), ("XDG_DATA_HOME", "data"),
+                      ("XDG_STATE_HOME", "state"), ("XDG_CACHE_HOME", "cache"), ("XDG_RUNTIME_DIR", "run")]:
+        (root / name).mkdir(mode=0o700)
+        env[key] = str(root / name)
+    env.update(HERDR_APP_HOME=str(root / "app"), HC_SESSION="agents-test",
+               HERDR_TELEMETRY="0", SHELL="/bin/sh", MANGOHUD="0")
+    for mod in ["pbogut-spaces", "pbogut-agents"]:
+        shutil.copytree(SOURCE / "mods" / mod, root / "app/mods" / mod)
+    (root / "app/layouts").mkdir()
+    layout = json.loads((SOURCE / "layouts/pbogut.json").read_text())
+    sidebar = layout["children"][0]
+    sidebar["size"]["px"] = 340
+    sidebar["children"] = [sidebar["children"][1]]
+    sidebar["children"][0]["children"][0]["size"] = {"px": 180}
+    layout["children"][1] = {"id": "main", "type": "block", "content": {"tab": "active"}}
+    (root / "app/layouts/test.json").write_text(json.dumps(layout))
+    (root / "app/settings.json").write_text(json.dumps({
+        "core": shutil.which("hc"), "telemetry": False, "sounds": {"enabled": False},
+    }))
+    (root / "app/shared.json").write_text(json.dumps({
+        "frame.welcomed": "skipped", "agents.sort": "folder-priority",
+    }))
+    for name in ["work", "personal"]:
+        (root / name).mkdir()
+    (root / "app/folders.json").write_text(json.dumps({
+        "folders": ["work", "personal"], "fallback": "other",
+        "rules": [{"path": str(root / name), "folder": name} for name in ["work", "personal"]],
+    }))
+    # Observe the real render's grouping only in the disposable copy.
+    main_js = root / "app/mods/pbogut-agents/main.js"
+    main_js.write_text(main_js.read_text().replace("    const drawGroup =", """
+    const snapshot = JSON.stringify(groups.map(g => ({
+      label: g.label, members: g.members.map(a => a.address),
+      sections: g.sections?.map(s => ({ label: s.label, members: s.members.map(a => a.address) })),
+    })));
+    if (snapshot !== this.testSnapshot) {
+      console.log("AGENT_GROUPS " + snapshot);
+      this.testSnapshot = snapshot;
+    }
+    const drawGroup ="""))
+
+    def call(*args):
+        return subprocess.check_output(args, env=env, text=True, stderr=subprocess.STDOUT, timeout=15).strip()
+
+    def app(*args):
+        return json.loads(call("herdr-app", *args))
+
+    def wait(check, message):
+        deadline = time.monotonic() + 15
+        while time.monotonic() < deadline:
+            if check():
+                return
+            time.sleep(0.05)
+        raise AssertionError(message)
+
+    def groups():
+        records = [line.split("AGENT_GROUPS ", 1)[1] for line in (root / "app.log").read_text().splitlines()
+                   if "AGENT_GROUPS " in line]
+        return json.JSONDecoder().raw_decode(records[-1])[0] if records else []
+
+    def sections():
+        return {g["label"]: {s["label"]: s["members"] for s in g.get("sections", [])}
+                for g in groups() if "sections" in g}
+
+    writers = []
+
+    def agent(name, status):
+        fifo = root / name
+        os.mkfifo(fifo)
+        code = (
+            "import sys\n"
+            "with open(sys.argv[1]) as stream:\n"
+            " for state in stream:\n"
+            "  print(chr(27)+']7501;state='+state.strip()+':app=agents-test'+chr(27)+chr(92),end='',flush=True)\n"
+        )
+        created = app("do", "tab.new", "--name", name, "--argv",
+                      json.dumps(["exec", "python3", "-u", "-c", code, str(fifo)]))
+        descriptor = None
+
+        def connect():
+            nonlocal descriptor
+            try:
+                descriptor = os.open(fifo, os.O_WRONLY | os.O_NONBLOCK)
+                return True
+            except OSError:
+                return False
+
+        wait(connect, "Agent terminal opens its status stream")
+        writer = os.fdopen(descriptor, "w", buffering=1)
+        writers.append(writer)
+        writer.write(status + "\n")
+        wait(lambda: any(created["terminal"] in g["members"] for g in groups()), "Agent status reaches the sidebar")
+        return created["terminal"], writer
+
+    xvfb = subprocess.Popen(["Xvfb", "-displayfd", "1", "-screen", "0", "1100x850x24", "-nolisten", "tcp"],
+                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+    env["DISPLAY"] = ":" + xvfb.stdout.readline().strip()
+    with (root / "app.log").open("w") as log:
+        process = subprocess.Popen(["herdr-app"], env=env, stdout=log, stderr=log)
+        try:
+            window = call("xdotool", "search", "--sync", "--pid", str(process.pid)).splitlines()[0]
+            call("xdotool", "windowfocus", window)
+            app("do", "layout.switch", "--name", "test")
+            app("do", "space.new", "--name", "API", "--folder", str(root / "work"))
+            idle, _ = agent("idle-agent", "idle")
+            blocked, writer = agent("blocked-agent", "blocked")
+            app("do", "space.new", "--name", "Notes", "--folder", str(root / "personal"))
+            busy, _ = agent("busy-agent", "working")
+            pinned, _ = agent("pinned-agent", "idle")
+            app("do", "terminal.pin", json.dumps({"terminal": pinned, "pinned": True}))
+            wait(lambda: sections() == {"work": {"Needs you": [blocked], "Idle": [idle]},
+                                       "personal": {"Working": [busy]}}, "Folders contain their priority sections")
+            assert [g["label"] for g in groups()] == ["Pinned", "work", "personal"]
+            assert groups()[0]["members"] == [pinned]
+            call("herdr-app", "shot", str(root / "folder-priority.png"))
+            app("do", "agent.focus", "--terminal", pinned)
+            for address in [blocked, idle, busy]:
+                app("do", "agent.next")
+                wait(lambda: app("status")["agent"] == address, "Navigation follows folder/priority order")
+            writer.write("working\n")
+            wait(lambda: sections().get("work", {}).get("Working") == [blocked], "A status change moves its section")
+            assert not app("status")["errors"], app("status")
+            print("PASS: folder/priority rendering, pins, status changes, and native next-agent order.", flush=True)
+        except Exception:
+            print((root / "app.log").read_text()[-6000:], flush=True)
+            print("Status:", app("status"), flush=True)
+            raise
+        finally:
+            for writer in writers:
+                writer.close()
+            try:
+                app("do", "window.close")
+            except Exception:
+                process.terminate()
+            process.wait(timeout=5)
+            subprocess.run(["hc", "kill-server"], env=env, capture_output=True, timeout=5)
+            xvfb.terminate()
+            xvfb.wait(timeout=5)
+
+
+if __name__ == "__main__":
+    main()

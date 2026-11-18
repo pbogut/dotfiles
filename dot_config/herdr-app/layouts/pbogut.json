@@ -40,7 +40,7 @@
               "type": "block",
               "size": { "weight": 1 },
               "min": 90,
-              "content": { "mod": "agents" }
+              "content": { "mod": "pbogut-agents" }
             }
           ]
         },

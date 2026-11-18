@@ -219,6 +219,8 @@ test("picker rows match sidebar machine, folder and worktree order, including fo
   }
   const visible = app.view.grouped({}, false).filter(row => row.attrs.id[0].startsWith("space-"));
   const snapshot = app.shared.get("pbogut.spaces.rows");
+  const folders = app.shared.get("pbogut.spaces.folders");
+  assert.deepEqual(JSON.parse(JSON.stringify(folders)), { names: ["work", "personal", "other"], fallback: "other" });
   assert.deepEqual(Array.from(snapshot, row => row.id), ["main", "linked", "notes", "a", "z"]);
   assert.deepEqual(Array.from(snapshot, row => `space-${row.id}`), Array.from(visible, row => row.attrs.id[0]));
   assert.equal(snapshot[1].name, "Pharmacy");
@@ -229,6 +231,11 @@ test("picker rows match sidebar machine, folder and worktree order, including fo
   app.view.folded.add("a-server");
   app.view.grouped({}, false);
   assert.equal(app.shared.get("pbogut.spaces.rows"), snapshot, "Folding neither hides picker rows nor republishes unchanged data");
+  assert.equal(app.shared.get("pbogut.spaces.folders"), folders, "Unchanged folder metadata is not republished");
+  app.view.folderConfig = { folders: ["personal", "work", "empty"], fallback: "unfiled", rules: [] };
+  app.view.grouped({}, false);
+  assert.deepEqual(JSON.parse(JSON.stringify(app.shared.get("pbogut.spaces.folders"))),
+    { names: ["personal", "work", "empty", "unfiled"], fallback: "unfiled" });
 });
 
 test("invalid edited config keeps the last rules, then a corrected config changes grouping", async () => {
