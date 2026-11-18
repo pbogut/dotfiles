@@ -114,18 +114,18 @@
           "content": { "mod": "pbogut-agent-status" }
         },
         {
-          "id": "prefix-anchor",
-          "type": "block",
-          "size": { "px": 0 },
-          "min": 0,
-          "content": { "mod": "pbogut-keys" }
-        },
-        {
           "id": "tabs",
           "type": "block",
           "size": { "px": 42 },
           "window_drag": true,
           "content": { "mod": "tabs" }
+        },
+        {
+          "id": "prefix-anchor",
+          "type": "block",
+          "size": { "px": 0 },
+          "min": 0,
+          "content": { "mod": "pbogut-keys" }
         },
         {
           "id": "status",

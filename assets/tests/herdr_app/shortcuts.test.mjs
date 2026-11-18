@@ -11,6 +11,7 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true) {
   const terminal = { address: "test/t1", rows: 24, cols: 80, selection: null };
   const focus = { pane: "test-pane", terminal: terminal.address };
   const config = { zoom: 1 };
+  const layout = JSON.parse(await readFile(new URL("../../layouts/pbogut.json", root), "utf8"));
   const context = vm.createContext({
     window: { viewport_size: () => ({ width: 1280, height: 800 }) },
   });
@@ -34,12 +35,7 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true) {
     nextCommand: () => commands.length ? Promise.resolve(commands.shift())
       : new Promise((resolve) => { resolveCommand = resolve; }),
     notify: (args) => calls.push(["notify", args]),
-    layout: () => ({
-      children: [{ id: "work", children: [
-        { id: "main" }, { id: "prefix-anchor" },
-        { id: "tabs", size: { px: 42 } }, { id: "status", size: { px: 28 } },
-      ] }],
-    }),
+    layout: () => layout,
     openOverlay: (spec) => { calls.push(["open", spec]); return `${spec.mod}-overlay`; },
     props: () => overlay ? { overlay: "test-overlay" } : null,
     settings: () => config,
@@ -137,7 +133,7 @@ test("the zero-height anchor toggles a frameless overlay without resizing the la
     assert.equal(spec.at.x, 0);
     assert.equal(spec.at.y, 0);
     assert.ok(Math.abs(spec.props.left - 269) < 0.001);
-    assert.equal(spec.props.bottom, 70);
+    assert.equal(spec.props.bottom, 28, "The menu covers the tabs above the status bar");
     await app.command("toggle");
     assert.equal(app.calls.at(-1)[0], "close");
     await app.command(`closed-${app.view.overlay}`);
@@ -159,7 +155,7 @@ test("copy mode uses the bottom overlay and replaces prefix mode without stale c
   assert.equal(spec.height, 1);
   assert.equal(spec.width, 1);
   assert.equal(spec.frame, "none");
-  assert.equal(spec.props.bottom, 70);
+  assert.equal(spec.props.bottom, 28, "Copy mode also covers the tabs");
   const copy = app.view.overlay;
   await app.command(`closed-${prefix}`);
   assert.equal(app.view.overlay, copy, "Late prefix cleanup must not forget the open copy overlay");

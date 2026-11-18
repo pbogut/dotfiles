@@ -79,7 +79,7 @@ def main():
         ) as motion:
             deadline = time.monotonic() + 10
             while motion.poll() is None and time.monotonic() < deadline:
-                image = ImageGrab.grab(bbox=(269, 0, 1280, 694), xdisplay=env["DISPLAY"]).convert("RGB")
+                image = ImageGrab.grab(bbox=(269, 0, 1280, 730), xdisplay=env["DISPLAY"]).convert("RGB")
                 pixels = dict((rgb, count) for count, rgb in image.getcolors(image.width * image.height))
                 selected = pixels.get(color, 0)
                 frames += 1
@@ -103,15 +103,17 @@ def main():
     def bar_open():
         return "pbogut-keys" in app("status")["overlays"]
 
-    def bar_snapshot(name, width, height):
+    def bar_snapshot(name, width, height, zoom=1, sidebar=True):
         colors = json.loads((SOURCE / "themes/tokyo-night.json").read_text())
-        top = height - 70 - 36
+        top = round(height - (28 + 36) * zoom)
+        left = round(269 * zoom) if sidebar else 0
         expected = [
-            ((271, top + 2), colors["colors"]["popover"]),
+            ((left + 2, top + 2), colors["colors"]["popover"]),
             ((width - 2, top + 2), colors["colors"]["popover"]),
-            ((width - 2, top - 2), colors["background"]),
-            ((266, top + 2), colors["colors"]["chrome"]),
+            ((width - 2, round(height - 70 * zoom) - 2), colors["background"]),
         ]
+        if sidebar:
+            expected.append(((left - 3, top + 2), colors["colors"]["chrome"]))
 
         def matches():
             path = root / f"{name}.png"
@@ -123,7 +125,7 @@ def main():
                     for point, color in expected
                 )
 
-        wait_for(matches, f"{name}: bar follows window dimensions above tabs, excluding sidebar")
+        wait_for(matches, f"{name}: bar covers the tabs and leaves the terminal visible")
 
     with (root / "app.log").open("w") as log:
         process = subprocess.Popen(["herdr-app"], env=env, stdout=log, stderr=log)
@@ -297,16 +299,16 @@ def main():
             app("do", "app.zoom_in")
             key("ctrl+g")
             wait_for(bar_open, "Bar opens at the new zoom")
-            call("herdr-app", "shot", str(root / "zoomed.png"))
+            bar_snapshot("zoomed", 1280, 800, zoom=app("status")["zoom"])
             key("Escape")
             key("alt+Escape")
             wait_for(lambda: "pbogut-copy" in app("status")["overlays"], "Copy mode opens at the new zoom")
-            call("herdr-app", "shot", str(root / "copy-zoomed.png"))
+            bar_snapshot("copy-zoomed", 1280, 800, zoom=app("status")["zoom"])
             key("Escape")
             app("do", "app.zoom_reset")
             key("alt+t", "ctrl+g")
             wait_for(bar_open, "Bar opens with the sidebar hidden")
-            call("herdr-app", "shot", str(root / "no-sidebar.png"))
+            bar_snapshot("no-sidebar", 1280, 800, sidebar=False)
             key("Escape")
 
             closing_space = app("status")["space"]

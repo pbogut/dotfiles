@@ -26,8 +26,8 @@ Choosing another layout in the app lasts until the next chezmoi apply.
 All four pickers accept Ctrl+J to move down and Ctrl+K to move up while
 their search field is focused. Up/Down also work; Enter selects a result.
 
-Ctrl+G opens a full-width overlay above the tabs in the terminal area.
-It covers the bottom of the terminal without resizing it. Shortcuts use
+Ctrl+G opens a full-width overlay over the tab bar, above the status bar.
+The terminal stays fully visible without resizing. Shortcuts use
 outlined keycaps in the current theme's colors.
 An action or cancellation closes the overlay and returns focus to the terminal.
 Prefix bindings live in `mods/pbogut-keys/bindings.js`.
