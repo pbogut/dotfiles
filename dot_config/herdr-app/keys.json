@@ -20,7 +20,7 @@
     "alt-shift-j": "pane.swap:down",
     "alt-shift-k": "pane.swap:up",
     "alt-shift-l": "pane.swap:right",
-    "alt-o": "mod.open:pbogut-picker",
+    "alt-o": "mod.open:pbogut-space-picker",
     "ctrl-alt-p": "mod.open:pbogut-projects",
     "alt-t": "layout.toggle:sidebar",
     "alt-p": "tab.prev",

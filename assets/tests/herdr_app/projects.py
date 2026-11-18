@@ -1,4 +1,4 @@
-"""Exercise project discovery and keyboard navigation in all three native pickers."""
+"""Exercise project discovery and keyboard navigation in the project, Go to, and command pickers."""
 
 import argparse
 import json
@@ -261,10 +261,10 @@ def main():
                 app("do", "tab.new", "--name", f"jk-navigation-{index:02}", "--space", original["space"])
             tabs = next(space["tabs"] for space in app("ls")["spaces"] if space["id"] == original["space"])
             choices = [tab for tab in tabs if tab["name"].startswith("jk-navigation-")]
-            search("jk-navigation-", "alt+o", "pbogut-picker")
+            search("jk-navigation-", "ctrl+shift+k", "pbogut-picker")
             key("ctrl+j", "Return")
             wait(lambda: app("status")["tab"] == choices[1]["id"], "Ctrl+J chooses the next tab")
-            search("jk-navigation-", "alt+o", "pbogut-picker")
+            search("jk-navigation-", "ctrl+shift+k", "pbogut-picker")
             key("ctrl+j", "ctrl+k", "Return")
             wait(lambda: app("status")["tab"] == choices[0]["id"], "Ctrl+K chooses the previous tab")
             search("jk-navigation-", "ctrl+shift+k", "pbogut-picker")

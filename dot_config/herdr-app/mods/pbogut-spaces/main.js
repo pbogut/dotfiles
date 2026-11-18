@@ -558,6 +558,7 @@ export default class Spaces extends View {
   // The rows, under machine headers, then folder headers.
   grouped(t, collapsed) {
     const rows = this.ordered();
+    this.publishRows(rows, t);
     this.revealFolder(rows);
     const draw = (r) => (collapsed ? this.compact(r, t) : this.row(r, t));
     // Where the active space's row lands among the children this returns: the list scrolls by its direct
@@ -641,6 +642,32 @@ export default class Spaces extends View {
     });
   }
 
+  name(w) {
+    return isProject(w) ? this.projects.get(projectKey(w))?.name ?? projectName("", w.folder, w.name) : w.name;
+  }
+
+  icon(w, tree, t) {
+    if (tree) return { svg: "mods/workspace-chrome/branch.svg" };
+    const color = (shared("space.colors") ?? {})[w.id] ?? "ansi6";
+    return {
+      initial: [...this.name(w)][0]?.toUpperCase() ?? "?",
+      color: color.startsWith("#") ? color : (MARK[color] ?? t[color]),
+    };
+  }
+
+  // Give the picker the sidebar's resolved order and labels, before folding.
+  publishRows(rows, t) {
+    const remote = [...new Set(rows.map(r => r.w.machine).filter(Boolean))].sort();
+    const snapshot = [null, ...remote].flatMap(machine =>
+      rows.filter(r => (r.w.machine ?? null) === machine).map(({ w, g, tree }) => ({
+        id: w.id, name: this.name(w), folder: this.folderFor(w), tree, icon: this.icon(w, tree, t),
+        branch: g?.branch ?? "", ahead: g?.ahead ?? 0, behind: g?.behind ?? 0,
+      })));
+    if (JSON.stringify(shared("pbogut.spaces.rows")) !== JSON.stringify(snapshot)) {
+      setShared("pbogut.spaces.rows", snapshot);
+    }
+  }
+
   // The full Git branch remains available on hover; only its display is shortened.
   gitTail(g, t) {
     const raw = g.branch ?? "(detached)";
@@ -660,11 +687,9 @@ export default class Spaces extends View {
 
   row({ w, i, g, tree }, t) {
     const on = w.active;
-    const name = isProject(w) ? this.projects.get(projectKey(w))?.name ?? projectName("", w.folder, w.name) : w.name;
+    const name = this.name(w);
+    const icon = this.icon(w, tree, t);
     const fromIndex = this.pressed === null ? -1 : spaces().findIndex(s => s.id === this.pressed);
-    const colors = shared("space.colors") ?? {};
-    const color = colors[w.id] ?? "ansi6";
-    const fill = color.startsWith("#") ? color : (MARK[color] ?? t[color]);
     return v_flex()
       .relative()
       .id(`space-${w.id}`)
@@ -713,9 +738,9 @@ export default class Spaces extends View {
         h_flex()
           .gap(9)
           .items_center()
-          .when(Boolean(tree), el => el.pl(22).child(svg("mods/workspace-chrome/branch.svg").size(13).flex_none().text_color(t.dim)))
-          .when(!tree, el => el.child(h_flex().size(18).flex_none().rounded(5).bg(fill).items_center().justify_center().text_size(10.5).font_bold().text_color("#ffffff")
-            .child([...name][0]?.toUpperCase() ?? "?")))
+          .when(Boolean(tree), el => el.pl(22).child(svg(icon.svg).size(13).flex_none().text_color(t.dim)))
+          .when(!tree, el => el.child(h_flex().size(18).flex_none().rounded(5).bg(icon.color).items_center().justify_center().text_size(10.5).font_bold().text_color("#ffffff")
+            .child(icon.initial)))
           .child(div().flex_initial().min_w(SIDE_MIN).truncate().tooltip(w.folder || w.name).text_color(t.foreground).child(name))
           .child(g ? this.gitTail(g, t) : div().flex_1()),
       );

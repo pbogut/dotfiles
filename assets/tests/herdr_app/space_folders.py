@@ -1,4 +1,4 @@
-"""Check folder navigation, drag assignments, persistence, and reset in an isolated Herdr window."""
+"""Check the spaces picker, folder navigation, drag assignments, and persistence in an isolated Herdr window."""
 
 import json
 import os
@@ -35,6 +35,13 @@ def main():
     settings.update(core=shutil.which("hc"), telemetry=False, sounds={"enabled": False})
     (root / "app/settings.json").write_text(json.dumps(settings))
     (root / "app/shared.json").write_text(json.dumps({"frame.welcomed": "skipped"}))
+    # Observe rendered picker order and selection only in the disposable copy.
+    picker = root / "app/mods/pbogut-space-picker/main.js"
+    picker.write_text(picker.read_text().replace("    const height =", """    console.log("SPACE_PICKER " + JSON.stringify({
+      query: this.query, selected: this.selected,
+      rows: rows.map(row => ({ id: row.w.id, name: row.name, branch: row.branch })),
+    }));
+    const height ="""))
 
     def call(*args):
         return subprocess.check_output(args, env=env, text=True, stderr=subprocess.STDOUT, timeout=15).strip()
@@ -63,6 +70,15 @@ def main():
 
     def key(*keys):
         call("xdotool", "key", "--clearmodifiers", "--delay", "80", *keys)
+
+    def picker_state():
+        records = [line.split("SPACE_PICKER ", 1)[1] for line in (root / "app.log").read_text().splitlines()
+                   if "SPACE_PICKER " in line]
+        return json.JSONDecoder().raw_decode(records[-1])[0] if records else {}
+
+    def open_picker():
+        key("alt+o")
+        wait(lambda: "pbogut-space-picker" in app("status")["overlays"], "Alt+O opens the dedicated spaces picker")
 
     def drag(source_y, target_y):
         call("xdotool", "mousemove", "100", str(source_y), "mousedown", "1")
@@ -129,6 +145,36 @@ def main():
             assert before is not None
             call("xdotool", "mousemove", "100", "93", "click", "1")
             wait(lambda: selected_top("folded") == before - 60, "Folding work hides its two rows")
+            open_picker()
+            wait(lambda: picker_state().get("selected") == opened[str(personal)], "The picker starts on the current space")
+            assert [row["id"] for row in picker_state()["rows"]] == [opened[folder] for folder in expected], \
+                "The picker keeps sidebar order, including folded spaces"
+            assert [row["name"] for row in picker_state()["rows"][:2]] == ["Pharmacy", "Pharmacy"]
+            assert picker_state()["rows"][1]["branch"] == "2026-11-18-feature"
+            call("herdr-app", "shot", str(root / "spaces-picker.png"))
+            key("ctrl+k", "Return")
+            wait(lambda: app("status")["space"] == opened[str(outside)] and not app("status")["overlays"],
+                 "Ctrl+K and Enter switch to the previous, folded space")
+            wait(lambda: selected_top("picker-revealed") is not None, "Selecting through the picker reveals the folder")
+            open_picker()
+            call("xdotool", "type", "--clearmodifiers", "Pharmacy")
+            wait(lambda: picker_state().get("query") == "Pharmacy", "Typing filters by the sidebar project label")
+            assert [row["id"] for row in picker_state()["rows"]] == [opened[str(main_tree)], opened[str(outside)]]
+            key("ctrl+j", "Return")
+            wait(lambda: not app("status")["overlays"], "Ctrl+J selects with the search field focused")
+            assert app("status")["space"] == opened[str(outside)]
+            open_picker()
+            call("xdotool", "type", "--clearmodifiers", "Pharmacy")
+            key("ctrl+j", "ctrl+k", "Return")
+            wait(lambda: app("status")["space"] == opened[str(main_tree)], "Ctrl+K returns to the first filtered space")
+            open_picker()
+            call("xdotool", "type", "--clearmodifiers", "not-a-space-jk")
+            key("ctrl+j", "ctrl+k", "Return")
+            assert picker_state()["rows"] == []
+            assert "pbogut-space-picker" in app("status")["overlays"], "Empty results cannot switch or create anything"
+            key("Escape")
+            wait(lambda: not app("status")["overlays"], "Escape closes the spaces picker")
+            assert app("status")["space"] == opened[str(main_tree)]
             key("alt+1")
             wait(lambda: app("status")["space"] == opened[str(main_tree)], "Numbered shortcuts include folded spaces")
             key("ctrl+shift+Page_Down")
@@ -247,9 +293,37 @@ def main():
             wait(lambda: scratch_key not in assignments(), "Reset clears only the ordinary space's assignment")
             assert assignments().get(project_key) == "other"
             wait(lambda: {s["id"] for s in app("ls")["spaces"][:3]} == {peer["space"], fresh["space"], scratch["space"]},
-                 "Reset restores the ordinary space's opening-folder group without moving projects")
+                  "Reset restores the ordinary space's opening-folder group without moving projects")
+            for index in range(14):
+                app("do", "space.new", "--name", f"picker-scroll-{index:02}", "--folder", str(notes))
+            expected_ids = [space["id"] for space in app("ls")["spaces"]]
+            open_picker()
+            wait(lambda: [row["id"] for row in picker_state().get("rows", [])] == expected_ids,
+                 "The picker follows sidebar order after additions and manual moves")
+            call("xdotool", "type", "--clearmodifiers", "picker-scroll-")
+            wait(lambda: len(picker_state()["rows"]) == 14, "All scrolling fixtures match")
+            choices = [row["id"] for row in picker_state()["rows"]]
+            key("Up")
+            wait(lambda: picker_state()["selected"] == choices[-1], "Up wraps to the last space")
+            path = root / "spaces-picker-scrolled.png"
+            call("herdr-app", "shot", str(path))
+            with Image.open(path) as image:
+                pixels = image.convert("RGB")
+                selected = ImageColor.getrgb("#283457")
+                ys = [y for y in range(130, 480) if pixels.getpixel((850, y)) == selected]
+            assert ys, "The selected row scrolls into view"
+            call("xdotool", "mousemove", "--window", window, "850", str((min(ys) + max(ys)) // 2), "click", "1")
+            wait(lambda: not app("status")["overlays"], "Clicking the scrolled row selects its space")
+            assert app("status")["space"] == choices[-1]
+            open_picker()
+            key("Down", "Return")
+            wait(lambda: not app("status")["overlays"], "Down wraps from the last space to the first")
+            assert app("status")["space"] == expected_ids[0]
+            key("ctrl+shift+k")
+            wait(lambda: "pbogut-picker" in app("status")["overlays"], "Ctrl+Shift+K opens Go to")
+            key("Escape")
             assert not app("status")["errors"], app("status")
-            print("PASS: grouping, navigation, project and per-space drag isolation, restart/recreation persistence, and scoped reset.", flush=True)
+            print("PASS: spaces picker order/search/keyboard/scrolling, grouping, drag isolation, persistence, and scoped reset.", flush=True)
         except Exception:
             print("Status:", app("status"), flush=True)
             call("herdr-app", "shot", str(root / "failure.png"))

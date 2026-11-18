@@ -16,13 +16,14 @@ Choosing another layout in the app lasts until the next chezmoi apply.
 | --- | --- |
 | Ctrl+G | Bottom shortcut bar |
 | Alt+Esc | Copy mode |
-| Alt+O | Space/tab picker |
+| Alt+O | Spaces picker in sidebar order |
+| Ctrl+Shift+K | Go to space/tab/agent picker |
 | Ctrl+Alt+P | Project picker |
 | Ctrl+Shift+P | Command palette |
 | Alt+T | Toggle sidebar |
 | Alt+P / Alt+N | Previous / next tab |
 
-All three pickers accept Ctrl+J to move down and Ctrl+K to move up while
+All four pickers accept Ctrl+J to move down and Ctrl+K to move up while
 their search field is focused. Up/Down also work; Enter selects a result.
 
 Ctrl+G opens a full-width overlay above the tabs in the terminal area.
@@ -481,11 +482,27 @@ The menu keeps Herdr's rename,
 worktree, and close actions. Its space-only implementation is in
 `mods/pbogut-spaces/menu.js`, based on Herdr 0.1.16's menu.
 
+## Spaces picker
+
+Alt+O opens `mods/pbogut-space-picker`. It lists one row per open space in
+the Spaces sidebar's machine, folder, and worktree order, including folded groups.
+The current space is selected on opening. Search matches space and project names,
+folders, machines, and branches without reordering results. Arrow keys and
+Ctrl+J/K wrap at either end; Enter or a click switches spaces, and Escape closes.
+Selecting a space restores its active tab.
+
+The sidebar publishes its resolved rows under `pbogut.spaces.rows` in shared state.
+The picker uses those labels, icons, and branch details without repeating Git
+lookups. The sidebar decides the icon and color: an initial tile for a space,
+or a branch icon for a nested worktree.
+Closed spaces are omitted; newly created spaces appear at the end until the
+sidebar resolves their order. The list scrolls to the keyboard selection.
+
 ## Customized built-in pickers
 
 `mods/pbogut-picker` copies Herdr App 0.1.16's `mods/picker`.
 `mods/pbogut-palette` copies its `frame/palette` as a regular native mod.
-Alt+O and Ctrl+Shift+K open the customized picker; Ctrl+Shift+P opens the
+Ctrl+Shift+K opens the customized Go to picker; Ctrl+Shift+P opens the
 customized palette. The palette's "Go to space or tab…" entry opens
 `pbogut-picker` too.
 
@@ -509,6 +526,7 @@ herdr-app check dot_config/herdr-app/mods/pbogut-copy
 herdr-app check dot_config/herdr-app/mods/pbogut-tabs
 herdr-app check dot_config/herdr-app/mods/pbogut-projects
 herdr-app check dot_config/herdr-app/mods/pbogut-picker
+herdr-app check dot_config/herdr-app/mods/pbogut-space-picker
 herdr-app check dot_config/herdr-app/mods/pbogut-palette
 herdr-app check dot_config/herdr-app/mods/pbogut-agent-status
 node --experimental-vm-modules --test assets/tests/herdr_agents/push.test.mjs
@@ -519,6 +537,7 @@ node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/space_initials.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/space_folders.test.mjs
+node --experimental-vm-modules --test assets/tests/herdr_app/space_picker.test.mjs
 python3 -B assets/tests/herdr_app/space_folders.py
 node --test assets/tests/herdr_app/projects.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/project_machines.test.mjs
@@ -545,6 +564,9 @@ It starts its own window,
 home directory, and core session under `/tmp/opencode`, sends keys only there,
 and stops those test processes on exit. Screenshots and logs remain in its
 printed sandbox directory.
+The space-folder test also checks Alt+O's sidebar order and labels, folded spaces,
+search, current-space selection, Ctrl+J/K, arrow wrapping, scrolled-row clicks,
+empty results, and Escape in its isolated window.
 The named-tab test uses Zsh and harmless stand-in role programs, including
 successful and failed exits and recreating a closed tab. It also verifies
 actual SQL, main-editor, and scratch Neovim processes running together,

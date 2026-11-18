@@ -199,6 +199,38 @@ test("empty-folder toggle and folding persist across sidebar reloads", async () 
   await reopened.flush();
 });
 
+test("picker rows match sidebar machine, folder and worktree order, including folded spaces", async () => {
+  const spaces = [
+    { id: "z", name: "Z remote", machine: "z-server", folder: "/notes" },
+    { id: "notes", name: "Notes", folder: "/notes" },
+    { id: "linked", name: "Raw feature", folder: "/outside" },
+    { id: "main", name: "Raw main", folder: "/repos/gitlab.com/example-work/pms" },
+    { id: "a", name: "A remote", machine: "a-server", folder: "/notes" },
+  ];
+  const app = await sidebar(spaces);
+  app.shared.set("pbogut.projects.spaces", { main: true, linked: true });
+  const repo = spaces.find(s => s.id === "main").folder;
+  for (const id of ["main", "linked"]) {
+    const space = spaces.find(s => s.id === id);
+    app.view.projects.set(JSON.stringify([null, space.folder]), { root: repo, name: "Pharmacy" });
+    app.view.git[JSON.stringify([null, space.folder])] = {
+      repo, linked: id === "linked", branch: id === "main" ? "main" : "2026-11-18-feature", ahead: 2, behind: 1,
+    };
+  }
+  const visible = app.view.grouped({}, false).filter(row => row.attrs.id[0].startsWith("space-"));
+  const snapshot = app.shared.get("pbogut.spaces.rows");
+  assert.deepEqual(Array.from(snapshot, row => row.id), ["main", "linked", "notes", "a", "z"]);
+  assert.deepEqual(Array.from(snapshot, row => `space-${row.id}`), Array.from(visible, row => row.attrs.id[0]));
+  assert.equal(snapshot[1].name, "Pharmacy");
+  assert.equal(snapshot[1].folder, "work");
+  assert.equal(snapshot[1].branch, "2026-11-18-feature");
+  assert.equal(snapshot[1].tree, "└─");
+  app.view.foldersFolded.add('[null,"work"]');
+  app.view.folded.add("a-server");
+  app.view.grouped({}, false);
+  assert.equal(app.shared.get("pbogut.spaces.rows"), snapshot, "Folding neither hides picker rows nor republishes unchanged data");
+});
+
 test("invalid edited config keeps the last rules, then a corrected config changes grouping", async () => {
   const space = { id: "work", folder: "/code/gitlab.com/example-work/pms" };
   const app = await sidebar([space]);
