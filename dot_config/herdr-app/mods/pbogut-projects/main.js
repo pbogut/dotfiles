@@ -1,5 +1,5 @@
 import { View, div } from "gpui-kit";
-import { v_flex, h_flex, InputState, Input, v_virtual_list, VirtualListScrollHandle, Scrollbar } from "gpui-base";
+import { v_flex, h_flex, InputState, Input, v_virtual_list, VirtualListScrollHandle } from "gpui-base";
 import { appHome, checking, closeOverlay, exec, home, machines, props, readTextFile, run, settings, shared, spaces, theme } from "herdr";
 import { machinePaths, pickerMachines } from "./machines.js";
 import { openProject, projectLabel, projectRows } from "./projects.js";
@@ -201,8 +201,7 @@ export default class Projects extends View {
                 .child(div().truncate().text_size(11).text_color(t.dim).child(row.folder || "~"))))
             .size_full().track_scroll(this.scroll)
             .on_item_click((key) => this.open(this.rows().find((row) => (row.id ?? row.folder) === key)))
-          : div().p(10).text_color(t.dim).child(this.loading ? "Loading projects…" : "No matching projects."))
-        .when(Boolean(rows.length), (el) => el.child(Scrollbar.vertical("project-list").absolute().inset_0())))
+          : div().p(10).text_color(t.dim).child(this.loading ? "Loading projects…" : "No matching projects.")))
       .child(div().flex_none().text_size(11).text_color(t.dim).child("Tab / Shift+Tab machine · ↑↓ / Ctrl+J/K choose · Enter open · Ctrl+Enter worktree · Esc close"));
   }
 }

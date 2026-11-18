@@ -1,5 +1,5 @@
 import { View, div, svg } from "gpui-kit";
-import { v_flex, h_flex, InputState, Input, v_virtual_list, VirtualListScrollHandle, Scrollbar } from "gpui-base";
+import { v_flex, h_flex, InputState, Input, v_virtual_list, VirtualListScrollHandle } from "gpui-base";
 import { closeOverlay, props, run, settings, shared, spaces, theme } from "herdr";
 
 export default class SpacePicker extends View {
@@ -105,8 +105,7 @@ export default class SpacePicker extends View {
                   .child([row.w.machine ?? "This computer", row.folder, row.w.folder].filter(Boolean).join(" · ")))))
             .size_full().track_scroll(this.scroll)
             .on_item_click(id => this.open(this.rows().find(row => row.w.id === id)))
-          : div().p(10).text_color(t.dim).child("No matching spaces."))
-        .when(Boolean(rows.length), el => el.child(Scrollbar.vertical("space-picker-list").absolute().inset_0())))
+          : div().p(10).text_color(t.dim).child("No matching spaces.")))
       .child(div().flex_none().text_size(11).text_color(t.dim).child("↑↓ / Ctrl+J/K choose · Enter switch · Esc close"));
   }
 }
