@@ -99,6 +99,7 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true) {
 test("prefix closes the native overlay before running each action", async () => {
   for (const [key, command, direction] of [
     ["c", "tab.new", undefined], ["v", "pane.split", "right"], ["s", "pane.split", "down"],
+    ["x", "pbogut-tabs.close-project", undefined],
   ]) {
     const app = await fixture();
     app.key(key);
@@ -108,11 +109,11 @@ test("prefix closes the native overlay before running each action", async () => 
   }
 });
 
-test("removed prefix shortcuts do nothing, including navigation, copy, closing, and numbers", async () => {
+test("removed prefix shortcuts do nothing, including navigation, copy, and numbers", async () => {
   const app = await fixture();
   for (const key of [
     "shift-s", "y", "ctrl-y", "ctrl-k", "w", "ctrl-w", "b", "t", "ctrl-t",
-    "p", "n", "]", "[", "ctrl-shift-d", "h", "j", "k", "l", "x", "shift-x",
+    "p", "n", "]", "[", "ctrl-shift-d", "h", "j", "k", "l", "shift-x",
     "z", "shift-n", "shift-w", "shift-t", "?", "shift-/", "g", "ctrl-j",
     "tab", "shift-tab", "up", "down", "left", "right", "q", "ctrl-c",
     "ctrl-g", "enter", ..."123456789",

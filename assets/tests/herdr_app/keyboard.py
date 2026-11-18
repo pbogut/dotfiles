@@ -159,7 +159,7 @@ def main():
             )
             wait_for(lambda: not bar_open(), "Down split closes the bar")
             before = app("status")
-            key("ctrl+g", "g", "h", "p", "n", "y", "ctrl+y", "ctrl+k", "shift+s", "ctrl+shift+d", "1", "x")
+            key("ctrl+g", "g", "h", "p", "n", "y", "ctrl+y", "ctrl+k", "shift+s", "ctrl+shift+d", "1")
             after = app("status")
             assert after["overlays"] == ["pbogut-keys"], after
             for field in ("space", "tab", "focused_pane"):
@@ -309,8 +309,13 @@ def main():
             call("herdr-app", "shot", str(root / "no-sidebar.png"))
             key("Escape")
 
+            closing_space = app("status")["space"]
+            key("ctrl+g", "x")
+            wait_for(lambda: all(space["id"] != closing_space for space in app("ls")["spaces"]),
+                     "Prefix+x closes the current project")
+            assert not bar_open()
             assert not app("status")["errors"], app("status")
-            print("PASS: whole-line copying and rapid reversals, live overlay resizing, c/v/s actions, restored typing, and clipboard copy.", flush=True)
+            print("PASS: whole-line copying and rapid reversals, live overlay resizing, c/v/s/x actions, restored typing, and clipboard copy.", flush=True)
         except Exception:
             print((root / "app.log").read_text()[-8000:], flush=True)
             try:

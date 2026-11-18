@@ -35,6 +35,7 @@ Prefix bindings live in `mods/pbogut-keys/bindings.js`.
 | --- | --- |
 | c | New tab |
 | v / s | Split right / down |
+| x | Close project with teardown |
 | Escape / Ctrl+G | Cancel |
 
 Alt+Esc opens copy mode directly. Its hints use a single row in the same bottom
@@ -345,7 +346,8 @@ Add a teardown script to the project definition:
 }
 ```
 
-Open the command palette with Ctrl+Shift+P and choose **Close project**.
+Press Ctrl+G, then x, or open the command palette with Ctrl+Shift+P and choose
+**Close project**.
 The action reads the current definition and runs teardown in a visible,
 interactive `teardown` tab. It closes the other tabs in that space before
 starting the script. Repeating the action while teardown runs focuses that tab.
