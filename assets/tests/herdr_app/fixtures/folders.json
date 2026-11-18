@@ -1,0 +1,14 @@
+{
+  "folders": ["work", "personal"],
+  "fallback": "other",
+  "rules": [
+    { "path": "gitlab.com/example-work", "folder": "work" },
+    { "path": "github.com/example-personal", "folder": "personal" },
+    { "path": "gitlab.com/example-personal", "folder": "personal" },
+    { "path": "codeberg.org/example-personal", "folder": "personal" },
+    { "path": "github.com/example-side-projects", "folder": "personal" },
+    { "path": "gitlab.com/example-side-projects", "folder": "personal" },
+    { "path": "codeberg.org/example-side-projects", "folder": "personal" },
+    { "path": ".local/share/chezmoi", "folder": "personal" }
+  ]
+}

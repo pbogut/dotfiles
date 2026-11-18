@@ -5,7 +5,8 @@
 
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, ScrollHandle } from "gpui-base";
-import { spaces, machines, panes, run, openOverlay, exec, hc, readTextFile, theme, shared, setShared, watchFolder, window, layout, checking, nextCommand, notify } from "herdr";
+import { spaces, machines, panes, run, openOverlay, exec, hc, appHome, readTextFile, theme, shared, setShared, watchFolder, window, layout, checking, nextCommand, notify } from "herdr";
+import { DEFAULT_FOLDERS, folderNames, parseFolders, matchFolder, orderFolders } from "./folders.js";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -96,6 +97,13 @@ export default class Spaces extends View {
       for (const state of Object.values(this.reconnecting)) state.busy = false;
     } catch { this.reconnecting = {}; }
     try { this.folded = new Set(JSON.parse(localStorage.getItem("machines.folded") ?? "[]")); } catch { this.folded = new Set(); }
+    try { this.foldersFolded = new Set(JSON.parse(localStorage.getItem("pbogut.folders.folded") ?? "[]")); } catch { this.foldersFolded = new Set(); }
+    this.showEmptyFolders = localStorage.getItem("pbogut.folders.show-empty") === "true";
+    this.folderConfig = DEFAULT_FOLDERS;
+    if (!checking()) {
+      this.reloadFolders(cx);
+      cx.timer.every(5000, cx => this.reloadFolders(cx));
+    }
     this.refreshMachines(cx);
     cx.timer.every(15000, cx => this.refreshMachines(cx));
     // Refresh only when the refs could have changed (see `due`).
@@ -112,6 +120,27 @@ export default class Spaces extends View {
         } catch {}
       }
     });
+  }
+
+  reloadFolders(cx) {
+    if (this.readingFolders) return;
+    this.readingFolders = true;
+    cx.spawn(async cx => {
+      const before = JSON.stringify([this.folderConfig, this.folderError]);
+      try {
+        this.folderConfig = parseFolders(await readTextFile(`${appHome()}/folders.json`));
+        this.folderError = null;
+      } catch (error) {
+        this.folderError = `folders.json: ${error.message ?? error}`;
+      } finally {
+        this.readingFolders = false;
+      }
+      if (before !== JSON.stringify([this.folderConfig, this.folderError])) cx.notify();
+    });
+  }
+
+  folderFor(space) {
+    return matchFolder(this.projects.get(projectKey(space))?.root ?? space.folder, this.folderConfig);
   }
 
   checkNew(cx) {
@@ -364,7 +393,8 @@ export default class Spaces extends View {
       && this.ordering.machines.every(name => machines().some(m => m.name === name && m.layout === "ready"));
   }
 
-  // Spaces in order, each worktree space moved under its main checkout's.
+  // Spaces in folder order, each worktree space under its main checkout's.
+  // Updating core order also makes numbered and next/previous shortcuts agree.
   ordered() {
     const sp = spaces(), ps = panes();
     const ready = (w) => this.shown.has(w.id) || where(w, ps) in this.git || Date.now() - (this.born[w.id] ??= Date.now()) > 1500;
@@ -372,7 +402,7 @@ export default class Spaces extends View {
     const list = sp.map((w, i) => ({ w, i, g: this.git[where(w, ps)] ?? null }));
     const mains = new Set(list.filter((r) => r.g && !r.g.linked).map((r) => r.g.repo));
     const nested = (r) => r.g?.linked && mains.has(r.g.repo);
-    const out = [];
+    let out = [];
     const placed = new Set(); // repos whose worktrees are listed (under the first of its spaces)
     for (const r of list) {
       if (nested(r)) continue;
@@ -382,6 +412,7 @@ export default class Spaces extends View {
       const kids = list.filter((k) => nested(k) && k.g.repo === r.g.repo);
       kids.forEach((k, n) => out.push({ ...k, tree: n === kids.length - 1 ? "└─" : "├─" }));
     }
+    out = orderFolders(out, this.folderConfig, space => this.folderFor(space));
     // Simulate the batch so later indexes include earlier moves. An attempted
     // write can lose a sync conflict: allow the echo to settle before retrying.
     const order = sp.map(w => w.id);
@@ -401,12 +432,60 @@ export default class Spaces extends View {
       }
       this.ordering.machines = [...moved];
     }
-    return out.filter(r => this.shown.has(r.w.id));
+    return out.map((r, i) => ({ ...r, i })).filter(r => this.shown.has(r.w.id));
   }
 
-  // The rows, under a header per machine once one isn't this computer.
+  // Reveal a switched-to space even when its machine or folder was folded.
+  // Folding the current group by hand remains possible until selection changes.
+  revealFolder(rows) {
+    const active = rows.find(row => row.w.active)?.w;
+    const folder = active && JSON.stringify([active.machine ?? null, this.folderFor(active)]);
+    const key = active && JSON.stringify([active.id, folder]);
+    if (key === this.folderSelection) return;
+    this.folderSelection = key;
+    if (!active) return;
+    if (this.foldersFolded.delete(folder)) localStorage.setItem("pbogut.folders.folded", JSON.stringify([...this.foldersFolded]));
+    if (this.folded.delete(active.machine ?? null)) localStorage.setItem("machines.folded", JSON.stringify([...this.folded]));
+  }
+
+  foldered(rows, machine, t, collapsed, draw) {
+    const items = [];
+    let activeAt = -1;
+    for (const folder of folderNames(this.folderConfig)) {
+      const mine = rows.filter(row => this.folderFor(row.w) === folder);
+      if (!mine.length && !this.showEmptyFolders) continue;
+      const id = JSON.stringify([machine, folder]);
+      const folded = this.foldersFolded.has(id);
+      const header = h_flex().id(`folder-${id}`).h(24).flex_none().mt(4)
+        .px(collapsed ? 0 : 8).gap(7).items_center().rounded(6)
+        .text_size(11).font_semibold().text_color(t.muted)
+        .cursor_pointer().hover(el => el.bg(t.hover))
+        .tooltip(`${folder} (${mine.length})`)
+        .when(collapsed, el => el.w(RAIL_CELL).justify_center())
+        .on_click((_event, cx) => {
+          folded ? this.foldersFolded.delete(id) : this.foldersFolded.add(id);
+          localStorage.setItem("pbogut.folders.folded", JSON.stringify([...this.foldersFolded]));
+          cx.notify();
+        })
+        .child(svg("mods/workspace-chrome/folder.svg").size(12).flex_none())
+        .when(!collapsed, el => el
+          .child(div().flex_1().truncate().child(folder))
+          .child(div().flex_none().text_color(t.dim).font_normal().child(String(mine.length)))
+          .child(svg(`mods/workspace-chrome/chevron-${folded ? "right" : "down"}.svg`).size(11).flex_none()));
+      items.push(collapsed ? railCell(header) : header);
+      if (!folded) {
+        const selected = mine.findIndex(row => row.w.active);
+        if (selected !== -1) activeAt = items.length + selected;
+        items.push(...mine.map(draw));
+      }
+    }
+    return { items, activeAt };
+  }
+
+  // The rows, under machine headers, then folder headers.
   grouped(t, collapsed) {
     const rows = this.ordered();
+    this.revealFolder(rows);
     const draw = (r) => (collapsed ? this.compact(r, t) : this.row(r, t));
     // Where the active space's row lands among the children this returns: the list scrolls by its direct
     // children, and machine headers, login notes and loading rows count too.
@@ -421,8 +500,9 @@ export default class Spaces extends View {
     const loadingRow = m => h_flex().id(`machine-loading-${m ?? "local"}`).h(28).flex_none().px(collapsed ? 0 : 8).items_center().when(collapsed, el => el.justify_center()).text_size(12).text_color(t.dim).child(collapsed ? "…" : "Loading…");
     if (!remote.length) {
       if (loading(null) && !rows.length) return [loadingRow(null)];
-      this.activeAt = rows.findIndex(r => r.w.active);
-      return rows.map(draw);
+      const group = this.foldered(rows, null, t, collapsed, draw);
+      this.activeAt = group.activeAt;
+      return group.items;
     }
     const machineNames = [null, ...remote];
     return machineNames.flatMap((m) => {
@@ -479,9 +559,10 @@ export default class Spaces extends View {
             .text_size(11).text_color(t.foreground).bg(t.raised).cursor_pointer().hover(s => s.bg(t.hover))
             .on_click((_e, cx) => { cx.stop_propagation(); cx.write_to_clipboard(login); this.copiedLogin = login; cx.notify(); })
             .child(this.copiedLogin === login ? "Copied" : "Copy")))] : [];
-      const items = [cell(head), ...guidance, ...(folded ? [] : mine.length ? mine.map(draw) : [loading(m) ? loadingRow(m) : cell(empty)])];
-      const first = folded ? -1 : mine.findIndex(r => r.w.active);
-      if (first >= 0) this.activeAt = before + 1 + guidance.length + first;
+      const group = folded ? { items: [], activeAt: -1 } : this.foldered(mine, m, t, collapsed, draw);
+      const items = [cell(head), ...guidance, ...group.items,
+        ...(!folded && !mine.length ? [loading(m) ? loadingRow(m) : cell(empty)] : [])];
+      if (group.activeAt >= 0) this.activeAt = before + 1 + guidance.length + group.activeAt;
       before += items.length;
       return items;
     });
@@ -607,6 +688,18 @@ export default class Spaces extends View {
       .child(h_flex().h(31).pl(16).pr(10).items_center().justify_between().text_size(11.5).text_color(t.dim)
         .when(collapsed, el => el.pl(0).pr(0).justify_center())
         .when(!collapsed, el => el.child("Spaces"))
+        .when(!collapsed && Boolean(this.folderError), el => el.child(div().px(4).text_color(t.blocked).tooltip(this.folderError).child("!")))
+        .when(!collapsed, el => el.child(h_flex().flex_1().justify_end()
+          .child(div().id("space-empty-folders").size(26).flex_none().flex().items_center().justify_center().rounded(6)
+            .text_color(this.showEmptyFolders ? t.foreground : t.dim)
+            .hover(s => s.bg(t.hover).text_color(t.foreground))
+            .tooltip(this.showEmptyFolders ? "Hide empty folders" : "Show empty folders")
+            .on_click((_event, cx) => {
+              this.showEmptyFolders = !this.showEmptyFolders;
+              localStorage.setItem("pbogut.folders.show-empty", JSON.stringify(this.showEmptyFolders));
+              cx.notify();
+            })
+            .child(svg("mods/workspace-chrome/folder.svg").size(14)))))
         .child(div().id("space-new").size(26).flex_none().flex().items_center().justify_center().rounded(6).hover(s => s.bg(t.hover).text_color(t.foreground))
           .on_click(() => run("space.new")).child(svg("mods/workspace-chrome/plus.svg").size(14))))
       .child(v_flex().flex_1().min_h(0).px(collapsed ? 0 : 8).pb(14).overflow_y_scrollbar().mode("always").track_scroll(this.scroll)

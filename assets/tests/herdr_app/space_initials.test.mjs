@@ -48,13 +48,17 @@ async function fixture(spaces, exec, readTextFile = async () => null) {
       spaces: () => spaces, panes: () => state.panes, machines: () => [],
       window: () => ({ active: true }), layout: () => ({}),
       run() {}, openOverlay() {}, theme: () => ({}), shared: () => null, setShared() {},
-      hc: async () => ({ code: 0, stdout: '{"machines":[]}' }), exec, readTextFile, watchFolder() {},
+      hc: async () => ({ code: 0, stdout: '{"machines":[]}' }), exec, appHome: () => "/app",
+      readTextFile: (path, options) => path === "/app/folders.json" ? Promise.resolve(null) : readTextFile(path, options),
+      watchFolder() {},
       checking: () => false, notify: message => notices.push(message),
       nextCommand: () => new Promise(resolve => { receive = resolve; }),
     }),
   };
+  const folders = new vm.SourceTextModule(await readFile(new URL("folders.js", source), "utf8"), { context });
+  await folders.link(() => {});
   const main = new vm.SourceTextModule(await readFile(source, "utf8"), { context });
-  await main.link(name => modules[name]);
+  await main.link(name => name === "./folders.js" ? folders : modules[name]);
   await main.evaluate();
   const cx = { spawn: callback => tasks.push(callback(cx)),
     notify: () => view.refreshProjects(spaces, cx), timer: { every() {} } };
@@ -88,7 +92,7 @@ test("real Git worktrees use the project name and initial, independently of labe
   const normalWorktree = join(root, "different-branch-name");
   await git(normal, "worktree", "add", "-b", "feature", normalWorktree);
 
-  const project = join(root, "gitlab.com", "assuredpharmacy", "pms");
+  const project = join(root, "gitlab.com", "example-work", "pms");
   await mkdir(project, { recursive: true });
   await git(root, "clone", "--bare", normal, join(project, ".bare"));
   await writeFile(join(project, ".git"), "gitdir: ./.bare\n");
@@ -96,9 +100,11 @@ test("real Git worktrees use the project name and initial, independently of labe
   const feature = join(project, "2026-11-17-feature");
   await git(project, "worktree", "add", main, "main");
   await git(project, "worktree", "add", "-b", "2026-11-17-feature", feature, "feature");
+  const elsewhere = join(root, "outside-worktree");
+  await git(project, "worktree", "add", "-b", "outside", elsewhere);
   const notes = join(root, "notes");
   await mkdir(notes);
-  const spaces = [main, feature, project, normal, normalWorktree, notes].map((folder, i) => ({
+  const spaces = [main, feature, project, normal, normalWorktree, notes, elsewhere].map((folder, i) => ({
     id: `s${i}`, name: `gl/ap/${i < 3 ? "pms" : "other"}/${i}`,
     folder, machine: null, tabs: [{ id: `tab${i}` }],
   }));
@@ -115,9 +121,12 @@ test("real Git worktrees use the project name and initial, independently of labe
     throw error;
   }));
   await app.refresh();
-  for (const [i, name] of ["pms", "pms", "pms", "website", "website", "notes"].entries()) {
+  app.view.folderConfig = JSON.parse(await readFile(new URL("fixtures/folders.json", import.meta.url), "utf8"));
+  for (const [i, name] of ["pms", "pms", "pms", "website", "website", "notes", "pms"].entries()) {
     assert.deepEqual(app.row(spaces[i]), [name[0].toUpperCase(), name]);
   }
+  for (const i of [0, 1, 2, 6]) assert.equal(app.view.folderFor(spaces[i]), "work");
+  assert.equal(app.view.folderFor(spaces[3]), "other");
   const branchInfo = app.view.git[JSON.stringify([null, feature])];
   assert.deepEqual(app.row(spaces[1], branchInfo), ["P", "pms", "feature"]);
   assert.equal(branchInfo.branch, "2026-11-17-feature");
@@ -127,6 +136,7 @@ test("real Git worktrees use the project name and initial, independently of labe
   spaces[0].name = "a custom name";
   await app.refresh();
   assert.deepEqual(app.row(spaces[0]), ["P", "pms"]);
+  assert.equal(app.view.folderFor(spaces[0]), "work", "Terminal cd cannot change the project's folder");
   assert.equal(spaces[0].name, "a custom name");
   await writeFile(join(project, "herdr-project.json"), '{"name":" Dispensary ","tabs":["nvim"]}');
   await writeFile(join(feature, "herdr-project.json"), '{"name":"Wrong worktree override"}');

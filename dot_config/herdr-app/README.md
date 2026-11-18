@@ -398,6 +398,43 @@ file watchers. After upgrading Herdr,
 merge changes from the shipped Spaces mod into this copy, keeping the
 configured-folder lookup, optional name, and shortened branch display.
 
+## Space folders
+
+The Spaces sidebar groups projects into `work`, `personal`, and `other` within
+each machine. It uses the folding-folder design from
+[Bruno-Tome/herdr-folders](https://github.com/Bruno-Tome/herdr-folders) alongside
+the custom project labels above.
+
+`folders.json` defines the folder order, fallback name, and matching rules.
+Its source is encrypted at `dot_config/herdr-app/encrypted_folders.json.age`.
+Keep the source encrypted when updating rules, then apply that target:
+
+```sh
+chezmoi apply ~/.config/herdr-app/folders.json
+```
+
+A relative rule such as `gitlab.com/example-work` matches that sequence of
+whole directory components anywhere in a path. It works with different project
+roots on remote machines. An absolute rule matches only that directory and its
+descendants. These are directory paths, not Git remote URLs or glob patterns.
+The longest matching rule wins; equally specific rules use the first match.
+
+Matching uses the shared repository root resolved from the space's configured
+folder. All worktrees of a `.bare` or regular Git repository follow that root,
+even when a worktree lives elsewhere. Non-Git spaces use their configured folder.
+Changing a terminal's directory does not change its group.
+
+Config changes load within five seconds. Invalid edits retain the previous
+configuration and show an error indicator beside Spaces. Tests use synthetic
+rules in `assets/tests/herdr_app/fixtures/folders.json`; they do not decrypt the
+managed configuration.
+
+Click a folder header to fold it. The folder button beside + shows or hides empty
+folders; they start hidden. Folding and the empty-folder preference survive App
+restarts. Native space order follows folder order, so Alt+1…9 and previous/next
+space shortcuts include collapsed spaces in that order. Switching to a hidden
+space expands its folder and machine and scrolls its row into view.
+
 ## Customized built-in pickers
 
 `mods/pbogut-picker` copies Herdr App 0.1.16's `mods/picker`.
@@ -435,6 +472,8 @@ herdr-app check dot_config/herdr-app/mods/pbogut-spaces
 node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/space_initials.test.mjs
+node --experimental-vm-modules --test assets/tests/herdr_app/space_folders.test.mjs
+python3 -B assets/tests/herdr_app/space_folders.py
 node --test assets/tests/herdr_app/projects.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/project_machines.test.mjs
 node --test assets/tests/herdr_app/project_tabs.test.mjs
