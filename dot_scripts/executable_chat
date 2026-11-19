@@ -110,4 +110,5 @@ if [[ ${1:-} == 'pair' ]]; then
   exit 0
 fi
 
+export OPENCODE_CLI_CONFIG_CONTENT='{"tabs":{"mode":"on","layout":"vertical"}}'
 exec "$opencode_bin" --server "$server_url" "$@"
