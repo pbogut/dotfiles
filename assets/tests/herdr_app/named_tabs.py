@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import shlex
 import shutil
+import signal
 import subprocess
 import tempfile
 import time
@@ -39,8 +40,11 @@ def main():
     settings.update(core=str(bindir / "hc"), telemetry=False, sounds={"enabled": False})
     settings_path.write_text(json.dumps(settings))
     (root / "app/shared.json").write_text(json.dumps({"frame.welcomed": "skipped"}))
-    (root / "home/.zshrc").write_text("# Suppress the first-run wizard in this test home.\n")
-    for name in ("herdr-app-vim", "herdr-app-opencode"):
+    recovery_hooks = "".join(
+        f"source {shlex.quote(str(ROOT / f'dot_zshrc.d/{name}.zsh'))}\n"
+        for name in ("herdr-app-opencode", "herdr-app-tabs"))
+    (root / "home/.zshrc").write_text(recovery_hooks)
+    for name in ("herdr-app-vim", "herdr-app-opencode", "herdr-app-tab"):
         shutil.copyfile(ROOT / f"dot_scripts/executable_{name}", bindir / name)
         (bindir / name).chmod(0o700)
     shutil.copytree(ROOT / "dot_config/opencode/extensions/herdr-subject",
@@ -52,6 +56,7 @@ def main():
         "with open(os.environ['ROLE_LOG'], 'a') as log:\n"
         " log.write(json.dumps({'program': os.path.basename(sys.argv[0]), 'args': sys.argv[1:], "
         "'cwd': os.getcwd(), 'space': os.environ.get('HERDR_APP_SPACE_ID'), "
+        "'terminal': os.environ.get('HC_TERMINAL_ID'), 'pid': os.getpid(), "
         "'legacy': os.environ.get('HERDR_ENV')}) + '\\n')\n"
         "print('ROLE-READY', flush=True)\n"
         "sys.exit(17 if input().strip() == 'fail' else 0)\n"
@@ -184,7 +189,7 @@ def main():
             )
             shutil.copyfile(ROOT / "dot_config/lazygit/config-herdr-app.yml", config / "config-herdr-app.yml")
             (root / "home/.zshrc").write_text(
-                f"source {shlex.quote(str(ROOT / 'dot_zshrc.d/functions/draft'))}\n")
+                recovery_hooks + f"source {shlex.quote(str(ROOT / 'dot_zshrc.d/functions/draft'))}\n")
             key("alt+m")
             wait(lambda: any(tab["name"] == "sql" for tab in tabs(space)), "Actual SQL editor tab appears")
             sql_tab = next(tab for tab in tabs(space) if tab["name"] == "sql")
@@ -228,8 +233,53 @@ def main():
                 key(*quit_keys)
                 wait(lambda: all(item["id"] != tab["id"] for item in tabs(space)), f"Quitting actual {role} closes its tab")
                 assert json.loads(call("hc", "get", terminal, "--json"))["exit_code"] == 0
+
+            # Recover a registered git terminal, including literal argument boundaries.
+            (bindir / "lazygit").unlink()
+            (bindir / "lazygit").symlink_to(fixture)
+            arguments = ["a file's name", "", "$(touch should-not-run)", "last\n"]
+            recovered_tab = app("do", "tab.new", "--name", "git", "--folder", str(project),
+                                "--argv", json.dumps(["exec", "env", f"HERDR_APP_SPACE_ID={space}",
+                                                     "herdr-app-tab", "--start", "git", "lazygit", *arguments]))
+            terminal = recovered_tab["terminal"]
+
+            def launches():
+                return [record for line in (root / "roles.jsonl").read_text().splitlines()
+                        if (record := json.loads(line))["terminal"] == terminal]
+
+            wait(lambda: len(launches()) == 1, "Git fixture launches")
+            app("do", "pane.split", "--direction", "right")
+            wait(lambda: len(next(tab for tab in tabs(space) if tab["id"] == recovered_tab["tab"])["terminals"]) == 2,
+                 "The git tab has an unrelated shell split")
+            app("do", "tab.select", "--id", scratch["tab"])
+            wait(lambda: app("status")["tab"] == scratch["tab"], "Another tab stays focused during recovery")
+            old = json.loads(call("hc", "get", terminal, "--json"))
+            os.kill(old["pid"], signal.SIGKILL)
+            wait(lambda: len(launches()) == 2, "A lost git program restarts")
+            assert app("status")["tab"] == scratch["tab"], "Process recovery preserves focus"
+
+            app("do", "window.close")
+            process.wait(timeout=5)
+            call("hc", "server", "stop")
+            call("hc", "server", "start")
+            process = subprocess.Popen(["herdr-app"], env=env, stdout=log, stderr=log)
+            call("xdotool", "search", "--sync", "--pid", str(process.pid))
+            wait(lambda: len(launches()) == 3, "Git restores after a core shutdown")
+            assert all(record["cwd"] == str(project) and record["args"] == arguments and record["space"] == space
+                       for record in launches()), launches()
+            assert len({record["pid"] for record in launches()}) == 3
+            restored = next(tab for tab in tabs(space) if tab["id"] == recovered_tab["tab"])
+            assert len(restored["terminals"]) == 2, restored
+            assert app("status")["tab"] == scratch["tab"], "Core recovery preserves focus"
+            call("hc", "send", terminal, "fail")
+            wait(lambda: json.loads(call("hc", "get", terminal, "--json"))["state"] == "finished",
+                 "The recovered program still exits normally")
+            assert json.loads(call("hc", "get", terminal, "--json"))["exit_code"] == 17
+            wait(lambda: len(next(tab for tab in tabs(space) if tab["id"] == recovered_tab["tab"])["terminals"]) == 1,
+                 "Program exit closes only its own split")
+            assert len(launches()) == 3, "A normal nonzero exit does not relaunch"
             assert not app("status")["errors"], app("status")
-            print("PASS: named-tab shortcuts, close-on-exit, concurrent SQL/main/scratch Neovim, lazygit file opening and editor recreation.", flush=True)
+            print("PASS: named-tab shortcuts, close-on-exit, editor routing, git process/core recovery, arguments, splits and focus.", flush=True)
         except Exception as error:
             if isinstance(error, subprocess.CalledProcessError):
                 print(error.output, flush=True)

@@ -29,7 +29,7 @@ export function commandFor(role, space, appHome, home, dev) {
       ...(dev ?? ["zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi"])];
     case "sql": return ["zsh", "-ic", "draft sql"];
     case "rest": return ["zsh", "-ic", "rest"];
-    case "git": return [...context, "lazygit",
+    case "git": return [...context, "herdr-app-tab", "--start", role, "lazygit",
       `--use-config-file=${home}/.config/lazygit/config.yml,${home}/.config/lazygit/config-herdr-app.yml`];
     case "docker": return ["lazydocker"];
   }

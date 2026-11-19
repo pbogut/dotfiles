@@ -116,6 +116,17 @@ The tab closes when the command exits, including on failure.
 Teardown, tasks, and general command restoration are part of the remaining
 project-workflow migration.
 
+## Program recovery
+
+New `git` tabs register their command, launch directory, and terminal identity
+through `herdr-app-tab`. Core keeps this record in the terminal's labels.
+After a reboot or process loss, `~/.zshrc.d/herdr-app-tabs.zsh` checks at the
+replacement Zsh shell's first prompt and executes the saved command in its
+original directory. The tab must still have its registered name.
+Recovery preserves the terminal, splits, and focus. Commands keep their normal
+exit behavior, including closing the pane on a nonzero exit.
+Existing tabs register when closed and reopened.
+
 ## OpenCode sessions
 
 Each space's `oc-1`, `oc-2`, and other numbered OpenCode tabs remembers its own
@@ -621,6 +632,7 @@ shellcheck dot_config/herdr-app/mods/pbogut-tabs/teardown.sh
 node --test assets/tests/herdr_app/worktrees.test.mjs
 node --test assets/tests/herdr_app/opencode_session.test.mjs
 node --test assets/tests/herdr_app/opencode_rpc.test.mjs
+node --test assets/tests/herdr_app/tab_recovery.test.mjs
 python3 assets/tests/herdr_app/keyboard.py
 python3 assets/tests/herdr_app/prefix_input.py
 python3 assets/tests/herdr_app/named_tabs.py
@@ -643,7 +655,9 @@ empty results, and Escape in its isolated window.
 The named-tab test uses Zsh and harmless stand-in role programs, including
 successful and failed exits and recreating a closed tab. It also verifies
 actual SQL, main-editor, and scratch Neovim processes running together,
-lazygit file opening, and closing tabs on exit. The editor test uses headless
+lazygit file opening, and closing tabs on exit. It checks git recovery after
+process loss and Core shutdown, preserving literal arguments, splits, and focus.
+The editor test uses headless
 Neovim servers to check terminal-specific sockets and named-tab routing,
 including when an old space-wide lock is still held.
 The OpenCode test runs the real App/core and local TUI extension with a small

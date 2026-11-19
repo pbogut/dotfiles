@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export HERDR_APP_HOME=${HERDR_APP_HOME:-${XDG_CONFIG_HOME:-$HOME/.config}/herdr-app}
+module=$HERDR_APP_HOME/mods/pbogut-tabs/recovery.mjs
+case ${1:-} in
+--recover)
+	exec node "$module" recover "${2:-}"
+	;;
+--start)
+	(($# >= 3)) || exit 2
+	shift
+	node "$module" prepare "$@"
+	shift
+	exec "$@"
+	;;
+*) exit 2 ;;
+esac
