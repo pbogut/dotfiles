@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -eu
+
+if [[ ${1:-} != --edit ]]; then
+    exec terminal-float --title "Edit clipboard" -- clip-edit --edit
+fi
+
+dir=$(mktemp -d "${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/clip-edit.XXXXXXXX")
+trap 'rm -rf -- "$dir"' EXIT
+if ! wl-paste --no-newline --type text > "$dir/draft"; then
+    notify-send "Edit clipboard" "No clipboard text to edit."
+    exit 1
+fi
+
+nvim -n -i NONE --cmd 'set nomodeline noundofile' \
+    -c 'set clipboard= nobackup nowritebackup' \
+    -c 'setlocal noundofile nofixendofline' \
+    -- "$dir/draft" &&
+    wl-copy --type 'text/plain;charset=utf-8' < "$dir/draft"

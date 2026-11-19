@@ -598,6 +598,7 @@ binds {
     Mod+apostrophe hotkey-overlay-title="Clipboard Manager" {
         spawn "dms" "ipc" "call" "clipboard" "toggle";
     }
+    Mod+Ctrl+V repeat=false hotkey-overlay-title="Edit clipboard" { spawn "clip-edit"; }
 
     // F15 is reported as XF86Launch6.
     XF86Launch6 hotkey-overlay-title="Transcribe" {
