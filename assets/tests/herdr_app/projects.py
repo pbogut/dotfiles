@@ -429,6 +429,26 @@ def main():
             wait(lambda: len(dev_records(target)) == 2, "Alt+; reloads the command when recreating dev")
             assert dev_records(target)[1]["args"] == [*dev_args, "refreshed"]
             assert tab_names(target).count("dev") == 1, "Repeated shortcuts create only one dev tab"
+            definition.write_text(json.dumps({**project_config, "tasks": [
+                *[{"name": f"other {i}", "command": ["touch", "wrong-task"]} for i in range(19)],
+                {"name": "last task", "hint": "sa", "command": ["touch", "last-ran"]},
+                {"name": "other ssh", "hint": "sm", "command": ["touch", "wrong-task"]},
+            ]}))
+            call("xdotool", "windowsize", "--sync", window, "800", "600")
+            key("alt+h")
+            wait(lambda: "pbogut-task-picker" in app("status")["overlays"], "Alt+H opens local project tasks")
+            call("herdr-app", "shot", str(root / "task-hints.png"))
+            key("s", "BackSpace", "Escape")
+            wait(lambda: "pbogut-task-picker" not in app("status")["overlays"], "Escape cancels a partial hint")
+            key("alt+h")
+            wait(lambda: "pbogut-task-picker" in app("status")["overlays"], "Task hints reopen")
+            key("s", "x", "a")
+            wait(lambda: (target / "last-ran").exists() and "last task" in tab_names(target),
+                 "Custom hint launches the task without Enter, ignoring an invalid key")
+            key("Return")
+            wait(lambda: "last task" not in tab_names(target), "Successful task stays open until Enter by default")
+            assert not (target / "wrong-task").exists()
+            call("xdotool", "windowsize", "--sync", window, "1280", "800")
             definition.write_text(json.dumps(project_config))
             app("do", "pbogut-tabs.shell-3")
             wait(lambda: tab_names(target) == [*ordered_tabs, "shell-3"], "Named shortcuts preserve fixed order")

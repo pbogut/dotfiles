@@ -18,13 +18,14 @@ Choosing another layout in the app lasts until the next chezmoi apply.
 | Alt+Esc | Copy mode |
 | Alt+O | Spaces picker in sidebar order |
 | Alt+I | Agents picker in sidebar order |
+| Alt+H | Project task picker |
 | Ctrl+Shift+K | Go to space/tab/agent picker |
 | Ctrl+Alt+P | Project picker |
 | Ctrl+Shift+P | Command palette |
 | Alt+T | Toggle sidebar |
 | Alt+P / Alt+N | Previous / next tab |
 
-All five pickers accept Ctrl+J to move down and Ctrl+K to move up while
+The five searchable pickers accept Ctrl+J to move down and Ctrl+K to move up while
 their search field is focused. Up/Down also work; Enter selects a result.
 
 Ctrl+G opens a full-width overlay over the tab bar, above the status bar.
@@ -82,10 +83,10 @@ focus the named tab in the current space, or create it and launch its program:
 | Alt+K / Alt+L | `shell` / `shell-2` |
 | Alt+; | `dev` |
 | Alt+M / Alt+, / Alt+. | `sql` / `rest` / `git` |
-| Alt+H / Ctrl+Alt+J | `oc-1` |
+| Ctrl+Alt+J | `oc-1` |
 | Ctrl+Alt+K / Ctrl+Alt+L / Ctrl+Alt+; | `oc-2` / `oc-3` / `oc-4` |
 
-These override Alt+H/J/K/L pane navigation in this layout. New tabs start in
+Alt+H/J/K/L override pane navigation in this layout. New tabs start in
 the space's configured folder. Tabs use a fixed order:
 `nvim`, `shell`, `shell-2`, `dev`, `sql`, `rest`, `git`, `docker`, numbered
 `oc-N` slots, then `shell-3`. OpenCode slots sort numerically. Other tabs follow
@@ -206,7 +207,7 @@ Such a project has no open badge, and selecting it creates a separate project
 space. Ordinary spaces remain available through the sidebar and Go to picker.
 
 All `herdr-project.json` behavior applies only to marked projects: names,
-initial tabs, dev overrides, setup, teardown, and explicit config reloads.
+initial tabs, dev overrides, tasks, setup, teardown, and explicit config reloads.
 Ordinary spaces retain their native names and Git branches. Named-tab shortcuts
 still work there without reading either the project or fallback definition.
 
@@ -338,6 +339,51 @@ corrected and retried.
 The fallback file can also supply `dev`. A project file overrides the fallback
 as a whole, so omitting `dev` in a project file selects the default `make dev`
 behavior. Remote tabs use their own machine's paths and configuration.
+
+### Project tasks
+
+Press Alt+H in the `pbogut` layout or choose **Run project task** in the
+command palette. Type the hint to the left of a task to select it immediately,
+or click its row. Set `hint` to pin a shortcut using lowercase letters `a` to `z`.
+Hints can share a prefix, like `sa` and `sm`, but one cannot equal or start with
+another complete hint. The picker reserves your hints first, then assigns the
+rest in project order, preferring `fjdkslaurieowhgmvcn`. With no custom hints,
+up to 19 tasks take one key each.
+Typing the first letter of a longer hint dims other rows without moving them.
+Backspace undoes a letter; Escape dismisses the picker.
+
+Tasks fill columns instead of scrolling. If the window is too small to show
+them all, enlarge it or zoom out and reopen the picker.
+Define tasks in the shared `herdr-project.json` beside `.bare`:
+
+```json
+{
+  "tasks": [
+    { "name": "test", "command": ["make", "test"], "progress": true },
+    { "name": "ssh ap", "hint": "sa", "command": ["ssh", "ap"] },
+    { "name": "ssh mp", "hint": "sm", "command": ["ssh", "mp"] },
+    { "name": "refresh cache", "command": ["make", "refresh-cache"], "close": true }
+  ]
+}
+```
+
+Each task runs in an interactive terminal in the current worktree on its own
+machine. `command` uses literal arguments, like `dev`. Use a script or invoke a
+shell explicitly for pipelines or shell functions. Names must be unique and
+cannot be named tab roles, `setup`, or `teardown`. Tasks use the same whole-file
+fallback as `dev`. Opening the picker reads the current definition; selecting a
+task checks it again before running. No task runs just because a project opens.
+
+Choosing a running task focuses it. Sibling worktrees can run the same task
+independently. `progress` and `close` both default to `false`. Only `progress: true`
+shows a spinner while the task runs. Finished tasks keep their output with `✓`
+or `✗` unless you set `close: true`, which closes the tab on either exit status.
+Select a retained task to confirm a fresh run, or press Esc
+to keep its output. Pressing Enter inside the finished terminal closes it.
+
+`mods/pbogut-tab-bar` copies Herdr App 0.1.16's `tabs` mod to show the task
+status beside its name. When upgrading Herdr, merge upstream tab bar changes
+into that copy.
 
 ### Setup hooks
 
@@ -604,6 +650,10 @@ Run from the chezmoi source directory:
 herdr-app check dot_config/herdr-app/mods/pbogut-keys
 herdr-app check dot_config/herdr-app/mods/pbogut-copy
 herdr-app check dot_config/herdr-app/mods/pbogut-tabs
+herdr-app check dot_config/herdr-app/mods/pbogut-task-picker
+node --test assets/tests/herdr_app/task_hints.test.mjs
+herdr-app check dot_config/herdr-app/mods/pbogut-tab-bar
+shellcheck dot_config/herdr-app/mods/pbogut-tabs/task.sh
 herdr-app check dot_config/herdr-app/mods/pbogut-projects
 herdr-app check dot_config/herdr-app/mods/pbogut-picker
 herdr-app check dot_config/herdr-app/mods/pbogut-space-picker

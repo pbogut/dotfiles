@@ -36,6 +36,7 @@ const NAMED = [
   ...["left", "right", "up", "down"].map((d) => ["pane.swap", { direction: d }, "Pane", `Swap pane ${d}`, "move"]),
   ["space.new", {}, "Space", "New space", "workspace"],
   ["pbogut-tabs.reload-project", {}, "Space", "Reload project config", "refresh name tabs dev herdr-project.json"],
+  ["pbogut-tabs.tasks", {}, "Space", "Run project task", "custom command herdr-project.json"],
   ["pbogut-tabs.close-project", {}, "Space", "Close project", "teardown cleanup workspace"],
   ["space.rename", {}, "Space", "Rename space", "workspace"],
   ["space.close", {}, "Space", "Close space", "workspace kill"],
@@ -83,7 +84,7 @@ function titleOf(name) {
 function entries() {
   const known = new Set(commands().map((c) => c.name));
   const mac = win()?.platform === "macos";
-  const list = NAMED.filter(([n]) => known.has(n) || n === "pbogut-tabs.reload-project" || n === "pbogut-tabs.close-project")
+  const list = NAMED.filter(([n]) => known.has(n) || n.startsWith("pbogut-tabs."))
     .filter(([n]) => !(mac && n.startsWith("window.")))
     .map(([name, args, group, title, words]) => ({ name, args, group, title, words }));
   for (const l of layouts()) {

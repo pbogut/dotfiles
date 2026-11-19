@@ -63,6 +63,7 @@ def main():
     shutil.copyfile(ROOT / "dot_config/herdr-app/mods/pbogut-tabs/setup.sh", setup_runner)
     shutil.copyfile(ROOT / "dot_config/herdr-app/mods/pbogut-tabs/teardown.sh", setup_runner.with_name("teardown.sh"))
     shutil.copyfile(ROOT / "dot_config/herdr-app/mods/pbogut-tabs/recovery.mjs", setup_runner.with_name("recovery.mjs"))
+    shutil.copyfile(ROOT / "dot_config/herdr-app/mods/pbogut-tabs/task.sh", setup_runner.with_name("task.sh"))
     (remote_app / "setup fixture.sh").write_text(
         'printf "%s\\n" "$HERDR_PROJECT_DIR" "$HERDR_WORKTREE_DIR" "$PWD" >> "$HERDR_PROJECT_DIR/setup.log"\n')
     (remote_app / "teardown fixture.sh").write_text(
@@ -70,6 +71,12 @@ def main():
     (remote_app / "herdr-project.json").write_text(json.dumps({
         "tabs": ["shell", "nvim"], "setup": {"script": "setup fixture.sh"},
         "teardown": {"script": "teardown fixture.sh"},
+        "tasks": [
+            {"name": "check @ staging", "command": ["sh", "-c",
+             'printf "%s\\n" "$HOME" "$PWD" "$1" >> task.log; read -r code; exit "$code"', "_", "literal ' $HOME"],
+             "progress": True},
+            {"name": "quick failure", "command": ["sh", "-c", "touch quick-ran; exit 7"], "close": True},
+        ],
     }))
 
     def call(*args, env=local):
@@ -114,6 +121,20 @@ def main():
     def space(machine, folder):
         return next((s for s in app("ls")["spaces"] if s["machine"] == machine and s["folder"] == str(folder)), None)
 
+    def choose_task(hint, palette=False):
+        if palette:
+            key("ctrl+shift+p")
+            wait(lambda: "pbogut-palette" in app("status")["overlays"], "Command palette opens")
+            call("xdotool", "type", "--clearmodifiers", "run project task")
+            key("Return")
+        else:
+            key("alt+h")
+        wait(lambda: "pbogut-task-picker" in app("status")["overlays"], "Task picker opens")
+        key(hint)
+
+    def task_tab(folder):
+        return next((t for t in space("fixture", folder)["tabs"] if t["name"] == "check @ staging"), None)
+
     xvfb = subprocess.Popen(["Xvfb", "-displayfd", "1", "-screen", "0", "1280x800x24", "-nolisten", "tcp"],
                             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
     local["DISPLAY"] = ":" + xvfb.stdout.readline().strip()
@@ -153,6 +174,11 @@ def main():
             assert (remote_app / "setup.log").read_text().splitlines() == [
                 str(remote_app), str(remote_repo), str(remote_repo),
             ], "The remote fallback setup runs with the remote config and working directory"
+            choose_task("f", palette=True)
+            wait(lambda: (remote_repo / "task.log").exists(), "Palette runs the remote interactive command")
+            first = task_tab(remote_repo)
+            assert (remote_repo / "task.log").read_text().splitlines() == [remote["HOME"], str(remote_repo), "literal ' $HOME"]
+            wait(lambda: app("status")["tab"] == first["id"], "New task gets focus")
             key("ctrl+alt+p")
             wait(lambda: loaded("fixture"), "Reopening defaults to the active remote machine")
             assert state()["folders"].count(str(remote_repo)) == 1
@@ -170,6 +196,35 @@ def main():
             assert (remote_app / "setup.log").read_text().splitlines()[3:] == [
                 str(remote_app), str(worktree), str(worktree),
             ], "A sibling worktree runs its own setup on the remote machine"
+            choose_task("f")
+            wait(lambda: (worktree / "task.log").exists(), "Sibling worktree starts its own copy")
+            sibling = task_tab(worktree)
+            terminal = sibling["terminals"][0]["terminal"]
+            assert first["id"] != sibling["id"]
+            assert (worktree / "task.log").read_text().splitlines() == [remote["HOME"], str(worktree), "literal ' $HOME"]
+            app("do", "tab.select", "--id", space("fixture", worktree)["tabs"][0]["id"])
+            choose_task("f")
+            wait(lambda: app("status")["tab"] == sibling["id"], "Selecting a running task focuses it")
+            assert len((worktree / "task.log").read_text().splitlines()) == 3
+            call("hc", "send", terminal, "17")
+            wait(lambda: json.loads(call("hc", "get", terminal, "--json"))["labels"].get("pbogut.task.state") == "failed",
+                 "Interactive failure retains the terminal")
+            choose_task("f")
+            wait(lambda: "confirm" in app("status")["overlays"], "Rerun asks for confirmation")
+            key("Escape")
+            assert task_tab(worktree)["id"] == sibling["id"]
+            choose_task("f")
+            wait(lambda: "confirm" in app("status")["overlays"], "Rerun can be requested again")
+            key("Return")
+            wait(lambda: len((worktree / "task.log").read_text().splitlines()) == 6, "Confirmed rerun starts a fresh process")
+            wait(lambda: not any(t["id"] == sibling["id"] for t in space("fixture", worktree)["tabs"]), "Old PTY removed")
+            call("hc", "send", task_tab(worktree)["terminals"][0]["terminal"], "0")
+            wait(lambda: json.loads(call("hc", "get", task_tab(worktree)["terminals"][0]["terminal"], "--json"))
+                 ["labels"].get("pbogut.task.state") == "success", "Progress retains successful output")
+            choose_task("j")
+            wait(lambda: (worktree / "quick-ran").exists() and
+                 all(t["name"] != "quick failure" for t in space("fixture", worktree)["tabs"]), "close overrides failure retention")
+            assert task_tab(remote_repo)["id"] == first["id"]
             key("ctrl+alt+p")
             wait(lambda: loaded("fixture"), "The new worktree stays on the selected machine")
             # An invalid remote setting stays an error on that machine.
@@ -191,7 +246,7 @@ def main():
             ], "Remote teardown uses the remote fallback and worktree directory"
             assert space("fixture", remote_repo) and space(None, remote_repo) and space(None, local_repo)
             assert not app("status")["errors"], app("status")
-            print("PASS: native machine picker, remote tabs, setup/teardown, dated worktrees, focus and errors.", flush=True)
+            print("PASS: native machine picker, remote tasks and tabs, setup/teardown, dated worktrees, focus and errors.", flush=True)
     except Exception:
         if process and process.poll() is None:
             print("Status:", app("status"), flush=True)

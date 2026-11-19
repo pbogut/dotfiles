@@ -67,6 +67,7 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
       shared: (key) => persisted.get(key),
       setShared: (key, value) => persisted.set(key, JSON.parse(JSON.stringify(value))),
       appHome: () => "/config/herdr-app", home: () => "/home/test",
+      settings: () => ({ zoom: 1 }),
       notify: (args) => calls.push(["notify", args]),
       openOverlay: (args) => overlays.push(JSON.parse(JSON.stringify(args))),
       nextCommand: () => commands.length ? Promise.resolve(commands.shift())
@@ -80,7 +81,9 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
     }),
     "./roles.js": new vm.SourceTextModule(await readFile(new URL("roles.js", root), "utf8"), { context }),
     "./project.js": new vm.SourceTextModule(await readFile(new URL("project.js", root), "utf8"), { context }),
+    "./hints.js": new vm.SourceTextModule(await readFile(new URL("hints.js", root), "utf8"), { context }),
     "./close.js": new vm.SourceTextModule(await readFile(new URL("close.js", root), "utf8"), { context }),
+    "./tasks.js": new vm.SourceTextModule(await readFile(new URL("tasks.js", root), "utf8"), { context }),
   };
   const main = new vm.SourceTextModule(await readFile(new URL("main.js", root), "utf8"), { context });
   await main.link((name) => modules[name]);
@@ -224,6 +227,20 @@ test("unknown roles, stale spaces and check mode never create tabs", async () =>
   const check = await fixture(true);
   await check.command("nvim");
   assert.deepEqual(check.calls, []);
+});
+
+test("project task picker ignores ordinary spaces and reports empty or invalid definitions", async () => {
+  const ordinary = await fixture(false, [], false);
+  await ordinary.command("tasks");
+  assert.deepEqual(ordinary.reads, []);
+  assert.ok(ordinary.calls.some(([name, o]) => name === "notify" && /open a project/i.test(o.body)));
+  const app = await fixture();
+  await app.command("tasks");
+  assert.ok(app.calls.some(([name, o]) => name === "notify" && /no tasks/i.test(o.body)));
+  app.files.set("/project one/herdr-project.json", '{"tasks":"make test"}');
+  await app.command("tasks");
+  assert.ok(app.calls.some(([name, o]) => name === "notify" && o.body.includes("/project one/herdr-project.json")));
+  assert.equal(app.overlays.length, 0);
 });
 
 const projectCommand = (project) => `project@${encodeURIComponent(JSON.stringify(project))}`;

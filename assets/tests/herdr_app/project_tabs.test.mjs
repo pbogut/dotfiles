@@ -6,6 +6,29 @@ import { commandFor, compareTabs } from "../../../dot_config/herdr-app/mods/pbog
 const defaults = "/config/herdr-app/herdr-project.json";
 const loadProjectTabs = async (...args) => (await loadProjectConfig(...args)).tabs;
 
+test("task definitions validate the entire file and preserve literal command arguments", async () => {
+  const task = { name: "docs @ staging", command: ["./run docs", "$1", "", "'"] };
+  assert.deepEqual(projectConfig({ tasks: [task] }).tasks, [{ ...task, hint: "f", progress: false, close: false }]);
+  assert.deepEqual(projectConfig({ tasks: [] }).tasks, []);
+  for (const tasks of [null, {}, [task, task], [null], [{ ...task, name: " shell" }],
+    [{ ...task, name: "oc-2" }], [{ ...task, name: "setup" }], [{ ...task, command: [] }],
+    [{ ...task, command: "make test" }], [{ ...task, progress: "yes" }], [{ ...task, close: null }]]) {
+    await assert.rejects(loadProjectConfig("/repo/main", async () => ({ code: 0, stdout: "/repo/.bare\n" }),
+      async () => JSON.stringify({ tasks }), defaults), /\/repo\/herdr-project.json:.*tasks/);
+  }
+});
+
+test("custom task hints accept lowercase letters and reject ambiguous shortcuts", () => {
+  const make = (name, hint) => ({ name, hint, command: ["true"] });
+  assert.equal(projectConfig({ tasks: [make("check", "bt")] }).tasks[0].hint, "bt");
+  for (const bad of ["", "S", "s a", "1", "s\n", null, 7]) {
+    assert.throws(() => projectConfig({ tasks: [make("check", bad)] }), /hint.*check.*lowercase/);
+  }
+  for (const [a, b] of [["s", "sa"], ["sa", "s"], ["sa", "sa"]]) {
+    assert.throws(() => projectConfig({ tasks: [make("first", a), make("second", b)] }), /second.*conflicts with.*first/);
+  }
+});
+
 test("teardown validates its script and follows whole-file fallback precedence", async () => {
   const teardown = { script: "scripts/cleanup project's.sh" };
   assert.deepEqual(projectConfig({ teardown }), { tabs: [], teardown });

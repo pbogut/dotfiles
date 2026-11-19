@@ -118,7 +118,7 @@
           "type": "block",
           "size": { "px": 42 },
           "window_drag": true,
-          "content": { "mod": "tabs" }
+          "content": { "mod": "pbogut-tab-bar" }
         },
         {
           "id": "prefix-anchor",

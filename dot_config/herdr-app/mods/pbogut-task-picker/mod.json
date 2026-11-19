@@ -1,0 +1,5 @@
+{
+  "place": "none",
+  "title": "Project tasks",
+  "overlay": { "kind": "popup", "at": "top", "offset": 40, "width": 500, "height": 0.7 }
+}

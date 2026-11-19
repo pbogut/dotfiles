@@ -1,4 +1,5 @@
 import { roleOf } from "./roles.js";
+import { taskHints } from "./hints.js";
 
 export const PROJECT_SPACES = "pbogut.projects.spaces";
 export const isProject = (space, marked) => marked?.[space?.id] === true;
@@ -31,15 +32,38 @@ export function projectTabs(config) {
   return roles;
 }
 
+function validCommand(argv) {
+  return Array.isArray(argv) && argv.length && argv.every(arg => typeof arg === "string" && !arg.includes("\0")) && argv[0];
+}
+
 export function projectConfig(config) {
   const tabs = projectTabs(config);
   const result = { tabs };
   if (config.dev !== undefined) {
-    if (!Array.isArray(config.dev) || !config.dev.length ||
-      config.dev.some((arg) => typeof arg !== "string" || arg.includes("\0")) || !config.dev[0]) {
+    if (!validCommand(config.dev)) {
       throw new Error('"dev" must be a non-empty command array of strings.');
     }
     result.dev = config.dev;
+  }
+  if (config.tasks !== undefined) {
+    if (!Array.isArray(config.tasks)) throw new Error('"tasks" must be an array.');
+    const seen = new Set();
+    result.tasks = config.tasks.map((task, index) => {
+      const where = `tasks[${index}]`, name = task?.name;
+      if (typeof name !== "string" || !name || name.trim() !== name || /[\x00-\x1f\x7f]/.test(name)) {
+        throw new Error(`${where} requires a non-empty, single-line name.`);
+      }
+      if (roleOf(name) || ["setup", "teardown"].includes(name)) throw new Error(`${where}: reserved tab name "${name}".`);
+      if (seen.has(name)) throw new Error(`${where}: duplicate task "${name}".`);
+      seen.add(name);
+      if (!validCommand(task.command)) throw new Error(`${where}.command must be a non-empty command array of strings.`);
+      for (const flag of ["progress", "close"]) {
+        if (task[flag] !== undefined && typeof task[flag] !== "boolean") throw new Error(`${where}.${flag} must be a boolean.`);
+      }
+      return { name, hint: task.hint, command: task.command, progress: task.progress ?? false, close: task.close ?? false };
+    });
+    const hints = taskHints(result.tasks);
+    result.tasks.forEach((task, i) => { task.hint = hints[i]; });
   }
   if (config.setup !== undefined) {
     const setup = config.setup;

@@ -117,7 +117,7 @@ def main():
             for shortcut, role in [
                 ("alt+k", "shell"), ("alt+l", "shell-2"), ("alt+semicolon", "dev"),
                 ("alt+m", "sql"), ("alt+comma", "rest"), ("alt+period", "git"),
-                ("alt+h", "oc-1"), ("ctrl+alt+k", "oc-2"), ("ctrl+alt+l", "oc-3"), ("ctrl+alt+semicolon", "oc-4"),
+                ("ctrl+alt+j", "oc-1"), ("ctrl+alt+k", "oc-2"), ("ctrl+alt+l", "oc-3"), ("ctrl+alt+semicolon", "oc-4"),
             ]:
                 key(shortcut)
                 wait(lambda: any(tab["name"] == role for tab in tabs(space)), f"{shortcut} creates {role}")
@@ -128,7 +128,7 @@ def main():
                     call("hc", "send", shell, "cd subdirectory")
                     wait(lambda: json.loads(call("hc", "get", shell, "--json"))["foreground"]["cwd"] == str(project / "subdirectory"),
                          "Shell changes folder before the next tab is created")
-            key("ctrl+alt+j", "alt+h", "alt+j")
+            key("ctrl+alt+j", "alt+j")
             wait(lambda: len((root / "roles.jsonl").read_text().splitlines()) == 9, "Role programs launch once")
             records = [json.loads(line) for line in (root / "roles.jsonl").read_text().splitlines()]
             assert len([record for record in records if record["program"] == "nvim"]) == 1, records

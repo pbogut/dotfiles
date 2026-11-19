@@ -3,6 +3,7 @@ import { appHome, checking, exec, home, nextCommand, notify, panes, readTextFile
 import { commandFor, compareTabs, roleOf } from "./roles.js";
 import { PROJECT_SPACES, isProject, folderKey, loadProjectConfig, machinePaths } from "./project.js";
 import ProjectClose from "./close.js";
+import ProjectTasks from "./tasks.js";
 
 export default class NamedTabs extends View {
   init(_props, cx) {
@@ -10,11 +11,19 @@ export default class NamedTabs extends View {
     this.setups = new Map();
     this.setupSerial = 0;
     this.closer = new ProjectClose();
+    this.tasks = new ProjectTasks();
     if (checking()) return;
     for (const space of spaces()) this.sortTabs(space);
     cx.spawn(async (cx) => {
       for (;;) {
         const command = await nextCommand();
+        if (command === "tasks" || command.startsWith("task@")) {
+          cx.spawn(async () => {
+            try { await this.tasks.handle(command); }
+            catch (error) { notify({ title: "Could not run project task", body: String(error.message ?? error), level: "error" }); }
+          });
+          continue;
+        }
         if (command === "reload-project" || command.startsWith("project@")) {
           try {
             const reload = command === "reload-project";
