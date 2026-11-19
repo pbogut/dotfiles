@@ -2,12 +2,12 @@
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "plan",
   "agents": {
-    "build": { "model": "openai/gpt-6-astra" },
-    "plan": { "model": "openai/gpt-6-astra" },
+    "build": { "model": "openai/gpt-6.2-astra#xhigh" },
+    "plan": { "model": "openai/gpt-6.2-astra#xhigh" },
     "chat": {
       "mode": "primary",
       "hidden": true,
-      "model": "openai/gpt-6.1-sol#medium",
+      "model": "openai/gpt-6.2-sol#medium",
       "description": "General chat assistant with web access",
       "system": "You are a helpful general-purpose chat assistant. You have access to the web to fetch information. Do not attempt to modify files or execute shell commands if you are not specifically asked for it.",
       "permissions": [
