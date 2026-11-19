@@ -167,7 +167,7 @@ export default class Agents extends View {
     const st = kidStatus(k, this.listed);
     const pic = icon(k.program, 14, t.foreground);
     const on = k.address === shown;
-    return h_flex()
+    return h_flex().relative()
       .id(`sub-${k.address}`)
       .pl(39)
       .pr(8)
@@ -185,7 +185,16 @@ export default class Agents extends View {
         .when(l === "└" || l === "├", el => el.border_b(1.5).rounded_bl(6))))
       .when(Boolean(pic), el => el.child(div().mr(8).child(pic)))
       .child(div().flex_1().truncate().text_color(on ? t.foreground : t.muted).child(k.name || k.template || k.program?.name || k.address))
-      .child(status(t, { status: st }, compact));
+      .child(status(t, { status: st }, compact))
+      .when(Boolean(this.hintState?.hints[k.address]), el => el.child(this.hintBadge(k.address, 39 + 13 * s.lines.length, t)));
+  }
+
+  hintBadge(address, left, t) {
+    const { hints, prefix } = this.hintState;
+    const color = hints[address].startsWith(prefix) ? t.accent : t.dim;
+    return h_flex().absolute().left(left).top(4).h(18).min_w(18).px(2).rounded(4).bg(t.surface)
+      .border_1().border_color(color).items_center().justify_center().font_family("JetBrainsMono Nerd Font Mono")
+      .text_size(12).font_bold().text_color(color).whitespace_nowrap().child(hints[address].toUpperCase());
   }
 
   render(cx) {
@@ -251,10 +260,15 @@ export default class Agents extends View {
       setShared("pbogut.agents.rows", snapshot);
     }
 
+    const hints = shared("pbogut.sidebar.hints");
+    this.hintState = hints?.mode === "agents" ? hints : null;
+    const targets = new Set();
     const withKids = (a, i) => {
       const subs = collapsed ? [] : this.tree(all, a.address);
+      targets.add(a.address);
       const r = row(a, i, subs);
       if (this.folded.has(a.address)) return [r];
+      for (const s of subs) targets.add(s.t.address);
       return [r, ...subs.map((s) => this.subRow(t, s, shown, byPriority))];
     };
 
@@ -291,7 +305,7 @@ export default class Agents extends View {
       // An agent on another machine (`vps/t7`) says which.
       const machine = a.address.includes("/") ? a.address.split("/")[0] : null;
       if (collapsed) {
-        return h_flex()
+        return h_flex().relative()
           .id(`ag-${a.address}`)
           .h(26)
           .px(8)
@@ -302,7 +316,8 @@ export default class Agents extends View {
           .hover((s) => s.bg(t.hover))
           .on_click(() => run("pane.focus", { pane: a.pane }))
           .child(div().flex_1().min_w(0).whitespace_nowrap().text_right().text_color(t.muted).child(String(i + 1)))
-          .child(h_flex().w(14).flex_none().items_center().justify_center().child(status(t, a, true)));
+          .child(h_flex().w(14).flex_none().items_center().justify_center().child(status(t, a, true)))
+          .when(Boolean(this.hintState?.hints[a.address]), el => el.child(this.hintBadge(a.address, 4, t)));
       }
       const when = this.since(a);
       const idle = a.status === "idle" && !a.focused;
@@ -324,7 +339,7 @@ export default class Agents extends View {
           cx.notify();
         })
         .child(svg(`mods/workspace-chrome/${isPinned ? "pin-off" : "pin"}.svg`).size(13));
-      return h_flex()
+      return h_flex().relative()
         .id(`ag-${a.address}`)
         .px(8)
         .h(30)
@@ -355,7 +370,8 @@ export default class Agents extends View {
         .when(subs.length > 0, el => el.child(fold(a, subs)))
         .when(this.hovered === a.address, el => el.child(pin))
         .when(this.hovered !== a.address && Boolean(when), el => el.child(div().flex_none().text_size(11).text_color(t.dim).child(duration(now - when))))
-        .child(status(t, a, byPriority && !isPinned));
+        .child(status(t, a, byPriority && !isPinned))
+        .when(Boolean(this.hintState?.hints[a.address]), el => el.child(this.hintBadge(a.address, 8, t)));
     };
 
     // Folder mode nests priority sections under each folder. Pins stay above them.
@@ -412,6 +428,9 @@ export default class Agents extends View {
     const rows = collapsed
       ? list.flatMap(withKids)
       : groups.flatMap(drawGroup);
+    if (JSON.stringify([...targets]) !== JSON.stringify(shared("pbogut.agents.hintTargets"))) {
+      setShared("pbogut.agents.hintTargets", [...targets]);
+    }
 
     return v_flex()
       .size_full()

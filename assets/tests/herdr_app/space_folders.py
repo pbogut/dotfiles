@@ -77,8 +77,8 @@ def main():
         return json.JSONDecoder().raw_decode(records[-1])[0] if records else {}
 
     def open_picker():
-        key("alt+o")
-        wait(lambda: "pbogut-space-picker" in app("status")["overlays"], "Alt+O opens the dedicated spaces picker")
+        call("xdotool", "keydown", "Alt_L", "key", "o", "key", "o", "keyup", "Alt_L")
+        wait(lambda: "pbogut-space-picker" in app("status")["overlays"], "Double Alt+O opens the spaces picker")
 
     def drag(source_y, target_y):
         call("xdotool", "mousemove", "100", str(source_y), "mousedown", "1")
@@ -136,6 +136,23 @@ def main():
                 opened[str(folder)] = open_project(name, folder) if folder in (main_tree, outside) else \
                     app("do", "space.new", "--name", name, "--folder", str(folder))["space"]
             wait(lambda: [s["folder"] for s in app("ls")["spaces"]] == expected, "Core space order matches work, personal, other")
+            wait(lambda: json.loads((root / "app/shared.json").read_text()).get("pbogut.spaces.hintTargets") ==
+                 [opened[folder] for folder in expected], "All four sidebar rows have rendered")
+            call("xdotool", "mousemove", "900", "700")
+            call("herdr-app", "shot", str(root / "before-hints.png"))
+            key("alt+o")
+            wait(lambda: "pbogut-keys" in app("status")["overlays"], "Space hints take focus")
+            call("herdr-app", "shot", str(root / "space-hints.png"))
+            with Image.open(root / "before-hints.png") as before, Image.open(root / "space-hints.png") as after:
+                # Compare names and branch labels, excluding the overlay on each icon.
+                region = (70, 85, 250, 330)
+                assert before.crop(region).tobytes() == after.crop(region).tobytes(), "Hints shifted sidebar text"
+                icons = (9, 85, 68, 330)
+                assert before.crop(icons).tobytes() != after.crop(icons).tobytes(), "Hints did not appear over the icons"
+                # Inspect the ink inside the first badge, excluding its border.
+                assert len(after.crop((19, 112, 31, 124)).getcolors()) > 1, "First hint F is blank"
+            key("f")
+            wait(lambda: app("status")["space"] == opened[expected[0]], "Hint selects first sidebar space")
             for number, folder in enumerate(expected, 1):
                 key(f"alt+{number}")
                 wait(lambda: app("status")["space"] == opened[folder], f"Alt+{number} selects the grouped space")

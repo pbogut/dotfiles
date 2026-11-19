@@ -124,6 +124,21 @@ def main():
                 key("ctrl+g", "Escape")
                 assert not app("status")["overlays"]
                 assert app("status")["focused_pane"] == focus
+                if name == "legacy" and not machine:
+                    start = len(records())
+                    call("xdotool", "keydown", "Alt_L", "keydown", "o")
+                    time.sleep(1.0)  # X11 auto-repeat must not count as a second tap.
+                    call("xdotool", "keyup", "o", "keyup", "Alt_L")
+                    assert app("status")["overlays"] == ["pbogut-keys"], "Holding O must leave the hints open"
+                    key("Escape")
+                    key("alt+o", "z", "Escape")
+                    wait(lambda: not app("status")["overlays"], "Escape dismisses space hints")
+                    call("xdotool", "keydown", "Alt_L", "key", "o", "key", "o", "keyup", "Alt_L")
+                    wait(lambda: "pbogut-space-picker" in app("status")["overlays"], "Held Alt and two taps open search")
+                    key("z", "Escape")
+                    key("alt+o", "f")
+                    key("b")
+                    wait(lambda: received(start) == b"b", "Only typing after hints reaches the terminal")
                 start = len(records())
                 key("b")
                 typed = b"\x1b[98;;98u" if name == "kitty-all" else b"b"

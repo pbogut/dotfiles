@@ -16,8 +16,8 @@ Choosing another layout in the app lasts until the next chezmoi apply.
 | --- | --- |
 | Ctrl+G | Bottom shortcut bar |
 | Alt+Esc | Copy mode |
-| Alt+O | Spaces picker in sidebar order |
-| Alt+I | Agents picker in sidebar order |
+| Alt+O | Show space hints; tap again for the spaces picker |
+| Alt+I | Show agent hints; tap again for the agents picker |
 | Alt+H | Project task picker |
 | Ctrl+Shift+K | Go to space/tab/agent picker |
 | Ctrl+Alt+P | Project picker |
@@ -590,7 +590,14 @@ over an agent's number for its project and full branch.
 
 ## Agents picker
 
-Alt+I opens `mods/pbogut-agents/picker.js`. It follows the Agents sidebar's
+In the `pbogut` layout, Alt+I draws hints over the agent icons and Alt+O does
+the same for spaces. Type the letters to jump. Esc cancels; Backspace erases
+one letter. A floating bottom bar captures the keys without moving the rows.
+Hints keep their targets until you finish. Folded rows stay folded. Hold Alt
+and tap the same letter again to search all rows, including folded ones.
+When the sidebar is hidden, the shortcut opens search directly.
+
+The searchable agents picker (`mods/pbogut-agents/picker.js`) follows the Agents sidebar's
 current sort, including pinned agents and agents in folded groups. Sub-agents
 follow their parent; pinned sub-agents appear only once.
 The first line shows the project name and shortened branch. The second shows
@@ -610,7 +617,7 @@ until the sidebar resolves their order.
 
 ## Spaces picker
 
-Alt+O opens `mods/pbogut-space-picker`. It lists one row per open space in
+The searchable spaces picker (`mods/pbogut-space-picker`) lists one row per open space in
 the Spaces sidebar's machine, folder, and worktree order, including folded groups.
 The current space is selected on opening. Search matches space and project names,
 folders, machines, and branches without reordering results. Arrow keys and

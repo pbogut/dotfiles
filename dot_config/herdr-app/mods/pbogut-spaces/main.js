@@ -560,7 +560,11 @@ export default class Spaces extends View {
     const rows = this.ordered();
     this.publishRows(rows, t);
     this.revealFolder(rows);
-    const draw = (r) => (collapsed ? this.compact(r, t) : this.row(r, t));
+    this.hintTargets = [];
+    const draw = (r) => {
+      this.hintTargets.push(r.w.id);
+      return collapsed ? this.compact(r, t) : this.row(r, t);
+    };
     // Where the active space's row lands among the children this returns: the list scrolls by its direct
     // children, and machine headers, login notes and loading rows count too.
     this.activeAt = -1;
@@ -747,7 +751,15 @@ export default class Spaces extends View {
             .child(icon.initial)))
           .child(div().flex_initial().min_w(SIDE_MIN).truncate().tooltip(w.folder || w.name).text_color(t.foreground).child(name))
           .child(g ? this.gitTail(g, t) : div().flex_1()),
-      );
+      ).when(Boolean(this.hintState?.hints[w.id]), el => el.child(this.hintBadge(w.id, tree ? 30 : 8, t)));
+  }
+
+  hintBadge(id, left, t) {
+    const { hints, prefix } = this.hintState;
+    const color = hints[id].startsWith(prefix) ? t.accent : t.dim;
+    return h_flex().absolute().left(left).top(4).h(18).min_w(18).px(2).rounded(4).bg(t.surface)
+      .border_1().border_color(color).items_center().justify_center().font_family("JetBrainsMono Nerd Font Mono")
+      .text_size(12).font_bold().text_color(color).whitespace_nowrap().child(hints[id].toUpperCase());
   }
 
   compact({ w, i }, t) {
@@ -763,7 +775,8 @@ export default class Spaces extends View {
       .when(!w.active, (el) => el.hover((s) => s.bg(t.hover)))
       .on_click(() => run("space.select", { id: w.id }))
       .child(div().text_color(w.active ? t.foreground : t.muted).child(String(i + 1)))
-      .child(div().absolute().right(5).text_color(tone(t, w.status)).child(glyph(w.status))));
+      .child(div().absolute().right(5).text_color(tone(t, w.status)).child(glyph(w.status)))
+      .when(Boolean(this.hintState?.hints[w.id]), el => el.child(this.hintBadge(w.id, 4, t))));
   }
 
   render(cx) {
@@ -783,7 +796,12 @@ export default class Spaces extends View {
       changed = true;
     }
     if (changed) setShared("space.colors", kept);
+    const hints = shared("pbogut.sidebar.hints");
+    this.hintState = hints?.mode === "spaces" ? hints : null;
     const list = this.grouped(t, collapsed);
+    if (JSON.stringify(this.hintTargets) !== JSON.stringify(shared("pbogut.spaces.hintTargets"))) {
+      setShared("pbogut.spaces.hintTargets", this.hintTargets);
+    }
     // Bring the active space into view when it, or its place in the list, changes; a row already in view stays put.
     const active = sp.find(p => p.active)?.id;
     if (active !== this.revealed || this.activeAt !== this.revealedAt) {

@@ -9,6 +9,8 @@ import tempfile
 import time
 from urllib.parse import quote
 
+from PIL import Image
+
 SOURCE = Path(__file__).resolve().parents[3] / "dot_config/herdr-app"
 
 
@@ -27,7 +29,7 @@ def main():
                GIT_CONFIG_GLOBAL="/dev/null", GIT_CONFIG_NOSYSTEM="1",
                GIT_AUTHOR_NAME="Test", GIT_AUTHOR_EMAIL="test@example.com",
                GIT_COMMITTER_NAME="Test", GIT_COMMITTER_EMAIL="test@example.com")
-    for mod in ["pbogut-spaces", "pbogut-agents"]:
+    for mod in ["pbogut-spaces", "pbogut-agents", "pbogut-keys"]:
         shutil.copytree(SOURCE / "mods" / mod, root / "app/mods" / mod)
     shutil.copyfile(SOURCE / "keys.json", root / "app/keys.json")
     (root / "app/layouts").mkdir()
@@ -35,10 +37,12 @@ def main():
     sidebar = layout["children"][0]
     sidebar["children"] = [sidebar["children"][1]]
     sidebar["children"][0]["children"][0]["size"] = {"px": 180}
-    layout["children"][1] = {"id": "main", "type": "block", "content": {"tab": "active"}}
+    work = layout["children"][1]
+    work["children"] = [{"id": "main", "type": "block", "content": {"tab": "active"}},
+                        next(node for node in work["children"] if node["id"] == "prefix-anchor")]
     layout["children"].append({"id": "test-projects", "type": "block", "size": {"px": 0}, "min": 0,
                                "content": {"mod": "test-projects"}})
-    (root / "app/layouts/test.json").write_text(json.dumps(layout))
+    (root / "app/layouts/pbogut.json").write_text(json.dumps(layout))
     (root / "app/settings.json").write_text(json.dumps({
         "core": shutil.which("hc"), "telemetry": False, "sounds": {"enabled": False},
     }))
@@ -125,8 +129,8 @@ export default class Projects extends View {
         call("xdotool", "key", "--clearmodifiers", "--delay", "80", *keys)
 
     def open_picker():
-        key("alt+i")
-        wait(lambda: "pbogut-agents" in app("status")["overlays"], "Alt+I opens the agent picker")
+        call("xdotool", "keydown", "Alt_L", "key", "i", "key", "i", "keyup", "Alt_L")
+        wait(lambda: "pbogut-agents" in app("status")["overlays"], "Double Alt+I opens the agent picker")
 
     call("git", "-C", str(root / "work"), "init", "-b", "2026-11-18-feature")
     call("git", "-C", str(root / "work"), "commit", "--allow-empty", "-m", "Fixture")
@@ -168,7 +172,7 @@ export default class Projects extends View {
         try:
             window = call("xdotool", "search", "--sync", "--pid", str(process.pid)).splitlines()[0]
             call("xdotool", "windowfocus", window)
-            app("do", "layout.switch", "--name", "test")
+            app("do", "layout.switch", "--name", "pbogut")
             app("do", "space.new", "--name", "API", "--folder", str(root / "work"))
             idle, _ = agent("idle-agent", "idle")
             blocked, writer = agent("blocked-agent", "blocked")
@@ -189,6 +193,13 @@ export default class Projects extends View {
             app("do", "pbogut-spaces.reload@" + quote(json.dumps({"folder": str(root / "work")}), safe=""))
             wait(lambda: labels().get(blocked, {}).get("name") == "PMS", "Project config reload updates agent labels")
             call("herdr-app", "shot", str(root / "project-labels.png"))
+            key("alt+i")
+            wait(lambda: "pbogut-keys" in app("status")["overlays"], "Agent hints take focus")
+            call("herdr-app", "shot", str(root / "agent-hints.png"))
+            with Image.open(root / "agent-hints.png") as image:
+                assert len(image.crop((19, 259, 31, 271)).getcolors()) > 1, "First agent hint F is blank"
+            key("j")
+            wait(lambda: app("status")["agent"] == blocked, "Second hint focuses the second sidebar agent")
             app("do", "agent.focus", "--terminal", pinned)
             for address in [blocked, idle, busy]:
                 app("do", "agent.next")

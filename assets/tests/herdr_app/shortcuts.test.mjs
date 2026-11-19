@@ -21,6 +21,7 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true, e
   let view;
   let resolveCommand;
   const commands = [];
+  const shared = new Map();
   function sendCommand(command) {
     if (resolveCommand) {
       const resolve = resolveCommand;
@@ -29,6 +30,10 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true, e
     } else commands.push(command);
   }
   const host = {
+    shared: key => shared.get(key),
+    setShared: (key, value) => shared.set(key, value),
+    agents: () => [],
+    spaces: () => [],
     appHome: () => "/app",
     checking: () => checking,
     closeOverlay: () => { calls.push(["close"]); view.close?.(); },

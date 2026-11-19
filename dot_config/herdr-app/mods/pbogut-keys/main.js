@@ -1,26 +1,48 @@
 import { View, div } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { appHome, checking, closeOverlay, exec, focused, layout, nextCommand, notify, openOverlay, props, run, settings, theme } from "herdr";
-import { prefixBindings } from "./bindings.js";
+import { agents, appHome, checking, closeOverlay, exec, focused, layout, nextCommand, notify, openOverlay, props, run, settings, shared, setShared, spaces, terminals, theme } from "herdr";
+import { pickers, prefixBindings, sidebarHints } from "./bindings.js";
+
+const STATE = "pbogut.sidebar.hints";
 
 export default class Shortcuts extends View {
   init(_props, cx) {
     this.handle = cx.focus_handle();
     if (checking()) return;
     if (props()?.overlay) {
+      const { mode, overlay, hints } = props();
+      if (hints) setShared(STATE, { overlay, mode, hints, prefix: "" });
       this.handle.focus();
       return;
     }
+    if (shared(STATE)) setShared(STATE, null);
     cx.spawn(async (cx) => {
       for (;;) {
         const command = await nextCommand();
         if (command === `closed-${this.overlay}`) this.overlay = null;
-        if (command !== "toggle" && command !== "copy") continue;
+        if (this.overlay && command === `released-${this.overlay}`) {
+          this.released = true;
+          if (this.pending === 1) {
+            closeOverlay(this.overlay);
+            this.overlay = null;
+            run(pickers[this.mode]);
+          }
+          continue;
+        }
+        if (command !== "toggle" && command !== "copy" && !Object.hasOwn(pickers, command)) continue;
         const mod = command === "copy" ? "pbogut-copy" : "pbogut-keys";
         if (this.overlay) {
+          // A rapid pair can reach the layout before the bar receives a key-up.
+          // Later, native shortcut commands include auto-repeat but no held flag.
+          if (this.mode === command && Object.hasOwn(pickers, command) &&
+              Date.now() - this.opened > 100 && !this.released) {
+            this.pending++;
+            continue;
+          }
           closeOverlay(this.overlay);
           this.overlay = null;
-          if (this.mod === mod) {
+          if (this.mode === command) {
+            if (Object.hasOwn(pickers, command)) { run(pickers[command]); continue; }
             const terminal = command === "toggle" && focused()?.terminal;
             if (terminal) cx.spawn(async () => {
               try {
@@ -35,12 +57,16 @@ export default class Shortcuts extends View {
             continue;
           }
         }
-        this.open(mod);
+        if (Object.hasOwn(pickers, command) && layout().children.find(n => n.id === "sidebar")?.hidden) {
+          run(pickers[command]);
+          continue;
+        }
+        this.open(mod, command);
       }
     });
   }
 
-  open(mod) {
+  open(mod, mode) {
     if (!this.width) return;
     const viewport = window.viewport_size();
     const zoom = settings().zoom ?? 1;
@@ -48,11 +74,15 @@ export default class Shortcuts extends View {
     const index = work.children.findIndex((node) => node.id === "prefix-anchor");
     const below = work.children.slice(index + 1)
       .reduce((height, node) => height + (node.hidden ? 0 : node.size?.px ?? 0), 0);
-    this.mod = mod;
+    this.mode = mode;
+    this.opened = Date.now();
+    this.released = false;
+    this.pending = 0;
+    const hints = Object.hasOwn(pickers, mode) ? sidebarHints(shared(`pbogut.${mode}.hintTargets`) ?? []) : null;
     this.overlay = openOverlay({
       mod, kind: "window", frame: "none",
       width: 1, height: 1, at: { x: 0, y: 0 },
-      props: { left: (viewport.width - this.width) / zoom, bottom: below },
+      props: { mode, hints, left: (viewport.width - this.width) / zoom, bottom: below },
     });
   }
 
@@ -61,12 +91,42 @@ export default class Shortcuts extends View {
   }
 
   close() {
-    if (!checking() && props()?.overlay) run(`pbogut-keys.closed-${props().overlay}`);
+    const overlay = props()?.overlay;
+    if (!checking() && overlay) {
+      if (shared(STATE)?.overlay === overlay) setShared(STATE, null);
+      run(`pbogut-keys.closed-${overlay}`);
+    }
   }
 
   onKey(event, cx) {
     cx.stop_propagation();
     if (event.keystroke === "escape") return this.dismiss();
+    if (props()?.hints) {
+      if (event.is_held) return;
+      const state = shared(STATE);
+      if (state?.overlay !== props().overlay) return;
+      const { mode, hints, prefix } = state, key = event.keystroke;
+      if (key === (mode === "spaces" ? "alt-o" : "alt-i")) {
+        run(`pbogut-keys.${mode}`);
+        return;
+      }
+      if (key === "backspace") { setShared(STATE, { ...state, prefix: prefix.slice(0, -1) }); return; }
+      if (key.length !== 1) return;
+      const next = prefix + key;
+      const match = Object.entries(hints).find(([, hint]) => hint === next);
+      if (!match) {
+        if (Object.values(hints).some(h => h.startsWith(next))) setShared(STATE, { ...state, prefix: next });
+        return;
+      }
+      const [id] = match;
+      this.dismiss();
+      if (mode === "spaces") {
+        if (spaces().some(s => s.id === id)) run("space.select", { id });
+      } else if (agents().some(a => a.address === id) || terminals().some(t => t.address === id && t.parent && t.state === "live")) {
+        run("agent.focus", { terminal: id });
+      }
+      return;
+    }
     const action = prefixBindings[event.keystroke];
     if (action) {
       this.dismiss();
@@ -86,19 +146,29 @@ export default class Shortcuts extends View {
       .text_color(t.accent).text_size(12).child(key);
     const hint = (key, label) => h_flex().gap(6).flex_shrink_0()
       .child(keycap(key)).child(div().child(label));
+    const mode = props()?.mode, sidebar = Object.hasOwn(pickers, mode), space = mode === "spaces";
     const bar = h_flex().id("shortcuts").track_focus(this.handle).h(36)
       .overflow_hidden().on_key_down((event, cx) => this.onKey(event, cx))
+      .on_key_up((event) => {
+        if (sidebar && event.key === (space ? "o" : "i")) {
+          run(`pbogut-keys.released-${props().overlay}`);
+        }
+      })
       .on_mouse_down("left", (_event, cx) => cx.stop_propagation())
       .on_mouse_down_out(() => this.dismiss())
       .items_center().px(12).gap(24).whitespace_nowrap()
       .bg(t.popover).border_t_1().border_color(t.border)
       .text_color(t.foreground).text_size(13)
-      .child(h_flex().flex_1().min_w(0).gap(24).overflow_hidden()
+      .when(sidebar, el => el.child(h_flex().flex_1().min_w(0).gap(12).overflow_hidden()
+        .child(div().font_semibold().child(space ? "Space hints" : "Agent hints"))
+        .child(Object.keys(props().hints).length ? (space ? "Type a hint to switch" : "Type a hint to focus") : "No visible targets"))
+        .child(hint(space ? "Alt+O" : "Alt+I", "Open picker")))
+      .when(!sidebar, el => el.child(h_flex().flex_1().min_w(0).gap(24).overflow_hidden()
         .child(hint("Ctrl+G", "send Ctrl+G"))
         .child(hint("v", "split right"))
         .child(hint("s", "split down"))
         .child(hint("c", "new tab"))
-        .child(hint("x", "close project")))
+        .child(hint("x", "close project"))))
       .child(hint("Esc", "cancel"));
     // Native relative positioning follows resizes without reopening the overlay.
     return div().id("shortcuts-overlay").relative().size_full()
