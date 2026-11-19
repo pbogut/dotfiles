@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
 const label = "pbogut.tab.launch";
-const roles = new Set(["git"]);
+const roles = new Set(["nvim", "git", "dev", "sql", "rest", "docker"]);
 
 export function core(method, params) {
   return new Promise((resolve, reject) => {

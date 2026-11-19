@@ -21,16 +21,17 @@ export function commandFor(role, space, appHome, home, dev) {
   const id = space.machine && space.id.startsWith(`${space.machine}/`) ? space.id.slice(space.machine.length + 1) : space.id;
   const context = ["env", `HERDR_APP_HOME=${appHome}`, `HERDR_APP_SPACE_ID=${id}`];
   if (role.startsWith("oc-")) return [...context, "herdr-app-opencode", "--start", role];
+  const launch = [...context, "herdr-app-tab", "--start", role];
   switch (role) {
-    case "nvim": return [...context, "herdr-app-vim", "--start"];
+    case "nvim": return [...launch, "herdr-app-vim", "--start"];
     case "shell": case "shell-2": case "shell-3": return undefined;
     // Program-backed tabs close on exit, including the default make dev.
-    case "dev": return ["env", "-u", "HERDR_ENV", "--",
+    case "dev": return [...launch, "env", "-u", "HERDR_ENV", "--",
       ...(dev ?? ["zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi"])];
-    case "sql": return ["zsh", "-ic", "draft sql"];
-    case "rest": return ["zsh", "-ic", "rest"];
-    case "git": return [...context, "herdr-app-tab", "--start", role, "lazygit",
+    case "sql": return [...launch, "zsh", "-ic", "draft sql"];
+    case "rest": return [...launch, "zsh", "-ic", "rest"];
+    case "git": return [...launch, "lazygit",
       `--use-config-file=${home}/.config/lazygit/config.yml,${home}/.config/lazygit/config-herdr-app.yml`];
-    case "docker": return ["lazydocker"];
+    case "docker": return [...launch, "lazydocker"];
   }
 }

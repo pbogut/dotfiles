@@ -113,19 +113,22 @@ In a project, the `dev` role runs the command from `herdr-project.json`.
 When `dev` is omitted, or in an ordinary space, it runs `make dev` if a
 `Makefile` exists, or exits immediately otherwise.
 The tab closes when the command exits, including on failure.
-Teardown, tasks, and general command restoration are part of the remaining
-project-workflow migration.
+Named program tabs also recover after reboot or process loss, as described below.
 
 ## Program recovery
 
-New `git` tabs register their command, launch directory, and terminal identity
-through `herdr-app-tab`. Core keeps this record in the terminal's labels.
+New `nvim`, `git`, `dev`, `sql`, `rest`, and `docker` tabs register their command,
+launch directory, and terminal identity through `herdr-app-tab`.
+Core keeps this record in the terminal's labels.
 After a reboot or process loss, `~/.zshrc.d/herdr-app-tabs.zsh` checks at the
 replacement Zsh shell's first prompt and executes the saved command in its
 original directory. The tab must still have its registered name.
 Recovery preserves the terminal, splits, and focus. Commands keep their normal
 exit behavior, including closing the pane on a nonzero exit.
 Existing tabs register when closed and reopened.
+Neovim opens fresh through its editor-socket helper. The `dev` tab replays the
+command captured at launch, even if `herdr-project.json` has since changed.
+Recovery starts programs directly, without rerunning project setup.
 
 ## OpenCode sessions
 
@@ -655,11 +658,11 @@ empty results, and Escape in its isolated window.
 The named-tab test uses Zsh and harmless stand-in role programs, including
 successful and failed exits and recreating a closed tab. It also verifies
 actual SQL, main-editor, and scratch Neovim processes running together,
-lazygit file opening, and closing tabs on exit. It checks git recovery after
-process loss and Core shutdown, preserving literal arguments, splits, and focus.
-The editor test uses headless
-Neovim servers to check terminal-specific sockets and named-tab routing,
-including when an old space-wide lock is still held.
+lazygit file opening, and closing tabs on exit. It checks recovery for all six
+program roles after process loss and Core shutdown, preserving literal arguments,
+the saved dev command, splits, and focus. It also verifies that setup runs once.
+The editor test uses headless Neovim servers to check terminal-specific sockets
+and named-tab routing, including when an old space-wide lock is still held.
 The OpenCode test runs the real App/core and local TUI extension with a small
 session-cache fixture instead of an OpenCode account. It checks separate slots,
 root selection, normal exit/reopening, window reconnection, process loss,

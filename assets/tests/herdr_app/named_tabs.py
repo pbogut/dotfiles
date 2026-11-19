@@ -9,6 +9,7 @@ import signal
 import subprocess
 import tempfile
 import time
+from urllib.parse import quote
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -234,28 +235,49 @@ def main():
                 wait(lambda: all(item["id"] != tab["id"] for item in tabs(space)), f"Quitting actual {role} closes its tab")
                 assert json.loads(call("hc", "get", terminal, "--json"))["exit_code"] == 0
 
-            # Recover a registered git terminal, including literal argument boundaries.
-            (bindir / "lazygit").unlink()
-            (bindir / "lazygit").symlink_to(fixture)
+            # Recover every program role, including saved dev config and literal arguments.
+            for name in ("nvim", "lazygit"):
+                (bindir / name).unlink()
+                (bindir / name).symlink_to(fixture)
+            (root / "home/.zshrc").write_text(recovery_hooks)
             arguments = ["a file's name", "", "$(touch should-not-run)", "last\n"]
+            project = root / "recovered project's folder"
+            project.mkdir()
+            roles = ["nvim", "dev", "sql", "rest", "docker"]
+            (root / "app/setup-recovery.sh").write_text('echo setup >> "$HERDR_APP_HOME/setup-runs"\n')
+            config = {"tabs": roles, "dev": [str(fixture), *arguments], "setup": {"script": "setup-recovery.sh"}}
+            (root / "app/herdr-project.json").write_text(json.dumps(config))
+            app("do", "pbogut-tabs.project@" + quote(json.dumps({"folder": str(project)}), safe=""))
+            wait(lambda: any(item["folder"] == str(project) for item in app("ls")["spaces"]), "Recovery project opens")
+            space = next(item["id"] for item in app("ls")["spaces"] if item["folder"] == str(project))
+            wait(lambda: all(any(tab["name"] == role for tab in tabs(space)) for role in roles), "Program roles launch")
+            recovery_tabs = {tab["name"]: tab for tab in tabs(space) if tab["name"] in roles}
             recovered_tab = app("do", "tab.new", "--name", "git", "--folder", str(project),
                                 "--argv", json.dumps(["exec", "env", f"HERDR_APP_SPACE_ID={space}",
                                                      "herdr-app-tab", "--start", "git", "lazygit", *arguments]))
             terminal = recovered_tab["terminal"]
+            targets = {role: tab["terminals"][0]["terminal"] for role, tab in recovery_tabs.items()}
+            targets["git"] = terminal
 
-            def launches():
+            def launches(target=terminal):
                 return [record for line in (root / "roles.jsonl").read_text().splitlines()
-                        if (record := json.loads(line))["terminal"] == terminal]
+                        if (record := json.loads(line))["terminal"] == target]
 
-            wait(lambda: len(launches()) == 1, "Git fixture launches")
+            wait(lambda: all(len(launches(target)) == 1 for target in targets.values()), "All fixtures launch")
+            before = {role: launches(target)[0] for role, target in targets.items()}
+            assert before["dev"]["args"] == arguments and before["dev"]["legacy"] is None
+            # Recovery must replay the running job, not reread this changed command or rerun setup.
+            config["dev"] = ["must-not-run"]
+            (root / "app/herdr-project.json").write_text(json.dumps(config))
             app("do", "pane.split", "--direction", "right")
             wait(lambda: len(next(tab for tab in tabs(space) if tab["id"] == recovered_tab["tab"])["terminals"]) == 2,
                  "The git tab has an unrelated shell split")
             app("do", "tab.select", "--id", scratch["tab"])
             wait(lambda: app("status")["tab"] == scratch["tab"], "Another tab stays focused during recovery")
-            old = json.loads(call("hc", "get", terminal, "--json"))
-            os.kill(old["pid"], signal.SIGKILL)
-            wait(lambda: len(launches()) == 2, "A lost git program restarts")
+            for target in targets.values():
+                old = json.loads(call("hc", "get", target, "--json"))
+                os.kill(old["pid"], signal.SIGKILL)
+            wait(lambda: all(len(launches(target)) == 2 for target in targets.values()), "Every lost program restarts")
             assert app("status")["tab"] == scratch["tab"], "Process recovery preserves focus"
 
             app("do", "window.close")
@@ -264,10 +286,13 @@ def main():
             call("hc", "server", "start")
             process = subprocess.Popen(["herdr-app"], env=env, stdout=log, stderr=log)
             call("xdotool", "search", "--sync", "--pid", str(process.pid))
-            wait(lambda: len(launches()) == 3, "Git restores after a core shutdown")
-            assert all(record["cwd"] == str(project) and record["args"] == arguments and record["space"] == space
-                       for record in launches()), launches()
-            assert len({record["pid"] for record in launches()}) == 3
+            wait(lambda: all(len(launches(target)) == 3 for target in targets.values()), "Every role restores after Core shutdown")
+            for role, target in targets.items():
+                assert all(record["cwd"] == str(project) and record["args"] == before[role]["args"]
+                           and record["space"] == space for record in launches(target)), (role, launches(target))
+                assert len({record["pid"] for record in launches(target)}) == 3
+            assert all(record["legacy"] is None for record in launches(targets["dev"]))
+            assert (root / "app/setup-runs").read_text().splitlines() == ["setup"]
             restored = next(tab for tab in tabs(space) if tab["id"] == recovered_tab["tab"])
             assert len(restored["terminals"]) == 2, restored
             assert app("status")["tab"] == scratch["tab"], "Core recovery preserves focus"
@@ -278,8 +303,14 @@ def main():
             wait(lambda: len(next(tab for tab in tabs(space) if tab["id"] == recovered_tab["tab"])["terminals"]) == 1,
                  "Program exit closes only its own split")
             assert len(launches()) == 3, "A normal nonzero exit does not relaunch"
+            for role, tab in recovery_tabs.items():
+                target = targets[role]
+                call("hc", "send", target, "fail")
+                wait(lambda: all(item["id"] != tab["id"] for item in tabs(space)), f"Recovered {role} closes on exit")
+                assert json.loads(call("hc", "get", target, "--json"))["exit_code"] == 17
+                assert len(launches(target)) == 3
             assert not app("status")["errors"], app("status")
-            print("PASS: named-tab shortcuts, close-on-exit, editor routing, git process/core recovery, arguments, splits and focus.", flush=True)
+            print("PASS: named-tab shortcuts, editor routing, all-role process/core recovery, saved dev, setup, exits, splits and focus.", flush=True)
         except Exception as error:
             if isinstance(error, subprocess.CalledProcessError):
                 print(error.output, flush=True)

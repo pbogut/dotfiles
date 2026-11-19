@@ -187,7 +187,8 @@ test("creation is serialized and OpenCode slots sort numerically", async () => {
   assert.deepEqual(app.spaces[0].tabs.map((tab) => tab.name), ["nvim", "oc-2", "oc-10", "1"]);
   const editor = app.calls.find(([name, args]) => name === "tab.new" && args.name === "nvim")[1];
   assert.equal(editor.folder, "/project one");
-  assert.deepEqual(editor.argv, ["exec", "env", "HERDR_APP_HOME=/config/herdr-app", "HERDR_APP_SPACE_ID=one", "herdr-app-vim", "--start"]);
+  assert.deepEqual(editor.argv, ["exec", "env", "HERDR_APP_HOME=/config/herdr-app", "HERDR_APP_SPACE_ID=one",
+    "herdr-app-tab", "--start", "nvim", "herdr-app-vim", "--start"]);
   const opencode = app.calls.find(([name, args]) => name === "tab.new" && args.name === "oc-2")[1];
   assert.deepEqual(opencode.argv, ["exec", "env", "HERDR_APP_HOME=/config/herdr-app", "HERDR_APP_SPACE_ID=one",
     "herdr-app-opencode", "--start", "oc-2"]);
@@ -249,7 +250,7 @@ test("ordinary spaces ignore project definitions and keep manual tool shortcuts 
     await settle(app);
     assert.deepEqual(app.reads, [], "Neither project nor global herdr-project.json is read");
     assert.deepEqual(creations(app).map(tab => tab.name), ["dev", "nvim"]);
-    assert.deepEqual(creations(app)[0].argv, devArgv("zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi"));
+    assert.deepEqual(creations(app)[0].argv, devArgv(space, "zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi"));
     assert.equal(app.persisted.has("pbogut.projects.spaces"), false);
     app.calls.length = 0;
     await app.command("close-project");
@@ -392,7 +393,10 @@ test("a rejected space creation does not block the next project request", async 
 });
 
 const creations = (app) => app.calls.filter(([name]) => name === "tab.new").map(([, args]) => args);
-const devArgv = (...args) => ["exec", "env", "-u", "HERDR_ENV", "--", ...args];
+const devArgv = (space, ...args) => ["exec", "env",
+  `HERDR_APP_HOME=${space.machine ? "/remote/app" : "/config/herdr-app"}`,
+  `HERDR_APP_SPACE_ID=${space.id.replace(/^[^/]+\//, "")}`,
+  "herdr-app-tab", "--start", "dev", "env", "-u", "HERDR_ENV", "--", ...args];
 
 test("manual reload applies fresh tabs and dev, refreshes labels, and preserves running tabs and selection", async () => {
   const app = await fixture();
@@ -418,7 +422,7 @@ test("manual reload applies fresh tabs and dev, refreshes labels, and preserves 
   space.tabs = space.tabs.filter(tab => tab.id !== dev.id);
   await app.command("reload-project");
   app.flush();
-  assert.deepEqual(creations(app).at(-1).argv, devArgv("new-dev"));
+  assert.deepEqual(creations(app).at(-1).argv, devArgv(space, "new-dev"));
 });
 
 test("invalid reloads and picker reopens preserve existing tabs and never refresh labels", async () => {
@@ -469,7 +473,7 @@ test("manual reload reads the active machine and a folderless space reports an e
   await app.command("reload-project");
   app.flush();
   assert.deepEqual(creations(app).map(tab => tab.name), ["dev"]);
-  assert.deepEqual(creations(app)[0].argv, devArgv("remote-dev"));
+  assert.deepEqual(creations(app)[0].argv, devArgv(app.spaces[0], "remote-dev"));
   const update = app.calls.find(([name]) => name.startsWith("pbogut-spaces.reload@"))[0];
   assert.equal(JSON.parse(decodeURIComponent(update.split("@")[1])).machine, "remote");
   app.calls.length = 0;
@@ -487,7 +491,7 @@ test("project layouts use one validated dev configuration for the whole batch", 
   app.flush();
   const space = app.spaces.find((space) => space.folder === "/new");
   assert.deepEqual(space.tabs.map((tab) => tab.name), ["shell", "dev"]);
-  assert.deepEqual(creations(app).find((tab) => tab.name === "dev").argv, devArgv("npm", "run", "dev", "--", "two words"));
+  assert.deepEqual(creations(app).find((tab) => tab.name === "dev").argv, devArgv(space, "npm", "run", "dev", "--", "two words"));
   assert.deepEqual(app.reads, [path]);
 });
 
@@ -498,7 +502,7 @@ test("dev shortcuts reuse a running tab and reload the command only when recreat
   for (let i = 0; i < 10; i++) await app.command("dev");
   app.flush();
   assert.equal(creations(app).length, 1);
-  assert.deepEqual(creations(app)[0].argv, devArgv("npm", "run", "dev"));
+  assert.deepEqual(creations(app)[0].argv, devArgv(app.spaces[0], "npm", "run", "dev"));
   assert.equal(creations(app)[0].folder, "/project one");
   app.files.set(path, "{");
   await app.command("dev");
@@ -509,7 +513,7 @@ test("dev shortcuts reuse a running tab and reload the command only when recreat
   app.files.set(path, '{"dev":["./dev script","new argument"]}');
   await app.command("dev");
   app.flush();
-  assert.deepEqual(creations(app)[1].argv, devArgv("./dev script", "new argument"));
+  assert.deepEqual(creations(app)[1].argv, devArgv(app.spaces[0], "./dev script", "new argument"));
 });
 
 test("dev shortcuts use fallback commands, while a project file fully overrides them", async () => {
@@ -520,8 +524,8 @@ test("dev shortcuts use fallback commands, while a project file fully overrides 
     await app.command("dev");
     app.flush();
     assert.deepEqual(creations(app)[0].argv, override
-      ? devArgv("zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi")
-      : devArgv("npm", "run", "dev"));
+      ? devArgv(app.spaces[0], "zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi")
+      : devArgv(app.spaces[0], "npm", "run", "dev"));
   }
 });
 
@@ -533,7 +537,7 @@ test("remote dev shortcuts read their own definitions and ignore local definitio
   await app.command("dev");
   app.flush();
   assert.deepEqual(app.reads, ["/project one/herdr-project.json"]);
-  assert.deepEqual(creations(app)[0].argv, devArgv("remote-dev"));
+  assert.deepEqual(creations(app)[0].argv, devArgv(app.spaces[0], "remote-dev"));
 });
 
 test("the same project path on two machines creates separate spaces with remote paths and config", async () => {
@@ -553,7 +557,7 @@ test("the same project path on two machines creates separate spaces with remote 
   assert.ok(tabs[1].argv.includes("--use-config-file=/remote/home/.config/lazygit/config.yml,/remote/home/.config/lazygit/config-herdr-app.yml"));
   assert.ok(tabs[2].argv.includes("HERDR_APP_HOME=/remote/app"));
   assert.ok(tabs[2].argv.includes(`HERDR_APP_SPACE_ID=${remote.id.slice(4)}`));
-  assert.deepEqual(tabs[3].argv, devArgv("remote-dev"));
+  assert.deepEqual(tabs[3].argv, devArgv(remote, "remote-dev"));
   assert.equal(app.spaces.filter((space) => space.folder === "/project one").length, 2);
   const before = creations(app).length;
   await app.command(projectCommand({ folder: "/project one", machine: "vps" }));

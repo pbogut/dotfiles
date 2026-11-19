@@ -52,9 +52,11 @@ test("dev commands preserve argument boundaries and require an executable", () =
     assert.throws(() => projectConfig({ dev: value }), /"dev"/);
   }
   assert.deepEqual(commandFor("dev", { id: "one" }, "/app", "/home/test", dev),
-    ["env", "-u", "HERDR_ENV", "--", ...dev]);
+    ["env", "HERDR_APP_HOME=/app", "HERDR_APP_SPACE_ID=one", "herdr-app-tab", "--start", "dev",
+      "env", "-u", "HERDR_ENV", "--", ...dev]);
   assert.deepEqual(commandFor("dev", { id: "one" }, "/app", "/home/test"),
-    ["env", "-u", "HERDR_ENV", "--", "zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi"]);
+    ["env", "HERDR_APP_HOME=/app", "HERDR_APP_SPACE_ID=one", "herdr-app-tab", "--start", "dev",
+      "env", "-u", "HERDR_ENV", "--", "zsh", "-ic", "if [[ -f Makefile ]]; then exec make dev; fi"]);
 });
 
 test("dev follows whole-file fallback precedence and invalid commands identify the file", async () => {

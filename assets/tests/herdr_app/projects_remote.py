@@ -28,7 +28,7 @@ def main():
                    HERDR_TELEMETRY="0", SHELL="/bin/sh", MANGOHUD="0")
         scripts = Path(env["HOME"]) / ".scripts"
         scripts.mkdir()
-        for script in ("ls-project", "herdr-app-vim", "git-new-dated-worktree", "git-wt"):
+        for script in ("ls-project", "herdr-app-vim", "herdr-app-tab", "git-new-dated-worktree", "git-wt"):
             shutil.copyfile(ROOT / f"dot_scripts/executable_{script}", scripts / script)
             (scripts / script).chmod(0o700)
         env["PATH"] = f"{scripts}:{env['PATH']}"
@@ -62,6 +62,7 @@ def main():
     setup_runner.parent.mkdir(parents=True)
     shutil.copyfile(ROOT / "dot_config/herdr-app/mods/pbogut-tabs/setup.sh", setup_runner)
     shutil.copyfile(ROOT / "dot_config/herdr-app/mods/pbogut-tabs/teardown.sh", setup_runner.with_name("teardown.sh"))
+    shutil.copyfile(ROOT / "dot_config/herdr-app/mods/pbogut-tabs/recovery.mjs", setup_runner.with_name("recovery.mjs"))
     (remote_app / "setup fixture.sh").write_text(
         'printf "%s\\n" "$HERDR_PROJECT_DIR" "$HERDR_WORKTREE_DIR" "$PWD" >> "$HERDR_PROJECT_DIR/setup.log"\n')
     (remote_app / "teardown fixture.sh").write_text(

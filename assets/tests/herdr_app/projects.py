@@ -35,7 +35,7 @@ def main():
     (root / "app/shared.json").write_text(json.dumps({"frame.welcomed": "skipped"}))
     scripts = root / "home/.scripts"
     scripts.mkdir()
-    for name in ("ls-project", "git-new-dated-worktree", "git-wt", "herdr-app-vim"):
+    for name in ("ls-project", "git-new-dated-worktree", "git-wt", "herdr-app-vim", "herdr-app-tab"):
         shutil.copyfile(ROOT / f"dot_scripts/executable_{name}", scripts / name)
         (scripts / name).chmod(0o700)
     env["PATH"] = f"{scripts}:{env['PATH']}"
