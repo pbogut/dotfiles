@@ -32,6 +32,8 @@ gui:
   commandLogSize: 8
 git:
   diffRenderers:
+    - type: extDiff
+      command: difft --color=always --width={{width}} --background={{colorScheme}} --context={{diffContext}}
     - colorArg: always
       command: diff-so-fancy
       # useConfig: false
