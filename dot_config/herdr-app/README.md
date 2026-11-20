@@ -37,6 +37,7 @@ Prefix bindings live in `mods/pbogut-keys/bindings.js`.
 | After Ctrl+G | Action |
 | --- | --- |
 | c | New tab |
+| q | Close current tab |
 | v / s | Split right / down |
 | x | Close project with teardown, or normally close an ordinary space |
 | Ctrl+G | Send Ctrl+G to the focused terminal |

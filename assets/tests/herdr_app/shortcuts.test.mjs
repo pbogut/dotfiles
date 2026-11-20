@@ -123,7 +123,7 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true, e
 test("prefix closes the native overlay before running each action", async () => {
   for (const [key, command, direction] of [
     ["c", "tab.new", undefined], ["v", "pane.split", "right"], ["s", "pane.split", "down"],
-    ["x", "pbogut-tabs.close-project", undefined],
+    ["q", "tab.close", undefined], ["x", "pbogut-tabs.close-project", undefined],
   ]) {
     const app = await fixture();
     app.key(key);
@@ -139,7 +139,7 @@ test("removed prefix shortcuts do nothing, including navigation, copy, and numbe
     "shift-s", "y", "ctrl-y", "ctrl-k", "w", "ctrl-w", "b", "t", "ctrl-t",
     "p", "n", "]", "[", "ctrl-shift-d", "h", "j", "k", "l", "shift-x",
     "z", "shift-n", "shift-w", "shift-t", "?", "shift-/", "g", "ctrl-j",
-    "tab", "shift-tab", "up", "down", "left", "right", "q", "ctrl-c",
+    "tab", "shift-tab", "up", "down", "left", "right", "ctrl-c",
     "ctrl-g", "enter", ..."123456789",
   ]) app.key(key);
   assert.deepEqual(app.calls, []);

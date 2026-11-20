@@ -211,6 +211,7 @@ export default class Shortcuts extends View {
         .child(hint("v", "split right"))
         .child(hint("s", "split down"))
         .child(hint("c", "new tab"))
+        .child(hint("q", "close tab"))
         .child(hint("x", "close project"))))
       .child(hint("Esc", "cancel"));
     // Native relative positioning follows resizes without reopening the overlay.
