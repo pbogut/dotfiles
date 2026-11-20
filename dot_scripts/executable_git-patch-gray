@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""Git interactive.diffFilter: dim formatting-only hunks in diff-so-fancy."""
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+SGR = re.compile(rb"\033\[[0-9;:]*m")
+GRAY = {b"-": b"\033[38;5;243m", b"+": b"\033[38;5;248m"}
+HUNK = re.compile(rb"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
+INDEX = re.compile(rb"index ([0-9a-f]+)\.\.([0-9a-f]+) 100(?:644|755)$")
+LIMIT = 1024 * 1024
+
+
+def run(*args, data=None, **kwargs):
+    return subprocess.run(args, input=data, capture_output=True, check=True,
+                          timeout=3, **kwargs).stdout
+
+
+def structural_lines(path, old_id, new_id):
+    """Return zero-based changed lines on each side, or no verdict."""
+    if (path.is_absolute() or ".." in path.parts or path.is_symlink()
+            or not path.is_file() or path.stat().st_size > LIMIT):
+        return
+    after = path.read_bytes()
+    # interactive.diffFilter is also called by restore/reset -p. Never guess
+    # which revision was displayed, or trust a working file that changed meanwhile.
+    if not run("git", "hash-object", "--stdin", data=after).startswith(new_id):
+        return
+    if int(run("git", "cat-file", "-s", old_id)) > LIMIT:
+        return
+    before = run("git", "cat-file", "blob", old_id)
+    with tempfile.TemporaryDirectory() as tmp:
+        old, new = (Path(tmp, side, path.name) for side in ("old", "new"))
+        for file, content in ((old, before), (new, after)):
+            file.parent.mkdir()
+            file.write_bytes(content)
+        report = json.loads(run("difft", "--display=json", old, new,
+                                env={**os.environ, "DFT_UNSTABLE": "yes"}))
+    lang = report["language"].lower()
+    if not lang or lang.startswith("text") or "exceeded" in lang:
+        return
+    changed = (set(), set())
+    if report["status"] == "unchanged":
+        return changed
+    if report["status"] == "changed":
+        for chunk in report["chunks"]:
+            for row in chunk:
+                for side, lines in zip(("lhs", "rhs"), changed):
+                    if side in row and row[side]["changes"]:
+                        lines.add(row[side]["line_number"])
+        if any(changed):
+            return changed
+
+
+def dim_hunks(file_patch, fancy, offset):
+    headers = []
+    for i, line in enumerate(file_patch):
+        if match := HUNK.match(line):
+            headers.append((i, match))
+    if not headers:
+        return
+    metadata = file_patch[:headers[0][0]]
+    ids = next((m for line in metadata if (m := INDEX.fullmatch(line))), None)
+    name = next((line[6:].removesuffix(b"\t") for line in metadata if line.startswith(b"+++ b/")), None)
+    if not ids or not name:
+        return
+    changed = structural_lines(Path(os.fsdecode(name)), *ids.groups())
+    if changed is None:
+        return
+    for j, (start, match) in enumerate(headers):
+        old, nold, new, nnew = match.groups()
+        if any(any(int(pos) - 1 <= line < int(pos) - 1 + int(n or 1) for line in lines)
+               for lines, pos, n in zip(changed, (old, new), (nold, nnew))):
+            continue
+        end = headers[j + 1][0] if j + 1 < len(headers) else len(file_patch)
+        for i in range(start + 1, end):
+            if shade := GRAY.get(file_patch[i][:1]):
+                fancy[offset + i] = shade + SGR.sub(b"", fancy[offset + i]) + b"\033[0m"
+
+
+def main():
+    patch = sys.stdin.buffer.read()
+    try:
+        output = run("diff-so-fancy", "--patch", data=patch)
+    except (OSError, subprocess.SubprocessError):
+        return patch
+    raw = SGR.sub(b"", patch).split(b"\n")
+    fancy = output.split(b"\n")
+    if len(raw) != len(fancy):
+        return patch  # Git rejects filters that add or drop lines.
+    starts = [i for i, line in enumerate(raw) if line.startswith(b"diff --git ")]
+    for start, end in zip(starts, starts[1:] + [len(raw)]):
+        try:
+            dim_hunks(raw[start:end], fancy, start)
+        except (OSError, subprocess.SubprocessError, ValueError, KeyError, TypeError, AttributeError):
+            continue  # Keep fancy's colors if difft is missing or its JSON changes.
+    return b"\n".join(fancy)
+
+
+if __name__ == "__main__":
+    sys.stdout.buffer.write(main())
