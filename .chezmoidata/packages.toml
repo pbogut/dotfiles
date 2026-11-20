@@ -9,6 +9,7 @@ pacman = [
   "copyq",
   "dbus-broker",
   "ddcutil",
+  "difftastic",
   "dunst",
   "enca",
   "fakeroot",
