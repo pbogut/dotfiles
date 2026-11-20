@@ -13,7 +13,7 @@ export default class NamedTabs extends View {
     this.closer = new ProjectClose();
     this.tasks = new ProjectTasks();
     if (checking()) return;
-    for (const space of spaces()) this.sortTabs(space);
+    this.sortNewTabs();
     cx.spawn(async (cx) => {
       for (;;) {
         const command = await nextCommand();
@@ -245,6 +245,16 @@ export default class NamedTabs extends View {
     }
   }
 
+  sortNewTabs() {
+    const previous = this.tabIds;
+    this.tabIds = new Map();
+    for (const space of spaces()) {
+      const known = previous?.get(space.id);
+      this.tabIds.set(space.id, new Set(space.tabs.map(tab => tab.id)));
+      if (space.tabs.some(tab => !known?.has(tab.id))) this.sortTabs(space);
+    }
+  }
+
   sortTabs(space) {
     const tabs = [...space.tabs].sort(compareTabs);
     if (tabs.every((tab, index) => tab.id === space.tabs[index].id)) return;
@@ -252,7 +262,6 @@ export default class NamedTabs extends View {
   }
 
   complete(request, space, tab) {
-    this.sortTabs(space);
     if (request.layout) {
       const initial = space.tabs.find((tab) => tab.id === request.layout.initial && !tab.named && tab.panes === 1);
       if (initial && !request.layout.focused) {
@@ -348,6 +357,8 @@ export default class NamedTabs extends View {
   }
 
   render(cx) {
+    if (checking()) return div().h(0);
+    this.sortNewTabs();
     this.closer.update(cx);
     this.updateSetups(cx);
     if (this.pending) {

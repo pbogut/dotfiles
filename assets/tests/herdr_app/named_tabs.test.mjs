@@ -171,6 +171,29 @@ test("loading the mod restores fixed order without changing existing tabs or sel
   assert.ok(app.calls.every(([name]) => name === "tab.move"));
 });
 
+test("switching to a named tab preserves manual order until a new tab appears in that space", async () => {
+  const app = await fixture(false, ["nvim", "git"].map(name => ({ id: name, name, named: true })));
+  const [space, other] = app.spaces;
+  space.tabs.reverse();
+  app.render();
+  await app.command("git");
+  app.flush();
+  assert.deepEqual(app.calls, [["tab.select", { id: "git" }]]);
+
+  other.tabs.unshift({ id: "other-shell", named: false });
+  app.render();
+  app.flush();
+  assert.deepEqual(other.tabs.map(tab => tab.id), ["other", "other-shell"]);
+  assert.deepEqual(space.tabs.map(tab => tab.id), ["git", "nvim"]);
+
+  space.tabs.splice(1, 0, { id: "plain", named: false });
+  space.selected = "plain";
+  app.render();
+  app.flush();
+  assert.deepEqual(space.tabs.map(tab => tab.id), ["nvim", "git", "plain"]);
+  assert.equal(space.selected, "plain");
+});
+
 test("rapid repeated requests create one tab and preserve the original terminal", async () => {
   const app = await fixture();
   for (let i = 0; i < 20; i++) await app.command("shell");

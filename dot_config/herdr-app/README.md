@@ -91,9 +91,10 @@ Alt+H/J/K/L override pane navigation in this layout. New tabs start in
 the space's configured folder. Tabs use a fixed order:
 `nvim`, `shell`, `shell-2`, `dev`, `sql`, `rest`, `git`, `docker`, numbered
 `oc-N` slots, then `shell-3`. OpenCode slots sort numerically. Other tabs follow
-in their existing relative order. Loading the mod, opening or reloading a project,
-and named-tab shortcuts restore this order. Project definitions only choose which
-tabs open automatically.
+in their existing relative order. Each new tab restores this order in its space.
+Switching to an existing tab preserves manual tab order, including when you use
+a named-tab shortcut. Loading the mod and opening or reloading a project also
+restore the fixed order. Project definitions only choose which tabs open automatically.
 Repeated shortcuts reuse existing tabs. They preserve the running program
 and its working directory. Shortcuts retain the initial unnamed tab.
 Program-backed tabs replace the launcher's shell with `exec`. Exiting the
