@@ -4,23 +4,24 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   17/08/2024
 #=================================================
-if [[ "$1" == "focus" ]]; then
-    shift
-    focus-or-exec "brave-personal" brave \
-        --ozone-platform=wayland \
-        --class=brave-personal \
-        --user-data-dir="$HOME/.config/BraveSoftware/Personal/" \
-        --profile-directory=Personal \
-        --remote-debugging-address=127.0.0.1 \
-        --remote-debugging-port=9223 \
-        "$@"
-else
-    brave \
-        --ozone-platform=wayland \
-        --class=brave-personal \
-        --user-data-dir="$HOME/.config/BraveSoftware/Personal/" \
-        --profile-directory=Personal \
-        --remote-debugging-address=127.0.0.1 \
-        --remote-debugging-port=9223 \
-        "$@"
+launcher=(brave)
+if [[ ${XDG_CURRENT_DESKTOP:-} == niri ]]; then
+    launcher=(niri msg action spawn -- brave)
 fi
+if [[ ${1:-} == focus ]]; then
+    shift
+fi
+if (($# == 0)); then
+    case ${XDG_CURRENT_DESKTOP:-} in
+    niri | Hyprland | sway) launcher=(focus-or-exec brave-personal "${launcher[@]}") ;;
+    esac
+fi
+
+exec "${launcher[@]}" \
+    --ozone-platform=wayland \
+    --class=brave-personal \
+    --user-data-dir="$HOME/.config/BraveSoftware/Personal/" \
+    --profile-directory=Personal \
+    --remote-debugging-address=127.0.0.1 \
+    --remote-debugging-port=9223 \
+    "$@"
