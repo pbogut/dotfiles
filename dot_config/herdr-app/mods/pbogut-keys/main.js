@@ -1,6 +1,6 @@
 import { View, div } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { agents, appHome, checking, closeOverlay, exec, focused, layout, nextCommand, notify, openOverlay, props, run, settings, shared, setShared, spaces, terminals, theme } from "herdr";
+import { agents, appHome, checking, closeOverlay, exec, focused, layout, nextCommand, notify, openOverlay, props, run, settings, shared, setShared, spaces, terminals, theme, window as appWindow } from "herdr";
 import { pickers, prefixBindings, sidebarHints } from "./bindings.js";
 
 const STATE = "pbogut.sidebar.hints";
@@ -11,8 +11,16 @@ export default class Shortcuts extends View {
     if (checking()) return;
     if (props()?.overlay) {
       const { mode, overlay, hints } = props();
-      if (hints) setShared(STATE, { overlay, mode, hints, prefix: "" });
+      if (hints) {
+        const current = mode === "spaces" ? spaces().find(s => s.active)?.id : focused()?.agent;
+        const selected = Object.hasOwn(hints, current) ? current : Object.keys(hints)[0] ?? null;
+        setShared(STATE, { overlay, mode, hints, prefix: "", selected });
+      }
       this.handle.focus();
+      // Frameless windows don't dismiss on blur. Only watch while hints are open.
+      if (hints) cx.timer.every(75, () => {
+        if (!this.closing && (!this.handle.is_focused() || !appWindow().active)) this.dismiss();
+      });
       return;
     }
     if (shared(STATE)) setShared(STATE, null);
@@ -20,16 +28,22 @@ export default class Shortcuts extends View {
       for (;;) {
         const command = await nextCommand();
         if (command === `closed-${this.overlay}`) this.overlay = null;
+        if (command === `closed-${this.picker}`) this.picker = null;
         if (this.overlay && command === `released-${this.overlay}`) {
           this.released = true;
           if (this.pending === 1) {
             closeOverlay(this.overlay);
             this.overlay = null;
-            run(pickers[this.mode]);
+            this.openPicker(this.mode);
           }
           continue;
         }
         if (command !== "toggle" && command !== "copy" && !Object.hasOwn(pickers, command)) continue;
+        if (this.picker) {
+          closeOverlay(this.picker);
+          this.picker = null;
+          if (this.mode === command) continue;
+        }
         const mod = command === "copy" ? "pbogut-copy" : "pbogut-keys";
         if (this.overlay) {
           // A rapid pair can reach the layout before the bar receives a key-up.
@@ -42,7 +56,7 @@ export default class Shortcuts extends View {
           closeOverlay(this.overlay);
           this.overlay = null;
           if (this.mode === command) {
-            if (Object.hasOwn(pickers, command)) { run(pickers[command]); continue; }
+            if (Object.hasOwn(pickers, command)) { this.openPicker(command); continue; }
             const terminal = command === "toggle" && focused()?.terminal;
             if (terminal) cx.spawn(async () => {
               try {
@@ -58,12 +72,20 @@ export default class Shortcuts extends View {
           }
         }
         if (Object.hasOwn(pickers, command) && layout().children.find(n => n.id === "sidebar")?.hidden) {
-          run(pickers[command]);
+          this.openPicker(command);
           continue;
         }
         this.open(mod, command);
       }
     });
+  }
+
+  openPicker(mode) {
+    const viewport = window.viewport_size().width / (settings().zoom ?? 1);
+    const width = Math.min(680, viewport - 32);
+    this.mode = mode;
+    this.picker = openOverlay({ mod: pickers[mode], kind: "popup", width, height: 0.7,
+      at: { x: (viewport - width) / 2, y: 40 }, props: { sidebarPicker: true, picker: mode === "agents" } });
   }
 
   open(mod, mode) {
@@ -87,6 +109,8 @@ export default class Shortcuts extends View {
   }
 
   dismiss() {
+    if (this.closing) return;
+    this.closing = true;
     closeOverlay(props().overlay);
   }
 
@@ -102,10 +126,23 @@ export default class Shortcuts extends View {
     cx.stop_propagation();
     if (event.keystroke === "escape") return this.dismiss();
     if (props()?.hints) {
-      if (event.is_held) return;
       const state = shared(STATE);
       if (state?.overlay !== props().overlay) return;
       const { mode, hints, prefix } = state, key = event.keystroke;
+      const targets = (shared(`pbogut.${mode}.hintTargets`) ?? []).filter(id => Object.hasOwn(hints, id));
+      if (key === "j" || key === "k") {
+        if (targets.length) {
+          const i = targets.indexOf(state.selected);
+          const at = i < 0 ? 0 : (i + (key === "j" ? 1 : -1) + targets.length) % targets.length;
+          setShared(STATE, { ...state, prefix: "", selected: targets[at] });
+        }
+        return;
+      }
+      if (event.is_held) return;
+      if (key === "enter") {
+        if (targets.includes(state.selected)) this.choose(mode, state.selected);
+        return;
+      }
       if (key === (mode === "spaces" ? "alt-o" : "alt-i")) {
         run(`pbogut-keys.${mode}`);
         return;
@@ -118,19 +155,22 @@ export default class Shortcuts extends View {
         if (Object.values(hints).some(h => h.startsWith(next))) setShared(STATE, { ...state, prefix: next });
         return;
       }
-      const [id] = match;
-      this.dismiss();
-      if (mode === "spaces") {
-        if (spaces().some(s => s.id === id)) run("space.select", { id });
-      } else if (agents().some(a => a.address === id) || terminals().some(t => t.address === id && t.parent && t.state === "live")) {
-        run("agent.focus", { terminal: id });
-      }
+      if (targets.includes(match[0])) this.choose(mode, match[0]);
       return;
     }
     const action = prefixBindings[event.keystroke];
     if (action) {
       this.dismiss();
       run(...action);
+    }
+  }
+
+  choose(mode, id) {
+    this.dismiss();
+    if (mode === "spaces") {
+      if (spaces().some(s => s.id === id)) run("space.select", { id });
+    } else if (agents().some(a => a.address === id) || terminals().some(t => t.address === id && t.parent && t.state === "live")) {
+      run("agent.focus", { terminal: id });
     }
   }
 
@@ -159,9 +199,12 @@ export default class Shortcuts extends View {
       .items_center().px(12).gap(24).whitespace_nowrap()
       .bg(t.popover).border_t_1().border_color(t.border)
       .text_color(t.foreground).text_size(13)
-      .when(sidebar, el => el.child(h_flex().flex_1().min_w(0).gap(12).overflow_hidden()
-        .child(div().font_semibold().child(space ? "Space hints" : "Agent hints"))
-        .child(Object.keys(props().hints).length ? (space ? "Type a hint to switch" : "Type a hint to focus") : "No visible targets"))
+      .when(sidebar, el => el.child(h_flex().flex_1().min_w(0).gap(24).overflow_hidden()
+        .child(div().flex_shrink_0().font_semibold().text_color(t.accent).child(space ? "Space hints" : "Agent hints"))
+        .child(Object.keys(props().hints).length
+          ? h_flex().gap(8).items_center().child("Type a hint or").child(hint("j", "down"))
+            .child(hint("k", "up")).child(hint("Enter", "select"))
+          : "No visible targets"))
         .child(hint(space ? "Alt+O" : "Alt+I", "Open picker")))
       .when(!sidebar, el => el.child(h_flex().flex_1().min_w(0).gap(24).overflow_hidden()
         .child(hint("Ctrl+G", "send Ctrl+G"))

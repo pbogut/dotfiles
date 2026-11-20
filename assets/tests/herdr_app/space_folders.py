@@ -153,6 +153,10 @@ def main():
                 assert len(after.crop((19, 112, 31, 124)).getcolors()) > 1, "First hint F is blank"
             key("f")
             wait(lambda: app("status")["space"] == opened[expected[0]], "Hint selects first sidebar space")
+            key("alt+o", "j", "Escape")
+            assert app("status")["space"] == opened[expected[0]], "Escape cancels a highlighted move"
+            key("alt+o", "k", "Return")
+            wait(lambda: app("status")["space"] == opened[expected[-1]], "k wraps upward and Enter selects the last row")
             for number, folder in enumerate(expected, 1):
                 key(f"alt+{number}")
                 wait(lambda: app("status")["space"] == opened[folder], f"Alt+{number} selects the grouped space")

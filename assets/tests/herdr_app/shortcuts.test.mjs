@@ -30,6 +30,7 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true, e
     } else commands.push(command);
   }
   const host = {
+    window: () => ({ active: true }),
     shared: key => shared.get(key),
     setShared: (key, value) => shared.set(key, value),
     agents: () => [],

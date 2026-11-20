@@ -38,14 +38,18 @@ export default class SpacePicker extends View {
     });
   }
 
-  close() {
+  dismiss() {
     this.closed = true;
     closeOverlay(props().overlay);
   }
 
+  close() {
+    if (props()?.sidebarPicker) run(`pbogut-keys.closed-${props().overlay}`);
+  }
+
   open(row) {
     if (!row || this.closed || !spaces().some(w => w.id === row.w.id)) return;
-    this.close();
+    this.dismiss();
     run("space.select", { id: row.w.id });
   }
 
@@ -69,7 +73,7 @@ export default class SpacePicker extends View {
         const key = event.keystroke === "ctrl-j" ? "down" : event.keystroke === "ctrl-k" ? "up" : event.key;
         if (key === "escape") {
           cx.stop_propagation();
-          return this.close();
+          return this.dismiss();
         }
         if (!rows.length || !["up", "down"].includes(key)) return;
         this.at = (this.at + (key === "down" ? 1 : rows.length - 1)) % rows.length;

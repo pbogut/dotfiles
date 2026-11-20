@@ -547,7 +547,7 @@ export default class Spaces extends View {
           .child(svg(`mods/workspace-chrome/chevron-${folded ? "right" : "down"}.svg`).size(11).flex_none()));
       items.push(collapsed ? railCell(header) : header);
       if (!folded) {
-        const selected = mine.findIndex(row => row.w.active);
+        const selected = mine.findIndex(row => this.isSelected(row.w));
         if (selected !== -1) activeAt = items.length + selected;
         items.push(...mine.map(draw));
       }
@@ -693,8 +693,12 @@ export default class Spaces extends View {
       .when(g.behind > 0, (el) => el.child(div().flex_none().text_color(t.ansi1).child(`\u2193${g.behind}`)));
   }
 
+  isSelected(w) {
+    return this.hintState ? this.hintState.selected === w.id : w.active;
+  }
+
   row({ w, i, g, tree }, t) {
-    const on = w.active;
+    const on = this.isSelected(w);
     const name = this.name(w);
     const icon = this.icon(w, tree, t);
     const fromIndex = this.pressed === null ? -1 : spaces().findIndex(s => s.id === this.pressed);
@@ -771,8 +775,8 @@ export default class Spaces extends View {
       .rounded(6)
       .justify_center()
       .items_center()
-      .when(w.active, (el) => el.bg(t.selected))
-      .when(!w.active, (el) => el.hover((s) => s.bg(t.hover)))
+      .when(this.isSelected(w), (el) => el.bg(t.selected))
+      .when(!this.isSelected(w), (el) => el.hover((s) => s.bg(t.hover)))
       .on_click(() => run("space.select", { id: w.id }))
       .child(div().text_color(w.active ? t.foreground : t.muted).child(String(i + 1)))
       .child(div().absolute().right(5).text_color(tone(t, w.status)).child(glyph(w.status)))
@@ -803,7 +807,7 @@ export default class Spaces extends View {
       setShared("pbogut.spaces.hintTargets", this.hintTargets);
     }
     // Bring the active space into view when it, or its place in the list, changes; a row already in view stays put.
-    const active = sp.find(p => p.active)?.id;
+    const active = sp.find(p => this.isSelected(p))?.id;
     if (active !== this.revealed || this.activeAt !== this.revealedAt) {
       this.revealed = active;
       this.revealedAt = this.activeAt;

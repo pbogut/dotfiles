@@ -591,10 +591,14 @@ over an agent's number for its project and full branch.
 ## Agents picker
 
 In the `pbogut` layout, Alt+I draws hints over the agent icons and Alt+O does
-the same for spaces. Type the letters to jump. Esc cancels; Backspace erases
+the same for spaces. Type a hint to jump directly, or use `j` and `k` to move
+the highlight down and up in sidebar order. `Enter` switches to that row.
+Navigation wraps at the ends. Esc cancels; Backspace erases
 one letter. A floating bottom bar captures the keys without moving the rows.
 Hints keep their targets until you finish. Folded rows stay folded. Hold Alt
 and tap the same letter again to search all rows, including folded ones.
+Tap the shortcut again in search to close it. Switching between Alt+O and Alt+I
+replaces the previous panel; losing keyboard focus dismisses the hint bar.
 When the sidebar is hidden, the shortcut opens search directly.
 
 The searchable agents picker (`mods/pbogut-agents/picker.js`) follows the Agents sidebar's

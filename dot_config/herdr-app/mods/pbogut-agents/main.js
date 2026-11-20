@@ -4,7 +4,7 @@
 // Uses Spaces' project labels and branches, and adds a Folder + priority view.
 
 import { View, div, svg } from "gpui-kit";
-import { v_flex, h_flex } from "gpui-base";
+import { v_flex, h_flex, ScrollHandle } from "gpui-base";
 import { agents, terminals, focused, spaces, run, theme, shared, setShared, setAgentOrder, openOverlay, closeOverlay, props, window, layout, checking, nextCommand } from "herdr";
 import { icon, status } from "./appearance.js";
 import AgentPicker, { openPicker } from "./picker.js";
@@ -61,6 +61,7 @@ export default class Agents extends View {
       return;
     }
     if (props()?.sortMenu) return;
+    this.scroll = ScrollHandle.new();
     this.folded = new Set();
     // Each agent's last state and when it changed (ms), kept across restarts.
     try { this.changed = JSON.parse(localStorage.getItem("changed") ?? "{}"); } catch { this.changed = {}; }
@@ -73,6 +74,10 @@ export default class Agents extends View {
     if (!checking()) cx.spawn(async () => {
       for (;;) if (await nextCommand() === "picker") openPicker();
     });
+  }
+
+  close() {
+    if (props()?.sidebarPicker) run(`pbogut-keys.closed-${props().overlay}`);
   }
 
   // Stamps agents whose state changed. Done and idle count as one: looking at a
@@ -166,7 +171,7 @@ export default class Agents extends View {
     const k = s.t;
     const st = kidStatus(k, this.listed);
     const pic = icon(k.program, 14, t.foreground);
-    const on = k.address === shown;
+    const on = this.hintState ? k.address === this.hintState.selected : k.address === shown;
     return h_flex().relative()
       .id(`sub-${k.address}`)
       .pl(39)
@@ -263,13 +268,17 @@ export default class Agents extends View {
     const hints = shared("pbogut.sidebar.hints");
     this.hintState = hints?.mode === "agents" ? hints : null;
     const targets = new Set();
+    let highlighted;
+    const target = (address, el) => {
+      targets.add(address);
+      if (!highlighted && address === this.hintState?.selected) highlighted = el;
+      return el;
+    };
     const withKids = (a, i) => {
       const subs = collapsed ? [] : this.tree(all, a.address);
-      targets.add(a.address);
-      const r = row(a, i, subs);
+      const r = target(a.address, row(a, i, subs));
       if (this.folded.has(a.address)) return [r];
-      for (const s of subs) targets.add(s.t.address);
-      return [r, ...subs.map((s) => this.subRow(t, s, shown, byPriority))];
+      return [r, ...subs.map(s => target(s.t.address, this.subRow(t, s, shown, byPriority)))];
     };
 
     // The fold chevron; folded, the count too, colored by the most urgent one.
@@ -301,6 +310,7 @@ export default class Agents extends View {
     const row = (a, i, subs = []) => {
       const pic = icon(a.program, 16, t.foreground);
       const name = nameOf(a);
+      const selected = this.hintState ? a.address === this.hintState.selected : a.focused;
       const branch = branchOf(a);
       // An agent on another machine (`vps/t7`) says which.
       const machine = a.address.includes("/") ? a.address.split("/")[0] : null;
@@ -313,6 +323,7 @@ export default class Agents extends View {
           .items_center()
           .gap(4)
           .tooltip([name, branch].filter(Boolean).join(" · "))
+          .when(this.hintState && selected, el => el.bg(t.selected))
           .hover((s) => s.bg(t.hover))
           .on_click(() => run("pane.focus", { pane: a.pane }))
           .child(div().flex_1().min_w(0).whitespace_nowrap().text_right().text_color(t.muted).child(String(i + 1)))
@@ -347,7 +358,7 @@ export default class Agents extends View {
         .rounded(8)
         .items_center()
         .gap(9)
-        .when(a.focused, (el) => el.bg(t.selected))
+        .when(selected, (el) => el.bg(t.selected))
         .cursor_pointer()
         .hover((s) => s.bg(t.hover))
         .on_hover((on, cx) => {
@@ -428,6 +439,9 @@ export default class Agents extends View {
     const rows = collapsed
       ? list.flatMap(withKids)
       : groups.flatMap(drawGroup);
+    const at = highlighted ? rows.indexOf(highlighted) : -1;
+    if (at !== this.revealedAt && at >= 0) this.scroll.scroll_to_item(at);
+    this.revealedAt = at;
     if (JSON.stringify([...targets]) !== JSON.stringify(shared("pbogut.agents.hintTargets"))) {
       setShared("pbogut.agents.hintTargets", [...targets]);
     }
@@ -465,7 +479,7 @@ export default class Agents extends View {
       .when(list.length === 0 && !collapsed, (el) =>
         el.child(div().px(12).text_size(12).text_color(t.dim).child("No agent status yet. Agents show up here when they report their status. Older versions and agents inside tmux may not.")),
       )
-      .child(v_flex().id("ag-list").flex_1().min_h(0).px(collapsed ? 0 : 8).overflow_y_scrollbar().mode("always").children(rows))
+      .child(v_flex().id("ag-list").flex_1().min_h(0).px(collapsed ? 0 : 8).overflow_y_scrollbar().mode("always").track_scroll(this.scroll).children(rows))
       .when(collapsed, (el) =>
         el.child(
           h_flex()

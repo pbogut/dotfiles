@@ -198,8 +198,10 @@ export default class Projects extends View {
             call("herdr-app", "shot", str(root / "agent-hints.png"))
             with Image.open(root / "agent-hints.png") as image:
                 assert len(image.crop((19, 259, 31, 271)).getcolors()) > 1, "First agent hint F is blank"
-            key("j")
-            wait(lambda: app("status")["agent"] == blocked, "Second hint focuses the second sidebar agent")
+            key("j", "k", "j")
+            assert app("status")["agent"] == pinned and "pbogut-keys" in app("status")["overlays"]
+            key("Return")
+            wait(lambda: app("status")["agent"] == blocked, "Enter focuses the highlighted second sidebar agent")
             app("do", "agent.focus", "--terminal", pinned)
             for address in [blocked, idle, busy]:
                 app("do", "agent.next")

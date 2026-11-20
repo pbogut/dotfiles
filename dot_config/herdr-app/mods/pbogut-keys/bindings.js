@@ -5,11 +5,11 @@ export const prefixBindings = {
   x: ["pbogut-tabs.close-project"],
 };
 
-export const pickers = { spaces: "mod.open:pbogut-space-picker", agents: "pbogut-agents.picker" };
+export const pickers = { spaces: "pbogut-space-picker", agents: "pbogut-agents" };
 
-// Same unpinned hint order as the task picker. Mods cannot import across directories.
+// Task-picker order, except j/k are reserved for moving the sidebar highlight.
 export function sidebarHints(ids) {
-  const keys = "fjdkslaurieowhgmvcn";
+  const keys = "fdslaurieowhgmvcn";
   let leaves = [...keys];
   while (leaves.length < ids.length) {
     const split = Math.min(leaves.length, Math.ceil((ids.length - leaves.length) / (keys.length - 1)));

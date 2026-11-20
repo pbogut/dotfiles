@@ -56,7 +56,7 @@ async function sidebar(list, sort) {
     "gpui-kit": mock({ View: class {}, div: element, svg: element, image: element }),
     "gpui-base": mock({
       v_flex: element, h_flex: element, InputState: {}, Input: {},
-      v_virtual_list: element, VirtualListScrollHandle: {},
+      v_virtual_list: element, VirtualListScrollHandle: {}, ScrollHandle: { new: () => ({ scroll_to_item() {} }) },
     }),
     herdr: mock({
       agents: () => state.agents, terminals: () => state.terminals, panes: () => state.panes,
