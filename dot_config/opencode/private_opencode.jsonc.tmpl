@@ -87,6 +87,16 @@
     "@slkiser/opencode-quota@latest",
     "{{ .chezmoi.homeDir }}/.local/share/opencode/plugins/lsp-builds/4a17bc8379e572ab104ec26b55f92ee9b51dce37-{{ include "assets/opencode2-lsp/sidebar.patch" | sha256sum }}"
   ],
+  "formatter": {
+    // Adding a custom formatter enables the built-ins.
+    {{- range splitList " " "gofmt mix oxfmt prettier biome zig clang-format ktlint ruff air uv rubocop standardrb htmlbeautifier dart ocamlformat terraform latexindent gleam shfmt nixfmt rustfmt pint ormolu cljfmt dfmt" }}
+    "{{ . }}": { "disabled": true },
+    {{- end }}
+    "phpcbf": {
+      "command": ["{{ .chezmoi.homeDir }}/.config/opencode/format-php", "$FILE"],
+      "extensions": [".php"]
+    }
+  },
   "lsp": {
     "php intelephense": {
       "command": ["intelephense", "--stdio"],

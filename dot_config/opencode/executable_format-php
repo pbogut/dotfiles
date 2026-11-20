@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -eu
+
+file=$(realpath -e -- "$1")
+root=$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)
+[[ -f $file && $file == "${root%/}/"* ]] || exit 0
+
+# Walk up from the changed file so nested packages can use their own rules.
+dir=$(dirname -- "$file")
+ruleset=
+bin=phpcbf
+while :; do
+    if [[ -z $ruleset ]]; then
+        for name in .phpcs.xml phpcs.xml .phpcs.xml.dist phpcs.xml.dist; do
+            if [[ -f $dir/$name ]]; then
+                ruleset=$dir/$name
+                break
+            fi
+        done
+    fi
+    if [[ $bin == phpcbf && -x $dir/vendor/bin/phpcbf ]]; then
+        bin=$dir/vendor/bin/phpcbf
+    fi
+    [[ $dir != "$root" ]] || break
+    dir=$(dirname -- "$dir")
+done
+[[ -n $ruleset ]] || exit 0
+
+cd -- "$(dirname -- "$ruleset")"
+status=0
+"$bin" --standard="$ruleset" "$file" || status=$?
+# PHPCBF 3 exits 1 after successfully fixing a file.
+if [[ $status == 1 ]]; then
+    exit 0
+fi
+exit "$status"
