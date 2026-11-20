@@ -189,7 +189,7 @@ export default class Agents extends View {
         .when(Boolean(l), el => el.border_l(1.5).border_color(t.input))
         .when(l === "└" || l === "├", el => el.border_b(1.5).rounded_bl(6))))
       .when(Boolean(pic), el => el.child(div().mr(8).child(pic)))
-      .child(div().flex_1().truncate().text_color(on ? t.foreground : t.muted).child(k.name || k.template || k.program?.name || k.address))
+      .child(div().flex_1().truncate().text_color(t.foreground).child(k.name || k.template || k.program?.name || k.address))
       .child(status(t, { status: st }, compact))
       .when(Boolean(this.hintState?.hints[k.address]), el => el.child(this.hintBadge(k.address, 39 + 13 * s.lines.length, t)));
   }
@@ -331,7 +331,6 @@ export default class Agents extends View {
           .when(Boolean(this.hintState?.hints[a.address]), el => el.child(this.hintBadge(a.address, 4, t)));
       }
       const when = this.since(a);
-      const idle = a.status === "idle" && !a.focused;
       const isPinned = a.pinned;
       const pin = div()
         .id(`pin-${a.address}`)
@@ -374,8 +373,8 @@ export default class Agents extends View {
             cx.notify();
           })).child(pic)))
         .child(h_flex().flex_1().min_w(0).gap(5).items_center()
-          .child(div().flex_initial().min_w(40).truncate().tooltip(name).text_color(idle ? t.muted : t.foreground).child(name))
-          .when(Boolean(branch), el => el.child(div().flex_1().min_w(40).truncate().text_size(11).text_color(t.dim)
+          .child(div().flex_initial().min_w(40).truncate().tooltip(name).text_color(t.foreground).child(name))
+          .when(Boolean(branch), el => el.child(div().flex_1().min_w(40).truncate().text_size(11).text_color(t.muted)
             .tooltip(branch).child(`· ${branch.replace(/^\d{4}-\d{2}-\d{2}-(?=.)/, "")}`))))
         .when(Boolean(machine), el => el.child(div().text_size(10).text_color(t.dim).child(machine)))
         .when(subs.length > 0, el => el.child(fold(a, subs)))
@@ -407,6 +406,7 @@ export default class Agents extends View {
     // A group's header; it folds the group. Folded, it says how many and the most urgent state.
     const header = (g) => {
       const open = !this.folded.has(g.id);
+      const groupColor = g.sections ? t.muted : t.dim;
       const top = SECTION_STATUS[g.members.reduce((rank, a) => Math.max(rank, rankOf(a)), 0)];
       return h_flex()
         .id(g.id)
@@ -425,14 +425,14 @@ export default class Agents extends View {
           open ? this.folded.add(g.id) : this.folded.delete(g.id);
           cx.notify();
         })
-        .when(Boolean(g.sections), el => el.child(svg("mods/workspace-chrome/folder.svg").size(12).flex_none().text_color(t.dim)))
-        .child(div().truncate().text_color(t[g.status] ?? t.dim).child(g.label))
+        .when(Boolean(g.sections), el => el.child(svg("mods/workspace-chrome/folder.svg").size(12).flex_none().text_color(groupColor)))
+        .child(div().truncate().text_color(t[g.status] ?? groupColor).child(g.label))
         .when(byPriority || !open, (el) => el.child(div().text_color(t.dim).child(String(g.members.length))))
         .child(div().flex_1())
         .when(!open, (el) => el
           .when((!byPriority || Boolean(g.sections)) && Boolean(top), (el) => el.child(status(t, { status: top }, true)))
-          .child(svg("mods/workspace-chrome/chevron-right.svg").size(11).flex_none().text_color(t.dim)))
-        .when(Boolean(g.sections) && open, el => el.child(svg("mods/workspace-chrome/chevron-down.svg").size(11).flex_none().text_color(t.dim)));
+          .child(svg("mods/workspace-chrome/chevron-right.svg").size(11).flex_none().text_color(groupColor)))
+        .when(Boolean(g.sections) && open, el => el.child(svg("mods/workspace-chrome/chevron-down.svg").size(11).flex_none().text_color(groupColor)));
     };
     const drawGroup = g => [header(g), ...(this.folded.has(g.id) ? []
       : g.sections ? g.sections.flatMap(drawGroup) : g.members.flatMap(withKids))];
