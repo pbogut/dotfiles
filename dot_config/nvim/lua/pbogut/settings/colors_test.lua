@@ -46,7 +46,6 @@ u.highlights({
 
 })
 
-cmd.TSBufDisable('highlight')
 fn.matchadd('ClTestAdDark1', 'ClTestAdDark1\\>')
 fn.matchadd('ClTestAdDark2', 'ClTestAdDark2\\>')
 fn.matchadd('ClTestAdInfo', 'ClTestAdInfo\\>')
