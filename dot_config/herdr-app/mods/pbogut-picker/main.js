@@ -7,9 +7,29 @@
 
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, InputState, Input } from "gpui-base";
-import { agents, spaces, terminals, run, hc, theme, settings, props, closeOverlay, openOverlay, shared, setShared } from "herdr";
+import {
+  agents,
+  spaces,
+  terminals,
+  run,
+  hc,
+  theme,
+  settings,
+  props,
+  closeOverlay,
+  openOverlay,
+  shared,
+  setShared,
+} from "herdr";
 
-const MARK = { ansi6: "#22a99a", ansi3: "#e3814f", ansi4: "#5b8def", ansi5: "#8b7cf6", ansi2: "#3fae6a", ansi1: "#d9649a" };
+const MARK = {
+  ansi6: "#22a99a",
+  ansi3: "#e3814f",
+  ansi4: "#5b8def",
+  ansi5: "#8b7cf6",
+  ansi2: "#3fae6a",
+  ansi1: "#d9649a",
+};
 
 // Space colors, kept by space id in shared "space.colors": a theme
 // color name ("ansi6") or a picked #rrggbb. A space seen without one gets
@@ -18,7 +38,9 @@ const MARK = { ansi6: "#22a99a", ansi3: "#e3814f", ansi4: "#5b8def", ansi5: "#8b
 const PROJECT_COLORS = ["ansi6", "ansi3", "ansi4", "ansi5", "ansi2", "ansi1"];
 function spaceColors() {
   const ids = new Set(spaces().map((p) => p.id));
-  const kept = Object.fromEntries(Object.entries(shared("space.colors") ?? {}).filter(([id]) => ids.has(id)));
+  const kept = Object.fromEntries(
+    Object.entries(shared("space.colors") ?? {}).filter(([id]) => ids.has(id)),
+  );
   let changed = Object.keys(kept).length !== Object.keys(shared("space.colors") ?? {}).length;
   for (const p of spaces()) {
     if (kept[p.id] || p.name === "~") continue;
@@ -41,10 +63,19 @@ export default class Picker extends View {
     this.input = InputState.new({ placeholder: "Go to a tab, space or agent…" });
     this.input.on("change", (_e, cx) => {
       this.filter = this.input.value();
-      this.at = this.filter ? Math.max(0, this.rows().filter(r => r.kind !== "head").findIndex(r => r.kind === "ctx")) : 0;
+      this.at = this.filter
+        ? Math.max(
+            0,
+            this.rows()
+              .filter((r) => r.kind !== "head")
+              .findIndex((r) => r.kind === "ctx"),
+          )
+        : 0;
       cx.notify();
     });
-    this.input.on("submit", (_e, cx) => this.go(this.rows().filter(r => r.kind !== "head")[this.at], cx));
+    this.input.on("submit", (_e, cx) =>
+      this.go(this.rows().filter((r) => r.kind !== "head")[this.at], cx),
+    );
     this.input.focus();
     cx.timer.after(600, () => this.input.focus());
     this.at = null;
@@ -55,7 +86,10 @@ export default class Picker extends View {
     cx.spawn(async (cx) => {
       try {
         const r = await hc(["machine", "ls", "--json"]);
-        if (r.code === 0) this.machines = (JSON.parse(r.stdout).machines ?? []).filter((m) => m.state === "connected" && !m.temporary).map((m) => m.name);
+        if (r.code === 0)
+          this.machines = (JSON.parse(r.stdout).machines ?? [])
+            .filter((m) => m.state === "connected" && !m.temporary)
+            .map((m) => m.name);
       } catch {}
       cx.notify();
     });
@@ -81,7 +115,14 @@ export default class Picker extends View {
           const mine = all.filter((a) => a.tab === ctx.id);
           return { w, ctx, mine, team: teamOf(mine.map((a) => a.address)) };
         })
-        .filter((c) => !f || [w.name, c.ctx.name, ...c.mine.map((a) => a.program?.name ?? "")].join(" ").toLowerCase().includes(f));
+        .filter(
+          (c) =>
+            !f ||
+            [w.name, c.ctx.name, ...c.mine.map((a) => a.program?.name ?? "")]
+              .join(" ")
+              .toLowerCase()
+              .includes(f),
+        );
       return { w, ctxs };
     });
     const busy = groups.filter((p) => p.w.status && p.ctxs.length);
@@ -106,7 +147,9 @@ export default class Picker extends View {
   go(r, cx) {
     if (!r) return;
     if (r.kind === "earlier") {
-      this.at = this.rows().filter(r => r.kind !== "head").findIndex(r => r.kind === "earlier");
+      this.at = this.rows()
+        .filter((r) => r.kind !== "head")
+        .findIndex((r) => r.kind === "earlier");
       this.showEarlier = !this.showEarlier;
       this.input.focus();
       cx.notify();
@@ -119,8 +162,17 @@ export default class Picker extends View {
   }
 
   glyph(t, st) {
-    if (st === "working") return svg("mods/workspace-chrome/spinner.svg").size(12).flex_none().text_color(t.working).spin(900);
-    return div().w(12).flex_none().text_color(t[st] ?? t.dim).child(st === "idle" ? "○" : st ? "●" : "·");
+    if (st === "working")
+      return svg("mods/workspace-chrome/spinner.svg")
+        .size(12)
+        .flex_none()
+        .text_color(t.working)
+        .spin(900);
+    return div()
+      .w(12)
+      .flex_none()
+      .text_color(t[st] ?? t.dim)
+      .child(st === "idle" ? "○" : st ? "●" : "·");
   }
 
   render() {
@@ -128,7 +180,11 @@ export default class Picker extends View {
     const rows = this.rows();
     const pickable = rows.filter((r) => r.kind !== "head");
     // Opens on where you are.
-    if (this.at === null) this.at = Math.max(0, pickable.findIndex((r) => r.kind === "ctx" && r.w.active && r.ctx.active));
+    if (this.at === null)
+      this.at = Math.max(
+        0,
+        pickable.findIndex((r) => r.kind === "ctx" && r.w.active && r.ctx.active),
+      );
     this.at = Math.min(this.at, pickable.length - 1);
     const sel = pickable[this.at];
     // One continuous strip: each row (and the group title before it) at a fixed
@@ -137,7 +193,10 @@ export default class Picker extends View {
     const H = { head: 29, earlier: 35, new: 36, ctx: 32, space: 32 };
     const tops = [];
     let y = 0;
-    rows.forEach((r) => { tops.push(y); y += H[r.kind] ?? 32; });
+    rows.forEach((r) => {
+      tops.push(y);
+      y += H[r.kind] ?? 32;
+    });
     const total = y;
     const height = Math.min(320, this.listHeight ?? 320);
     const fixed = total > height;
@@ -146,13 +205,20 @@ export default class Picker extends View {
     const si = rows.indexOf(sel);
     if (si >= 0) {
       if (tops[si] < this.scroll) this.scroll = tops[si];
-      if (tops[si] + (H[sel.kind] ?? 32) > this.scroll + height) this.scroll = tops[si] + (H[sel.kind] ?? 32) - height;
+      if (tops[si] + (H[sel.kind] ?? 32) > this.scroll + height)
+        this.scroll = tops[si] + (H[sel.kind] ?? 32) - height;
     }
     const place = (el, i) =>
       fixed
-        ? el.absolute().left(0).right(0).top(tops[i] - this.scroll).bottom(height - (tops[i] + (H[rows[i].kind] ?? 32) - this.scroll))
+        ? el
+            .absolute()
+            .left(0)
+            .right(0)
+            .top(tops[i] - this.scroll)
+            .bottom(height - (tops[i] + (H[rows[i].kind] ?? 32) - this.scroll))
         : el;
-    const visible = (i) => !fixed || (tops[i] + (H[rows[i].kind] ?? 32) > this.scroll && tops[i] < this.scroll + height);
+    const visible = (i) =>
+      !fixed || (tops[i] + (H[rows[i].kind] ?? 32) > this.scroll && tops[i] < this.scroll + height);
 
     const row = (r) => {
       if (r.kind === "head") {
@@ -165,7 +231,18 @@ export default class Picker extends View {
           .text_size(11)
           .font_semibold()
           .text_color(t.dim)
-          .child(h_flex().size(18).rounded(5).bg(spaceColor(t, r.w)).items_center().justify_center().text_size(10.5).font_bold().text_color("#ffffff").child([...r.w.name][0]?.toUpperCase() ?? "?"))
+          .child(
+            h_flex()
+              .size(18)
+              .rounded(5)
+              .bg(spaceColor(t, r.w))
+              .items_center()
+              .justify_center()
+              .text_size(10.5)
+              .font_bold()
+              .text_color("#ffffff")
+              .child([...r.w.name][0]?.toUpperCase() ?? "?"),
+          )
           .child(r.w.name);
       }
       if (r.kind === "earlier") {
@@ -182,11 +259,14 @@ export default class Picker extends View {
           .when(r === sel, (el) => el.bg(t.hover).text_color(t.foreground))
           .hover((s) => s.bg(t.hover).text_color(t.foreground))
           .on_click((_e, cx) => this.go(r, cx))
-          .child(`earlier: ${r.count} quiet space${r.count > 1 ? "s" : ""} ${this.showEarlier ? "▴" : "▾"}`);
+          .child(
+            `earlier: ${r.count} quiet space${r.count > 1 ? "s" : ""} ${this.showEarlier ? "▴" : "▾"}`,
+          );
       }
       const on = r === sel;
       if (r.kind === "new" || r.kind === "space") {
-        const label = r.kind === "new" ? "new tab" : r.machine ? `new space on ${r.machine}` : "new space";
+        const label =
+          r.kind === "new" ? "new tab" : r.machine ? `new space on ${r.machine}` : "new space";
         return h_flex()
           .id(r.kind === "new" ? "pk-new" : `pk-space-${r.machine ?? "here"}`)
           .mx(4)
@@ -210,7 +290,7 @@ export default class Picker extends View {
         .id(`pk-${r.ctx.id}`)
         .mx(4)
         .px(10)
-.h(32)
+        .h(32)
         .rounded(7)
         .gap(10)
         .items_center()
@@ -219,10 +299,26 @@ export default class Picker extends View {
         .hover((s) => s.bg(t.hover))
         .on_click(() => this.go(r))
         .child(this.glyph(t, r.ctx.status))
-        .child(div().flex_1().truncate().text_color(t.foreground).when(here, (d) => d.font_semibold()).child(r.ctx.name))
-        .when(r.ctx.status === "blocked", (el) => el.child(div().text_size(11).text_color(t.blocked).child("needs you")))
-        .when(r.ctx.status === "done", (el) => el.child(div().text_size(11).text_color(t.done).child("finished")))
-        .child(div().text_size(11).text_color(t.dim).child(who + (r.team ? `  +${r.team}` : "")));
+        .child(
+          div()
+            .flex_1()
+            .truncate()
+            .text_color(t.foreground)
+            .when(here, (d) => d.font_semibold())
+            .child(r.ctx.name),
+        )
+        .when(r.ctx.status === "blocked", (el) =>
+          el.child(div().text_size(11).text_color(t.blocked).child("needs you")),
+        )
+        .when(r.ctx.status === "done", (el) =>
+          el.child(div().text_size(11).text_color(t.done).child("finished")),
+        )
+        .child(
+          div()
+            .text_size(11)
+            .text_color(t.dim)
+            .child(who + (r.team ? `  +${r.team}` : "")),
+        );
     };
 
     return v_flex()
@@ -248,9 +344,37 @@ export default class Picker extends View {
         cx.stop_propagation();
         cx.notify();
       })
-      .child(h_flex().items_center().child(div().flex_1().text_size(15).font_semibold().text_color(t.foreground).child("Go to…")).child(div().id("picker-esc").px(6).py(2).rounded(5).text_size(11).text_color(t.dim).cursor_pointer().hover((s) => s.bg(t.hover).text_color(t.foreground)).on_click(() => this.close()).child("Esc")))
       .child(
-        h_flex().h(36).flex_none().px(10).gap(8).items_center().rounded(9).border_1().border_color(t.accent).bg(t.background)
+        h_flex()
+          .items_center()
+          .child(
+            div().flex_1().text_size(15).font_semibold().text_color(t.foreground).child("Go to…"),
+          )
+          .child(
+            div()
+              .id("picker-esc")
+              .px(6)
+              .py(2)
+              .rounded(5)
+              .text_size(11)
+              .text_color(t.dim)
+              .cursor_pointer()
+              .hover((s) => s.bg(t.hover).text_color(t.foreground))
+              .on_click(() => this.close())
+              .child("Esc"),
+          ),
+      )
+      .child(
+        h_flex()
+          .h(36)
+          .flex_none()
+          .px(10)
+          .gap(8)
+          .items_center()
+          .rounded(9)
+          .border_1()
+          .border_color(t.accent)
+          .bg(t.background)
           .child(svg("mods/workspace-chrome/search.svg").size(15).text_color(t.dim))
           .child(Input.new(this.input).flex_1().h_full().text_size(12.8).text_color(t.foreground)),
       )
@@ -268,10 +392,20 @@ export default class Picker extends View {
             el.overflow_hidden().on_scroll_wheel((e, cx) => {
               this.scroll = Math.max(0, Math.min(this.scroll - e.delta.y, maxScroll));
               // The selection follows the wheel, so the next frame doesn't scroll back to it.
-              while (this.at < pickable.length - 1 && tops[rows.indexOf(pickable[this.at])] < this.scroll) this.at++;
-              while (this.at > 0 && tops[rows.indexOf(pickable[this.at])] + (H[pickable[this.at].kind] ?? 32) > this.scroll + height) this.at--;
+              while (
+                this.at < pickable.length - 1 &&
+                tops[rows.indexOf(pickable[this.at])] < this.scroll
+              )
+                this.at++;
+              while (
+                this.at > 0 &&
+                tops[rows.indexOf(pickable[this.at])] + (H[pickable[this.at].kind] ?? 32) >
+                  this.scroll + height
+              )
+                this.at--;
               cx.notify();
-            }))
+            }),
+          )
           .children(rows.map((r, i) => (visible(i) ? place(row(r), i) : null)).filter(Boolean)),
       );
   }

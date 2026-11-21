@@ -8,7 +8,18 @@
 
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, InputState, Input } from "gpui-base";
-import { commands, layouts, keys, run, theme, props, closeOverlay, openOverlay, shared, window as win } from "herdr";
+import {
+  commands,
+  layouts,
+  keys,
+  run,
+  theme,
+  props,
+  closeOverlay,
+  openOverlay,
+  shared,
+  window as win,
+} from "herdr";
 
 // The list keeps one height while you move: rows and group titles have fixed
 // heights, and the window shows as many as fit in LIST_H.
@@ -32,10 +43,28 @@ const NAMED = [
   ["pane.split", { direction: "down" }, "Pane", "Split down", "horizontal"],
   ["pane.close", {}, "Pane", "Close pane", "kill"],
   ["pane.zoom", {}, "Pane", "Zoom pane", "maximize fullscreen"],
-  ...["left", "right", "up", "down"].map((d) => ["pane.go", { direction: d }, "Pane", `Focus pane ${d}`, "move go"]),
-  ...["left", "right", "up", "down"].map((d) => ["pane.swap", { direction: d }, "Pane", `Swap pane ${d}`, "move"]),
+  ...["left", "right", "up", "down"].map((d) => [
+    "pane.go",
+    { direction: d },
+    "Pane",
+    `Focus pane ${d}`,
+    "move go",
+  ]),
+  ...["left", "right", "up", "down"].map((d) => [
+    "pane.swap",
+    { direction: d },
+    "Pane",
+    `Swap pane ${d}`,
+    "move",
+  ]),
   ["space.new", {}, "Space", "New space", "workspace"],
-  ["pbogut-tabs.reload-project", {}, "Space", "Reload project config", "refresh name tabs dev herdr-project.json"],
+  [
+    "pbogut-tabs.reload-project",
+    {},
+    "Space",
+    "Reload project config",
+    "refresh name tabs dev herdr-project.json",
+  ],
   ["pbogut-tabs.tasks", {}, "Space", "Run project task", "custom command herdr-project.json"],
   ["pbogut-tabs.close-project", {}, "Space", "Close project", "teardown cleanup workspace"],
   ["space.rename", {}, "Space", "Rename space", "workspace"],
@@ -63,21 +92,51 @@ const NAMED = [
   ["app.zoom_out", {}, "App", "Zoom out", "smaller font size"],
   ["app.zoom_reset", {}, "App", "Reset zoom", "font size"],
   ["app.quit", {}, "App", "Quit Herdr", "exit"],
-  ...["graphite", "ink", "moss", "atom-one-dark"].map((n) => ["app.theme", { name: n }, "App", `Theme: ${n.replace(/-/g, " ")}`, "colors look"]),
+  ...["graphite", "ink", "moss", "atom-one-dark"].map((n) => [
+    "app.theme",
+    { name: n },
+    "App",
+    `Theme: ${n.replace(/-/g, " ")}`,
+    "colors look",
+  ]),
 ];
 
 // Commands that act on something you point at (ids, terminals): not for a list.
 const HIDDEN = new Set([
-  "space.move", "tab.move", "space.select", "tab.select", "pane.focus", "terminal.keep",
-  "terminal.park", "terminal.kill", "terminal.show", "agent.focus", "layout.set", "layout.toggle",
-  "layout.show", "layout.hide", "layout.resize", "layout.select", "mod.open", "overlay.close",
-  "tab.settle", "tab.unsettle",
-  "app.palette", "app.hide", "app.hide_others", "app.show_all", "app.theme", "app.settings",
+  "space.move",
+  "tab.move",
+  "space.select",
+  "tab.select",
+  "pane.focus",
+  "terminal.keep",
+  "terminal.park",
+  "terminal.kill",
+  "terminal.show",
+  "agent.focus",
+  "layout.set",
+  "layout.toggle",
+  "layout.show",
+  "layout.hide",
+  "layout.resize",
+  "layout.select",
+  "mod.open",
+  "overlay.close",
+  "tab.settle",
+  "tab.unsettle",
+  "app.palette",
+  "app.hide",
+  "app.hide_others",
+  "app.show_all",
+  "app.theme",
+  "app.settings",
 ]);
 
 function titleOf(name) {
   const [noun, verb] = name.split(".");
-  return { group: noun.charAt(0).toUpperCase() + noun.slice(1), title: `${verb.replace(/_/g, " ")} ${noun}`.replace(/^./, (c) => c.toUpperCase()) };
+  return {
+    group: noun.charAt(0).toUpperCase() + noun.slice(1),
+    title: `${verb.replace(/_/g, " ")} ${noun}`.replace(/^./, (c) => c.toUpperCase()),
+  };
 }
 
 // Every entry for the state we're in now.
@@ -88,13 +147,26 @@ function entries() {
     .filter(([n]) => !(mac && n.startsWith("window.")))
     .map(([name, args, group, title, words]) => ({ name, args, group, title, words }));
   for (const l of layouts()) {
-    const t = { main: "Herdr", terminals: "Terminals", win98: "Herdr 98" }[l] ?? l.charAt(0).toUpperCase() + l.slice(1);
-    list.push({ name: "layout.switch", args: { name: l }, group: "Layout", title: `Layout: ${t}`, words: `look ${l}` });
+    const t =
+      { main: "Herdr", terminals: "Terminals", win98: "Herdr 98" }[l] ??
+      l.charAt(0).toUpperCase() + l.slice(1);
+    list.push({
+      name: "layout.switch",
+      args: { name: l },
+      group: "Layout",
+      title: `Layout: ${t}`,
+      words: `look ${l}`,
+    });
   }
   // Anything new in the app shows up too, until it gets a better name here.
   const named = new Set(NAMED.map(([n]) => n));
   for (const c of commands()) {
-    if (named.has(c.name) || HIDDEN.has(c.name) || c.args.some((a) => a.required && a.name !== "name")) continue;
+    if (
+      named.has(c.name) ||
+      HIDDEN.has(c.name) ||
+      c.args.some((a) => a.required && a.name !== "name")
+    )
+      continue;
     list.push({ name: c.name, args: {}, ...titleOf(c.name), words: c.about });
   }
   return list.map((e) => ({ ...e, id: `${e.name}:${JSON.stringify(e.args)}` }));
@@ -136,7 +208,11 @@ export default class Palette extends View {
   init(_props, cx) {
     this.query = "";
     this.input = InputState.new({ placeholder: "Type a command…" });
-    this.input.on("change", (_e, cx) => { this.query = this.input.value(); this.at = 0; cx.notify(); });
+    this.input.on("change", (_e, cx) => {
+      this.query = this.input.value();
+      this.at = 0;
+      cx.notify();
+    });
     this.input.on("submit", () => this.go(this.rows()[this.at]?.e));
     this.input.focus();
     cx.timer.after(600, () => this.input.focus());
@@ -157,10 +233,16 @@ export default class Palette extends View {
     localStorage.setItem("recent", JSON.stringify(this.recent));
     this.close();
     if (e.name === "mod.clone") {
-      openOverlay({ mod: "prompt", kind: "dialog", width: 380, props: {
-        title: "Duplicate mod", hint: "Mod to copy; creates <name>-copy",
-        command: { name: "mod.clone", args: {} },
-      } });
+      openOverlay({
+        mod: "prompt",
+        kind: "dialog",
+        width: 380,
+        props: {
+          title: "Duplicate mod",
+          hint: "Mod to copy; creates <name>-copy",
+          command: { name: "mod.clone", args: {} },
+        },
+      });
     } else {
       run(e.name, e.name === "layout.clone" ? { name: shared("layout") ?? "main" } : e.args);
     }
@@ -171,10 +253,18 @@ export default class Palette extends View {
     const all = entries();
     const q = this.query.trim().toLowerCase().replace(/\s+/g, "");
     if (!q) {
-      const recent = this.recent.map((id) => all.find((e) => e.id === id)).filter(Boolean).slice(0, 5);
-      const rest = GROUPS.slice(1).flatMap((g) => all.filter((e) => e.group === g && !recent.includes(e)));
+      const recent = this.recent
+        .map((id) => all.find((e) => e.id === id))
+        .filter(Boolean)
+        .slice(0, 5);
+      const rest = GROUPS.slice(1).flatMap((g) =>
+        all.filter((e) => e.group === g && !recent.includes(e)),
+      );
       const others = all.filter((e) => !GROUPS.includes(e.group) && !recent.includes(e));
-      return [...recent.map((e) => ({ e, head: "Recent" })), ...[...rest, ...others].map((e) => ({ e, head: e.group }))];
+      return [
+        ...recent.map((e) => ({ e, head: "Recent" })),
+        ...[...rest, ...others].map((e) => ({ e, head: e.group })),
+      ];
     }
     const rank = (e) => this.recent.indexOf(e.id);
     return all
@@ -185,11 +275,17 @@ export default class Palette extends View {
         return best && { e, score: best.score, hits: best.hits };
       })
       .filter(Boolean)
-      .sort((a, b) => b.score - a.score || (rank(a.e) < 0 ? 99 : rank(a.e)) - (rank(b.e) < 0 ? 99 : rank(b.e)));
+      .sort(
+        (a, b) =>
+          b.score - a.score || (rank(a.e) < 0 ? 99 : rank(a.e)) - (rank(b.e) < 0 ? 99 : rank(b.e)),
+      );
   }
 
   title(t, text, hits, on) {
-    if (!hits?.length) return div().text_color(on ? t.foreground : t.muted).child(text);
+    if (!hits?.length)
+      return div()
+        .text_color(on ? t.foreground : t.muted)
+        .child(text);
     const parts = [];
     let cur = "";
     let lit = false;
@@ -203,7 +299,14 @@ export default class Palette extends View {
       cur += ch;
     });
     if (cur) parts.push([cur, lit]);
-    return h_flex().children(parts.map(([s, h]) => div().text_color(h ? t.accent : on ? t.foreground : t.muted).when(h, (d) => d.font_semibold()).child(s.replace(/ /g, "\u00a0"))));
+    return h_flex().children(
+      parts.map(([s, h]) =>
+        div()
+          .text_color(h ? t.accent : on ? t.foreground : t.muted)
+          .when(h, (d) => d.font_semibold())
+          .child(s.replace(/ /g, "\u00a0")),
+      ),
+    );
   }
 
   render() {
@@ -232,20 +335,49 @@ export default class Palette extends View {
     }
     this.scroll = Math.max(0, Math.min(this.scroll, this.maxScroll));
     const key = (k) =>
-      h_flex().gap(3).children(keyParts(k).map((p) => div().px(5).rounded(4).border_1().border_color(t.border).bg(t.raised).text_size(11).text_color(t.dim).child(p)));
+      h_flex()
+        .gap(3)
+        .children(
+          keyParts(k).map((p) =>
+            div()
+              .px(5)
+              .rounded(4)
+              .border_1()
+              .border_color(t.border)
+              .bg(t.raised)
+              .text_size(11)
+              .text_color(t.dim)
+              .child(p),
+          ),
+        );
     // In a scrolling list each item is placed at its edges from the model
     // above, not stacked: GPUI rounds every height to whole pixels, and a
     // stack of rounded heights drifts away from the model (19 px at zoom 1.3
     // by row 40, cutting the selection off). Edges from the model can't add up.
     const place = (el, start, end) =>
       fixed
-        ? el.absolute().left(0).right(0).top(start - this.scroll).bottom(LIST_H - (end - this.scroll))
+        ? el
+            .absolute()
+            .left(0)
+            .right(0)
+            .top(start - this.scroll)
+            .bottom(LIST_H - (end - this.scroll))
         : el.flex_none().h(end - start);
     const visible = (start, end) => !fixed || (end > this.scroll && start < this.scroll + LIST_H);
     const list = [];
     rows.forEach((r, i) => {
       const { head, title, row } = tops[i];
-      if (head && visible(title, row)) list.push(place(h_flex(), title, row).px(14).pb(4).items_end().text_size(11).font_semibold().text_color(t.dim).child(r.head));
+      if (head && visible(title, row))
+        list.push(
+          place(h_flex(), title, row)
+            .px(14)
+            .pb(4)
+            .items_end()
+            .text_size(11)
+            .font_semibold()
+            .text_color(t.dim)
+            .child(r.head),
+        );
       if (!visible(row, row + ROW_H)) return;
       const on = i === this.at;
       const k = keyOf(r.e, bound);
@@ -262,8 +394,15 @@ export default class Palette extends View {
           .when(on, (el) => el.bg(t.selected))
           .hover((s) => s.bg(t.hover))
           .on_click(() => this.go(r.e))
-          .child(div().flex_1().min_w(0).child(this.title(t, r.e.title, r.hits, on)))
-          .when(Boolean(this.query), (el) => el.child(div().text_size(11.5).text_color(t.dim).child(r.e.group)))
+          .child(
+            div()
+              .flex_1()
+              .min_w(0)
+              .child(this.title(t, r.e.title, r.hits, on)),
+          )
+          .when(Boolean(this.query), (el) =>
+            el.child(div().text_size(11.5).text_color(t.dim).child(r.e.group)),
+          )
           .when(Boolean(k), (el) => el.child(key(k))),
       );
     });
@@ -298,7 +437,15 @@ export default class Palette extends View {
           .border_1()
           .border_color(t.accent)
           .bg(t.background)
-          .child(svg(win()?.platform === "macos" ? "mods/pbogut-palette/command.svg" : "mods/workspace-chrome/search.svg").size(16).text_color(t.dim))
+          .child(
+            svg(
+              win()?.platform === "macos"
+                ? "mods/pbogut-palette/command.svg"
+                : "mods/workspace-chrome/search.svg",
+            )
+              .size(16)
+              .text_color(t.dim),
+          )
           .child(Input.new(this.input).flex_1().h_full().text_size(12.8).text_color(t.foreground))
           .child(div().text_size(11).text_color(t.dim).child("Esc")),
       )
@@ -314,12 +461,21 @@ export default class Palette extends View {
                 this.scroll = Math.max(0, Math.min(this.scroll - e.delta.y, this.maxScroll));
                 // The selection stays on screen, so the next frame doesn't scroll back to it.
                 // A row that opens a group is shown with its title, so the title counts.
-                while (this.at < rows.length - 1 && (tops[this.at].head ? tops[this.at].title : tops[this.at].row) < this.scroll) this.at++;
+                while (
+                  this.at < rows.length - 1 &&
+                  (tops[this.at].head ? tops[this.at].title : tops[this.at].row) < this.scroll
+                )
+                  this.at++;
                 while (this.at > 0 && tops[this.at].row + ROW_H > this.scroll + LIST_H) this.at--;
                 cx.notify();
               })
               .children(fixed ? list : [v_flex().children(list)])
-          : div().px(16).py(14).text_size(13).text_color(t.dim).child(`Nothing matches "${this.query}". Places are in the picker.`),
+          : div()
+              .px(16)
+              .py(14)
+              .text_size(13)
+              .text_color(t.dim)
+              .child(`Nothing matches "${this.query}". Places are in the picker.`),
       );
   }
 }

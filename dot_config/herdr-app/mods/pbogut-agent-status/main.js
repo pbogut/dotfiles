@@ -29,7 +29,7 @@ export default class AgentStatus extends View {
         // after 30 seconds; retrying that read sends no data to the helper.
         while (!this.stopped) {
           try {
-            if (await socket.read(1) === null) break;
+            if ((await socket.read(1)) === null) break;
           } catch (error) {
             if (!/timed out|temporarily unavailable/i.test(String(error))) throw error;
           }

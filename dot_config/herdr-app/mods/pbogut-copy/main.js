@@ -1,6 +1,18 @@
 import { View, div } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { checking, closeOverlay, focused, hc, nextCommand, notify, panes, props, run, terminals, theme } from "herdr";
+import {
+  checking,
+  closeOverlay,
+  focused,
+  hc,
+  nextCommand,
+  notify,
+  panes,
+  props,
+  run,
+  terminals,
+  theme,
+} from "herdr";
 import { wordTarget } from "./words.js";
 
 const directions = {
@@ -12,19 +24,35 @@ const directions = {
   "ctrl-f": "page_down",
   "ctrl-u": "half_page_up",
   "ctrl-d": "half_page_down",
-  home: "home", "shift-g": "end", end: "end",
-  "0": "line_start", "$": "line_end", "shift-4": "line_end",
+  home: "home",
+  "shift-g": "end",
+  end: "end",
+  0: "line_start",
+  $: "line_end",
+  "shift-4": "line_end",
 };
 
 const textMotions = {
-  w: "w", e: "e", b: "b",
-  "shift-w": "W", "shift-e": "E", "shift-b": "B",
-  "^": "^", "shift-6": "^",
+  w: "w",
+  e: "e",
+  b: "b",
+  "shift-w": "W",
+  "shift-e": "E",
+  "shift-b": "B",
+  "^": "^",
+  "shift-6": "^",
 };
 
 function verticalStep(direction, rows) {
   const half = Math.max(1, Math.floor(rows / 2));
-  return { up: -1, down: 1, page_up: -rows, page_down: rows, half_page_up: -half, half_page_down: half }[direction];
+  return {
+    up: -1,
+    down: 1,
+    page_up: -rows,
+    page_down: rows,
+    half_page_up: -half,
+    half_page_down: half,
+  }[direction];
 }
 
 export default class CopyMode extends View {
@@ -40,7 +68,7 @@ export default class CopyMode extends View {
     this.handle.focus();
     cx.spawn(async (cx) => {
       for (;;) {
-        if (await nextCommand() !== "selection-ready") continue;
+        if ((await nextCommand()) !== "selection-ready") continue;
         if (this.closed) return;
         this.waiting = false;
         this.drainKeys(cx);
@@ -91,8 +119,13 @@ export default class CopyMode extends View {
     const lastCol = terminal.cols - 1;
     let { row, col } = terminal.selection.end;
     if (direction === "left" || direction === "right") {
-      const cell = Math.max(0, Math.min((lastRow + 1) * terminal.cols - 1,
-        row * terminal.cols + col + (direction === "left" ? -1 : 1)));
+      const cell = Math.max(
+        0,
+        Math.min(
+          (lastRow + 1) * terminal.cols - 1,
+          row * terminal.cols + col + (direction === "left" ? -1 : 1),
+        ),
+      );
       row = Math.floor(cell / terminal.cols);
       col = cell % terminal.cols;
     } else if (direction === "home" || direction === "end") {
@@ -128,9 +161,16 @@ export default class CopyMode extends View {
     cx.spawn(async (cx) => {
       let moved = false;
       try {
-        const result = await hc(["read", this.terminal, "--json", "--lines", String(Math.max(0, total - rows))]);
+        const result = await hc([
+          "read",
+          this.terminal,
+          "--json",
+          "--lines",
+          String(Math.max(0, total - rows)),
+        ]);
         if (this.closed) return;
-        if (result.code !== 0) throw new Error(result.stderr.trim() || "Could not read terminal text.");
+        if (result.code !== 0)
+          throw new Error(result.stderr.trim() || "Could not read terminal text.");
         const content = JSON.parse(result.stdout);
         // complete also describes discarded older output, not the usability of
         // the retained screen/history returned for the copy cursor.
@@ -144,18 +184,25 @@ export default class CopyMode extends View {
         const from = { ...current.selection.end };
         const at = wordTarget(content.text, cols, total, from, textMotions[key]);
         if (this.selecting) {
-          const adjust = (direction) => run("terminal.adjust_selection", { terminal: this.terminal, direction });
+          const adjust = (direction) =>
+            run("terminal.adjust_selection", { terminal: this.terminal, direction });
           const distance = Math.abs(at.row - from.row);
-          for (let i = 0; i < Math.floor(distance / rows); i++) adjust(at.row < from.row ? "page_up" : "page_down");
+          for (let i = 0; i < Math.floor(distance / rows); i++)
+            adjust(at.row < from.row ? "page_up" : "page_down");
           for (let i = 0; i < distance % rows; i++) adjust(at.row < from.row ? "up" : "down");
-          for (let i = 0; i < Math.abs(at.col - from.col); i++) adjust(at.col < from.col ? "left" : "right");
+          for (let i = 0; i < Math.abs(at.col - from.col); i++)
+            adjust(at.col < from.col ? "left" : "right");
         } else this.selectCursor(at, view);
         moved = true;
         this.waitForSelection();
       } catch (error) {
         if (!this.closed) {
           this.keys = [];
-          notify({ title: "Could not move by word", body: String(error.message ?? error), level: "error" });
+          notify({
+            title: "Could not move by word",
+            body: String(error.message ?? error),
+            level: "error",
+          });
         }
       } finally {
         if (!moved) this.waiting = false;
@@ -170,11 +217,13 @@ export default class CopyMode extends View {
   moveLines(direction) {
     const terminal = terminals().find((terminal) => terminal.address === this.terminal);
     if (!terminal?.selection) return;
-    const adjust = (direction) => run("terminal.adjust_selection", { terminal: this.terminal, direction });
-    const anchor = (side) => run("terminal.select", {
-      terminal: this.terminal,
-      at: { row: this.lineAnchor, col: side < 0 ? terminal.cols - 1 : 0 },
-    });
+    const adjust = (direction) =>
+      run("terminal.adjust_selection", { terminal: this.terminal, direction });
+    const anchor = (side) =>
+      run("terminal.select", {
+        terminal: this.terminal,
+        at: { row: this.lineAnchor, col: side < 0 ? terminal.cols - 1 : 0 },
+      });
     if (direction === "home" || direction === "end") {
       this.lineDirection = direction === "home" ? -1 : 1;
       anchor(this.lineDirection);
@@ -215,12 +264,13 @@ export default class CopyMode extends View {
     if (key === "v" || key === "shift-v") {
       const at = this.selection()?.end;
       this.selecting = key === "shift-v" || !this.selecting;
-      this.lineAnchor = key === "shift-v" ? at?.row ?? null : null;
+      this.lineAnchor = key === "shift-v" ? (at?.row ?? null) : null;
       this.lineDirection = 1;
       if (at) {
         // Native line mode skips indentation; anchor full lines at column zero.
         run("terminal.select", {
-          terminal: this.terminal, at: this.lineAnchor === null ? at : { row: at.row, col: 0 },
+          terminal: this.terminal,
+          at: this.lineAnchor === null ? at : { row: at.row, col: 0 },
         });
         if (this.lineAnchor !== null) {
           run("terminal.adjust_selection", { terminal: this.terminal, direction: "line_end" });
@@ -248,7 +298,10 @@ export default class CopyMode extends View {
         if (!terminal?.selection) return;
         const step = verticalStep(direction, terminal.rows);
         for (let i = 0; i < Math.abs(step); i++) {
-          run("terminal.adjust_selection", { terminal: this.terminal, direction: step < 0 ? "up" : "down" });
+          run("terminal.adjust_selection", {
+            terminal: this.terminal,
+            direction: step < 0 ? "up" : "down",
+          });
         }
       } else run("terminal.adjust_selection", { terminal: this.terminal, direction });
     } else this.moveCursor(direction);
@@ -258,35 +311,81 @@ export default class CopyMode extends View {
 
   render() {
     const t = theme();
-    const keycap = (key) => h_flex().h(22).min_w(22).px(5).justify_center()
-      .border_1().rounded(4).border_color(t.border).bg(t.surface)
-      .text_color(t.accent).text_size(12).child(key);
-    const hint = (keys, label) => h_flex().gap(6).flex_shrink_0()
-      .child(h_flex().gap(4).children(keys.map(keycap)))
-      .child(div().child(label));
-    const bar = h_flex().id("copy-mode").track_focus(this.handle).h(36)
-      .px(12).gap(24).overflow_hidden().whitespace_nowrap()
-      .bg(t.popover).border_t_1().border_color(t.border)
-      .text_color(t.foreground).text_size(13)
+    const keycap = (key) =>
+      h_flex()
+        .h(22)
+        .min_w(22)
+        .px(5)
+        .justify_center()
+        .border_1()
+        .rounded(4)
+        .border_color(t.border)
+        .bg(t.surface)
+        .text_color(t.accent)
+        .text_size(12)
+        .child(key);
+    const hint = (keys, label) =>
+      h_flex()
+        .gap(6)
+        .flex_shrink_0()
+        .child(h_flex().gap(4).children(keys.map(keycap)))
+        .child(div().child(label));
+    const bar = h_flex()
+      .id("copy-mode")
+      .track_focus(this.handle)
+      .h(36)
+      .px(12)
+      .gap(24)
+      .overflow_hidden()
+      .whitespace_nowrap()
+      .bg(t.popover)
+      .border_t_1()
+      .border_color(t.border)
+      .text_color(t.foreground)
+      .text_size(13)
       .on_key_down((event, cx) => this.onKey(event, cx))
       .on_mouse_down("left", (_event, cx) => cx.stop_propagation())
       .on_mouse_down_out(() => this.dismiss())
-      .child(h_flex().flex_1().min_w(0).gap(24).overflow_hidden()
-        .child(div().flex_shrink_0().font_semibold().text_color(t.accent)
-          .child(this.selecting ? "Copy · selecting" : "Copy mode"))
-        .child(hint(["hjkl"], "move"))
-        .child(hint(["w/e/b", "W/E/B"], "words"))
-        .child(hint(["v"], "select"))
-        .child(hint(["V"], "lines"))
-        .child(hint(["0", "^", "$"], "line"))
-        .child(hint(["Ctrl+U/D"], "half page"))
-        .child(hint(["gg", "G"], "history edges"))
-        .child(hint(["Ctrl+B/F"], "page")))
-      .child(h_flex().flex_shrink_0().gap(24)
-        .child(hint(["y"], "copy"))
-        .child(hint(["Esc"], "cancel")));
-    return div().id("copy-overlay").relative().size_full()
+      .child(
+        h_flex()
+          .flex_1()
+          .min_w(0)
+          .gap(24)
+          .overflow_hidden()
+          .child(
+            div()
+              .flex_shrink_0()
+              .font_semibold()
+              .text_color(t.accent)
+              .child(this.selecting ? "Copy · selecting" : "Copy mode"),
+          )
+          .child(hint(["hjkl"], "move"))
+          .child(hint(["w/e/b", "W/E/B"], "words"))
+          .child(hint(["v"], "select"))
+          .child(hint(["V"], "lines"))
+          .child(hint(["0", "^", "$"], "line"))
+          .child(hint(["Ctrl+U/D"], "half page"))
+          .child(hint(["gg", "G"], "history edges"))
+          .child(hint(["Ctrl+B/F"], "page")),
+      )
+      .child(
+        h_flex()
+          .flex_shrink_0()
+          .gap(24)
+          .child(hint(["y"], "copy"))
+          .child(hint(["Esc"], "cancel")),
+      );
+    return div()
+      .id("copy-overlay")
+      .relative()
+      .size_full()
       .on_mouse_down("left", (_event, cx) => cx.stop_propagation())
-      .child(bar.absolute().left(props()?.left ?? 0).right(0).bottom(props()?.bottom ?? 0));
+      .child(
+        bar
+          .absolute()
+          .left(props()?.left ?? 0)
+          .right(0)
+          .bottom(props()?.bottom ?? 0),
+      );
   }
 }

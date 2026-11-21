@@ -89,7 +89,7 @@
   ],
   "formatter": {
     // Adding a custom formatter enables the built-ins.
-    {{- range splitList " " "gofmt mix oxfmt prettier biome zig clang-format ktlint ruff air uv rubocop standardrb htmlbeautifier dart ocamlformat terraform latexindent gleam shfmt nixfmt rustfmt pint ormolu cljfmt dfmt" }}
+    {{- range splitList " " "mix prettier biome zig clang-format ktlint ruff air uv rubocop standardrb htmlbeautifier dart ocamlformat terraform latexindent gleam pint ormolu cljfmt dfmt" }}
     "{{ . }}": { "disabled": true },
     {{- end }}
     "phpcbf": {
