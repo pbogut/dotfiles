@@ -20,6 +20,7 @@ pacman = [
   "gnome-keyring",
   "grim",
   "gtk3-print-backends",
+  "herdr-app",
   "hex-bin",
   "hyprland",
   "hyprpaper",
