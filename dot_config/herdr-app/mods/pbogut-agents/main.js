@@ -394,7 +394,7 @@ export default class Agents extends View {
         .child(v_flex().flex_1().min_w(0)
           .child(h_flex().gap(5).items_center()
             .child(div().flex_initial().min_w(40).truncate().tooltip(name).text_color(t.foreground).child(name))
-            .when(Boolean(branch), el => el.child(div().flex_1().min_w(40).truncate().text_right().text_size(11.5).text_color(t.accent)
+            .when(Boolean(branch), el => el.child(div().flex_1().min_w(40).truncate().text_right().text_size(11.5).text_color(t.branch ?? t.dim)
               .tooltip(branch).child(branch.replace(/^\d{4}-\d{2}-\d{2}-(?=.)/, "")))))
           .when(Boolean(title), el => el.child(div().truncate().text_size(11).italic().text_color(t.foreground).opacity(0.72).tooltip(title).child(title))))
         .when(Boolean(machine), el => el.child(div().text_size(10).text_color(t.dim).child(machine)))

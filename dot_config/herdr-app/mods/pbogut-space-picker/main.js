@@ -104,7 +104,7 @@ export default class SpacePicker extends View {
                     : h_flex().size(18).flex_none().rounded(5).bg(row.icon.color).items_center().justify_center()
                       .text_size(10.5).font_bold().text_color("#ffffff").child(row.icon.initial)))
                   .child(div().flex_1().min_w(0).truncate().when(row.w.active, el => el.font_semibold()).child(row.name))
-                  .when(Boolean(row.branch), el => el.child(div().max_w(240).truncate().text_size(11).text_color(t.dim)
+                  .when(Boolean(row.branch), el => el.child(div().max_w(240).truncate().text_size(11).text_color(t.branch ?? t.dim)
                     .tooltip(row.branch).child(row.branch.replace(/^\d{4}-\d{2}-\d{2}-(?=.)/, ""))))
                   .when(row.ahead > 0, el => el.child(div().flex_none().text_color(t.ansi2).child(`↑${row.ahead}`)))
                   .when(row.behind > 0, el => el.child(div().flex_none().text_color(t.ansi1).child(`↓${row.behind}`))))

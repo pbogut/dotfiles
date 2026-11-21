@@ -38,6 +38,7 @@
     "working": "#e0af68",
     "blocked": "#f7768e",
     "done": "#9ece6a",
-    "idle": "#565f89"
+    "idle": "#565f89",
+    "branch": "#ad8ee6"
   }
 }

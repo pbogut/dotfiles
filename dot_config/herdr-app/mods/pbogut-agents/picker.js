@@ -121,9 +121,9 @@ export default class AgentPicker extends View {
                 .child(h_flex().items_center().gap(8).pl((row.depth ?? 0) * 12)
                   .when(Boolean(pic), el => el.child(pic))
                   .child(div().flex_1().min_w(0).truncate().tooltip(row.name)
-                    .text_color(row.status === "idle" && row.address !== current ? t.muted : t.foreground)
+                    .text_color(t.foreground)
                     .when(row.address === current, el => el.font_semibold()).child(row.name))
-                  .when(Boolean(row.branch), el => el.child(div().max_w(240).truncate().text_size(11).text_color(t.dim)
+                  .when(Boolean(row.branch), el => el.child(div().max_w(240).truncate().text_size(11).text_color(t.branch ?? t.dim)
                     .tooltip(row.branch).child(row.branch.replace(/^\d{4}-\d{2}-\d{2}-(?=.)/, ""))))
                   .child(status(t, row, row.compact)))
                 .child(div().truncate().text_size(11).text_color(t.dim).tooltip(detail).child(detail));
