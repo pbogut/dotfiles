@@ -1,10 +1,17 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { taskHints } from "../../../dot_config/herdr-app/mods/pbogut-tabs/hints.js";
+import { assignHints } from "../../../dot_config/herdr-app/mods/pbogut-tabs/hints.js";
 
 const keys = "fjdkslaurieowhgmvcn";
-const automatic = n => Array.from({ length: n }, (_, i) => ({ name: `auto ${i}` }));
-const autoHints = n => taskHints(automatic(n));
+const ids = n => Array.from({ length: n }, (_, i) => `auto ${i}`);
+const autoHints = n => Object.values(assignHints(ids(n)));
+test("sidebar hints follow display order, reserve j/k, and split the last key first", () => {
+  assert.deepEqual(assignHints(["work", "personal", "other"], { skipKeys: "jk" }), { work: "f", personal: "d", other: "s" });
+  const ids = Array.from({ length: 18 }, (_, i) => `space-${i}`);
+  const hints = assignHints(ids, { skipKeys: "jk" });
+  assert.deepEqual(ids.map(id => hints[id]), [..."fdslaurieowhgmvc", "nf", "nd"]);
+});
+
 test("small lists use the preferred letters in project order", () => {
   assert.deepEqual(autoHints(0), []);
   assert.deepEqual(autoHints(7), [..."fjdksla"]);
@@ -28,19 +35,27 @@ test("hints remain unambiguous and minimize equal-weight keypresses across depth
 });
 
 test("reserve custom hints before handing out automatic hints in project order", () => {
-  const ssh = [{ name: "ssh ap", hint: "sa" }, { name: "ssh mp", hint: "sm" }];
-  assert.deepEqual(taskHints([...automatic(5), ...ssh]), [..."fjdkl", "sa", "sm"]);
-  const hints = taskHints([...ssh, ...automatic(20)]);
+  const assigned = { "ssh ap": "sa", "ssh mp": "sm" }, ssh = Object.keys(assigned);
+  assert.deepEqual(Object.values(assignHints([...ids(5), ...ssh], { assigned })), [..."fjdkl", "sa", "sm"]);
+  const hints = Object.values(assignHints([...ssh, ...ids(20)], { assigned }));
   assert.deepEqual(hints, ["sa", "sm", ...keys.replace("s", ""), "sf", "sj"]);
-  const many = taskHints([...ssh, ...automatic(700)]);
+  const many = Object.values(assignHints([...ssh, ...ids(700)], { assigned }));
   for (const h of many) assert.equal(many.filter(other => other.startsWith(h)).length, 1);
 });
 
 test("reserve letters outside the automatic alphabet and report exhausted keys", () => {
-  const pinned = [...keys].map(hint => ({ name: hint, hint }));
-  const hints = taskHints([...pinned, ...automatic(1)]);
+  const pin = alphabet => Object.fromEntries([...alphabet].map(key => [key, key]));
+  const hints = Object.values(assignHints([...keys, "auto"], { assigned: pin(keys) }));
   assert.equal(hints.length, 20);
   assert.ok(!keys.includes(hints.at(-1)));
-  const all = [..."abcdefghijklmnopqrstuvwxyz"].map(hint => ({ name: hint, hint }));
-  assert.throws(() => taskHints([...all, ...automatic(1)]), /no free keys/);
+  const all = "abcdefghijklmnopqrstuvwxyz";
+  assert.throws(() => assignHints([...all, "auto"], { assigned: pin(all) }), /no free keys/);
+});
+
+test("skipped keys stay excluded even in pinned hints and fallback allocations", () => {
+  assert.throws(() => assignHints(["test"], { assigned: { test: "fj" }, skipKeys: "jk" }), /skipped key/);
+  const preferred = [...keys].filter(key => !"jk".includes(key));
+  const assigned = Object.fromEntries(preferred.map(key => [key, key]));
+  const hints = assignHints([...preferred, ...ids(20)], { assigned, skipKeys: "jk" });
+  assert.ok(Object.values(hints).every(hint => !/[jk]/.test(hint)));
 });

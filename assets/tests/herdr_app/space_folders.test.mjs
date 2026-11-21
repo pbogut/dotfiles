@@ -209,7 +209,7 @@ test("folder checklist hides spaces across machines and preserves their folder m
   app.view.showEmptyFolders = true;
   find(app.view.render(app.cx), "space-folder-filter").attrs.on_click[0]();
   assert.equal(app.state.commands.at(-1).command, "pbogut-keys.folder-filter-at-pointer");
-  app.state.overlays.push({ props: { folderFilter: ["work", "personal", "other"], folderHints: { work: "f", personal: "d", other: "s" } } });
+  app.state.overlays.push({ props: { folderFilter: ["work", "personal", "other"], folderHints: { work: "f", personal: "j", other: "d" } } });
   const menu = app.popup();
   const option = name => find(menu.render(app.cx), `filter-${name}`);
   assert.ok(option("personal").attrs.checked[0]);

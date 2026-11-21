@@ -1,5 +1,5 @@
 import { roleOf } from "./roles.js";
-import { taskHints } from "./hints.js";
+import { assignHints } from "./hints.js";
 
 export const PROJECT_SPACES = "pbogut.projects.spaces";
 export const isProject = (space, marked) => marked?.[space?.id] === true;
@@ -62,8 +62,13 @@ export function projectConfig(config) {
       }
       return { name, hint: task.hint, command: task.command, progress: task.progress ?? false, close: task.close ?? false };
     });
-    const hints = taskHints(result.tasks);
-    result.tasks.forEach((task, i) => { task.hint = hints[i]; });
+    const assigned = Object.fromEntries(result.tasks.filter(t => t.hint !== undefined).map(t => [t.name, t.hint]));
+    try {
+      const hints = assignHints([...seen], { assigned });
+      for (const task of result.tasks) task.hint = hints[task.name];
+    } catch (error) {
+      throw new Error(`tasks: ${error.message}`);
+    }
   }
   if (config.setup !== undefined) {
     const setup = config.setup;

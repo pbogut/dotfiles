@@ -33,6 +33,9 @@ The terminal stays fully visible without resizing. Shortcuts use
 outlined keycaps in the current theme's colors.
 An action or cancellation closes the overlay and returns focus to the terminal.
 Prefix bindings live in `mods/pbogut-keys/bindings.js`.
+All pickers call `assignHints(ids, options)` in `mods/pbogut-tabs/hints.js`.
+The Spaces and Agents sidebars reserve `j` and `k` for navigation. The folder filter uses the full key order, and tasks pass their configured hints in `assigned`.
+The `pbogut-keys/hints.js` source links to it so chezmoi installs the same file inside both mods.
 
 | After Ctrl+G | Action |
 | --- | --- |

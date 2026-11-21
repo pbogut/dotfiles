@@ -87,6 +87,7 @@ async function fixture(name = "pbogut-keys", checking = false, overlay = true, e
     "gpui-kit": mock({ View: class {}, div: () => element }),
     "gpui-base": mock({ v_flex: () => element, h_flex: () => element }),
     "./bindings.js": new vm.SourceTextModule(await readFile(new URL("bindings.js", root), "utf8"), { context }),
+    "./hints.js": new vm.SourceTextModule(await readFile(new URL("hints.js", root), "utf8"), { context }),
     "./words.js": new vm.SourceTextModule(await readFile(new URL("../pbogut-copy/words.js", root), "utf8"), { context }),
   };
   const main = new vm.SourceTextModule(await readFile(new URL(`../${name}/main.js`, root), "utf8"), { context });

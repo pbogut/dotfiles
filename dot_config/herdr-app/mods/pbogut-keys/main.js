@@ -1,7 +1,8 @@
 import { View, div } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import { agents, appHome, checking, closeOverlay, exec, focused, layout, nextCommand, notify, openOverlay, props, run, settings, shared, setShared, spaces, terminals, theme, window as appWindow } from "herdr";
-import { pickers, prefixBindings, sidebarHints } from "./bindings.js";
+import { pickers, prefixBindings } from "./bindings.js";
+import { assignHints } from "./hints.js";
 
 const STATE = "pbogut.sidebar.hints";
 
@@ -33,7 +34,7 @@ export default class Shortcuts extends View {
           const viewport = window.viewport_size().width / (settings().zoom ?? 1);
           openOverlay({ mod: "pbogut-spaces", kind: "popup", width, height: Math.min(340, 38 + names.length * 28),
             at: command === "folder-filter" ? { x: Math.max(0, (viewport - width) / 2), y: 40 } : "pointer",
-            props: { folderFilter: names, folderHints: sidebarHints(names) } });
+            props: { folderFilter: names, folderHints: assignHints(names) } });
           continue;
         }
         if (command === `closed-${this.overlay}`) this.overlay = null;
@@ -109,7 +110,7 @@ export default class Shortcuts extends View {
     this.opened = Date.now();
     this.released = false;
     this.pending = 0;
-    const hints = Object.hasOwn(pickers, mode) ? sidebarHints(shared(`pbogut.${mode}.hintTargets`) ?? []) : null;
+    const hints = Object.hasOwn(pickers, mode) ? assignHints(shared(`pbogut.${mode}.hintTargets`) ?? [], { skipKeys: "jk" }) : null;
     this.overlay = openOverlay({
       mod, kind: "window", frame: "none",
       width: 1, height: 1, at: { x: 0, y: 0 },
