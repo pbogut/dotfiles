@@ -44,6 +44,12 @@ a continuation, the first hint opens the short URL and the hint on the second
 row opens the joined URL. Without the border, or in other programs, the mod uses
 the ordinary terminal URL scanner.
 
+**Lazygit panel wraps.** `mods/pbogut-links/lazygit-wraps.js` finds panels by
+their box borders, regardless of their titles. It checks for URL continuations
+only inside the same panel. For a Git push URL that wraps at `/-`, the hint on
+`https://` opens the short URL; the hint on `/merge_requests` opens the full
+URL with its branch query.
+
 Ctrl+G opens a full-width overlay over the tab bar, above the status bar.
 The terminal stays fully visible without resizing. Shortcuts use
 outlined keycaps in the current theme's colors.
@@ -729,6 +735,7 @@ node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --test assets/tests/herdr_app/words.test.mjs
 node --test assets/tests/herdr_app/link_hints.test.mjs
 node --test assets/tests/herdr_app/opencode_wraps.test.mjs
+node --test assets/tests/herdr_app/lazygit_wraps.test.mjs
 node --test assets/tests/herdr_app/send_ctrl_g.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/space_initials.test.mjs

@@ -4,6 +4,7 @@ import { checking, closeOverlay, focused, hc, notify, panes, props, run, setting
 import { assignHints } from "./hints.js";
 import { grid, visibleLinks } from "./links.js";
 import { openCodeLinks } from "./opencode-wraps.js";
+import { lazygitLinks } from "./lazygit-wraps.js";
 
 export default class LinkHints extends View {
   init(_props, cx) {
@@ -17,7 +18,7 @@ export default class LinkHints extends View {
     if (!terminal?.cols || !terminal.rows) return this.dismiss();
     const { rows, cols } = terminal;
     const pane = panes().find((p) => p.terminal === this.terminal);
-    const scanLinks = pane?.program?.key === "opencode" ? openCodeLinks : visibleLinks;
+    const scanLinks = { opencode: openCodeLinks, lazygit: lazygitLinks }[pane?.program?.key] ?? visibleLinks;
     const scroll = pane?.scroll;
     const history = Math.max(0, (scroll?.total ?? rows) - rows);
     const top = scroll?.offset ?? 0;
