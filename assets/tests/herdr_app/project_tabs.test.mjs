@@ -169,6 +169,29 @@ test("a project file replaces the fallback, including an empty or omitted tabs l
   }
 });
 
+test("origin selects one complete global definition on the project's machine", async () => {
+  const key = "github.com/pbogut/chezmoi", folder = "/some other checkout/branch";
+  const wildcard = { name: "Default", tabs: ["nvim"] };
+  const global = { "*": wildcard, [key]: { name: " Dotfiles ", setup: { script: "init.sh" } } };
+  const load = (origin, map = global, local = null) => loadProjectConfig(folder, async (bin, args, options) => {
+    assert.equal(bin, "git");
+    assert.deepEqual(options, { cwd: folder, on: "vps" });
+    if (args[0] === "rev-parse") return { code: 0, stdout: "/repo/.bare\n" };
+    assert.deepEqual(args, ["remote", "get-url", "origin"]);
+    return origin ? { code: 0, stdout: `${origin}\n` } : { code: 2 };
+  }, async path => path === defaults ? JSON.stringify(map) : local, defaults, "vps");
+  for (const origin of [`https://${key}.git`, "git@github.com:pbogut/chezmoi.git", `ssh://git@${key}/`]) {
+    assert.deepEqual(await load(origin), { name: "Dotfiles", tabs: [], setup: { script: "init.sh", directory: "/config/herdr-app" } });
+  }
+  for (const origin of [null, "/srv/chezmoi.git", "https://github.com/other/chezmoi.git"]) {
+    assert.deepEqual(await load(origin), wildcard);
+  }
+  assert.deepEqual(await load(null, { [key]: wildcard }), { tabs: [] });
+  assert.deepEqual(await load(`https://${key}`, { "*": wildcard, [key]: {} }), { tabs: [] });
+  assert.deepEqual(await load(`https://${key}`, global, "{}"), { tabs: [] });
+  await assert.rejects(load(`https://${key}`, { "*": wildcard, [key]: null }), /herdr-project\.json:.*github.com\/pbogut\/chezmoi/);
+});
+
 test("missing fallback leaves a shell, and invalid fallback identifies its path", async () => {
   const exec = async () => ({ code: 128 });
   assert.deepEqual(await loadProjectTabs("/plain", exec, async () => null, defaults), []);

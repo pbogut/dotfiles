@@ -81,6 +81,7 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
     }),
     "./roles.js": new vm.SourceTextModule(await readFile(new URL("roles.js", root), "utf8"), { context }),
     "./project.js": new vm.SourceTextModule(await readFile(new URL("project.js", root), "utf8"), { context }),
+    "./definition.js": new vm.SourceTextModule(await readFile(new URL("definition.js", root), "utf8"), { context }),
     "./hints.js": new vm.SourceTextModule(await readFile(new URL("hints.js", root), "utf8"), { context }),
     "./close.js": new vm.SourceTextModule(await readFile(new URL("close.js", root), "utf8"), { context }),
     "./tasks.js": new vm.SourceTextModule(await readFile(new URL("tasks.js", root), "utf8"), { context }),

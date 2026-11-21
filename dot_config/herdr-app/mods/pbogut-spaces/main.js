@@ -8,6 +8,7 @@ import { v_flex, h_flex, ScrollHandle } from "gpui-base";
 import { spaces, machines, panes, run, openOverlay, exec, hc, appHome, readTextFile, theme, shared, setShared, watchFolder, window, layout, checking, nextCommand, notify, props } from "herdr";
 import { ASSIGNMENTS, assignmentKey, spaceAssignmentKey, DEFAULT_FOLDERS, folderNames, parseFolders, matchFolder, orderFolders } from "./folders.js";
 import SpaceMenu, { FolderFilter } from "./menu.js";
+import { configuredName, machinePaths, projectDefinition, readDefinition } from "./definition.js";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -229,13 +230,17 @@ export default class Spaces extends View {
             entry.root = (common || cwd).replace(/\/+$/, "").replace(/\/\.(git|bare)$/, "");
             entry.name ??= fallback;
             if (entry.nameLoaded) {
-              const path = `${entry.root}/herdr-project.json`;
-              try {
-                const config = JSON.parse(await readTextFile(path, { on }));
-                entry.name = typeof config?.name === "string" && config.name.trim() ? config.name.trim() : fallback;
-              } catch (error) {
-                throw new Error(`${path}: ${error.message ?? error}`);
+              const definition = await projectDefinition(common, cwd, exec, readTextFile, async () => {
+                const paths = await machinePaths(on, exec, { appHome: appHome() });
+                return `${paths.appHome}/herdr-project.json`;
+              }, on);
+              let name = configuredName(definition?.config);
+              if (!name && !common.endsWith("/.bare")) {
+                // Regular repos and plain folders also support a local, name-only override.
+                const local = await readDefinition(`${entry.root}/herdr-project.json`, readTextFile, on);
+                name = configuredName(local?.config);
               }
+              entry.name = name || fallback;
             }
             if (reload) {
               for (const [otherKey, other] of this.projects) {

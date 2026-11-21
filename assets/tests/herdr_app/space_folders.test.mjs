@@ -124,6 +124,7 @@ async function sidebar(spaces, storage = new Map(), shared = new Map()) {
     }),
   };
   const source = new URL("../../../dot_config/herdr-app/mods/pbogut-spaces/main.js", import.meta.url);
+  mods["./definition.js"] = new vm.SourceTextModule(await readFile(new URL("definition.js", source), "utf8"), { context });
   const folders = new vm.SourceTextModule(await readFile(new URL("folders.js", source), "utf8"), { context });
   await folders.link(() => {});
   const menu = new vm.SourceTextModule(await readFile(new URL("menu.js", source), "utf8"), { context });

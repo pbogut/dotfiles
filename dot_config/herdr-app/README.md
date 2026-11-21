@@ -296,19 +296,29 @@ Each role uses its existing launcher and the space's configured folder.
 When the project has no shared definition, the picker reads
 `~/.config/herdr-app/herdr-project.json` on that machine, or the same file under
 `HERDR_APP_HOME`.
-Chezmoi supplies this fallback:
+Use `"*"` for the default and an exact Git `origin` for any project you want
+to configure centrally. For example:
 
 ```json
 {
-  "tabs": ["nvim"]
+  "*": { "tabs": ["nvim"] },
+  "github.com/pbogut/chezmoi": {
+    "name": "Dotfiles",
+    "tabs": ["nvim", "git"]
+  }
 }
 ```
 
-For marked projects, the fallback also applies to regular Git repositories
-and non-Git folders.
-The project's file takes precedence as a whole. An omitted `tabs` field or an
-explicit `"tabs": []` in that file keeps a shell. Both definitions are read
-afresh when opening a project.
+Herdr reads `origin` on the project's machine without contacting the Git host.
+`git@github.com:pbogut/chezmoi.git` and `https://github.com/pbogut/chezmoi.git`
+both match the key above, including in linked worktrees. A missing or
+unmatched origin uses `"*"`, as do non-Git folders.
+
+The first match wins: the file beside `.bare`, the origin entry, then `"*"`.
+Each is a whole definition. An empty origin entry `{}` keeps the initial shell
+even if `"*"` lists tabs. With no matching entry and no `"*"`, the shell stays.
+Chezmoi ships just the `"*"` entry shown above. An existing flat global
+definition such as `{"tabs":["nvim"]}` still works as the default.
 
 Invalid JSON, unknown roles, duplicate roles, and invalid dev or setup fields produce an error with
 the file path. A new project opens with a shell rather than a partial layout.
@@ -484,10 +494,11 @@ current directory unless explicitly renamed. Marked projects use the project
 name from their configured folder for labels and letter tiles.
 Git's common directory identifies the repository across worktrees:
 `gitlab.com/assuredpharmacy/pms/.bare` gives `pms` and `P`, as does `pms/.git`.
-Set `"name": "PMS"` in the shared `herdr-project.json` beside `.bare` to override
-the label and its initial for marked project worktrees. Regular repositories read the file
-beside `.git`; non-Git folders read it from the configured folder.
-An absent, blank, or non-string `name` falls back to the repository or folder name.
+Set `"name": "PMS"` in the selected project definition to override the label
+and its initial for marked project worktrees. If that name is absent, blank, or
+not a string, the usual naming rules apply. Regular repositories can still
+supply a name beside `.git`, and non-Git folders in their configured folder.
+Otherwise the sidebar shows the repository or folder name.
 Invalid JSON uses that fallback on initial load; a failed reload keeps the last name.
 Folders outside Git use the folder name; a space without a folder uses its name.
 
@@ -694,7 +705,10 @@ python3 -B assets/tests/herdr_app/agents.py
 node --experimental-vm-modules --test assets/tests/herdr_agents/push.test.mjs
 python3 -B assets/tests/herdr_agents/agents_test.py
 python3 -B assets/tests/herdr_agents/push.py
-herdr-app check dot_config/herdr-app/mods/pbogut-spaces
+# Herdr checks imports inside the mod directory. Copy the shared source as chezmoi does.
+checkdir=$(mktemp -d /tmp/opencode/herdr-check-XXXXXX)
+cp -RL dot_config/herdr-app/mods/pbogut-spaces "$checkdir/"
+herdr-app check "$checkdir/pbogut-spaces"
 node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --test assets/tests/herdr_app/words.test.mjs
 node --test assets/tests/herdr_app/send_ctrl_g.test.mjs

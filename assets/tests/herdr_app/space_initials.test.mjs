@@ -57,6 +57,7 @@ async function fixture(spaces, exec, readTextFile = async () => null, marked = O
       nextCommand: () => new Promise(resolve => { receive = resolve; }),
     }),
   };
+  modules["./definition.js"] = new vm.SourceTextModule(await readFile(new URL("definition.js", source), "utf8"), { context });
   const folders = new vm.SourceTextModule(await readFile(new URL("folders.js", source), "utf8"), { context });
   await folders.link(() => {});
   const menu = new vm.SourceTextModule(await readFile(new URL("menu.js", source), "utf8"), { context });
@@ -120,7 +121,7 @@ test("real Git worktrees use the project name and initial, independently of labe
     } catch (error) {
       return { code: error.code, stdout: error.stdout, stderr: error.stderr };
     }
-  }, path => readFile(path, "utf8").catch(error => {
+  }, path => readFile(path === "/app/herdr-project.json" ? join(root, "global.json") : path, "utf8").catch(error => {
     if (error.code === "ENOENT") return null;
     throw error;
   }));
@@ -162,6 +163,18 @@ test("real Git worktrees use the project name and initial, independently of labe
   await app.reload(spaces[5]);
   for (const i of [0, 3, 4]) assert.deepEqual(app.row(spaces[i]), ["S", "Site"]);
   assert.deepEqual(app.row(spaces[5]), ["R", "Research"]);
+
+  await git(normal, "remote", "add", "origin", "git@github.com:team/site.git");
+  await writeFile(join(root, "global.json"), JSON.stringify({
+    "github.com/team/site": { name: " Dotfiles " }, "*": { name: "Other" },
+  }));
+  for (const i of [4, 5, 1]) await app.reload(spaces[i]);
+  for (const i of [0, 3, 4]) assert.deepEqual(app.row(spaces[i]), ["D", "Dotfiles"]);
+  assert.deepEqual(app.row(spaces[5]), ["O", "Other"]);
+  assert.deepEqual(app.row(spaces[1]), ["D", "Dispensary"], "The file beside .bare wins");
+  await writeFile(join(root, "global.json"), '{"github.com/team/site":{},"*":{"name":"Other"}}');
+  await app.reload(spaces[4]);
+  assert.deepEqual(app.row(spaces[4]), ["S", "Site"], "Missing name uses the existing regular-repo override, not the wildcard");
 });
 
 test("lookups distinguish machines, share folder caches and retry only on explicit reload", async () => {
@@ -175,14 +188,15 @@ test("lookups distinguish machines, share folder caches and retry only on explic
   const calls = [];
   const reads = [];
   let offline = false;
-  const app = await fixture(spaces, async (_bin, args, options) => {
+  const app = await fixture(spaces, async (bin, args, options) => {
+    if (bin === "sh") return { code: 0, stdout: "/srv/home\n/srv/config/herdr\n" };
     if (!args.includes("--git-common-dir")) return { code: 1, stdout: "", stderr: "not a git repository" };
     calls.push(options);
     if (offline && options.on) throw new Error("offline");
     return { code: 0, stdout: options.on ? "/repos/remote.git\n" : "/repos/pms/.bare\n" };
   }, async (path, { on }) => {
     reads.push([path, on]);
-    return on ? '{"name":"Remote project"}' : null;
+    return on && path === "/repos/remote.git/herdr-project.json" ? '{"name":"Remote project"}' : null;
   });
   // Exercise only the icon lookup to count its requests separately from git status.
   app.view.refreshGit = () => {};
@@ -190,7 +204,8 @@ test("lookups distinguish machines, share folder caches and retry only on explic
   assert.equal(calls.length, 2);
   assert.deepEqual(spaces.map(s => app.row(s)[0]), ["P", "P", "R", "S"]);
   assert.deepEqual(app.row(spaces[2]), ["R", "Remote project"]);
-  assert.deepEqual(reads, [["/repos/pms/herdr-project.json", null], ["/repos/remote.git/herdr-project.json", "work"]]);
+  assert.deepEqual(reads.filter(([, on]) => !on), [["/repos/pms/herdr-project.json", null], ["/app/herdr-project.json", null]]);
+  assert.deepEqual(reads.filter(([, on]) => on), [["/srv/config/herdr/herdr-project.json", "work"], ["/repos/remote.git/herdr-project.json", "work"]]);
   await app.refresh();
   assert.equal(calls.length, 2, "Do not launch git on every 250ms tick");
   offline = true;
@@ -215,6 +230,7 @@ test("optional names fall back safely and branch shortening changes display text
   const app = await fixture([space],
     async () => ({ code: 0, stdout: "/repo/.bare\n" }),
     async path => {
+      if (path === "/app/herdr-project.json") return null;
       assert.equal(path, "/repo/herdr-project.json");
       return definition;
     });

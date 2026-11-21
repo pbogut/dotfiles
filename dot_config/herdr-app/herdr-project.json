@@ -1,3 +1,14 @@
 {
-  "tabs": ["nvim"]
+  "*": {
+    "tabs": [
+      "nvim"
+    ]
+  },
+  "github.com/pbogut/dotfiles": {
+    "name": "Dotfiles",
+    "tabs": [
+      "nvim",
+      "git"
+    ]
+  }
 }
