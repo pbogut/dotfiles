@@ -1,4 +1,4 @@
-import { View, div, svg } from "gpui-kit";
+import { div, svg } from "gpui-kit";
 import {
   v_flex,
   h_flex,
@@ -7,10 +7,11 @@ import {
   v_virtual_list,
   VirtualListScrollHandle,
 } from "gpui-base";
-import { closeOverlay, props, run, settings, shared, spaces, theme } from "herdr";
+import { closeOverlay, run, settings, shared, spaces, theme } from "herdr";
 
-export default class SpacePicker extends View {
-  init(_props, cx) {
+export default class SpacePicker {
+  constructor(props, cx) {
+    this.overlay = props.overlay;
     this.query = "";
     this.at = 0;
     this.scroll = VirtualListScrollHandle.new();
@@ -52,11 +53,7 @@ export default class SpacePicker extends View {
 
   dismiss() {
     this.closed = true;
-    closeOverlay(props().overlay);
-  }
-
-  close() {
-    if (props()?.sidebarPicker) run(`pbogut-keys.closed-${props().overlay}`);
+    closeOverlay(this.overlay);
   }
 
   open(row) {

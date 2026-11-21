@@ -134,7 +134,7 @@ def main():
                     key("alt+o", "z", "Escape")
                     wait(lambda: not app("status")["overlays"], "Escape dismisses space hints")
                     call("xdotool", "keydown", "Alt_L", "key", "o", "key", "o", "keyup", "Alt_L")
-                    wait(lambda: "pbogut-space-picker" in app("status")["overlays"], "Held Alt and two taps open search")
+                    wait(lambda: "pbogut-spaces" in app("status")["overlays"], "Held Alt and two taps open search")
                     key("z", "Escape")
                     for shortcut in ("alt+o", "alt+i"):
                         key(shortcut, shortcut, shortcut, delay=20)

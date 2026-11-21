@@ -1,6 +1,8 @@
 .config/DankMaterialShell/plugins/BatteryConservation
 .config/herdr/plugins/managed-tabs
 .config/herdr/plugins/repo-metadata
+.config/herdr-app/mods/pbogut-space-picker/main.js
+.config/herdr-app/mods/pbogut-space-picker/mod.json
 .config/hypr/hyprland.conf
 .config/themes/i3-solar/hyprland.conf
 .config/themes/solarized/hyprland.conf

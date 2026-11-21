@@ -43,12 +43,11 @@ async function picker() {
     }),
   };
   const main = new vm.SourceTextModule(await readFile(new URL(
-    "../../../dot_config/herdr-app/mods/pbogut-space-picker/main.js", import.meta.url), "utf8"), { context });
+    "../../../dot_config/herdr-app/mods/pbogut-spaces/picker.js", import.meta.url), "utf8"), { context });
   await main.link(name => modules[name]);
   await main.evaluate();
   const cx = { focus_handle() {}, notify() {}, stop_propagation() {} };
-  const view = new main.namespace.default();
-  view.init({}, cx);
+  const view = new main.namespace.default({ overlay: "spaces" }, cx);
   view.render();
   return {
     view, state,

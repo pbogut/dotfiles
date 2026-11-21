@@ -36,7 +36,7 @@ def main():
     (root / "app/settings.json").write_text(json.dumps(settings))
     (root / "app/shared.json").write_text(json.dumps({"frame.welcomed": "skipped"}))
     # Observe rendered picker order and selection only in the disposable copy.
-    picker = root / "app/mods/pbogut-space-picker/main.js"
+    picker = root / "app/mods/pbogut-spaces/picker.js"
     picker.write_text(picker.read_text().replace("    const height =", """    console.log("SPACE_PICKER " + JSON.stringify({
       query: this.query, selected: this.selected,
       rows: rows.map(row => ({ id: row.w.id, name: row.name, branch: row.branch })),
@@ -78,7 +78,7 @@ def main():
 
     def open_picker():
         call("xdotool", "keydown", "Alt_L", "key", "o", "key", "o", "keyup", "Alt_L")
-        wait(lambda: "pbogut-space-picker" in app("status")["overlays"], "Double Alt+O opens the spaces picker")
+        wait(lambda: "pbogut-spaces" in app("status")["overlays"], "Double Alt+O opens the spaces picker")
 
     def drag(source_y, target_y):
         call("xdotool", "mousemove", "100", str(source_y), "mousedown", "1")
@@ -130,6 +130,10 @@ def main():
         try:
             window = call("xdotool", "search", "--sync", "--pid", str(process.pid)).splitlines()[0]
             call("xdotool", "windowfocus", window)
+            key("alt+o")
+            wait(lambda: "pbogut-spaces" in app("status")["overlays"] and "rows" in picker_state(),
+                 "Global Alt+O opens search without the custom sidebar")
+            key("Escape")
             app("do", "layout.switch", "--name", "pbogut")
             opened = {}
             for name, folder in [("Notes", notes), ("Dotfiles", personal), ("Main name", main_tree), ("Feature name", outside)]:
@@ -157,6 +161,10 @@ def main():
             assert app("status")["space"] == opened[expected[0]], "Escape cancels a highlighted move"
             key("alt+o", "k", "Return")
             wait(lambda: app("status")["space"] == opened[expected[-1]], "k wraps upward and Enter selects the last row")
+            key("alt+t", "alt+o")
+            wait(lambda: app("status")["overlays"] == ["pbogut-spaces"] and picker_state().get("selected") == opened[expected[-1]],
+                 "With the sidebar hidden, one Alt+O opens search on the current space")
+            key("Escape", "alt+t")
             for number, folder in enumerate(expected, 1):
                 key(f"alt+{number}")
                 wait(lambda: app("status")["space"] == opened[folder], f"Alt+{number} selects the grouped space")
@@ -192,7 +200,7 @@ def main():
             call("xdotool", "type", "--clearmodifiers", "not-a-space-jk")
             key("ctrl+j", "ctrl+k", "Return")
             assert picker_state()["rows"] == []
-            assert "pbogut-space-picker" in app("status")["overlays"], "Empty results cannot switch or create anything"
+            assert "pbogut-spaces" in app("status")["overlays"], "Empty results cannot switch or create anything"
             key("Escape")
             wait(lambda: not app("status")["overlays"], "Escape closes the spaces picker")
             assert app("status")["space"] == opened[str(main_tree)]

@@ -153,7 +153,7 @@ export default class Shortcuts extends View {
       width,
       height: 0.7,
       at: { x: (viewport - width) / 2, y: 40 },
-      props: { sidebarPicker: true, picker: mode === "agents" },
+      props: { sidebarPicker: true, picker: true },
     });
   }
 

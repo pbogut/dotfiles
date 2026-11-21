@@ -671,7 +671,7 @@ until the sidebar resolves their order.
 
 ## Spaces picker
 
-The searchable spaces picker (`mods/pbogut-space-picker`) lists one row per open space in
+The searchable spaces picker (`mods/pbogut-spaces/picker.js`) lists one row per open space in
 the Spaces sidebar's machine, folder, and worktree order, including folded groups.
 The current space is selected on opening. Search matches space and project names,
 folders, machines, and branches without reordering results. Arrow keys and
@@ -717,7 +717,6 @@ herdr-app check dot_config/herdr-app/mods/pbogut-tab-bar
 shellcheck dot_config/herdr-app/mods/pbogut-tabs/task.sh
 herdr-app check dot_config/herdr-app/mods/pbogut-projects
 herdr-app check dot_config/herdr-app/mods/pbogut-picker
-herdr-app check dot_config/herdr-app/mods/pbogut-space-picker
 herdr-app check dot_config/herdr-app/mods/pbogut-palette
 herdr-app check dot_config/herdr-app/mods/pbogut-agent-status
 herdr-app check dot_config/herdr-app/mods/pbogut-agents

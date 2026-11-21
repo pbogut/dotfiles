@@ -1,5 +1,6 @@
 {
   "place": "none",
   "title": "Spaces",
+  "overlay": { "kind": "popup", "at": "top", "offset": 40, "width": 680, "height": 0.7 },
   "cloned_from": { "name": "spaces", "version": "0.1.16" }
 }

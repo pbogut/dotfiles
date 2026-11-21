@@ -42,6 +42,7 @@ async function fixture(spaces, exec, readTextFile = async () => null, marked = O
     }, { context });
   }
   const modules = {
+    "./picker.js": mock({ default: class {} }),
     "gpui-kit": mock({ View: class {}, div: element, svg: element }),
     "gpui-base": mock({ v_flex: element, h_flex: element, ScrollHandle: { new: () => ({ scroll_to_item() {} }) } }),
     herdr: mock({

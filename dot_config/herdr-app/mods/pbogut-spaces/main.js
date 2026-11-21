@@ -37,6 +37,7 @@ import {
   orderFolders,
 } from "./folders.js";
 import SpaceMenu, { FolderFilter } from "./menu.js";
+import SpacePicker from "./picker.js";
 import { configuredName, machinePaths, projectDefinition, readDefinition } from "./definition.js";
 
 function find(node, id) {
@@ -119,6 +120,10 @@ export default class Spaces extends View {
       this.popup = new SpaceMenu(props(), cx);
       return;
     }
+    if (props()?.overlay) {
+      this.popup = new SpacePicker(props(), cx);
+      return;
+    }
     this.git = {}; // where() -> { name, branch, ahead, behind, repo, linked }, null: not a repo
     this.checked = {}; // where() -> when it was last looked at
     this.unsure = new Set(); // where()s git couldn't answer for (a machine away)
@@ -186,6 +191,10 @@ export default class Spaces extends View {
           } catch {}
         }
       });
+  }
+
+  close() {
+    if (props()?.sidebarPicker) run(`pbogut-keys.closed-${props().overlay}`);
   }
 
   reloadFolders(cx) {

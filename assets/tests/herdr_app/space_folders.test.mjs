@@ -101,6 +101,7 @@ async function sidebar(spaces, storage = new Map(), shared = new Map()) {
     for (const [key, value] of Object.entries(values)) this.setExport(key, value);
   }, { context });
   const mods = {
+    "./picker.js": mock({ default: class {} }),
     "gpui-kit": mock({ View: class {}, div: element, svg: element }),
     "gpui-base": mock({ v_flex: element, h_flex: element, ScrollHandle: { new: () => ({
       scroll_to_item: index => state.scrolled.push(index),
