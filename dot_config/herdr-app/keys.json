@@ -69,6 +69,7 @@
     "shift-f2": "space.rename"
   },
   "layout:pbogut": {
+    "alt-u": "pbogut-keys.links",
     "alt-o": "pbogut-keys.spaces",
     "alt-i": "pbogut-keys.agents",
     "alt-h": "pbogut-tabs.tasks",

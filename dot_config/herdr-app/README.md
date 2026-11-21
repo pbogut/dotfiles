@@ -16,6 +16,7 @@ Choosing another layout in the app lasts until the next chezmoi apply.
 | --- | --- |
 | Ctrl+G | Bottom shortcut bar |
 | Alt+Esc | Copy mode |
+| Alt+U | Show inline hints on visible web URLs |
 | Alt+O | Show space hints; tap again for the spaces picker |
 | Alt+I | Show agent hints; tap again for the agents picker |
 | Alt+H | Project task picker |
@@ -27,6 +28,12 @@ Choosing another layout in the app lasts until the next chezmoi apply.
 
 The five searchable pickers accept Ctrl+J to move down and Ctrl+K to move up while
 their search field is focused. Up/Down also work; Enter selects a result.
+
+In a single-pane tab, press Alt+U and type the letters drawn on the URL you
+want to open. Backspace removes a letter; Esc cancels. The hints use the
+printed `http://` and `https://` addresses in the current viewport, including
+scrollback. A hyperlink whose destination is hidden behind a label is skipped.
+The overlay uses a snapshot, so press Alt+U again for fresh output.
 
 Ctrl+G opens a full-width overlay over the tab bar, above the status bar.
 The terminal stays fully visible without resizing. Shortcuts use
@@ -711,6 +718,7 @@ cp -RL dot_config/herdr-app/mods/pbogut-spaces "$checkdir/"
 herdr-app check "$checkdir/pbogut-spaces"
 node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --test assets/tests/herdr_app/words.test.mjs
+node --test assets/tests/herdr_app/link_hints.test.mjs
 node --test assets/tests/herdr_app/send_ctrl_g.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/space_initials.test.mjs

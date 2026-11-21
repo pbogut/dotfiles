@@ -11,6 +11,7 @@ import {
   nextCommand,
   notify,
   openOverlay,
+  panes,
   props,
   run,
   settings,
@@ -77,14 +78,14 @@ export default class Shortcuts extends View {
           }
           continue;
         }
-        if (command !== "toggle" && command !== "copy" && !Object.hasOwn(pickers, command))
+        if (!["toggle", "copy", "links"].includes(command) && !Object.hasOwn(pickers, command))
           continue;
         if (this.picker) {
           closeOverlay(this.picker);
           this.picker = null;
           if (this.mode === command) continue;
         }
-        const mod = command === "copy" ? "pbogut-copy" : "pbogut-keys";
+        const mod = { copy: "pbogut-copy", links: "pbogut-links" }[command] ?? "pbogut-keys";
         if (this.overlay) {
           // A rapid pair can reach the layout before the bar receives a key-up.
           // Later, native shortcut commands include auto-repeat but no held flag.
@@ -161,6 +162,26 @@ export default class Shortcuts extends View {
     const viewport = window.viewport_size();
     const zoom = settings().zoom ?? 1;
     const work = layout().children.find((node) => node.id === "work");
+    let linkProps;
+    if (mode === "links") {
+      const focus = focused(), tabPanes = panes().filter((p) => p.tab === focus?.tab);
+      if (!focus?.terminal || tabPanes.length !== 1 || tabPanes[0].terminal !== focus.terminal) {
+        notify({ title: "Link hints need a single terminal pane", level: "info" });
+        return;
+      }
+      const body = work.children.find((n) => n.id === "work-body");
+      const panel = body.children.find((n) => n.id === "panel");
+      const footer = work.children.filter((n) => n !== body && !n.hidden)
+        .reduce((height, n) => height + (n.size?.px ?? 0), 0);
+      linkProps = {
+        terminal: focus.terminal,
+        box: {
+          left: viewport.width - this.width,
+          width: this.width - (panel.hidden ? 0 : panel.size.px * zoom),
+          height: viewport.height - footer * zoom,
+        },
+      };
+    }
     const index = work.children.findIndex((node) => node.id === "prefix-anchor");
     const below = work.children
       .slice(index + 1)
@@ -179,7 +200,7 @@ export default class Shortcuts extends View {
       width: 1,
       height: 1,
       at: { x: 0, y: 0 },
-      props: { mode, hints, left: (viewport.width - this.width) / zoom, bottom: below },
+      props: { mode, hints, left: (viewport.width - this.width) / zoom, bottom: below, ...linkProps },
     });
   }
 

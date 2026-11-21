@@ -1,7 +1,7 @@
-const glyphs =
+export const glyphs =
   /(?:\p{Regional_Indicator}{2}|[^\p{Mark}\u200d])[\p{Mark}\p{Emoji_Modifier}\ufe0e\ufe0f]*(?:\u200d.[\p{Mark}\p{Emoji_Modifier}\ufe0e\ufe0f]*)*/gu;
 
-function cellWidth(glyph) {
+export function cellWidth(glyph) {
   const code = glyph.codePointAt(0);
   if (/\p{Emoji_Presentation}|\ufe0f/u.test(glyph)) return 2;
   return code >= 0x1100 &&

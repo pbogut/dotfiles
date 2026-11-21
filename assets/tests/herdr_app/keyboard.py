@@ -34,6 +34,19 @@ def main():
         HERDR_APP_HOME=str(root / "app"), HC_SESSION="keyboard-test",
         HERDR_TELEMETRY="0", SHELL="/bin/sh", MANGOHUD="0",
     )
+    bindir = root / "bin"
+    bindir.mkdir()
+    opener = bindir / "record-url"
+    opener.write_text('#!/bin/sh\nprintf "%s\\n" "$1" >> "$HOME/opened-urls"\n')
+    opener.chmod(0o755)
+    apps = root / "data/applications"
+    apps.mkdir()
+    (apps / "test-browser.desktop").write_text(
+        f"[Desktop Entry]\nType=Application\nName=Test browser\nExec={opener} %u\n"
+        "MimeType=x-scheme-handler/http;x-scheme-handler/https;\n")
+    (root / "config/mimeapps.list").write_text(
+        "[Default Applications]\nx-scheme-handler/https=test-browser.desktop\n")
+    env["BROWSER"] = str(opener)
     shutil.copytree(SOURCE, root / "app")
     settings_path = root / "app/settings.json"
     settings = json.loads(settings_path.read_text())
@@ -127,6 +140,53 @@ def main():
 
         wait_for(matches, f"{name}: bar covers the tabs and leaves the terminal visible")
 
+    def link_snapshot(name, row, col):
+        # Highlight just the "h" of two URLs in magenta. Those cells give the
+        # test a pixel reference independent of how the mod calculates its grid.
+        def link(url):
+            return "\033[48;2;255;0;255mh\033[0m" + url[1:]
+        screen = "\033[3J\033[2J\033[2;2H" + link("https://first.test")
+        screen += f"\033[{row};{col}H" + link("https://last.test") + "\033[H"
+        # Wait for Core and App to agree on grid size before positioning output.
+        target = app("do", "tab.new", "--name", name, "--argv", json.dumps([
+            "python3", "-u", "-c", f"input(); print({screen!r}, end='', flush=True); input()",
+        ]))["terminal"]
+        wait_for(lambda: terminal_ready(target), "Link terminal ready")
+        key("Return")
+        wait_for(lambda: "https://last.test" in call("hc", "read", target), "Link fixture ready")
+        def shot(suffix):
+            path = root / f"{name}-{suffix}.png"
+            call("herdr-app", "shot", str(path))
+            with Image.open(path) as image:
+                return image.convert("RGB")
+        before = shot("cells")
+        centers = []
+        for half in (before.crop((0, 0, before.width, before.height // 2)),
+                     before.crop((0, before.height // 2, before.width, before.height))):
+            mask = half.convert("P", palette=Image.Palette.ADAPTIVE)
+            magenta = mask.getpalette()
+            index = next(i for i in range(len(magenta) // 3) if magenta[i*3:i*3+3] == [255, 0, 255])
+            x, y, _, _ = mask.point(lambda p: 255 if p == index else 0, "L").getbbox()
+            centers.append((x + 1, y + 2 + (before.height // 2 if centers else 0)))
+        key("alt+u")
+        wait_for(lambda: "pbogut-links" in app("status")["overlays"], "Alt+U opens link hints")
+        def aligned():
+            after = shot("hints")
+            colors = json.loads((SOURCE / "themes/tokyo-night.json").read_text())["colors"]
+            keycap = {ImageColor.getrgb(colors[k]) for k in ("surface", "accent")}
+            return all(keycap <= {rgb for _, rgb in after.crop((x - 1, y, x + 9, y + 12)).getcolors()}
+                       for x, y in centers)
+        wait_for(aligned, f"{name}: both labels cover their URL cells at {centers}")
+        if name == "links":
+            key("j")
+            opened = root / "home/opened-urls"
+            wait_for(lambda: opened.exists() and opened.read_text().strip() == "https://last.test",
+                     "Typing the second hint opens its URL")
+        else:
+            key("Escape")
+        wait_for(lambda: not app("status")["overlays"], "Link hints close")
+        app("do", "tab.close")
+
     with (root / "app.log").open("w") as log:
         process = subprocess.Popen(["herdr-app"], env=env, stdout=log, stderr=log)
         try:
@@ -137,6 +197,15 @@ def main():
             wait_for(lambda: app("status")["focused_pane"] is not None, "Initial terminal focus")
             assert app("status")["overlays"] == []
 
+            link_snapshot("links", 31, 80)
+            call("xdotool", "windowsize", "--sync", window, "820", "600")
+            link_snapshot("links-resized", 23, 36)
+            app("do", "app.zoom_in")
+            key("alt+t")
+            link_snapshot("links-zoom-no-sidebar", 19, 52)
+            key("alt+t")
+            app("do", "app.zoom_reset")
+            call("xdotool", "windowsize", "--sync", window, "1280", "800")
             key("ctrl+g")
             wait_for(bar_open, "Ctrl+G opens the bottom overlay")
             bar_snapshot("prefix", 1280, 800)
