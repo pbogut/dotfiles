@@ -5,6 +5,61 @@ import { v_flex, h_flex } from "gpui-base";
 import { spaces, panes, exec, run, closeOverlay, openOverlay, theme, keys, shared, setShared } from "herdr";
 import { ASSIGNMENTS } from "./folders.js";
 
+export class FolderFilter {
+  constructor(props, cx) {
+    this.names = props.folderFilter;
+    this.hints = props.folderHints;
+    this.prefix = "";
+    this.overlay = props.overlay;
+    this.handle = cx.focus_handle();
+    this.handle.focus();
+  }
+
+  toggle(name) {
+    this.prefix = "";
+    const hidden = new Set(shared("pbogut.folders.hidden") ?? []);
+    if (hidden.has(name)) hidden.delete(name);
+    else hidden.add(name);
+    setShared("pbogut.folders.hidden", [...hidden]);
+  }
+
+  render() {
+    const t = theme(), hidden = new Set(shared("pbogut.folders.hidden") ?? []);
+    const names = this.names;
+    return v_flex().id("folder-filter").w_full().p(5).bg(t.popover).track_focus(this.handle)
+      .on_key_down((event, cx) => {
+        cx.stop_propagation();
+        const key = event.keystroke;
+        if (key === "escape") return closeOverlay(this.overlay);
+        if (event.is_held) return;
+        if (key === "backspace") this.prefix = this.prefix.slice(0, -1);
+        else if (key?.length === 1) {
+          const next = this.prefix + key;
+          const match = names.find(name => this.hints[name] === next);
+          if (match !== undefined) this.toggle(match);
+          else this.prefix = names.some(name => this.hints[name].startsWith(next)) ? next : "";
+        } else return;
+        cx.notify();
+      })
+      .child(div().px(8).py(4).text_size(11).text_color(t.muted).child("Show folders"))
+      .child(v_flex().id("filter-options").h(Math.min(302, names.length * 28)).flex_none().overflow_y_scrollbar()
+        .children(names.map(name => {
+          const on = !hidden.has(name);
+          const hint = this.hints[name];
+          return h_flex().id(`filter-${name}`).role("check_box").checked(on).accessibility_label(name)
+            .h(28).flex_none().px(8).gap(8).items_center().rounded(5).cursor_pointer()
+            .hover(s => s.bg(t.hover)).on_click(() => this.toggle(name))
+            .child(h_flex().size(14).flex_none().items_center().justify_center().border_1().rounded(3)
+              .border_color(on ? t.accent : t.muted)
+              .when(on, el => el.child(svg("mods/workspace-chrome/check.svg").size(12).text_color(t.accent))))
+            .child(div().flex_1().truncate().text_size(13).text_color(t.foreground).child(name))
+            .child(div().px(4).rounded(3).border_1().text_size(11)
+              .text_color(hint.startsWith(this.prefix) ? t.accent : t.dim)
+              .border_color(t.border).child(hint.toUpperCase()));
+        })));
+  }
+}
+
 export default class SpaceMenu {
   constructor(props, cx) {
     this.target = props.spaceMenu;

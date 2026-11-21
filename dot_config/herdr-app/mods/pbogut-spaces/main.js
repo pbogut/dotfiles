@@ -7,7 +7,7 @@ import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, ScrollHandle } from "gpui-base";
 import { spaces, machines, panes, run, openOverlay, exec, hc, appHome, readTextFile, theme, shared, setShared, watchFolder, window, layout, checking, nextCommand, notify, props } from "herdr";
 import { ASSIGNMENTS, assignmentKey, spaceAssignmentKey, DEFAULT_FOLDERS, folderNames, parseFolders, matchFolder, orderFolders } from "./folders.js";
-import SpaceMenu from "./menu.js";
+import SpaceMenu, { FolderFilter } from "./menu.js";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -74,6 +74,10 @@ export function tone(t, status) {
 
 export default class Spaces extends View {
   init(_props, cx) {
+    if (props()?.folderFilter) {
+      this.popup = new FolderFilter(props(), cx);
+      return;
+    }
     if (props()?.spaceMenu) {
       this.popup = new SpaceMenu(props(), cx);
       return;
@@ -502,7 +506,9 @@ export default class Spaces extends View {
   foldered(rows, machine, t, collapsed, draw) {
     const items = [];
     let activeAt = -1;
+    const hidden = shared("pbogut.folders.hidden") ?? [];
     for (const folder of folderNames(this.folderConfig)) {
+      if (hidden.includes(folder)) continue;
       const mine = rows.filter(row => this.folderFor(row.w) === folder);
       if (!mine.length && !this.showEmptyFolders) continue;
       const id = JSON.stringify([machine, folder]);
@@ -787,6 +793,8 @@ export default class Spaces extends View {
     if (this.popup) return this.popup.render(cx);
     const t = theme();
     const collapsed = narrow();
+    const names = folderNames(this.folderConfig);
+    const hidden = shared("pbogut.folders.hidden") ?? [];
     const palette = ["ansi6", "ansi3", "ansi4", "ansi5", "ansi2", "ansi1"];
     const sp = spaces();
     this.refreshProjects(sp, cx);
@@ -818,7 +826,12 @@ export default class Spaces extends View {
         .when(collapsed, el => el.pl(0).pr(0).justify_center())
         .when(!collapsed, el => el.child("Spaces"))
         .when(!collapsed && Boolean(this.folderError), el => el.child(div().px(4).text_color(t.blocked).tooltip(this.folderError).child("!")))
-        .when(!collapsed, el => el.child(h_flex().flex_1().justify_end()
+        .when(!collapsed, el => el.child(h_flex().flex_1().justify_end().items_center()
+          .child(h_flex().id("space-folder-filter").size(24).items_center().justify_center().rounded(5).cursor_pointer()
+            .text_color(names.some(name => hidden.includes(name)) ? t.accent : t.muted)
+            .tooltip("Filter folders (Ctrl+G, F)").hover(s => s.bg(t.hover).text_color(t.foreground))
+            .on_click(() => run("pbogut-keys.folder-filter-at-pointer"))
+            .child(svg("mods/pbogut-spaces/filter.svg").size(14)))
           .child(div().id("space-empty-folders").size(26).flex_none().flex().items_center().justify_center().rounded(6)
             .text_color(this.showEmptyFolders ? t.foreground : t.dim)
             .hover(s => s.bg(t.hover).text_color(t.foreground))

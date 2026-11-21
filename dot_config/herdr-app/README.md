@@ -38,6 +38,7 @@ Prefix bindings live in `mods/pbogut-keys/bindings.js`.
 | --- | --- |
 | c | New tab |
 | q | Close current tab |
+| f | Open the shared folder filter |
 | v / s | Split right / down |
 | x | Close project with teardown, or normally close an ordinary space |
 | Ctrl+G | Send Ctrl+G to the focused terminal |
@@ -581,6 +582,15 @@ The sidebar reads resolved assignments from `pbogut.spaces.rows` and folder orde
 and fallback from `pbogut.spaces.folders`. Manual moves and folder configuration
 changes follow Spaces. A new space uses the fallback folder until Spaces resolves it.
 After a Herdr upgrade, merge changes from the shipped Agents mod into this copy.
+
+Press Ctrl+G, then `f`, or click the filter in the **Spaces** or **Agents** header.
+Type a folder’s displayed hint to toggle it. The list stays open for more changes.
+Press Esc to close it.
+Both panels and their pickers remember the same selection. Unchecking a folder
+hides its spaces and idle agents, including pinned agents, in every sort mode.
+Working and blocked agents stay visible. Done agents stay visible until viewed,
+then disappear when they become idle. Active subagents can appear on their own
+when their parent is hidden.
 
 In every sort view, agent rows show the space's resolved project name and
 branch on the first line. A second line shows the session title in italics when available.

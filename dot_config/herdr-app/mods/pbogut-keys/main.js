@@ -27,6 +27,15 @@ export default class Shortcuts extends View {
     cx.spawn(async (cx) => {
       for (;;) {
         const command = await nextCommand();
+        if (command === "folder-filter" || command === "folder-filter-at-pointer") {
+          const names = shared("pbogut.spaces.folders")?.names ?? ["work", "personal", "other"];
+          const width = 200;
+          const viewport = window.viewport_size().width / (settings().zoom ?? 1);
+          openOverlay({ mod: "pbogut-spaces", kind: "popup", width, height: Math.min(340, 38 + names.length * 28),
+            at: command === "folder-filter" ? { x: Math.max(0, (viewport - width) / 2), y: 40 } : "pointer",
+            props: { folderFilter: names, folderHints: sidebarHints(names) } });
+          continue;
+        }
         if (command === `closed-${this.overlay}`) this.overlay = null;
         if (command === `closed-${this.picker}`) this.picker = null;
         if (this.overlay && command === `released-${this.overlay}`) {
@@ -208,6 +217,7 @@ export default class Shortcuts extends View {
         .child(hint(space ? "Alt+O" : "Alt+I", "Open picker")))
       .when(!sidebar, el => el.child(h_flex().flex_1().min_w(0).gap(24).overflow_hidden()
         .child(hint("Ctrl+G", "send Ctrl+G"))
+        .child(hint("f", "filter folders"))
         .child(hint("v", "split right"))
         .child(hint("s", "split down"))
         .child(hint("c", "new tab"))

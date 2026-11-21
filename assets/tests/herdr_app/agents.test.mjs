@@ -212,6 +212,37 @@ test("sub-agent urgency promotes its parent inside the same folder and state cha
   ]);
 });
 
+test("hidden folders suppress idle pins across every sort and keep busy children reachable", async () => {
+  const app = await sidebar([agent("idle", "api", "idle", { pinned: true }), agent("finished", "api", "done"),
+    agent("busy", "api", "working"), agent("waiting", "api", "blocked"), agent("home", "notes", "idle")]);
+  resolved(app, [{ id: "api", folder: "work" }, { id: "notes", folder: "personal" }]);
+  app.state.terminals = [
+    { address: "child", parent: "idle", state: "live", status: "blocked" },
+    { address: "sleeping", parent: "busy", state: "live", status: "idle" },
+  ];
+  find(app.render(), "ag-folder-filter").attrs.on_click[0]();
+  assert.equal(app.state.commands.at(-1)[0], "pbogut-keys.folder-filter-at-pointer");
+  app.shared.set("pbogut.folders.hidden", ["work"]);
+  for (const width of [268, 44]) {
+    app.state.width = width;
+    for (const sort of ["priority", "grouped", "folder-priority"]) {
+      app.shared.set("agents.sort", sort);
+      assert.deepEqual(app.rows().filter(id => /^(ag|sub)-/.test(id)).sort(),
+        ["ag-busy", "ag-child", "ag-finished", "ag-home", "ag-waiting"]);
+      assert.deepEqual(Array.from(app.shared.get("pbogut.agents.hintTargets")).sort(),
+        ["busy", "child", "finished", "home", "waiting"]);
+    }
+  }
+  find(app.render(), "ag-child").attrs.on_click[0]();
+  assert.deepEqual(JSON.parse(JSON.stringify(app.state.commands.at(-1))), ["terminal.peek", { terminal: "child" }]);
+  app.state.agents[0].status = "working";
+  app.state.agents[1].status = "idle";
+  assert.ok(app.rows().includes("ag-idle"));
+  assert.ok(!app.rows().includes("ag-finished"));
+  app.shared.set("pbogut.folders.hidden", []);
+  assert.ok(app.rows().includes("ag-finished"));
+});
+
 test("the sort menu opts into Folder + priority and can return to the existing modes", async () => {
   const app = await sidebar([], "grouped");
   find(app.render(), "ag-sort").attrs.on_click[0]();

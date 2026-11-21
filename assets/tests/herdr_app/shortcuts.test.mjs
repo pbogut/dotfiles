@@ -124,6 +124,7 @@ test("prefix closes the native overlay before running each action", async () => 
   for (const [key, command, direction] of [
     ["c", "tab.new", undefined], ["v", "pane.split", "right"], ["s", "pane.split", "down"],
     ["q", "tab.close", undefined], ["x", "pbogut-tabs.close-project", undefined],
+    ["f", "pbogut-keys.folder-filter", undefined],
   ]) {
     const app = await fixture();
     app.key(key);

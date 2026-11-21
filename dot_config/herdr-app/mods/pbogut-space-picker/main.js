@@ -32,7 +32,10 @@ export default class SpacePicker extends View {
     // New spaces remain reachable while the sidebar resolves their Git data.
     for (const w of live.values()) rows.push({ w, name: w.name });
     const words = this.query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const hidden = new Set(shared("pbogut.folders.hidden") ?? []);
+    const fallback = shared("pbogut.spaces.folders")?.fallback ?? "other";
     return rows.filter(row => {
+      if (hidden.has(row.folder ?? fallback)) return false;
       const text = [row.name, row.w.name, row.w.folder, row.w.machine, row.folder, row.branch].join(" ").toLowerCase();
       return words.every(word => text.includes(word));
     });

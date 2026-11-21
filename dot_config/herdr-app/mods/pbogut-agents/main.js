@@ -216,10 +216,6 @@ export default class Agents extends View {
     const shown = focused()?.agent;
     const now = Date.now();
     this.track(list, now);
-    // A kept sub-agent (one with a pane) is in agents() too: where a tree shows
-    // it, it gets no row of its own, unless it's pinned.
-    const nested = new Set(collapsed ? [] : list.flatMap((a) => this.tree(all, a.address).map((s) => s.t.address)));
-    list = list.filter((a) => a.pinned || !nested.has(a.address));
     const byFolder = sort.id === "folder-priority";
     const byPriority = sort.id === "priority" || byFolder;
     const sp = spaces();
@@ -228,9 +224,28 @@ export default class Agents extends View {
       .filter(row => liveSpaces.has(row.id)).map(row => [row.id, row]));
     const nameOf = a => spaceRows.get(a.space)?.name || a.space_name || "";
     const branchOf = a => spaceRows.get(a.space)?.branch || "";
-    const folders = shared("pbogut.spaces.folders") ?? { names: [], fallback: "other" };
+    const folders = shared("pbogut.spaces.folders") ?? { names: ["work", "personal", "other"], fallback: "other" };
     const folderOf = a => spaceRows.get(a.space)?.folder ?? folders.fallback;
-    const urgency = new Map(list.map((a) => [a.address, Math.max(this.rank(a), ...this.tree(all, a.address).map((s) => RANK[kidStatus(s.t, this.listed)] ?? 0))]));
+    const hidden = new Set(shared("pbogut.folders.hidden") ?? []);
+    const children = new Map(list.map(a => [a.address, this.tree(all, a.address)]));
+    const kidsOf = a => children.get(a.address) ?? [];
+    // In hidden folders each agent stands on its own status, even when its
+    // parent is idle. A child without a pane can still be opened with peek.
+    const extra = new Map();
+    for (const a of list) {
+      if (!hidden.has(folderOf(a))) continue;
+      for (const { t: k } of kidsOf(a)) {
+        const status = kidStatus(k, this.listed);
+        if ((RANK[status] ?? 0) <= RANK.idle || this.listed.has(k.address)) continue;
+        extra.set(k.address, { address: k.address, parent: k.parent, space: a.space, space_name: a.space_name,
+          program: k.program, status, title: k.name, seq: 0 });
+      }
+      children.delete(a.address);
+    }
+    const nested = new Set(collapsed ? [] : list.flatMap(a => kidsOf(a).map(s => s.t.address)));
+    list = list.filter(a => (!hidden.has(folderOf(a)) || this.rank(a) > RANK.idle)
+      && (a.pinned || !nested.has(a.address))).concat([...extra.values()]);
+    const urgency = new Map(list.map((a) => [a.address, Math.max(this.rank(a), ...kidsOf(a).map((s) => RANK[kidStatus(s.t, this.listed)] ?? 0))]));
     const rankOf = (a) => urgency.get(a.address);
     if (byPriority) list = [...list].sort((x, y) => rankOf(y) - rankOf(x) || this.since(y) - this.since(x) || y.seq - x.seq);
     const pinned = list.filter((a) => a.pinned);
@@ -240,7 +255,7 @@ export default class Agents extends View {
       rest.sort((a, b) => names.indexOf(folderOf(a)) - names.indexOf(folderOf(b)));
     }
     list = [...pinned, ...rest];
-    setAgentOrder(list.map((a) => a.address));
+    setAgentOrder(list.filter(a => a.pane).map(a => a.address));
 
     // Publish the picker order before folding. A pinned child appears once, at the top.
     const roots = new Set(list.map(a => a.address));
@@ -252,8 +267,9 @@ export default class Agents extends View {
         address: a.address, name: nameOf(a), branch: branchOf(a), folder: folderOf(a),
         machine: space?.machine ?? null, path: space?.folder ?? "",
         program: a.program, status: a.status, compact: byPriority && !a.pinned, depth: 0,
+        ...(a.parent ? { parent: a.parent } : {}),
       };
-      return [row, ...this.tree(all, a.address).filter(s => !roots.has(s.t.address)).map(s => ({
+      return [row, ...kidsOf(a).filter(s => !roots.has(s.t.address)).map(s => ({
         ...row, address: s.t.address, parent: s.t.parent, depth: s.lines.length,
         program: s.t.program, status: kidStatus(s.t, this.listed), compact: byPriority,
       }))];
@@ -276,7 +292,7 @@ export default class Agents extends View {
       return el;
     };
     const withKids = (a, i) => {
-      const subs = collapsed ? [] : this.tree(all, a.address);
+      const subs = collapsed ? [] : kidsOf(a);
       const r = target(a.address, row(a, i, subs));
       if (this.folded.has(a.address)) return [r];
       return [r, ...subs.map(s => target(s.t.address, this.subRow(t, s, shown, byPriority)))];
@@ -313,6 +329,7 @@ export default class Agents extends View {
       const name = nameOf(a);
       const selected = this.hintState ? a.address === this.hintState.selected : a.focused;
       const branch = branchOf(a);
+      const focus = () => a.pane ? run("pane.focus", { pane: a.pane }) : this.peek(a.address);
       // An agent on another machine (`vps/t7`) says which.
       const machine = a.address.includes("/") ? a.address.split("/")[0] : null;
       if (collapsed) {
@@ -326,7 +343,7 @@ export default class Agents extends View {
           .tooltip([name, branch].filter(Boolean).join(" · "))
           .when(this.hintState && selected, el => el.bg(t.selected))
           .hover((s) => s.bg(t.hover))
-          .on_click(() => run("pane.focus", { pane: a.pane }))
+          .on_click(focus)
           .child(div().flex_1().min_w(0).whitespace_nowrap().text_right().text_color(t.muted).child(String(i + 1)))
           .child(h_flex().w(14).flex_none().items_center().justify_center().child(status(t, a, true)))
           .when(Boolean(this.hintState?.hints[a.address]), el => el.child(this.hintBadge(a.address, 4, t)));
@@ -367,7 +384,7 @@ export default class Agents extends View {
           else if (this.hovered === a.address) this.hovered = null;
           cx.notify();
         })
-        .on_click(() => run("pane.focus", { pane: a.pane }))
+        .on_click(focus)
         .when(Boolean(pic), el => el.child(div().id(`agent-fold-${a.address}`)
           .when(subs.length > 0, el => el.on_click((_e, cx) => {
             cx.stop_propagation();
@@ -382,7 +399,7 @@ export default class Agents extends View {
           .when(Boolean(title), el => el.child(div().truncate().text_size(11).italic().text_color(t.foreground).opacity(0.72).tooltip(title).child(title))))
         .when(Boolean(machine), el => el.child(div().text_size(10).text_color(t.dim).child(machine)))
         .when(subs.length > 0, el => el.child(fold(a, subs)))
-        .when(this.hovered === a.address, el => el.child(pin))
+        .when(this.hovered === a.address && Boolean(a.pane), el => el.child(pin))
         .when(this.hovered !== a.address && Boolean(when), el => el.child(div().flex_none().text_size(11).text_color(t.dim).child(duration(now - when))))
         .child(status(t, a, byPriority && !isPinned))
         .when(Boolean(this.hintState?.hints[a.address]), el => el.child(this.hintBadge(a.address, 8, t)));
@@ -468,6 +485,11 @@ export default class Agents extends View {
             .items_center()
             .gap(8)
             .child(div().flex_1().text_size(11.5).font_medium().text_color(t.dim).child("Agents"))
+            .child(h_flex().id("ag-folder-filter").w(24).h(22).items_center().justify_center().rounded(5).cursor_pointer()
+              .text_color(folders.names.some(name => hidden.has(name)) ? t.accent : t.muted)
+              .tooltip("Filter folders (Ctrl+G, F)").hover(s => s.bg(t.hover).text_color(t.foreground))
+              .on_click(() => run("pbogut-keys.folder-filter-at-pointer"))
+              .child(svg("mods/pbogut-spaces/filter.svg").size(14)))
             .child(h_flex().id("ag-titles").w(24).h(22).items_center().justify_center().rounded(5).cursor_pointer()
               .text_color(this.showTitles ? t.foreground : t.dim)
               .hover(s => s.bg(t.hover).text_color(t.foreground))
@@ -491,7 +513,7 @@ export default class Agents extends View {
         ),
       )
       .when(list.length === 0 && !collapsed, (el) =>
-        el.child(div().px(12).text_size(12).text_color(t.dim).child("No agent status yet. Agents show up here when they report their status. Older versions and agents inside tmux may not.")),
+        el.child(div().px(12).text_size(12).text_color(t.dim).child(this.listed.size ? "No agents match the folder filter." : "No agent status yet. Agents show up here when they report their status. Older versions and agents inside tmux may not.")),
       )
       .child(v_flex().id("ag-list").flex_1().min_h(0).px(collapsed ? 0 : 8).overflow_y_scrollbar().mode("always").track_scroll(this.scroll).children(rows))
       .when(collapsed, (el) =>

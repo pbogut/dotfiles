@@ -199,6 +199,40 @@ test("empty-folder toggle and folding persist across sidebar reloads", async () 
   await reopened.flush();
 });
 
+test("folder checklist hides spaces across machines and preserves their folder metadata for Agents", async () => {
+  const spaces = [
+    { id: "local", name: "Local", folder: "/repos/gitlab.com/example-work/api", active: true },
+    { id: "remote", name: "Remote", folder: "/srv/gitlab.com/example-work/api", machine: "server" },
+    { id: "notes", name: "Notes", folder: "/notes" },
+  ];
+  const app = await sidebar(spaces);
+  app.view.showEmptyFolders = true;
+  find(app.view.render(app.cx), "space-folder-filter").attrs.on_click[0]();
+  assert.equal(app.state.commands.at(-1).command, "pbogut-keys.folder-filter-at-pointer");
+  app.state.overlays.push({ props: { folderFilter: ["work", "personal", "other"], folderHints: { work: "f", personal: "d", other: "s" } } });
+  const menu = app.popup();
+  const option = name => find(menu.render(app.cx), `filter-${name}`);
+  assert.ok(option("personal").attrs.checked[0]);
+  const press = (keystroke, is_held = false) => menu.render(app.cx).attrs.on_key_down[0]({ keystroke, is_held }, app.cx);
+  press("f");
+  press("f", true);
+  assert.equal(option("work").attrs.checked[0], false);
+  const rebuilt = await sidebar(spaces, new Map(), app.shared);
+  rebuilt.view.showEmptyFolders = true;
+  const tree = rebuilt.view.render(rebuilt.cx);
+  for (const id of ["space-local", "space-remote", 'folder-[null,"work"]', 'folder-["server","work"]']) {
+    assert.equal(find(tree, id), undefined);
+  }
+  assert.ok(find(tree, "space-notes"));
+  assert.equal(app.shared.get("pbogut.spaces.rows").find(r => r.id === "local").folder, "work");
+  assert.deepEqual(Array.from(app.shared.get("pbogut.spaces.hintTargets")), ["notes"]);
+  option("other").attrs.on_click[0]();
+  assert.equal(find(rebuilt.view.render(rebuilt.cx), "space-notes"), undefined);
+  option("work").attrs.on_click[0]();
+  assert.ok(find(rebuilt.view.render(rebuilt.cx), "space-local"));
+  await Promise.all([app.flush(), rebuilt.flush()]);
+});
+
 test("picker rows match sidebar machine, folder and worktree order, including folded spaces", async () => {
   const spaces = [
     { id: "z", name: "Z remote", machine: "z-server", folder: "/notes" },

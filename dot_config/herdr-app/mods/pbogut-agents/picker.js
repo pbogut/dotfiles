@@ -53,7 +53,9 @@ export default class AgentPicker extends View {
       });
     }
     const words = this.query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const hidden = new Set(shared("pbogut.folders.hidden") ?? []);
     return rows.filter(row => {
+      if (hidden.has(row.folder) && !["working", "blocked", "done"].includes(row.status)) return false;
       const text = [row.name, row.branch, row.machine ?? "This computer", row.folder, row.path, row.program?.name, row.address]
         .join(" ").toLowerCase();
       return words.every(word => text.includes(word));
