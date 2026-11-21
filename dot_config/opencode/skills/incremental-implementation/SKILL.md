@@ -7,7 +7,7 @@ description: Delivers changes incrementally. Use when implementing any feature o
 
 ## Overview
 
-Build in thin vertical slices — implement one piece, test it, verify it, then expand. Avoid implementing an entire feature in one pass. Each increment should leave the system in a working, testable state. This is the execution discipline that makes large features manageable. Commit every working increment.
+Build in thin vertical slices. Implement one piece, test it, verify it, then expand. Avoid implementing an entire feature in one pass. Each increment should leave the system in a working, testable state. This is the execution discipline that makes large features manageable. Commit every working increment.
 
 ## When to Use
 
@@ -38,8 +38,8 @@ For each slice:
 1. **Implement** the smallest complete piece of functionality
 2. **Test** — run the test suite (or write a test if none exists)
 3. **Verify** — confirm the slice works as expected (tests pass, build succeeds, manual check)
-4. **Ask for review** using Plannotator as described in Human review. Wait for acceptance before continuing.
-5. **Commit** your progress with a descriptive semantic commit message.
+4. **Hand the slice back for review** as described in [Human review](#human-review). Wait for explicit acceptance.
+5. **Commit the accepted slice** when the reviewer authorizes the commit. Use a descriptive semantic commit message.
 6. **Move to the next slice** and carry forward, don't restart.
 
 ## Slicing Strategies
@@ -210,7 +210,7 @@ After each increment, verify with the repository's own commands (see the test-dr
 - [ ] Type checking passes, where the stack has one (`npx tsc --noEmit`, `mypy`, ...)
 - [ ] Linting passes (the repository's lint command)
 - [ ] The new functionality works as expected
-- [ ] Plannotator feedback or approval is visible in chat and the user has accepted the increment
+- [ ] The reviewer explicitly accepted this increment
 - [ ] The change is committed with a descriptive message
 
 **Note:** Run each verification command after a change that could affect it. After a successful run, don't repeat the same command unless the code has changed since — re-running on unchanged code adds no information.
@@ -248,30 +248,30 @@ After completing all increments for a task:
 - [ ] The build is clean
 - [ ] The feature works end-to-end as specified
 - [ ] Human reviewed and approved changes
-- [ ] No uncommitted changes remain
+- [ ] All approved changes for this task are committed; unrelated changes and the reviewer's staged hunks are preserved
 
 ## Human review
 
-Before reviewing changes or handing completed, verified work back to the user,
-call `switch_agent` with `{"agent":"plan"}`. Call it alone and wait until the
-next model turn before starting the review. Routine implementation checks stay
-in Build. If the switch is rejected, stay in the current mode and wait for the
-user's direction rather than retrying or starting the review.
+Verify the slice in Build, then switch to Plan. In chat, say what changed, which
+files to review, which checks passed, and whether anything differs from the
+agreement. End your turn and wait. The reviewer can send feedback or approval
+from Neovim or directly in chat.
 
-Once in Plan, give a short summary:
-- What behaviour this increment adds.
-- Files added, removed, or moved, with reasons.
-- Existing behaviour changed or removed.
-- Any deviation from the agreement.
+**Feedback.** Stay in Plan. Check each submitted finding against the code,
+answer questions, and discuss any proposed corrections. Feedback alone does
+not authorize edits or a commit. Once the reviewer explicitly authorizes a
+correction, switch to Build, make it, run the relevant checks, and hand the
+slice back for review.
 
-Then request review through Plannotator:
+**Approval.** Explicit acceptance closes the review. If the reviewer also
+authorizes a commit, switch to Build and commit only the reviewed changes.
+One message can authorize both. Preserve unrelated changes and staging.
+Continue with the next already-agreed slice, or return to Plan after the final
+commit.
 
-1. Call the native `plannotator` tool with `{"action":"review","gate":true}`. Set `target` to the repository directory if it differs from the current session's directory. `gate: true` ensures that approval arrives even when the user leaves no annotations.
-2. End your turn after the tool returns. 
-3. Remain available to answer questions while the review is open. Do not make further changes, commit, or start the next slice while waiting. Do not poll, reopen the review.
-4. The plugin delivers feedback or approval later as a visible message in this conversation.
-5. Check feedback against the actual code and discuss it in Plan. Feedback, including requests for corrections, is not approval to implement and must not trigger a Build request. Only after the user explicitly approves implementation, call `switch_agent` with `{"agent":"build"}` as a standalone tool call. After it succeeds, continue on the next model turn without asking for another message. Address the approved corrections, run the relevant checks, switch back to Plan, and request review again. If the switch is rejected, stay in Plan and do not retry without a new explicit instruction.
-6. An approval returned by Plannotator counts as acceptance; an error or cancellation does not. Always commit after review is accepted, then continue to the next slice. Acceptance permits requesting Build through `switch_agent` to create the commit and continue any next already-agreed increment. After the final increment is committed, switch back to Plan.
+Call `switch_agent` alone for each switch and continue on the next turn after
+it succeeds. If a switch is rejected, stay in the current mode and wait for
+the user's direction.
 
 ## See Also
 
