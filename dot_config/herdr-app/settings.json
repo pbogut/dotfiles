@@ -4,7 +4,7 @@
     "enabled": true
   },
   "font": "JetBrainsMono Nerd Font Mono",
-  "font_size": 16,
+  "font_size": 15,
   "font_weight": 400,
   "font_ligatures": true,
   "terminal_line_height": 1,
