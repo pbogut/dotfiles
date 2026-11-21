@@ -16,7 +16,7 @@ customCommands:
   - key: 'o'
     description: 'Open file'
     context: 'commitFiles'
-    command: 'herdr-app-vim {{ .SelectedFile.Name | quote }}'
+    command: 'herdr-app-vim {{ .SelectedCommitFile.Name | quote }}'
   - key: 'o'
     description: 'Open file'
     context: 'normal'
