@@ -699,9 +699,9 @@ export default class Spaces extends View {
       .items_center()
       .text_size(11.5)
       .text_color(t.branch ?? t.dim)
-      .child(div().min_w(0).truncate().tooltip(raw).child(branch))
       .when(g.ahead > 0, (el) => el.child(div().flex_none().text_color(t.ansi2).child(`\u2191${g.ahead}`)))
-      .when(g.behind > 0, (el) => el.child(div().flex_none().text_color(t.ansi1).child(`\u2193${g.behind}`)));
+      .when(g.behind > 0, (el) => el.child(div().flex_none().text_color(t.ansi1).child(`\u2193${g.behind}`)))
+      .child(div().min_w(0).truncate().tooltip(raw).child(branch));
   }
 
   isSelected(w) {
