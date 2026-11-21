@@ -3,6 +3,7 @@ import { h_flex } from "gpui-base";
 import { checking, closeOverlay, focused, hc, notify, panes, props, run, settings, terminals, theme } from "herdr";
 import { assignHints } from "./hints.js";
 import { grid, visibleLinks } from "./links.js";
+import { openCodeLinks } from "./opencode-wraps.js";
 
 export default class LinkHints extends View {
   init(_props, cx) {
@@ -15,7 +16,9 @@ export default class LinkHints extends View {
     const terminal = terminals().find((t) => t.address === this.terminal);
     if (!terminal?.cols || !terminal.rows) return this.dismiss();
     const { rows, cols } = terminal;
-    const scroll = panes().find((p) => p.terminal === this.terminal)?.scroll;
+    const pane = panes().find((p) => p.terminal === this.terminal);
+    const scanLinks = pane?.program?.key === "opencode" ? openCodeLinks : visibleLinks;
+    const scroll = pane?.scroll;
     const history = Math.max(0, (scroll?.total ?? rows) - rows);
     const top = scroll?.offset ?? 0;
     const { zoom, font_size } = settings();
@@ -27,7 +30,7 @@ export default class LinkHints extends View {
         const result = await hc(["read", this.terminal, "--json", "--lines", String(history)]);
         if (this.closed) return;
         if (result.code !== 0) throw new Error(result.stderr.trim() || "Terminal read failed");
-        const links = visibleLinks(JSON.parse(result.stdout).text, cols, top, rows);
+        const links = scanLinks(JSON.parse(result.stdout).text, cols, top, rows);
         if (!links.length) {
           notify({ title: "No visible web URLs", level: "info", timeout: 1500 });
           return this.dismiss();

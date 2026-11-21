@@ -1,6 +1,6 @@
 import { cellWidth, glyphs } from "./words.js";
 
-function trimUrl(url) {
+export function trimUrl(url) {
   const pairs = { ")": "(", "]": "[", "}": "{" };
   for (;;) {
     url = url.replace(/[.,;:!?]+$/, "");

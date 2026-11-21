@@ -35,6 +35,15 @@ printed `http://` and `https://` addresses in the current viewport, including
 scrollback. A hyperlink whose destination is hidden behind a label is skipped.
 The overlay uses a snapshot, so press Alt+U again for fresh output.
 
+**OpenCode chat wraps.** When Herdr identifies the focused program as `opencode`,
+`mods/pbogut-links/opencode-wraps.js` handles URLs that OpenCode splits across
+chat rows. It measures the chat column from the prompt's `╹▀▀▀` border to exclude
+the sidebar. For `http` followed by `://host`, the hint on `http` opens the whole
+URL. If the first row already contains a usable URL and the next row looks like
+a continuation, the first hint opens the short URL and the hint on the second
+row opens the joined URL. Without the border, or in other programs, the mod uses
+the ordinary terminal URL scanner.
+
 Ctrl+G opens a full-width overlay over the tab bar, above the status bar.
 The terminal stays fully visible without resizing. Shortcuts use
 outlined keycaps in the current theme's colors.
@@ -719,6 +728,7 @@ herdr-app check "$checkdir/pbogut-spaces"
 node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --test assets/tests/herdr_app/words.test.mjs
 node --test assets/tests/herdr_app/link_hints.test.mjs
+node --test assets/tests/herdr_app/opencode_wraps.test.mjs
 node --test assets/tests/herdr_app/send_ctrl_g.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/named_tabs.test.mjs
 node --experimental-vm-modules --test assets/tests/herdr_app/space_initials.test.mjs
