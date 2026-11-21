@@ -237,9 +237,9 @@ test("all sort modes show project and per-worktree branch on one line without ta
   for (const sort of ["priority", "grouped", "folder-priority"]) {
     app.shared.set("agents.sort", sort);
     const tree = app.render();
-    assert.match(text(find(tree, "ag-one")), /PMS · main/);
-    assert.match(text(find(tree, "ag-two")), /PMS · feature-branch/);
-    assert.match(text(find(tree, "ag-server/three")), /Remote API · master server/);
+    assert.match(text(find(tree, "ag-one")), /PMS main/);
+    assert.match(text(find(tree, "ag-two")), /PMS feature-branch/);
+    assert.match(text(find(tree, "ag-server/three")), /Remote API master server/);
     assert.equal(find(tree, "ag-two").attrs.h[0], 30);
     assert.ok(tooltips(find(tree, "ag-two")).includes("2026-11-18-feature-branch"));
     assert.doesNotMatch(text(find(tree, "ag-two")), /raw-feature|2026-11-18|oc-1/);
@@ -256,38 +256,39 @@ test("labels follow refreshed shared data and fall back to the native name while
   assert.match(text(row), /^scratch /);
   assert.doesNotMatch(text(row), /·/);
   resolved(app, [{ id: "scratch", name: "Project name", branch: "main", folder: "personal" }]);
-  assert.match(text(find(app.render(), "ag-one")), /^Project name · main/);
+  assert.match(text(find(app.render(), "ag-one")), /^Project name main/);
   app.shared.set("pbogut.spaces.rows", [{ id: "scratch", name: "Renamed", branch: "2026-11-19-fix", folder: "personal" }]);
-  assert.match(text(find(app.render(), "ag-one")), /^Renamed · fix/);
+  assert.match(text(find(app.render(), "ag-one")), /^Renamed fix/);
   app.shared.set("pbogut.spaces.rows", [{ id: "scratch", name: "Non-Git project", branch: "", folder: "personal" }]);
   row = find(app.render(), "ag-one");
   assert.match(text(row), /^Non-Git project /);
   assert.doesNotMatch(text(row), /·|main|fix/);
 });
 
-test("matching project labels keep separate focus targets without adding titles or tab numbers", async () => {
+test("session titles distinguish agents in the same project and tab; untitled rows stay compact", async () => {
   const app = await sidebar([
     agent("one", "space", "working", { tab: "split", title: "✦ Fix login" }),
     agent("two", "space", "working", { tab: "split", title: "[ ! ] Review login" }),
   ]);
   resolved(app, [{ id: "space", name: "API", branch: "fix", folder: "work" }]);
   app.state.spaces[0].tabs = [{ id: "split", name: "oc-1", named: true }];
-  for (const address of ["one", "two"]) {
+  for (const { address, title } of app.state.agents) {
     const row = find(app.render(), `ag-${address}`);
-    assert.match(text(row), /^API · fix/);
-    assert.doesNotMatch(text(row), /Fix login|Review login|oc-1/);
-    assert.deepEqual(tooltips(row), ["API", "fix"]);
+    assert.match(text(row), /^API fix/);
+    assert.ok(text(row).includes(title));
+    assert.doesNotMatch(text(row), /oc-1/);
+    assert.deepEqual(tooltips(row), ["API", "fix", title]);
     row.attrs.on_click[0]();
     assert.equal(app.state.commands.at(-1)[1].pane, `pane-${address}`);
   }
-  app.state.agents = [agent("one", "first", "idle"), agent("two", "second", "idle")];
+  app.state.agents = [agent("one", "first", "idle"), agent("two", "second", "idle", { title: "  " })];
   app.state.spaces = [{ id: "first", tabs: [{ id: "tab-one", name: "1", named: true }] },
     { id: "second", tabs: [{ id: "tab-two", name: "2", named: true }] }];
   resolved(app, [{ id: "first", name: "API", branch: "main", folder: "work" },
     { id: "second", name: "API", branch: "main", folder: "work" }]);
   for (const address of ["one", "two"]) {
     const row = find(app.render(), `ag-${address}`);
-    assert.equal(text(row), "API · main <1m");
+    assert.equal(text(row), "API main <1m");
     assert.equal(row.attrs.h[0], 30);
   }
 });

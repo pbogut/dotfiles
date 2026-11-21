@@ -63,6 +63,7 @@ export default class Agents extends View {
     if (props()?.sortMenu) return;
     this.scroll = ScrollHandle.new();
     this.folded = new Set();
+    this.showTitles = localStorage.getItem("showTitles") !== "false";
     // Each agent's last state and when it changed (ms), kept across restarts.
     try { this.changed = JSON.parse(localStorage.getItem("changed") ?? "{}"); } catch { this.changed = {}; }
     if (!this.changed || typeof this.changed !== "object" || Array.isArray(this.changed)) this.changed = {};
@@ -330,6 +331,7 @@ export default class Agents extends View {
           .child(h_flex().w(14).flex_none().items_center().justify_center().child(status(t, a, true)))
           .when(Boolean(this.hintState?.hints[a.address]), el => el.child(this.hintBadge(a.address, 4, t)));
       }
+      const title = this.showTitles && a.title?.trim();
       const when = this.since(a);
       const isPinned = a.pinned;
       const pin = div()
@@ -352,7 +354,7 @@ export default class Agents extends View {
       return h_flex().relative()
         .id(`ag-${a.address}`)
         .px(8)
-        .h(30)
+        .h(title ? 44 : 30)
         .flex_none()
         .rounded(8)
         .items_center()
@@ -372,10 +374,12 @@ export default class Agents extends View {
             this.folded.has(a.address) ? this.folded.delete(a.address) : this.folded.add(a.address);
             cx.notify();
           })).child(pic)))
-        .child(h_flex().flex_1().min_w(0).gap(5).items_center()
-          .child(div().flex_initial().min_w(40).truncate().tooltip(name).text_color(t.foreground).child(name))
-          .when(Boolean(branch), el => el.child(div().flex_1().min_w(40).truncate().text_size(11).text_color(t.muted)
-            .tooltip(branch).child(`· ${branch.replace(/^\d{4}-\d{2}-\d{2}-(?=.)/, "")}`))))
+        .child(v_flex().flex_1().min_w(0)
+          .child(h_flex().gap(5).items_center()
+            .child(div().flex_initial().min_w(40).truncate().tooltip(name).text_color(t.foreground).child(name))
+            .when(Boolean(branch), el => el.child(div().flex_1().min_w(40).truncate().text_right().text_size(11.5).text_color(t.accent)
+              .tooltip(branch).child(branch.replace(/^\d{4}-\d{2}-\d{2}-(?=.)/, "")))))
+          .when(Boolean(title), el => el.child(div().truncate().text_size(11).italic().text_color(t.foreground).opacity(0.72).tooltip(title).child(title))))
         .when(Boolean(machine), el => el.child(div().text_size(10).text_color(t.dim).child(machine)))
         .when(subs.length > 0, el => el.child(fold(a, subs)))
         .when(this.hovered === a.address, el => el.child(pin))
@@ -462,8 +466,18 @@ export default class Agents extends View {
             .pb(5)
             .flex_none()
             .items_center()
-            .justify_between()
-            .child(div().text_size(11.5).font_medium().text_color(t.dim).child("Agents"))
+            .gap(8)
+            .child(div().flex_1().text_size(11.5).font_medium().text_color(t.dim).child("Agents"))
+            .child(h_flex().id("ag-titles").w(24).h(22).items_center().justify_center().rounded(5).cursor_pointer()
+              .text_color(this.showTitles ? t.foreground : t.dim)
+              .hover(s => s.bg(t.hover).text_color(t.foreground))
+              .tooltip(this.showTitles ? "Hide session titles" : "Show session titles")
+              .on_click((_event, cx) => {
+                this.showTitles = !this.showTitles;
+                localStorage.setItem("showTitles", String(this.showTitles));
+                cx.notify();
+              })
+              .child(div().italic().text_size(13).child("T")))
             .child(
               div()
                 .id("ag-sort")
