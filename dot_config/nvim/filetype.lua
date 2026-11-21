@@ -19,15 +19,5 @@ vim.filetype.add({
     ['%.?env%.[%w_%..-]+'] = 'dotenv',
     ['/tmp/.*%.dump'] = 'zellijdump',
     ['.*%/environment.d%/.*%.conf'] = 'sh',
-    -- chezmoi
-    ['hyprland%.conf%.tmpl'] = 'hyprlang',
-    ['.*%/environment.d%/.*%.conf%.tmpl'] = 'sh',
-    ['.*%.toml%.tmpl'] = 'toml',
-    ['.*%.json%.tmpl'] = 'json',
-    ['.*%/dot_profile%.tmpl'] = 'sh',
-    ['.*%.sh%.tmpl'] = 'sh',
-    ['.*%.conf%.tmpl'] = 'conf',
-    ['.*%.desktop%.tmpl'] = 'desktop',
-    ['.*%.kdl%.tmpl'] = 'kdl',
   },
 })
