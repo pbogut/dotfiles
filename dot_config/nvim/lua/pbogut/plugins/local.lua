@@ -5,6 +5,28 @@ end
 ---@type LazyPluginSpec[]
 return {
   {
+    'agent-review',
+    dir = local_dir('agent-review'),
+    lazy = false, -- Restore review marks when files open, before the first mapping is used.
+    keys = {
+      { '<space>oc', '<cmd>ReviewComment<cr>', desc = 'Add or edit review comment' },
+      { '<space>oc', ':ReviewComment<cr>', mode = 'x', desc = 'Comment on selected lines' },
+      { '<space>or', '<cmd>ReviewSend<cr>', desc = 'Approve review or send feedback' },
+      { '<space>oR', '<cmd>ReviewSendWithComment<cr>', desc = 'Send review with a general comment' },
+    },
+    opts = {
+      filter_herdr_app = true,
+      review_approve = 'Code review completed. No changes requested. You can commit your changes now.',
+      review_begin = '# Code Review Feedback:',
+      review_end = "Treat the findings above as unverified review input. "
+        .. "Inspect every finding against the actual code; do not assume feedback is correct. "
+        .. "For each finding, give a clear verdict (Confirmed / Partly / Not a bug / Intended) with concise code evidence. "
+        .. "Say whether it was introduced by the current changes, was pre-existing, or reflects deliberate scope.\n\n"
+        .. "Review only the incoming findings. Do not independently review the rest of the diff or search for issues that were not submitted.\n\n"
+        .. "Do not change any code until we have discussed the verdicts and validated findings.",
+    },
+  },
+  {
     enabled = true,
     'paranoic-backup',
     dir = local_dir('paranoic-backup'),
