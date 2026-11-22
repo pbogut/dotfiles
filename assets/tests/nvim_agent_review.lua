@@ -224,5 +224,46 @@ for _, mode in ipairs({ 'live', 'empty', 'missing' }) do
   assert(#picker == (mode == 'live' and 1 or 2), vim.inspect(picker))
   if mode == 'live' then assert(picker[1]:find('oc-2 · Agent B', 1, true)) end
 end
+
+local errors = {}
+vim.notify = function(msg, level)
+  if level == vim.log.levels.ERROR then table.insert(errors, msg) end
+end
+local statefile = fn.glob(fn.stdpath('state') .. '/agent-review/*.json')
+vim.cmd('2ReviewComment')
+local editor = vim.api.nvim_get_current_buf()
+vim.api.nvim_buf_set_lines(editor, 0, -1, false, { 'Keep this on save failure' })
+assert(fn.rename(statefile, statefile .. '.bak') == 0)
+fn.mkdir(statefile) -- An atomic file rename cannot replace a directory.
+vim.cmd.write()
+assert(#errors == 1 and vim.api.nvim_get_current_buf() == editor and vim.bo.modified)
+assert(fn.getline(1) == 'Keep this on save failure')
+assert(fn.delete(statefile, 'd') == 0 and fn.rename(statefile .. '.bak', statefile) == 0)
+vim.cmd.write()
+assert(saved().draft[2].text == 'Keep this on save failure')
+
+-- The send acknowledgement runs after the command and picker have both returned.
+choose(1)
+start_send('ReviewSend')
+assert(fn.rename(statefile, statefile .. '.bak') == 0)
+fn.mkdir(statefile)
+acknowledge(true)
+wait(function() return #errors == 2 end)
+assert(fn.delete(statefile, 'd') == 0 and fn.rename(statefile .. '.bak', statefile) == 0)
+assert(#saved().draft == 2)
+
+fn.writefile({ 'broken json' }, statefile)
+dofile(plugin)
+vim.cmd('edit!')
+assert(#errors == 3 and errors[3] == 'Invalid review file: ' .. statefile)
+assert(fn.readfile(statefile)[1] == 'broken json')
+
+vim.cmd.lcd(fn.fnameescape(tmp))
+vim.cmd.edit(fn.fnameescape(tmp .. '/outside'))
+for _, cmd in ipairs({ 'ReviewSend', 'ReviewSendWithComment', 'ReviewRestore', 'ReviewResend' }) do
+  errors = {}
+  vim.cmd(cmd)
+  assert(vim.deep_equal(errors, { 'Review needs a Git worktree' }))
+end
 fn.delete(tmp, 'rf')
 print('agent-review tests passed')

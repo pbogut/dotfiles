@@ -10,6 +10,24 @@ local defaults = {
 }
 local config = defaults
 
+-- Catch errors where Neovim enters the plugin, including callbacks that run later.
+local function guarded(callback, fallback)
+  return function(...)
+    local ok, value = pcall(callback, ...)
+    if ok then return value end
+    local message = tostring(value):gsub('^.-%.lua:%d+: ', '')
+    vim.notify(message, vim.log.levels.ERROR)
+    return fallback
+  end
+end
+
+local function select_item(items, opts, on_choice)
+  opts.format_item = guarded(opts.format_item, '[Invalid review entry]')
+  vim.ui.select(items, opts, guarded(on_choice))
+end
+
+local function command(name, callback, opts) api.nvim_create_user_command(name, guarded(callback), opts or {}) end
+
 local function worktree(path)
   local root = vim.fs.root(path, '.git')
   if root then return uv.fs_realpath(root), vim.fs.relpath(root, path) end
@@ -29,8 +47,17 @@ local function state(root)
     local stat, err, code = uv.fs_stat(path)
     local data = { root = root, draft = {}, history = {} }
     if stat then
-      data = vim.json.decode(table.concat(fn.readfile(path), '\n'))
-      assert(data.root == root and vim.islist(data.draft) and vim.islist(data.history), 'Invalid review file: ' .. path)
+      local contents = fn.readfile(path)
+      local ok, parsed = pcall(vim.json.decode, table.concat(contents, '\n'))
+      assert(
+        ok
+          and type(parsed) == 'table'
+          and parsed.root == root
+          and vim.islist(parsed.draft)
+          and vim.islist(parsed.history),
+        'Invalid review file: ' .. path
+      )
+      data = parsed
     else
       assert(code == 'ENOENT', err)
     end
@@ -90,7 +117,7 @@ local function update(root, change)
   end)
   if not ok then
     uv.fs_unlink(tmp)
-    error(err)
+    error(err, 0)
   end
   states[root] = next_state
   for _, buf in ipairs(api.nvim_list_bufs()) do
@@ -104,10 +131,10 @@ end
 local group = api.nvim_create_augroup('AgentReview', { clear = true })
 api.nvim_create_autocmd({ 'BufReadPost', 'BufNewFile' }, {
   group = group,
-  callback = function(ev)
+  callback = guarded(function(ev)
     local root, path = worktree(api.nvim_buf_get_name(ev.buf))
     if root and path then draw(ev.buf, root, path) end
-  end,
+  end),
 })
 
 local function edit_text(source, first, last, text, save, title)
@@ -168,9 +195,10 @@ local function edit_text(source, first, last, text, save, title)
     vim.bo[buf].modified = false
     close()
   end
-  api.nvim_create_autocmd('BufWriteCmd', { buffer = buf, callback = submit })
-  vim.keymap.set({ 'i', 'n' }, '<C-s>', submit, { buffer = buf })
-  vim.keymap.set('n', 'q', close, { buffer = buf })
+  local save_comment = guarded(submit)
+  api.nvim_create_autocmd('BufWriteCmd', { buffer = buf, callback = save_comment })
+  vim.keymap.set({ 'i', 'n' }, '<C-s>', save_comment, { buffer = buf })
+  vim.keymap.set('n', 'q', guarded(close), { buffer = buf })
   api.nvim_win_set_cursor(win, { #lines, #lines[#lines] })
   vim.cmd.startinsert({ bang = true })
 end
@@ -181,7 +209,9 @@ local function comment(opts)
   local source = api.nvim_get_current_win()
   local file = api.nvim_buf_get_name(0)
   local root, path = worktree(file)
-  assert(root and path and vim.bo.buftype == '', 'Review needs a file in a Git worktree')
+  if not root or not path or vim.bo.buftype ~= '' then
+    return vim.notify('Review needs a file in a Git worktree', vim.log.levels.INFO)
+  end
   local first, last = opts.line1, opts.line2
   local code = api.nvim_buf_get_lines(0, first - 1, last, false)
   local matches = {}
@@ -217,7 +247,7 @@ local function comment(opts)
     end)
   end
   if #matches < 2 then return edit(matches[1]) end
-  vim.ui.select(
+  select_item(
     matches,
     { prompt = 'Edit comment', format_item = function(c) return c.text:match('^[^\n]*') end },
     function(c)
@@ -259,7 +289,7 @@ end
 local function pick_batch(root, prompt, action)
   local history = state(root).history
   if #history == 0 then return vim.notify('No archived reviews for this worktree') end
-  vim.ui.select(history, {
+  select_item(history, {
     prompt = prompt,
     format_item = function(b)
       return ('%s  %s  %s  [%d] %s'):format(
@@ -292,20 +322,22 @@ local function restore(opts)
   end)
 end
 
-api.nvim_create_user_command('ReviewComment', comment, { range = true })
-api.nvim_create_user_command('ReviewRestore', restore, { bang = true })
+command('ReviewComment', comment, { range = true })
+command('ReviewRestore', restore, { bang = true })
 
 local function read_json(cmd, opts, done)
   local ok, err = pcall(
     vim.system,
     cmd,
     opts,
-    vim.schedule_wrap(function(result)
-      if result.code ~= 0 then return done(nil, vim.trim(result.stderr ~= '' and result.stderr or result.stdout)) end
+    vim.schedule_wrap(guarded(function(result)
+      if result.code ~= 0 then
+        return done(nil, vim.trim(result.stderr ~= '' and result.stderr or result.stdout or ''))
+      end
       local parsed, response = pcall(vim.json.decode, result.stdout)
       if not parsed or type(response) ~= 'table' then return done(nil, 'Invalid response from ' .. cmd[1]) end
       done(response)
-    end)
+    end))
   )
   if not ok then done(nil, tostring(err)) end
 end
@@ -368,7 +400,7 @@ local function pick_session(root, label, action)
         break
       end
     end
-    vim.ui.select(choices, {
+    select_item(choices, {
       prompt = label,
       format_item = function(s)
         return (s.id == last and '[Last review] ' or '')
@@ -420,34 +452,31 @@ local function send(root, batch, approve_if_empty)
     if not batch and not vim.deep_equal(state(root).draft, comments) then
       return vim.notify('Draft changed. Open the review picker again.')
     end
+    local args = { 'session.prompt', '--param', 'sessionID=' .. session.id, '--data', vim.json.encode({ text = text }) }
     sending[root] = true
-    request(
-      root,
-      { 'session.prompt', '--param', 'sessionID=' .. session.id, '--data', vim.json.encode({ text = text }) },
-      function(result, err)
-        sending[root] = nil
-        if not (result and result.data and result.data.sessionID == session.id) then
-          return report(err or 'OpenCode did not confirm delivery')
-        end
-        update(root, function(s)
-          archive(s, approval and 'approved' or (batch and 'resent' or 'sent'), comments, text, session)
-          if not batch then
-            -- Keep comments added or edited while the request was in flight.
-            local sent = {}
-            for _, c in ipairs(comments) do
-              sent[c.id] = c
-            end
-            s.draft = vim.tbl_filter(function(c) return not vim.deep_equal(c, sent[c.id]) end, s.draft)
-          end
-        end)
-        vim.notify('Review sent to ' .. (session.title or session.id))
+    request(root, args, function(result, err)
+      sending[root] = nil
+      if not (result and result.data and result.data.sessionID == session.id) then
+        return report(err or 'OpenCode did not confirm delivery')
       end
-    )
+      update(root, function(s)
+        archive(s, approval and 'approved' or (batch and 'resent' or 'sent'), comments, text, session)
+        if not batch then
+          -- Keep comments added or edited while the request was in flight.
+          local sent = {}
+          for _, c in ipairs(comments) do
+            sent[c.id] = c
+          end
+          s.draft = vim.tbl_filter(function(c) return not vim.deep_equal(c, sent[c.id]) end, s.draft)
+        end
+      end)
+      vim.notify('Review sent to ' .. (session.title or session.id))
+    end)
   end)
 end
 
-api.nvim_create_user_command('ReviewSend', function() send(current_root(), nil, true) end, {})
-api.nvim_create_user_command('ReviewSendWithComment', function()
+command('ReviewSend', function() send(current_root(), nil, true) end)
+command('ReviewSendWithComment', function()
   local root = current_root()
   local general = vim.tbl_filter(function(c) return not c.path end, state(root).draft)
   local previous = table.concat(vim.tbl_map(function(c) return c.text end, general), '\n\n')
@@ -462,11 +491,11 @@ api.nvim_create_user_command('ReviewSendWithComment', function()
     end
     send(root)
   end, ' General review comment ')
-end, {})
-api.nvim_create_user_command('ReviewResend', function()
+end)
+command('ReviewResend', function()
   local root = current_root()
   pick_batch(root, 'Resend archived review', function(batch) send(root, batch) end)
-end, {})
+end)
 
 return {
   setup = function(opts) config = vim.tbl_extend('force', defaults, opts or {}) end,
