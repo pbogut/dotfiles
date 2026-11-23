@@ -190,6 +190,37 @@ test("last follows external selection per space, toggles and skips closed tabs",
   assert.equal(one.selected, "a");
 });
 
+test("last-oc picks the last visited open slot in this space without creating one or cycling", async () => {
+  const app = await fixture(false, ["shell", "oc-2", "oc-10"].map(name =>
+    ({ id: name, name, named: true, active: name === "shell" })));
+  const [space, other] = app.spaces;
+  const visit = (id) => {
+    space.tabs.forEach(tab => { tab.active = tab.id === id; });
+    app.render();
+  };
+  const recall = async () => {
+    app.calls.length = 0;
+    await app.command("last-oc");
+    app.flush();
+    return app.calls;
+  };
+  assert.deepEqual(await recall(), []);
+  visit("oc-2");
+  visit("oc-10");
+  visit("shell");
+  assert.deepEqual(await recall(), [["tab.select", { id: "oc-10" }]]);
+  assert.deepEqual(await recall(), []);
+  visit("shell");
+  space.active = false;
+  other.active = true;
+  other.tabs[0].active = true;
+  assert.deepEqual(await recall(), []);
+  space.active = true;
+  other.active = false;
+  space.tabs = space.tabs.filter(tab => tab.id !== "oc-10");
+  assert.deepEqual(await recall(), [["tab.select", { id: "oc-2" }]]);
+});
+
 test("loading the mod restores fixed order without changing existing tabs or selection", async () => {
   const tabs = ["oc-10", "shell", "nvim", "oc-2"].map(name => ({ id: name, name, named: true }));
   const app = await fixture(false, tabs);

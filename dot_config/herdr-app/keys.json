@@ -52,6 +52,7 @@
   },
   "layout:pbogut": {
     "ctrl-alt-d": "pbogut-tabs.last",
+    "ctrl-alt-o": "pbogut-tabs.last-oc",
     "alt-u": "pbogut-keys.links",
     "alt-o": "pbogut-keys.spaces",
     "alt-i": "pbogut-keys.agents",

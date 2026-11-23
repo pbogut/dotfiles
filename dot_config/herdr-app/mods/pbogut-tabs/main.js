@@ -37,9 +37,18 @@ export default class NamedTabs extends View {
     cx.spawn(async (cx) => {
       for (;;) {
         const command = await nextCommand();
-        if (command === "last") {
-          const last = this.syncTabs();
-          if (last) run("tab.select", { id: last });
+        if (command === "last" || command === "last-oc") {
+          const active = this.syncTabs();
+          if (!active) continue;
+          const { recent, tabs } = active;
+          let id = recent[1];
+          if (command === "last-oc") {
+            const slots = new Set(
+              tabs.filter((tab) => tab.named && roleOf(tab.name)?.startsWith("oc-")).map((tab) => tab.id),
+            );
+            id = recent.find((id) => slots.has(id));
+          }
+          if (id && id !== recent[0]) run("tab.select", { id });
           continue;
         }
         if (command === "tasks" || command.startsWith("task@")) {
@@ -412,7 +421,7 @@ export default class NamedTabs extends View {
   syncTabs() {
     const previous = this.tabsBySpace;
     this.tabsBySpace = new Map();
-    let last;
+    let active;
     for (const space of spaces()) {
       const known = previous?.get(space.id);
       const ids = new Set(space.tabs.map((tab) => tab.id));
@@ -421,13 +430,13 @@ export default class NamedTabs extends View {
         const current = space.tabs.find((tab) => tab.active)?.id;
         if (current) {
           if (recent[0] !== current) recent = [current, ...recent.filter((id) => id !== current)];
-          last = recent[1];
+          active = { recent, tabs: space.tabs };
         }
       }
       this.tabsBySpace.set(space.id, { ids, recent });
       if (space.tabs.some((tab) => !known?.ids.has(tab.id))) this.sortTabs(space);
     }
-    return last;
+    return active;
   }
 
   sortTabs(space) {
