@@ -409,7 +409,12 @@ local function preview_reply(root, id, buf, cursor)
         if part.type == 'text' then table.insert(parts, part.text) end
       end
       local text = table.concat(parts, '\n\n')
-      if vim.trim(text) ~= '' then return show(text) end
+      if vim.trim(text) ~= '' then
+        show(text)
+        vim.bo[buf].filetype = 'markdown'
+        require('telescope.previewers.utils').highlighter(buf, 'markdown')
+        return
+      end
     end
     local next_page = result.cursor and result.cursor.next
     if type(next_page) == 'string' then return preview_reply(root, id, buf, next_page) end
