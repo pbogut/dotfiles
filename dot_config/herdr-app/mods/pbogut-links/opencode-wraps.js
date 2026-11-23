@@ -1,6 +1,7 @@
 // OpenCode alone draws hard line breaks inside a chat column beside a sidebar.
 // Keep all guesses about that UI here; links.js only knows terminal soft wraps.
 import { trimUrl, visibleLinks } from "./links.js";
+import { wrappedFiles } from "./file-wraps.js";
 import { cellWidth, glyphs } from "./words.js";
 
 const width = (s) => (s.match(glyphs) ?? []).reduce((n, g) => n + cellWidth(g), 0);
@@ -29,6 +30,7 @@ export function openCodeLinks(text, cols, top, rows, files = false) {
   if (ruler < 0 || lines.slice(0, top + ruler + 1).some((s) => width(s) > cols)) return links;
   const edge = screen[ruler].match(/^ *╹▀+/u)[0].length;
   const chat = screen.slice(0, ruler).map((s) => chatColumn(s, edge));
+  const urlParts = new Set();
 
   for (let row = 0; row + 1 < chat.length; row++) {
     const start = startAtEnd.exec(chat[row]);
@@ -56,8 +58,7 @@ export function openCodeLinks(text, cols, top, rows, files = false) {
     }
     if (at === row || !hasHost.test(raw)) continue;
     const startCol = width(chat[row].slice(0, start.index)), marginCol = width(margin);
-    links = links.filter((l) => !l.path || l.row < row || l.row > at ||
-      l.col !== (l.row === row ? startCol : marginCol));
+    for (let r = row; r <= at; r++) urlParts.add(`${r}:${r === row ? startCol : marginCol}`);
     // If the first fragment already opens, leave its original hint alone. The
     // first continuation gets the full URL, including any further wrapped rows.
     links.push({
@@ -65,6 +66,10 @@ export function openCodeLinks(text, cols, top, rows, files = false) {
       col: short ? marginCol : startCol,
       url: trimUrl(raw),
     });
+  }
+  if (files) {
+    links = links.filter((l) => !l.path || !urlParts.has(`${l.row}:${l.col}`));
+    links.push(...wrappedFiles(chat, edge, urlParts, { chat: true }));
   }
   return links.sort((a, b) => a.row - b.row || a.col - b.col);
 }

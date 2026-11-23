@@ -1,6 +1,7 @@
 // Lazygit paints adjacent panel borders as part of the terminal text. Locate
 // each closed box in display cells, then only join rows inside that box.
 import { trimUrl, visibleLinks } from "./links.js";
+import { wrappedFiles } from "./file-wraps.js";
 import { cellWidth, glyphs } from "./words.js";
 
 function cells(line) {
@@ -30,8 +31,9 @@ const suffix = /\bhttps?(?::(?:\/(?:\/[^\s<>"'`]*)?)?)?$/i;
 const hasHost = /^https?:\/\/(?:[\p{L}\p{N}-]+|\[[\da-f:]+\])/iu;
 const token = /^[\p{L}\p{N}._~:/?#@!$&()*+,;=%[\]-]+/u;
 
-function scanPanel(content, width, files) {
+function scanPanel(content, width, files, origin) {
   let links = visibleLinks(content.join("\n"), width, 0, content.length, files);
+  const urlParts = new Set();
   for (let row = 0; row + 1 < content.length; row++) {
     const start = suffix.exec(content[row]);
     if (!start) continue;
@@ -53,8 +55,8 @@ function scanPanel(content, width, files) {
     }
     if (at === row || !hasHost.test(raw)) continue;
     const startCol = cells(content[row].slice(0, start.index)).length;
-    links = links.filter((l) => !l.path || l.row < row || l.row > at ||
-      l.col !== (l.row === row ? startCol : content[l.row].length - content[l.row].trimStart().length));
+    for (let r = row; r <= at; r++)
+      urlParts.add(`${r}:${r === row ? startCol : content[r].length - content[r].trimStart().length}`);
     const short = hasHost.test(start[0]);
     links.push({
       row: short ? row + 1 : row,
@@ -62,6 +64,9 @@ function scanPanel(content, width, files) {
       url: trimUrl(raw),
     });
   }
+  links = links.filter((l) => !l.path || !urlParts.has(`${l.row}:${l.col}`))
+    .map((l) => ({ ...l, row: origin.row + l.row, col: origin.col + l.col }));
+  if (files) links.push(...wrappedFiles(content, width, urlParts, origin));
   return links;
 }
 
@@ -75,8 +80,7 @@ export function lazygitLinks(text, cols, top, rows, files = false) {
   for (const { left, right, top: y, bottom } of boxes) {
     const content = screen.slice(y + 1, bottom).map((line) =>
       line.slice(left + 1, right).join("").trimEnd());
-    for (const link of scanPanel(content, right - left - 1, files))
-      links.push({ ...link, row: y + 1 + link.row, col: left + 1 + link.col });
+    links.push(...scanPanel(content, right - left - 1, files, { row: y + 1, col: left + 1 }));
   }
   return links.sort((a, b) => a.row - b.row || a.col - b.col);
 }

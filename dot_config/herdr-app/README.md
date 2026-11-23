@@ -39,19 +39,24 @@ scrollback. A hyperlink whose destination is hidden behind a label is skipped.
 The overlay uses a snapshot, so press Alt+U again for fresh output.
 
 **OpenCode chat wraps.** When Herdr identifies the focused program as `opencode`,
-`mods/pbogut-links/opencode-wraps.js` handles URLs that OpenCode splits across
+`mods/pbogut-links/opencode-wraps.js` handles URLs and paths that OpenCode splits across
 chat rows. It measures the chat column from the prompt's `╹▀▀▀` border to exclude
 the sidebar. For `http` followed by `://host`, the hint on `http` opens the whole
 URL. If the first row already contains a usable URL and the next row looks like
 a continuation, the first hint opens the short URL and the hint on the second
 row opens the joined URL. Without the border, or in other programs, the mod uses
-the ordinary terminal URL scanner.
+the ordinary terminal scanner.
 
 **Lazygit panel wraps.** `mods/pbogut-links/lazygit-wraps.js` finds panels by
-their box borders, regardless of their titles. It checks for URL continuations
+their box borders, regardless of their titles. It checks for URL and path continuations
 only inside the same panel. For a Git push URL that wraps at `/-`, the hint on
 `https://` opens the short URL; the hint on `/merge_requests` opens the full
 URL with its branch query.
+
+In either program, if `src/` wraps onto `main.lua:20-22`, the hint on `src/`
+opens `src/main.lua` at line 20. If the first fragment and the joined path are
+different existing files, the first hint opens the shorter file and a hint on
+the next row opens the longer one.
 
 Ctrl+G opens a full-width overlay over the tab bar, above the status bar.
 The terminal stays fully visible without resizing. Shortcuts use
@@ -736,6 +741,7 @@ herdr-app check "$checkdir/pbogut-spaces"
 node --experimental-vm-modules --test assets/tests/herdr_app/shortcuts.test.mjs
 node --test assets/tests/herdr_app/words.test.mjs
 node --test assets/tests/herdr_app/link_hints.test.mjs
+node --test assets/tests/herdr_app/file_wraps.test.mjs
 node --test assets/tests/herdr_app/opencode_wraps.test.mjs
 node --test assets/tests/herdr_app/lazygit_wraps.test.mjs
 node --test assets/tests/herdr_app/send_ctrl_g.test.mjs

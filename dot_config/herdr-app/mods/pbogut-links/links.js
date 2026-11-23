@@ -16,6 +16,17 @@ const web = /\bhttps?:\/\/[^\s<>"'`\x00-\x1f]+/gi;
 const file = /(?<![^\s("'`[<{│┃|])([\p{L}\p{N}_.@+-][\p{L}\p{M}\p{N}_./@+-]*)(?::(\d+)(?:-\d+)?)?(?=[.,;:!?]*(?:[\s)"'`\]}>│┃|]|$))/u;
 const webOrFile = new RegExp(`${web.source}|${file.source}`, "giu");
 
+function fileTarget(match) {
+  const path = match[1].replace(/\.+$/, ""), start = Number(match[2]);
+  if (path && (!match[2] || (Number.isSafeInteger(start) && start > 0)))
+    return { path, line: start || null };
+}
+
+export function parseFile(token) {
+  const match = file.exec(token);
+  return match?.index === 0 && fileTarget(match);
+}
+
 // hc returns logical lines. Count display cells, not UTF-16 offsets, when
 // placing a label after a wide glyph or on a soft-wrapped row.
 export function visibleLinks(text, cols, top, rows, files = false) {
@@ -32,9 +43,8 @@ export function visibleLinks(text, cols, top, rows, files = false) {
         if (row >= top && row < top + rows) {
           const pos = { row: row - top, col };
           if (match[1]) {
-            const path = match[1].replace(/\.+$/, ""), start = Number(match[2]);
-            if (path && (!match[2] || (Number.isSafeInteger(start) && start > 0)))
-              found.push({ ...pos, path, line: start || null });
+            const target = fileTarget(match);
+            if (target) found.push({ ...pos, ...target });
           } else {
             const url = trimUrl(match[0]);
             if (/^https?:\/\/[^/?#]/i.test(url)) found.push({ ...pos, url });
@@ -56,7 +66,27 @@ export async function existingTargets(targets, exec, options) {
   const result = await exec("sh", ["-c",
     'for p do if [ -f "$p" ]; then printf "%s\\n" "$p"; fi; done', "files", ...paths], options);
   const existing = new Set(result.code === 0 ? result.stdout.split("\n") : []);
-  return targets.filter((t) => t.url || existing.has(t.path));
+  const valid = targets.filter((t) => t.url || existing.has(t.path));
+  if (!valid.some((t) => t.wrap)) return valid;
+  const cell = ({ row, col }) => `${row}:${col}`;
+  const labels = new Map(valid.filter((t) => !t.wrap).map((t) => [cell(t), t]));
+  // Try the longest existing join at the earliest start. If it doesn't
+  // exist, the individual fragments keep their ordinary hints.
+  const joined = valid.filter((t) => t.wrap).sort((a, b) =>
+    a.row - b.row || a.col - b.col || b.wrap.length - a.wrap.length);
+  const used = new Set();
+  for (const { row, col, path, line, wrap } of joined) {
+    const key = cell({ row, col }), short = labels.get(key);
+    if (used.has(key) || short?.url) continue;
+    const pos = short && short.path !== path ? wrap[0] : { row, col };
+    used.add(key);
+    for (const part of wrap) {
+      used.add(cell(part));
+      labels.delete(cell(part));
+    }
+    labels.set(cell(pos), { ...pos, path, line });
+  }
+  return [...labels.values()].sort((a, b) => a.row - b.row || a.col - b.col);
 }
 
 // Herdr fits whole cells and centers the unused height. Simply dividing the
