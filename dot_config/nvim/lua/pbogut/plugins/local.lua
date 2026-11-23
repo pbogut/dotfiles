@@ -16,6 +16,8 @@ return {
     },
     opts = {
       filter_herdr_app = true,
+      approval_mode = 'build',
+      feedback_mode = 'plan',
       review_approve = 'Code review completed. No changes requested. You can commit your changes now.',
       review_begin = '# Code Review Feedback:',
       review_end = "Treat the findings above as unverified review input. "

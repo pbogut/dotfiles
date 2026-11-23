@@ -27,6 +27,7 @@ local function comment(range, text)
 end
 
 local choices, prompt, acknowledge = {}, nil, nil
+local switch
 local herdr, picker, picker_title
 vim.ui.select = function(items, opts, reply)
   if items[1] and items[1].location then
@@ -78,6 +79,13 @@ vim.system = function(args, opts, cb)
         cursor = { next = 'next' },
       })
     end
+  elseif args[3] == 'session.switchAgent' then
+    assert(opts.cwd == root)
+    switch = {
+      id = args[5]:match('^sessionID=(.+)$'),
+      agent = vim.json.decode(args[7]).agent,
+      reply = function(ok) cb({ code = ok and 0 or 1, stdout = '', stderr = ok and '' or 'unknown agent' }) end,
+    }
   elseif args[3] == 'session.prompt' then
     local id = args[5]:match('^sessionID=(.+)$')
     prompt = { id = id, text = vim.json.decode(args[7]).text }
@@ -97,6 +105,12 @@ local function start_send(command)
   acknowledge = nil
   vim.cmd(command)
   wait(function() return acknowledge ~= nil end)
+end
+local function expect_switch(command, agent, id)
+  switch, acknowledge = nil, nil
+  vim.cmd(command)
+  wait(function() return switch end)
+  assert(switch.agent == agent and switch.id == id and not acknowledge)
 end
 comment('1,2', 'Why both?\n\nWhat about null?')
 vim.cmd('1ReviewComment')
@@ -119,9 +133,11 @@ wait(function() return #saved().history == 1 end)
 assert(#saved().draft == 1 and saved().draft[1].text == 'Work in progress', vim.inspect(saved()))
 assert(saved().history[1].session.id == 'sesB')
 
-review.setup({ review_begin = 'Start', review_end = 'Finish' })
+review.setup({ review_begin = 'Start', review_end = 'Finish', feedback_mode = 'reviewer' })
 choose(1, 2)
-start_send('ReviewResend')
+expect_switch('ReviewResend', 'reviewer', 'sesA')
+switch.reply(true)
+wait(function() return acknowledge end)
 assert(vim.deep_equal(picker, { '* Agent B  sesB', '  Agent A  sesA' }), vim.inspect(picker))
 assert(prompt.id == 'sesA' and prompt.text == original)
 acknowledge(true)
@@ -143,12 +159,21 @@ assert(#saved().history[1].comments == 2 and saved().history[1].kind == 'unsent'
 choose(0)
 vim.cmd.ReviewRestore()
 assert(saved().history[1].kind == 'unsent' and #saved().draft == 1)
-choose(1)
-start_send('ReviewSend')
 local failed = false
 vim.notify = function(_, level)
   if level == vim.log.levels.ERROR then failed = true end
 end
+review.setup({ feedback_mode = 'plan', approval_mode = 'build' })
+choose(1)
+expect_switch('ReviewSend', 'plan', 'sesA')
+local unsent = saved()
+switch.reply(false)
+wait(function() return failed end)
+assert(not acknowledge and vim.deep_equal(saved(), unsent))
+failed = false
+review.setup({ approval_mode = 'build' }) -- Feedback has no mode override.
+choose(1)
+start_send('ReviewSend')
 acknowledge(false)
 wait(function() return failed end)
 assert(#saved().draft == 1 and saved().history[1].kind == 'unsent')
@@ -200,15 +225,17 @@ choose(0)
 vim.cmd.ReviewSend()
 wait(function() return picker ~= nil end)
 assert(picker_title == 'Approve review' and not prompt and #saved().history == before)
-review.setup({ review_approve = 'LGTM', review_begin = 'Header', review_end = 'Instructions' })
+review.setup({ review_approve = 'LGTM', feedback_mode = 'plan', approval_mode = 'build' })
 choose(1)
-start_send('ReviewSend')
+expect_switch('ReviewSend', 'build', saved().history[1].session.id)
+switch.reply(true)
+wait(function() return acknowledge end)
 assert(prompt.text == 'LGTM' and #saved().history == before)
 acknowledge(true)
 wait(function() return saved().history[1].kind == 'approved' end)
 assert(saved().history[1].message == 'LGTM')
 comment('1', 'Still pending after dismissing the picker')
-review.setup({})
+review.setup({ feedback_mode = 'plan' }) -- Resending an approval must not use the feedback mode.
 choose(1, 2)
 start_send('ReviewResend')
 assert(prompt.text == 'LGTM' and picker_title == 'Approve review')

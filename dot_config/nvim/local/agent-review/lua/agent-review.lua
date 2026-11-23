@@ -3,6 +3,7 @@ local ns = api.nvim_create_namespace('agent-review')
 local directory = fn.stdpath('state') .. '/agent-review'
 local states, sending = {}, {}
 local defaults = {
+  -- Optional approval_mode and feedback_mode are OpenCode agent IDs. Omit either to keep the current mode.
   review_begin = 'Review feedback:',
   review_end = '',
   review_approve = 'Approved. No issues found.',
@@ -325,7 +326,7 @@ end
 command('ReviewComment', comment, { range = true })
 command('ReviewRestore', restore, { bang = true })
 
-local function read_json(cmd, opts, done)
+local function run(cmd, opts, done)
   local ok, err = pcall(
     vim.system,
     cmd,
@@ -334,16 +335,25 @@ local function read_json(cmd, opts, done)
       if result.code ~= 0 then
         return done(nil, vim.trim(result.stderr ~= '' and result.stderr or result.stdout or ''))
       end
-      local parsed, response = pcall(vim.json.decode, result.stdout)
-      if not parsed or type(response) ~= 'table' then return done(nil, 'Invalid response from ' .. cmd[1]) end
-      done(response)
+      done(result.stdout or '')
     end))
   )
   if not ok then done(nil, tostring(err)) end
 end
 
+local function read_json(cmd, opts, done)
+  run(cmd, opts, function(stdout, err)
+    if err then return done(nil, err) end
+    local parsed, response = pcall(vim.json.decode, stdout)
+    if not parsed or type(response) ~= 'table' then return done(nil, 'Invalid response from ' .. cmd[1]) end
+    done(response)
+  end)
+end
+
 local function request(root, args, done)
-  read_json(vim.list_extend({ 'opencode', 'api' }, args), { cwd = root, text = true }, done)
+  -- switchAgent returns HTTP 204; its exit status is the acknowledgement.
+  local execute = args[1] == 'session.switchAgent' and run or read_json
+  execute(vim.list_extend({ 'opencode', 'api' }, args), { cwd = root, text = true }, done)
 end
 
 local function report(err) vim.notify('Review: ' .. err, vim.log.levels.ERROR) end
@@ -530,6 +540,19 @@ local function pick_session(root, label, action)
   end)
 end
 
+local function prompt_session(root, id, text, mode, done)
+  local session = 'sessionID=' .. id
+  local function prompt()
+    request(root, { 'session.prompt', '--param', session, '--data', vim.json.encode({ text = text }) }, done)
+  end
+  if not mode then return prompt() end
+  local args = { 'session.switchAgent', '--param', session, '--data', vim.json.encode({ agent = mode }) }
+  request(root, args, function(_, err)
+    if err then return done(nil, 'Could not switch to ' .. mode .. (err ~= '' and ': ' .. err or '')) end
+    prompt()
+  end)
+end
+
 local function send(root, batch, approve_if_empty)
   if sending[root] then return vim.notify('A review is being sent') end
   local comments = batch and batch.comments or state(root).draft
@@ -542,9 +565,9 @@ local function send(root, batch, approve_if_empty)
     if not batch and not vim.deep_equal(state(root).draft, comments) then
       return vim.notify('Draft changed. Open the review picker again.')
     end
-    local args = { 'session.prompt', '--param', 'sessionID=' .. session.id, '--data', vim.json.encode({ text = text }) }
+    local mode = config[approval and 'approval_mode' or 'feedback_mode']
     sending[root] = true
-    request(root, args, function(result, err)
+    prompt_session(root, session.id, text, mode, function(result, err)
       sending[root] = nil
       if not (result and result.data and result.data.sessionID == session.id) then
         return report(err or 'OpenCode did not confirm delivery')
