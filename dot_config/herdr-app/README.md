@@ -28,7 +28,7 @@ Choosing another layout in the app lasts until the next chezmoi apply.
 | Ctrl+Alt+D | Toggle between the two most recently focused tabs in this space, including tabs selected by mouse or script |
 | Ctrl+Alt+O | Focus the last visited `oc-*` tab still open in this space. If none was visited, stay here. |
 
-The five searchable pickers accept Ctrl+J to move down and Ctrl+K to move up while
+The searchable pickers accept Ctrl+J to move down and Ctrl+K to move up while
 their search field is focused. Up/Down also work; Enter selects a result.
 
 In a single-pane tab, press Alt+U and type the letters drawn on a URL or file.
@@ -398,6 +398,10 @@ rest in project order, preferring `fjdkslaurieowhgmvcn`. With no custom hints,
 up to 19 tasks take one key each.
 Typing the first letter of a longer hint dims other rows without moving them.
 Backspace undoes a letter; Escape dismisses the picker.
+
+Press `/` to search by any part of a task name, ignoring case. The first
+match starts selected. Use Up/Down or Ctrl+J/K to move, then Enter to choose
+a task. Escape returns to the full hint grid.
 
 Tasks fill columns instead of scrolling. If the window is too small to show
 them all, enlarge it or zoom out and reopen the picker.

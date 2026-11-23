@@ -33,6 +33,9 @@ def main():
     settings.update(core=shutil.which("hc"), telemetry=False, sounds={"enabled": False})
     (root / "app/settings.json").write_text(json.dumps(settings))
     (root / "app/shared.json").write_text(json.dumps({"frame.welcomed": "skipped"}))
+    defaults = root / "app/herdr-project.json"
+    default_source = json.dumps({"*": {"tabs": ["nvim"]}})
+    defaults.write_text(default_source)
     scripts = root / "home/.scripts"
     scripts.mkdir()
     for name in ("ls-project", "git-new-dated-worktree", "git-wt", "herdr-app-vim", "herdr-app-tab"):
@@ -237,8 +240,6 @@ def main():
             wait(lambda: any(space["folder"] == scroll_paths[-2] and space["active"] for space in app("ls")["spaces"]),
                  "Clicking a virtual row opens its project after scrolling")
 
-            defaults = root / "app/herdr-project.json"
-            default_source = defaults.read_text()
             defaults.write_text(json.dumps({"tabs": ["shell", "dev"], "dev": ["python3", str(dev_script), "fallback"]}))
             search(Path(scroll_paths[4]).name)
             key("Return")
@@ -433,6 +434,7 @@ def main():
                 *[{"name": f"other {i}", "command": ["touch", "wrong-task"]} for i in range(19)],
                 {"name": "last task", "hint": "sa", "command": ["touch", "last-ran"]},
                 {"name": "other ssh", "hint": "sm", "command": ["touch", "wrong-task"]},
+                {"name": "check SSH status", "command": ["touch", "search-ran"]},
             ]}))
             call("xdotool", "windowsize", "--sync", window, "800", "600")
             key("alt+h")
@@ -442,11 +444,24 @@ def main():
             wait(lambda: "pbogut-task-picker" not in app("status")["overlays"], "Escape cancels a partial hint")
             key("alt+h")
             wait(lambda: "pbogut-task-picker" in app("status")["overlays"], "Task hints reopen")
+            key("s", "slash")
+            call("xdotool", "type", "--clearmodifiers", "no such task")
+            key("Return", "Escape")
+            assert "pbogut-task-picker" in app("status")["overlays"], "Esc returns from an empty search to hints"
             key("s", "x", "a")
             wait(lambda: (target / "last-ran").exists() and "last task" in tab_names(target),
                  "Custom hint launches the task without Enter, ignoring an invalid key")
             key("Return")
             wait(lambda: "last task" not in tab_names(target), "Successful task stays open until Enter by default")
+            key("alt+h")
+            wait(lambda: "pbogut-task-picker" in app("status")["overlays"], "Task picker reopens for name search")
+            key("slash")
+            call("xdotool", "type", "--clearmodifiers", "sSh")
+            key("ctrl+j", "Return")
+            wait(lambda: (target / "search-ran").exists() and "check SSH status" in tab_names(target),
+                 "Enter runs the selected case-insensitive search match")
+            key("Return")
+            wait(lambda: "check SSH status" not in tab_names(target), "The selected task can be closed")
             assert not (target / "wrong-task").exists()
             call("xdotool", "windowsize", "--sync", window, "1280", "800")
             definition.write_text(json.dumps(project_config))
