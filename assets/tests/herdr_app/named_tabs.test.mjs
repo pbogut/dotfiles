@@ -162,6 +162,34 @@ test("an existing role only focuses its tab in the requested space", async () =>
   assert.deepEqual(app.calls, [["tab.select", { id: "other" }]]);
 });
 
+test("last follows external selection per space, toggles and skips closed tabs", async () => {
+  const app = await fixture(false, ["a", "b", "c"].map(id => ({ id, active: id === "a" })));
+  const [one, two] = app.spaces;
+  const select = (id) => one.tabs.forEach(tab => { tab.active = tab.id === id; });
+  const toggle = async () => { await app.command("last"); app.flush(); };
+  await toggle();
+  assert.deepEqual(app.calls, []);
+  select("b");
+  app.render();
+  select("c");
+  await toggle(); // The command can arrive before the next render.
+  assert.equal(one.selected, "b");
+  one.active = false;
+  two.active = true;
+  two.tabs[0].active = true;
+  app.render();
+  app.calls.length = 0;
+  await toggle();
+  assert.deepEqual(app.calls, []);
+  one.active = true;
+  two.active = false;
+  await toggle();
+  assert.equal(one.selected, "c");
+  one.tabs = one.tabs.filter(tab => tab.id !== "b");
+  await toggle();
+  assert.equal(one.selected, "a");
+});
+
 test("loading the mod restores fixed order without changing existing tabs or selection", async () => {
   const tabs = ["oc-10", "shell", "nvim", "oc-2"].map(name => ({ id: name, name, named: true }));
   const app = await fixture(false, tabs);

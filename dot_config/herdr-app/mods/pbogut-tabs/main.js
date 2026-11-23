@@ -33,10 +33,15 @@ export default class NamedTabs extends View {
     this.closer = new ProjectClose();
     this.tasks = new ProjectTasks();
     if (checking()) return;
-    this.sortNewTabs();
+    this.syncTabs();
     cx.spawn(async (cx) => {
       for (;;) {
         const command = await nextCommand();
+        if (command === "last") {
+          const last = this.syncTabs();
+          if (last) run("tab.select", { id: last });
+          continue;
+        }
         if (command === "tasks" || command.startsWith("task@")) {
           cx.spawn(async () => {
             try {
@@ -403,14 +408,26 @@ export default class NamedTabs extends View {
     }
   }
 
-  sortNewTabs() {
-    const previous = this.tabIds;
-    this.tabIds = new Map();
+  // Read Herdr's selection so clicks, shortcuts and scripted focus all count.
+  syncTabs() {
+    const previous = this.tabsBySpace;
+    this.tabsBySpace = new Map();
+    let last;
     for (const space of spaces()) {
       const known = previous?.get(space.id);
-      this.tabIds.set(space.id, new Set(space.tabs.map((tab) => tab.id)));
-      if (space.tabs.some((tab) => !known?.has(tab.id))) this.sortTabs(space);
+      const ids = new Set(space.tabs.map((tab) => tab.id));
+      let recent = known?.recent.filter((id) => ids.has(id)) ?? [];
+      if (space.active) {
+        const current = space.tabs.find((tab) => tab.active)?.id;
+        if (current) {
+          if (recent[0] !== current) recent = [current, ...recent.filter((id) => id !== current)];
+          last = recent[1];
+        }
+      }
+      this.tabsBySpace.set(space.id, { ids, recent });
+      if (space.tabs.some((tab) => !known?.ids.has(tab.id))) this.sortTabs(space);
     }
+    return last;
   }
 
   sortTabs(space) {
@@ -546,7 +563,7 @@ export default class NamedTabs extends View {
 
   render(cx) {
     if (checking()) return div().h(0);
-    this.sortNewTabs();
+    this.syncTabs();
     this.closer.update(cx);
     this.updateSetups(cx);
     if (this.pending) {
