@@ -2,8 +2,9 @@ import { parseFile } from "./links.js";
 import { cellWidth, glyphs } from "./words.js";
 
 const width = (s) => (s.match(glyphs) ?? []).reduce((n, g) => n + cellWidth(g), 0);
-const endToken = /(?<![^\s("'`[<{│┃|])([\p{L}\p{N}_.@+-][\p{L}\p{M}\p{N}_./@+:-]*)$/u;
-const firstToken = /^[\p{L}\p{M}\p{N}_./@+:-]+(?=[,;!?]*(?:[\s)"'`\]}>]|$))/u;
+const endToken = /(?<![^\s("'`[<{│┃|])([\p{L}\p{N}_.@+-][\p{L}\p{M}\p{N}_./@+:–-]*)$/u;
+const firstToken = /^[\p{L}\p{M}\p{N}_./@+:–-]+(?=[,;!?]*(?:[\s)"'`\]}>]|$))/u;
+const lineSuffix = /:\d*(?:[-–]\d*)?$/;
 
 // Each row is already clipped to one panel or the chat column. Keep partial
 // joins too: only the filesystem can tell which row actually ends the path.
@@ -26,13 +27,13 @@ export function wrappedFiles(lines, edge, urlParts, { chat = false, row: y = 0, 
       if (!part || urlParts.has(`${at}:${indent}`) || /^[a-z][\w+.-]*:\/\//i.test(tail)) break;
       // A slash boundary or split line suffix can wrap early. Otherwise
       // the continuation must plausibly have run out of room.
-      if (!raw.endsWith("/") && !/^[/:-]/.test(part) && !/:\d*(?:-\d*)?$/.test(raw) &&
+      if (!raw.endsWith("/") && !/^[/:–-]/.test(part) && !lineSuffix.test(raw) &&
           rooms[at - 1] > 4 && width(part) + 2 <= rooms[at - 1]) break;
       raw += part;
       wrap.push({ row: y + at, col: x + indent });
       const target = parseFile(raw);
       if (target) found.push({ row: y + row, col: x + col, ...target, wrap: [...wrap] });
-      if (tail !== part || (!target && !/:\d*(?:-\d*)?$/.test(raw))) break;
+      if (tail !== part || (!target && !lineSuffix.test(raw))) break;
     }
   }
   return found;

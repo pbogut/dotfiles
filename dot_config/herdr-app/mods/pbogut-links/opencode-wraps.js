@@ -19,6 +19,30 @@ function chatColumn(line, edge) {
   return line.slice(0, end).trimEnd();
 }
 
+// A table can be partly offscreen. Two matching vertical borders on
+// consecutive rows suffice; a horizontal divider starts a new table cell.
+function tableFiles(lines) {
+  const latest = new Map(), cells = [];
+  for (const [row, line] of lines.entries()) {
+    if (!/^ *(?:┃ *)?│/u.test(line)) continue;
+    const parts = line.split("│");
+    let col = width(parts[0]) + 1;
+    for (const text of parts.slice(1, -1)) {
+      const span = width(text), key = `${col}:${span}`;
+      let cell = latest.get(key);
+      if (!cell || cell.row + cell.lines.length !== row) {
+        cell = { row, col, span, lines: [] };
+        latest.set(key, cell);
+        cells.push(cell);
+      }
+      cell.lines.push(text.trimEnd());
+      col += span + 1;
+    }
+  }
+  return cells.filter((c) => c.lines.length > 1)
+    .flatMap((c) => wrappedFiles(c.lines, c.span, new Set(), c));
+}
+
 export function openCodeLinks(text, cols, top, rows, files = false) {
   let links = visibleLinks(text, cols, top, rows, files);
   const lines = text.split("\n");
@@ -27,7 +51,9 @@ export function openCodeLinks(text, cols, top, rows, files = false) {
   // as screen positions. Keep the standard hints in that case.
   const screen = lines.slice(top, top + rows);
   const ruler = screen.findLastIndex((s) => /^ *╹▀{8,}(?:\s|$)/u.test(s));
-  if (ruler < 0 || lines.slice(0, top + ruler + 1).some((s) => width(s) > cols)) return links;
+  const end = ruler < 0 ? screen.length : ruler + 1;
+  if (lines.slice(0, top + end).some((s) => width(s) > cols)) return links;
+  if (ruler < 0) return files ? links.concat(tableFiles(screen)) : links;
   const edge = screen[ruler].match(/^ *╹▀+/u)[0].length;
   const chat = screen.slice(0, ruler).map((s) => chatColumn(s, edge));
   const urlParts = new Set();
@@ -70,6 +96,7 @@ export function openCodeLinks(text, cols, top, rows, files = false) {
   if (files) {
     links = links.filter((l) => !l.path || !urlParts.has(`${l.row}:${l.col}`));
     links.push(...wrappedFiles(chat, edge, urlParts, { chat: true }));
+    links.push(...tableFiles(chat));
   }
   return links.sort((a, b) => a.row - b.row || a.col - b.col);
 }

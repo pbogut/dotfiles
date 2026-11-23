@@ -34,7 +34,8 @@ their search field is focused. Up/Down also work; Enter selects a result.
 In a single-pane tab, press Alt+U and type the letters drawn on a URL or file.
 Files must exist relative to the pane's working directory. Picking `src/main.lua`
 opens it in the space's `nvim` tab; `src/main.lua:20` and `src/main.lua:20-22`
-both jump to line 20. Backspace removes a letter; Esc cancels.
+both jump to line 20. Ranges written with an en dash (`:20–22`) work too.
+Backspace removes a letter; Esc cancels.
 URL hints use printed `http://` and `https://` addresses in the current viewport, including
 scrollback. A hyperlink whose destination is hidden behind a label is skipped.
 The overlay uses a snapshot, so press Alt+U again for fresh output.
@@ -45,8 +46,8 @@ chat rows. It measures the chat column from the prompt's `╹▀▀▀` border t
 the sidebar. For `http` followed by `://host`, the hint on `http` opens the whole
 URL. If the first row already contains a usable URL and the next row looks like
 a continuation, the first hint opens the short URL and the hint on the second
-row opens the joined URL. Without the border, or in other programs, the mod uses
-the ordinary terminal scanner.
+row opens the joined URL. In Markdown tables, file hints follow wraps inside
+the same cell even when the prompt border is offscreen.
 
 **Lazygit panel wraps.** `mods/pbogut-links/lazygit-wraps.js` finds panels by
 their box borders, regardless of their titles. It checks for URL and path continuations

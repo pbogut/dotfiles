@@ -23,6 +23,41 @@ test("OpenCode joins three chat rows, measures wide glyphs, and ignores the side
   ]);
 });
 
+test("OpenCode review table hints both Order.php ranges, even in scrollback without the prompt", async () => {
+  const path = "app/Models/Order.php";
+  const row = (priority, finding) => `  │ ${priority.padEnd(8)} │ ${finding.padEnd(50)} │  sidebar`;
+  const table = [
+    row("Priority", "Finding"),
+    "  ├──────────┼────────────────────────────────────────────────────┤",
+    row("P1", "Before releasing it. app/Models/"),
+    row("", "Order.php:1231–1234"),
+    "  ├──────────┼────────────────────────────────────────────────────┤",
+    row("P1", "response. app/Models/Order.php:1459–1461"),
+  ];
+  for (const footer of [[], ["  ╹" + "▀".repeat(65)]]) {
+    const screen = openCodeLinks([...table, ...footer].join("\n"), 90, 0, 20, true);
+    assert.deepEqual(await resolve(screen, path), [
+      { row: 2, col: table[2].indexOf("app/"), path, line: 1231 },
+      { row: 5, col: table[5].indexOf("app/"), path, line: 1459 },
+    ]);
+  }
+});
+
+test("table file hints cannot join through a divider or into a different column", async () => {
+  const screen = [
+    "  │ src/ │ file/  │",
+    "  │      │ x.lua  │",
+    "  ├──────┼────────┤",
+    "  │      │ main/  │",
+    "  ├──────┼────────┤",
+    "  │      │ x.lua  │",
+  ];
+  const targets = openCodeLinks(screen.join("\n"), 60, 0, 10, true);
+  assert.deepEqual(await resolve(targets, "src/x.lua", "main/x.lua", "file/x.lua"), [
+    { row: 0, col: 11, path: "file/x.lua", line: null },
+  ]);
+});
+
 test("Lazygit leaves the short file at its cell and puts the joined file on the continuation", async () => {
   const screen = panels(["", ""], ["see src/name", ".lua:20-22"]);
   const long = "src/name.lua";
@@ -35,7 +70,8 @@ test("Lazygit leaves the short file at its cell and puts the joined file on the 
 });
 
 test("a split line suffix gives one hint for the file, with the reconstructed line", async () => {
-  for (const parts of [["main.lua", ":20-22"], ["main.lua:", "20-22"], ["main.lua:2", "0-22"], ["main.lua:20-", "22"]]) {
+  for (const parts of [["main.lua", ":20-22"], ["main.lua:", "20-22"], ["main.lua:2", "0-22"],
+    ["main.lua:20-", "22"], ["main.lua:20–", "22"], ["main.lua:20", "–22"]]) {
     const screen = panels([parts[0].padStart(16), parts[1]]);
     assert.deepEqual(await resolve(screen, "main.lua"), [
       { row: 1, col: 17 - parts[0].length, path: "main.lua", line: 20 },

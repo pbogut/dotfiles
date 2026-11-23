@@ -13,7 +13,7 @@ export function trimUrl(url) {
 const web = /\bhttps?:\/\/[^\s<>"'`\x00-\x1f]+/gi;
 // Match a whole relative token between prose delimiters. Consume URLs first
 // so even a path in a URL's query string cannot get a file hint.
-const file = /(?<![^\s("'`[<{│┃|])([\p{L}\p{N}_.@+-][\p{L}\p{M}\p{N}_./@+-]*)(?::(\d+)(?:-\d+)?)?(?=[.,;:!?]*(?:[\s)"'`\]}>│┃|]|$))/u;
+const file = /(?<![^\s("'`[<{│┃|])([\p{L}\p{N}_.@+-][\p{L}\p{M}\p{N}_./@+-]*)(?::(\d+)(?:[-–]\d+)?)?(?=[.,;:!?]*(?:[\s)"'`\]}>│┃|]|$))/u;
 const webOrFile = new RegExp(`${web.source}|${file.source}`, "giu");
 
 function fileTarget(match) {
