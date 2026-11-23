@@ -1,8 +1,8 @@
 import { View, div } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { checking, closeOverlay, focused, hc, notify, panes, props, run, settings, terminals, theme } from "herdr";
+import { appHome, checking, closeOverlay, exec, focused, hc, notify, panes, props, run, settings, spaces, terminals, theme } from "herdr";
 import { assignHints } from "./hints.js";
-import { grid, visibleLinks } from "./links.js";
+import { existingTargets, grid, visibleLinks } from "./links.js";
 import { openCodeLinks } from "./opencode-wraps.js";
 import { lazygitLinks } from "./lazygit-wraps.js";
 
@@ -18,6 +18,8 @@ export default class LinkHints extends View {
     if (!terminal?.cols || !terminal.rows) return this.dismiss();
     const { rows, cols } = terminal;
     const pane = panes().find((p) => p.terminal === this.terminal);
+    this.space = spaces().find((s) => s.tabs.some((tab) => tab.id === pane?.tab));
+    this.location = { cwd: pane?.cwd, on: this.space?.machine };
     const scanLinks = { opencode: openCodeLinks, lazygit: lazygitLinks }[pane?.program?.key] ?? visibleLinks;
     const scroll = pane?.scroll;
     const history = Math.max(0, (scroll?.total ?? rows) - rows);
@@ -31,9 +33,12 @@ export default class LinkHints extends View {
         const result = await hc(["read", this.terminal, "--json", "--lines", String(history)]);
         if (this.closed) return;
         if (result.code !== 0) throw new Error(result.stderr.trim() || "Terminal read failed");
-        const links = scanLinks(JSON.parse(result.stdout).text, cols, top, rows);
+        const targets = scanLinks(JSON.parse(result.stdout).text, cols, top, rows,
+          Boolean(this.space && this.location.cwd));
+        const links = await existingTargets(targets, exec, this.location);
+        if (this.closed) return;
         if (!links.length) {
-          notify({ title: "No visible web URLs", level: "info", timeout: 1500 });
+          notify({ title: "No visible URLs or files", level: "info", timeout: 1500 });
           return this.dismiss();
         }
         const hints = assignHints(links.map((_, i) => String(i)));
@@ -68,6 +73,24 @@ export default class LinkHints extends View {
     if (!checking()) run(`pbogut-keys.closed-${props().overlay}`);
   }
 
+  openFile(hit, cx) {
+    const { id, machine } = this.space;
+    const spaceId = machine && id.startsWith(`${machine}/`) ? id.slice(machine.length + 1) : id;
+    const args = [
+      ...(!machine ? [`HERDR_APP_HOME=${appHome()}`] : []),
+      `HERDR_APP_SPACE_ID=${spaceId}`, "herdr-app-vim",
+      ...(hit.line ? ["--line", String(hit.line)] : []), "--", hit.path,
+    ];
+    cx.spawn(async () => {
+      try {
+        const result = await exec("env", args, this.location);
+        if (result.code !== 0) throw new Error(result.stderr.trim() || hit.path);
+      } catch (error) {
+        notify({ title: "Could not open file in Neovim", body: String(error.message ?? error), level: "error" });
+      }
+    });
+  }
+
   render() {
     const t = theme(), g = this.grid;
     return div().id("terminal-link-hints").relative().size_full().track_focus(this.handle)
@@ -83,8 +106,9 @@ export default class LinkHints extends View {
           this.prefix += k;
           const hit = this.labels.find((l) => l.key === this.prefix);
           if (hit) {
+            if (hit.path) this.openFile(hit, cx);
+            else cx.open_url(hit.url);
             this.dismiss();
-            cx.open_url(hit.url);
             return;
           }
         }

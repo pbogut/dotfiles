@@ -16,7 +16,7 @@ Choosing another layout in the app lasts until the next chezmoi apply.
 | --- | --- |
 | Ctrl+G | Bottom shortcut bar |
 | Alt+Esc | Copy mode |
-| Alt+U | Show inline hints on visible web URLs |
+| Alt+U | Open a visible URL or relative file path |
 | Alt+O | Show space hints; tap again for the spaces picker |
 | Alt+I | Show agent hints; tap again for the agents picker |
 | Alt+H | Project task picker |
@@ -29,9 +29,11 @@ Choosing another layout in the app lasts until the next chezmoi apply.
 The five searchable pickers accept Ctrl+J to move down and Ctrl+K to move up while
 their search field is focused. Up/Down also work; Enter selects a result.
 
-In a single-pane tab, press Alt+U and type the letters drawn on the URL you
-want to open. Backspace removes a letter; Esc cancels. The hints use the
-printed `http://` and `https://` addresses in the current viewport, including
+In a single-pane tab, press Alt+U and type the letters drawn on a URL or file.
+Files must exist relative to the pane's working directory. Picking `src/main.lua`
+opens it in the space's `nvim` tab; `src/main.lua:20` and `src/main.lua:20-22`
+both jump to line 20. Backspace removes a letter; Esc cancels.
+URL hints use printed `http://` and `https://` addresses in the current viewport, including
 scrollback. A hyperlink whose destination is hidden behind a label is skipped.
 The overlay uses a snapshot, so press Alt+U again for fresh output.
 

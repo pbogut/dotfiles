@@ -18,8 +18,8 @@ function chatColumn(line, edge) {
   return line.slice(0, end).trimEnd();
 }
 
-export function openCodeLinks(text, cols, top, rows) {
-  const links = visibleLinks(text, cols, top, rows);
+export function openCodeLinks(text, cols, top, rows, files = false) {
+  let links = visibleLinks(text, cols, top, rows, files);
   const lines = text.split("\n");
   // The prompt's lower border measures the chat, with or without a sidebar.
   // If this isn't a screen of painted rows, we can't use its newline indices
@@ -55,11 +55,14 @@ export function openCodeLinks(text, cols, top, rows) {
       if (tail !== token || trimUrl(raw) !== raw) break;
     }
     if (at === row || !hasHost.test(raw)) continue;
+    const startCol = width(chat[row].slice(0, start.index)), marginCol = width(margin);
+    links = links.filter((l) => !l.path || l.row < row || l.row > at ||
+      l.col !== (l.row === row ? startCol : marginCol));
     // If the first fragment already opens, leave its original hint alone. The
     // first continuation gets the full URL, including any further wrapped rows.
     links.push({
       row: short ? row + 1 : row,
-      col: short ? width(margin) : width(chat[row].slice(0, start.index)),
+      col: short ? marginCol : startCol,
       url: trimUrl(raw),
     });
   }

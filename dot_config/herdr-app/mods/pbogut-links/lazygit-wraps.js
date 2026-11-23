@@ -30,8 +30,8 @@ const suffix = /\bhttps?(?::(?:\/(?:\/[^\s<>"'`]*)?)?)?$/i;
 const hasHost = /^https?:\/\/(?:[\p{L}\p{N}-]+|\[[\da-f:]+\])/iu;
 const token = /^[\p{L}\p{N}._~:/?#@!$&()*+,;=%[\]-]+/u;
 
-function scanPanel(content, width) {
-  const links = visibleLinks(content.join("\n"), width, 0, content.length);
+function scanPanel(content, width, files) {
+  let links = visibleLinks(content.join("\n"), width, 0, content.length, files);
   for (let row = 0; row + 1 < content.length; row++) {
     const start = suffix.exec(content[row]);
     if (!start) continue;
@@ -52,18 +52,21 @@ function scanPanel(content, width) {
       if (part !== next || trimUrl(raw) !== raw) break;
     }
     if (at === row || !hasHost.test(raw)) continue;
+    const startCol = cells(content[row].slice(0, start.index)).length;
+    links = links.filter((l) => !l.path || l.row < row || l.row > at ||
+      l.col !== (l.row === row ? startCol : content[l.row].length - content[l.row].trimStart().length));
     const short = hasHost.test(start[0]);
     links.push({
       row: short ? row + 1 : row,
-      col: short ? continuation : cells(content[row].slice(0, start.index)).length,
+      col: short ? continuation : startCol,
       url: trimUrl(raw),
     });
   }
   return links;
 }
 
-export function lazygitLinks(text, cols, top, rows) {
-  const ordinary = visibleLinks(text, cols, top, rows);
+export function lazygitLinks(text, cols, top, rows, files = false) {
+  const ordinary = visibleLinks(text, cols, top, rows, files);
   const lines = text.split("\n").slice(0, top + rows).map(cells);
   if (lines.some((line) => line.length > cols)) return ordinary;
   const screen = lines.slice(top), boxes = [...panels(screen)];
@@ -72,8 +75,8 @@ export function lazygitLinks(text, cols, top, rows) {
   for (const { left, right, top: y, bottom } of boxes) {
     const content = screen.slice(y + 1, bottom).map((line) =>
       line.slice(left + 1, right).join("").trimEnd());
-    for (const link of scanPanel(content, right - left - 1))
-      links.push({ row: y + 1 + link.row, col: left + 1 + link.col, url: link.url });
+    for (const link of scanPanel(content, right - left - 1, files))
+      links.push({ ...link, row: y + 1 + link.row, col: left + 1 + link.col });
   }
   return links.sort((a, b) => a.row - b.row || a.col - b.col);
 }

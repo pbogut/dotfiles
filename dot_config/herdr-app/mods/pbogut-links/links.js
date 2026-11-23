@@ -10,22 +10,36 @@ export function trimUrl(url) {
   }
 }
 
+const web = /\bhttps?:\/\/[^\s<>"'`\x00-\x1f]+/gi;
+// Match a whole relative token between prose delimiters. Consume URLs first
+// so even a path in a URL's query string cannot get a file hint.
+const file = /(?<![^\s("'`[<{│┃|])([\p{L}\p{N}_.@+-][\p{L}\p{M}\p{N}_./@+-]*)(?::(\d+)(?:-\d+)?)?(?=[.,;:!?]*(?:[\s)"'`\]}>│┃|]|$))/u;
+const webOrFile = new RegExp(`${web.source}|${file.source}`, "giu");
+
 // hc returns logical lines. Count display cells, not UTF-16 offsets, when
 // placing a label after a wide glyph or on a soft-wrapped row.
-export function visibleLinks(text, cols, top, rows) {
+export function visibleLinks(text, cols, top, rows, files = false) {
   const found = [];
   let row = 0;
   for (const line of text.split("\n")) {
     if (row >= top + rows) break;
-    const matches = line.matchAll(/\bhttps?:\/\/[^\s<>"'`\x00-\x1f]+/gi);
+    const matches = line.matchAll(files ? webOrFile : web);
     let match = matches.next().value, col = 0, index = 0;
     for (const glyph of line.match(glyphs) ?? []) {
       const width = cellWidth(glyph);
       if (col + width > cols) { row++; col = 0; }
       if (match?.index === index) {
-        const url = trimUrl(match[0]);
-        if (row >= top && row < top + rows && /^https?:\/\/[^/?#]/i.test(url))
-          found.push({ row: row - top, col, url });
+        if (row >= top && row < top + rows) {
+          const pos = { row: row - top, col };
+          if (match[1]) {
+            const path = match[1].replace(/\.+$/, ""), start = Number(match[2]);
+            if (path && (!match[2] || (Number.isSafeInteger(start) && start > 0)))
+              found.push({ ...pos, path, line: start || null });
+          } else {
+            const url = trimUrl(match[0]);
+            if (/^https?:\/\/[^/?#]/i.test(url)) found.push({ ...pos, url });
+          }
+        }
         match = matches.next().value;
       }
       col += width;
@@ -34,6 +48,15 @@ export function visibleLinks(text, cols, top, rows) {
     row++;
   }
   return found;
+}
+
+export async function existingTargets(targets, exec, options) {
+  const paths = [...new Set(targets.filter((t) => t.path).map((t) => t.path))];
+  if (!paths.length) return targets;
+  const result = await exec("sh", ["-c",
+    'for p do if [ -f "$p" ]; then printf "%s\\n" "$p"; fi; done', "files", ...paths], options);
+  const existing = new Set(result.code === 0 ? result.stdout.split("\n") : []);
+  return targets.filter((t) => t.url || existing.has(t.path));
 }
 
 // Herdr fits whole cells and centers the unused height. Simply dividing the
