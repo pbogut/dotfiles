@@ -7,15 +7,17 @@ return {
     { 'ray-x/lsp_signature.nvim', cond = true },
     { 'smiteshp/nvim-navic', cond = true },
   },
-  init = function() end,
+  init = function()
+    if vim.fn.has('linux') == 1 and vim.fn.executable('inotifywait') == 1 then
+      vim.lsp.config('*', {
+        capabilities = { workspace = { didChangeWatchedFiles = { dynamicRegistration = true } } },
+      })
+    end
+  end,
   config = function()
     local command = vim.api.nvim_create_user_command
     local u = require('pbogut.utils')
-    local lspconfig = require('lspconfig')
     local has_lspstatus, lspstatus = pcall(require, 'lsp-status')
-    local has_lsp_signature, lsp_signature = pcall(require, 'lsp_signature')
-
-    local b = {}
 
     vim.diagnostic.config({
       severity_sort = true,
@@ -35,10 +37,9 @@ return {
     local on_attach = lsp_config.on_attach
     local servers = lsp_config.servers
 
-    local capabilities = vim.lsp.protocol.make_client_capabilities()
-    capabilities.textDocument.completion.completionItem.snippetSupport = true
+    local capabilities = { textDocument = { completion = { completionItem = { snippetSupport = true } } } }
     if has_lspstatus then
-      capabilities = vim.tbl_extend('keep', capabilities or {}, lspstatus.capabilities)
+      capabilities = vim.tbl_extend('keep', capabilities, lspstatus.capabilities)
       lspstatus.register_progress()
     end
 
@@ -78,7 +79,7 @@ return {
       end
       opts.on_attach = on_attach
       if server.snippet_support then
-        opts.capabilities = capabilities
+        opts.capabilities = vim.tbl_deep_extend('force', capabilities, opts.capabilities or {})
       end
       vim.lsp.config(server.name, opts)
       vim.lsp.enable(server.name)
@@ -176,7 +177,7 @@ return {
         local config = require('pbogut.config')
         if config.get('lsp.autoformat_on_save.enabled') then
           local file_types = config.get('lsp.autoformat_on_save.file_types', {})
-          file_types["make"] = false
+          file_types['make'] = false
           local file = vim.fn.expand('%:p')
           local cwd = vim.fn.getcwd()
           local ft = vim.bo.filetype
