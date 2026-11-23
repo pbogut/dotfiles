@@ -31,6 +31,7 @@ alias so="source"
 alias clone="~/.scripts/term-in-current-dir.sh"
 alias c="clone"
 
+alias mixe=mise
 
 alias php_debug_on="export XDEBUG_CONFIG=\"idekey=PHPSTORM\""
 alias php_debug_off="export XDEBUG_CONFIG="
