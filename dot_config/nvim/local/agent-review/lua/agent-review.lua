@@ -382,6 +382,71 @@ local function herdr_tabs(root, done)
   end)
 end
 
+local function preview_reply(root, id, buf, cursor)
+  local args =
+    { 'session.message.list', '--param', 'sessionID=' .. id, '--param', 'type=assistant', '--param', 'limit=5' }
+  vim.list_extend(args, { '--param', cursor and 'cursor=' .. cursor or 'order=desc' })
+  request(root, args, function(result, err)
+    -- Each session owns its preview buffer, even when replies arrive out of order.
+    if not api.nvim_buf_is_loaded(buf) then return end
+    local function show(text) api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(text, '\n', { plain = true })) end
+    if not (result and vim.islist(result.data)) then
+      return show('Could not load reply' .. (err and err ~= '' and ': ' .. err or '.'))
+    end
+    for _, msg in ipairs(result.data) do
+      local parts = {}
+      for _, part in ipairs(msg.content or {}) do
+        if part.type == 'text' then table.insert(parts, part.text) end
+      end
+      local text = table.concat(parts, '\n\n')
+      if vim.trim(text) ~= '' then return show(text) end
+    end
+    local next_page = result.cursor and result.cursor.next
+    if type(next_page) == 'string' then return preview_reply(root, id, buf, next_page) end
+    show('No assistant reply yet.')
+  end)
+end
+
+local function open_session_picker(root, label, action)
+  local ok, pickers = pcall(require, 'telescope.pickers')
+  if not ok then return end
+  local actions = require('telescope.actions')
+  local picker
+  picker = pickers.new({}, {
+    prompt_title = label,
+    results_title = 'Loading sessions...',
+    layout_strategy = 'vertical',
+    layout_config = { mirror = true, preview_cutoff = 1 },
+    cache_picker = false,
+    finder = require('telescope.finders').new_table({ results = {} }),
+    sorter = require('telescope.config').values.generic_sorter({}),
+    previewer = require('telescope.previewers').new_buffer_previewer({
+      title = 'Last assistant reply',
+      get_buffer_by_name = function(_, entry) return entry.value.id end,
+      define_preview = function(self, entry)
+        if self.state.bufname == entry.value.id then return end
+        local buf = self.state.bufnr
+        vim.wo[self.state.winid].wrap = true
+        vim.wo[self.state.winid].linebreak = true
+        api.nvim_buf_set_lines(buf, 0, -1, false, { 'Loading reply...' })
+        preview_reply(root, entry.value.id, buf)
+      end,
+    }),
+    attach_mappings = function(prompt_buf, map)
+      actions.select_default:replace(guarded(function()
+        local entry = picker:get_selection()
+        if not entry then return end
+        actions.close(prompt_buf)
+        action(entry.value)
+      end))
+      map({ 'i', 'n' }, '<Esc>', actions.close)
+      return true
+    end,
+  })
+  picker:find()
+  return picker
+end
+
 local function pick_session(root, label, action)
   local last
   for _, b in ipairs(state(root).history) do
@@ -390,8 +455,11 @@ local function pick_session(root, label, action)
       break
     end
   end
-  local sessions = {}
-  local function show(tabs)
+  local picker = open_session_picker(root, label, action)
+  local sessions, tabs, listed = {}, nil, false
+  local function active() return not picker or api.nvim_buf_is_loaded(picker.prompt_bufnr) end
+  local function show()
+    if not (listed and tabs and active()) then return end
     local open = vim.tbl_filter(function(s) return tabs[s.id] ~= nil end, sessions)
     local choices = #open > 0 and open or sessions
     for i, s in ipairs(choices) do
@@ -400,18 +468,28 @@ local function pick_session(root, label, action)
         break
       end
     end
-    select_item(choices, {
-      prompt = label,
-      format_item = function(s)
-        return (s.id == last and '[Last review] ' or '')
-          .. (tabs[s.id] and tabs[s.id] .. ' · ' or '')
-          .. (s.title or 'Untitled')
-          .. '  '
-          .. s.id
+    local function format_item(s)
+      return (s.id == last and '* ' or '  ')
+        .. (tabs[s.id] and tabs[s.id] .. ' · ' or '')
+        .. (s.title or 'Untitled')
+        .. '  '
+        .. s.id
+    end
+    if not picker then
+      return select_item(choices, { prompt = label, format_item = format_item }, function(s)
+        if s then action(s) end
+      end)
+    end
+    picker.results_title = 'Sessions'
+    local border = picker.layout.results.border
+    if border then border:change_title(picker.results_title) end
+    picker:refresh(require('telescope.finders').new_table({
+      results = choices,
+      entry_maker = function(s)
+        local display = format_item(s)
+        return { value = s, display = display, ordinal = display }
       end,
-    }, function(s)
-      if s then action(s) end
-    end)
+    }))
   end
   local function page(cursor)
     local args = {
@@ -427,17 +505,29 @@ local function pick_session(root, label, action)
     }
     if cursor then vim.list_extend(args, { '--param', 'cursor=' .. cursor }) end
     request(root, args, function(result, err)
-      if not (result and vim.islist(result.data)) then return report(err or 'Could not list sessions') end
+      if not active() then return end
+      if not (result and vim.islist(result.data)) then
+        if picker then require('telescope.actions').close(picker.prompt_bufnr) end
+        return report(err or 'Could not list sessions')
+      end
       for _, s in ipairs(result.data) do
         if in_worktree(s.location and s.location.directory, root) then table.insert(sessions, s) end
       end
       local next_page = result.cursor and result.cursor.next
       if type(next_page) == 'string' then return page(next_page) end
-      if #sessions == 0 then return vim.notify('No OpenCode conversations in ' .. root) end
-      herdr_tabs(root, show)
+      if #sessions == 0 then
+        if picker then require('telescope.actions').close(picker.prompt_bufnr) end
+        return vim.notify('No OpenCode conversations in ' .. root)
+      end
+      listed = true
+      show()
     end)
   end
   page()
+  herdr_tabs(root, function(result)
+    tabs = result
+    show()
+  end)
 end
 
 local function send(root, batch, approve_if_empty)
@@ -489,7 +579,8 @@ command('ReviewSendWithComment', function()
         end
       end)
     end
-    send(root)
+    -- Open the recipient picker after the comment editor closes.
+    vim.schedule(guarded(function() send(root) end))
   end, ' General review comment ')
 end)
 command('ReviewResend', function()
