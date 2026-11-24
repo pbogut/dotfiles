@@ -14,6 +14,27 @@ const workflow = `Agent switching:
 export default {
   id: "agent-switch",
   async setup(ctx) {
+    const key = (sessionID: string) => `disabled:${sessionID}`
+    const disabled = async (sessionID: string) => (await ctx.storage.get(key(sessionID))) === true
+
+    await ctx.command.transform((editor) => {
+      editor.add({
+        name: "agent-switch",
+        description: "Turn agent switching on or off for this session: /agent-switch on|off",
+        execute: async ({ sessionID, prompt }) => {
+          switch (prompt.text.trim()) {
+            case "off": return ctx.storage.set(key(sessionID), true)
+            case "on": return ctx.storage.remove(key(sessionID))
+            default: throw new Error("Usage: /agent-switch on|off")
+          }
+        },
+      })
+    })
+
+    const requireEnabled = async (sessionID: string) => {
+      if (await disabled(sessionID)) throw new Error("Agent switching is off for this session.")
+    }
+
     await ctx.tool.transform((editor) => {
       editor.add({
         name: "switch_agent",
@@ -28,6 +49,7 @@ export default {
         execute: async (input, context) => {
           const { agent } = input as { agent: string }
           if (agent !== "plan" && agent !== "build") throw new Error("Choose plan or build.")
+          await requireEnabled(context.sessionID)
           const session = await ctx.session.get({ sessionID: context.sessionID })
           if (session.agent === agent) return { content: `Already in ${agent} mode.` }
 
@@ -39,6 +61,8 @@ export default {
             resources: [agent],
             save: [],
           })
+          // The user can turn switching off while the permission prompt is open.
+          await requireEnabled(context.sessionID)
           await ctx.session.switchAgent({ sessionID: context.sessionID, agent })
           return {
             content: agent === "plan"
@@ -49,7 +73,14 @@ export default {
       })
     })
 
-    await ctx.session.hook("context", (event) => {
+    await ctx.session.hook("context", async (event) => {
+      if (await disabled(event.sessionID)) {
+        delete event.tools.switch_agent
+        if (event.agent === "build") {
+          event.system.push({ type: "text", text: "Agent switching is off for this session. Stay in Build, verify each increment, and continue the requested work without pausing for routine human review unless the user asks for it." })
+        }
+        return
+      }
       if (event.agent !== "plan" && event.agent !== "build") return
       if (event.agent === "plan") {
         // Core's Plan reminder is a standalone user message. Change only its

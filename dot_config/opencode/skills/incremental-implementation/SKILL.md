@@ -252,6 +252,10 @@ After completing all increments for a task:
 
 ## Human review
 
+If agent switching is off for this session, skip the routine review and
+acceptance steps in this skill. Verify each increment in Build and continue
+with the requested work. Honor explicit review requests and commit permissions.
+
 Verify the slice in Build, then switch to Plan. In chat, say what changed, which
 files to review, which checks passed, and whether anything differs from the
 agreement. End your turn and wait. The reviewer can send feedback or approval

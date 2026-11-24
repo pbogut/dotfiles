@@ -2,10 +2,16 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 import plugin from "../../../dot_config/opencode/plugins/agent-switch/index.ts"
 
-async function fixture({ agent = "plan", assertPermission = async () => {} } = {}) {
-  let tool, contextHook
+async function fixture({ agent = "plan", assertPermission = async () => {}, storage = new Map() } = {}) {
+  let tool, command, contextHook
   const permissions = [], switches = []
   await plugin.setup({
+    storage: {
+      get: async (key) => storage.get(key),
+      set: async (key, value) => { storage.set(key, value) },
+      remove: async (key) => { storage.delete(key) },
+    },
+    command: { transform: async (register) => register({ add: (value) => { command = value } }) },
     tool: { transform: async (register) => register({ add: (value) => { tool = value } }) },
     permission: { assert: async (request) => {
       permissions.push(request)
@@ -18,7 +24,7 @@ async function fixture({ agent = "plan", assertPermission = async () => {} } = {
     },
   })
   return {
-    tool, contextHook, permissions, switches,
+    tool, command, contextHook, permissions, switches,
     run: (destination) => tool.execute({ agent: destination }, {
       sessionID: "ses_test", agent, messageID: "msg_test", id: "call_test",
     }),
@@ -105,7 +111,7 @@ test("only the standalone stock Plan reminder is adapted, preserving review and 
   const assistant = message(reminder, "assistant")
   const tool = { role: "tool", content: [{ type: "tool-result", id: "result", name: "read", result: { type: "text", value: reminder } }] }
   const event = { agent: "plan", messages: [original, quoted, assistant, tool], system: [] }
-  app.contextHook(event)
+  await app.contextHook(event)
   assert.equal(original.content[0].text, reminder)
   assert.equal(event.messages[1], quoted)
   assert.equal(event.messages[2], assistant)
@@ -124,7 +130,7 @@ test("the provider's manual-switch instruction is adapted only during Plan", asy
   for (const agent of ["plan", "build", "general"]) {
     const system = { type: "text", text }
     const event = { agent, messages: [], system: [system] }
-    app.contextHook(event)
+    await app.contextHook(event)
     assert.equal(system.text, text)
     if (agent === "plan") {
       assert.match(event.system[0].text, /^Keep other instructions\./)
@@ -134,4 +140,46 @@ test("the provider's manual-switch instruction is adapted only during Plan", asy
     }
     assert.equal(event.system.length, agent === "general" ? 1 : 2)
   }
+})
+
+test("off survives plugin reload for only that session; on restores tools and review instructions", async () => {
+  const storage = new Map()
+  let app = await fixture({ storage })
+  assert.equal(app.command.name, "agent-switch")
+  const set = (text) => app.command.execute({ sessionID: "ses_test", prompt: { text } })
+  const context = async (sessionID, agent) => {
+    const event = { sessionID, agent, tools: { switch_agent: {}, read: {} }, messages: [message(reminder)], system: [] }
+    await app.contextHook(event)
+    return event
+  }
+  await set("off")
+  app = await fixture({ storage })
+  await assert.rejects(set("toggle"), /Usage:/)
+  for (const agent of ["build", "plan", "general"]) {
+    const event = await context("ses_test", agent)
+    assert.deepEqual(Object.keys(event.tools), ["read"])
+    assert.equal(event.messages[0].content[0].text, reminder)
+    if (agent === "build") assert.match(event.system[0].text, /without pausing for routine human review/)
+    else assert.deepEqual(event.system, [])
+  }
+  await assert.rejects(app.run("build"), /off for this session/)
+  assert.deepEqual(app.permissions, [])
+  assert.deepEqual(app.switches, [])
+  assert.ok((await context("ses_other", "plan")).tools.switch_agent)
+  await set("on")
+  const enabled = await context("ses_test", "plan")
+  assert.ok(enabled.tools.switch_agent)
+  assert.match(enabled.system[0].text, /before reviewing changes/)
+  assert.match(enabled.messages[0].content[0].text, /explicitly approves implementation/)
+  await app.run("build")
+  assert.equal(app.permissions.length, 1)
+  assert.equal(app.switches.length, 1)
+})
+
+test("turning off while approval is pending prevents the switch", async () => {
+  const app = await fixture({ assertPermission: async () => {
+    await app.command.execute({ sessionID: "ses_test", prompt: { text: "off" } })
+  } })
+  await assert.rejects(app.run("build"), /off for this session/)
+  assert.deepEqual(app.switches, [])
 })

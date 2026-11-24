@@ -8,6 +8,15 @@ switches the current session. Each switch checks the `switch_agent` permission
 with the destination as its resource. The source agent is not part of the
 resource. Selecting the current agent is a no-op.
 
+Use `/agent-switch off` to hide the tool for this session. The command keeps
+the current agent. For an unattended `/goal`, select Build first: Build will
+verify each increment and continue without asking for routine review. If you
+turn switching off in Plan, you stay in Plan until you switch manually.
+
+`/agent-switch on` restores the tool and its review workflow. The setting
+takes effect on the next model call, persists when you reopen the session,
+and is shared by tabs showing that session. New sessions start with switching on.
+
 Defaults live in the chezmoi source at
 `dot_config/opencode/private_opencode.jsonc.tmpl`:
 
