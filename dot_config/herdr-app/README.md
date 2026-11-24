@@ -179,6 +179,12 @@ and slot name. Document version checks preserve concurrent updates from other
 tabs. Child sessions resolve to their root; visiting Home retains the last
 conversation. Unmanaged tabs do not write this cache.
 
+Neovim's review and send pickers match live OpenCode terminals by terminal ID,
+regardless of tab name. The same extension labels each terminal with its
+selected root session and OpenCode process ID. The picker checks that process
+is still in the foreground, so a shell tab can run OpenCode without acquiring a
+recovery slot.
+
 Named tabs launch through `herdr-app-opencode`. It resumes the slot with
 `opencode --session <id>`, or starts without a session when the slot is new.
 Normal exit closes the tab. Its shortcut recreates it with the saved conversation.
@@ -192,7 +198,7 @@ original project folder. The tab ID, terminal ID, splits, and focus survive.
 This automatic recovery requires Zsh to remain the core's recovery shell.
 Renamed tabs and nested shells do not trigger restoration.
 
-Run `/reload` in already-open named OpenCode tabs after applying the extension.
+Run `/reload` in already-open OpenCode tabs after applying the extension.
 It can register their selected conversation without closing them. New tabs load
 it automatically. The App launcher clears inherited old-Herdr pane variables;
 OpenCode running in Herdr TUI continues using the existing official integration,

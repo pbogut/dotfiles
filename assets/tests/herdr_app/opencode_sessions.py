@@ -210,8 +210,27 @@ for await (const line of createInterface({ input: process.stdin })) {
             assert launches()[-1]["selected"] == "root-a"
             call("hc", "send", third, "quit")
             wait(lambda: len(tabs()) == 1, "Adopted session closes after reopening")
+
+            # Launch OpenCode by hand in a shell tab. Changing sessions updates
+            # the picker identity without making the shell a recovery slot.
+            custom = app("do", "tab.new", "--name", "dupa-34")["terminal"]
+            call("hc", "send", custom, "env -u HERDR_ENV opencode")
+            wait(lambda: any(r["terminal"] == custom for r in launches()), "OpenCode starts in the shell")
+            def shows(session):
+                term = rpc("terminal.get", {"terminal": custom})
+                labels = term["labels"]
+                pid = (term.get("foreground") or {}).get("pid")
+                return labels.get("pbogut.oc.session") == session and labels.get("pbogut.oc.session-pid") == str(pid)
+
+            call("hc", "send", custom, "select child-a")
+            wait(lambda: shows("root-a"), "Custom tab reports the child session's root")
+            call("hc", "send", custom, "select root-b")
+            wait(lambda: shows("root-b"), "Custom tab follows session changes")
+            assert cached("dupa-34") is None
+            call("hc", "send", custom, "quit")
+            wait(lambda: not shows("root-b"), "Returning to the shell invalidates the picker identity")
             assert not app("status")["errors"], app("status")
-            print("PASS: selected roots, separate slots, recreation, live reconnect, process loss, core shutdown, existing-tab adoption, and normal exits.", flush=True)
+            print("PASS: selected roots, custom tabs, separate slots, recreation, live reconnect, process loss, core shutdown, existing-tab adoption, and normal exits.", flush=True)
         except Exception as error:
             if isinstance(error, subprocess.CalledProcessError):
                 print(error.output, flush=True)

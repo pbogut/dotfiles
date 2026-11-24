@@ -369,24 +369,22 @@ local function herdr_tabs(root, done)
     for _, space in ipairs(layout and layout.spaces or {}) do
       if in_worktree(space.folder, root) then
         for _, tab in ipairs(space.tabs or {}) do
-          local role = tab.name == 'opencode' and 'oc-1' or tab.name
-          if type(role) == 'string' and role:match('^oc%-%d+$') then
-            for _, term in ipairs(tab.terminals or {}) do
-              if term.app == 'opencode' then live[term.terminal] = { key = space.id .. '/' .. role, role = role } end
-            end
+          for _, term in ipairs(tab.terminals or {}) do
+            if term.app == 'opencode' then live[term.terminal] = tab.name or term.terminal end
           end
         end
       end
     end
     if not next(live) then return done({}) end
-    local rpc = '{"jsonrpc":"2.0","id":1,"method":"doc.get","params":{"name":"pbogut-opencode"}}\n'
-    read_json({ 'hc', 'connect' }, { text = true, stdin = rpc, timeout = 2000 }, function(doc)
-      local slots = vim.tbl_get(doc or {}, 'result', 'value', 'slots') or {}
+    local rpc = '{"jsonrpc":"2.0","id":1,"method":"terminal.list","params":{}}\n'
+    read_json({ 'hc', 'connect' }, { text = true, stdin = rpc, timeout = 2000 }, function(result)
       local tabs = {}
-      for terminal, tab in pairs(live) do
-        local slot = slots[tab.key]
-        if slot and slot.terminal == terminal and type(slot.sessionID) == 'string' then
-          tabs[slot.sessionID] = tab.role
+      for _, term in ipairs(vim.tbl_get(result or {}, 'result', 'terminals') or {}) do
+        local name, labels = live[term.address], term.labels or {}
+        local pid = type(term.foreground) == 'table' and term.foreground.pid
+        local id = labels['pbogut.oc.session']
+        if name and pid and labels['pbogut.oc.session-pid'] == tostring(pid) and type(id) == 'string' then
+          tabs[id] = name
         end
       end
       done(tabs)
@@ -475,10 +473,12 @@ local function pick_session(root, label, action)
   local picker = open_session_picker(root, label, action)
   local sessions, tabs, listed = {}, nil, false
   local function active() return not picker or api.nvim_buf_is_loaded(picker.prompt_bufnr) end
-  local function show()
-    if not (listed and tabs and active()) then return end
-    local open = vim.tbl_filter(function(s) return tabs[s.id] ~= nil end, sessions)
-    local choices = #open > 0 and open or sessions
+  local function show(choices)
+    if not active() then return end
+    if #choices == 0 then
+      if picker then require('telescope.actions').close(picker.prompt_bufnr) end
+      return vim.notify('No OpenCode conversations in ' .. root)
+    end
     for i, s in ipairs(choices) do
       if s.id == last then
         table.insert(choices, 1, table.remove(choices, i))
@@ -508,6 +508,29 @@ local function pick_session(root, label, action)
       end,
     }))
   end
+  local function show_listed()
+    if not (listed and tabs and active()) then return end
+    if not next(tabs) then return show(sessions) end
+    -- session.list filters by exact directory. A live tab can be in a worktree subdirectory.
+    local missing, open = vim.deepcopy(tabs), {}
+    for _, s in ipairs(sessions) do
+      if missing[s.id] then
+        table.insert(open, s)
+        missing[s.id] = nil
+      end
+    end
+    local remaining = vim.tbl_count(missing)
+    local function finish() show(#open > 0 and open or sessions) end
+    if remaining == 0 then return finish() end
+    for id in pairs(missing) do
+      request(root, { 'session.get', '--param', 'sessionID=' .. id }, function(response)
+        local s = response and response.data
+        if s and s.id == id and in_worktree(s.location and s.location.directory, root) then table.insert(open, s) end
+        remaining = remaining - 1
+        if remaining == 0 then finish() end
+      end)
+    end
+  end
   local function page(cursor)
     local args = {
       'session.list',
@@ -532,18 +555,14 @@ local function pick_session(root, label, action)
       end
       local next_page = result.cursor and result.cursor.next
       if type(next_page) == 'string' then return page(next_page) end
-      if #sessions == 0 then
-        if picker then require('telescope.actions').close(picker.prompt_bufnr) end
-        return vim.notify('No OpenCode conversations in ' .. root)
-      end
       listed = true
-      show()
+      show_listed()
     end)
   end
   page()
   herdr_tabs(root, function(result)
     tabs = result
-    show()
+    show_listed()
   end)
 end
 

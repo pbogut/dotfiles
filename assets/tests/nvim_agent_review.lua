@@ -50,22 +50,32 @@ vim.system = function(args, opts, cb)
           folder = root,
           tabs = {
             { name = 'oc-1', terminals = { { terminal = 't1', app = 'opencode' } } },
-            { name = 'oc-2', terminals = { { terminal = 't2', app = 'opencode' } } },
+            { name = 'dupa-34', terminals = { { terminal = 't2', app = 'opencode' }, { terminal = 't3', app = 'zsh' } } },
+            { name = 'stale', terminals = { { terminal = 't4', app = 'opencode' } } },
           },
         },
+        { folder = tmp .. '/other', tabs = { { name = 'elsewhere', terminals = { { terminal = 't5', app = 'opencode' } } } } },
       },
     })
   elseif args[1] == 'hc' then
+    assert(vim.json.decode(opts.stdin).method == 'terminal.list')
+    local function term(address, id, pid)
+      return {
+        address = address, foreground = { pid = 123 },
+        labels = { ['pbogut.oc.session'] = id, ['pbogut.oc.session-pid'] = pid or '123' },
+      }
+    end
     respond({
       result = {
-        value = {
-          slots = {
-            ['w1/oc-1'] = { terminal = 'old', sessionID = 'sesA' },
-            ['w1/oc-2'] = { terminal = 't2', sessionID = 'sesB' },
-          },
+        terminals = {
+          term('t1', 'sesB'), term('t2', 'sesCustom'), term('t3', 'sesA'),
+          term('t4', 'sesA', '99'), term('t5', 'sesA'),
         },
       },
     })
+  elseif args[3] == 'session.get' then
+    assert(args[5] == 'sessionID=sesCustom')
+    respond({ data = { title = 'Agent B', id = 'sesCustom', location = { directory = cwd } } })
   elseif args[3] == 'session.list' then
     assert(opts.cwd == root and vim.list_contains(args, 'directory=' .. root))
     if vim.list_contains(args, 'cursor=next') then
@@ -286,8 +296,19 @@ for _, mode in ipairs({ 'live', 'empty', 'missing' }) do
   choose(0)
   vim.cmd.ReviewSend()
   wait(function() return picker ~= nil end)
-  assert(#picker == (mode == 'live' and 1 or 2), vim.inspect(picker))
-  if mode == 'live' then assert(picker[1]:find('oc-2 · Agent B', 1, true)) end
+  assert(#picker == 2, vim.inspect(picker))
+  if mode == 'live' then
+    assert(picker[1]:find('oc-1 · Agent B  sesB', 1, true), vim.inspect(picker))
+    assert(picker[2]:find('dupa-34 · Agent B  sesCustom', 1, true), vim.inspect(picker))
+    choose(2)
+    start_send('AgentSend')
+    assert(prompt.id == 'sesCustom' and picker_title == 'Send message')
+    failed = false
+    acknowledge(false)
+    wait(function() return failed end)
+  else
+    assert(not table.concat(picker):find(' · ', 1, true))
+  end
 end
 
 local errors = {}

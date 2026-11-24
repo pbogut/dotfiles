@@ -119,9 +119,8 @@ export async function reportSession(terminalID, sessionID, rpc = core, isCurrent
 
 export function trackSession(ctx, terminalID = process.env.HC_TERMINAL_ID, rpc = core) {
   let disposed = false
-  let delivered
+  let labeled
   let refreshAt = 0
-  let retryAt = 0
   let attached = false
   let pending
   function selected() {
@@ -131,23 +130,25 @@ export function trackSession(ctx, terminalID = process.env.HC_TERMINAL_ID, rpc =
     return root && ctx.data.session.get(root) ? root : null
   }
   function sync() {
-    if (disposed || pending || Date.now() < retryAt) return
+    if (disposed || pending) return
     const sessionID = selected()
     // Home and plugin routes retain the last conversation, as in the old TUI.
-    if (!sessionID || (sessionID === delivered && Date.now() < refreshAt)) return
+    if (!validID(sessionID) || (sessionID === labeled && Date.now() < refreshAt)) return
     pending = (async () => {
-      if (!attached) attached = await adopt(terminalID, rpc)
-      if (!attached) {
-        retryAt = Date.now() + 5000
-        return
+      // Picker identity belongs to this OpenCode process, even in an ordinary shell tab.
+      if (labeled !== sessionID) {
+        await rpc("terminal.label", { terminal: terminalID, labels: {
+          "pbogut.oc.session": sessionID, "pbogut.oc.session-pid": String(process.pid),
+        } })
+        labeled = sessionID
+        refreshAt = 0
       }
-      return reportSession(terminalID, sessionID, rpc, () => !disposed && selected() === sessionID)
-    })()
-      .then((saved) => {
-        if (!saved) return
-        delivered = sessionID
-        refreshAt = Date.now() + 5000
-      }).catch(() => {}).finally(() => { pending = undefined })
+      if (!attached) attached = await adopt(terminalID, rpc)
+      if (attached) {
+        await reportSession(terminalID, sessionID, rpc, () => !disposed && selected() === sessionID)
+      }
+      refreshAt = Date.now() + 5000
+    })().catch(() => {}).finally(() => { pending = undefined })
   }
   const timer = setInterval(sync, 250)
   timer.unref()
