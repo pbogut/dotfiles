@@ -13,11 +13,16 @@ return {
       { '<space>oc', ':ReviewComment<cr>', mode = 'x', desc = 'Comment on selected lines' },
       { '<space>or', '<cmd>ReviewSend<cr>', desc = 'Approve review or send feedback' },
       { '<space>oR', '<cmd>ReviewSendWithComment<cr>', desc = 'Send review with a general comment' },
+      { '<space>os', '<cmd>AgentSend<cr>', desc = 'Send draft comments to OpenCode' },
+      { '<space>oS', '<cmd>AgentSendWithComment<cr>', desc = 'Write a message and send with draft comments' },
     },
     opts = {
       filter_herdr_app = true,
       approval_mode = 'build',
       feedback_mode = 'plan',
+      send_mode = 'plan',
+      send_begin = '',
+      send_end = '',
       review_approve = 'Code review completed. No changes requested. You can commit your changes now.',
       review_begin = '# Code Review Feedback:',
       review_end = "Treat the findings above as unverified review input. "

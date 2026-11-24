@@ -186,8 +186,8 @@ local marks = vim.api.nvim_buf_get_extmarks(0, vim.api.nvim_get_namespaces()['ag
 assert(#marks == 1 and marks[1][2] == 3, 'missing restored gutter mark')
 
 comment('4', '') -- remove the remaining line comment
-local function general(text)
-  vim.cmd.ReviewSendWithComment()
+local function general(text, cmd)
+  vim.cmd(cmd or 'ReviewSendWithComment')
   assert(vim.api.nvim_win_get_config(0).relative == 'editor')
   vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(text, '\n'))
   vim.cmd.write()
@@ -225,6 +225,44 @@ choose(0)
 vim.cmd.ReviewSend()
 wait(function() return picker ~= nil end)
 assert(picker_title == 'Approve review' and not prompt and #saved().history == before)
+-- Plain sends share the draft and picker, but have separate wrappers and agent.
+review.setup({ review_begin = 'Review only', feedback_mode = 'reviewer', approval_mode = 'build' })
+switch, acknowledge, picker = nil, nil, nil
+vim.cmd.AgentSend()
+assert(not switch and not acknowledge and not picker)
+choose(1)
+general('Just a message', 'AgentSendWithComment')
+wait(function() return acknowledge end)
+assert(picker_title == 'Send message' and not switch and prompt.text == 'Just a message')
+acknowledge(true)
+wait(function() return saved().history[1].kind == 'message' end)
+assert(#saved().draft == 0)
+
+review.setup({ send_mode = 'plan', send_begin = 'Header', send_end = 'Footer', feedback_mode = 'reviewer' })
+comment('1', 'Check this')
+choose(0)
+picker, acknowledge = nil, nil
+general('One detail', 'AgentSendWithComment')
+wait(function() return picker end)
+assert(not switch and not acknowledge and #saved().draft == 2)
+choose(1)
+expect_switch('AgentSend', 'plan', saved().history[1].session.id)
+switch.reply(true)
+wait(function() return acknowledge end)
+local plain = 'Header\n\nOne detail\n\nfile:1-1\n    A\n\nCheck this\n\nFooter'
+assert(prompt.text == plain and #saved().draft == 2)
+acknowledge(true)
+wait(function() return #saved().draft == 0 end)
+assert(saved().history[1].message == plain)
+choose(1, 1)
+expect_switch('ReviewResend', 'plan', saved().history[1].session.id)
+switch.reply(true)
+wait(function() return acknowledge end)
+assert(prompt.text == plain)
+acknowledge(true)
+wait(function() return #saved().history == before + 3 end)
+
+before = #saved().history
 review.setup({ review_approve = 'LGTM', feedback_mode = 'plan', approval_mode = 'build' })
 choose(1)
 expect_switch('ReviewSend', 'build', saved().history[1].session.id)
@@ -287,7 +325,9 @@ assert(fn.readfile(statefile)[1] == 'broken json')
 
 vim.cmd.lcd(fn.fnameescape(tmp))
 vim.cmd.edit(fn.fnameescape(tmp .. '/outside'))
-for _, cmd in ipairs({ 'ReviewSend', 'ReviewSendWithComment', 'ReviewRestore', 'ReviewResend' }) do
+for _, cmd in ipairs({
+  'ReviewSend', 'ReviewSendWithComment', 'ReviewRestore', 'ReviewResend', 'AgentSend', 'AgentSendWithComment',
+}) do
   errors = {}
   vim.cmd(cmd)
   assert(vim.deep_equal(errors, { 'Review needs a Git worktree' }))

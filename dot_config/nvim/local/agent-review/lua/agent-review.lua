@@ -3,9 +3,11 @@ local ns = api.nvim_create_namespace('agent-review')
 local directory = fn.stdpath('state') .. '/agent-review'
 local states, sending = {}, {}
 local defaults = {
-  -- Optional approval_mode and feedback_mode are OpenCode agent IDs. Omit either to keep the current mode.
+  -- approval_mode, feedback_mode and send_mode are optional OpenCode agent IDs.
   review_begin = 'Review feedback:',
   review_end = '',
+  send_begin = '',
+  send_end = '',
   review_approve = 'Approved. No issues found.',
   filter_herdr_app = false,
 }
@@ -257,12 +259,12 @@ local function comment(opts)
   )
 end
 
-local function message(comments)
+local function message(comments, kind)
   local parts = {}
   local function add(text)
     if vim.trim(text) ~= '' then table.insert(parts, text) end
   end
-  add(config.review_begin)
+  add(kind == 'message' and config.send_begin or config.review_begin)
   for _, c in ipairs(comments) do
     if not c.path then add(c.text) end
   end
@@ -273,7 +275,7 @@ local function message(comments)
       add(('%s:%d-%d\n    %s\n\n%s'):format(c.path, c.first, c.last, table.concat(code, '\n    '), c.text))
     end
   end
-  add(config.review_end)
+  add(kind == 'message' and config.send_end or config.review_end)
   return table.concat(parts, '\n\n')
 end
 
@@ -558,19 +560,19 @@ local function prompt_session(root, id, text, mode, done)
   end)
 end
 
-local function send(root, batch, approve_if_empty)
-  if sending[root] then return vim.notify('A review is being sent') end
+local function send(root, kind, batch)
+  if sending[root] then return vim.notify('Already sending to OpenCode') end
   local comments = batch and batch.comments or state(root).draft
-  local approval = #comments == 0 and (approve_if_empty or (batch and batch.kind == 'approved'))
+  local approval = #comments == 0 and (kind == 'review' or kind == 'approved')
   if #comments == 0 and not approval then return vim.notify('No comments to send') end
-  local text = batch and batch.message or (approval and config.review_approve or message(comments))
-  local label = approval and 'Approve review' or 'Send feedback'
+  local text = batch and batch.message or (approval and config.review_approve or message(comments, kind))
+  local label = kind == 'message' and 'Send message' or (approval and 'Approve review' or 'Send feedback')
+  local mode = config[kind == 'message' and 'send_mode' or (approval and 'approval_mode' or 'feedback_mode')]
   pick_session(root, label, function(session)
-    if sending[root] then return vim.notify('A review is being sent') end
+    if sending[root] then return vim.notify('Already sending to OpenCode') end
     if not batch and not vim.deep_equal(state(root).draft, comments) then
-      return vim.notify('Draft changed. Open the review picker again.')
+      return vim.notify('Draft changed. Choose a recipient again.')
     end
-    local mode = config[approval and 'approval_mode' or 'feedback_mode']
     sending[root] = true
     prompt_session(root, session.id, text, mode, function(result, err)
       sending[root] = nil
@@ -578,7 +580,8 @@ local function send(root, batch, approve_if_empty)
         return report(err or 'OpenCode did not confirm delivery')
       end
       update(root, function(s)
-        archive(s, approval and 'approved' or (batch and 'resent' or 'sent'), comments, text, session)
+        local archived_kind = approval and 'approved' or (kind == 'message' and 'message') or (batch and 'resent' or 'sent')
+        archive(s, archived_kind, comments, text, session)
         if not batch then
           -- Keep comments added or edited while the request was in flight.
           local sent = {}
@@ -588,13 +591,12 @@ local function send(root, batch, approve_if_empty)
           s.draft = vim.tbl_filter(function(c) return not vim.deep_equal(c, sent[c.id]) end, s.draft)
         end
       end)
-      vim.notify('Review sent to ' .. (session.title or session.id))
+      vim.notify((kind == 'message' and 'Message sent to ' or 'Review sent to ') .. (session.title or session.id))
     end)
   end)
 end
 
-command('ReviewSend', function() send(current_root(), nil, true) end)
-command('ReviewSendWithComment', function()
+local function send_with_comment(kind)
   local root = current_root()
   local general = vim.tbl_filter(function(c) return not c.path end, state(root).draft)
   local previous = table.concat(vim.tbl_map(function(c) return c.text end, general), '\n\n')
@@ -608,12 +610,17 @@ command('ReviewSendWithComment', function()
       end)
     end
     -- Open the recipient picker after the comment editor closes.
-    vim.schedule(guarded(function() send(root) end))
-  end, ' General review comment ')
-end)
+    vim.schedule(guarded(function() send(root, kind) end))
+  end, kind == 'message' and ' Message to OpenCode ' or ' General review comment ')
+end
+
+command('ReviewSend', function() send(current_root(), 'review') end)
+command('ReviewSendWithComment', function() send_with_comment('feedback') end)
+command('AgentSend', function() send(current_root(), 'message') end)
+command('AgentSendWithComment', function() send_with_comment('message') end)
 command('ReviewResend', function()
   local root = current_root()
-  pick_batch(root, 'Resend archived review', function(batch) send(root, batch) end)
+  pick_batch(root, 'Resend archived review', function(batch) send(root, batch.kind, batch) end)
 end)
 
 return {
