@@ -13,13 +13,14 @@ export function trimUrl(url) {
 const web = /\bhttps?:\/\/[^\s<>"'`\x00-\x1f]+/gi;
 // Match a whole relative token between prose delimiters. Consume URLs first
 // so even a path in a URL's query string cannot get a file hint.
-const file = /(?<![^\s("'`[<{│┃|])([\p{L}\p{N}_.@+-][\p{L}\p{M}\p{N}_./@+-]*)(?::(\d+)(?:[-–]\d+)?)?(?=[.,;:!?]*(?:[\s)"'`\]}>│┃|]|$))/u;
+const file = /(?<![^\s("'`[<{│┃|])([\p{L}\p{N}_.@+-][\p{L}\p{M}\p{N}_./@+-]*)(?::(\d+)(?:[-–]\d+)?|#L(\d+)(?:[-–]L\d+)?)?(?=[.,;:!?]*(?:[\s)"'`\]}>│┃|]|$))/iu;
 const webOrFile = new RegExp(`${web.source}|${file.source}`, "giu");
 
 function fileTarget(match) {
-  const path = match[1].replace(/\.+$/, ""), start = Number(match[2]);
-  if (path && (!match[2] || (Number.isSafeInteger(start) && start > 0)))
-    return { path, line: start || null };
+  const path = match[1].replace(/\.+$/, ""), digits = match[2] ?? match[3];
+  const line = digits === undefined ? null : Number(digits);
+  if (path && (line === null || (Number.isSafeInteger(line) && line > 0)))
+    return { path, line };
 }
 
 export function parseFile(token) {

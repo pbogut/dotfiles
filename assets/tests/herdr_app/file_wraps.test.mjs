@@ -23,6 +23,19 @@ test("OpenCode joins three chat rows, measures wide glyphs, and ignores the side
   ]);
 });
 
+test("OpenCode joins a parenthesized file anchor across a directory or any part of the anchor", async () => {
+  const dir = "app/Console/Commands/", file = "SubscriptionScheduleProcess.php", anchor = "#L306-L318";
+  const path = dir + file;
+  for (const cut of [dir.length, ...Array.from({ length: anchor.length }, (_, i) => path.length + i)]) {
+    const token = path + anchor, first = "  payday processing (" + token.slice(0, cut);
+    const rows = [first, "  " + token.slice(cut) + ") runs first.", "  ╹" + "▀".repeat(84)];
+    const targets = openCodeLinks(rows.join("\n"), 100, 0, rows.length, true);
+    assert.deepEqual(await resolve(targets, path), [
+      { row: 0, col: first.indexOf(dir), path, line: 306 },
+    ], `split after ${token.slice(0, cut)}`);
+  }
+});
+
 test("OpenCode review table hints both Order.php ranges, even in scrollback without the prompt", async () => {
   const path = "app/Models/Order.php";
   const row = (priority, finding) => `  │ ${priority.padEnd(8)} │ ${finding.padEnd(50)} │  sidebar`;

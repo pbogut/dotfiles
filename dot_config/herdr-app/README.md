@@ -34,7 +34,8 @@ their search field is focused. Up/Down also work; Enter selects a result.
 In a single-pane tab, press Alt+U and type the letters drawn on a URL or file.
 Files must exist relative to the pane's working directory. Picking `src/main.lua`
 opens it in the space's `nvim` tab; `src/main.lua:20` and `src/main.lua:20-22`
-both jump to line 20. Ranges written with an en dash (`:20–22`) work too.
+both jump to line 20. `src/main.lua#L20` and `src/main.lua#L20-L22` open at
+the same line. Both range formats also accept an en dash.
 Backspace removes a letter; Esc cancels.
 URL hints use printed `http://` and `https://` addresses in the current viewport, including
 scrollback. A hyperlink whose destination is hidden behind a label is skipped.

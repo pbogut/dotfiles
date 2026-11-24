@@ -20,6 +20,17 @@ test("labels use the cell pitch rather than accumulating the spare pixels", () =
   assert.equal(grid({left: 0, width: 1010, height: 730}, 106, 34, 1, 16).w, 9.5);
 });
 
+test("parenthesized file anchors use the first line; web URLs keep their fragments", () => {
+  const path = "app/Models/Order.php", url = `https://example.test/${path}#L1231-L1234`;
+  const text = [`(${path}#L1231-L1234)`, `(${path}#L49).`, `(${path}#L20–L22)`, url,
+    `${path}#L0 ${path}#other ${path}#L49oops`].join("\n");
+  const hints = visibleLinks(text, 100, 0, 5, true);
+  assert.deepEqual(hints, [
+    { row: 0, col: 1, path, line: 1231 }, { row: 1, col: 1, path, line: 49 },
+    { row: 2, col: 1, path, line: 20 }, { row: 3, col: 0, url },
+  ]);
+});
+
 test("visible file hints use the pane directory, check each path once, and keep the start line", async () => {
   const cwd = fileURLToPath(new URL("../../../dot_config/herdr-app", import.meta.url));
   const path = "mods/pbogut-links/main.js";

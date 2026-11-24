@@ -2,9 +2,10 @@ import { parseFile } from "./links.js";
 import { cellWidth, glyphs } from "./words.js";
 
 const width = (s) => (s.match(glyphs) ?? []).reduce((n, g) => n + cellWidth(g), 0);
-const endToken = /(?<![^\s("'`[<{│┃|])([\p{L}\p{N}_.@+-][\p{L}\p{M}\p{N}_./@+:–-]*)$/u;
-const firstToken = /^[\p{L}\p{M}\p{N}_./@+:–-]+(?=[,;!?]*(?:[\s)"'`\]}>]|$))/u;
-const lineSuffix = /:\d*(?:[-–]\d*)?$/;
+const endToken = /(?<![^\s("'`[<{│┃|])([\p{L}\p{N}_.@+-][\p{L}\p{M}\p{N}_./@+#:–-]*)$/u;
+const firstToken = /^[\p{L}\p{M}\p{N}_./@+#:–-]+(?=[,;!?]*(?:[\s)"'`\]}>]|$))/u;
+// Partial suffixes are enough to keep joining; parseFile validates the result.
+const lineSuffix = /(?::\d*(?:[-–]\d*)?|#L?\d*(?:[-–]L?\d*)?)$/i;
 
 // Each row is already clipped to one panel or the chat column. Keep partial
 // joins too: only the filesystem can tell which row actually ends the path.
@@ -27,7 +28,7 @@ export function wrappedFiles(lines, edge, urlParts, { chat = false, row: y = 0, 
       if (!part || urlParts.has(`${at}:${indent}`) || /^[a-z][\w+.-]*:\/\//i.test(tail)) break;
       // A slash boundary or split line suffix can wrap early. Otherwise
       // the continuation must plausibly have run out of room.
-      if (!raw.endsWith("/") && !/^[/:–-]/.test(part) && !lineSuffix.test(raw) &&
+      if (!raw.endsWith("/") && !/^[/#:–-]/.test(part) && !lineSuffix.test(raw) &&
           rooms[at - 1] > 4 && width(part) + 2 <= rooms[at - 1]) break;
       raw += part;
       wrap.push({ row: y + at, col: x + indent });
