@@ -211,13 +211,13 @@ for await (const line of createInterface({ input: process.stdin })) {
             call("hc", "send", third, "quit")
             wait(lambda: len(tabs()) == 1, "Adopted session closes after reopening")
 
-            # Launch OpenCode by hand in a shell tab. Changing sessions updates
-            # the picker identity without making the shell a recovery slot.
+            # A custom tab stays a shell after a deliberate quit. A second tab
+            # still in OpenCode at shutdown should resume, even after a rename.
             custom = app("do", "tab.new", "--name", "dupa-34")["terminal"]
             call("hc", "send", custom, "env -u HERDR_ENV opencode")
             wait(lambda: any(r["terminal"] == custom for r in launches()), "OpenCode starts in the shell")
-            def shows(session):
-                term = rpc("terminal.get", {"terminal": custom})
+            def shows(session, terminal=custom):
+                term = rpc("terminal.get", {"terminal": terminal})
                 labels = term["labels"]
                 pid = (term.get("foreground") or {}).get("pid")
                 return labels.get("pbogut.oc.session") == session and labels.get("pbogut.oc.session-pid") == str(pid)
@@ -226,9 +226,43 @@ for await (const line of createInterface({ input: process.stdin })) {
             wait(lambda: shows("root-a"), "Custom tab reports the child session's root")
             call("hc", "send", custom, "select root-b")
             wait(lambda: shows("root-b"), "Custom tab follows session changes")
+            assert rpc("terminal.get", {"terminal": custom})["labels"]["pbogut.oc.resume-dir"]
             assert cached("dupa-34") is None
             call("hc", "send", custom, "quit")
             wait(lambda: not shows("root-b"), "Returning to the shell invalidates the picker identity")
+            wait(lambda: not rpc("terminal.get", {"terminal": custom})["labels"].get("pbogut.oc.resume-dir"),
+                 "The shell disarms recovery after a normal exit")
+
+            nested = project / "next project's dir"
+            nested.mkdir()
+            active_tab = app("do", "tab.new", "--name", "scratch")
+            active = active_tab["terminal"]
+            call("hc", "send", active, f"cd -- {shlex.quote(str(nested))} && env -u HERDR_ENV opencode")
+            wait(lambda: any(r["terminal"] == active for r in launches()), "OpenCode starts in the subdirectory")
+            call("hc", "send", active, "select root-a")
+            wait(lambda: shows("root-a", active), "Custom session selected before reboot")
+            app("do", "tab.rename", "--name", "renamed")
+            for _ in range(2):
+                app("do", "window.close")
+                process.wait(timeout=5)
+                count = len(launches())
+                call("hc", "server", "stop")
+                call("hc", "server", "start")
+                process = start()
+                wait(lambda: len(launches()) > count, "Custom session resumes after core shutdown", timeout=30)
+                resumed, = launches()[count:]
+                assert (resumed["terminal"], resumed["args"], resumed["cwd"]) == (active, ["--session", "root-a"], str(nested)), resumed
+                assert any(t["id"] == active_tab["tab"] and t["name"] == "renamed" for t in tabs()), tabs()
+                wait(lambda: shows("root-a", active), "Resumed OpenCode registers its session for the next reboot")
+                assert rpc("terminal.get", {"terminal": active})["labels"]["pbogut.oc.resume-dir"] == str(nested)
+            call("hc", "send", active, "quit")
+            # Prove both restored panes actually accept shell commands.
+            for terminal in (active, custom):
+                marker = root / f"{terminal}.shell"
+                call("hc", "send", terminal, f"touch -- {shlex.quote(str(marker))}")
+                wait(marker.exists, "Restored shell accepts commands")
+                assert not rpc("terminal.get", {"terminal": terminal})["labels"].get("pbogut.oc.resume-dir")
+            assert len(launches()) == count + 1
             assert not app("status")["errors"], app("status")
             print("PASS: selected roots, custom tabs, separate slots, recreation, live reconnect, process loss, core shutdown, existing-tab adoption, and normal exits.", flush=True)
         except Exception as error:

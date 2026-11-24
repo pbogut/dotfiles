@@ -1,4 +1,6 @@
 import { spawn } from "node:child_process"
+import { writeFile } from "node:fs/promises"
+import { isAbsolute } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const document = "pbogut-opencode"
@@ -120,6 +122,7 @@ export async function reportSession(terminalID, sessionID, rpc = core, isCurrent
 export function trackSession(ctx, terminalID = process.env.HC_TERMINAL_ID, rpc = core) {
   let disposed = false
   let labeled
+  let retryAt = 0
   let refreshAt = 0
   let attached = false
   let pending
@@ -130,16 +133,33 @@ export function trackSession(ctx, terminalID = process.env.HC_TERMINAL_ID, rpc =
     return root && ctx.data.session.get(root) ? root : null
   }
   function sync() {
-    if (disposed || pending) return
+    if (disposed || pending || Date.now() < retryAt) return
     const sessionID = selected()
     // Home and plugin routes retain the last conversation, as in the old TUI.
     if (!validID(sessionID) || (sessionID === labeled && Date.now() < refreshAt)) return
     pending = (async () => {
       // Picker identity belongs to this OpenCode process, even in an ordinary shell tab.
       if (labeled !== sessionID) {
-        await rpc("terminal.label", { terminal: terminalID, labels: {
+        const labels = {
           "pbogut.oc.session": sessionID, "pbogut.oc.session-pid": String(process.pid),
-        } })
+        }
+        const term = await rpc("terminal.get", { terminal: terminalID })
+        const flag = process.env.HERDR_APP_OC_PROMPT_FLAG
+        if (term.keep && term.labels["herdr.space"] && term.labels["herdr.tab"] && !term.labels["pbogut.oc.role"] &&
+            !term.labels["pbogut.tab.launch"] && (flag || term.pid === process.pid)) {
+          // Core can still be showing the launching shell when the TUI first reports.
+          if (term.foreground?.pid !== process.pid) {
+            retryAt = Date.now() + 1000
+            return
+          }
+          // The launching Zsh clears the recovery label when it gets its prompt back.
+          // A lost shell never does. Direct launches have no parent prompt to clear.
+          if (flag) await writeFile(flag, "", { flag: "wx", mode: 0o600 }).catch((error) => {
+            if (error.code !== "EEXIST") throw error
+          })
+          labels["pbogut.oc.resume-dir"] = ctx.data.session.get(sessionID)?.location?.directory ?? process.cwd()
+        }
+        await rpc("terminal.label", { terminal: terminalID, labels })
         labeled = sessionID
         refreshAt = 0
       }
@@ -167,10 +187,16 @@ export async function recovery(terminalID, shellPID, rpc = core) {
   const labels = terminal.labels
   const role = roleOf(labels["pbogut.oc.role"])
   const space = labels["herdr.space"]
-  // Only the new root shell may restore. Nested shells and the original
-  // launcher's `zsh -ic` cannot consume the recovery marker.
-  if (!role || !space || terminal.state !== "live" || String(terminal.pid) !== shellPID ||
-      !labels["pbogut.oc.pid"] || labels["pbogut.oc.pid"] === shellPID) return
+  if (!space || terminal.state !== "live" || String(terminal.pid) !== shellPID) return
+  if (!role) {
+    const folder = labels["pbogut.oc.resume-dir"]
+    const sessionID = labels["pbogut.oc.session"]
+    if (!labels["herdr.tab"] || labels["pbogut.tab.launch"] || !folder || !isAbsolute(folder) || !validID(sessionID)) return
+    // Consume before launch so a missing folder or failed resume leaves a usable shell.
+    await rpc("terminal.label", { terminal: terminalID, labels: { "pbogut.oc.resume-dir": "" } })
+    return { sessionID, folder }
+  }
+  if (!labels["pbogut.oc.pid"] || labels["pbogut.oc.pid"] === shellPID) return
   const layout = await rpc("doc.get", { name: "herdr-app" })
   const tab = layout.value?.spaces?.find((item) => item.id === space)?.tabs
     ?.find((item) => item.id === labels["herdr.tab"])
@@ -188,7 +214,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       process.stdout.write(session ?? "")
     } else if (action === "recover") {
       const target = await recovery(process.env.HC_TERMINAL_ID, first)
-      if (target) process.stdout.write([target.space, target.role, target.folder].join("\0"))
+      if (target) process.stdout.write((target.sessionID
+        ? ["shell", target.sessionID, target.folder]
+        : ["slot", target.space, target.role, target.folder]).join("\0"))
     } else throw new Error("Expected prepare or recover")
   } catch (error) {
     console.error(`OpenCode restoration: ${error.message}`)

@@ -190,17 +190,24 @@ Named tabs launch through `herdr-app-opencode`. It resumes the slot with
 Normal exit closes the tab. Its shortcut recreates it with the saved conversation.
 Closing and reopening the App window reconnects to surviving processes.
 
-For a lost process or a reboot, core recovery first creates a replacement shell
+After a reboot, a kept shell tab such as `dupa-34` also resumes the conversation
+that was open in it. The extension records the session directory on that
+terminal. When you quit OpenCode, the next Zsh prompt clears that record.
+If Herdr restarts first, the replacement Zsh opens the saved session in its
+directory. Quitting it brings back the shell. Renaming the tab is fine.
+
+For a numbered OpenCode tab, core recovery first creates a replacement shell
 in the same terminal. `~/.zshrc.d/herdr-app-opencode.zsh` checks once at that
 shell's first prompt. It verifies the root process ID, terminal labels, saved
 slot owner, and current tab name, then replaces the shell with OpenCode in the
 original project folder. The tab ID, terminal ID, splits, and focus survive.
 This automatic recovery requires Zsh to remain the core's recovery shell.
-Renamed tabs and nested shells do not trigger restoration.
+Renamed numbered tabs and nested shells do not trigger slot restoration.
 
-Run `/reload` in already-open OpenCode tabs after applying the extension.
-It can register their selected conversation without closing them. New tabs load
-it automatically. The App launcher clears inherited old-Herdr pane variables;
+New tabs load the changes automatically. In an existing custom shell tab, source
+`~/.zshrc.d/herdr-app-opencode.zsh` at the shell prompt before launching OpenCode.
+In an already-open numbered tab, run `/reload` in OpenCode.
+The App launcher clears inherited old-Herdr pane variables;
 OpenCode running in Herdr TUI continues using the existing official integration,
 title reporting, and workspace-local session caches.
 
