@@ -31,12 +31,10 @@ PluginComponent {
     property bool refreshPending: false
     property string errorText: ""
     property double updatedAt: 0
-    property bool razerAvailabilityKnown: false
-    property bool razerCommandAvailable: false
-    property bool razerCheckingAvailability: false
     property bool razerRefreshing: false
     property bool razerRefreshPending: false
     property var razerDevices: []
+    readonly property bool razerDeviceAvailable: razerDevices.length > 0
     property string razerErrorText: ""
     property double razerUpdatedAt: 0
     property bool asusAvailabilityKnown: false
@@ -113,11 +111,11 @@ PluginComponent {
             return;
 
         pluginService.setGlobalVar(pluginId, "peripheralBatteries", {
-            "available": (razerAvailabilityKnown && razerCommandAvailable)
+            "available": razerDeviceAvailable
                 || (asusAvailabilityKnown && asusDeviceAvailable) || zmkState.available,
             "devices": razerDevices.concat(asusDevices, zmkState.devices),
             "barDevices": razerDevices.concat(asusDevices, zmkState.barDevices),
-            "refreshing": razerCheckingAvailability || razerRefreshing || asusRefreshing || zmkDiscovering,
+            "refreshing": razerRefreshing || asusRefreshing || zmkDiscovering,
             "error": peripheralErrorText(),
             "updatedAt": Math.max(razerUpdatedAt, asusUpdatedAt, zmkUpdatedAt)
         });
@@ -194,108 +192,6 @@ PluginComponent {
         publishPeripheralState();
     }
 
-    function parseRazerDevices(stdout) {
-        const devices = [];
-        const lines = String(stdout || "").split(/\r?\n/);
-        let current = null;
-        let inBattery = false;
-
-        function appendCurrent() {
-            if (!current || !current.hasBattery || !isFinite(current.percentage))
-                return;
-
-            devices.push({
-                "name": current.name,
-                "type": current.type || "device",
-                "percentage": Math.max(0, Math.min(100, Math.round(current.percentage))),
-                "charging": current.charging,
-                "lowThreshold": Math.max(0, Math.min(100, Math.round(current.lowThreshold)))
-            });
-        }
-
-        for (const line of lines) {
-            const deviceMatch = line.match(/^([^\s].*):\s*$/);
-            if (deviceMatch) {
-                appendCurrent();
-                current = {
-                    "name": deviceMatch[1].trim(),
-                    "type": "",
-                    "hasBattery": false,
-                    "percentage": NaN,
-                    "charging": false,
-                    "lowThreshold": 0
-                };
-                inBattery = false;
-                continue;
-            }
-            if (!current)
-                continue;
-
-            const trimmed = line.trim();
-            const separator = trimmed.indexOf(":");
-            if (separator < 0)
-                continue;
-
-            const indentMatch = line.match(/^\s*/);
-            const indent = indentMatch ? indentMatch[0].length : 0;
-            const key = trimmed.slice(0, separator).trim().toLowerCase();
-            const value = trimmed.slice(separator + 1).trim();
-
-            if (indent <= 4) {
-                inBattery = key === "battery";
-                if (key === "type")
-                    current.type = value.toLowerCase();
-                if (inBattery)
-                    current.hasBattery = true;
-                continue;
-            }
-            if (!inBattery)
-                continue;
-
-            if (key === "charge") {
-                current.percentage = Number(value);
-            } else if (key === "charging") {
-                current.charging = value.toLowerCase() === "true";
-            } else if (key === "low threshold") {
-                current.lowThreshold = Number(value.split(/\s+/)[0]);
-            }
-        }
-
-        appendCurrent();
-        return devices;
-    }
-
-    function checkRazerAvailability() {
-        if (razerCheckingAvailability)
-            return false;
-
-        razerCheckingAvailability = true;
-        publishPeripheralState();
-
-        Proc.runCommand(
-            "batteryHub.checkRazerAvailability",
-            ["sh", "-c", "command -v razer-cli >/dev/null 2>&1"],
-            (_stdout, exitCode) => {
-                root.razerCommandAvailable = exitCode === 0;
-                root.razerAvailabilityKnown = true;
-                root.razerCheckingAvailability = false;
-
-                if (!root.razerCommandAvailable) {
-                    root.razerDevices = [];
-                    root.razerErrorText = "";
-                    root.publishPeripheralState();
-                    return;
-                }
-
-                root.publishPeripheralState();
-                root.refreshRazer();
-            },
-            0,
-            10000
-        );
-        return true;
-    }
-
     function finishRazerRefresh() {
         razerRefreshing = false;
         publishPeripheralState();
@@ -306,8 +202,6 @@ PluginComponent {
     }
 
     function refreshRazer() {
-        if (!razerCommandAvailable)
-            return false;
         if (razerRefreshing) {
             razerRefreshPending = true;
             return false;
@@ -319,22 +213,26 @@ PluginComponent {
 
         Proc.runCommand(
             "batteryHub.razerDevices",
-            ["razer-cli", "-ls"],
+            ["sh", "-c", "exec razer-battery"],
             (stdout, exitCode) => {
-                if (exitCode !== 0) {
+                const level = String(stdout || "").trim();
+                if (exitCode === 1 || exitCode === 127) {
+                    root.razerDevices = [];
+                } else if (exitCode === 2 || (exitCode === 0 && /^(100|[1-9]?\d)%$/.test(level))) {
+                    root.razerDevices = [{
+                        "name": "Razer Naga V2 HyperSpeed",
+                        "type": "mouse",
+                        "percentage": exitCode === 0 ? parseInt(level, 10) : null,
+                        "status": exitCode === 2 ? "No connection" : "",
+                        "lowThreshold": 10
+                    }];
+                } else {
                     root.razerErrorText = exitCode === 124
                         ? "Razer battery refresh timed out."
                         : "Could not read Razer battery status.";
                     root.finishRazerRefresh();
                     return;
                 }
-                if (!/^Found\s+\d+\s+Razer device\(s\)/m.test(String(stdout || ""))) {
-                    root.razerErrorText = "razer-cli returned an unknown device list.";
-                    root.finishRazerRefresh();
-                    return;
-                }
-
-                root.razerDevices = root.parseRazerDevices(stdout);
                 root.razerUpdatedAt = Date.now();
                 root.finishRazerRefresh();
             },
@@ -459,14 +357,14 @@ PluginComponent {
     }
 
     function discoverPeripherals() {
-        const razerStarted = checkRazerAvailability();
+        const razerStarted = refreshRazer();
         const asusStarted = discoverAsus();
         const zmkStarted = discoverZmk();
         return razerStarted || asusStarted || zmkStarted;
     }
 
     function refreshPeripherals() {
-        const razerStarted = refreshRazer();
+        const razerStarted = razerDeviceAvailable && refreshRazer();
         const asusStarted = refreshAsus();
         return razerStarted || asusStarted || zmkState.available;
     }
@@ -677,7 +575,7 @@ PluginComponent {
     Timer {
         interval: 900000
         repeat: true
-        running: root.razerCommandAvailable
+        running: root.razerDeviceAvailable
         onTriggered: root.refreshRazer()
     }
 
@@ -734,7 +632,7 @@ PluginComponent {
         }
 
         function refresh(): string {
-            if (!root.razerCommandAvailable && !root.asusDeviceAvailable && !root.zmkState.available)
+            if (!root.razerDeviceAvailable && !root.asusDeviceAvailable && !root.zmkState.available)
                 return "UNAVAILABLE";
             return root.refreshPeripherals() ? "REFRESH_STARTED" : "REFRESH_QUEUED";
         }
@@ -743,7 +641,7 @@ PluginComponent {
             const error = root.peripheralErrorText();
             if (error)
                 return "error\t" + error;
-            if (!root.razerCommandAvailable && !root.asusDeviceAvailable && !root.zmkState.available)
+            if (!root.razerDeviceAvailable && !root.asusDeviceAvailable && !root.zmkState.available)
                 return "UNAVAILABLE";
             return (root.razerDevices.length + root.asusDevices.length + root.zmkState.devices.length)
                 + " battery device(s)";

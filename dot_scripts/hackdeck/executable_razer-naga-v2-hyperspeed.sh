@@ -4,15 +4,19 @@
 # author: Pawel Bogut <pbogut@pbogut.me>
 # date:   07/02/2025
 #=================================================
-level=$(razer-cli --battery 'Razer Naga V2 HyperSpeed' | grep charge | awk '{print $2}')
-if [[ $level -eq 0 ]]; then
-    echo "{\"label_color\": \"#ccc\"}"
-    exit 0
-fi
-if [[ $level -gt 10 ]]; then
-    echo "{\"label_color\": \"#fff\", \"label_size\": 60, \"icon_color\": \"#fff\", \"color\": \"#000\", \"label\": \"$level%\"}"
-elif [[ $level -gt 5 ]]; then
-    echo "{\"label_color\": \"#fff\", \"label_size\": 60, \"icon_color\": \"#ff7806\", \"color\": \"#000\", \"label\": \"$level%\"}"
+result=0
+label=$(razer-battery 2>/dev/null) || result=$?
+color="#000"
+if ((result == 2)); then
+	label="-"
+elif ((result == 0)) && [[ $label =~ ^(100|[1-9]?[0-9])%$ ]]; then
+	level=${label%\%}
+	if ((level <= 5)); then
+		color="#ff0806"
+	elif ((level <= 10)); then
+		color="#ff7806"
+	fi
 else
-    echo "{\"label_color\": \"#fff\", \"label_size\": 60, \"icon_color\": \"#ff0806\", \"color\": \"#000\", \"label\": \"$level%\"}"
+	label=""
 fi
+printf '{"label_color":"#fff","label_size":60,"icon_color":"#fff","color":"%s","label":"%s"}\n' "$color" "$label"

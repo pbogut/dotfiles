@@ -232,6 +232,12 @@ PluginComponent {
         return Theme.widgetIconColor;
     }
 
+    function peripheralPercentageText(device) {
+        if (typeof device.percentage === "number")
+            return device.percentage + "%";
+        return device.slotDetails ? "Unknown" : "-";
+    }
+
     function batteryColor() {
         if (!primaryBatteryAvailable)
             return Theme.widgetIconColor;
@@ -644,7 +650,7 @@ PluginComponent {
 
                     StyledText {
                         anchors.verticalCenter: parent.verticalCenter
-                        text: horizontalPeripheralBattery.modelData.percentage + "%"
+                        text: root.peripheralPercentageText(horizontalPeripheralBattery.modelData)
                         font.pixelSize: Theme.barTextSize(
                             root.barThickness,
                             root.barConfig?.fontScale,
@@ -732,7 +738,7 @@ PluginComponent {
 
                     StyledText {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: verticalPeripheralBattery.modelData.percentage + "%"
+                        text: root.peripheralPercentageText(verticalPeripheralBattery.modelData)
                         font.pixelSize: Theme.barTextSize(
                             root.barThickness,
                             root.barConfig?.fontScale,
@@ -1168,11 +1174,9 @@ PluginComponent {
                                     StyledText {
                                         width: parent.width
                                         visible: !peripheralBatteryRow.modelData.slotDetails
-                                        text: peripheralBatteryRow.modelData.status
-                                            || (String(peripheralBatteryRow.modelData.type || "device")
-                                            + (peripheralBatteryRow.modelData.charging
-                                                ? " | Charging"
-                                                : " | On battery"))
+                                        text: String(peripheralBatteryRow.modelData.type || "device") + " | "
+                                            + (peripheralBatteryRow.modelData.status
+                                                || (peripheralBatteryRow.modelData.charging ? "Charging" : "On battery"))
                                         font.pixelSize: Theme.fontSizeSmall
                                         color: Theme.surfaceTextMedium
                                         elide: Text.ElideRight
@@ -1201,9 +1205,7 @@ PluginComponent {
                                     id: peripheralPercent
 
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: typeof peripheralBatteryRow.modelData.percentage === "number"
-                                        ? peripheralBatteryRow.modelData.percentage + "%"
-                                        : "Unknown"
+                                    text: root.peripheralPercentageText(peripheralBatteryRow.modelData)
                                     font.pixelSize: Theme.fontSizeMedium
                                     font.weight: Font.Bold
                                     color: root.peripheralBatteryColor(peripheralBatteryRow.modelData)
