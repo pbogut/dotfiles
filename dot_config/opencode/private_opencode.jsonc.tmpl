@@ -87,6 +87,7 @@
     }
   },
   "plugins": [
+    "-opencode.fork-notice",
     { "package": "@plannotator/opencode@latest", "options": { "workflow": "manual" } },
     "@slkiser/opencode-quota@latest",
     "{{ .chezmoi.homeDir }}/.local/share/opencode/plugins/lsp-builds/4a17bc8379e572ab104ec26b55f92ee9b51dce37-{{ include "assets/opencode2-lsp/sidebar.patch" | sha256sum }}"
