@@ -1,0 +1,87 @@
+#!/usr/bin/python3
+import json
+import os
+import subprocess
+import sys
+from html import escape
+from pathlib import Path
+
+
+def inspect(kind, name, template):
+    result = subprocess.run(
+        ["docker", kind, "inspect", "--format", template, name],
+        capture_output=True, text=True,
+    )
+    if result.returncode:
+        # A short-lived container or volume may already have been removed.
+        print(f"Could not inspect {kind} {name}: {result.stderr.strip()}", file=sys.stderr)
+        return None
+    return json.loads(result.stdout)
+
+
+def notify(body, replace=None):
+    bus = Path(f"/run/user/{os.getuid()}/bus")
+    if not bus.is_socket():
+        return None
+    args = ["notify-send", "--print-id", "--app-name=Docker volume watcher"]
+    if replace:
+        args.append(f"--replace-id={replace}")
+    try:
+        result = subprocess.run(
+            [*args, "Docker created an anonymous volume", escape(body)],
+            env={**os.environ, "DBUS_SESSION_BUS_ADDRESS": f"unix:path={bus}"},
+            capture_output=True, text=True, timeout=3, check=True,
+        )
+        return result.stdout.strip()
+    except (OSError, subprocess.SubprocessError) as error:
+        print(f"Desktop notification unavailable: {error}", file=sys.stderr)
+        return None
+
+
+def watch(events):
+    # Only the first mount after creation updates the desktop notification.
+    pending = {}
+    for line in events:
+        event = json.loads(line)
+        action, actor = event["Action"], event["Actor"]
+        volume = actor["ID"]
+        if action == "destroy":
+            pending.pop(volume, None)
+            continue
+        if volume not in pending:
+            labels = inspect("volume", volume, "{{json .Labels}}")
+            if not labels or "com.docker.volume.anonymous" not in labels:
+                continue
+        if action == "create":
+            print(f"Created anonymous volume {volume}", flush=True)
+            pending[volume] = notify(volume)
+        elif action == "mount":
+            attrs = actor["Attributes"]
+            container = attrs["container"]
+            dest = attrs["destination"]
+            info = inspect(
+                "container", container,
+                '{"name":{{json .Name}},"labels":{{json .Config.Labels}}}',
+            )
+            name = info["name"].lstrip("/") if info else container
+            labels = (info["labels"] if info else None) or {}
+            compose = "/".join(
+                labels[key] for key in ("com.docker.compose.project", "com.docker.compose.service")
+                if labels.get(key)
+            )
+            owner = f"{name}:{dest}" + (f" (Compose: {compose})" if compose else "")
+            print(f"Mounted anonymous volume {volume} at {owner}", flush=True)
+            if volume in pending:
+                notify(f"{owner}\n{volume}", replace=pending.pop(volume))
+
+
+if __name__ == "__main__":
+    args = ["docker", "events", "--filter", "type=volume", "--format", "{{json .}}"]
+    for action in ("create", "mount", "destroy"):
+        args.extend(["--filter", f"event={action}"])
+    with subprocess.Popen(args, stdout=subprocess.PIPE, text=True) as events:
+        try:
+            watch(events.stdout)
+        finally:
+            events.terminate()
+        sys.exit(events.wait())

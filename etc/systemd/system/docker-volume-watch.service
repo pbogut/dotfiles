@@ -1,0 +1,16 @@
+[Unit]
+Description=Log anonymous Docker volumes and notify the desktop
+BindsTo=docker.service
+After=docker.service
+PartOf=docker.service
+
+[Service]
+User=pbogut
+SupplementaryGroups=docker
+Environment=DOCKER_HOST=unix:///run/docker.sock
+ExecStart=/home/pbogut/.scripts/docker-volume-watch
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=docker.service
