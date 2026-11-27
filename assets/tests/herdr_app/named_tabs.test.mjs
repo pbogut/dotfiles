@@ -11,7 +11,7 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
   const files = new Map(), persisted = new Map();
   files.set("/config/herdr-app/herdr-project.json", '{"tabs":["nvim"]}');
   const failures = new Set();
-  const native = [], executions = [], setupChecks = new Map(), coreResults = new Map(), sends = [];
+  const native = [], extraPanes = [], executions = [], setupChecks = new Map(), coreResults = new Map(), sends = [];
   const spaces = [
     { id: "one", active: true, folder: "/project one", tabs: initialTabs },
     { id: "two", active: false, folder: "/project two", tabs: [{ id: "other", name: "shell", named: true }] },
@@ -43,7 +43,7 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
           native.find(terminal => terminal.address === args[1])) };
       },
       panes: () => spaces.flatMap(space => space.tabs.filter(tab => tab.terminal)
-        .map(tab => ({ tab: tab.id, terminal: tab.terminal }))),
+        .map(tab => ({ tab: tab.id, terminal: tab.terminal }))).concat(extraPanes),
       exec: async (name, args, options) => {
         executions.push([name, [...args], { ...options }]);
         if (name === "env") {
@@ -93,7 +93,7 @@ async function fixture(checking = false, initialTabs = [{ id: "original", name: 
   let view = new main.namespace.default();
   view.init({}, cx);
   return {
-    calls, spaces, timers, files, reads, overlays, failures, persisted, native, executions, setupChecks, coreResults, sends, creation,
+    calls, spaces, timers, files, reads, overlays, failures, persisted, native, extraPanes, executions, setupChecks, coreResults, sends, creation,
     roles: modules["./roles.js"].namespace,
     render: () => view.render(cx),
     async confirm() {
@@ -190,10 +190,14 @@ test("last follows external selection per space, toggles and skips closed tabs",
   assert.equal(one.selected, "a");
 });
 
-test("last-oc picks the last visited open slot in this space without creating one or cycling", async () => {
-  const app = await fixture(false, ["shell", "oc-2", "oc-10"].map(name =>
-    ({ id: name, name, named: true, active: name === "shell" })));
+test("last-oc recalls a visited tab in this space while any of its panes runs OpenCode", async () => {
+  const app = await fixture(false, ["shell", "oc-2", "oc-10", "scratch"].map(name =>
+    ({ id: name, name, named: name !== "scratch", active: name === "shell" })));
   const [space, other] = app.spaces;
+  const opencode = { key: "opencode" };
+  const slotPane = { tab: "oc-10", program: opencode };
+  app.extraPanes.push({ tab: "oc-2", program: opencode }, slotPane,
+    { tab: "scratch", program: { key: "zsh" } }, { tab: "scratch", program: opencode });
   const visit = (id) => {
     space.tabs.forEach(tab => { tab.active = tab.id === id; });
     app.render();
@@ -206,10 +210,14 @@ test("last-oc picks the last visited open slot in this space without creating on
   };
   assert.deepEqual(await recall(), []);
   visit("oc-2");
+  visit("scratch");
   visit("oc-10");
   visit("shell");
   assert.deepEqual(await recall(), [["tab.select", { id: "oc-10" }]]);
   assert.deepEqual(await recall(), []);
+  visit("shell");
+  slotPane.program = { key: "zsh" };
+  assert.deepEqual(await recall(), [["tab.select", { id: "scratch" }]]);
   visit("shell");
   space.active = false;
   other.active = true;
@@ -217,7 +225,7 @@ test("last-oc picks the last visited open slot in this space without creating on
   assert.deepEqual(await recall(), []);
   space.active = true;
   other.active = false;
-  space.tabs = space.tabs.filter(tab => tab.id !== "oc-10");
+  space.tabs = space.tabs.filter(tab => tab.id !== "scratch");
   assert.deepEqual(await recall(), [["tab.select", { id: "oc-2" }]]);
 });
 

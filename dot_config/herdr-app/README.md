@@ -26,7 +26,7 @@ Choosing another layout in the app lasts until the next chezmoi apply.
 | Alt+T | Toggle sidebar |
 | Alt+P / Alt+N | Previous / next tab |
 | Ctrl+Alt+D | Toggle between the two most recently focused tabs in this space, including tabs selected by mouse or script |
-| Ctrl+Alt+O | Focus the last visited `oc-*` tab still open in this space. If none was visited, stay here. |
+| Ctrl+Alt+O | Focus the most recently visited tab in this space with a pane running OpenCode. If none qualifies, stay here. |
 
 The searchable pickers accept Ctrl+J to move down and Ctrl+K to move up while
 their search field is focused. Up/Down also work; Enter selects a result.

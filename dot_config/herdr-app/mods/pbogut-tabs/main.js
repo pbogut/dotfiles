@@ -38,15 +38,14 @@ export default class NamedTabs extends View {
       for (;;) {
         const command = await nextCommand();
         if (command === "last" || command === "last-oc") {
-          const active = this.syncTabs();
-          if (!active) continue;
-          const { recent, tabs } = active;
+          const recent = this.syncTabs();
+          if (!recent) continue;
           let id = recent[1];
           if (command === "last-oc") {
-            const slots = new Set(
-              tabs.filter((tab) => tab.named && roleOf(tab.name)?.startsWith("oc-")).map((tab) => tab.id),
+            const openCodeTabs = new Set(
+              panes().filter((pane) => pane.program?.key === "opencode").map((pane) => pane.tab),
             );
-            id = recent.find((id) => slots.has(id));
+            id = recent.find((id) => openCodeTabs.has(id));
           }
           if (id && id !== recent[0]) run("tab.select", { id });
           continue;
@@ -430,7 +429,7 @@ export default class NamedTabs extends View {
         const current = space.tabs.find((tab) => tab.active)?.id;
         if (current) {
           if (recent[0] !== current) recent = [current, ...recent.filter((id) => id !== current)];
-          active = { recent, tabs: space.tabs };
+          active = recent;
         }
       }
       this.tabsBySpace.set(space.id, { ids, recent });
