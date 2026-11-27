@@ -45,9 +45,10 @@ The overlay uses a snapshot, so press Alt+U again for fresh output.
 `mods/pbogut-links/opencode-wraps.js` handles URLs and paths that OpenCode splits across
 chat rows. It measures the chat column from the prompt's `╹▀▀▀` border to exclude
 the sidebar. For `http` followed by `://host`, the hint on `http` opens the whole
-URL. If the first row already contains a usable URL and the next row looks like
-a continuation, the first hint opens the short URL and the hint on the second
-row opens the joined URL. In Markdown tables, file hints follow wraps inside
+URL. A URL in parentheses that closes on a later row also opens in full from
+the first hint, including in an indented list item. If the wrap is ambiguous,
+the first hint opens the short URL and the second opens the joined URL.
+In Markdown tables, file hints follow wraps inside
 the same cell even when the prompt border is offscreen.
 
 **Lazygit panel wraps.** `mods/pbogut-links/lazygit-wraps.js` finds panels by

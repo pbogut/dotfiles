@@ -39,11 +39,24 @@ test("ambiguous wrap has two distinct targets; a third row extends the second", 
   ]);
 });
 
+test("the hint on a numbered item's parenthesized URL opens the full path", () => {
+  const prefix = "  1. Sign in as a prescriber and open the order approval page (";
+  const base = "https://create-order-before-payment.pms.assuredpharmacy.test/pms/";
+  const text = screen(134, [prefix + base, "     approval/828/view). Click Approve and sign."]);
+  const targets = openCodeLinks(text, 150, 0, 40, true);
+  assert.deepEqual(targets.filter((t) => t.url), [
+    {row: 0, col: prefix.length, url: base + "approval/828/view"},
+  ]);
+  assert.ok(!targets.some((t) => t.row === 1 && t.col === 5));
+});
+
 test("avoid joins across chat blocks, sidebar entries or independent links", () => {
   for (const text of [
     screen(40, ["     https://a.test", "     next paragraph"]),
     screen(40, ["     (http://", "  ┃  unrelated.test"]),
     screen(40, ["     (http://", ""], ["", "example.com"]),
     screen(40, ["     https://example.com/123456789", "     https://other.test"]),
+    screen(29, ["  1. Open (https://a.test/p/", "  2. Next step"]),
+    screen(29, ["  1. Open (https://a.test/p/", "     1. Nested step"]),
   ]) assert.deepEqual(scan(text), visibleLinks(text, 150, 0, 40));
 });

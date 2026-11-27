@@ -8,6 +8,8 @@ const width = (s) => (s.match(glyphs) ?? []).reduce((n, g) => n + cellWidth(g), 
 const startAtEnd = /\b(https?(?::(?:\/(?:\/[^\s<>"'`]*)?)?)?)$/i;
 const firstToken = /^[\p{L}\p{N}._~:/?#@!$&()*+,;=%[\]-]+/u;
 const hasHost = /^https?:\/\/(?:[\p{L}\p{N}-]+|\[[\da-f:]+\])/iu;
+const chatIndent = /^ *(?:┃ *)?/u;
+const listMarker = /^(?:\d+[.)]|[-*+•])(?: +|$)/u;
 
 function chatColumn(line, edge) {
   let col = 0, end = 0;
@@ -61,14 +63,17 @@ export function openCodeLinks(text, cols, top, rows, files = false) {
   for (let row = 0; row + 1 < chat.length; row++) {
     const start = startAtEnd.exec(chat[row]);
     if (!start) continue;
-    // Match the chat's indentation, including OpenCode's user-message rail.
-    const margin = chat[row].match(/^ *(?:┃ *)?/u)[0];
+    // OpenCode aligns wrapped list items under the text after the marker.
+    const indent = chat[row].match(chatIndent)[0];
+    const marker = listMarker.exec(chat[row].slice(indent.length));
+    const margin = indent + " ".repeat(marker?.[0].length ?? 0);
     let raw = start[0], at = row;
     const short = hasHost.test(raw);
     while (at + 1 < chat.length) {
       const next = chat[at + 1];
-      if (next.match(/^ *(?:┃ *)?/u)[0] !== margin) break;
+      if (next.match(chatIndent)[0] !== margin) break;
       const tail = next.slice(margin.length);
+      if (listMarker.test(tail)) break;
       const token = firstToken.exec(tail)?.[0];
       if (!token || /^https?:/i.test(tail)) break;
       // An incomplete scheme is strong evidence. For an ambiguous wrap,
@@ -85,12 +90,17 @@ export function openCodeLinks(text, cols, top, rows, files = false) {
     if (at === row || !hasHost.test(raw)) continue;
     const startCol = width(chat[row].slice(0, start.index)), marginCol = width(margin);
     for (let r = row; r <= at; r++) urlParts.add(`${r}:${r === row ? startCol : marginCol}`);
-    // If the first fragment already opens, leave its original hint alone. The
-    // first continuation gets the full URL, including any further wrapped rows.
+    const url = trimUrl(raw);
+    // A closing prose parenthesis marks the end of the displayed destination.
+    if (short && chat[row][start.index - 1] === "(" && raw[url.length] === ")") {
+      const first = links.find((l) => l.url && l.row === row && l.col === startCol);
+      if (first) { first.url = url; continue; }
+    }
+    // For ambiguous wraps, keep the short URL and label the joined URL separately.
     links.push({
       row: short ? row + 1 : row,
       col: short ? marginCol : startCol,
-      url: trimUrl(raw),
+      url,
     });
   }
   if (files) {
