@@ -5,7 +5,11 @@
 # date:   13/11/2026
 #=================================================
 # Prompt before starting or stopping a Hex meeting recording.
+# Choose Keep open within 20 seconds to leave Record available until you
+# dismiss the notification or the meeting ends.
 # Requires notify-send with action support, GNU timeout, and hex on PATH.
+# "Keep open" needs a systemd user session. The desktop controls popup placement
+# and may ignore the request to keep the notification visible.
 # Configure go-to-meeting with absolute paths:
 #   "on_start": ["/path/to/examples/hex-meetings.sh", "start"],
 #   "on_end": ["/path/to/examples/hex-meetings.sh", "stop"]
@@ -13,42 +17,61 @@
 set -eu
 
 usage() {
-    printf 'Usage: %s start|stop\n' "$0" >&2
-    exit 2
+	printf 'Usage: %s start|stop\n' "$0" >&2
+	exit 2
 }
 
 [ "$#" -eq 1 ] || usage
 
+unit=go-to-meeting-hex-prompt.service
+
+close_held_prompt() {
+	# Normally there is no unit: recording or dismissing the prompt ends it.
+	systemctl --user stop "$unit" 2>/dev/null || :
+}
+
+short_prompt() {
+	# Leave time for Hex within go-to-meeting's 30-second hook timeout.
+	timeout --signal=INT --kill-after=1s 20s notify-send \
+		--app-name='Hex meetings' --expire-time=20000 "$@" || {
+		status=$?
+		[ "$status" -eq 124 ] || return "$status"
+	}
+}
+
 case "$1" in
-    start)
-        action=record
-        label='Record'
-        title='Meeting started'
-        body='Start recording this meeting with Hex?'
-        ;;
-    stop)
-        action=stop
-        label='Stop recording'
-        title='Meeting ended'
-        body='Stop the Hex meeting recording?'
-        ;;
-    *)
-        usage
-        ;;
+start)
+	close_held_prompt
+	selected=$(short_prompt --action=record=Record --action='keep=Keep open' \
+		'Meeting started' 'Start recording this meeting with Hex?')
+	if [ "$selected" = keep ]; then
+		# A separate unit can wait past the hook deadline. On stop, SIGINT
+		# asks notify-send to close its notification before exiting.
+		exec systemd-run --user --quiet --collect --unit="$unit" \
+			--property=KillSignal=SIGINT --property=TimeoutStopSec=2s \
+			--property='PartOf=go-to-meeting.service graphical-session.target' \
+			--setenv=PATH "$(realpath "$0")" held
+	fi
+	;;
+held)
+	# A distinct title keeps the desktop from treating this as a duplicate.
+	selected=$(notify-send --app-name='Hex meetings' --expire-time=0 \
+		--action=record=Record 'Ready when you are' 'Select Record to start recording this meeting.')
+	;;
+stop)
+	close_held_prompt
+	selected=$(short_prompt --action='stop=Stop recording' \
+		'Meeting ended' 'Stop the Hex meeting recording?')
+	if [ "$selected" = stop ]; then
+		exec hex meetings stop
+	fi
+	exit 0
+	;;
+*)
+	usage
+	;;
 esac
 
-# Leave time for Hex within go-to-meeting's 30-second hook timeout.
-# GNU timeout also bounds the wait if the notification daemon ignores expiry.
-if selected=$(timeout --kill-after=1s 20s notify-send \
-    --app-name='Hex meetings' \
-    --expire-time=20000 \
-    --action="$action=$label" \
-    "$title" "$body"); then
-    if [ "$selected" = "$action" ]; then
-        exec hex meetings "$action"
-    fi
-else
-    status=$?
-    # Expiring without a selection is a normal outcome.
-    [ "$status" -eq 124 ] || exit "$status"
+if [ "$selected" = record ]; then
+	exec hex meetings record
 fi
